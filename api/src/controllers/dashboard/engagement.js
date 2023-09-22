@@ -125,61 +125,6 @@ router.post("/volontaires-statuts-phase", passport.authenticate("referent", { se
   }
 });
 
-router.post("/volontaires-statuts-divers", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    // --- test body
-    const { error, value } = Joi.object({
-      filters: filtersJoi,
-    }).validate(req.body);
-    if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    const { filters } = value;
-
-    // --- get data
-    // TODO: optimization
-    const youngs = await YoungModel.find({ ...computeYoungFilter(filters), status: "VALIDATED" }, { phase2ApplicationStatus: 1, statusPhase2Contract: 1 });
-    let phase2 = {};
-    let totalPhase2 = 0;
-    let contract = {};
-    let totalContract = 0;
-    for (const young of youngs) {
-      // statuses
-      for (const status of young.phase2ApplicationStatus) {
-        if (phase2[status] === undefined) {
-          phase2[status] = 0;
-        }
-        ++phase2[status];
-        ++totalPhase2;
-      }
-
-      // contracts
-      for (const status of young.statusPhase2Contract) {
-        if (contract[status] === undefined) {
-          contract[status] = 0;
-        }
-        ++contract[status];
-        ++totalContract;
-      }
-    }
-
-    // --- format data
-    let data = [];
-    for (const status of Object.keys(phase2)) {
-      data.push({ category: "phase2", status, value: phase2[status], percentage: totalPhase2 ? phase2[status] / totalPhase2 : 0 });
-    }
-    for (const status of Object.keys(contract)) {
-      data.push({ category: "contract", status, value: contract[status], percentage: totalContract ? contract[status] / totalContract : 0 });
-    }
-
-    // --- result
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/volontaires-equivalence-mig", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- test body
