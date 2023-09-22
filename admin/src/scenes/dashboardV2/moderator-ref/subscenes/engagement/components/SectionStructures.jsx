@@ -62,7 +62,7 @@ export default function SectionStructures({ filters }) {
                 getNewLink({
                   base: `/structure`,
                   filter: filters,
-                  filtersUrl: [queryString.stringify({ legalStatus: structure._id, types: type._id })],
+                  filtersUrl: [queryString.stringify({ legalStatus: structure.key, types: type._id })],
                 }),
               )}
               valueSuffix="%"
@@ -123,7 +123,7 @@ export default function SectionStructures({ filters }) {
                   getNewLink({
                     base: `/structure`,
                     filter: filters,
-                    filtersUrl: [queryString.stringify({ legalStatus: structure._id })],
+                    filtersUrl: [queryString.stringify({ legalStatus: structure.key })],
                   }),
                 )}
                 tooltipsPercent

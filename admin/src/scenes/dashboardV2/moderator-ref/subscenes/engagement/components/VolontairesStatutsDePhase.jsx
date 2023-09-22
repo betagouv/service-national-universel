@@ -38,10 +38,7 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
               {
                 base: `/volontaire`,
                 filter: filters,
-                filtersUrl: [
-                  queryString.stringify({ [`statusPhase${phase}`]: encodeURIComponent(data._id) }),
-                  queryString.stringify({ [`status`]: encodeURIComponent("VALIDATED") }),
-                ],
+                filtersUrl: [queryString.stringify({ [`statusPhase${phase}`]: encodeURIComponent(data._id) })],
               },
               "session",
             ),

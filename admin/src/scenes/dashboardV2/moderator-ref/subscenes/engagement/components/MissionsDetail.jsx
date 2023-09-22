@@ -4,7 +4,6 @@ import api from "../../../../../../services/api";
 import { translate } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
 import { BarChart, Legends } from "../../../../components/graphs";
-import { computeMissionUrl } from "../../../../components/common";
 import { LoadingBar } from "../../../../components/ui/loading";
 import { getNewLink } from "@/utils";
 import queryString from "query-string";
@@ -135,7 +134,7 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
                 tooltips={bar.tooltips}
                 max={maxValue}
                 unit="%"
-                className="h-[140px]"
+                className="h-[140px] cursor-pointer"
                 onClick={() => onBarClick(bar)}
               />
             ))}
