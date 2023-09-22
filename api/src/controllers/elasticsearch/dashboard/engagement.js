@@ -126,14 +126,26 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    let filters = [
+      queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+      queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+      queryFilters.start?.length ? { range: { startAt: { gte: queryFilters.start[0], lte: queryFilters.start[1] } } } : null,
+      queryFilters.end?.length ? { range: { endAt: { gte: queryFilters.end[0], lte: queryFilters.end[1] } } } : null,
+    ];
+
+    if (queryFilters.source?.length && queryFilters.source.includes("jva")) {
+      filters.push({ term: { "isJvaMission.keyword": "true" } });
+    }
+
+    if (queryFilters.source?.length && queryFilters.source.includes("snu")) {
+      filters.push({ term: { "isJvaMission.keyword": "false" } });
+    }
+
     const body = {
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [
-            queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
-            queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-          ].filter(Boolean),
+          filter: filters.filter(Boolean),
         },
       },
       aggs: {
