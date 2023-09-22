@@ -134,7 +134,7 @@ router.post("/volontaires-statuts-divers", passport.authenticate("referent", { s
 
     // --- get data
     // TODO: optimization
-    const youngs = await YoungModel.find(computeYoungFilter(filters), { phase2ApplicationStatus: 1, statusPhase2Contract: 1 });
+    const youngs = await YoungModel.find({ ...computeYoungFilter(filters), status: "VALIDATED" }, { phase2ApplicationStatus: 1, statusPhase2Contract: 1 });
     let phase2 = {};
     let totalPhase2 = 0;
     let contract = {};
@@ -189,7 +189,7 @@ router.post("/volontaires-equivalence-mig", passport.authenticate("referent", { 
 
     // --- get data
     // TODO: optimization
-    const youngs = await YoungModel.find(computeYoungFilter(filters), { phase2ApplicationStatus: 1, statusPhase2Contract: 1 });
+    const youngs = await YoungModel.find({ ...computeYoungFilter(filters), status_equivalence: { $exists: true } }, { phase2ApplicationStatus: 1, statusPhase2Contract: 1 });
 
     const youngIds = youngs.map((young) => young._id.toString());
     const missions = await MissionEquivalenceModel.find({ youngId: { $in: youngIds } });
