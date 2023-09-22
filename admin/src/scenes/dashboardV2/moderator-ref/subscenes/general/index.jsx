@@ -265,7 +265,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
             <NoteContainer
               title="Dossier"
               number={stats.inscription.inscription_en_attente_de_validation}
-              content="dossier d'inscriptions sont en attente de validation."
+              content="dossiers d'inscription sont en attente de validation."
               link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À instruire"
             />
