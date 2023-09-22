@@ -263,7 +263,7 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
 
 router.post("/youngForInscription", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["statusPhase1", "statusPhase2", "statusPhase3", "status", "cohort", "academy", "departement", "region"];
+    const filterFields = ["statusPhase1", "statusPhase2", "statusPhase3", "status", "cohort", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const body = {
