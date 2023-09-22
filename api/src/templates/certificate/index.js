@@ -28,12 +28,13 @@ const getCohesionCenter = async (young) => {
 
 const getCohesionCenterLocation = (cohesionCenter) => {
   let t = "";
-  if (cohesionCenter.city) {
+  if (cohesionCenter?.city) {
     t = `à ${cohesionCenter.city}`;
     if (cohesionCenter.zip) {
       t += `, ${cohesionCenter.zip}`;
     }
   }
+
   return t;
 };
 

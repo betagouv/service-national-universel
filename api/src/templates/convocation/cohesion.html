@@ -43,7 +43,7 @@
 		margin-top: 160px;
 		padding-left: 50px;
 		padding-right: 60px;
-		margin-bottom: 16px;
+		margin-bottom: 95px;
 	}
 
 	#convocation-cohesion>.head-infos>.referent {
@@ -67,13 +67,24 @@
 		max-width: 100%;
 	}
 
+	#convocation-cohesion>.head-infos>.infos-date {
+		position: absolute;
+		font-size: 0.8rem;
+		text-align: right;
+		right: 60px;
+		top: 100px;
+	}
+
 	#convocation-cohesion>.head-infos>.infos-young {
 		position: absolute;
 		font-size: 0.8rem;
 		text-align: right;
 		right: 60px;
-		top: 65px;
+		top: 200px;
+		font-weight: bold;
+		text-decoration: underline;
 	}
+
 
 	#convocation-cohesion>.title-container {
 		text-align: center;
@@ -153,8 +164,10 @@
 		<div class="title">Affaire suivie par :</div>
 		<div class="info">{{CONTACTS}}</div>
 	  </div>
-	  <div class="infos-young">
+	  <div class="infos-date">
 		<b>Paris</b>, le {{DATE}}<br />
+	</div>
+	<div class="infos-young">
 		{{FIRST_NAME}} {{LAST_NAME}}<br />
 		Né(e) le {{BIRTHDATE}}<br />
 		{{ADDRESS}}<br />

@@ -9,12 +9,12 @@ import Footer from "./Footer";
 const Wrapper = ({ home, children }) => {
   const { user } = useUser();
   const { setSeeAs, seeAs } = useContext(SeeAsContext);
-
-  const withSeeAs = ["admin", "referent_department", "referent_region"].includes(user?.role);
+  const withSeeAs = ["admin", "referent_department", "referent_region", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
+  const withSeeAsPublicAndYoung = ["public", "young"].includes(seeAs);
 
   return (
     <>
-      <Header home={home} />
+      <Header home={home} withSeeAs={withSeeAsPublicAndYoung} />
       {!!seeAs && withSeeAs && user?.role !== seeAs && (
         <div className="bg-blue-50 flex items-center justify-center gap-4 p-4 w-full">
           <AiOutlineInfoCircle className="text-blue-500 text-xl flex-none" />

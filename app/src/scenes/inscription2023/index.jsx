@@ -16,8 +16,9 @@ import MobileCorrectionProfil from "./mobile/correction/stepProfil";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
-import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
+import { YOUNG_STATUS, inscriptionCreationOpenForYoungs, inscriptionModificationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
+import InscriptionClosed from "./InscriptionClosed";
 import { environment } from "../../config";
 
 function renderStep(step) {
@@ -95,6 +96,11 @@ export default function Index() {
   //Il a fini son inscription
   if (young.inscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION") {
     return <Redirect to={{ pathname: "/" }} />;
+  }
+
+  // Si la periode de modification est finie, pour les volontaires en cours d'inscription qui n'ont pas encore été basculés sur "à venir"
+  if (!inscriptionCreationOpenForYoungs(young.cohort, false, environment) && young.status === YOUNG_STATUS.IN_PROGRESS) {
+    return <InscriptionClosed />;
   }
 
   //si la periode de modification est finie

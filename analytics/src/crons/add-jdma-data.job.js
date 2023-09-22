@@ -1,10 +1,11 @@
 require("dotenv").config();
 
-require("../postgresql");
-const { capture } = require("../sentry");
+const { db } = require("../services/databases/postgresql.service");
+const { capture, captureMessage } = require("../sentry");
 const slack = require("../slack");
-const Demarche = require("../models/demarche_JDMA");
+const Demarche = require("../models/demarche-jdma.model");
 const { JDMA_LOGIN, JDMA_PASSWORD } = require("../config");
+
 const ONE_DAY_IN_MS = 86400000; // one day in milliseconds
 
 module.exports.handler = function () {
@@ -80,11 +81,13 @@ module.exports.handler = function () {
           } else {
             slack.error({ title: "JDMA synchronization - INCOMPLETE", text: `Only ${count}/4 demarches were synchronized. Some failed.` });
           }
+
+          return db.cacheClear();
         })
         .catch((e) => {
           capture(e);
+          captureMessage(`Error during synchronization: ${e.message}`);
           slack.error({ title: "JDMA synchronization - ERROR", text: JSON.stringify(e) });
-          console.error("Error during synchronization:", e);
         });
     })
     .catch((e) => {

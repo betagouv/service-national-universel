@@ -21,6 +21,18 @@
       plausible("pageview", { u: redactedUrl });
     </script>
     <script type="module" src="/src/index.jsx"></script>
+    <script>
+      if (url.search("https://admin.beta-snu.dev") !== -1) {
+        window.Userback = window.Userback || {};
+        Userback.access_token = "41690|84705|cKpMu1PpxNEcPH1w014sdGe9G";
+        (function (d) {
+          var s = d.createElement("script");
+          s.async = true;
+          s.src = "https://static.userback.io/widget/v1.js";
+          (d.head || d.body).appendChild(s);
+        })(document);
+      }
+    </script>
   </head>
 
   <body>

@@ -103,7 +103,7 @@ export default function Index() {
   return (
     <DashboardContainer
       active="inscription"
-      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
+      availableTab={["general", "engagement", "sejour", "inscription"]}
       navChildren={
         <div className="flex items-center gap-2">
           <ExportReport filter={selectedFilters} />
@@ -176,7 +176,7 @@ function filterByRegionAndDepartement(e, filters, user) {
 }
 
 async function getCurrentInscriptions(filters) {
-  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", {filters: filters} );
+  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", { filters: filters });
   // if (!responses.length) return {};
   return api.getAggregations(responses);
 }

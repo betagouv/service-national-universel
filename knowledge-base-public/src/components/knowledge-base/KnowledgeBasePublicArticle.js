@@ -7,6 +7,8 @@ import Breadcrumbs from "../breadcrumbs";
 import FeedbackComponent from "../FeedBack";
 import NavigationArticle from "../NavigationArticle";
 import { HiPrinter } from "react-icons/hi";
+import { separateEmojiAndText } from "../../utils/index";
+import { Emoji } from "../Emoji";
 
 const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   const group = useMemo(() => {
@@ -14,6 +16,7 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
   }, [item]);
 
   if (!item || isLoading) return <ArticleLoader />;
+  const [emoji, text] = separateEmojiAndText(item.title);
   return (
     <div className="w-full bg-white">
       <section className="mx-auto flex max-w-[950px] flex-shrink flex-grow flex-col overflow-hidden px-4 text-gray-800 print:bg-transparent print:pb-12">
@@ -28,7 +31,10 @@ const KnowledgeBasePublicArticle = ({ item, isLoading }) => {
             <div className="flew-row flex justify-between pb-2 pt-4">
               <div className="mr-4">
                 <h2 className="mb-2 text-[24px] font-bold print:mb-0 print:text-black">{group?.title}</h2>
-                <h1 className="mb-2 text-[24px] font-bold md:text-[30px] print:mb-0 print:text-black">{item?.title}</h1>
+                <h1 className="mb-2 text-[24px] font-bold md:text-[30px] print:mb-0 print:text-black">
+                  <Emoji emoji={emoji} />
+                  {text}
+                </h1>
                 <h6 className="text-[18px] text-snu-purple-100 md:text-[18px] lg:text-xl print:text-black">{item?.description}</h6>
               </div>
               <div>

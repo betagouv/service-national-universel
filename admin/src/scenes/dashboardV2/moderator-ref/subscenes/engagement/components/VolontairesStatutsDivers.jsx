@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DashboardBox from "../../../../components/ui/DashboardBox";
-import api from "../../../../../../services/api";
+import api from "@/services/api";
 import { translate, translateApplication } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
 import StatusTable from "../../../../components/ui/StatusTable";
@@ -18,7 +18,6 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
   const tabs = [
     { value: "phase2", label: "Mission de phase 2" },
     { value: "contract", label: "Contrats d'engagement" },
-    { value: "equivalence", label: "Demandes d'équivalence de MIG" },
   ];
 
   async function loadData() {
@@ -41,8 +40,6 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
             case "contract":
               url += `&CONTRACT_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
               break;
-            case "equivalence":
-              url += `&EQUIVALENCE_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
           }
 
           statuses[status.category].push({

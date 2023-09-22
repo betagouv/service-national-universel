@@ -7,14 +7,14 @@ import API from "../../services/api";
 import Link from "next/link";
 import { Popover, Transition } from "@headlessui/react";
 import { translateRoleBDC } from "../../utils/constants";
-import { HiOutlineLogout, HiOutlineUser } from "react-icons/hi";
+import { HiOutlineLogout, HiOutlineUser, HiCheck } from "react-icons/hi";
 
 export default function AdminMenu() {
   const { mutate, user } = useUser();
   const { setSeeAs, seeAs, roles } = useContext(SeeAsContext);
   const categoryAccessibleReferent = ["structure", "head_center", "young", "visitor"];
   const { cache } = useSWRConfig();
-  const withSeeAs = ["admin", "referent_department", "referent_region"].includes(user?.role);
+  const withSeeAs = ["admin", "referent_department", "referent_region", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
 
   const onLogout = async (event) => {
     event.preventDefault();
@@ -25,23 +25,30 @@ export default function AdminMenu() {
 
   return (
     <>
-      {/* TODO: new role selector */}
       {withSeeAs && (
         <Popover className="relative mx-auto flex w-auto justify-end md:ml-auto md:flex-none lg:flex-1">
-          <Popover.Button className="flex items-center justify-center gap-3 rounded-none border-none bg-white p-0 text-left shadow-none">
-            <img src="/assets/change-user.png" className="h-5 w-5 grayscale" />
-            <div className="flex h-full flex-col justify-center">
-              <span className="text-sm font-medium text-gray-700">Voir les articles pour</span>
+          <Popover.Button className="flex items-center justify-center gap-3 rounded-none border-none bg-[#32257F] p-0 text-left shadow-none">
+            <div className="flex h-full flex-raw justify-center align-center">
+              <span className="text-xs md:text-sm leading-8 font-medium text-white truncate">Voir en tant que</span>
+              <span className="text-xs md:text-sm leading-8 font-medium text-blue-300 ml-1 capitalize truncate">
+                {seeAs !== null ? translateRoleBDC[seeAs] : translateRoleBDC[user.role]}
+              </span>
+              <span className={`material-icons mt-1 lg:mt-0 text-blue-300 text-md flex-none`}>expand_more</span>
             </div>
           </Popover.Button>
 
-          <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] shadow-md lg:min-w-0">
+          <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] shadow-md lg:min-w-[300px]">
             <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
               {roles
                 .filter((role) => (user.role === "admin" ? true : categoryAccessibleReferent.includes(role)))
                 .map((role) => (
-                  <a key={role} onClick={() => setSeeAs(role)} className={`text-sm font-${seeAs === role ? "bold" : "medium"} cursor-pointer text-gray-700`}>
+                  <a
+                    key={role}
+                    onClick={() => setSeeAs(role)}
+                    className={`text-sm font-${seeAs === role ? "bold" : "medium"} flex flex-raw justify-between cursor-pointer text-gray-700`}
+                  >
                     {translateRoleBDC[role]}
+                    <HiCheck className={`text-xl text-blue-600 " ${seeAs === role ? "inline" : "hidden"}`} />
                   </a>
                 ))}
             </div>

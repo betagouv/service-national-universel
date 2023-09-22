@@ -15,6 +15,7 @@ import SectionMissions from "./components/SectionMissions";
 import plausibleEvent from "../../../../../services/plausible";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import ExportEngagementReport from "./components/ExportEngagementReport";
+import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -107,7 +108,7 @@ export default function Index() {
 
   return (
     <DashboardContainer
-      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
+      availableTab={["general", "engagement", "sejour", "inscription"]}
       active="engagement"
       navChildren={
         <div className="flex items-center gap-2">
@@ -128,6 +129,7 @@ export default function Index() {
           <VolontairesStatutsDePhase filters={selectedFilters} className="mr-4 flex-[0_0_332px]" />
           <VolontairesStatutsDivers filters={selectedFilters} className="grow" />
         </div>
+        <VolontairesEquivalenceMig filters={selectedFilters} />
       </Section>
       <SectionStructures filters={selectedFilters} />
       <SectionMissions filters={selectedFilters} />

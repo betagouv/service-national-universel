@@ -8,10 +8,12 @@ import FolderIcon from "./FolderIcon";
 import { HiChevronLeft } from "react-icons/hi";
 import useUser from "../hooks/useUser";
 import { useMediaQuery } from "../hooks/useMediaQuery";
-
+import { separateEmojiAndText } from "../utils/index";
+import { Emoji } from "./Emoji";
 // accessibility: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
 
 const NavigationArticle = ({ item }) => {
+  const [emoji, text] = separateEmojiAndText(item.title);
   const { restriction } = useUser();
   const router = useRouter();
   const { cache } = useSWRConfig();
@@ -50,7 +52,10 @@ const NavigationArticle = ({ item }) => {
 
   return (
     <>
-      <Link href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`} className=" align-center mb-2 flex flex-row justify-start text-center md:hidden">
+      <Link
+        href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`}
+        className=" align-center mb-2 flex flex-row justify-start text-center md:hidden"
+      >
         <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-500" />
         <p className="text-sm leading-5 text-gray-500">Retour</p>
       </Link>
@@ -68,7 +73,10 @@ const NavigationArticle = ({ item }) => {
             } py-4 px-4 shadow-none md:py-[0.5rem] md:pr-[2rem]`}
             onClick={toggleAccordion}
           >
-            <Link href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`} className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block">
+            <Link
+              href={`/base-de-connaissance/${item.parents[0].slug}?openTheme=${item.parents[1].slug}`}
+              className="align-center flex hidden flex-row justify-between text-center md:mr-2 md:block"
+            >
               <HiChevronLeft className="h-[23px] text-center text-[20px] text-gray-400 md:mr-4 md:border-r md:border-gray-200" />
             </Link>
             <div className="mr-2 flex flex-col justify-center">
@@ -92,21 +100,27 @@ const NavigationArticle = ({ item }) => {
               {list
                 .slice()
                 .sort((a, b) => a.position - b.position)
-                .map(({ _id, title, slug, type }, index) => (
-                  <li
-                    className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-600"}`}
-                    key={_id}
-                  >
-                    <Link
-                      tabIndex={active ? 0 : -1}
-                      className="flex flex-1 items-center px-6 py-4"
-                      href={`${path}/${type === "section" ? slugTheme : slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
+                .map(({ _id, title, slug, type }) => {
+                  const [emoji, text] = separateEmojiAndText(title);
+                  return (
+                    <li
+                      className={`flex border-gray-200 text-sm font-medium leading-5 text-gray-600 ${_id === item._id ? "rounded-md bg-gray-200 text-gray-900" : "text-gray-600"}`}
+                      key={_id}
                     >
-                      {type === "section" && <FolderIcon />}
-                      <span className="line-clamp-2">{title}</span>
-                    </Link>
-                  </li>
-                ))}
+                      <Link
+                        tabIndex={active ? 0 : -1}
+                        className="flex flex-1 items-center px-6 py-4"
+                        href={`${path}/${slug}${type === "section" ? `?loadingType=section&openTheme=${slug}` : ""}`}
+                      >
+                        {type === "section" && <FolderIcon />}
+                        <div className="flex flex-row">
+                          <Emoji emoji={emoji} />
+                          <span className="line-clamp-2">{text}</span>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
             </ul>
           ) : (
             <div className="px-6 pb-4 text-sm font-medium text-gray-400">Articles en cours de rédaction ⏳</div>
