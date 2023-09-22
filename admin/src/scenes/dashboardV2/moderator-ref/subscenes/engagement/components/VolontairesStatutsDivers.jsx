@@ -61,8 +61,6 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
     setLoading(false);
   }
 
-  // console.log("statuses", statuses);
-
   return (
     <DashboardBox title="Statuts divers" className={`flex flex-col ${className}`} childrenClassName="grow flex flex-col">
       {error ? (
