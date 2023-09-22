@@ -3,13 +3,15 @@ import React, { useEffect, useMemo, useState } from "react";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { Link } from "react-router-dom";
+import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, translate } from "snu-lib";
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../../../sentry";
-import { translate } from "snu-lib";
-import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import api from "../../../../../services/api";
 import { getLink as getOldLink } from "../../../../../utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import KeyNumbers from "../../../components/KeyNumbers";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
 import InfoMessage from "../../../components/ui/InfoMessage";
@@ -17,8 +19,6 @@ import Engagement from "../../../components/ui/icons/Engagement";
 import Inscription from "../../../components/ui/icons/Inscription";
 import Sejour from "../../../components/ui/icons/Sejour";
 import VolontaireSection from "./components/VolontaireSection";
-import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
-import KeyNumbers from "../../../components/KeyNumbers";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -29,6 +29,8 @@ export default function Index() {
 
   const [stats, setStats] = useState({});
   const [message, setMessage] = useState([]);
+
+  const [cohortsNotFinished, setCohortsNotFinished] = useState([]);
 
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
@@ -82,7 +84,6 @@ export default function Index() {
     const res = await getCurrentInscriptions(selectedFilters);
     setVolontairesData(res);
   }
-
   async function fetchInOutCohort() {
     const res = await getInAndOutCohort(selectedFilters);
     setInAndOutCohort(res);
@@ -130,12 +131,24 @@ export default function Index() {
       setMessage(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération des messages");
+    }
+  };
+
+  const getCohorts = async () => {
+    try {
+      const { ok, code, data: cohorts } = await api.get(`/cohort`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes", translate(code));
+      setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name));
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes");
     }
   };
 
   React.useEffect(() => {
     getMessage();
+    getCohorts();
   }, []);
 
   return (
@@ -144,7 +157,7 @@ export default function Index() {
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
-          <Actus stats={stats} />
+          <Actus stats={stats} user={user} cohortsNotFinished={cohortsNotFinished} />
           <KeyNumbers />
         </div>
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
@@ -177,7 +190,7 @@ export default function Index() {
   );
 }
 
-const NoteContainer = ({ title, number, content, btnLabel }) => {
+const NoteContainer = ({ title, number, content, btnLabel, link }) => {
   return (
     <div className="flex h-36 w-full flex-col justify-between rounded-lg bg-blue-50 py-3.5 px-3">
       <div className="flex flex-col gap-2">
@@ -187,20 +200,23 @@ const NoteContainer = ({ title, number, content, btnLabel }) => {
           {content}
         </p>
       </div>
-      <div className="flex justify-end">
-        <button className="flex items-center gap-2 rounded-full bg-blue-600 py-1 pr-2 pl-3 text-xs font-medium text-white">
-          <span>{btnLabel}</span>
-          <HiChevronRight className="h-4 w-4" />
-        </button>
-      </div>
+      {link && (
+        <div className="flex justify-end">
+          <Link className="flex items-center gap-2 rounded-full bg-blue-600 py-1 pr-2 pl-3 text-xs font-medium text-white" to={link}>
+            <span>{btnLabel}</span>
+            <HiChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
 
-function Actus({ stats }) {
+function Actus({ stats, user, cohortsNotFinished }) {
   const [fullNote, setFullNote] = useState(false);
 
   function shouldShow(parent, key, index = null) {
+    true;
     if (fullNote) return true;
 
     const entries = Object.entries(parent);
@@ -249,7 +265,8 @@ function Actus({ stats }) {
             <NoteContainer
               title="Dossier"
               number={stats.inscription.inscription_en_attente_de_validation}
-              content="dossier d’inscriptions sont en attente de validation."
+              content="dossiers d'inscription sont en attente de validation."
+              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À instruire"
             />
           )}
@@ -257,7 +274,8 @@ function Actus({ stats }) {
             <NoteContainer
               title="Dossier"
               number={stats.inscription.inscription_corrigé_à_instruire_de_nouveau}
-              content="dossiers d’inscription corrigés sont à instruire de nouveau."
+              content="dossiers d'inscription corrigés sont à instruire de nouveau."
+              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À instruire"
             />
           )}
@@ -265,7 +283,8 @@ function Actus({ stats }) {
             <NoteContainer
               title="Dossier"
               number={stats.inscription.inscription_en_attente_de_correction}
-              content="dossiers d’inscription en attente de correction."
+              content="dossiers d'inscription en attente de correction."
+              link={`/inscription?status=WAITING_CORRECTION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À relancer"
             />
           )}
@@ -274,25 +293,27 @@ function Actus({ stats }) {
               shouldShow(stats.inscription, "inscription_en_attente_de_validation_cohorte", key) && (
                 <NoteContainer
                   key={"inscription_en_attente_de_validation_cohorte" + item.cohort}
-                  title="Droit à l'image"
+                  title="Dossier"
                   number={item.count}
-                  content={`dossiers d’inscription en attente de validation pour le séjour de ${item.cohort}`}
+                  content={`dossiers d'inscription en attente de validation pour le séjour de ${item.cohort}`}
+                  link={`/inscription?cohort=${item.cohort}&status=WAITING_VALIDATION`}
                   btnLabel="À relancer"
                 />
               ),
           )}
-          {stats.inscription.inscription_sans_accord_renseigné.map(
+          {/* {stats.inscription.inscription_sans_accord_renseigné.map(
             (item, key) =>
               shouldShow(stats.inscription, "inscription_sans_accord_renseigné", key) && (
                 <NoteContainer
                   key={"inscription_sans_accord_renseigné" + item.cohort}
-                  title="Droit à l'image"
+                  title=""
                   number={item.count}
                   content={`volontaires sans accord renseigné pour le séjour de ${item.cohort}`}
+                  link={`volontaire?status=VALIDATED~WAITING_LIST&cohort=${item.cohort}&parentAllowSNU=N/A`}
                   btnLabel="À relancer"
                 />
               ),
-          )}
+          )} */}
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -307,7 +328,8 @@ function Actus({ stats }) {
                   title="Point de rassemblement"
                   key={"sejour_rassemblement_non_confirmé" + item.cohort}
                   number={item.count}
-                  content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  content={`volontaires n'ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  link={`/volontaire?status=VALIDATED&hasMeetingInformation=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
                   btnLabel="À déclarer"
                 />
               ),
@@ -319,7 +341,8 @@ function Actus({ stats }) {
                   title="Point de rassemblement"
                   key={"sejour_participation_non_confirmée" + item.cohort}
                   number={item.count}
-                  content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  content={`volontaires n'ont pas confirmé leur participation pour le séjour de ${item.cohort}`}
+                  link={`/volontaire?status=VALIDATED&youngPhase1Agreement=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
                   btnLabel="À déclarer"
                 />
               ),
@@ -332,6 +355,7 @@ function Actus({ stats }) {
                   key={"sejour_point_de_rassemblement_à_déclarer" + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
+                  link={`/point-de-rassemblement/liste/liste-points?cohort=${item.cohort}&department=${item.department}`}
                   btnLabel="À déclarer"
                 />
               ),
@@ -343,7 +367,8 @@ function Actus({ stats }) {
                   title="Emploi du temps"
                   key={"sejour_emploi_du_temps_non_déposé" + item.cohort}
                   number={item.count}
-                  content={`emplois du temps n’ont pas été déposés. ${item.cohort}`}
+                  content={`emplois du temps n'ont pas été déposés. ${item.cohort}`}
+                  link={`/centre/liste/session?hasTimeSchedule=false&cohort=${item.cohort}`}
                   btnLabel="À relancer"
                 />
               ),
@@ -356,6 +381,7 @@ function Actus({ stats }) {
                   key={"sejour_contact_à_renseigner" + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
+                  link={user.role === ROLES.REFERENT_DEPARTMENT ? `/team` : null}
                   btnLabel="À renseigner"
                 />
               ),
@@ -368,6 +394,7 @@ function Actus({ stats }) {
                   key={"sejour_volontaires_à_contacter" + item.cohort}
                   number={item.count}
                   content={`volontaires à contacter pour préparer leur accueil pour le séjour de ${item.cohort}`}
+                  link={null}
                   btnLabel="À contacter"
                 />
               ),
@@ -380,6 +407,7 @@ function Actus({ stats }) {
                   key={"sejour_chef_de_centre" + item.cohort}
                   number={item.count}
                   content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
+                  link={`centre/liste/session?headCenterExist=Non&cohort=${item.cohort}`}
                   btnLabel="À renseigner"
                 />
               ),
@@ -392,6 +420,7 @@ function Actus({ stats }) {
                   key={"sejour_centre_à_déclarer" + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 centre est en attente de déclaration pour le séjour de ${item.cohort} (${item.department})`}
+                  link={`/centre/liste/session?cohort=${item.cohort}&department=${item.department}`}
                   btnLabel="À déclarer"
                 />
               ),
@@ -403,23 +432,26 @@ function Actus({ stats }) {
                   title="Pointage"
                   key={"sejourPointage" + item.cohort}
                   number={item.count}
-                  content={`centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de ${item.cohort}`}
+                  content={`centres n'ont pas pointés tous leurs volontaires à l'arrivée au séjour de ${item.cohort}`}
+                  link={null}
                   btnLabel="À renseigner"
                 />
               ),
           )}
-          {stats.sejour.sejour_pointage_jdm.map(
+          {/* ON A PLUS LA JDM DE MEMOIRE */}
+          {/* {stats.sejour.sejour_pointage_jdm.map(
             (item, key) =>
               shouldShow(stats.sejour, "sejour_pointage_jdm", key) && (
                 <NoteContainer
                   title="Pointage"
                   key={"sejour_pointage_jdm" + item.cohort}
                   number={item.count}
-                  content={`centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de ${item.cohort}`}
+                  content={`centres n'ont pas pointés tous leurs volontaires à la JDM sur le séjour de ${item.cohort}`}
+                  link={null}
                   btnLabel="À renseigner"
                 />
               ),
-          )}
+          )} */}
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -431,24 +463,27 @@ function Actus({ stats }) {
             <NoteContainer
               title="Contrat"
               number={stats.engagement.engagement_contrat_à_éditer}
-              content="contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature."
+              content="contrats d'engagement sont à éditer par la structure d'accueil et à envoyer en signature."
               btnLabel="À suivre"
+              link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=DRAFT`}
             />
           )}
           {shouldShow(stats.engagement, "engagement_contrat_en_attente_de_signature") && (
             <NoteContainer
               title="Contrat"
               number={stats.engagement.engagement_contrat_en_attente_de_signature}
-              content="contrats d’engagement sont en attente de signature."
+              content="contrats d'engagement sont en attente de signature."
               btnLabel="À suivre"
+              link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=SENT`}
             />
           )}
           {shouldShow(stats.engagement, "engagement_dossier_militaire_en_attente_de_validation") && (
             <NoteContainer
               title="Dossier d’éligibilité"
               number={stats.engagement.engagement_dossier_militaire_en_attente_de_validation}
-              content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
+              content="dossiers d'éligibilité en préparation militaire sont en attente de vérification."
               btnLabel="À vérifier"
+              link={`/volontaire?status=VALIDATED&statusMilitaryPreparationFiles=WAITING_VERIFICATION`}
             />
           )}
           {shouldShow(stats.engagement, "engagement_mission_en_attente_de_validation") && (
@@ -457,6 +492,7 @@ function Actus({ stats }) {
               number={stats.engagement.engagement_mission_en_attente_de_validation}
               content="missions sont en attente de validation."
               btnLabel="À instruire"
+              link={`/mission?status=WAITING_VALIDATION`}
             />
           )}
           {shouldShow(stats.engagement, "engagement_phase3_en_attente_de_validation") && (
@@ -465,21 +501,10 @@ function Actus({ stats }) {
               number={stats.engagement.engagement_phase3_en_attente_de_validation}
               content="demandes de validation de phase 3 à suivre."
               btnLabel="À suivre"
+              link={`/volontaire?status=VALIDATED&statusPhase3=WAITING_VALIDATION`}
             />
           )}
-          {stats.engagement.engagement_contrat_à_renseigner.map(
-            (item, key) =>
-              shouldShow(stats.engagement, "engagement_contrat_à_renseigner", key) && (
-                <NoteContainer
-                  title="Contact"
-                  key={"engagement_contrat_à_renseigner" + item.cohort + item.department}
-                  number=""
-                  content={`Au moins 1 représentant de l’État est à renseigner pour le séjour de ${item.cohort} (${item.department})`}
-                  btnLabel="À renseigner"
-                />
-              ),
-          )}
-          {shouldShow(stats.engagement, "volontaires_à_suivre_sans_contrat") && (
+          {/* {shouldShow(stats.engagement, "volontaires_à_suivre_sans_contrat") && (
             <NoteContainer
               title="Volontaires"
               number={stats.engagement.volontaires_à_suivre_sans_contrat}
@@ -502,7 +527,7 @@ function Actus({ stats }) {
               content="volontaires ayant achevé leur mission sans statut à jour"
               btnLabel="À suivre"
             />
-          )}
+          )} */}
         </div>
       </div>
       <div className="flex justify-center">
