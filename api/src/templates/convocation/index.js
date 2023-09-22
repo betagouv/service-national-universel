@@ -29,7 +29,7 @@ function getBottom() {
   return getSignedUrl("convocation/bottom.png");
 }
 function getBGForNc() {
-  return getSignedUrl("convocation/convocation_template_baseV2.png");
+  return getSignedUrl("convocation/convocation_template_base_NC.png");
 }
 
 const render = async (young) => {

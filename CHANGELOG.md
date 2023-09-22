@@ -1,3 +1,17 @@
+# [1.337.0](https://github.com/betagouv/service-national-universel/compare/v1.336.0...v1.337.0) (2023-09-21)
+
+
+### Bug Fixes
+
+* **analytics:** bug crons ([5b4d9e9](https://github.com/betagouv/service-national-universel/commit/5b4d9e9f7011276489207a6d09f5b4fc0fe40cc4))
+* **analytics:** crons sentry/codeclimate/uptime ([23cce4e](https://github.com/betagouv/service-national-universel/commit/23cce4e7ceb87ff5dc6e4dd5f1d95b99a0e50cc6))
+* **api:** async missing ([1e0a38a](https://github.com/betagouv/service-national-universel/commit/1e0a38a7c6fb860a3362ebae7b399bcfa0b5bbe5))
+
+
+### Features
+
+* **admin:** Add userback ([8157092](https://github.com/betagouv/service-national-universel/commit/8157092dac65b3fd11cb1aae20e7ec4a485849ea))
+
 # [1.336.0](https://github.com/betagouv/service-national-universel/compare/v1.335.0...v1.336.0) (2023-09-20)
 
 
