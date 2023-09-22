@@ -15,11 +15,23 @@ export default function VolontairesEquivalenceMig({ filters }) {
   const [selected, setSelected] = useState("ALL");
   const [filtered, setFiltered] = useState(null);
 
+  const filterBase = {
+    status: filters?.status?.join("~") || [],
+    cohort: filters?.cohorts?.join("~") || [],
+    region: filters?.region?.join("~") || [],
+    department: filters.department?.join("~") || [],
+    academy: filters?.academy?.join("~") || [],
+  };
+
   async function loadData() {
     setError(null);
     setLoading(true);
     try {
-      const result = await api.post(`/dashboard/engagement/volontaires-equivalence-mig`, { filters });
+      const newFilters = { ...filters, cohort: filters.cohorts };
+      delete newFilters.cohorts;
+      const result = await api.post(`/dashboard/engagement/volontaires-equivalence-mig`, {
+        filters: newFilters,
+      });
       if (result.ok) {
         setStatuses(
           result.data.statuses.map((status) => ({
@@ -28,12 +40,12 @@ export default function VolontairesEquivalenceMig({ filters }) {
             nb: status.value,
             percentage: Math.round(status.percentage * 100),
             url: `/volontaire?${queryString.stringify({
-              status: filters.status,
+              ...filterBase,
               status_equivalence: status.status,
             })}`,
           })),
         );
-        setTypes(result.data.types.map((type) => ({ ...type, url: `/volontaire?${queryString.stringify({ status: filters.status, type_equivalence: type.label })}` })));
+        setTypes(result.data.types || []);
       } else {
         console.log("error : ", result);
         setError("Erreur: impossible de charger les données.");

@@ -16,6 +16,7 @@ const filtersJoi = Joi.object({
   academy: Joi.array().items(Joi.string()),
   department: Joi.array().items(Joi.string()),
   cohorts: Joi.array().items(Joi.string()),
+  cohort: Joi.array().items(Joi.string()),
 });
 
 const missionFiltersJoi = Joi.object({
@@ -40,6 +41,9 @@ function computeYoungFilter(filters) {
   }
   if (filters && filters.cohort && filters.cohort.length > 0) {
     matchs.cohort = { $in: filters.cohort };
+  }
+  if (filters && filters.cohorts && filters.cohorts.length > 0) {
+    matchs.cohort = { $in: filters.cohorts };
   }
   return matchs;
 }
@@ -187,6 +191,8 @@ router.post("/volontaires-equivalence-mig", passport.authenticate("referent", { 
     }
     const { filters } = value;
 
+    console.log("filters: ", filters);
+
     // --- get data
     // TODO: optimization
     const youngs = await YoungModel.find({ ...computeYoungFilter(filters), status_equivalence: { $exists: true } }, { phase2ApplicationStatus: 1, statusPhase2Contract: 1 });
@@ -282,7 +288,7 @@ router.post("/structures", passport.authenticate("referent", { session: false, f
 
     // --- get data
     const pipeline = [
-      { $match: computeYoungFilter(filters) },
+      { $match: computeStructureFilter(filters) },
       {
         $unwind: {
           path: "$types",
@@ -375,8 +381,6 @@ router.post("/mission-proposed-places", passport.authenticate("referent", { sess
       },
     ];
     let result = await MissionModel.aggregate(pipeline);
-
-    console.log("result: ", result);
 
     let data;
     if (result.length > 0) {
