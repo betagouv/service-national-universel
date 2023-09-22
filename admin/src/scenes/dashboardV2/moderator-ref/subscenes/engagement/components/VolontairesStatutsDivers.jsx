@@ -4,6 +4,8 @@ import api from "@/services/api";
 import { translate, translateApplication } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
 import StatusTable from "../../../../components/ui/StatusTable";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function VolontairesStatutsDivers({ filters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -32,13 +34,27 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
           if (statuses[status.category] === undefined) {
             statuses[status.category] = [];
           }
-          let url = '/volontaire?STATUS=%5B"VALIDATED"%5D';
+          let url = "";
           switch (status.category) {
             case "phase2":
-              url += `&APPLICATION_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+              url += getNewLink(
+                {
+                  base: `/volontaire`,
+                  filter: filters,
+                  filtersUrl: [queryString.stringify({ phase2ApplicationStatus: encodeURIComponent(status.status) })],
+                },
+                "session",
+              );
               break;
             case "contract":
-              url += `&CONTRACT_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+              url += getNewLink(
+                {
+                  base: `/volontaire`,
+                  filter: filters,
+                  filtersUrl: [queryString.stringify({ statusPhase2Contract: encodeURIComponent(status.status) })],
+                },
+                "session",
+              );
               break;
           }
 

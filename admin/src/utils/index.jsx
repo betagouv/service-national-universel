@@ -5,6 +5,7 @@ import { formatStringLongDate, ROLES, translate, translateApplication, translate
 import api from "../services/api";
 import { translateModelFields } from "./translateFieldsModel";
 import { environment } from "../config";
+import dayjs from "dayjs";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
 
@@ -182,6 +183,7 @@ export const getNewLink = ({ base = "/", filter, filtersUrl = [] }, from) => {
   Object.keys(filter).forEach((key) => {
     if (key === "cohorts" && from === "center") return;
     if (key === "cohort" && from === "session") return;
+
     if (filter[key]?.length) {
       filtersUrl.push(`${key}=${replaceSpacesNewList(filter[key]?.map((c) => `${c}`)?.join("~"))}`);
     }
@@ -191,6 +193,17 @@ export const getNewLink = ({ base = "/", filter, filtersUrl = [] }, from) => {
   }
   if (filter?.cohorts?.length && from === "session") {
     filtersUrl.push(`cohort=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join("~"))}`);
+  }
+
+  if (filter?.start || filter?.end) {
+    let dates = [];
+    if (filter.start) {
+      dates.push("FROMDATE", dayjs(filter.start).format("YYYY-MM-DD"));
+    }
+    if (filter.end) {
+      dates.push("TODATE", dayjs(filter.end).format("YYYY-MM-DD"));
+    }
+    filtersUrl.push(`DATE=%5B"${dates.join('"%2C"')}"%5D`);
   }
 
   let res = base;

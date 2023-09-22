@@ -6,6 +6,8 @@ import Tabs from "../../../../../phase0/components/Tabs";
 import { BarChart, Legends } from "../../../../components/graphs";
 import { computeMissionUrl } from "../../../../components/common";
 import { LoadingBar } from "../../../../components/ui/loading";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function MissionsDetail({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -87,7 +89,14 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
 
   function onBarClick(bar) {
     if (selectedTab === "domain") {
-      window.open(computeMissionUrl(filters, missionFilters, { DOMAIN: bar.id }), "_blank");
+      window.open(
+        getNewLink({
+          base: `/mission`,
+          filter: filters,
+          filtersUrl: [queryString.stringify({ mainDomain: bar.id })],
+        }),
+        "_blank",
+      );
     }
   }
 
