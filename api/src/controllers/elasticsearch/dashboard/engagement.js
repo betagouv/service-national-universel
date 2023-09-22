@@ -120,4 +120,73 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
   }
 });
 
+router.post("/missions-statuts", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const filterFields = ["department", "region", "start", "end"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const body = {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+            queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+            queryFilters.start ? { range: { start: { gte: queryFilters.start } } } : null,
+            queryFilters.end ? { range: { end: { lte: queryFilters.end } } } : null,
+          ].filter(Boolean),
+        },
+      },
+      aggs: {
+        by_status: {
+          terms: {
+            field: "status.keyword",
+            missing: "EMPTY",
+          },
+          aggs: {
+            total: {
+              sum: {
+                field: "placesTotal",
+              },
+            },
+            left: {
+              sum: {
+                field: "placesLeft",
+              },
+            },
+          },
+        },
+      },
+      size: 0,
+      track_total_hits: true,
+    };
+
+    const response = await esClient.search({ index: "mission", body: body });
+
+    if (!response?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const aggregations = response.body.aggregations.by_status.buckets;
+    const total = aggregations.reduce((acc, bucket) => acc + bucket.doc_count, 0);
+
+    const data = aggregations.map((bucket) => ({
+      status: bucket.key,
+      value: bucket.doc_count,
+      percentage: total ? bucket.doc_count / total : 0,
+      total: bucket.total.value,
+      left: bucket.left.value,
+    }));
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+module.exports = router;
+
 module.exports = router;
