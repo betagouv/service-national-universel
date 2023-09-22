@@ -15,7 +15,46 @@ export default function SectionStructures({ filters }) {
   const [structures, setStructures] = useState(null);
 
   useEffect(() => {
-    loadData();
+    (async () => {
+      const res = await api.post("/elasticsearch/dashboard/engagement/structures", {
+        filters: Object.fromEntries(Object.entries(filters)),
+      });
+      // setLoading(false);
+      console.log(res);
+      setTotalStructures(res.hits?.total?.value);
+      setNationalStructures(res.aggregations?.total_with_network_name?.doc_count);
+      console.log(res.aggregations?.by_legal_status?.buckets);
+      setStructures(
+        res.aggregations?.by_legal_status?.buckets.map((structure) => {
+          structure.types = structure.by_type.buckets.map((type) => {
+            return {
+              _id: type.key,
+              total: type.doc_count,
+            };
+          });
+          return {
+            _id: structure.key,
+            label: translate(structure.key),
+            total: structure.doc_count,
+            info: getInfoPanel(structure),
+          };
+        }),
+      );
+      /*
+      setStructures(
+        res.aggregations?.by_legal_status?.buckets.map((structure) => {
+          structure.
+          return {
+            _id: structure.key,
+            label: translate(structure.key),
+            total: structure.doc_count,
+            info: getInfoPanel(structure),
+          }
+        }),
+      );
+      */
+    })();
+    // loadData();
   }, [filters]);
 
   async function loadData() {
@@ -49,15 +88,11 @@ export default function SectionStructures({ filters }) {
           national += structure.national;
         }
 
-        setTotalStructures(total);
-        setNationalStructures(national);
-
         setStructures(
           Object.values(byStatus).map((structure) => ({
             _id: structure._id,
             label: translate(structure._id),
             total: structure.total,
-            national: structure.national,
             info: getInfoPanel(structure),
           })),
         );
@@ -74,19 +109,20 @@ export default function SectionStructures({ filters }) {
 
   function getInfoPanel(structure) {
     const total = structure.types ? structure.types.reduce((acc, type) => acc + type.total, 0) : 0;
+    console.log(structure);
 
-    switch (structure._id) {
+    switch (structure.key) {
       case "PRIVATE":
       case "PUBLIC":
         return (
           <div className="p-8">
-            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure.key)}</div>
             <FullDoughnut
               legendSide="right"
               maxLegends={3}
               labels={structure.types.map((type) => translate(type._id))}
               values={structure.types.map((type) => Math.round((type.total / total) * 100))}
-              legendUrls={structure.types.map((type) => `/structure?LEGAL_STATUS=%5B"${structure._id}"%5D&TYPE=%5B"${type._id}"%5D`)}
+              legendUrls={structure.types.map((type) => `/structure?LEGAL_STATUS=%5B"${structure.key}"%5D&TYPE=%5B"${type._id}"%5D`)}
               valueSuffix="%"
               tooltips={structure.types.map((type) => type.total)}
             />
@@ -103,7 +139,7 @@ export default function SectionStructures({ filters }) {
         });
         return (
           <div className="p-8">
-            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure.key)}</div>
             <StatusTable statuses={statuses} />
           </div>
         );
