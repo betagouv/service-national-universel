@@ -45,11 +45,11 @@ import ViewMessage from "./scenes/echanges/View";
 
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
-import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
+import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
-import { cohortsInit } from "./utils/cohorts";
+import { cohortsInit, canYoungResumePhase1 } from "./utils/cohorts";
 
 initSentry();
 initApi();
