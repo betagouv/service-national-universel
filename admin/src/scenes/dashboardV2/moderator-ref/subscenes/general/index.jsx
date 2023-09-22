@@ -139,7 +139,7 @@ export default function Index() {
   }, []);
 
   return (
-    <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
+    <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription"]}>
       <div className="flex flex-col gap-8 mb-4">
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
