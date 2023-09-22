@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { FullDoughnut } from "../../../../components/graphs";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
-import { translate } from "snu-lib";
+import { translate, translatePhase1, translatePhase2 } from "snu-lib";
 import { LoadingDoughnut } from "../../../../components/ui/loading";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function VolontairesStatutsDePhase({ filters, className = "" }) {
   const [phase, setPhase] = useState(1);
@@ -29,9 +31,18 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
         const values = [];
         const legendUrls = [];
         for (const data of result.data) {
-          labels.push(translate(data._id));
+          labels.push(phase === 1 ? translatePhase1(data._id) : phase === 2 ? translatePhase2(data._id) : translate(data._id));
           values.push(data.count);
-          legendUrls.push(`/volontaire?STATUS=%5B"VALIDATED"%5D&STATUS_PHASE_${phase}=%5B"${encodeURIComponent(data._id)}"%5D`);
+          legendUrls.push(
+            getNewLink(
+              {
+                base: `/volontaire`,
+                filter: filters,
+                filtersUrl: [queryString.stringify({ [`statusPhase${phase}`]: encodeURIComponent(data._id) })],
+              },
+              "session",
+            ),
+          );
         }
         setGraph({ values, labels, legendUrls });
       } else {

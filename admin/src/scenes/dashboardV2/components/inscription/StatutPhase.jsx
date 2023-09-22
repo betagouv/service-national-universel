@@ -1,6 +1,7 @@
-import React from "react";
+import queryString from "query-string";
 import { Link } from "react-router-dom";
-import { getLink as getOldLink } from "../../../../utils";
+import { getNewLink } from "../../../../utils";
+import React from "react";
 
 export default function StatutPhase({ values, filter }) {
   const total = Object.values(values).reduce((acc, cur) => acc + cur, 0);
@@ -18,7 +19,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.IN_PROGRESS || 0}
             percentage={computePercentage(values.IN_PROGRESS)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"IN_PROGRESS"%5D']}
+            filtersUrl={[queryString.stringify({ status: "IN_PROGRESS" })]}
             base="/inscription"
           />
           <StatusText
@@ -26,7 +27,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.WAITING_VALIDATION || 0}
             percentage={computePercentage(values.WAITING_VALIDATION)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"WAITING_VALIDATION"%5D']}
+            filtersUrl={[queryString.stringify({ status: "WAITING_VALIDATION" })]}
             base="/inscription"
           />
           <StatusText
@@ -34,7 +35,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.WAITING_CORRECTION || 0}
             percentage={computePercentage(values.WAITING_CORRECTION)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"WAITING_CORRECTION"%5D']}
+            filtersUrl={[queryString.stringify({ status: "WAITING_CORRECTION" })]}
             base="/inscription"
           />
           <StatusText
@@ -42,7 +43,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.VALIDATED || 0}
             percentage={computePercentage(values.VALIDATED)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"VALIDATED"%5D']}
+            filtersUrl={[queryString.stringify({ status: "VALIDATED" })]}
             base="/volontaire"
           />
         </div>
@@ -55,7 +56,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.WAITING_LIST || 0}
             percentage={computePercentage(values.WAITING_LIST)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"WAITING_LIST"%5D']}
+            filtersUrl={[queryString.stringify({ status: "WAITING_LIST" })]}
             base="/volontaire"
           />
           <StatusText
@@ -63,7 +64,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.REFUSED || 0}
             percentage={computePercentage(values.REFUSED)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"REFUSED"%5D']}
+            filtersUrl={[queryString.stringify({ status: "REFUSED" })]}
             base="/inscription"
           />
           <StatusText
@@ -71,7 +72,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.REINSCRIPTION || 0}
             percentage={computePercentage(values.REINSCRIPTION)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"REINSCRIPTION"%5D']}
+            filtersUrl={[queryString.stringify({ status: "REINSCRIPTION" })]}
             base="/inscription"
           />
           <StatusText
@@ -79,7 +80,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.NOT_ELIGIBLE || 0}
             percentage={computePercentage(values.NOT_ELIGIBLE)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"NOT_ELIGIBLE"%5D']}
+            filtersUrl={[queryString.stringify({ status: "NOT_ELIGIBLE" })]}
             base="/inscription"
           />
         </div>
@@ -92,7 +93,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.ABANDONED || 0}
             percentage={computePercentage(values.ABANDONED)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"ABANDONED"%5D']}
+            filtersUrl={[queryString.stringify({ status: "ABANDONED" })]}
             base="/inscription"
           />
 
@@ -101,7 +102,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.NOT_AUTORISED || 0}
             percentage={computePercentage(values.NOT_AUTORISED)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"NOT_AUTORISED"%5D']}
+            filtersUrl={[queryString.stringify({ status: "NOT_AUTORISED" })]}
             base="/inscription"
           />
           <StatusText
@@ -109,7 +110,7 @@ export default function StatutPhase({ values, filter }) {
             nb={values.DELETED || 0}
             percentage={computePercentage(values.DELETED)}
             filter={filter}
-            filtersUrl={['STATUS=%5B"DELETED"%5D']}
+            filtersUrl={[[queryString.stringify({ status: "DELETED" })]]}
             base="/volontaire"
           />
         </div>
@@ -120,7 +121,7 @@ export default function StatutPhase({ values, filter }) {
 
 function StatusText({ status, nb, percentage, filter, filtersUrl, base }) {
   return (
-    <Link className="flex items-center justify-between gap-2" to={getOldLink({ base, filter, filtersUrl })} target={"_blank"}>
+    <Link className="flex items-center justify-between gap-2" to={getNewLink({ base, filter, filtersUrl })} target={"_blank"}>
       <div className="float-right flex w-full items-center justify-end gap-2">
         <span className="w-[10%] text-right text-lg font-bold text-gray-900">{nb}</span>
         <div className="ml-4 w-[80%]">

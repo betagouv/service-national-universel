@@ -1,12 +1,11 @@
 import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } from "react-icons/hi";
 import { Link } from "react-router-dom";
-import api from "../../../../../../services/api";
-import { currentFilterAsUrl } from "../../../../components/FilterDashBoard";
+import { getNewLink } from "@/utils";
 
 const PAGE_SIZE = 6;
 
-export default function TabSession({sessionByCenter, filters}) {
+export default function TabSession({ sessionByCenter, filters }) {
   const [sessionData, setSessionData] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [page, setPage] = React.useState(0);
@@ -41,7 +40,7 @@ export default function TabSession({sessionByCenter, filters}) {
     <div className="flex w-[60%] flex-col gap-5 rounded-lg bg-white px-8 py-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="flex items-center gap-3">
         <p className="text-left text-base font-bold leading-5 text-gray-900">Liste des centres</p>
-        <Link to={`/centre/liste/presence?${currentFilterAsUrl(filters)}`} target={"_blank"}>
+        <Link to={getNewLink({ base: `/centre/liste/presence`, filter: filters, filtersUrl: [] })} target={"_blank"}>
           <HiOutlineExternalLink className="h-5 w-5 cursor-pointer text-gray-400" />
         </Link>
       </div>

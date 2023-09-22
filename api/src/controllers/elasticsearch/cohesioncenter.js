@@ -92,9 +92,9 @@ router.post("/not-in-cohort/:cohort", passport.authenticate(["referent"], { sess
 router.post("/presence/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
-    const { user, body } = req;
     const searchFields = ["name", "city", "zip", "code2022"];
-    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status", "statusPhase1"];
+    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status.keyword", "statusPhase1.keyword"];
+    const filterFieldsCenter = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword"];
     const sortFields = [];
 
     // Authorization
@@ -105,13 +105,25 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
     const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    const queryFiltersCenter = { ...queryFilters };
+    delete queryFiltersCenter.status;
+    delete queryFiltersCenter.statusPhase1;
+
     // Context filters
     let contextFilters = [];
     if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields: filterFieldsCenter,
+      queryFilters: queryFiltersCenter,
+      page,
+      sort,
+      contextFilters,
+      size,
+    });
 
     async function getAdditionalData(centerIds) {
       const sessionQuery = {
@@ -229,6 +241,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+
       const reducedAdditionalData = await getAdditionalData(response.body.responses[0].hits.hits.map((h) => h._id));
       response.body.responses[0].hits.hits = response.body.responses[0].hits.hits.map((h) => {
         const additionalData = reducedAdditionalData[h._id];
