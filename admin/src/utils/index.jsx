@@ -183,14 +183,14 @@ export const getNewLink = ({ base = "/", filter, filtersUrl = [] }, from) => {
     if (key === "cohorts" && from === "center") return;
     if (key === "cohort" && from === "session") return;
     if (filter[key]?.length) {
-      filtersUrl.push(`${key}=${replaceSpacesNewList(filter[key]?.map((c) => `${c}`)?.join(","))}`);
+      filtersUrl.push(`${key}=${replaceSpacesNewList(filter[key]?.map((c) => `${c}`)?.join("~"))}`);
     }
   });
   if (filter?.cohorts?.length && from === "center") {
-    filtersUrl.push(`cohorts=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
+    filtersUrl.push(`cohorts=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join("~"))}`);
   }
   if (filter?.cohorts?.length && from === "session") {
-    filtersUrl.push(`cohort=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
+    filtersUrl.push(`cohort=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join("~"))}`);
   }
 
   let res = base;

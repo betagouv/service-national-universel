@@ -1,7 +1,7 @@
 import React from "react";
-// import StatusText from "./StatusText";
-import { getLink as getOldLink } from "../../../../../../utils";
 import { Link } from "react-router-dom";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function StatusPhase1({ statusPhase1, total, filter }) {
   const WAITING_AFFECTATION = statusPhase1?.WAITING_AFFECTATION || 0;
@@ -21,7 +21,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             percentage={total && WAITING_AFFECTATION ? ((WAITING_AFFECTATION / total) * 100).toFixed(0) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={['STATUS_PHASE_1=%5B"WAITING_AFFECTATION"%5D']}
+            filtersUrl={[queryString.stringify({ statusPhase1: "WAITING_AFFECTATION" })]}
           />
           <StatusText
             status="Affectée"
@@ -29,7 +29,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             percentage={total && AFFECTED ? ((AFFECTED / total) * 100).toFixed(0) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={['STATUS_PHASE_1=%5B"AFFECTED"%5D']}
+            filtersUrl={[queryString.stringify({ statusPhase1: "AFFECTED" })]}
           />
           <StatusText
             status="Validée"
@@ -37,7 +37,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             percentage={total && DONE ? ((DONE / total) * 100).toFixed(0) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={['STATUS_PHASE_1=%5B"DONE"%5D']}
+            filtersUrl={[queryString.stringify({ statusPhase1: "DONE" })]}
           />
         </div>
         <div className="flex w-[10%] items-center justify-center">
@@ -50,7 +50,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             percentage={total && NOT_DONE ? ((NOT_DONE / total) * 100).toFixed(0) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={['STATUS_PHASE_1=%5B"NOT_DONE"%5D']}
+            filtersUrl={[queryString.stringify({ statusPhase1: "NOT_DONE" })]}
           />
           <StatusText
             status="Dispensée"
@@ -58,7 +58,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             percentage={total && EXEMPTED ? ((EXEMPTED / total) * 100).toFixed(0) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={['STATUS_PHASE_1=%5B"EXEMPTED"%5D']}
+            filtersUrl={[queryString.stringify({ statusPhase1: "EXEMPTED" })]}
           />
         </div>
       </div>
@@ -68,7 +68,20 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
 
 function StatusText({ status, nb, percentage, filter, filtersUrl, base }) {
   return (
-    <Link className="flex items-center justify-between gap-2" to={getOldLink({ base, filter, filtersUrl })} target={"_blank"}>
+    <Link
+      className="flex items-center justify-between gap-2"
+      to={getNewLink({
+        base,
+        filter: {
+          region: filter.region,
+          department: filter.department,
+          academy: filter.academy,
+          cohort: filter.cohorts,
+          status: filter.status,
+        },
+        filtersUrl,
+      })}
+      target={"_blank"}>
       <div className="flex w-[80%] items-center justify-start gap-2">
         <span className="w-[20%] text-lg font-bold text-gray-900">{nb}</span>
         <div className="flex w-[80%] items-center text-left text-sm text-gray-600">{status}</div>

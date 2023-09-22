@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 
+import queryString from "query-string";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, translate } from "snu-lib";
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../../../sentry";
-import { translate } from "snu-lib";
-import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import api from "../../../../../services/api";
-import { getLink as getOldLink } from "../../../../../utils";
+import { getNewLink } from "../../../../../utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import KeyNumbers from "../../../components/KeyNumbers";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
 import InfoMessage from "../../../components/ui/InfoMessage";
@@ -17,8 +19,6 @@ import Engagement from "../../../components/ui/icons/Engagement";
 import Inscription from "../../../components/ui/icons/Inscription";
 import Sejour from "../../../components/ui/icons/Sejour";
 import VolontaireSection from "./components/VolontaireSection";
-import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
-import KeyNumbers from "../../../components/KeyNumbers";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -163,11 +163,11 @@ export default function Index() {
             goal={goal}
             showTooltips={true}
             legendUrls={[
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] }),
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
             ]}
           />
         </div>
