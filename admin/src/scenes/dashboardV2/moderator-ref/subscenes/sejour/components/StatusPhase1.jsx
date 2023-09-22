@@ -10,6 +10,9 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
   const NOT_DONE = statusPhase1?.NOT_DONE || 0;
   const EXEMPTED = statusPhase1?.EXEMPTED || 0;
 
+  const filterWithoutStatusPhase1 = { ...filter };
+  delete filterWithoutStatusPhase1.statusPhase1;
+
   return (
     <div className="flex h-[220px] w-[70%] flex-col gap-6 rounded-lg bg-white px-8 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <p className="text-base font-bold leading-5 text-gray-900">Statut de phase 1</p>
@@ -19,7 +22,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             status="En attente d'affectation"
             nb={WAITING_AFFECTATION}
             percentage={total && WAITING_AFFECTATION ? ((WAITING_AFFECTATION / total) * 100).toFixed(0) : 0}
-            filter={filter}
+            filter={filterWithoutStatusPhase1}
             base="/volontaire"
             filtersUrl={[queryString.stringify({ statusPhase1: "WAITING_AFFECTATION" })]}
           />
@@ -27,7 +30,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             status="Affectée"
             nb={AFFECTED || 0}
             percentage={total && AFFECTED ? ((AFFECTED / total) * 100).toFixed(0) : 0}
-            filter={filter}
+            filter={filterWithoutStatusPhase1}
             base="/volontaire"
             filtersUrl={[queryString.stringify({ statusPhase1: "AFFECTED" })]}
           />
@@ -35,7 +38,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             status="Validée"
             nb={DONE || 0}
             percentage={total && DONE ? ((DONE / total) * 100).toFixed(0) : 0}
-            filter={filter}
+            filter={filterWithoutStatusPhase1}
             base="/volontaire"
             filtersUrl={[queryString.stringify({ statusPhase1: "DONE" })]}
           />
@@ -48,7 +51,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             status="Non réalisée"
             nb={NOT_DONE || 0}
             percentage={total && NOT_DONE ? ((NOT_DONE / total) * 100).toFixed(0) : 0}
-            filter={filter}
+            filter={filterWithoutStatusPhase1}
             base="/volontaire"
             filtersUrl={[queryString.stringify({ statusPhase1: "NOT_DONE" })]}
           />
@@ -56,7 +59,7 @@ export default function StatusPhase1({ statusPhase1, total, filter }) {
             status="Dispensée"
             nb={EXEMPTED || 0}
             percentage={total && EXEMPTED ? ((EXEMPTED / total) * 100).toFixed(0) : 0}
-            filter={filter}
+            filter={filterWithoutStatusPhase1}
             base="/volontaire"
             filtersUrl={[queryString.stringify({ statusPhase1: "EXEMPTED" })]}
           />
@@ -72,13 +75,7 @@ function StatusText({ status, nb, percentage, filter, filtersUrl, base }) {
       className="flex items-center justify-between gap-2"
       to={getNewLink({
         base,
-        filter: {
-          region: filter.region,
-          department: filter.department,
-          academy: filter.academy,
-          cohort: filter.cohorts,
-          status: filter.status,
-        },
+        filter,
         filtersUrl,
       })}
       target={"_blank"}>

@@ -1,8 +1,6 @@
 import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } from "react-icons/hi";
 import { Link } from "react-router-dom";
-import api from "../../../../../../services/api";
-import { currentFilterAsUrl } from "../../../../components/FilterDashBoard";
 import { getNewLink } from "@/utils";
 
 const PAGE_SIZE = 6;

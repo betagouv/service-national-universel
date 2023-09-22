@@ -92,9 +92,8 @@ router.post("/not-in-cohort/:cohort", passport.authenticate(["referent"], { sess
 router.post("/presence/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
-    const { user, body } = req;
     const searchFields = ["name", "city", "zip", "code2022"];
-    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status", "statusPhase1"];
+    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status.keyword", "statusPhase1.keyword"];
     const filterFieldsCenter = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword"];
     const sortFields = [];
 

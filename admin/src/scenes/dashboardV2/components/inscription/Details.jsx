@@ -227,7 +227,7 @@ export default function Details({ selectedFilters }) {
             tooltipsPercent={true}
             legendUrls={[
               getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ qpv: "true" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ qpv: "false~" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ qpv: "false" })] }),
             ]}
           />
 

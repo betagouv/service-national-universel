@@ -121,7 +121,6 @@ export default function StatutPhase({ values, filter }) {
 
 function StatusText({ status, nb, percentage, filter, filtersUrl, base }) {
   return (
-    // getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ gender: "male" })] }),
     <Link className="flex items-center justify-between gap-2" to={getNewLink({ base, filter, filtersUrl })} target={"_blank"}>
       <div className="float-right flex w-full items-center justify-end gap-2">
         <span className="w-[10%] text-right text-lg font-bold text-gray-900">{nb}</span>
