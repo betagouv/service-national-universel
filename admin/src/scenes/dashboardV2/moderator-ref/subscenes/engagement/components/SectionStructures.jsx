@@ -19,10 +19,9 @@ export default function SectionStructures({ filters }) {
       const res = await api.post("/elasticsearch/dashboard/engagement/structures", {
         filters: Object.fromEntries(Object.entries(filters)),
       });
-      setLoading(false);
+
       setTotalStructures(res.hits?.total?.value);
       setNationalStructures(res.aggregations?.total_with_network_name?.doc_count);
-      console.log(res.aggregations?.by_legal_status?.buckets);
       setStructures(
         res.aggregations?.by_legal_status?.buckets.map((structure) => {
           structure.types = structure.by_type.buckets.map((type) => {
@@ -44,7 +43,6 @@ export default function SectionStructures({ filters }) {
 
   function getInfoPanel(structure) {
     const total = structure.types ? structure.types.reduce((acc, type) => acc + type.total, 0) : 0;
-    console.log(structure);
 
     switch (structure.key) {
       case "PRIVATE":
