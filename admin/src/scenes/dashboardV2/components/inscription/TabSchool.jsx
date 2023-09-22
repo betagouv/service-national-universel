@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { ROLES } from "snu-lib";
 import api from "../../../../services/api";
-import { replaceSpaces } from "../../../../utils";
+import { getNewLink, replaceSpaces } from "../../../../utils";
 import { currentFilterAsUrl } from "../FilterDashBoard";
 
 const PAGE_SIZE = 6;
@@ -24,8 +24,8 @@ export default function TabSchool({ filters }) {
     setTotal(0);
     setPageMax(0);
     setIsLoading(true);
-    
-    const responses = await api.post("/elasticsearch/dashboard/inscription/youngBySchool", {filters: filters} );
+
+    const responses = await api.post("/elasticsearch/dashboard/inscription/youngBySchool", { filters: filters });
     if (!responses?.aggregations) return setNoResult(true);
     if (setNoResult(responses.aggregations.school.buckets.length === 0)) {
       setNoResult(true);
@@ -73,7 +73,7 @@ export default function TabSchool({ filters }) {
       <div className="flex w-full flex-row justify-between">
         <div className="flex items-center gap-3">
           <div className="text-base font-bold text-gray-900">Liste des établissements</div>
-          <Link to={`/etablissement/liste-jeunes?${currentFilterAsUrl(filters)}`} target={"_blank"}>
+          <Link to={getNewLink({ base: `/etablissement/liste-jeunes`, filter: filters, filtersUrl: [] })} target={"_blank"}>
             <HiOutlineExternalLink className="h-5 w-5 cursor-pointer text-gray-400" />
           </Link>
         </div>

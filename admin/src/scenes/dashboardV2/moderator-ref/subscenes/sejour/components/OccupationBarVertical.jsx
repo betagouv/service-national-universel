@@ -11,12 +11,10 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
 
   const exclusion = departMotif?.Exclusion || 0;
   const forceMajeure = departMotif && "Cas de force majeure pour le volontaire" in departMotif ? departMotif["Cas de force majeure pour le volontaire"] : 0;
-  const annulation = departMotif && "Annulation du séjour ou mesure d’éviction sanitaire" in departMotif ? departMotif["Annulation du séjour ou mesure d'éviction sanitaire"] : 0;
+  const annulation = departMotif && "Annulation du séjour ou mesure d’éviction sanitaire" in departMotif ? departMotif["Annulation du séjour ou mesure d’éviction sanitaire"] : 0;
   const autre = departMotif?.Autre || 0;
 
   if (isNaN(occupationPercentage)) occupationPercentage = 0;
-
-  console.log(filter);
 
   if (occupationPercentage < 20) height = "h-[20%]";
   else if (occupationPercentage < 30) height = "h-[30%]";
@@ -32,16 +30,16 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
     <div className="flex items-center gap-10">
       <div className="flex flex-col gap-5">
         {Math.floor(occupationPercentage) === 0 ? (
-          <div className="flex h-52 w-16 flex-col items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-xs font-bold">0%</div>
+          <div className="flex h-52 w-16 flex-col items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-xs font-bold mx-auto">0%</div>
         ) : (
-          <div className="flex h-52 w-16  flex-col justify-end overflow-hidden rounded-lg bg-gray-100">
+          <div className="flex h-52 w-16  flex-col justify-end overflow-hidden rounded-lg bg-gray-100 mx-auto">
             <div className={`flex w-16 items-center justify-center ${height} ${bgColor} rounded-lg text-xs font-bold text-white`}>{Math.floor(occupationPercentage)}%</div>
           </div>
         )}
         {nbDepart === undefined ? (
-          <p className="text-sm font-bold leading-4 text-gray-900">{nbDepart || 0} départs</p>
+          <p className="text-sm font-bold leading-4 text-gray-900 w-fit">{nbDepart || 0} départs</p>
         ) : (
-          <div className="text-sm font-bold leading-4 text-gray-900">
+          <div className="text-sm font-bold leading-4 text-gray-900 text-center">
             <StatusTextDepart status="départs" nb={nbDepart || 0} filter={filter} base="/volontaire" filtersUrl={[queryString.stringify({ departInform: "true" })]} />
           </div>
         )}
@@ -71,7 +69,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
             percentage={nbDepart ? Math.floor((annulation / nbDepart) * 100) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={[queryString.stringify({ departSejourMotif: "Annulation du séjour ou mesure d'éviction sanitaire" })]}
+            filtersUrl={[queryString.stringify({ departSejourMotif: "Annulation du séjour ou mesure d’éviction sanitaire" })]}
           />
           <StatusText
             status="Autre"
@@ -91,7 +89,7 @@ function StatusTextDepart({ status, nb, filter, filtersUrl, base }) {
   return (
     <Link className="flex items-center justify-between gap-2" to={getNewLink({ base, filter, filtersUrl }, "session")} target={"_blank"}>
       <div className="flex w-[80%] items-center justify-start gap-1">
-        <span className="w-[20%] text-sm font-bold text-gray-900">{nb}</span>
+        <span className="text-sm font-bold text-gray-900">{nb}</span>
         <div className="flex items-center text-left text-sm text-gray-900">{status}</div>
       </div>
     </Link>
