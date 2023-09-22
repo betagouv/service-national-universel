@@ -37,11 +37,14 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
                   labels={["occupées", "disponibles"]}
                 />
               ),
-              url: getNewLink({
-                base: `/mission`,
-                filter: filters,
-                filtersUrl: [queryString.stringify({ status: status.status })],
-              }),
+              url: getNewLink(
+                {
+                  base: `/mission`,
+                  filter: { ...filters, status: [] },
+                  filtersUrl: [queryString.stringify({ status: status.status })],
+                },
+                "mission",
+              ),
             };
           }),
         );
