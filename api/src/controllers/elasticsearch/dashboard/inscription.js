@@ -273,8 +273,6 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
           filter: [
             queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
-            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-            queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
           ].filter(Boolean),
         },
       },
@@ -318,6 +316,17 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
           ],
         },
       });
+
+    if (queryFilters?.department?.length)
+      body.query.bool.filter.push({
+        bool: {
+          should: [
+            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },
+            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": queryFilters.department } }] } },
+          ],
+        },
+      });
+
     const responseYoung = await esClient.search({ index: "young", body: body });
     if (!responseYoung?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
