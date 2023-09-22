@@ -24,7 +24,7 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
     setError(null);
     setLoading(true);
     try {
-      const result = await api.post(`/dashboard/engagement/volontaires-statuts-divers`, { filters });
+      const result = await api.post(`/elasticsearch/dashboard/engagement/status-divers`, { filters });
       if (result.ok) {
         let statuses = {};
 
