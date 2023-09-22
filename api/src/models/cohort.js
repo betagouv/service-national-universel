@@ -11,6 +11,21 @@ const DSNJExportDates = new mongoose.Schema({
   youngsAfterSession: Date,
 });
 
+const Eligibility = new mongoose.Schema({
+  zones: {
+    type: [String],
+    enum: ["A", "B", "C", "DOM", "PF", "Etranger", "NC", "Corse"],
+    required: true,
+  },
+  schoolLevels: {
+    type: [String],
+    enum: ["4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE"],
+    required: true,
+  },
+  bornAfter: { type: Date, required: true },
+  bornBefore: { type: Date, required: true },
+});
+
 const Schema = new mongoose.Schema({
   snuId: {
     type: String,
@@ -62,6 +77,13 @@ const Schema = new mongoose.Schema({
   dateStart: { type: Date, required: true },
   dateEnd: { type: Date, required: true },
 
+  // @todo required: true
+  eligibility: { type: Eligibility },
+
+  // @todo required: true
+  inscriptionEndDate: { type: Date },
+  instructionEndDate: { type: Date },
+
   pdrChoiceLimitDate: {
     type: Date,
     documentation: {
@@ -75,6 +97,7 @@ const Schema = new mongoose.Schema({
       description: "Date d'autoValidation du jeune (apèrs cette date, sa phase 1 est validée), par defaut 23h59",
     },
   },
+
   validationDateForTerminaleGrade: {
     type: Date,
     documentation: {
