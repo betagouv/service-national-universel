@@ -108,7 +108,7 @@ export default function Index() {
 
   return (
     <DashboardContainer
-      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
+      availableTab={["general", "engagement", "sejour", "inscription"]}
       active="engagement"
       navChildren={
         <div className="flex items-center gap-2">
