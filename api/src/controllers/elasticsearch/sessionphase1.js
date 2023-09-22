@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
@@ -23,6 +23,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "typology.keyword",
       "domain.keyword",
       "hasPedagoProject.keyword",
+      "headCenterExist",
     ];
     // check query parameters to fill cohesionCenter
 
@@ -38,7 +39,29 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort,
+      contextFilters,
+      size,
+      customQueries: {
+        headCenterExist: (query, value) => {
+          const conditions = [];
+          if (value.includes("Oui")) conditions.push({ bool: { must: [{ exists: { field: "headCenterId.keyword" } }] } });
+          if (value.includes("Non")) conditions.push({ bool: { must_not: [{ exists: { field: "headCenterId.keyword" } }] } });
+          if (conditions.length) query.bool.must.push({ bool: { should: conditions } });
+          return query;
+        },
+        headCenterExistAggs: () => {
+          return {
+            terms: { field: "headCenterId.keyword", size: ES_NO_LIMIT, missing: "N/A" },
+          };
+        },
+      },
+    });
 
     let sessionphase1 = [];
     let response;

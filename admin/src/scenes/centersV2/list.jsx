@@ -115,6 +115,12 @@ const ListSession = ({ firstSession }) => {
     { title: "Places restantes", name: "placesLeft", missingLabel: "Non renseignée" },
     { title: "Emploi du temps", name: "hasTimeSchedule", missingLabel: "Non renseignée", translate: translate },
     { title: "Projet Pédagogique", name: "hasPedagoProject", missingLabel: "Non renseignée", translate: translate },
+    {
+      title: "Chef de centre renseigné",
+      name: "headCenterExist",
+      missingLabel: "Non renseigné",
+      transformData: (value) => transformHeadCenter(value),
+    },
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", missingLabel: "Non renseignée" });
 
@@ -416,4 +422,19 @@ const HitSession = ({ hit, onClick }) => {
       </div>
     </>
   );
+};
+
+const transformHeadCenter = (data) => {
+  const newData = [
+    { key: "Oui", doc_count: 0 },
+    { key: "Non", doc_count: 0 },
+  ];
+  data.map((d) => {
+    if (d.key === "N/A") {
+      newData.find((e) => e.key === "Non").doc_count += d.doc_count;
+    } else {
+      newData.find((e) => e.key === "Oui").doc_count += d.doc_count;
+    }
+  });
+  return newData;
 };
