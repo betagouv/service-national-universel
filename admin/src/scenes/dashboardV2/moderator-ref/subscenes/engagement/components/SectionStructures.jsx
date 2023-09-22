@@ -124,7 +124,6 @@ export default function SectionStructures({ filters }) {
         return null;
     }
   }
-  console.log("structures", structures);
   return (
     <Section title="Structures">
       {error ? (

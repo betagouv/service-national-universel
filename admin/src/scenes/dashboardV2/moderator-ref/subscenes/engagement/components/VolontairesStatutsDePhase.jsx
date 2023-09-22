@@ -55,8 +55,6 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
     }
   }
 
-  console.log(graph);
-
   const phaseSelector = (
     <select className="" value={phase} onChange={selectPhase}>
       <option value={1}>Phase 1</option>
