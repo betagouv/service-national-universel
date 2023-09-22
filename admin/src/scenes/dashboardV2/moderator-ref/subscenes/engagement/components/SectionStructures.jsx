@@ -17,72 +17,42 @@ export default function SectionStructures({ filters }) {
   const [structures, setStructures] = useState(null);
 
   useEffect(() => {
-    loadData();
-  }, [filters]);
+    (async () => {
+      const res = await api.post("/elasticsearch/dashboard/engagement/structures", {
+        filters: Object.fromEntries(Object.entries(filters)),
+      });
 
-  async function loadData() {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await api.post(`/dashboard/engagement/structures`, { filters });
-      if (result.ok) {
-        let total = 0;
-        let national = 0;
-        let byStatus = {};
-
-        for (const structure of result.data) {
-          if (byStatus[structure._id.legalStatus] === undefined) {
-            byStatus[structure._id.legalStatus] = {
-              _id: structure._id.legalStatus,
-              total: 0,
-              national: 0,
-              types: [],
+      setTotalStructures(res.hits?.total?.value);
+      setNationalStructures(res.aggregations?.total_with_network_name?.doc_count);
+      setStructures(
+        res.aggregations?.by_legal_status?.buckets.map((structure) => {
+          structure.types = structure.by_type.buckets.map((type) => {
+            return {
+              _id: type.key,
+              total: type.doc_count,
             };
-          }
-          byStatus[structure._id.legalStatus].total += structure.total;
-          byStatus[structure._id.legalStatus].national += structure.national;
-          byStatus[structure._id.legalStatus].types.push({
-            _id: structure._id.type,
-            total: structure.total,
-            national: structure.national,
           });
-
-          total += structure.total;
-          national += structure.national;
-        }
-
-        setTotalStructures(total);
-        setNationalStructures(national);
-
-        setStructures(
-          Object.values(byStatus).map((structure) => ({
-            _id: structure._id,
-            label: translate(structure._id),
-            total: structure.total,
-            national: structure.national,
+          return {
+            _id: structure.key,
+            label: translate(structure.key),
+            total: structure.doc_count,
             info: getInfoPanel(structure),
-          })),
-        );
-      } else {
-        console.log("error : ", result);
-        setError("Erreur: impossible de charger les données.");
-      }
-    } catch (err) {
-      console.log("Error loading structures data", err);
-      setError("Erreur: impossible de charger les données.");
-    }
-    setLoading(false);
-  }
+          };
+        }),
+      );
+      setLoading(false);
+    })();
+  }, [filters]);
 
   function getInfoPanel(structure) {
     const total = structure.types ? structure.types.reduce((acc, type) => acc + type.total, 0) : 0;
 
-    switch (structure._id) {
+    switch (structure.key) {
       case "PRIVATE":
       case "PUBLIC":
         return (
           <div className="p-8">
-            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure.key)}</div>
             <FullDoughnut
               legendSide="right"
               maxLegends={3}
@@ -115,7 +85,7 @@ export default function SectionStructures({ filters }) {
         });
         return (
           <div className="p-8">
-            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure.key)}</div>
             <StatusTable statuses={statuses} />
           </div>
         );
