@@ -187,6 +187,6 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
   }
 });
 
-module.exports = router;
+
 
 module.exports = router;
