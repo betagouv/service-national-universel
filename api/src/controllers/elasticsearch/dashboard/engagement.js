@@ -61,7 +61,6 @@ router.post("/status-divers", passport.authenticate(["referent"], { session: fal
     for (const current of statusPhase2Contract) {
       data.push({ category: "contract", status: current.key, value: current.doc_count, percentage: totalContract ? current.doc_count / totalContract : 0 });
     }
-    console.log(data);
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
