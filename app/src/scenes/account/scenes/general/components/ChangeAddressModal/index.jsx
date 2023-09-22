@@ -9,8 +9,8 @@ import ChangedDepartmentInfoModalContent from "./ChangedDepartmentInfoModalConte
 import ChooseCohortModalContent from "./ChooseCohortModalContent";
 import { updateYoung } from "../../../../../../services/young.service";
 import { capture } from "../../../../../../sentry";
-import { getCohortPeriod, isCohortDone } from "../../../../../../utils/cohorts";
-import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, translateCohort } from "snu-lib";
+import { isCohortDone } from "../../../../../../utils/cohorts";
+import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, translateCohort, getCohortPeriod } from "snu-lib";
 import api from "../../../../../../services/api";
 import { setYoung } from "../../../../../../redux/auth/actions";
 

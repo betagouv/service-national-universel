@@ -87,20 +87,3 @@ export function isCohortNeedJdm(cohortName) {
     return false;
   }
 }
-
-export function getCohortPeriod(cohort) {
-  const startDate = new Date(cohort.dateStart);
-  const endDate = new Date(cohort.dateEnd);
-  const endDateformatOptions = { year: "numeric", month: "long", day: "numeric" };
-  const startDateformatOptions = { day: "numeric" };
-  if (startDate.getMonth() !== endDate.getMonth()) {
-    startDateformatOptions.month = "long";
-  }
-  if (startDate.getFullYear() !== endDate.getFullYear()) {
-    startDateformatOptions.year = "numeric";
-  }
-  const formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions).format(startDate);
-  const formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
-
-  return `du ${formattedStart} au ${formattedEnd}`;
-}
