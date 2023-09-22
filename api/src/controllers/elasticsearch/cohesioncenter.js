@@ -241,9 +241,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
       });
       return res.status(200).send({ ok: true, data: response });
     } else {
-      console.log(JSON.stringify(hitsRequestBody, null, 2));
       const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      // console.log(JSON.stringify(response.body.responses, null, 2));
 
       const reducedAdditionalData = await getAdditionalData(response.body.responses[0].hits.hits.map((h) => h._id));
       response.body.responses[0].hits.hits = response.body.responses[0].hits.hits.map((h) => {
