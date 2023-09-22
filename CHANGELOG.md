@@ -1,3 +1,61 @@
+# [1.337.0](https://github.com/betagouv/service-national-universel/compare/v1.336.0...v1.337.0) (2023-09-21)
+
+
+### Bug Fixes
+
+* **analytics:** bug crons ([5b4d9e9](https://github.com/betagouv/service-national-universel/commit/5b4d9e9f7011276489207a6d09f5b4fc0fe40cc4))
+* **analytics:** crons sentry/codeclimate/uptime ([23cce4e](https://github.com/betagouv/service-national-universel/commit/23cce4e7ceb87ff5dc6e4dd5f1d95b99a0e50cc6))
+* **api:** async missing ([1e0a38a](https://github.com/betagouv/service-national-universel/commit/1e0a38a7c6fb860a3362ebae7b399bcfa0b5bbe5))
+
+
+### Features
+
+* **admin:** Add userback ([8157092](https://github.com/betagouv/service-national-universel/commit/8157092dac65b3fd11cb1aae20e7ec4a485849ea))
+
+# [1.336.0](https://github.com/betagouv/service-national-universel/compare/v1.335.0...v1.336.0) (2023-09-20)
+
+
+### Bug Fixes
+
+* **admin:** places left on duplicate mission ([5c26e2a](https://github.com/betagouv/service-national-universel/commit/5c26e2ade2714c74b552625662e9a154961f4839))
+* **analytics:** redis client pingInterval ([1834bf3](https://github.com/betagouv/service-national-universel/commit/1834bf3db715db8607d4650f1b6b5e2718093f54))
+* **api:** Ping redis to not kill socket connection ([0488260](https://github.com/betagouv/service-national-universel/commit/048826046dc4e78c7d91edc4273bf259160289db))
+* **app:** only leave signup open in staging ([7ba77b2](https://github.com/betagouv/service-national-universel/commit/7ba77b2aaee3d04d5057dafead132446a1a7d4ed))
+* **app:** wording ([d583d18](https://github.com/betagouv/service-national-universel/commit/d583d18ed65d4cde060a1aba89aba3bfaeefac07))
+* redis connection ([4d34d2e](https://github.com/betagouv/service-national-universel/commit/4d34d2e9eb72873101f2d5ac89c2ee50f55ddd25))
+
+
+### Features
+
+* **analytics:** cron sentry + code climate + uptimeRobot ([#3025](https://github.com/betagouv/service-national-universel/issues/3025)) ([d959436](https://github.com/betagouv/service-national-universel/commit/d959436b2c6187eee836e36cd047303e7f67f429))
+
+
+### Reverts
+
+* Revert "Revert "fix(analytics): import deps redis (#3026)"" ([e55c129](https://github.com/betagouv/service-national-universel/commit/e55c1290eba7207be3e5b142c31dc41d8d368da2)), closes [#3026](https://github.com/betagouv/service-national-universel/issues/3026)
+* Revert "Revert "refacto(analytics): naming, separation of concerns, imports and more (#3020)"" ([2a390be](https://github.com/betagouv/service-national-universel/commit/2a390be671f7c3345fa1f4b2d0626d4e8f158ff4)), closes [#3020](https://github.com/betagouv/service-national-universel/issues/3020)
+
+# [1.335.0](https://github.com/betagouv/service-national-universel/compare/v1.334.1...v1.335.0) (2023-09-19)
+
+
+### Bug Fixes
+
+* **api:** bug city undefined ([7784467](https://github.com/betagouv/service-national-universel/commit/7784467a1282b7c7ccb7e6fa5ce40e34db9f51db))
+* **api:** bug packages ([bdcb5b0](https://github.com/betagouv/service-national-universel/commit/bdcb5b0541611fefa39ae0ed8fd90a3ae25c8cf3))
+* **api:** package ([d5b1e9f](https://github.com/betagouv/service-national-universel/commit/d5b1e9f403f41b6f02ddac8d44aac301b1398d25))
+* **api:** rerun api ([dad5750](https://github.com/betagouv/service-national-universel/commit/dad57502f4709bc6c438d571d7c6eb6849f15fa8))
+* **api:** rerun package lock ([406705d](https://github.com/betagouv/service-national-universel/commit/406705d0e23886aa5d48a8c5baec1deb9e834556))
+
+
+### Features
+
+* PR template ([#2975](https://github.com/betagouv/service-national-universel/issues/2975)) ([f1e4676](https://github.com/betagouv/service-national-universel/commit/f1e467678eaac1b181f6d4716ad86dee5e2f1c8f))
+
+
+### Reverts
+
+* Revert "refacto(analytics): naming, separation of concerns, imports and more (#3020)" ([5167ce4](https://github.com/betagouv/service-national-universel/commit/5167ce4f4bbbc45c23649fff6b57db1d50defaa6)), closes [#3020](https://github.com/betagouv/service-national-universel/issues/3020)
+
 ## [1.334.1](https://github.com/betagouv/service-national-universel/compare/v1.334.0...v1.334.1) (2023-09-18)
 
 

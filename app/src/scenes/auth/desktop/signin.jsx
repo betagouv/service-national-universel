@@ -109,16 +109,21 @@ export default function Signin() {
         <hr className="mt-3 border-b-1 text-[#E5E5E5]" />
         <div className="mt-3 text-[#E5E5E5] space-y-3">
           <div className="mt-3 mb-2 text-center text-xl font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
-          <p className="text-center text-base text-[#161616] my-3">
-            Les inscriptions sont actuellement uniquement ouvertes aux volontaires âgés de 15 à 17 ans et scolarisés ou résidant en Nouvelle-Calédonie ou à Wallis-et-Futuna.
-            <br />
-          </p>
-          <Link
+          {/* <p className="text-center text-base text-[#161616] my-3">Les inscriptions sont actuellement fermées.</p> */}
+          {/* <Link
             onClick={() => plausibleEvent("Connexion/Lien vers preinscription")}
             to="/preinscription"
             className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
             Pré-inscription
-          </Link>
+          </Link> */}
+
+          {environment !== "production" && (
+            <Link
+              to="/preinscription"
+              className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
+              Pré-inscription (accès staging)
+            </Link>
+          )}
 
           <p className="text-center text-base text-[#161616] m-3">Soyez informé(e) lors de l’ouverture des prochaines inscriptions.</p>
           <a

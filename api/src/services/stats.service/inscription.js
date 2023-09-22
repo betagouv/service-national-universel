@@ -415,7 +415,7 @@ async function getYoungWhoChangedCohort(startDate, endDate, user) {
   });
 
   const result = await response.json();
-  const value = result?.data.count;
+  const value = result?.data;
 
   return [
     {

@@ -119,6 +119,7 @@ export default function Create(props) {
     try {
       // build object from array of keys
       values.addressVerified = values?.addressVerified?.toString();
+      values.placesLeft = values.placesTotal;
       if (Object.keys(errors).length > 0) values.status = "DRAFT";
       else values.status = "WAITING_VALIDATION";
       const { ok, code, data } = await api.post(`/mission`, values);

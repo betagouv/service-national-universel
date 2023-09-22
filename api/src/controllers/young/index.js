@@ -710,6 +710,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
     };
     const redisClient = redis.createClient({
       url: config.REDIS_URL,
+      pingInterval: 60_000,
     });
     await redisClient.connect();
 
@@ -761,6 +762,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 
     const redisClient = redis.createClient({
       url: config.REDIS_URL,
+      pingInterval: 60_000,
     });
     await redisClient.connect();
 

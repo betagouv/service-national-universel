@@ -9,7 +9,7 @@ import Footer from "./Footer";
 const Wrapper = ({ home, children }) => {
   const { user } = useUser();
   const { setSeeAs, seeAs } = useContext(SeeAsContext);
-  const withSeeAs = ["admin", "referent_department", "referent_region"].includes(user?.role);
+  const withSeeAs = ["admin", "referent_department", "referent_region", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
   const withSeeAsPublicAndYoung = ["public", "young"].includes(seeAs);
 
   return (

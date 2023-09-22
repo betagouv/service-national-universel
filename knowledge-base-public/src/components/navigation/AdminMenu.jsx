@@ -14,7 +14,7 @@ export default function AdminMenu() {
   const { setSeeAs, seeAs, roles } = useContext(SeeAsContext);
   const categoryAccessibleReferent = ["structure", "head_center", "young", "visitor"];
   const { cache } = useSWRConfig();
-  const withSeeAs = ["admin", "referent_department", "referent_region"].includes(user?.role);
+  const withSeeAs = ["admin", "referent_department", "referent_region", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
 
   const onLogout = async (event) => {
     event.preventDefault();
