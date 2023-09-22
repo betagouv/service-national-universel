@@ -109,7 +109,7 @@ export default function Create(props) {
     setErrors(error);
 
     if (Object.keys(error).length > 0) {
-      if (values.name && values.tutorId && values.structureId) setModalConfirmation(true);
+      if (values.name && values.tutorId && values.structureId && values.addressVerified) setModalConfirmation(true);
       return setLoading(false);
     }
     createMission();
