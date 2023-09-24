@@ -93,38 +93,6 @@ function computeMissionFilter(filters) {
   return matchs;
 }
 
-router.post("/volontaires-statuts-phase", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    // --- test body
-    const { error, value } = Joi.object({
-      filters: filtersJoi,
-      phase: Joi.number().valid(1, 2, 3).required(),
-    }).validate(req.body);
-    if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    const { filters, phase } = value;
-
-    // --- get data
-    const pipeline = [
-      { $match: computeYoungFilter(filters) },
-      {
-        $group: {
-          _id: `$statusPhase${phase}`,
-          count: { $sum: 1 },
-        },
-      },
-    ];
-    const data = await YoungModel.aggregate(pipeline);
-
-    // --- result
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/volontaires-equivalence-mig", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- test body
