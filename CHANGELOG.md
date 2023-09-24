@@ -1,3 +1,10 @@
+# [1.339.0](https://github.com/betagouv/service-national-universel/compare/v1.338.0...v1.339.0) (2023-09-24)
+
+
+### Features
+
+* **admin:** statut phase dashboard admin refacto ([780da95](https://github.com/betagouv/service-national-universel/commit/780da95adbf8373e1b0164d1594fb85dbef71072))
+
 # [1.338.0](https://github.com/betagouv/service-national-universel/compare/v1.337.0...v1.338.0) (2023-09-22)
 
 
