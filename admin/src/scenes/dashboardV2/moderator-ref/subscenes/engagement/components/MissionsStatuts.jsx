@@ -17,6 +17,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     loadData();
   }, [filters, missionFilters]);
 
+  
   async function loadData() {
     setError(null);
     setLoading(true);
