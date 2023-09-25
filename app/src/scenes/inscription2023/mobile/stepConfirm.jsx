@@ -1,5 +1,4 @@
 import React from "react";
-import { FiChevronLeft } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { COHESION_STAY_LIMIT_DATE, translate } from "snu-lib";
@@ -10,9 +9,9 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
-import { supportURL } from "../../../config";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 export default function StepConfirm() {
   const young = useSelector((state) => state.Auth.young);
@@ -63,9 +62,9 @@ export default function StepConfirm() {
 
   return (
     <>
-      <div className="bg-white p-4 text-[#161616]">
-        {error?.text && <Error {...error} onClose={() => setError({})} />}
+      <DSFRContainer title="Vous y êtes presque...">
         <h1 className="text-xl font-bold mt-2">Vous y êtes presque...</h1>
+        {error?.text && <Error {...error} onClose={() => setError({})} />}
 
         <div className="mt-2 text-sm text-[#666666]">
           Vous êtes sur le point de soumettre votre dossier à l’administration du SNU. Veuillez vérifier vos informations avant de valider votre demande d’inscription.
@@ -141,25 +140,8 @@ export default function StepConfirm() {
             </>
           ) : null}
         </div>
-      </div>
-      <div className="fixed bottom-0 z-50 w-full">
-        <div className="flex flex-col gap-1 bg-white p-4 shadow-ninaInverted ">
-          <div className="flex flex-row gap-2">
-            <button className="flex w-10 items-center justify-center border-[1px] border-[#000091]" onClick={() => history.push("/inscription2023/documents")}>
-              <FiChevronLeft className="font-bold text-[#000091]" />
-            </button>
-            <button
-              className={`flex w-full cursor-pointer items-center justify-center p-2 ${loading ? "bg-[#E5E5E5] text-[#929292]" : "bg-[#000091] text-white"}`}
-              onClick={() => !loading && onSubmit()}>
-              Valider mon inscription au SNU
-            </button>
-          </div>
-          <div className="flex flex-row gap-2">
-            <div className="w-10" />
-            <div className="text-xs text-[#161616]">Je certifie l’exactitude de ces renseignements</div>
-          </div>
-        </div>
-      </div>
+        <SignupButtonContainer onClickNext={onSubmit} labelNext="Valider mon inscription au SNU" disabled={loading} />
+      </DSFRContainer>
       <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>
   );

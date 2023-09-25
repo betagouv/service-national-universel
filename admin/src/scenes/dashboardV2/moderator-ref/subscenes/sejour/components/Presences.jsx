@@ -1,7 +1,8 @@
 import React from "react";
 import FullDoughnut from "../../../../components/graphs/FullDoughnut";
 import OccupationBarVertical from "./OccupationBarVertical";
-import { getLink as getOldLink } from "../../../../../../utils";
+import { getNewLink } from "../../../../../../utils";
+import queryString from "query-string";
 
 export default function Presences({ presence, JDM, depart, departTotal, departMotif, filter }) {
   const departPercentage = departTotal ? depart?.true / departTotal : 0;
@@ -17,9 +18,9 @@ export default function Presences({ presence, JDM, depart, departTotal, departMo
           maxLegends={3}
           tooltipsPercent={true}
           legendUrls={[
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_PRESENCE=%5B"true"%5D'] }),
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_PRESENCE=%5B"false"%5D'] }),
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_PRESENCE=%5B"Non+renseigné"%5D'] }),
+            getNewLink({ base: `/volontaire`, filter, filtersUrl: [queryString.stringify({ cohesionStayPresence: "true" })] }, "session"),
+            getNewLink({ base: `/volontaire`, filter, filtersUrl: [queryString.stringify({ cohesionStayPresence: "false" })] }, "session"),
+            getNewLink({ base: `/volontaire`, filter, filtersUrl: [queryString.stringify({ cohesionStayPresence: "N/A" })] }, "session"),
           ]}
         />
         <div className="flex items-center justify-center">
@@ -33,9 +34,9 @@ export default function Presences({ presence, JDM, depart, departTotal, departMo
           maxLegends={3}
           tooltipsPercent={true}
           legendUrls={[
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_JDM=%5B"true"%5D'] }),
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_JDM=%5B"false"%5D'] }),
-            getOldLink({ base: "/volontaire", filter: { ...filter }, filtersUrl: ['COHESION_JDM=%5B"Non+renseigné"%5D'] }),
+            getNewLink({ base: `/volontaire`, filter, filtersUrl: [queryString.stringify({ presenceJDM: "true" })] }, "session"),
+            getNewLink({ base: `/volontaire`, filter, filtersUrl: [queryString.stringify({ presenceJDM: "false" })] }, "session"),
+            getNewLink({ base: `/volontaire`, filter, filtersUrl: [queryString.stringify({ presenceJDM: "N/A" })] }, "session"),
           ]}
         />
         <div className="flex items-center justify-center">

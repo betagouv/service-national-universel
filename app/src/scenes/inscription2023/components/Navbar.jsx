@@ -33,8 +33,8 @@ const Navbar = ({ onSave }) => {
   const currentStep = getStepFromUrlParam(step, INSCRIPTION_STEPS_LIST, true);
 
   return (
-    <div className="w-full bg-[#f9f6f2] px-3  py-3 text-[#161616]">
-      <div className={`flex flex-col justify-center ${desktop && "mx-auto my-0 w-1/2"}`}>
+    <div className="w-full bg-[#f9f6f2] px-3 text-[#161616] py-[1rem] md:pt-[2rem] md:pb-[0rem]">
+      <div className="flex flex-col justify-center md:mx-auto md:my-0 md:w-1/2">
         <div className="flex justify-between">
           <div>
             <div className="text-sm">Étape {index[currentStep]} sur 4</div>

@@ -9,7 +9,7 @@ const { ES_NO_LIMIT, COHORTS } = require("snu-lib");
 
 router.post("/status-divers", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["status", "cohort", "academy", "department", "region"];
+    const filterFields = ["status", "cohorts", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -19,7 +19,7 @@ router.post("/status-divers", passport.authenticate(["referent"], { session: fal
           must: { match_all: {} },
           filter: [
             queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
-            queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+            queryFilters?.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
             queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
@@ -55,7 +55,6 @@ router.post("/status-divers", passport.authenticate(["referent"], { session: fal
 
     const data = [];
     for (const current of phase2ApplicationStatus) {
-      console.log(current);
       data.push({ category: "phase2", status: current.key, value: current.doc_count, percentage: totalPhase2 ? current.doc_count / totalPhase2 : 0 });
     }
     for (const current of statusPhase2Contract) {
@@ -120,6 +119,66 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
   }
 });
 
+router.post("/status-de-phases", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const filterFields = ["status", "cohorts", "academy", "department", "region"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const body = {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
+            queryFilters?.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
+            queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+            queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+          ].filter(Boolean),
+        },
+      },
+      aggs: {
+        phase1: {
+          terms: {
+            field: "statusPhase1.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+        phase2: {
+          terms: {
+            field: "statusPhase2.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+        phase3: {
+          terms: {
+            field: "statusPhase3.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+      },
+      size: 0,
+    };
+
+    const reponse = await esClient.search({ index: "young", body: body });
+    if (!reponse?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    //format data
+    const data = [
+      { phase: 1, result: reponse?.body?.aggregations?.phase1?.buckets },
+      { phase: 2, result: reponse?.body?.aggregations?.phase2?.buckets },
+      { phase: 3, result: reponse?.body?.aggregations?.phase3?.buckets },
+    ];
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/mission-proposed-places", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const filterFields = ["region", "department", "start", "end", "source"];
@@ -172,6 +231,7 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
       occupied: responseMissions?.body?.aggregations?.places_total?.value - responseMissions?.body?.aggregations?.places_left?.value,
       total: responseMissions?.body?.aggregations?.places_total?.value,
     };
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

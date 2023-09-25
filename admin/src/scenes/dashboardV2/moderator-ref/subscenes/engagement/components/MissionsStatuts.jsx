@@ -3,9 +3,10 @@ import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import StatusTable from "../../../../components/ui/StatusTable";
 import HorizontalMiniBar from "../../../../components/graphs/HorizontalMiniBar";
-import { computeMissionUrl } from "../../../../components/common";
 import ExportMissionStatusReport from "./ExportMissionStatusReport";
 import { translate } from "snu-lib";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function MissionsStatuts({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,14 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
                   labels={["occupées", "disponibles"]}
                 />
               ),
-              url: computeMissionUrl(filters, missionFilters, { STATUS: status.status }),
+              url: getNewLink(
+                {
+                  base: `/mission`,
+                  filter: { ...filters, status: [] },
+                  filtersUrl: [queryString.stringify({ status: status.status })],
+                },
+                "mission",
+              ),
             };
           }),
         );

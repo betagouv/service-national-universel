@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 
+import queryString from "query-string";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link } from "react-router-dom";
 import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, translate } from "snu-lib";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../../../sentry";
 import api from "../../../../../services/api";
-import { getLink as getOldLink } from "../../../../../utils";
+import { getNewLink } from "../../../../../utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import KeyNumbers from "../../../components/KeyNumbers";
@@ -19,6 +19,7 @@ import Engagement from "../../../components/ui/icons/Engagement";
 import Inscription from "../../../components/ui/icons/Inscription";
 import Sejour from "../../../components/ui/icons/Sejour";
 import VolontaireSection from "./components/VolontaireSection";
+import { Link } from "react-router-dom";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -54,7 +55,7 @@ export default function Index() {
           id: "academy",
           name: "Académie",
           fullValue: "Toutes",
-          options: academyOptions,
+          options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
         }
       : null,
     {
@@ -176,11 +177,11 @@ export default function Index() {
             goal={goal}
             showTooltips={true}
             legendUrls={[
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] }),
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
             ]}
           />
         </div>
@@ -189,6 +190,14 @@ export default function Index() {
     </DashboardContainer>
   );
 }
+
+const NotePlaceholder = () => {
+  return (
+    <div className="flex h-36 w-full items-center justify-center rounded-lg bg-gray-50">
+      <div className="text-sm text-center text-gray-400">Aucune notification</div>
+    </div>
+  );
+};
 
 const NoteContainer = ({ title, number, content, btnLabel, link }) => {
   return (
@@ -261,6 +270,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
             <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
             <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.inscription)}</div>
           </div>
+          {!total(stats.inscription) && <NotePlaceholder />}
           {shouldShow(stats.inscription, "inscription_en_attente_de_validation") && (
             <NoteContainer
               title="Dossier"
@@ -321,6 +331,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
             <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
             <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.sejour)}</div>
           </div>
+          {!total(stats.sejour) && <NotePlaceholder />}
           {stats.sejour.sejour_rassemblement_non_confirmé.map(
             (item, key) =>
               shouldShow(stats.sejour, "sejour_rassemblement_non_confirmé", key) && (
@@ -459,6 +470,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
             <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
             <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.engagement)}</div>
           </div>
+          {!total(stats.engagement) && <NotePlaceholder />}
           {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
             <NoteContainer
               title="Contrat"

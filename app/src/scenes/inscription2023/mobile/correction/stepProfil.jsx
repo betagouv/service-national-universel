@@ -13,6 +13,8 @@ import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
 import Input from "../../components/Input";
 import { supportURL } from "@/config";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 export default function StepProfil() {
   const young = useSelector((state) => state.Auth.young);
@@ -90,23 +92,15 @@ export default function StepProfil() {
 
   return (
     <>
-      <div className="bg-white px-4 pt-4 pb-12">
-        <div className="flex w-full items-center justify-between">
-          <h1 className="text-xl text-[#161616]">Mon profil</h1>
-          <a href={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"} target="_blank" rel="noreferrer">
-            <QuestionMarkBlueCircle />
-          </a>
-        </div>
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+      <DSFRContainer title="Mon profil" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="flex flex-col">
           <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} label="Prénom" error={error.firstName} correction={corrections.firstName} />
           <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} label="Nom" error={error.lastName} correction={corrections.lastName} />
           <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} label="E-mail" error={error.email} correction={corrections.email} type="email" />
           <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} label="Confirmez votre e-mail" error={error.emailConfirm} type="email" />
         </div>
-      </div>
-      <Footer marginBottom="mb-[88px]" />
-      <StickyButton text="Corriger" onClick={() => onSubmit()} disabled={loading} />
+        <SignupButtonContainer labelNext="Corriger" onClickNext={onSubmit} disabled={Object.keys(error).length > 0} />
+      </DSFRContainer>
     </>
   );
 }

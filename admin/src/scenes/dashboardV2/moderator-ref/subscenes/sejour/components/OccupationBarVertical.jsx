@@ -1,7 +1,8 @@
-import React from "react";
 /* import StatusText from "./StatusText"; */
-import { getLink as getOldLink } from "../../../../../../utils";
+import queryString from "query-string";
 import { Link } from "react-router-dom";
+import { getNewLink } from "../../../../../../utils";
+import React from "react";
 
 export default function OccupationBarVertical({ percentage, nbDepart, departMotif, filter }) {
   let height = `h-0`;
@@ -29,17 +30,17 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
     <div className="flex items-center gap-10">
       <div className="flex flex-col gap-5">
         {Math.floor(occupationPercentage) === 0 ? (
-          <div className="flex h-52 w-16 flex-col items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-xs font-bold">0%</div>
+          <div className="flex h-52 w-16 flex-col items-center justify-center overflow-hidden rounded-lg bg-gray-100 text-xs font-bold mx-auto">0%</div>
         ) : (
-          <div className="flex h-52 w-16  flex-col justify-end overflow-hidden rounded-lg bg-gray-100">
+          <div className="flex h-52 w-16  flex-col justify-end overflow-hidden rounded-lg bg-gray-100 mx-auto">
             <div className={`flex w-16 items-center justify-center ${height} ${bgColor} rounded-lg text-xs font-bold text-white`}>{Math.floor(occupationPercentage)}%</div>
           </div>
         )}
         {nbDepart === undefined ? (
-          <p className="text-sm font-bold leading-4 text-gray-900">{nbDepart || 0} départs</p>
+          <p className="text-sm font-bold leading-4 text-gray-900 w-fit">{nbDepart || 0} départs</p>
         ) : (
-          <div className="text-sm font-bold leading-4 text-gray-900">
-            <StatusTextDepart status="départs" nb={nbDepart || 0} filter={filter} base="/volontaire" filtersUrl={['DEPART=%5B"true"%5D']} />
+          <div className="text-sm font-bold leading-4 text-gray-900 text-center">
+            <StatusTextDepart status="départs" nb={nbDepart || 0} filter={filter} base="/volontaire" filtersUrl={[queryString.stringify({ departInform: "true" })]} />
           </div>
         )}
       </div>
@@ -52,7 +53,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
             percentage={nbDepart ? Math.floor((exclusion / nbDepart) * 100) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={['DEPART_MOTIF=%5B"Exclusion"%5D']}
+            filtersUrl={[queryString.stringify({ departSejourMotif: "Exclusion" })]}
           />
           <StatusText
             status="Cas de force majeur"
@@ -60,7 +61,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
             percentage={nbDepart ? Math.floor((forceMajeure / nbDepart) * 100) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={['DEPART_MOTIF=%5B"Cas de force majeure pour le volontaire"%5D']}
+            filtersUrl={[queryString.stringify({ departSejourMotif: "Cas de force majeure pour le volontaire" })]}
           />
           <StatusText
             status="Annulation séjour, éviction sanitaire"
@@ -68,7 +69,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
             percentage={nbDepart ? Math.floor((annulation / nbDepart) * 100) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={['DEPART_MOTIF=%5B"Annulation du séjour ou mesure d’éviction sanitaire"%5D']}
+            filtersUrl={[queryString.stringify({ departSejourMotif: "Annulation du séjour ou mesure d’éviction sanitaire" })]}
           />
           <StatusText
             status="Autre"
@@ -76,7 +77,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
             percentage={nbDepart ? Math.floor((autre / nbDepart) * 100) : 0}
             filter={filter}
             base="/volontaire"
-            filtersUrl={['DEPART_MOTIF=%5B"Autre"%5D']}
+            filtersUrl={[queryString.stringify({ departSejourMotif: "Autre" })]}
           />
         </div>
       </div>
@@ -86,9 +87,9 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
 
 function StatusTextDepart({ status, nb, filter, filtersUrl, base }) {
   return (
-    <Link className="flex items-center justify-between gap-2" to={getOldLink({ base, filter, filtersUrl })} target={"_blank"}>
+    <Link className="flex items-center justify-between gap-2" to={getNewLink({ base, filter, filtersUrl }, "session")} target={"_blank"}>
       <div className="flex w-[80%] items-center justify-start gap-1">
-        <span className="w-[20%] text-sm font-bold text-gray-900">{nb}</span>
+        <span className="text-sm font-bold text-gray-900">{nb}</span>
         <div className="flex items-center text-left text-sm text-gray-900">{status}</div>
       </div>
     </Link>
@@ -97,7 +98,7 @@ function StatusTextDepart({ status, nb, filter, filtersUrl, base }) {
 
 function StatusText({ status, nb, percentage, filter, filtersUrl, base }) {
   return (
-    <Link className="flex items-center justify-between gap-2" to={getOldLink({ base, filter, filtersUrl })} target={"_blank"}>
+    <Link className="flex items-center justify-between gap-2" to={getNewLink({ base, filter, filtersUrl }, "session")} target={"_blank"}>
       <div className="flex w-[80%] items-center justify-start gap-2">
         <span className="w-[20%] text-lg font-bold text-gray-900">{nb}</span>
         <div className="flex w-[80%] items-center text-left text-sm text-gray-600">{status}</div>

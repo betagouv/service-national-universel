@@ -2,6 +2,8 @@ import { regionsListDROMS } from "./region-and-departments";
 
 const translate = (value) => {
   switch (value) {
+    case "WAITING_REALISATION":
+      return "En attente de réalisation";
     case "NONE":
       return "Aucun";
     case "AFFECTED":
@@ -31,7 +33,7 @@ const translate = (value) => {
     case "DELETED":
       return "Supprimée";
     case "deleted":
-        return "Supprimée";
+      return "Supprimée";
     case "WAITING_LIST":
       return "Sur liste complémentaire";
     case "NOT_AUTORISED":
@@ -998,6 +1000,7 @@ const translateField = (field) => {
       return "Pièce d'identité";
     case "latestCNIFileExpirationDate":
       return "Date d'expiration de la pièce d'identité";
+
     default:
       return field;
   }

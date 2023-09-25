@@ -12,7 +12,6 @@ import Input from "../components/Input";
 import Select from "../../../components/dsfr/forms/Select";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import Navbar from "../components/Navbar";
-import Help from "../components/Help";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
@@ -26,19 +25,19 @@ import {
 import api from "../../../services/api";
 import VerifyAddress from "../components/VerifyAddress";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
-import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import Toggle from "../../../components/dsfr/forms/toggle";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { debounce, translate } from "../../../utils";
 import { capture } from "../../../sentry";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -145,6 +144,7 @@ export default function StepCoordonnees() {
   const history = useHistory();
   const { step } = useParams();
   const ref = useRef(null);
+  const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
   const [hasSpecialSituation, setSpecialSituation] = useState(false);
 
@@ -534,14 +534,7 @@ export default function StepCoordonnees() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <div className="bg-white p-4 text-[#161616]">
-        <div className="mt-2 flex w-full items-center justify-between">
-          <h1 className="text-xl font-bold">Déclaration sur l’honneur</h1>
-          <a href={supportLink} target="_blank" rel="noreferrer">
-            <QuestionMarkBlueCircle />
-          </a>
-        </div>
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+      <DSFRContainer title="Déclaration sur l'honneur" supportLink={supportLink}>
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect
@@ -554,29 +547,38 @@ export default function StepCoordonnees() {
             correction={corrections?.birthCountry}
           />
         )}
-        <div className="relative">
+        <div className="flex flex-col md:flex-row md:gap-8">
+          <div className="relative w-full">
+            <Input
+              list="suggestions"
+              value={birthCity}
+              label="Commune de naissance"
+              onChange={wasBornInFranceBool ? updateBirthCity : updateData("birthCity")}
+              error={errors.birthCity}
+              correction={corrections?.birthCity}
+            />
+            {wasBornInFranceBool && (
+              <div ref={ref} className="border-3 absolute z-[100] mt-[-24px] w-full overflow-hidden border-red-600 bg-white shadow">
+                {birthCityZipSuggestions.map(({ city, postcode }, index) => (
+                  <div
+                    onClick={() => {
+                      onClickBirthCitySuggestion(city, postcode);
+                    }}
+                    className="group flex cursor-pointer items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50"
+                    key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</div>
+                ))}
+              </div>
+            )}
+          </div>
           <Input
-            list="suggestions"
-            value={birthCity}
-            label="Commune de naissance"
-            onChange={wasBornInFranceBool ? updateBirthCity : updateData("birthCity")}
-            error={errors.birthCity}
-            correction={corrections?.birthCity}
+            value={birthCityZip}
+            label="Code postal de naissance"
+            onChange={updateData("birthCityZip")}
+            error={errors.birthCityZip}
+            correction={corrections?.birthCityZip}
+            className="w-full"
           />
-          {wasBornInFranceBool && (
-            <div ref={ref} className="border-3 absolute z-[100] mt-[-24px] w-full overflow-hidden border-red-600 bg-white shadow">
-              {birthCityZipSuggestions.map(({ city, postcode }, index) => (
-                <div
-                  onClick={() => {
-                    onClickBirthCitySuggestion(city, postcode);
-                  }}
-                  className="group flex cursor-pointer items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50"
-                  key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</div>
-              ))}
-            </div>
-          )}
         </div>
-        <Input value={birthCityZip} label="Code postal de naissance" onChange={updateData("birthCityZip")} error={errors.birthCityZip} correction={corrections?.birthCityZip} />
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
         <PhoneField
           label="Votre téléphone"
@@ -614,20 +616,24 @@ export default function StepCoordonnees() {
           error={isFrenchResident ? errors.address : errors.foreignAddress}
           correction={isFrenchResident ? corrections?.address : corrections?.foreignAddress}
         />
-        <Input
-          value={isFrenchResident ? zip : foreignZip}
-          label="Code postal"
-          onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
-          error={isFrenchResident ? errors.zip : errors.foreignZip}
-          correction={isFrenchResident ? corrections?.zip : corrections?.foreignZip}
-        />
-        <Input
-          value={isFrenchResident ? city : foreignCity}
-          label="Ville"
-          onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
-          error={isFrenchResident ? errors.city : errors.foreignCity}
-          correction={isFrenchResident ? corrections?.city : corrections?.foreignCity}
-        />
+        <div className="flex flex-col md:flex-row md:gap-8">
+          <Input
+            value={isFrenchResident ? zip : foreignZip}
+            label="Code postal"
+            onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
+            error={isFrenchResident ? errors.zip : errors.foreignZip}
+            correction={isFrenchResident ? corrections?.zip : corrections?.foreignZip}
+            className="w-full"
+          />
+          <Input
+            value={isFrenchResident ? city : foreignCity}
+            label="Ville"
+            onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
+            error={isFrenchResident ? errors.city : errors.foreignCity}
+            correction={isFrenchResident ? corrections?.city : corrections?.foreignCity}
+            className="w-full"
+          />
+        </div>
         {!isFrenchResident && (
           <>
             <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
@@ -766,13 +772,8 @@ export default function StepCoordonnees() {
             )}
           </>
         )}
-      </div>
-      <Help supportLink={supportLink} />
-      {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-        <StickyButton text="Corriger" onClickPrevious={() => history.push("/")} onClick={onCorrection} disabled={loading} />
-      ) : (
-        <StickyButton text="Continuer" onClick={onSubmit} disabled={loading} />
-      )}
+        <SignupButtonContainer onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />
+      </DSFRContainer>
     </>
   );
 }
