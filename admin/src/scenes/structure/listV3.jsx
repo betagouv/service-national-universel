@@ -82,9 +82,21 @@ const ListStructure = () => {
       missingLabel: "Non renseignée",
     },
     {
+      title: "Réseau national",
+      name: "isNetwork",
+      missingLabel: "Non renseignée",
+      translate,
+    },
+    {
       title: "Affiliation à un réseau national",
       name: "networkName",
       missingLabel: "Non renseignée",
+    },
+    {
+      title: "TOTO",
+      name: "networkExist",
+      missingLabel: "Non renseignée",
+      transformData: transformNetworkexist,
     },
     {
       title: "Préparation militaire",
@@ -264,3 +276,18 @@ async function exportTransform(all, values) {
     return fields;
   });
 }
+
+const transformNetworkexist = (data) => {
+  const newData = [
+    { key: "Oui", doc_count: 0 },
+    { key: "Non", doc_count: 0 },
+  ];
+  data.map((d) => {
+    if (d.key === "N/A" || d.key === "") {
+      newData.find((e) => e.key === "Non").doc_count += d.doc_count;
+    } else {
+      newData.find((e) => e.key === "Oui").doc_count += d.doc_count;
+    }
+  });
+  return newData;
+};

@@ -104,7 +104,10 @@ export default function SectionStructures({ filters }) {
             <DashboardBox title="Structures" className="grow" to={getNewLink({ base: `/structure`, filter: filters })}>
               {loading ? <LoadingDoughnut /> : <div className="text-2xl font-bold hover:text-gray-900">{totalStructures}</div>}
             </DashboardBox>
-            <DashboardBox title="Affiliées à un réseau national" className="grow" to={getNewLink({ base: `/structure`, filter: filters })}>
+            <DashboardBox
+              title="Affiliées à un réseau national"
+              className="grow"
+              to={getNewLink({ base: `/structure`, filter: filters, filtersUrl: [queryString.stringify({ networkExist: "Oui" })] })}>
               {loading ? <LoadingDoughnut /> : <div className="text-2xl font-bold">{nationalStructures}</div>}
             </DashboardBox>
           </div>
