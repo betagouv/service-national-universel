@@ -179,9 +179,9 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
   }
 });
 
-router.post("/missions-statuts", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/mission-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["department", "region", "start", "end", "cohorts", "sources"];
+    const filterFields = ["department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -189,7 +189,6 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
     let filters = [
       queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
       queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-      queryFilters.cohorts?.length ? { terms: { "cohorts.keyword": queryFilters.cohorts } } : null,
       req.body.missionFilters.start?.length ? { range: { startAt: { gte: req.body.missionFilters.start } } } : null,
       req.body.missionFilters.end?.length ? { range: { endAt: { lte: req.body.missionFilters.end } } } : null,
     ];
@@ -206,7 +205,7 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
       query: {
         bool: {
           must: { match_all: {} },
-          // filter: filters.filter(Boolean),
+          filter: filters.filter(Boolean),
         },
       },
       aggs: {
@@ -237,14 +236,13 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
     if (!response?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
-    console.log(response.body);
-    const aggregations = response.body.aggregations.by_status.bucket;
-    const total = aggregations.reduce((acc, bucket) => acc + bucket.doc_count, 0);
 
-    const data = aggregations.map((bucket) => ({
+    const buckets = response.body.aggregations.by_status.buckets;
+
+    const data = buckets.map((bucket) => ({
       status: bucket.key,
       value: bucket.doc_count,
-      percentage: total ? bucket.doc_count / total : 0,
+      percentage: bucket.doc_count / buckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
       total: bucket.total.value,
       left: bucket.left.value,
     }));

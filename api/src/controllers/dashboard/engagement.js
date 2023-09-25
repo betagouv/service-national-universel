@@ -317,50 +317,6 @@ router.post("/mission-proposed-places", passport.authenticate("referent", { sess
   }
 });
 
-router.post("/missions-statuts", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    // --- test body
-    const { error, value } = Joi.object({
-      filters: filtersJoi,
-      missionFilters: missionFiltersJoi,
-    }).validate(req.body);
-    if (error) {
-      console.log(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    const { filters, missionFilters } = value;
-
-    // --- get data
-    let pipeline = [
-      { $match: { ...computeMissionFilter({ ...filters, ...missionFilters }) } },
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-          total: { $sum: "$placesTotal" },
-          left: { $sum: "$placesLeft" },
-        },
-      },
-    ];
-    let result = await MissionModel.aggregate(pipeline);
-
-    const total = result.reduce((acc, eq) => acc + eq.count, 0);
-    const data = result.map((status) => ({
-      status: status._id,
-      value: status.count,
-      percentage: total ? status.count / total : 0,
-      total: status.total,
-      left: status.left,
-    }));
-
-    // --- result
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/missions-detail", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- test body

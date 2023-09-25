@@ -22,7 +22,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     setError(null);
     setLoading(true);
     try {
-      const result = await api.post(`/elasticsearch/dashboard/engagement/missions-statuts`, { filters, missionFilters });
+      const result = await api.post(`/elasticsearch/dashboard/engagement/mission-status`, { filters, missionFilters });
       if (result.ok) {
         setStatuses(
           result.data.map((status) => {
