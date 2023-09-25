@@ -66,8 +66,13 @@ const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
+router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
 router.post("/signin-2fa", (req, res) => YoungAuth.signin2FA(req, res));
+router.post("/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.requestEmailUpdate(req, res));
+router.post("/email-validation/new-email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmailUpdate(req, res));
+router.post("/email-validation", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmail(req, res));
+router.get("/email-validation/token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.requestNewEmailValidationToken(req, res));
 router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     await YoungAuth.logout(req, res);
@@ -80,6 +85,7 @@ router.get("/signin_token", passport.authenticate("young", { session: false, fai
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.resetPassword(req, res));
+router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => YoungAuth.checkPassword(req, res));
 
 router.post("/signup_verify", async (req, res) => {
   try {

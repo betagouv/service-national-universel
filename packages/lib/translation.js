@@ -238,6 +238,8 @@ const translate = (value) => {
       return "Ressource introuvable";
     case "PASSWORD_TOKEN_EXPIRED_OR_INVALID":
       return "Lien expiré ou token invalide";
+    case "EMAIL_VALIDATION_TOKEN_EXPIRED_OR_INVALID":
+      return "Le code d'activation saisi n'est pas valide ou a expiré";
     case "USER_ALREADY_REGISTERED":
       return "Utilisateur déjà inscrit";
     case "PASSWORD_NOT_VALIDATED":
@@ -295,11 +297,13 @@ const translate = (value) => {
     case "EMAIL_OR_PASSWORD_INVALID":
       return "Email ou mot de passe invalide";
     case "PASSWORD_INVALID":
-      return "Mot de passe invalide";
+      return "Le mot de passe est incorrect";
     case "EMAIL_INVALID":
       return "Email invalide";
     case "EMAIL_ALREADY_USED":
       return "Cette adresse e-mail est déjà utilisée";
+    case "EMAIL_UNCHANGED":
+      return "L'adresse e-mail est indentique à l'actuelle";
     case "EMAIL_AND_PASSWORD_REQUIRED":
       return "Email et mot de passe requis";
     case "PASSWORD_NOT_MATCH":
