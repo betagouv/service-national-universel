@@ -43,7 +43,7 @@ export default function Details({ selectedFilters }) {
     setSituation(res?.situation || {});
     setQpv(res?.qpv || {});
     setRural(res?.rural || {});
-    setSpecificSituation({
+    let specific = {
       handicap: res?.handicap || {},
       allergies: res?.allergies || {},
       handicapInSameDepartment: res?.handicapInSameDepartment || {},
@@ -51,7 +51,14 @@ export default function Details({ selectedFilters }) {
       ppsBeneficiary: res?.ppsBeneficiary || {},
       paiBeneficiary: res?.paiBeneficiary || {},
       specificAmenagment: res?.specificAmenagment || {},
+    };
+
+    Object.keys(specific).forEach((e) => {
+      const total = Object.values(specific[e]).reduce((acc, curr) => acc + curr, 0);
+      let percent = total ? Math.round(((specific[e].true || 0) / total) * 100) + "%" : "-";
+      specific[e] = { true: specific[e].true || 0, false: specific[e].false || 0, percent };
     });
+    setSpecificSituation(specific);
   }
 
   useEffect(() => {
@@ -147,6 +154,12 @@ export default function Details({ selectedFilters }) {
               specificSituation?.ppsBeneficiary?.true || 0,
               specificSituation?.paiBeneficiary?.true || 0,
               specificSituation?.allergies?.true || 0,
+            ]}
+            tooltips={[
+              specificSituation?.handicap?.percent || 0,
+              specificSituation?.ppsBeneficiary?.percent || 0,
+              specificSituation?.paiBeneficiary?.percent || 0,
+              specificSituation?.allergies?.percent || 0,
             ]}
             noValue
             className="h-[150px]"
