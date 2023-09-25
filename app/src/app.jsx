@@ -40,6 +40,7 @@ import PreInscription from "./scenes/preinscription";
 import ReInscription from "./scenes/reinscription";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import Thanks from "./scenes/contact/Thanks";
+import ViewMessage from "./scenes/echanges/View";
 
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
@@ -123,6 +124,7 @@ const OptionalLogIn = () => {
   return (
     <Switch>
       <SentryRoute path="/public-besoin-d-aide" component={Contact} />
+      <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
       <SentryRoute path="/besoin-d-aide" component={Contact} />
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
