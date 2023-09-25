@@ -100,6 +100,7 @@ const DateFilterComponent = ({ filter, selectedFilters, setSelectedFilters }) =>
                   <DatePicker
                     fromYear={2022}
                     toYear={2023}
+                    value={selectedFilterValue || undefined}
                     onChange={(date) => {
                       setSelectedFilters({ ...selectedFilters, [filter.id]: date });
                     }}
