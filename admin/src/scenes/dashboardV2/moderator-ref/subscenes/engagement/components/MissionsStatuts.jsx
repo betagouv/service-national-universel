@@ -17,12 +17,11 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     loadData();
   }, [filters, missionFilters]);
 
-  
   async function loadData() {
     setError(null);
     setLoading(true);
     try {
-      const result = await api.post(`/dashboard/engagement/missions-statuts`, { filters, missionFilters });
+      const result = await api.post(`/elasticsearch/dashboard/engagement/missions-statuts`, { filters, missionFilters });
       if (result.ok) {
         setStatuses(
           result.data.map((status) => {
@@ -42,6 +41,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
           }),
         );
 
+        // --- compute export filter
         const exportFilter = {};
         if (filters.department) {
           exportFilter.department = filters.department;
@@ -55,13 +55,28 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
         if (missionFilters.end) {
           exportFilter.toDate = missionFilters.end;
         }
+        if (missionFilters.sources) {
+          if (missionFilters.sources.includes("JVA")) {
+            if (missionFilters.sources.includes("SNU")) {
+              // rien sur le filtre
+            } else {
+              exportFilter.isJvaMission = "true";
+            }
+          } else {
+            if (missionFilters.sources.includes("SNU")) {
+              exportFilter.isJvaMission = "false";
+            } else {
+              // rien sur le filtre
+            }
+          }
+        }
         setExportFilter(exportFilter);
       } else {
-        console.error("error : ", result);
+        console.log("error : ", result);
         setError("Erreur: impossible de charger les données.");
       }
     } catch (err) {
-      console.error("unable to load missions statuts: ", err);
+      console.log("unable to load missions statuts: ", err);
       setError("Erreur: impossible de charger les données.");
     }
     setLoading(false);
