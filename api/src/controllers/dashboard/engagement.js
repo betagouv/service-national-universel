@@ -267,7 +267,7 @@ router.post("/mission-sources", passport.authenticate("referent", { session: fal
   }
 });
 
-router.post("/mission-proposed-places", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/missions-statuts", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // --- test body
     const { error, value } = Joi.object({
@@ -282,10 +282,11 @@ router.post("/mission-proposed-places", passport.authenticate("referent", { sess
 
     // --- get data
     let pipeline = [
-      { $match: { ...computeMissionFilter({ ...filters, ...missionFilters }), status: "VALIDATED" } },
+      { $match: { ...computeMissionFilter({ ...filters, ...missionFilters }) } },
       {
         $group: {
-          _id: null,
+          _id: "$status",
+          count: { $sum: 1 },
           total: { $sum: "$placesTotal" },
           left: { $sum: "$placesLeft" },
         },
@@ -293,21 +294,14 @@ router.post("/mission-proposed-places", passport.authenticate("referent", { sess
     ];
     let result = await MissionModel.aggregate(pipeline);
 
-    let data;
-    if (result.length > 0) {
-      // --- format data
-      data = {
-        left: result[0].left,
-        occupied: result[0].total - result[0].left,
-        total: result[0].total,
-      };
-    } else {
-      data = {
-        left: 0,
-        occupied: 0,
-        total: 0,
-      };
-    }
+    const total = result.reduce((acc, eq) => acc + eq.count, 0);
+    const data = result.map((status) => ({
+      status: status._id,
+      value: status.count,
+      percentage: total ? status.count / total : 0,
+      total: status.total,
+      left: status.left,
+    }));
 
     // --- result
     return res.status(200).send({ ok: true, data });

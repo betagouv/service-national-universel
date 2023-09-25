@@ -1,5 +1,7 @@
 import React from "react";
 import { FiChevronLeft } from "react-icons/fi";
+import PrimaryButton from "./PrimaryButton";
+import SecondaryButton from "./SecondaryButton";
 
 export default function SignupButtonContainer({ onClickNext, onClickPrevious, labelNext = "Continuer", labelPrevious = "Précédent", disabled = false, collapsePrevious = false }) {
   return (
@@ -7,22 +9,15 @@ export default function SignupButtonContainer({ onClickNext, onClickPrevious, la
       <hr className="mb-8 hidden h-px border-0 bg-gray-200 md:block" />
       <div className={`flex ${!collapsePrevious && "flex-col-reverse md:flex-row"} justify-center gap-2 md:justify-end`}>
         {onClickPrevious && (
-          <button
-            className={`${
-              collapsePrevious ? "w-auto" : "w-full md:w-auto"
-            } flex items-center justify-center border-[1px] border-blue-france-sun-113 py-2 px-4 text-blue-france-sun-113 hover:border-blue-france-sun-113-hover hover:text-blue-france-sun-113-hover`}
-            onClick={onClickPrevious}>
+          <SecondaryButton className={`${collapsePrevious ? "w-auto" : "w-full md:w-auto"} `} onClick={onClickPrevious}>
             {onClickNext && collapsePrevious ? <FiChevronLeft className="block md:hidden" /> : <p className="block w-64 md:hidden">{labelPrevious}</p>}
             <p className="hidden md:block">{labelPrevious}</p>
-          </button>
+          </SecondaryButton>
         )}
         {onClickNext && (
-          <button
-            className="flex w-full items-center justify-center bg-blue-france-sun-113 py-2 px-4 text-white hover:bg-blue-france-sun-113-hover disabled:bg-grey-925 disabled:text-grey-625 md:w-auto"
-            onClick={onClickNext}
-            disabled={disabled}>
+          <PrimaryButton onClick={onClickNext} disabled={disabled}>
             {labelNext}
-          </button>
+          </PrimaryButton>
         )}
       </div>
     </div>
