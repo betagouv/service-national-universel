@@ -20,7 +20,6 @@ export default function MissionsProposedPlaces({ filters, missionFilters, classN
     setGraph(null);
     try {
       const result = await api.post("/elasticsearch/dashboard/engagement/mission-proposed-places", { filters, missionFilters });
-      console.log("🚀 ~ file: MissionsProposedPlaces.jsx:24 ~ loadData ~ result:", result)
       if (result.ok) {
         const values = [result.data.occupied, result.data.left];
         const labels = ["Occupées", "Disponibles"];

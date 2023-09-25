@@ -129,22 +129,22 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
     let filters = [
       queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
       queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-      queryFilters.start?.length ? { range: { startAt: { gte: queryFilters.start[0], lte: queryFilters.start[1] } } } : null,
-      queryFilters.end?.length ? { range: { endAt: { gte: queryFilters.end[0], lte: queryFilters.end[1] } } } : null,
+      req.body.missionFilters.start?.length ? { range: { startAt: { gte: req.body.missionFilters.start } } } : null,
+      req.body.missionFilters.end?.length ? { range: { endAt: { lte: req.body.missionFilters.end } } } : null,
     ];
 
-    if (queryFilters.source?.length && queryFilters.source.includes("jva")) {
+    const sources = req.body.missionFilters.sources || [];
+    if (sources.length === 1 && sources.includes("JVA")) {
       filters.push({ term: { "isJvaMission.keyword": "true" } });
     }
-
-    if (queryFilters.source?.length && queryFilters.source.includes("snu")) {
+    if (sources.length === 1 && sources.includes("SNU")) {
       filters.push({ term: { "isJvaMission.keyword": "false" } });
     }
 
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
+          must: { term: { "status.keyword": "VALIDATED" } },
           filter: filters.filter(Boolean),
         },
       },
