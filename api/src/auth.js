@@ -208,8 +208,7 @@ class Auth {
 
       await currentUser.save();
 
-      //@todo: new template
-      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+      await sendTemplate(SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION, {
         emailTo: [{ name: `${currentUser.firstName} ${currentUser.lastName}`, email: value.email }],
         params: {
           registration_code: tokenEmailValidation,
@@ -461,8 +460,7 @@ class Auth {
       user.set({ tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
       await user.save();
 
-      //@todo : different template for new account and existing account
-      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+      await sendTemplate(SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: req.user.email }],
         params: {
           registration_code: tokenEmailValidation,
