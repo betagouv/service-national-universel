@@ -35,6 +35,7 @@ const getInitialFormValues = (young) => ({
   },
 });
 
+//@todo : before going to production, adapt backend route as well
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();

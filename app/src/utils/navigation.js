@@ -15,7 +15,6 @@ export const PREINSCRIPTION_STEPS = {
   SEJOUR: "SEJOUR",
   PROFIL: "PROFIL",
   CONFIRM: "CONFIRM",
-  DONE: "DONE",
 };
 
 export const CORRECTION_STEPS = {
@@ -45,7 +44,6 @@ export const PREINSCRIPTION_STEPS_LIST = [
   { name: PREINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
   { name: PREINSCRIPTION_STEPS.PROFIL, url: "profil" },
   { name: PREINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
-  { name: PREINSCRIPTION_STEPS.DONE, url: "done" },
 ];
 
 export const CORRECTION_STEPS_LIST = [
