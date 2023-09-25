@@ -179,4 +179,64 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
   }
 });
 
+router.post("/mission-proposed-places", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const filterFields = ["region", "department", "start", "end", "source"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    let filters = [
+      queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+      queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+      req.body.missionFilters.start?.length ? { range: { startAt: { gte: req.body.missionFilters.start } } } : null,
+      req.body.missionFilters.end?.length ? { range: { endAt: { lte: req.body.missionFilters.end } } } : null,
+    ];
+
+    const sources = req.body.missionFilters.sources || [];
+    if (sources.length === 1 && sources.includes("JVA")) {
+      filters.push({ term: { "isJvaMission.keyword": "true" } });
+    }
+    if (sources.length === 1 && sources.includes("SNU")) {
+      filters.push({ term: { "isJvaMission.keyword": "false" } });
+    }
+
+    const body = {
+      query: {
+        bool: {
+          must: { term: { "status.keyword": "VALIDATED" } },
+          filter: filters.filter(Boolean),
+        },
+      },
+      aggs: {
+        places_total: {
+          sum: {
+            field: "placesTotal",
+          },
+        },
+        places_left: {
+          sum: {
+            field: "placesLeft",
+          },
+        },
+      },
+      size: 0,
+    };
+
+    const responseMissions = await esClient.search({ index: "mission", body: body });
+    if (!responseMissions?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    const data = {
+      left: responseMissions?.body?.aggregations?.places_left?.value,
+      occupied: responseMissions?.body?.aggregations?.places_total?.value - responseMissions?.body?.aggregations?.places_left?.value,
+      total: responseMissions?.body?.aggregations?.places_total?.value,
+    };
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;
