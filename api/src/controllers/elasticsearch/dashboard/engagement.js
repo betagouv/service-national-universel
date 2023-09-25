@@ -181,28 +181,39 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
 
 router.post("/missions-statuts", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["department", "region", "start", "end"];
+    const filterFields = ["department", "region", "start", "end", "cohorts", "sources"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    let filters = [
+      queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+      queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+      queryFilters.cohorts?.length ? { terms: { "cohorts.keyword": queryFilters.cohorts } } : null,
+      req.body.missionFilters.start?.length ? { range: { startAt: { gte: req.body.missionFilters.start } } } : null,
+      req.body.missionFilters.end?.length ? { range: { endAt: { lte: req.body.missionFilters.end } } } : null,
+    ];
+
+    const sources = req.body.missionFilters.sources || [];
+    if (sources.length === 1 && sources.includes("JVA")) {
+      filters.push({ term: { "isJvaMission.keyword": "true" } });
+    }
+    if (sources.length === 1 && sources.includes("SNU")) {
+      filters.push({ term: { "isJvaMission.keyword": "false" } });
+    }
 
     const body = {
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [
-            queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-            queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
-            queryFilters.start ? { range: { start: { gte: queryFilters.start } } } : null,
-            queryFilters.end ? { range: { end: { lte: queryFilters.end } } } : null,
-          ].filter(Boolean),
+          // filter: filters.filter(Boolean),
         },
       },
       aggs: {
         by_status: {
           terms: {
             field: "status.keyword",
-            missing: "EMPTY",
+            size: ES_NO_LIMIT,
           },
           aggs: {
             total: {
@@ -219,7 +230,6 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
         },
       },
       size: 0,
-      track_total_hits: true,
     };
 
     const response = await esClient.search({ index: "mission", body: body });
@@ -227,8 +237,8 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
     if (!response?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
-
-    const aggregations = response.body.aggregations.by_status.buckets;
+    console.log(response.body);
+    const aggregations = response.body.aggregations.by_status.bucket;
     const total = aggregations.reduce((acc, bucket) => acc + bucket.doc_count, 0);
 
     const data = aggregations.map((bucket) => ({
@@ -244,6 +254,6 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
-});"
+});
 
 module.exports = router;
