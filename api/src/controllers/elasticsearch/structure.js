@@ -79,10 +79,11 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       size,
       customQueries: {
         networkExist: (query, value) => {
+          console.log("networkExist", value);
           const conditions = [];
-          if (value.includes("Oui"))
+          if (value.includes("true"))
             conditions.push({ bool: { must_not: [{ term: { "networkId.keyword": "" } }, { bool: { must_not: { exists: { field: "networkId.keyword" } } } }] } });
-          if (value.includes("Non")) {
+          if (value.includes("false")) {
             conditions.push({ term: { "networkId.keyword": "" } });
             conditions.push({ bool: { must_not: { exists: { field: "networkId.keyword" } } } });
           }

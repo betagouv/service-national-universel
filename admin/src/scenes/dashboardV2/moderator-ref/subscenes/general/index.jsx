@@ -418,7 +418,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
                   key={"sejour_chef_de_centre" + item.cohort}
                   number={item.count}
                   content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
-                  link={`centre/liste/session?headCenterExist=Non&cohort=${item.cohort}`}
+                  link={`centre/liste/session?headCenterExist=false&cohort=${item.cohort}`}
                   btnLabel="À renseigner"
                 />
               ),

@@ -13,6 +13,7 @@ import { BsDownload } from "react-icons/bs";
 import { corpsEnUniforme } from "../../utils";
 import Badge from "../../components/Badge";
 import { structureExportFields } from "snu-lib/excelExports";
+import { transformExistingField } from "@/components/filters-system-v2/components/filters/utils";
 
 export default function ListV3() {
   const user = useSelector((state) => state.Auth.user);
@@ -85,7 +86,8 @@ const ListStructure = () => {
       title: "Affiliation à un réseau national",
       name: "networkExist",
       missingLabel: "Non renseignée",
-      transformData: transformNetworkexist,
+      transformData: transformExistingField,
+      translate,
     },
     {
       title: "Réseau national d'affiliation",
@@ -270,18 +272,3 @@ async function exportTransform(all, values) {
     return fields;
   });
 }
-
-const transformNetworkexist = (data) => {
-  const newData = [
-    { key: "Oui", doc_count: 0 },
-    { key: "Non", doc_count: 0 },
-  ];
-  data.map((d) => {
-    if (d.key === "N/A" || d.key === "") {
-      newData.find((e) => e.key === "Non").doc_count += d.doc_count;
-    } else {
-      newData.find((e) => e.key === "Oui").doc_count += d.doc_count;
-    }
-  });
-  return newData;
-};
