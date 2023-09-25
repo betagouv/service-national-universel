@@ -19,7 +19,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import api from "../../services/api";
 import { Title } from "../pointDeRassemblement/components/common";
 import { Badge, TabItem } from "./components/commons";
-import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
+import { orderCohort, transformExistingField } from "../../components/filters-system-v2/components/filters/utils";
 
 import { useHistory, useParams } from "react-router-dom";
 
@@ -119,7 +119,8 @@ const ListSession = ({ firstSession }) => {
       title: "Chef de centre renseigné",
       name: "headCenterExist",
       missingLabel: "Non renseigné",
-      transformData: (value) => transformHeadCenter(value),
+      transformData: transformExistingField,
+      translate,
     },
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", missingLabel: "Non renseignée" });
@@ -422,19 +423,4 @@ const HitSession = ({ hit, onClick }) => {
       </div>
     </>
   );
-};
-
-const transformHeadCenter = (data) => {
-  const newData = [
-    { key: "Oui", doc_count: 0 },
-    { key: "Non", doc_count: 0 },
-  ];
-  data.map((d) => {
-    if (d.key === "N/A") {
-      newData.find((e) => e.key === "Non").doc_count += d.doc_count;
-    } else {
-      newData.find((e) => e.key === "Oui").doc_count += d.doc_count;
-    }
-  });
-  return newData;
 };

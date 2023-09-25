@@ -50,8 +50,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       customQueries: {
         headCenterExist: (query, value) => {
           const conditions = [];
-          if (value.includes("Oui")) conditions.push({ bool: { must: [{ exists: { field: "headCenterId.keyword" } }] } });
-          if (value.includes("Non")) conditions.push({ bool: { must_not: [{ exists: { field: "headCenterId.keyword" } }] } });
+          if (value.includes("true")) conditions.push({ bool: { must: [{ exists: { field: "headCenterId.keyword" } }] } });
+          if (value.includes("false")) conditions.push({ bool: { must_not: [{ exists: { field: "headCenterId.keyword" } }] } });
           if (conditions.length) query.bool.must.push({ bool: { should: conditions } });
           return query;
         },

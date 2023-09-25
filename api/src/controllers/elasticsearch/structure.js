@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
@@ -50,6 +50,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "isMilitaryPreparation.keyword",
       "structurePubliqueEtatType.keyword",
       "isNetwork.keyword",
+      "networkExist",
     ];
     const sortFields = [];
     // Authorization
@@ -76,6 +77,25 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       sort,
       contextFilters,
       size,
+      customQueries: {
+        networkExist: (query, value) => {
+          console.log("networkExist", value);
+          const conditions = [];
+          if (value.includes("true"))
+            conditions.push({ bool: { must_not: [{ term: { "networkId.keyword": "" } }, { bool: { must_not: { exists: { field: "networkId.keyword" } } } }] } });
+          if (value.includes("false")) {
+            conditions.push({ term: { "networkId.keyword": "" } });
+            conditions.push({ bool: { must_not: { exists: { field: "networkId.keyword" } } } });
+          }
+          if (conditions.length) query.bool.must.push({ bool: { should: conditions } });
+          return query;
+        },
+        networkExistAggs: () => {
+          return {
+            terms: { field: "networkId.keyword", size: ES_NO_LIMIT, missing: "N/A" },
+          };
+        },
+      },
     });
 
     let structures;

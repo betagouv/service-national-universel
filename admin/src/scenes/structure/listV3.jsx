@@ -13,6 +13,7 @@ import { BsDownload } from "react-icons/bs";
 import { corpsEnUniforme } from "../../utils";
 import Badge from "../../components/Badge";
 import { structureExportFields } from "snu-lib/excelExports";
+import { transformExistingField } from "@/components/filters-system-v2/components/filters/utils";
 
 export default function ListV3() {
   const user = useSelector((state) => state.Auth.user);
@@ -83,6 +84,13 @@ const ListStructure = () => {
     },
     {
       title: "Affiliation à un réseau national",
+      name: "networkExist",
+      missingLabel: "Non renseignée",
+      transformData: transformExistingField,
+      translate,
+    },
+    {
+      title: "Réseau national d'affiliation",
       name: "networkName",
       missingLabel: "Non renseignée",
     },

@@ -36,27 +36,29 @@ export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters, m
           {selectedFilterValues?.length === filter.options?.length ? (
             <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">{filter?.fullValue}</div>
           ) : selectedFilterValues.length > 0 ? (
-            selectedFilterValues.map((item, index) => {
-              const label = filter.options.find((option) => option.key === item)?.label;
-              if (index > maxItems - 1) {
-                if (index === selectedFilterValues.length - 1) {
-                  return (
-                    <div key={item}>
-                      <ToolTipView selectedFilterValues={selectedFilterValues} filter={filter} />
-                      <div data-tip="" data-for={"tooltip-filtre" + filter.id} className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">
-                        +{index - maxItems + 1}
+            selectedFilterValues
+              .sort((a, b) => a.localeCompare(b))
+              .map((item, index) => {
+                const label = filter.options.find((option) => option.key === item)?.label;
+                if (index > maxItems - 1) {
+                  if (index === selectedFilterValues.length - 1) {
+                    return (
+                      <div key={item}>
+                        <ToolTipView selectedFilterValues={selectedFilterValues} filter={filter} />
+                        <div data-tip="" data-for={"tooltip-filtre" + filter.id} className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">
+                          +{index - maxItems + 1}
+                        </div>
                       </div>
-                    </div>
-                  );
+                    );
+                  }
+                  return null;
                 }
-                return null;
-              }
-              return (
-                <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
-                  {label}
-                </div>
-              );
-            })
+                return (
+                  <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
+                    {label}
+                  </div>
+                );
+              })
           ) : (
             <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">{filter?.fullValue ? filter.fullValue : "Choisir"}</div>
           )}

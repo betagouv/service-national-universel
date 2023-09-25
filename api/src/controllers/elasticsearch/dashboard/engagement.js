@@ -87,7 +87,7 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
         total_with_network_name: {
           filter: {
             bool: {
-              must_not: [{ term: { "networkName.keyword": "" } }, { bool: { must_not: { exists: { field: "networkName" } } } }],
+              must_not: [{ term: { "networkId.keyword": "" } }, { bool: { must_not: { exists: { field: "networkId" } } } }],
             },
           },
         },
