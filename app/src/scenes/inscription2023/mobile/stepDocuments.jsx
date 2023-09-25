@@ -8,14 +8,14 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import Error from "../../../components/error";
-import Help from "../components/Help";
-import Navbar from "../components/Navbar";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
-import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
-import MyDocs from "../components/MyDocs";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
+import Help from "../components/Help";
+import MyDocs from "../components/MyDocs";
+import Navbar from "../components/Navbar";
 import Info from "../../../components/info";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -67,14 +67,7 @@ export default function StepDocuments() {
   return (
     <>
       <Navbar />
-      <div className="bg-white p-4">
-        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="flex w-full items-center justify-between">
-          <h1 className="text-2xl font-semibold">Ma pièce d’identité</h1>
-          <a href={supportLink} target="_blank" rel="noreferrer">
-            <QuestionMarkBlueCircle />
-          </a>
-        </div>
+      <DSFRContainer title="Ma pièce d’identité" supportLink={supportLink}>
         <div className="my-4">
           {corrections?.map((e) => (
             <ErrorMessage key={e._id}>
@@ -84,9 +77,10 @@ export default function StepDocuments() {
           ))}
         </div>
 
+        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+
         {young.files.cniFiles?.length > 0 && (
           <div className="mb-4">
-            <hr className="my-2" />
             <MyDocs />
             <hr className="my-2" />
           </div>
@@ -111,9 +105,9 @@ export default function StepDocuments() {
             </div>
           </div>
         ))}
-      </div>
+        <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/representants")} disabled={disabled} />
+      </DSFRContainer>
       <Help supportLink={supportLink} />
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/representants")} onClick={onSubmit} disabled={disabled} />
     </>
   );
 }

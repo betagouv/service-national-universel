@@ -2,10 +2,8 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
-import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -13,6 +11,8 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import Navbar from "../components/Navbar";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 export default function StepConsentements() {
   const young = useSelector((state) => state.Auth.young);
@@ -57,14 +57,7 @@ export default function StepConsentements() {
   return (
     <>
       <Navbar />
-      <div className="bg-white p-4 text-[#161616]">
-        <div className="mt-2 flex w-full items-center justify-between">
-          <h1 className="text-xl font-bold">Apporter mon consentement</h1>
-          <a href={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`} target="_blank" rel="noreferrer">
-            <QuestionMarkBlueCircle />
-          </a>
-        </div>
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+      <DSFRContainer title="Apporter mon consentement" supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`}>
         {error?.text && <Error {...error} onClose={() => setError({})} />}
         <div className="mt-4 flex flex-col gap-4 pb-2">
           <div className="text-base text-[#161616]">
@@ -96,13 +89,8 @@ export default function StepConsentements() {
             </div>
           </div>
         </div>
-        {/* <div className="mt-4 flex items-center justify-end gap-2 pb-4" onClick={() => setModal({ isOpen: true })}>
-          <EditPenLight />
-          <div className="text-sm font-medium text-[#000091]">Je souhaite modifier mes dates de séjour</div>
-        </div> */}
-      </div>
-      <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/coordonnee")} onClick={onSubmit} disabled={disabled || loading} />
-      {/* <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} /> */}
+        <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/coordonnee")} disabled={disabled || loading} />
+      </DSFRContainer>
     </>
   );
 }

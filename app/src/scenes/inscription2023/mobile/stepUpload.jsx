@@ -7,82 +7,43 @@ import dayjs from "dayjs";
 
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { resizeImage } from "../../../services/file.service";
 import { translate } from "../../../utils";
 import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 import { ID } from "../utils";
-import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 import { supportURL } from "@/config";
 
-import CheckBox from "../../../components/dsfr/forms/checkbox";
-import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
-import Error from "../../../components/error";
-import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import Help from "../components/Help";
-import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
-import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import StepUploadMobile from "../components/StepUploadMobile";
+import useDevice from "@/hooks/useDevice";
+import StepUploadDesktop from "../components/StepUploadDesktop";
 
 export default function StepUpload() {
+  const device = useDevice();
   let { category } = useParams();
   const young = useSelector((state) => state.Auth.young);
   if (!category) category = young.latestCNIFileCategory;
   const history = useHistory();
   const dispatch = useDispatch();
   const corrections = getCorrectionsForStepUpload(young);
+  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
-  const [step, setStep] = useState(getStep());
-  const [loading, setLoading] = useState(false);
-  const [hasChanged, setHasChanged] = useState(false);
-  const [error, setError] = useState({});
   const [recto, setRecto] = useState();
   const [verso, setVerso] = useState();
-  const [checked, setChecked] = useState({
-    "Toutes les informations sont lisibles": false,
-    "Le document n'est pas coupé": false,
-    "La photo est nette": false,
-  });
   const [date, setDate] = useState(young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) : null);
-
-  const isEnabled = validate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState({});
   const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
 
-  function validate() {
-    if (corrections?.length) {
-      return hasChanged && !loading && !error.text;
-    } else {
-      return (young?.files?.cniFiles?.length || (recto && (verso || category === "passport"))) && date && !loading && !error.text;
+  async function uploadFiles(resetState) {
+    const oversizedFiles = [recto, verso].filter((e) => e && e.size > 5000000).map((e) => e.name);
+    if (oversizedFiles.length) {
+      setError({ text: `Fichier(s) trop volumineux : ${oversizedFiles.join(", ")}.` });
+      resetState();
+      return { ok: false };
     }
-  }
 
-  function getStep() {
-    if (corrections?.some(({ reason }) => reason === "MISSING_BACK")) return "verso";
-    if (corrections?.some(({ field }) => field === "cniFile")) return "recto";
-    if (corrections?.some(({ field }) => field === "latestCNIFileExpirationDate")) return "date";
-    return "recto";
-  }
-
-  function renderStep(step) {
-    if (step === "recto") return <Recto />;
-    if (step === "verso") return <Verso />;
-    if (step === "verify")
-      return (
-        <>
-          <Gallery recto={recto} verso={verso} />
-          <Verify />
-        </>
-      );
-    if (step === "date") return <ExpirationDate />;
-  }
-
-  function resetState() {
-    setRecto();
-    setVerso();
-    setStep(getStep());
-    setLoading(false);
-  }
-
-  async function uploadFiles() {
     if (recto) {
       const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, recto, { category, expirationDate, side: "recto" });
       if (!res.ok) {
@@ -106,7 +67,7 @@ export default function StepUpload() {
     return { ok: true };
   }
 
-  async function onSubmit() {
+  async function onSubmit(resetState) {
     try {
       setLoading(true);
 
@@ -122,7 +83,9 @@ export default function StepUpload() {
         return;
       }
 
-      plausibleEvent("Phase0/CTA inscription - CI mobile");
+      if (device === "mobile") await plausibleEvent("Phase0/CTA inscription - CI mobile");
+      else await plausibleEvent("Phase0/CTA inscription - CI desktop");
+
       dispatch(setYoung(responseData));
       history.push("/inscription2023/confirm");
     } catch (e) {
@@ -132,7 +95,7 @@ export default function StepUpload() {
     }
   }
 
-  async function onCorrect() {
+  async function onCorrect(resetState) {
     try {
       setLoading(true);
 
@@ -154,168 +117,51 @@ export default function StepUpload() {
     } catch (e) {
       capture(e);
       setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données." });
-      setLoading(false);
+      resetState();
     }
   }
-  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
   return (
     <>
       <Navbar />
-      <div className="bg-white p-4">
-        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        {young?.files?.cniFiles?.length + recto?.length + verso?.length > 2 && (
-          <>
-            <Error text={`Vous ne pouvez téleverser plus de 3 fichiers. Vous avez déjà ${young.files.cniFiles?.length} fichiers en ligne.`} />
-            <MyDocs />
-          </>
-        )}
-        {renderStep(step)}
-      </div>
-      <Help supportLink={supportLink} />
-      {step === "verify" && (
-        <StickyButton
-          text="Continuer"
-          onClick={() => setStep("date")}
-          onClickPrevious={() => {
-            setRecto(null);
-            setVerso(null);
-            setHasChanged(false);
-            setStep(corrections?.some(({ reason }) => reason === "MISSING_BACK") ? "verso" : "recto");
-          }}
-          disabled={Object.values(checked).some((e) => e === false)}
-        />
-      )}
-      {step === "date" &&
-        (corrections?.length ? (
-          <StickyButton text={loading ? "Scan antivirus en cours" : "Corriger"} onClick={onCorrect} disabled={!isEnabled} />
+      <DSFRContainer title={ID[category].title} supportLink={supportLink}>
+        {device === "mobile" ? (
+          <StepUploadMobile
+            recto={recto}
+            setRecto={setRecto}
+            verso={verso}
+            setVerso={setVerso}
+            date={date}
+            setDate={setDate}
+            error={error}
+            setError={setError}
+            loading={loading}
+            setLoading={setLoading}
+            corrections={corrections}
+            category={category}
+            onSubmit={onSubmit}
+            onCorrect={onCorrect}
+          />
         ) : (
-          <StickyButton text={loading ? "Scan antivirus en cours" : "Continuer"} onClick={onSubmit} disabled={!isEnabled} />
-        ))}
-    </>
-  );
-
-  function Recto() {
-    async function handleChange(e) {
-      const image = await resizeImage(e.target.files[0]);
-      if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
-
-      setRecto(image);
-      setHasChanged(true);
-      setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
-    }
-
-    return (
-      <>
-        <div className="mb-4">
-          {corrections
-            ?.filter(({ field }) => field == "cniFile")
-            ?.map((e) => (
-              <ErrorMessage key={e._id} className="">
-                <strong>{translateCorrectionReason(e.reason)}</strong>
-                {e.message && ` : ${e.message}`}
-              </ErrorMessage>
-            ))}
-        </div>
-        <div className="mb-4 flex w-full items-center justify-center">
-          <img src={ID[category]?.imgFront} alt={ID[category]?.title} />
-        </div>
-        <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
-        <button className="flex w-full">
-          <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
-            {category === "passport" ? "Scannez le document" : "Scannez le recto du document"}
-          </label>
-        </button>
-      </>
-    );
-  }
-
-  function Verso() {
-    async function handleChange(e) {
-      const image = await resizeImage(e.target.files[0]);
-      if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
-
-      setVerso(image);
-      setHasChanged(true);
-      setStep("verify");
-    }
-
-    return (
-      <>
-        <div className="mb-4">
-          {corrections
-            ?.filter(({ field }) => field == "cniFile")
-            ?.map((e) => (
-              <ErrorMessage key={e._id}>
-                <strong>{translateCorrectionReason(e.reason)}</strong>
-                {e.message && ` : ${e.message}`}
-              </ErrorMessage>
-            ))}
-        </div>
-        <div className="mb-4 flex w-full items-center justify-center">{ID[category].imgBack && <img src={ID[category]?.imgBack} alt={ID[category]?.title} />}</div>
-        <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
-        <button className="flex w-full">
-          <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
-            Scannez le verso du document
-          </label>
-        </button>
-      </>
-    );
-  }
-
-  function Verify() {
-    return (
-      <>
-        <p className="my-4 text-lg font-semibold text-gray-800">Vérifiez les points suivants</p>
-        {Object.entries(checked).map(([key, value]) => (
-          <div className="my-2 flex items-center" key={key}>
-            <CheckBox type="checkbox" checked={value} onChange={() => setChecked({ ...checked, [key]: !checked[key] })} />
-            <span className="ml-2 mr-2">{key}</span>
-          </div>
-        ))}
-      </>
-    );
-  }
-
-  function ExpirationDate() {
-    function handleChange(date) {
-      setDate(date);
-      setHasChanged(true);
-    }
-
-    return (
-      <>
-        <div className="mb-4">
-          {corrections
-            ?.filter(({ field }) => field === "latestCNIFileExpirationDate")
-            ?.map((e) => (
-              <ErrorMessage key={e._id}>
-                <strong>Date d&apos;expiration incorrecte</strong>
-                {e.message && ` : ${e.message}`}
-              </ErrorMessage>
-            ))}
-        </div>
-        <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-        {young.cohort !== "à venir" && (
-          <div className="my-2 text-gray-600">
-            Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
-            ).
-          </div>
+          <StepUploadDesktop
+            recto={recto}
+            setRecto={setRecto}
+            verso={verso}
+            setVerso={setVerso}
+            date={date}
+            setDate={setDate}
+            error={error}
+            setError={setError}
+            loading={loading}
+            setLoading={setLoading}
+            corrections={corrections}
+            category={category}
+            onSubmit={onSubmit}
+            onCorrect={onCorrect}
+          />
         )}
-        <div className="mx-auto w-3/4">
-          <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
-        </div>
-        <DatePickerList value={date} onChange={(date) => handleChange(date)} />
-      </>
-    );
-  }
-}
-
-function Gallery({ recto, verso }) {
-  return (
-    <div className="mb-4 flex h-48 w-full space-x-2 overflow-x-auto">
-      {recto && <img src={URL.createObjectURL(recto)} className="w-3/4 object-contain" />}
-      {verso && <img src={URL.createObjectURL(verso)} className="w-3/4 object-contain" />}
-    </div>
+      </DSFRContainer>
+      <Help supportLink={supportLink} />
+    </>
   );
 }
