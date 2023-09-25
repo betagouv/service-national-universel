@@ -239,4 +239,78 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
   }
 });
 
+router.post("/mission-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const filterFields = ["department", "region"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    let filters = [
+      queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+      queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+      req.body.missionFilters.start?.length ? { range: { startAt: { gte: req.body.missionFilters.start } } } : null,
+      req.body.missionFilters.end?.length ? { range: { endAt: { lte: req.body.missionFilters.end } } } : null,
+    ];
+
+    const sources = req.body.missionFilters.sources || [];
+    if (sources.length === 1 && sources.includes("JVA")) {
+      filters.push({ term: { "isJvaMission.keyword": "true" } });
+    }
+    if (sources.length === 1 && sources.includes("SNU")) {
+      filters.push({ term: { "isJvaMission.keyword": "false" } });
+    }
+
+    const body = {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: filters.filter(Boolean),
+        },
+      },
+      aggs: {
+        by_status: {
+          terms: {
+            field: "status.keyword",
+            size: ES_NO_LIMIT,
+          },
+          aggs: {
+            total: {
+              sum: {
+                field: "placesTotal",
+              },
+            },
+            left: {
+              sum: {
+                field: "placesLeft",
+              },
+            },
+          },
+        },
+      },
+      size: 0,
+    };
+
+    const response = await esClient.search({ index: "mission", body: body });
+
+    if (!response?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const buckets = response.body.aggregations.by_status.buckets;
+
+    const data = buckets.map((bucket) => ({
+      status: bucket.key,
+      value: bucket.doc_count,
+      percentage: bucket.doc_count / buckets.reduce((acc, bucket) => acc + bucket.doc_count, 0),
+      total: bucket.total.value,
+      left: bucket.left.value,
+    }));
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;

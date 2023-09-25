@@ -22,7 +22,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     setError(null);
     setLoading(true);
     try {
-      const result = await api.post(`/dashboard/engagement/missions-statuts`, { filters, missionFilters });
+      const result = await api.post(`/elasticsearch/dashboard/engagement/mission-status`, { filters, missionFilters });
       if (result.ok) {
         setStatuses(
           result.data.map((status) => {
@@ -90,10 +90,10 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     setLoading(false);
   }
 
-  const exportButton = <ExportMissionStatusReport filter={exportFilter} />;
+  // const exportButton = <ExportMissionStatusReport filter={exportFilter} />; TODO: fix export and add this component in the headerChildren prop of <DashboardBox />
 
   return (
-    <DashboardBox title="Statut des missions proposées" className={className} headerChildren={exportButton}>
+    <DashboardBox title="Statut des missions proposées" className={className}>
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : (
