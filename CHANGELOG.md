@@ -1,3 +1,15 @@
+# [1.340.0](https://github.com/betagouv/service-national-universel/compare/v1.339.0...v1.340.0) (2023-09-25)
+
+
+### Bug Fixes
+
+* **app:** Add redirection for old ticket path ([2d6b50c](https://github.com/betagouv/service-national-universel/commit/2d6b50c006c2b9bb78abfeadec332320a7acf4e2))
+
+
+### Features
+
+* **admin/api:** retour test bertille ([#3047](https://github.com/betagouv/service-national-universel/issues/3047)) ([5d70e7d](https://github.com/betagouv/service-national-universel/commit/5d70e7dbf0afe7f37e78156aa436ea1b6dee96c3))
+
 # [1.339.0](https://github.com/betagouv/service-national-universel/compare/v1.338.0...v1.339.0) (2023-09-24)
 
 
