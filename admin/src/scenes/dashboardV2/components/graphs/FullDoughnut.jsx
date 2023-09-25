@@ -122,13 +122,13 @@ export default function FullDoughnut({
       // filter values
       if (totalValues !== 0) {
         for (let i = 0, n = values.length; i < n; ++i) {
-          if (values[i] / totalValues >= 0.01) {
-            completeValues.push({
-              value: values[i],
-              legend: legends[i],
-              tooltip: tooltips ? tooltips[i] : null,
-            });
-          }
+          // if (values[i] / totalValues >= 0.01) {
+          completeValues.push({
+            value: values[i],
+            legend: legends[i],
+            tooltip: tooltips ? tooltips[i] : null,
+          });
+          // }
         }
       }
 

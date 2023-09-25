@@ -485,7 +485,7 @@ async function getApplicationsChangeStatus(startDate, endDate, user) {
         {
           id: "missions-abandonned",
           value: abandonValue,
-          label: ` missions${abandonValue > 1 ? "s" : ""} abandonnée${abandonValue > 1 ? "s" : ""}`,
+          label: ` mission${abandonValue > 1 ? "s" : ""} abandonnée${abandonValue > 1 ? "s" : ""}`,
           icon: "action",
         },
       ];

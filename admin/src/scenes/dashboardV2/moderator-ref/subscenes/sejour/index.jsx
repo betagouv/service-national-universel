@@ -1,23 +1,26 @@
+import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
+import api from "@/services/api";
+import plausibleEvent from "@/services/plausible";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
-  academyList,
   COHORTS,
+  ROLES,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+  academyList,
   departmentToAcademy,
   region2department,
   regionList,
-  ROLES,
   translateInscriptionStatus,
   translatePhase1,
-  YOUNG_STATUS,
-  YOUNG_STATUS_PHASE1,
 } from "snu-lib";
-import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
-import api from "../../../../../services/api";
-import plausibleEvent from "../../../../../services/plausible";
-import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import BoxWithPercentage from "./components/BoxWithPercentage";
 import CardCenterCapacity from "./components/CardCenterCapacity";
 import MoreInfo from "./components/MoreInfo";
@@ -25,9 +28,6 @@ import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "./components/Presences";
 import StatusPhase1 from "./components/StatusPhase1";
 import TabSession from "./components/TabSession";
-import { getLink as getOldLink } from "../../../../../utils";
-import { getNewLink } from "../../../../../utils";
-import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -83,7 +83,7 @@ export default function Index() {
             id: "academy",
             name: "Académie",
             fullValue: "Toutes",
-            options: academyOptions,
+            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
           }
         : null,
       {
@@ -143,14 +143,14 @@ export default function Index() {
               number={data?.pdr?.NR + data?.pdr?.false || 0}
               title="Point de rassemblement"
               subLabel="restants à confirmer"
-              redirect={getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['MEETING_INFO=%5B"false"%5D'] })}
+              redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ hasMeetingInformation: "false" })] })}
             />
             <BoxWithPercentage
               total={data?.participationTotal || 0}
               number={data?.participation?.false || 0}
               title="Participation"
               subLabel="restants à confirmer"
-              redirect={getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['COHESION_PARTICIPATION=%5B"false"%5D'] })}
+              redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ youngPhase1Agreement: "false" })] })}
             />
           </div>
           <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} />

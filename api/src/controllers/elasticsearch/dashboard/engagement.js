@@ -9,7 +9,7 @@ const { ES_NO_LIMIT, COHORTS } = require("snu-lib");
 
 router.post("/status-divers", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["status", "cohort", "academy", "department", "region"];
+    const filterFields = ["status", "cohorts", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -19,7 +19,7 @@ router.post("/status-divers", passport.authenticate(["referent"], { session: fal
           must: { match_all: {} },
           filter: [
             queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
-            queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+            queryFilters?.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
             queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
@@ -55,7 +55,6 @@ router.post("/status-divers", passport.authenticate(["referent"], { session: fal
 
     const data = [];
     for (const current of phase2ApplicationStatus) {
-      console.log(current);
       data.push({ category: "phase2", status: current.key, value: current.doc_count, percentage: totalPhase2 ? current.doc_count / totalPhase2 : 0 });
     }
     for (const current of statusPhase2Contract) {
@@ -120,54 +119,118 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
   }
 });
 
-router.post("/missions-statuts", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/status-de-phases", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["department", "region", "start", "end", "cohorts", "academy", "source"];
+    const filterFields = ["status", "cohorts", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
-
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    let filters = [
-      queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
-      queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-      queryFilters.cohorts?.length ? { terms: { "cohorts.keyword": queryFilters.cohorts } } : null,
-      queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
-      queryFilters.start?.length ? { range: { startAt: { gte: queryFilters.start[0], lte: queryFilters.start[1] } } } : null,
-      queryFilters.end?.length ? { range: { endAt: { gte: queryFilters.end[0], lte: queryFilters.end[1] } } } : null,
-    ];
-
-    if (queryFilters.source?.length && queryFilters.source.includes("jva")) {
-      filters.push({ term: { "isJvaMission.keyword": "true" } });
-    }
-
-    if (queryFilters.source?.length && queryFilters.source.includes("snu")) {
-      filters.push({ term: { "isJvaMission.keyword": "false" } });
-    }
 
     const body = {
       query: {
         bool: {
           must: { match_all: {} },
-          filter: filters.filter(Boolean),
+          filter: [
+            queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
+            queryFilters?.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
+            queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+            queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+          ].filter(Boolean),
         },
       },
       aggs: {
-        mission_stats: {
-          terms: { field: "status.keyword" },
-          aggs: {
-            total: { sum: { field: "placesTotal" } },
-            left: { sum: { field: "placesLeft" } },
+        phase1: {
+          terms: {
+            field: "statusPhase1.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+        phase2: {
+          terms: {
+            field: "statusPhase2.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+        phase3: {
+          terms: {
+            field: "statusPhase3.keyword",
+            size: ES_NO_LIMIT,
           },
         },
       },
       size: 0,
     };
 
-    const result = await esClient.search({ index: 'mission', body });
-    console.log(result);
-    const aggregations = result.body.aggregations.mission_stats.buckets;
+    const reponse = await esClient.search({ index: "young", body: body });
+    if (!reponse?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    //format data
+    const data = [
+      { phase: 1, result: reponse?.body?.aggregations?.phase1?.buckets },
+      { phase: 2, result: reponse?.body?.aggregations?.phase2?.buckets },
+      { phase: 3, result: reponse?.body?.aggregations?.phase3?.buckets },
+    ];
 
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/missions-statuts", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const filterFields = ["department", "region", "start", "end"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const body = {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+            queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+            queryFilters.start ? { range: { start: { gte: queryFilters.start } } } : null,
+            queryFilters.end ? { range: { end: { lte: queryFilters.end } } } : null,
+          ].filter(Boolean),
+        },
+      },
+      aggs: {
+        by_status: {
+          terms: {
+            field: "status.keyword",
+            missing: "EMPTY",
+          },
+          aggs: {
+            total: {
+              sum: {
+                field: "placesTotal",
+              },
+            },
+            left: {
+              sum: {
+                field: "placesLeft",
+              },
+            },
+          },
+        },
+      },
+      size: 0,
+      track_total_hits: true,
+    };
+
+    const response = await esClient.search({ index: "mission", body: body });
+
+    if (!response?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const aggregations = response.body.aggregations.by_status.buckets;
     const total = aggregations.reduce((acc, bucket) => acc + bucket.doc_count, 0);
+
     const data = aggregations.map((bucket) => ({
       status: bucket.key,
       value: bucket.doc_count,
@@ -181,6 +244,6 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
-});
+});"
 
 module.exports = router;

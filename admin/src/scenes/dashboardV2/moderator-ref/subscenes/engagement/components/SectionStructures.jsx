@@ -6,6 +6,8 @@ import api from "../../../../../../services/api";
 import { translate } from "snu-lib/translation";
 import StatusTable from "../../../../components/ui/StatusTable";
 import { LoadingDoughnut } from "../../../../components/ui/loading";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function SectionStructures({ filters }) {
   const [loading, setLoading] = useState(true);
@@ -56,7 +58,13 @@ export default function SectionStructures({ filters }) {
               maxLegends={3}
               labels={structure.types.map((type) => translate(type._id))}
               values={structure.types.map((type) => Math.round((type.total / total) * 100))}
-              legendUrls={structure.types.map((type) => `/structure?LEGAL_STATUS=%5B"${structure.key}"%5D&TYPE=%5B"${type._id}"%5D`)}
+              legendUrls={structure.types.map((type) =>
+                getNewLink({
+                  base: `/structure`,
+                  filter: filters,
+                  filtersUrl: [queryString.stringify({ legalStatus: structure.key, types: type._id })],
+                }),
+              )}
               valueSuffix="%"
               tooltips={structure.types.map((type) => type.total)}
             />
@@ -68,7 +76,11 @@ export default function SectionStructures({ filters }) {
             status: translate(type._id),
             nb: type.total,
             percentage: Math.round((type.total / total) * 100),
-            url: `/structure?LEGAL_STATUS=%5B"ASSOCIATION"%5D&TYPE=%5B"${type._id}"%5D`,
+            url: getNewLink({
+              base: `/structure`,
+              filter: filters,
+              filtersUrl: [queryString.stringify({ legalStatus: "ASSOCIATION", types: type._id })],
+            }),
           };
         });
         return (
@@ -82,7 +94,6 @@ export default function SectionStructures({ filters }) {
         return null;
     }
   }
-
   return (
     <Section title="Structures">
       {error ? (
@@ -90,10 +101,10 @@ export default function SectionStructures({ filters }) {
       ) : (
         <div className="flex">
           <div className="mr-4 flex flex-[0_0_332px] flex-col">
-            <DashboardBox title="Structures" className="grow" to="/structure">
+            <DashboardBox title="Structures" className="grow" to={getNewLink({ base: `/structure`, filter: filters })}>
               {loading ? <LoadingDoughnut /> : <div className="text-2xl font-bold hover:text-gray-900">{totalStructures}</div>}
             </DashboardBox>
-            <DashboardBox title="Affiliées à un réseau national" className="grow" to="/structure">
+            <DashboardBox title="Affiliées à un réseau national" className="grow" to={getNewLink({ base: `/structure`, filter: filters })}>
               {loading ? <LoadingDoughnut /> : <div className="text-2xl font-bold">{nationalStructures}</div>}
             </DashboardBox>
           </div>
@@ -108,7 +119,13 @@ export default function SectionStructures({ filters }) {
                 maxLegends={2}
                 labels={structures.map((structure) => structure.label)}
                 values={structures.map((structure) => structure.total)}
-                legendUrls={structures.map((structure) => `/structure?LEGAL_STATUS=%5B"${structure._id}"%5D`)}
+                legendUrls={structures.map((structure) =>
+                  getNewLink({
+                    base: `/structure`,
+                    filter: filters,
+                    filtersUrl: [queryString.stringify({ legalStatus: structure._id })],
+                  }),
+                )}
                 tooltipsPercent
                 className="justify-center"
                 legendInfoPanels={structures.map((structure) => structure.info)}

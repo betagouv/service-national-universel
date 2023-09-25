@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { FullDoughnut } from "../../../../components/graphs";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
-import { translate } from "snu-lib";
+import { translate, translatePhase1, translatePhase2 } from "snu-lib";
 import { LoadingDoughnut } from "../../../../components/ui/loading";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function VolontairesStatutsDePhase({ filters, className = "" }) {
   const [phase, setPhase] = useState(1);
@@ -12,7 +14,7 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
 
   useEffect(() => {
     loadData();
-  }, [filters, phase]);
+  }, [filters]);
 
   function selectPhase(e) {
     setPhase(parseInt(e.target.value));
@@ -22,18 +24,31 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
     setError(null);
     setGraph(null);
     try {
-      const result = await api.post(`/dashboard/engagement/volontaires-statuts-phase`, { filters, phase });
+      const result = await api.post(`/elasticsearch/dashboard/engagement/status-de-phases`, { filters });
       if (result.ok) {
-        // console.log("RESULT Statuts de Phase: ", result.data);
-        const labels = [];
-        const values = [];
-        const legendUrls = [];
-        for (const data of result.data) {
-          labels.push(translate(data._id));
-          values.push(data.count);
-          legendUrls.push(`/volontaire?STATUS=%5B"VALIDATED"%5D&STATUS_PHASE_${phase}=%5B"${encodeURIComponent(data._id)}"%5D`);
-        }
-        setGraph({ values, labels, legendUrls });
+        let formatResult = result.data.reduce((acc, curr) => {
+          const phase = curr.phase;
+          const labels = [];
+          const values = [];
+          const legendUrls = [];
+          for (const data of curr.result) {
+            labels.push(phase === 1 ? translatePhase1(data.key) : phase === 2 ? translatePhase2(data.key) : translate(data.key));
+            values.push(data.doc_count);
+            legendUrls.push(
+              getNewLink(
+                {
+                  base: `/volontaire`,
+                  filter: filters,
+                  filtersUrl: [queryString.stringify({ [`statusPhase${phase}`]: encodeURIComponent(data.key) })],
+                },
+                "session",
+              ),
+            );
+          }
+          acc[phase] = { labels, values, legendUrls };
+          return acc;
+        }, {});
+        setGraph(formatResult);
       } else {
         console.log("error : ", result);
         setError("Erreur: impossible de charger les données.");
@@ -61,7 +76,15 @@ export default function VolontairesStatutsDePhase({ filters, className = "" }) {
           <LoadingDoughnut />
         </div>
       ) : (
-        <FullDoughnut labels={graph.labels} values={graph.values} legendUrls={graph.legendUrls} legendSide="bottom" maxLegends={2} className="mt-8" tooltipsPercent />
+        <FullDoughnut
+          labels={graph[phase].labels}
+          values={graph[phase].values}
+          legendUrls={graph[phase].legendUrls}
+          legendSide="bottom"
+          maxLegends={2}
+          className="mt-8"
+          tooltipsPercent
+        />
       )}
     </DashboardBox>
   );
