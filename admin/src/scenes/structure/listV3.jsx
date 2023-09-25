@@ -82,21 +82,15 @@ const ListStructure = () => {
       missingLabel: "Non renseignée",
     },
     {
-      title: "Réseau national",
-      name: "isNetwork",
-      missingLabel: "Non renseignée",
-      translate,
-    },
-    {
       title: "Affiliation à un réseau national",
-      name: "networkName",
-      missingLabel: "Non renseignée",
-    },
-    {
-      title: "TOTO",
       name: "networkExist",
       missingLabel: "Non renseignée",
       transformData: transformNetworkexist,
+    },
+    {
+      title: "Réseau national d'affiliation",
+      name: "networkName",
+      missingLabel: "Non renseignée",
     },
     {
       title: "Préparation militaire",
