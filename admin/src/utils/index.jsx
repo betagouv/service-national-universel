@@ -195,15 +195,11 @@ export const getNewLink = ({ base = "/", filter, filtersUrl = [] }, from) => {
     filtersUrl.push(`cohort=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join("~"))}`);
   }
 
-  if (filter?.start || filter?.end) {
-    let dates = [];
-    if (filter.start) {
-      dates.push("FROMDATE", dayjs(filter.start).format("YYYY-MM-DD"));
-    }
-    if (filter.end) {
-      dates.push("TODATE", dayjs(filter.end).format("YYYY-MM-DD"));
-    }
-    filtersUrl.push(`DATE=%5B"${dates.join('"%2C"')}"%5D`);
+  if (filter.start) {
+    filtersUrl.push(`fromDate=${dayjs(filter.start).format("YYYY-MM-DD")}`);
+  }
+  if (filter.end) {
+    filtersUrl.push(`toDate=${dayjs(filter.end).format("YYYY-MM-DD")}`);
   }
 
   let res = base;
