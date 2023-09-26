@@ -58,10 +58,10 @@ async function getPlaces(sessions, region) {
   ]);
 
   const session2023Ids = sessions2023.map((s) => s._id.toString());
-  const sessionObj = sessions.map((s) => ({ ...s.toObject() }));
+  const sessionObj = sessions.map((s) => ({ ...s }));
 
   for (let session of sessionObj) {
-    if (session2023Ids.includes(session._id.toString())) {
+    if (session._id && session2023Ids.includes(session._id.toString())) {
       session.numberOfCandidates = agg.find(({ _id }) => _id === session.name)?.candidates || 0;
       session.numberOfValidated = agg.find(({ _id }) => _id === session.name)?.validated || 0;
       session.goal = goals.find(({ _id }) => _id === session.name)?.total;

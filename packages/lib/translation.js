@@ -410,31 +410,6 @@ const translateState = (state) => {
   }
 };
 
-const translateCohort = (cohort) => {
-  switch (cohort) {
-    case "Février 2022":
-      return "du 13 au 25 Février 2022";
-    case "Juin 2022":
-      return "du 12 au 24 Juin 2022";
-    case "Juillet 2022":
-      return "du 3 au 15 Juillet 2022";
-    case "Février 2023 - C":
-      return "du 19 Février au 3 Mars 2023";
-    case "Avril 2023 - B":
-      return "du 16 au 28 Avril 2023";
-    case "Avril 2023 - A":
-      return "du 9 au 21 Avril 2023";
-    case "Juin 2023":
-      return "du 11 au 23 Juin 2023";
-    case "Juillet 2023":
-      return "du 4 au 16 Juillet 2023";
-    case "Octobre 2023 - NC":
-      return "du 9 au 20 Octobre 2023";
-    default:
-      return cohort;
-  }
-};
-
 const translateCohortTemp = (young) => {
   const { cohort } = young;
 
@@ -1177,7 +1152,6 @@ function translateBusPatchesField(path) {
 export {
   translate,
   translateState,
-  translateCohort,
   translateCohortTemp,
   translateSessionStatus,
   translatePhase1,
@@ -1210,7 +1184,6 @@ export {
 export default {
   translate,
   translateState,
-  translateCohort,
   translateCohortTemp,
   translateSessionStatus,
   translatePhase1,

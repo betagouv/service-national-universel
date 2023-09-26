@@ -102,6 +102,8 @@ const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { nam
 // ];
 
 const getCohortPeriod = (cohort) => {
+  //@todo : remove this after à venir and old cohort refacto
+  if (!cohort.dateStart || !cohort.dateEnd) return cohort.name;
   const startDate = new Date(cohort.dateStart);
   const endDate = new Date(cohort.dateEnd);
   const endDateformatOptions = { year: "numeric", month: "long", day: "numeric" };

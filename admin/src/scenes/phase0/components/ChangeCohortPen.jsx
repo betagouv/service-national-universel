@@ -3,7 +3,7 @@ import { IoWarningOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
-import { ROLES, translate, translateCohort, YOUNG_STATUS, calculateAge } from "snu-lib";
+import { ROLES, translate, getCohortPeriod, YOUNG_STATUS, calculateAge } from "snu-lib";
 import IconChangementCohorte from "../../../assets/IconChangementCohorte";
 import Pencil from "../../../assets/icons/Pencil";
 import Badge from "../../../components/Badge";
@@ -192,7 +192,8 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
                 Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
               </div>
               <div>
-                Nouveau séjour : <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={translateCohort(newCohort.name)} style={{ cursor: "default" }} />
+                Nouveau séjour :{" "}
+                <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={newCohort.name === "à venir" ? "à venir" : getCohortPeriod(newCohort)} style={{ cursor: "default" }} />
               </div>
               <textarea className="mt-2 w-full rounded-lg border-[1px] p-2" placeholder="Votre message..." rows="5" value={message} onChange={(e) => setMessage(e.target.value)} />
               <div className="mt-2">
