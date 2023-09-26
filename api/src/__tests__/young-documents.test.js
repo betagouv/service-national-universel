@@ -8,6 +8,8 @@ const getNewDepartmentServiceFixture = require("./fixtures/departmentService");
 const { createDepartmentServiceHelper } = require("./helpers/departmentService");
 const { createCohesionCenter } = require("./helpers/cohesionCenter");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
+const { createCohortHelper } = require("./helpers/cohort");
+const getNewCohortFixture = require("./fixtures/cohort");
 
 const getNewPointDeRassemblementFixture = require("./fixtures/PlanDeTransport/pointDeRassemblement");
 const { createPointDeRassemblementWithBus } = require("./helpers/PlanDeTransport/pointDeRassemblement");
@@ -51,6 +53,7 @@ describe("Young", () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
       const sessionPhase1 = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
       const young = await createYoungHelper({ ...getNewYoungFixture(), sessionPhase1Id: sessionPhase1._id });
+      await createCohortHelper({ ...getNewCohortFixture(), name: young.cohort });
       const certificates = ["1", "2", "3", "snu"];
       for (const certificate of certificates) {
         const res = await request(getAppHelper()).post("/young/" + young._id + "/documents/certificate/" + certificate);
