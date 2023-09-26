@@ -91,6 +91,7 @@ export default function SchemaRepartition({ region, department }) {
               (user.role === ROLES.REFERENT_REGION && c.schemaAccessForReferentRegion)
             );
           })
+          .sort((a, b) => new Date(b.dateStart) - new Date(a.dateStart))
           .map((c) => ({ value: c.name, label: formatCohortName(c) })),
       );
     } else {

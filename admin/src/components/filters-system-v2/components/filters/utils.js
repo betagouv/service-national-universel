@@ -116,7 +116,7 @@ export const orderCohort = (cohorts) => {
     if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, cohort.key)) {
       cohort.date = COHESION_STAY_START[cohort.key];
     } else {
-      cohort.date = new Date(2000, 0, 1);
+      cohort.date = new Date("01/01/2000");
     }
   }
   cohorts.sort((a, b) => b.date - a.date);
