@@ -1,3 +1,4 @@
+import { regionsListDROMS } from "./region-and-departments";
 const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
 
 // @todo : remove this
@@ -117,4 +118,12 @@ const getCohortPeriod = (cohort) => {
   return `du ${formattedStart} au ${formattedEnd}`;
 };
 
-export { oldSessions, getCohortPeriod };
+const getCohortPeriodTemp = (young) => {
+  const { cohort, region } = young;
+  if ([...regionsListDROMS, "Polynésie française"].includes(region)) {
+    return "du 4 au 16 Juillet 2023";
+  }
+  return getCohortPeriod(cohort);
+};
+
+export { oldSessions, getCohortPeriod, getCohortPeriodTemp };
