@@ -40,7 +40,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
               url: getNewLink(
                 {
                   base: `/mission`,
-                  filter: { ...filters, status: [] },
+                  filter: { ...filters, ...missionFilters, status: [] },
                   filtersUrl: [queryString.stringify({ status: status.status })],
                 },
                 "mission",
