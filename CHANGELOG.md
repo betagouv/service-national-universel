@@ -1,3 +1,12 @@
+## [1.340.1](https://github.com/betagouv/service-national-universel/compare/v1.340.0...v1.340.1) (2023-09-26)
+
+
+### Bug Fixes
+
+* **admin:** dashboard engagement redirection mission ([#3049](https://github.com/betagouv/service-national-universel/issues/3049)) ([e6178e6](https://github.com/betagouv/service-national-universel/commit/e6178e6951167fa7c908d0d1007235393a58479a))
+* **admin:** dashboard retours Emmanuel ([#3050](https://github.com/betagouv/service-national-universel/issues/3050)) ([955401e](https://github.com/betagouv/service-national-universel/commit/955401e3b219a9af4d0c9872c49ebc0dfb894b94))
+* **admin:** graph tooltip font weight ([13fcba2](https://github.com/betagouv/service-national-universel/commit/13fcba273b30d55abb58ad3a41227bbd1adb0566))
+
 # [1.340.0](https://github.com/betagouv/service-national-universel/compare/v1.339.0...v1.340.0) (2023-09-25)
 
 
