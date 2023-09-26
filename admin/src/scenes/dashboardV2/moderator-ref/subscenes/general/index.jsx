@@ -261,6 +261,10 @@ function Actus({ stats, user, cohortsNotFinished }) {
       </div>
     );
 
+  const totalInscription = total(stats.inscription);
+  const totalSejour = total(stats.sejour);
+  const totalEngagement = total(stats.engagement);
+
   return (
     <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
       <div className="grid grid-cols-3 gap-4">
@@ -268,9 +272,11 @@ function Actus({ stats, user, cohortsNotFinished }) {
           <div className="flex items-center gap-3">
             <Inscription />
             <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
-            <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.inscription)}</div>
+            <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!totalInscription ? "text-gray-400" : "text-blue-600"}`}>
+              {totalInscription}
+            </div>
           </div>
-          {!total(stats.inscription) && <NotePlaceholder />}
+          {!totalInscription && <NotePlaceholder />}
           {shouldShow(stats.inscription, "inscription_en_attente_de_validation") && (
             <NoteContainer
               title="Dossier"
@@ -329,9 +335,9 @@ function Actus({ stats, user, cohortsNotFinished }) {
           <div className="flex items-center gap-3">
             <Sejour />
             <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
-            <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.sejour)}</div>
+            <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!totalSejour ? "text-gray-400" : "text-blue-600"}`}>{totalSejour}</div>
           </div>
-          {!total(stats.sejour) && <NotePlaceholder />}
+          {!totalSejour && <NotePlaceholder />}
           {stats.sejour.sejour_rassemblement_non_confirmé.map(
             (item, key) =>
               shouldShow(stats.sejour, "sejour_rassemblement_non_confirmé", key) && (
@@ -468,9 +474,11 @@ function Actus({ stats, user, cohortsNotFinished }) {
           <div className="flex items-center gap-3">
             <Engagement />
             <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
-            <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.engagement)}</div>
+            <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!totalEngagement ? "text-gray-400" : "text-blue-600"}`}>
+              {totalEngagement}
+            </div>
           </div>
-          {!total(stats.engagement) && <NotePlaceholder />}
+          {!totalEngagement && <NotePlaceholder />}
           {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
             <NoteContainer
               title="Contrat"

@@ -205,7 +205,7 @@ export default function FullDoughnut({
   let mainClass = "flex items-center";
   // let graphClass = `relative w-[${CANVAS_SIZE}px] h-[${CANVAS_SIZE}px] shrink-0 grow-0`;
   let graphClass = `relative w-[208px] h-[208px] shrink-0 grow-0`;
-  let legendsClass = "shrink-0";
+  let legendsClass = "";
   let legendClass = "";
   let legendValueClass = "flex items-center";
   let legendDotClass = "mr-2";
