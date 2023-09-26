@@ -10,7 +10,8 @@ import ChooseCohortModalContent from "./ChooseCohortModalContent";
 import { updateYoung } from "../../../../../../services/young.service";
 import { capture } from "../../../../../../sentry";
 import { isCohortDone } from "../../../../../../utils/cohorts";
-import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, translateCohort, getCohortPeriod } from "snu-lib";
+import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod } from "snu-lib";
+import { getCohort as getCohortByName } from "@/utils/cohorts";
 import api from "../../../../../../services/api";
 import { setYoung } from "../../../../../../redux/auth/actions";
 
@@ -186,7 +187,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
             <ChooseCohortModalContent
               onCancel={onCancel}
               onConfirm={chooseNewCohort}
-              cohorts={availableCohorts.map((cohort) => ({ value: cohort, label: `Séjour ${translateCohort(cohort)}` }))}
+              cohorts={availableCohorts.map((cohort) => ({ value: cohort, label: cohort === "à venir" ? "Séjour à venir" : `Séjour ${getCohortPeriod(getCohortByName(cohort))}` }))}
               currentCohortPeriod={getCohortPeriod(currentCohort)}
               isLoading={isLoading}
             />
