@@ -77,12 +77,23 @@ const Schema = new mongoose.Schema({
   dateStart: { type: Date, required: true },
   dateEnd: { type: Date, required: true },
 
-  // @todo required: true
-  eligibility: { type: Eligibility },
+  eligibility: { type: Eligibility, required: true },
 
-  // @todo required: true
-  inscriptionEndDate: { type: Date },
-  instructionEndDate: { type: Date },
+  inscriptionEndDate: { type: Date, required: true },
+  instructionEndDate: { type: Date, required: true },
+
+  buffer: {
+    type: Number,
+    required: true,
+  },
+
+  event: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Event plausible",
+    },
+  },
 
   pdrChoiceLimitDate: {
     type: Date,
