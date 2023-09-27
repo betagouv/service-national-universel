@@ -19,15 +19,16 @@ export default function AdressSelect({ data, setData }) {
 
   const handleChange = async (e) => {
     setQuery(e.target.value);
+    if (e.target.value.length < 3) return;
     const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${e.target.value}&limit=10`);
     const data = await res.json();
     setOptions(data.features);
-    console.log(data);
   };
 
   const handleSelect = (option) => {
     setSelected(option);
     setData({ ...data, address: option.properties.name, zip: option.properties.postcode, city: option.properties.city });
+    setQuery(null);
   };
 
   const handleChangeAddress = (e) => {
@@ -36,78 +37,107 @@ export default function AdressSelect({ data, setData }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex flex-col gap-2">
-        Rechercher une adresse
-        <input type="text" value={query} onChange={handleChange} className="border" />
+      <label className="flex flex-col gap-2 font-bold">
+        {data.address ? "Modifier mon adresse" : "Rechercher une adresse"}
+        <input type="text" value={query} onChange={handleChange} className="border p-2 font-normal" />
       </label>
-      <div className="border flex flex-col">
-        {housenumbers.length > 0 && (
-          <>
-            <p className="p-2 font-bold">Numéro</p>
-            {housenumbers
-              .sort((a, b) => a.properties.score - b.properties.score)
-              .map((option) => (
-                <button key={option.properties.id} onClick={() => handleSelect(option)} className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full text-left">
-                  {option.properties.label}
-                </button>
-              ))}
-          </>
-        )}
 
-        {streets.length > 0 && (
-          <>
-            <p className="p-2 font-bold">Voie</p>
-            {streets
-              .sort((a, b) => a.properties.score - b.properties.score)
-              .map((option) => (
-                <button key={option.properties.id} onClick={() => handleSelect(option)} className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full text-left">
-                  {option.properties.label}
-                </button>
-              ))}
-          </>
-        )}
+      <div className="relative">
+        {query?.length > 2 && options.length > 0 && (
+          <div className="bg-white border flex flex-col absolute z-10 -top-4 w-full">
+            {housenumbers.length > 0 && (
+              <>
+                <p className="p-2 font-bold bg-gray-100">Numéro</p>
+                {housenumbers
+                  .sort((a, b) => b.properties.score - a.properties.score)
+                  .map((option) => (
+                    <button
+                      key={option.properties.id}
+                      onClick={() => handleSelect(option)}
+                      className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
+                      <p>{option.properties.name}</p>
+                      <p>
+                        {option.properties.city} -{option.properties.postcode}
+                      </p>
+                    </button>
+                  ))}
+              </>
+            )}
 
-        {localities.length > 0 && (
-          <>
-            <p className="p-2 font-bold">Lieu-dit</p>
-            {localities
-              .sort((a, b) => a.properties.score - b.properties.score)
-              .map((option) => (
-                <button key={option.properties.id} onClick={() => handleSelect(option)} className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full text-left">
-                  {option.properties.label}
-                </button>
-              ))}
-          </>
-        )}
+            {streets.length > 0 && (
+              <>
+                <p className="p-2 font-bold bg-gray-100">Voie</p>
+                {streets
+                  .sort((a, b) => b.properties.score - a.properties.score)
+                  .map((option) => (
+                    <button
+                      key={option.properties.id}
+                      onClick={() => handleSelect(option)}
+                      className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
+                      <p>{option.properties.name}</p>
+                      <p>
+                        {option.properties.city} -{option.properties.postcode}
+                      </p>
+                    </button>
+                  ))}
+              </>
+            )}
 
-        {municipalities.length > 0 && (
-          <>
-            <p className="p-2 font-bold">Commune</p>
-            {municipalities
-              .sort((a, b) => a.properties.score - b.properties.score)
-              .map((option) => (
-                <button key={option.properties.id} onClick={() => handleSelect(option)} className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full text-left">
-                  {option.properties.label}
-                </button>
-              ))}
-          </>
+            {localities.length > 0 && (
+              <>
+                <p className="p-2 font-bold bg-gray-100">Lieu-dit</p>
+                {localities
+                  .sort((a, b) => b.properties.score - a.properties.score)
+                  .map((option) => (
+                    <button
+                      key={option.properties.id}
+                      onClick={() => handleSelect(option)}
+                      className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
+                      <p>{option.properties.name}</p>
+                      <p>
+                        {option.properties.city} -{option.properties.postcode}
+                      </p>
+                    </button>
+                  ))}
+              </>
+            )}
+
+            {municipalities.length > 0 && (
+              <>
+                <p className="p-2 font-bold bg-gray-100">Commune</p>
+                {municipalities
+                  .sort((a, b) => b.properties.score - a.properties.score)
+                  .map((option) => (
+                    <button
+                      key={option.properties.id}
+                      onClick={() => handleSelect(option)}
+                      className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
+                      <p>{option.properties.name}</p>
+                      <p>
+                        {option.properties.city} -{option.properties.postcode}
+                      </p>
+                    </button>
+                  ))}
+              </>
+            )}
+          </div>
         )}
       </div>
 
-      <label className="flex flex-col gap-2">
+      <label className="flex flex-col gap-2 font-bold">
         Adresse
-        <input type="text" value={selected?.properties.name} disabled={selected?.properties.type === "housenumber"} className="border" onChange={handleChangeAddress} />
+        <input type="text" value={data.address} disabled={selected?.properties.type === "housenumber"} onChange={handleChangeAddress} className="border p-2 font-normal" />
       </label>
 
       <div className="flex gap-4">
-        <label className="flex flex-col gap-2 w-full">
+        <label className="flex flex-col gap-2 w-full font-bold">
           Code postal
-          <input type="text" value={selected?.properties.postcode} disabled className="border" />
+          <input type="text" value={data.zip} disabled className="border p-2 font-normal" />
         </label>
 
-        <label className="flex flex-col gap-2 w-full">
+        <label className="flex flex-col gap-2 w-full font-bold">
           Ville
-          <input type="text" value={selected?.properties.city} disabled className="border" />
+          <input type="text" value={data.city} disabled className="border p-2 font-normal" />
         </label>
       </div>
     </div>

@@ -30,7 +30,7 @@ import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { debounce, translate } from "../../../utils";
 import { capture } from "../../../sentry";
-import { supportURL } from "../../../config";
+import { environment, supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
@@ -610,31 +610,35 @@ export default function StepCoordonnees() {
             correction={corrections?.foreignCountry}
           />
         )}
-        <Input
-          value={isFrenchResident ? address : foreignAddress}
-          label="Adresse de résidence"
-          onChange={isFrenchResident ? updateAddressToVerify("address") : updateData("foreignAddress")}
-          error={isFrenchResident ? errors.address : errors.foreignAddress}
-          correction={isFrenchResident ? corrections?.address : corrections?.foreignAddress}
-        />
-        <div className="flex flex-col md:flex-row md:gap-8">
-          <Input
-            value={isFrenchResident ? zip : foreignZip}
-            label="Code postal"
-            onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
-            error={isFrenchResident ? errors.zip : errors.foreignZip}
-            correction={isFrenchResident ? corrections?.zip : corrections?.foreignZip}
-            className="w-full"
-          />
-          <Input
-            value={isFrenchResident ? city : foreignCity}
-            label="Ville"
-            onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
-            error={isFrenchResident ? errors.city : errors.foreignCity}
-            correction={isFrenchResident ? corrections?.city : corrections?.foreignCity}
-            className="w-full"
-          />
-        </div>
+        {environment === "production" && (
+          <>
+            <Input
+              value={isFrenchResident ? address : foreignAddress}
+              label="Adresse de résidence"
+              onChange={isFrenchResident ? updateAddressToVerify("address") : updateData("foreignAddress")}
+              error={isFrenchResident ? errors.address : errors.foreignAddress}
+              correction={isFrenchResident ? corrections?.address : corrections?.foreignAddress}
+            />
+            <div className="flex flex-col md:flex-row md:gap-8">
+              <Input
+                value={isFrenchResident ? zip : foreignZip}
+                label="Code postal"
+                onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
+                error={isFrenchResident ? errors.zip : errors.foreignZip}
+                correction={isFrenchResident ? corrections?.zip : corrections?.foreignZip}
+                className="w-full"
+              />
+              <Input
+                value={isFrenchResident ? city : foreignCity}
+                label="Ville"
+                onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
+                error={isFrenchResident ? errors.city : errors.foreignCity}
+                correction={isFrenchResident ? corrections?.city : corrections?.foreignCity}
+                className="w-full"
+              />
+            </div>
+          </>
+        )}
         {!isFrenchResident && (
           <>
             <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
@@ -670,17 +674,19 @@ export default function StepCoordonnees() {
             <Input value={city} label="Ville" onChange={updateAddressToVerify("city")} error={errors.city} correction={corrections?.city} />
           </>
         )}
-        {/* <VerifyAddress
-          address={address}
-          disabled={isVerifyAddressDisabled}
-          zip={zip}
-          city={city}
-          onSuccess={onVerifyAddress(true)}
-          onFail={onVerifyAddress()}
-          isVerified={addressVerified === "true"}
-        /> */}
+        {environment === "production" && (
+          <VerifyAddress
+            address={address}
+            disabled={isVerifyAddressDisabled}
+            zip={zip}
+            city={city}
+            onSuccess={onVerifyAddress(true)}
+            onFail={onVerifyAddress()}
+            isVerified={addressVerified === "true"}
+          />
+        )}
 
-        <AdressSelect data={data} setData={setData} />
+        {environment !== "production" && <AdressSelect data={data} setData={setData} />}
 
         <ErrorMessage>{errors.addressVerified}</ErrorMessage>
         <Select
