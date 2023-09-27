@@ -1,7 +1,9 @@
 import { regionsListDROMS } from "./region-and-departments";
 const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
 
-const getCohortPeriod = (cohort) => {
+const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
+
+const getCohortPeriod = (cohort, withBold = false) => {
   //@todo : remove this after à venir and old cohort refacto
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name;
   const startDate = new Date(cohort.dateStart);
@@ -17,6 +19,8 @@ const getCohortPeriod = (cohort) => {
   const formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions).format(startDate);
   const formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
 
+  if (withBold) return `du <b>${formattedStart} au ${formattedEnd}</b>`;
+
   return `du ${formattedStart} au ${formattedEnd}`;
 };
 
@@ -28,4 +32,4 @@ const getCohortPeriodTemp = (young) => {
   return getCohortPeriod(cohort);
 };
 
-export { oldSessions, getCohortPeriod, getCohortPeriodTemp };
+export { oldSessions, getCohortPeriod, getCohortPeriodTemp, sessions2023CohortNames };
