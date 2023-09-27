@@ -4,7 +4,6 @@ import { departmentLookUp } from "snu-lib";
 export default function AdressSelect({ data, setData }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
-  const [selected, setSelected] = useState(null);
 
   // https://adresse.data.gouv.fr/api-doc/adresse
   // Types de résultats :
@@ -20,10 +19,11 @@ export default function AdressSelect({ data, setData }) {
 
   const handleChangeQuery = async (e) => {
     setQuery(e.target.value);
+    setData({ ...data, address: e.target.value });
     if (e.target.value.length < 3) return;
     const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${e.target.value}&limit=10`);
-    const data = await res.json();
-    setOptions(data.features);
+    const json = await res.json();
+    setOptions(json.features);
   };
 
   const getDepartmentAndRegionFromContext = (context) => {
@@ -36,7 +36,6 @@ export default function AdressSelect({ data, setData }) {
   };
 
   const handleSelect = (option) => {
-    setSelected(option);
     setData({
       ...data,
       addressVerified: "true",
@@ -50,15 +49,11 @@ export default function AdressSelect({ data, setData }) {
     setQuery("");
   };
 
-  const handleChangeAddress = (e) => {
-    setData({ ...data, address: e.target.value });
-  };
-
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex flex-col gap-2 font-bold">
-        {data.address ? "Modifier mon adresse" : "Rechercher une adresse"}
-        <input type="text" value={query} onChange={handleChangeQuery} className="border p-2 font-normal" />
+      <label className="flex flex-col gap-2 font-medium">
+        Adresse
+        <input type="text" value={data.address} onChange={handleChangeQuery} className="border p-2 font-normal" />
       </label>
 
       <div className="relative">
@@ -107,26 +102,29 @@ export default function AdressSelect({ data, setData }) {
                   ))}
               </>
             )}
+            <button className="p-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white w-full" onClick={() => setQuery("")}>
+              Fermer
+            </button>
           </div>
         )}
       </div>
 
-      <label className="flex flex-col gap-2 font-bold">
-        Adresse
-        <input type="text" value={data.address} disabled={selected?.properties.type === "housenumber"} onChange={handleChangeAddress} className="border p-2 font-normal" />
-      </label>
-
       <div className="flex gap-4">
-        <label className="flex flex-col gap-2 w-full font-bold">
+        <label className="flex flex-col gap-2 w-full font-medium">
           Code postal
           <input type="text" value={data.zip} disabled className="border p-2 font-normal" />
         </label>
 
-        <label className="flex flex-col gap-2 w-full font-bold">
+        <label className="flex flex-col gap-2 w-full font-medium">
           Ville
           <input type="text" value={data.city} disabled className="border p-2 font-normal" />
         </label>
       </div>
+
+      <label className="flex flex-col gap-2 font-medium">
+        Complément d'adresse
+        <textarea type="text" value={data.addressComplement} onChange={(e) => setData({ ...data, addressComplement: e.target.value })} className="border p-2 font-normal" />
+      </label>
     </div>
   );
 }
