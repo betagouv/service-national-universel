@@ -27,8 +27,16 @@ export default function AdressSelect({ data, setData }) {
 
   const handleSelect = (option) => {
     setSelected(option);
-    setData({ ...data, address: option.properties.name, zip: option.properties.postcode, city: option.properties.city });
-    setQuery(null);
+    setData({
+      ...data,
+      addressVerified: "true",
+      address: option.properties.name,
+      zip: option.properties.postcode,
+      city: option.properties.city,
+      department: option.properties.context.split(",")[1].trim(),
+      region: option.properties.context.split(",")[2].trim(),
+    });
+    setQuery("");
   };
 
   const handleChangeAddress = (e) => {
@@ -57,7 +65,7 @@ export default function AdressSelect({ data, setData }) {
                       className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
                       <p>{option.properties.name}</p>
                       <p>
-                        {option.properties.city} -{option.properties.postcode}
+                        {option.properties.city} - {option.properties.postcode}
                       </p>
                     </button>
                   ))}
@@ -76,7 +84,7 @@ export default function AdressSelect({ data, setData }) {
                       className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
                       <p>{option.properties.name}</p>
                       <p>
-                        {option.properties.city} -{option.properties.postcode}
+                        {option.properties.city} - {option.properties.postcode}
                       </p>
                     </button>
                   ))}
@@ -95,7 +103,7 @@ export default function AdressSelect({ data, setData }) {
                       className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
                       <p>{option.properties.name}</p>
                       <p>
-                        {option.properties.city} -{option.properties.postcode}
+                        {option.properties.city} - {option.properties.postcode}
                       </p>
                     </button>
                   ))}
@@ -114,7 +122,7 @@ export default function AdressSelect({ data, setData }) {
                       className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
                       <p>{option.properties.name}</p>
                       <p>
-                        {option.properties.city} -{option.properties.postcode}
+                        {option.properties.city} - {option.properties.postcode}
                       </p>
                     </button>
                   ))}
