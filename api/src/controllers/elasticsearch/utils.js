@@ -95,6 +95,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   const hitsRequestBody = { query: getMainQuery(), size, from: page * size, sort: buildSort(sort) };
   if (search) {
     hitsRequestBody.query.bool.must.push(search);
+    countAggsQuery.bool.must.push(search);
     // We want to sort by score if there a search.
     delete hitsRequestBody.sort;
   }
