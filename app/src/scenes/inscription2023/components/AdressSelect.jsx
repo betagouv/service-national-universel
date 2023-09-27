@@ -51,17 +51,17 @@ export default function AdressSelect({ data, setData }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="flex flex-col gap-2 font-medium">
+      <label className="flex flex-col gap-1">
         Adresse
-        <input type="text" value={data.address} onChange={handleChangeQuery} className="border p-2 font-normal" />
+        <input type="text" value={data.address} onChange={handleChangeQuery} className="border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2" />
       </label>
 
       <div className="relative">
         {query?.length > 2 && options.length > 0 && (
-          <div className="bg-white border flex flex-col absolute z-10 -top-4 w-full">
+          <div className="bg-white border flex flex-col absolute z-10 -top-3 w-full shadow">
             {housenumbers.length > 0 && (
               <>
-                <p className="p-2 font-bold bg-gray-100">Numéro</p>
+                <p className="p-2 font-bold bg-[#EEEEEE]">Numéro</p>
                 {housenumbers
                   .sort((a, b) => b.properties.score - a.properties.score)
                   .map((option) => (
@@ -72,7 +72,7 @@ export default function AdressSelect({ data, setData }) {
 
             {streets.length > 0 && (
               <>
-                <p className="p-2 font-bold bg-gray-100">Voie</p>
+                <p className="p-2 font-bold bg-[#EEEEEE]">Voie</p>
                 {streets
                   .sort((a, b) => b.properties.score - a.properties.score)
                   .map((option) => (
@@ -83,7 +83,7 @@ export default function AdressSelect({ data, setData }) {
 
             {localities.length > 0 && (
               <>
-                <p className="p-2 font-bold bg-gray-100">Lieu-dit</p>
+                <p className="p-2 font-bold bg-[#EEEEEE]">Lieu-dit</p>
                 {localities
                   .sort((a, b) => b.properties.score - a.properties.score)
                   .map((option) => (
@@ -94,7 +94,7 @@ export default function AdressSelect({ data, setData }) {
 
             {municipalities.length > 0 && (
               <>
-                <p className="p-2 font-bold bg-gray-100">Commune</p>
+                <p className="p-2 font-bold bg-[#EEEEEE]">Commune</p>
                 {municipalities
                   .sort((a, b) => b.properties.score - a.properties.score)
                   .map((option) => (
@@ -109,21 +109,26 @@ export default function AdressSelect({ data, setData }) {
         )}
       </div>
 
-      <div className="flex gap-4">
-        <label className="flex flex-col gap-2 w-full font-medium">
+      <div className="flex gap-8">
+        <label className="flex flex-col gap-1 w-full text-gray-400">
           Code postal
-          <input type="text" value={data.zip} disabled className="border p-2 font-normal" />
+          <input type="text" value={data.zip} disabled className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-400" />
         </label>
 
-        <label className="flex flex-col gap-2 w-full font-medium">
+        <label className="flex flex-col gap-1 w-full text-gray-400">
           Ville
-          <input type="text" value={data.city} disabled className="border p-2 font-normal" />
+          <input type="text" value={data.city} disabled className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-400" />
         </label>
       </div>
 
-      <label className="flex flex-col gap-2 font-medium">
+      <label className="flex flex-col gap-1 mt-2">
         Complément d'adresse
-        <textarea type="text" value={data.addressComplement} onChange={(e) => setData({ ...data, addressComplement: e.target.value })} className="border p-2 font-normal" />
+        <textarea
+          type="text"
+          value={data.addressComplement}
+          onChange={(e) => setData({ ...data, addressComplement: e.target.value })}
+          className="border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2"
+        />
       </label>
     </div>
   );
