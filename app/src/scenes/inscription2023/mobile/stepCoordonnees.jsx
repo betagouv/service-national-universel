@@ -38,6 +38,7 @@ import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import AdressSelect from "../components/AdressSelect";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -669,7 +670,7 @@ export default function StepCoordonnees() {
             <Input value={city} label="Ville" onChange={updateAddressToVerify("city")} error={errors.city} correction={corrections?.city} />
           </>
         )}
-        <VerifyAddress
+        {/* <VerifyAddress
           address={address}
           disabled={isVerifyAddressDisabled}
           zip={zip}
@@ -677,7 +678,10 @@ export default function StepCoordonnees() {
           onSuccess={onVerifyAddress(true)}
           onFail={onVerifyAddress()}
           isVerified={addressVerified === "true"}
-        />
+        /> */}
+
+        <AdressSelect data={data} setData={setData} />
+
         <ErrorMessage>{errors.addressVerified}</ErrorMessage>
         <Select
           label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
