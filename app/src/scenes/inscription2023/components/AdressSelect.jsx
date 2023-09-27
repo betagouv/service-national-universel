@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { departmentLookUp } from "snu-lib";
 
 export default function AdressSelect({ data, setData }) {
   const [query, setQuery] = useState("");
@@ -25,6 +26,15 @@ export default function AdressSelect({ data, setData }) {
     setOptions(data.features);
   };
 
+  const getDepartmentAndRegionFromContext = (context) => {
+    const contextArray = context.split(",");
+    if (contextArray.length === 2) {
+      // Nouvelle-Calédonie, Polynésie...
+      return { department: departmentLookUp[contextArray[0].trim()], region: contextArray[1].trim() };
+    }
+    return { department: contextArray[1].trim(), region: contextArray[2].trim() };
+  };
+
   const handleSelect = (option) => {
     setSelected(option);
     setData({
@@ -33,8 +43,9 @@ export default function AdressSelect({ data, setData }) {
       address: option.properties.name,
       zip: option.properties.postcode,
       city: option.properties.city,
-      department: option.properties.context.split(",")[1].trim(),
-      region: option.properties.context.split(",")[2].trim(),
+      department: getDepartmentAndRegionFromContext(option.properties.context).department,
+      region: getDepartmentAndRegionFromContext(option.properties.context).region,
+      location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
     });
     setQuery("");
   };
@@ -59,15 +70,7 @@ export default function AdressSelect({ data, setData }) {
                 {housenumbers
                   .sort((a, b) => b.properties.score - a.properties.score)
                   .map((option) => (
-                    <button
-                      key={option.properties.id}
-                      onClick={() => handleSelect(option)}
-                      className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
-                      <p>{option.properties.name}</p>
-                      <p>
-                        {option.properties.city} - {option.properties.postcode}
-                      </p>
-                    </button>
+                    <Option key={option.properties.id} option={option} handleSelect={handleSelect} />
                   ))}
               </>
             )}
@@ -78,15 +81,7 @@ export default function AdressSelect({ data, setData }) {
                 {streets
                   .sort((a, b) => b.properties.score - a.properties.score)
                   .map((option) => (
-                    <button
-                      key={option.properties.id}
-                      onClick={() => handleSelect(option)}
-                      className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
-                      <p>{option.properties.name}</p>
-                      <p>
-                        {option.properties.city} - {option.properties.postcode}
-                      </p>
-                    </button>
+                    <Option key={option.properties.id} option={option} handleSelect={handleSelect} />
                   ))}
               </>
             )}
@@ -97,15 +92,7 @@ export default function AdressSelect({ data, setData }) {
                 {localities
                   .sort((a, b) => b.properties.score - a.properties.score)
                   .map((option) => (
-                    <button
-                      key={option.properties.id}
-                      onClick={() => handleSelect(option)}
-                      className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
-                      <p>{option.properties.name}</p>
-                      <p>
-                        {option.properties.city} - {option.properties.postcode}
-                      </p>
-                    </button>
+                    <Option key={option.properties.id} option={option} handleSelect={handleSelect} />
                   ))}
               </>
             )}
@@ -116,15 +103,7 @@ export default function AdressSelect({ data, setData }) {
                 {municipalities
                   .sort((a, b) => b.properties.score - a.properties.score)
                   .map((option) => (
-                    <button
-                      key={option.properties.id}
-                      onClick={() => handleSelect(option)}
-                      className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
-                      <p>{option.properties.name}</p>
-                      <p>
-                        {option.properties.city} - {option.properties.postcode}
-                      </p>
-                    </button>
+                    <Option key={option.properties.id} option={option} handleSelect={handleSelect} />
                   ))}
               </>
             )}
@@ -149,5 +128,17 @@ export default function AdressSelect({ data, setData }) {
         </label>
       </div>
     </div>
+  );
+}
+
+function Option({ option, handleSelect }) {
+  return (
+    <button key={option.properties.id} onClick={() => handleSelect(option)} className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
+      <p>{option.properties.name}</p>
+      <p>
+        {option.properties.city}
+        {option.properties.postcode && " - " + option.properties.postcode}
+      </p>
+    </button>
   );
 }
