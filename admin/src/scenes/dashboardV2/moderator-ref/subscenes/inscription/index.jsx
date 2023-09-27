@@ -18,6 +18,7 @@ import { getDepartmentOptions, getFilteredDepartment } from "../../../components
 import Details from "../../../components/inscription/Details";
 import TabSchool from "../../../components/inscription/TabSchool";
 import ExportReport from "./ExportReport";
+import { getCohortNameList } from "@/services/cohort.service";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -69,7 +70,7 @@ export default function Index() {
   }, [departmentOptions]);
 
   const [selectedFilters, setSelectedFilters] = React.useState({
-    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
+    cohort: [],
   });
 
   async function fetchInscriptionGoals() {
@@ -80,6 +81,14 @@ export default function Index() {
     const res = await getCurrentInscriptions(selectedFilters);
     setInscriptionDetailObject(res);
   }
+  const fetchCohorts = async () => {
+    const cohorts = await getCohortNameList();
+    setSelectedFilters({ cohort: cohorts });
+  };
+
+  useEffect(() => {
+    fetchCohorts();
+  }, []);
 
   useEffect(() => {
     fetchInscriptionGoals();

@@ -39,3 +39,8 @@ export const getCohorts = async () => {
     return [];
   }
 };
+
+export const getCohortNameList = async () => {
+  const cohorts = await getCohorts();
+  return cohorts.map((c) => c.name);
+};
