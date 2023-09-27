@@ -17,7 +17,7 @@ export default function AdressSelect({ data, setData }) {
   const localities = options.filter((option) => option.properties.type === "locality");
   const municipalities = options.filter((option) => option.properties.type === "municipality");
 
-  const handleChange = async (e) => {
+  const handleChangeQuery = async (e) => {
     setQuery(e.target.value);
     if (e.target.value.length < 3) return;
     const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${e.target.value}&limit=10`);
@@ -39,7 +39,7 @@ export default function AdressSelect({ data, setData }) {
     <div className="flex flex-col gap-2">
       <label className="flex flex-col gap-2 font-bold">
         {data.address ? "Modifier mon adresse" : "Rechercher une adresse"}
-        <input type="text" value={query} onChange={handleChange} className="border p-2 font-normal" />
+        <input type="text" value={query} onChange={handleChangeQuery} className="border p-2 font-normal" />
       </label>
 
       <div className="relative">

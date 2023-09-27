@@ -686,7 +686,7 @@ export default function StepCoordonnees() {
           />
         )}
 
-        {environment !== "production" && <AdressSelect data={data} setData={setData} />}
+        {data && environment !== "production" && <AdressSelect data={data} setData={setData} />}
 
         <ErrorMessage>{errors.addressVerified}</ErrorMessage>
         <Select
