@@ -1,3 +1,19 @@
+# [1.341.0](https://github.com/betagouv/service-national-universel/compare/v1.340.1...v1.341.0) (2023-09-27)
+
+
+### Bug Fixes
+
+* **admin:** footer prod / dev ([2fb3d4d](https://github.com/betagouv/service-national-universel/commit/2fb3d4df565b59531116f821b9d3096ac9dc00ce))
+* **api:** count total result when search with elasticsearch ([#3054](https://github.com/betagouv/service-national-universel/issues/3054)) ([1aed213](https://github.com/betagouv/service-national-universel/commit/1aed213b5d46c00f719b1ec918979853760f6bec))
+* **app:** fix address combobox  POC for DROMS ([32a4199](https://github.com/betagouv/service-national-universel/commit/32a41999f61c5d7858a2180249c576eed9c718ae))
+
+
+### Features
+
+* **admin:** MEP new dashboard + sidebar pour les modérateur ([#3052](https://github.com/betagouv/service-national-universel/issues/3052)) ([de22e64](https://github.com/betagouv/service-national-universel/commit/de22e6490df8cf8bf14d48b1da6123b9f2fbb883))
+* **app:** Inscription: POC combobox adresse - staging only ([#3055](https://github.com/betagouv/service-national-universel/issues/3055)) ([e11b6bf](https://github.com/betagouv/service-national-universel/commit/e11b6bf3ff70010af58b5551baf75d2364da8635))
+* **app:** poc combobox adresse v2 ([8232e63](https://github.com/betagouv/service-national-universel/commit/8232e632b01b3144f1ea2a8e011631d991baec27))
+
 ## [1.340.1](https://github.com/betagouv/service-national-universel/compare/v1.340.0...v1.340.1) (2023-09-26)
 
 
