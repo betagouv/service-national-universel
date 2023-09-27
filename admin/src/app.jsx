@@ -205,11 +205,12 @@ const Home = (props) => {
 
   return (
     <div>
-      {environment === "production" ? <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} /> : null}
+      {!newSideBarOpenProd(user, environment) ? <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} /> : null}
       <div className="flex">
-        {environment === "production" ? <Drawer open={drawerVisible} onOpen={setDrawerVisible} /> : <SideBar sessionsList={sessionPhase1List} />}
+        {!newSideBarOpenProd(user, environment) ? <Drawer open={drawerVisible} onOpen={setDrawerVisible} /> : <SideBar sessionsList={sessionPhase1List} />}
         <div className="flex flex-col w-full">
-          <div className={environment === "production" ? (drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`) : `flex-1  min-h-screen`}>
+          <div
+            className={!newSideBarOpenProd(user, environment) ? (drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`) : `flex-1  min-h-screen`}>
             <Switch>
               <RestrictedRoute path="/structure" component={Structure} />
               <RestrictedRoute path="/settings" component={Settings} />
@@ -242,11 +243,11 @@ const Home = (props) => {
               {/* Only for developper eyes... */}
               {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
               {/* DASHBOARD */}
-              {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
-              {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
-              {environment === "production" && <RestrictedRoute path="/" component={renderDashboard} />}
-              {environment !== "production" && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
-              {environment !== "production" && <RestrictedRoute path="/" component={renderDashboardV2} />}
+              {!newDashboardOpenProd(user, environment) && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
+              {!newDashboardOpenProd(user, environment) && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
+              {!newDashboardOpenProd(user, environment) && <RestrictedRoute path="/" component={renderDashboard} />}
+              {newDashboardOpenProd(user, environment) && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
+              {newDashboardOpenProd(user, environment) && <RestrictedRoute path="/" component={renderDashboardV2} />}
             </Switch>
           </div>
           {environment !== "production" ? <Footer /> : null}
@@ -307,3 +308,15 @@ function ScrollToTop() {
 
   return null;
 }
+
+const newSideBarOpenProd = (user, env) => {
+  const autorithedRoles = [ROLES.ADMIN];
+  if ((env === "production" && autorithedRoles.includes(user?.role)) || env !== "production") return true;
+  return false;
+};
+
+const newDashboardOpenProd = (user, env) => {
+  const autorithedRoles = [ROLES.ADMIN];
+  if ((env === "production" && autorithedRoles.includes(user?.role)) || env !== "production") return true;
+  return false;
+};
