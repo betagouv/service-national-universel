@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
@@ -26,14 +26,18 @@ import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
 export default function Consentement({ step, parentId }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
-  if (!young) return <Loader />;
 
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = React.useState(false);
   const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
   const [data, setData] = useState(getDataForConsentStep(young, parentId));
 
-  if (isReturningParent(young, parentId)) return done();
+  if (!young) return <Loader />;
+
+  if (isReturningParent(young, parentId)) {
+    const route = parentId === 2 ? "done-parent2" : "done";
+    return <Redirect to={`/representants-legaux/${route}?token=${token}`} />;
+  }
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;

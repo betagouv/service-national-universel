@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Redirect, useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Loader from "../../../components/Loader";
 import FranceConnectButton from "../../inscription2023/components/FranceConnectButton";
@@ -7,92 +7,78 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/dsfr/forms/toggle";
-import { translate } from "snu-lib";
+import { PHONE_ZONES, isPhoneNumberWellFormated, translate } from "snu-lib";
 import { FRANCE, ABROAD, translateError, stringToBoolean, isReturningParentForImageRights, API_CONSENT_IMAGE_RIGHTS } from "../commons";
 import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
-import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
-import { regexPhoneFrenchCountries } from "../../../utils";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import PhoneField from "@/components/dsfr/forms/PhoneField";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 
 export default function ImageRights({ parentId }) {
-  const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
+  if (!young) return <Loader />;
+  // Only render component after young is loaded => avoid buggy state
+  return ImageRightsForm({ young, token, parentId });
+}
+
+function ImageRightsForm({ young, token, parentId }) {
+  const history = useHistory();
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = React.useState(false);
+  const address = getInitialAdress(young, parentId);
   const [data, setData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    confirmAddress: false,
-    addressType: FRANCE,
-    addressVerified: false,
-    address: "",
-    addressComplement: "",
-    zip: "",
-    city: "",
-    country: "",
-    cityCode: null,
-    region: null,
-    department: null,
-    location: null,
-    allowImageRights: null,
+    firstName: young[`parent${parentId}FirstName`] ? young[`parent${parentId}FirstName`] : "",
+    lastName: young[`parent${parentId}LastName`] ? young[`parent${parentId}LastName`] : "",
+    email: young[`parent${parentId}Email`] ? young[`parent${parentId}Email`] : "",
+    phone: young[`parent${parentId}Phone`] ? young[`parent${parentId}Phone`] : "",
+    phoneZone: young[`parent${parentId}PhoneZone`] ? young[`parent${parentId}PhoneZone`] : "",
+    confirmAddress: !validator.isEmpty(address.address, { ignore_whitespace: true }) && !validator.isEmpty(address.city, { ignore_whitespace: true }),
+    addressType: address.country && address.country !== FRANCE ? ABROAD : FRANCE,
+    addressVerified: young.addressParent1Verified === "true",
+    ...address,
+    allowImageRights: stringToBoolean(young[`parent${parentId}AllowImageRights`]),
   });
+
   const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
 
-  useEffect(() => {
-    if (young) {
-      if (isReturningParentForImageRights(young, parentId)) {
-        return done();
-      }
-
-      let address;
-      if (young[`parent${parentId}OwnAddress`] === "true") {
-        address = {
-          address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
-          addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
-          zip: young[`parent${parentId}Zip`] ? young[`parent${parentId}Zip`] : "",
-          city: young[`parent${parentId}City`] ? young[`parent${parentId}City`] : "",
-          country: young[`parent${parentId}Country`] ? young[`parent${parentId}Country`] : "",
-          cityCode: young[`parent${parentId}CityCode`] ? young[`parent${parentId}CityCode`] : "",
-          department: young[`parent${parentId}Department`] ? young[`parent${parentId}Department`] : null,
-          region: young[`parent${parentId}Region`] ? young[`parent${parentId}Region`] : null,
-          location: young[`parent${parentId}Location`] ? young[`parent${parentId}Location`] : null,
-        };
-      } else {
-        address = {
-          address: young.address ? young.address : "",
-          addressComplement: young.complementAddress ? young.complementAddress : "",
-          zip: young.zip ? young.zip : "",
-          city: young.city ? young.city : "",
-          country: young.country ? young.country : "",
-          cityCode: young.cityCode ? young.cityCode : "",
-          department: young.department ? young.department : null,
-          region: young.region ? young.region : null,
-          location: young.location ? young.location : null,
-        };
-      }
-
-      const confirmAddress = !validator.isEmpty(address.address, { ignore_whitespace: true }) && !validator.isEmpty(address.city, { ignore_whitespace: true });
-
-      setData({
-        firstName: young[`parent${parentId}FirstName`] ? young[`parent${parentId}FirstName`] : "",
-        lastName: young[`parent${parentId}LastName`] ? young[`parent${parentId}LastName`] : "",
-        email: young[`parent${parentId}Email`] ? young[`parent${parentId}Email`] : "",
-        phone: young[`parent${parentId}Phone`] ? young[`parent${parentId}Phone`] : "",
-        confirmAddress,
-        addressType: address.country && address.country !== FRANCE ? ABROAD : FRANCE,
-        addressVerified: young.addressParent1Verified === "true",
-        ...address,
-        allowImageRights: stringToBoolean(young[`parent${parentId}AllowImageRights`]),
-      });
+  function getInitialAdress(young, parentId) {
+    let address;
+    if (young[`parent${parentId}OwnAddress`] === "true") {
+      address = {
+        address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
+        addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
+        zip: young[`parent${parentId}Zip`] ? young[`parent${parentId}Zip`] : "",
+        city: young[`parent${parentId}City`] ? young[`parent${parentId}City`] : "",
+        country: young[`parent${parentId}Country`] ? young[`parent${parentId}Country`] : "",
+        cityCode: young[`parent${parentId}CityCode`] ? young[`parent${parentId}CityCode`] : "",
+        department: young[`parent${parentId}Department`] ? young[`parent${parentId}Department`] : null,
+        region: young[`parent${parentId}Region`] ? young[`parent${parentId}Region`] : null,
+        location: young[`parent${parentId}Location`] ? young[`parent${parentId}Location`] : null,
+      };
+    } else {
+      address = {
+        address: young.address ? young.address : "",
+        addressComplement: young.complementAddress ? young.complementAddress : "",
+        zip: young.zip ? young.zip : "",
+        city: young.city ? young.city : "",
+        country: young.country ? young.country : "",
+        cityCode: young.cityCode ? young.cityCode : "",
+        department: young.department ? young.department : null,
+        region: young.region ? young.region : null,
+        location: young.location ? young.location : null,
+      };
     }
-  }, [young]);
+    return address;
+  }
 
-  if (!young) return <Loader />;
+  if (isReturningParentForImageRights(young, parentId)) {
+    const route = parentId === 2 ? "droits-image-done-parent2" : "droits-image-done";
+    return <Redirect to={`/representants-legaux/${route}?token=${token}`} />;
+  }
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
@@ -162,8 +148,11 @@ export default function ImageRights({ parentId }) {
     if (validate("email", "empty", validator.isEmpty(data.email, { ignore_whitespace: true }))) {
       validate("email", "invalid", !validator.isEmail(data.email));
     }
-    if (validate("phone", "empty", validator.isEmpty(data.phone, { ignore_whitespace: true }))) {
-      validate("phone", "invalid", !validator.matches(data.phone, regexPhoneFrenchCountries));
+
+    const trimmedPhone = data.phone?.replace(/\s/g, "");
+
+    if (data.phone && !isPhoneNumberWellFormated(trimmedPhone, data.phoneZone)) {
+      errors.phone = PHONE_ZONES[data.phoneZone]?.errorMessage;
     }
 
     // --- address
@@ -246,9 +235,8 @@ export default function ImageRights({ parentId }) {
 
   return (
     <>
-      <div className="bg-white px-3 py-4 text-[#161616]">
+      <DSFRContainer title="Modifier votre accord de droit à l'image">
         <div className="flex flex-col">
-          <h1 className="mb-1  text-[22px] font-bold text-[#21213F]">Modifier votre accord de droit à l&apos;image</h1>
           <div className="mb-[24px] text-[14px] leading-[20px] text-[#666666]">
             <p>
               En tant que représentant(e) légal(e), utilisez ce bouton pour vous identifier avec FranceConnect et <b>vérifier votre identité et vos données personnelles</b> (nom,
@@ -270,7 +258,17 @@ export default function ImageRights({ parentId }) {
             <Input value={data.firstName} label="Prénom" onChange={(e) => setData({ ...data, firstName: e })} error={errors.firstName} />
             <Input value={data.lastName} label="Nom" onChange={(e) => setData({ ...data, lastName: e })} error={errors.lastName} />
             <Input value={data.email} label="Adresse email" onChange={(e) => setData({ ...data, email: e })} error={errors.email} />
-            <Input value={data.phone} label="Votre téléphone" onChange={(e) => setData({ ...data, phone: e })} error={errors.phone} />
+            <PhoneField
+              value={data.phone}
+              label="Votre téléphone"
+              onChange={(e) => setData({ ...data, phone: e })}
+              zoneValue={data.phoneZone}
+              onChangeZone={(e) => setData({ ...data, phoneZone: e })}
+              placeholder={PHONE_ZONES[data.phoneZone]?.example}
+              error={errors.phone || errors.phoneZone}
+            />
+
+            {/* <Input value={data.phone} label="Votre téléphone" onChange={(e) => setData({ ...data, phone: e })} error={errors.phone} /> */}
           </div>
 
           <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] py-[20px]">
@@ -348,8 +346,8 @@ export default function ImageRights({ parentId }) {
 
           {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
         </div>
-      </div>
-      <StickyButton onClick={onSubmit} disabled={saving} text="Valider" />
+        <SignupButtonContainer onClickNext={onSubmit} labelNext="Valider" disabled={saving} />
+      </DSFRContainer>
     </>
   );
 }

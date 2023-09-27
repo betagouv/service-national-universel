@@ -38,14 +38,9 @@ export default function Presentation({ step, parentId }) {
   }
   if (["NOT_ELIGIBLE", "ABANDONED", "REFUSED"].includes(young.status))
     return (
-      <>
-        <div className="bg-white p-4 text-[#161616]">
-          <div className="flex flex-col gap-4">
-            <h1 className="text-[22px] font-bold">Votre accord n&apos;est plus requis</h1>
-            <div>Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</div>
-          </div>
-        </div>
-      </>
+      <DSFRContainer title="Votre accord n'est plus requis">
+        <p className="mb-8">Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</p>
+      </DSFRContainer>
     );
   return (
     <>

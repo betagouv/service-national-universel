@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import Loader from "@/components/Loader";
 
 export default function Done({ parentId }) {
   const { young } = useContext(RepresentantsLegauxContext);
@@ -10,10 +11,10 @@ export default function Done({ parentId }) {
 
   function getTitle() {
     if (parentId === 1) return young?.parentAllowSNU === "true" ? "Merci, nous avons bien enregistré votre consentement." : "Merci, nous avons bien enregistré votre refus.";
-    return young.parent2AllowImageRights === "true"
+    return young?.parent2AllowImageRights === "true"
       ? "Merci, nous avons bien enregistré votre accord de droit à l'image."
       : "Merci, nous avons bien enregistré votre refus du droit à l'image.";
-  };
+  }
 
   function getText() {
     if (parentId === 1)
@@ -21,7 +22,9 @@ export default function Done({ parentId }) {
         ? "Le dossier de votre enfant a bien été enregistré, celui-ci sera étudié ultérieurement."
         : "L'inscription de votre enfant a bien été refusée.";
     return "";
-  };
+  }
+
+  if (!young) return <Loader />;
 
   return (
     <>
