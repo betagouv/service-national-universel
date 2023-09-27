@@ -1,0 +1,3 @@
+[submodule "service-national-universel-scripts"]
+	path = service-national-universel-scripts
+	url = https://github.com/selego/service-national-universel-scripts.git
