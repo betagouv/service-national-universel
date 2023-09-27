@@ -90,7 +90,6 @@ export default function App() {
             {/* Authentification nécessaire */}
             <SentryRoute path="/" component={Home} />
           </Switch>
-          {environment === "production" ? <Footer /> : null}
         </div>
       </Router>
     </Sentry.ErrorBoundary>
@@ -259,7 +258,7 @@ const Home = (props) => {
               {isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/" component={renderDashboardV2} />}
             </Switch>
           </div>
-          {environment !== "production" ? <Footer /> : null}
+          <Footer />
         </div>
       </div>
       <ModalCGU

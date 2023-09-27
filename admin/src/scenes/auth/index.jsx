@@ -58,7 +58,7 @@ export default function AuthIndex() {
         <SentryRoute exact path="/auth" component={Signin} />
         <Redirect to={parentPath} /> {/* This will redirect to the parent path if no other Routes match */}
       </Switch>
-      {environment !== "production" ? <FooterComponent /> : null}
+      <FooterComponent />
     </div>
   );
 }
