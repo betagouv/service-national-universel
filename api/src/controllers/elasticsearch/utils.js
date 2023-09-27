@@ -94,6 +94,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   let countAggsQuery = unsafeStrucuredClone({ bool: { must: [], filter: contextFilters } });
   if (search) {
     hitsRequestBody.query.bool.must.push(search);
+    countAggsQuery.bool.must.push(search);
     // We want to sort by score if there a search.
     delete hitsRequestBody.sort;
   }
