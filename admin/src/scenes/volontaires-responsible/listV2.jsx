@@ -18,6 +18,7 @@ import {
   getAge,
   translate,
   translateApplication,
+  translateContractStatus,
   translateApplicationFileType,
   formatStringDateTimezoneUTC,
 } from "../../utils";
@@ -86,7 +87,12 @@ export default function List() {
       missingLabel: "Non renseigné",
       translate: (e) => translateApplication(e),
     },
-
+    {
+      title: "Statut du Contrat",
+      name: "contractStatus",
+      missingLabel: "Non renseigné",
+      translate: (e) => translateContractStatus(e),
+    },
     {
       title: "Pièces jointes",
       name: "filesType",

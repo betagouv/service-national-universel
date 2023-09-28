@@ -292,13 +292,14 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const filterFields = ["department", "region"];
+    const filterFields = ["department", "region", "structureId"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     let filters = [
       queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
       queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+      queryFilters.structureId?.length ? { terms: { "structureId.keyword": queryFilters.structureId } } : null,
       req.body.missionFilters.start?.length ? { range: { startAt: { gte: req.body.missionFilters.start } } } : null,
       req.body.missionFilters.end?.length ? { range: { endAt: { lte: req.body.missionFilters.end } } } : null,
     ];
@@ -360,6 +361,77 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
       total: bucket.total.value,
       left: bucket.left.value,
     }));
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/application-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const filterFields = ["department", "region", "structureId"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    let filters = [
+      queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+      queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+      queryFilters.structureId?.length ? { terms: { "structureId.keyword": queryFilters.structureId } } : null,
+    ];
+
+    const body = {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: filters.filter(Boolean),
+        },
+      },
+      aggs: {
+        by_status: {
+          terms: {
+            field: "status.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+        by_contract_status: {
+          terms: {
+            field: "contractStatus.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+      },
+      size: 0,
+    };
+
+    const response = await esClient.search({ index: "application", body: body });
+
+    if (!response?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const bucketsApplication = response.body.aggregations.by_status.buckets;
+    const bucketsContract = response.body.aggregations.by_contract_status.buckets;
+
+    const data = {
+      APPLICATION: bucketsApplication.reduce((acc, bucket) => {
+        const key = bucket.key;
+        acc[key] = {
+          nb: bucket.doc_count,
+          percentage: Math.round((bucket.doc_count / bucketsContract.reduce((acc, bucke) => acc + bucke.doc_count, 0)) * 100),
+        };
+        return acc;
+      }, {}),
+      CONTRACT: bucketsContract.reduce((acc, bucket) => {
+        const key = bucket.key;
+        acc[key] = {
+          nb: bucket.doc_count,
+          percentage: Math.round((bucket.doc_count / bucketsContract.reduce((acc, bucke) => acc + bucke.doc_count, 0)) * 100),
+        };
+        return acc;
+      }, {}),
+    };
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {

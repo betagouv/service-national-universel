@@ -136,6 +136,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       "missionId.keyword",
       "tutorName.keyword",
       "missionName.keyword",
+      "contractStatus.keyword",
     ];
     const sortFields = [];
 
