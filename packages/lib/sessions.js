@@ -3,6 +3,14 @@ const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { nam
 
 const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
 
+const getCohortNames = (with2023 = true, withToCome = false, withOld = false, oldCount = 6) => {
+  let cohortNames = [];
+  if (with2023) cohortNames = [...cohortNames, ...sessions2023CohortNames];
+  if (withToCome) cohortNames = [...cohortNames, "à venir"];
+  if (withOld) cohortNames = [...oldSessions.slice(-oldCount).map((e) => e.name), ...cohortNames];
+  return cohortNames;
+};
+
 const getCohortPeriod = (cohort, withBold = false) => {
   //@todo : remove this after à venir and old cohort refacto
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name;
@@ -32,4 +40,4 @@ const getCohortPeriodTemp = (young) => {
   return getCohortPeriod(cohort);
 };
 
-export { oldSessions, getCohortPeriod, getCohortPeriodTemp, sessions2023CohortNames };
+export { oldSessions, getCohortPeriod, getCohortPeriodTemp, sessions2023CohortNames, getCohortNames };

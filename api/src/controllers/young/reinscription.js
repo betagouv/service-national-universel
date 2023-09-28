@@ -9,7 +9,7 @@ const config = require("../../config");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023REINSCRIPTION } = require("../../utils");
-const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1, YOUNG_STATUS_PHASE1 } = require("snu-lib");
+const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1, YOUNG_STATUS_PHASE1, getCohortNames } = require("snu-lib");
 const { sendTemplate } = require("../../sendinblue");
 const { getFilteredSessions } = require("../../utils/cohort");
 
@@ -128,22 +128,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const { error, value } = Joi.object({
       originalCohort: Joi.string()
         .trim()
-        .valid(
-          "Février 2023 - C",
-          "Avril 2023 - B",
-          "Avril 2023 - A",
-          "Juin 2023",
-          "Juillet 2023",
-          "Octobre 2023 - NC",
-          "Juillet 2022",
-          "Juin 2022",
-          "Février 2022",
-          "2022",
-          "2021",
-          "2020",
-          "2019",
-          "à venir",
-        )
+        .valid(...getCohortNames(true, true, true))
         .required(),
       cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC").required(),
       cohortChangeReason: Joi.string().trim().required(),

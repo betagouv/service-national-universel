@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
+const { getCohortNames } = require("snu-lib");
 const esClient = require("../es");
 const MODELNAME = "sessionphase1";
 const { ENVIRONMENT } = require("../config");
@@ -22,20 +23,7 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    enum: [
-      "Juillet 2022",
-      "Juin 2022",
-      "Février 2022",
-      "2021",
-      "2020",
-      "2019",
-      "Octobre 2023 - NC",
-      "Juillet 2023",
-      "Juin 2023",
-      "Février 2023 - C",
-      "Avril 2023 - B",
-      "Avril 2023 - A",
-    ],
+    enum: [...getCohortNames(true, false, true)],
     documentation: {
       description: "Cohorte",
     },

@@ -58,7 +58,12 @@ async function getPlaces(sessions, region) {
   ]);
 
   const session2023Ids = sessions2023.map((s) => s._id.toString());
-  const sessionObj = sessions.map((s) => ({ ...s }));
+  const sessionObj = sessions.map((session) => {
+    if (sessions2023.map((e) => e.name).includes(session.name)) {
+      return { ...session.toObject() };
+    }
+    return session;
+  });
 
   for (let session of sessionObj) {
     if (session._id && session2023Ids.includes(session._id.toString())) {
