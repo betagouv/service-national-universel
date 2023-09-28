@@ -539,18 +539,18 @@ const START_DATE_PHASE1 = {
   2019: new Date("06/09/2019"),
   2020: new Date("06/14/2021"),
   2021: new Date("06/14/2021"),
-  "Février 2022": new Date("02/06/2022"),
-  "Juin 2022": new Date("06/05/2022"),
-  "Juillet 2022": new Date("06/27/2022"),
+  "Février 2022": new Date("02/13/2022"),
+  "Juin 2022": new Date("06/12/2022"),
+  "Juillet 2022": new Date("07/03/2022"),
 };
 
 const END_DATE_PHASE1 = {
   2019: new Date("06/29/2019"),
   2020: new Date("07/03/2021"),
   2021: new Date("07/03/2021"),
-  "Février 2022": new Date("02/26/2022"),
-  "Juin 2022": new Date("06/25/2022"),
-  "Juillet 2022": new Date("07/16/2022"),
+  "Février 2022": new Date("02/25/2022"),
+  "Juin 2022": new Date("06/24/2022"),
+  "Juillet 2022": new Date("07/15/2022"),
 };
 
 const PHASE1_YOUNG_ACCESS_LIMIT = {
