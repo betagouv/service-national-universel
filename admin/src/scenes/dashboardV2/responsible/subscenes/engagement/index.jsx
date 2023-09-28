@@ -42,7 +42,7 @@ export default function Index() {
       const { ok, data } = await API.get(`/structure/${id}`);
       if (ok) {
         if (data.isMilitaryPreparation === "true") setIsPrepaMilitary(true);
-        if (user.role === ROLES.RESPONSIBLE) setStructureId(user.structureId);
+        if (user.role === ROLES.RESPONSIBLE) setStructureId([user.structureId]);
         if (user.role === ROLES.SUPERVISOR) {
           let networkName = data.networkName;
           const { responses } = await API.post(`/elasticsearch/structure/search`, { filters: { searchbar: [], networkName: [networkName] }, size: 50 });
@@ -171,10 +171,10 @@ export default function Index() {
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-6 rounded-lg bg-white px-8 py-6 w-1/2 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-            <div className="flex">
+          <div className="flex flex-col gap-5 rounded-lg bg-white px-8 py-6 w-1/2 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+            <div className="flex align-middle">
               <p className="text-base font-bold leading-5 text-gray-900">Volontaires au sein de votre structure</p>
-              <div className="bg-blue-100 px-3 py-1 text-xs font-medium rounded-full ml-2">
+              <div className="bg-blue-100 px-3 py-1 text-xs font-medium rounded-full ml-2 flex self-start">
                 <p className="text-blue-700">À suivre</p>
               </div>
             </div>
