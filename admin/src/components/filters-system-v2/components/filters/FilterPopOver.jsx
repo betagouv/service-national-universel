@@ -47,8 +47,12 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     if (filter?.sort) {
       filter.sort(temp);
     }
+    if (filter?.translate) {
+      filter.translate(temp);
+    }
+
     setOptionsVisible(temp);
-  }, [data]);
+  }, [data, filter]);
 
   React.useEffect(() => {
     // normalize search
@@ -100,6 +104,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const handleCustomComponent = (value) => {
     setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: value } });
   };
+
   return (
     <Transition
       as={Fragment}
@@ -137,9 +142,6 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                     <>
                       {optionsVisible
                         ?.sort((a, b) => {
-                          if (filter?.translate) {
-                            return filter.translate(a.key)?.toString().localeCompare(filter.translate(b.key)?.toString());
-                          }
                           a.key.toString().localeCompare(b.key.toString());
                         })
 

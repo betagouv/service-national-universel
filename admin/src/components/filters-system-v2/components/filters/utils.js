@@ -119,6 +119,6 @@ export const orderCohort = (cohorts) => {
       cohort.date = new Date("01/01/2000");
     }
   }
-  cohorts.sort((a, b) => b.date - a.date);
+  cohorts = cohorts.sort((a, b) => new Date(b.date) - new Date(a.date));
   return cohorts;
 };
