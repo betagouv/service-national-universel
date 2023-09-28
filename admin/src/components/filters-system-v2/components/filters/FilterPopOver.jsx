@@ -52,7 +52,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     }
 
     setOptionsVisible(temp);
-  }, [data, filter]);
+  }, [data]);
 
   React.useEffect(() => {
     // normalize search
