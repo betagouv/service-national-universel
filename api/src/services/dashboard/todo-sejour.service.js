@@ -297,16 +297,10 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN_JDM] = async (user, { twoWeeksA
 
 service.departmentsFromTableRepartition = async (user, cohorts) => {
   // Liste des départements de la table de répartition pour la personne qui regarde et les cohortes concernées
-  const q = service.queryFromFilter(
-    user.role,
-    user.region,
-    user.department,
-    [{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }],
-    {
-      regionField: "fromRegion",
-      departmentField: "fromDepartment",
-    },
-  );
+  const q = queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { bool: { must: { exists: { field: "fromDepartment" } } } }], {
+    regionField: "fromRegion",
+    departmentField: "fromDepartment",
+  });
   q.size = ES_NO_LIMIT;
   const responseRepartition = await esClient.msearch({
     index: "tablederepartition",
