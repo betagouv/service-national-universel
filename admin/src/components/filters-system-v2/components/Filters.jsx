@@ -99,7 +99,6 @@ export default function Filters({
     debounce(async (selectedFilters, paramData, location, route, size) => {
       buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort, size).then((res) => {
         if (!res) return;
-        console.log(dataFilter)
         setDataFilter({ ...dataFilter, ...res.newFilters });
         const newParamData = {
           count: res.count,
