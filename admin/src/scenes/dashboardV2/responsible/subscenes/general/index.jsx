@@ -204,12 +204,14 @@ function Actus({ stats }) {
             />
           )} */}
       </div>
-      <div className="flex justify-center">
-        <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullNote(!fullNote)}>
-          <span>{fullNote ? "Voir moins" : "Voir plus"}</span>
-          {fullNote ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
-        </button>
-      </div>
+      {stats?.engagement.length > 9 ? (
+        <div className="flex justify-center">
+          <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullNote(!fullNote)}>
+            <span>{fullNote ? "Voir moins" : "Voir plus"}</span>
+            {fullNote ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
