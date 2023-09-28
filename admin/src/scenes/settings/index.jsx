@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { MdInfoOutline } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -19,28 +19,19 @@ import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
 import { settings, uselessSettings } from "./utils";
 import NumberInput from "../../components/ui/forms/NumberInput";
-
-const cohortList = [
-  { label: "Février 2023 - C", value: "Février 2023 - C" },
-  { label: "Avril 2023 - A", value: "Avril 2023 - A" },
-  { label: "Avril 2023 - B", value: "Avril 2023 - B" },
-  { label: "Juin 2023", value: "Juin 2023" },
-  { label: "Juillet 2023", value: "Juillet 2023" },
-  { label: "Octobre 2023 - NC", value: "Octobre 2023 - NC" },
-];
-
-const defaultCohort = "Octobre 2023 - NC";
+import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);
-  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [cohort, setCohort] = useState(urlParams.get("cohort"));
+  const [cohortList, setCohortList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const readOnly = !isSuperAdmin(user);
-  const [noChange, setNoChange] = React.useState(true);
+  const [noChange, setNoChange] = useState(true);
   const history = useHistory();
-  const [mounted, setMounted] = React.useState(false);
-  const [data, setData] = React.useState({
+  const [mounted, setMounted] = useState(false);
+  const [data, setData] = useState({
     ...settings,
     ...uselessSettings,
   });
@@ -71,12 +62,23 @@ export default function Settings() {
     }
   };
 
-  React.useEffect(() => {
+  const fetchCohorts = async () => {
+    const cohortList = await getCohortSelectOptions(true);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[cohortList.length - 1].value);
+  };
+
+  useEffect(() => {
+    fetchCohorts();
+  }, []);
+
+  useEffect(() => {
+    if (!cohort) return;
     setIsLoading(true);
     getCohort();
   }, [cohort]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mounted) return;
     setNoChange(false);
   }, [data]);

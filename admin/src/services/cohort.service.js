@@ -45,7 +45,8 @@ export const getCohortNameList = async () => {
   return cohorts.map((cohort) => cohort.name);
 };
 
-export const getCohortSelectOptions = async () => {
+export const getCohortSelectOptions = async (short = false) => {
   const cohorts = await getCohorts();
+  if (short) return cohorts.map((cohort) => ({ value: cohort.name, label: cohort.name }));
   return cohorts.map((cohort) => ({ value: cohort.name, label: `Séjour ${getCohortPeriod(cohort, true)}` }));
 };
