@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Inscription from "./ui/icons/Inscription";
 import CustomFilter from "../moderator-ref/subscenes/general/components/CustomFilter";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
@@ -7,13 +7,18 @@ import API from "../../../services/api";
 import Sejour from "./ui/icons/Sejour";
 import Engagement from "./ui/icons/Engagement";
 import { toastr } from "react-redux-toastr";
+import { ROLES } from "snu-lib";
 
-export default function KeyNumbers() {
+export default function KeyNumbers({ role }) {
   const [open, setOpen] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [phase, setPhase] = useState("all");
   const [notes, setNotes] = useState(null);
+
+  useEffect(() => {
+    if (role === ROLES.HEAD_CENTER) setPhase("sejour");
+  }, []);
 
   async function fetchData() {
     try {
@@ -38,7 +43,7 @@ export default function KeyNumbers() {
           <div className="text-sm font-bold leading-5 text-gray-900">Chiffres clés</div>
           <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">{notes?.length || 0}</div>
         </div>
-        <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} />
+        <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} role={role} />
       </div>
       <div className="overflow-hidden">
         {notes?.map((note) => (

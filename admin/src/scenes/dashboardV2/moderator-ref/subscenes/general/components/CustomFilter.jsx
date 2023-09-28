@@ -3,8 +3,9 @@ import React, { Fragment, useEffect, useState } from "react";
 import DatePicker from "../../../../../../components/ui/forms/DatePicker";
 import { HiChevronDown } from "react-icons/hi";
 import dayjs from "@/utils/dayjs.utils";
+import { ROLES } from "snu-lib";
 
-export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNotesPhase }) {
+export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNotesPhase, role }) {
   const [selectedPeriod, setSelectedPeriod] = React.useState("30"); //15, 30, 7, lastmonth, custom
   const [dateRange, setDateRange] = React.useState({ from: minusDate(new Date(), 30), to: formatDate(new Date()) });
 
@@ -16,7 +17,7 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
   return (
     <Popover className="relative">
       <Popover.Button className="inline-flex items-center gap-x-1 text-sm font-bold text-gray-500 outline-none">
-        <span>Filtres (2)</span>
+        {role === ROLES.HEAD_CENTER ? <span>Filtres (1)</span> : <span>Filtres (2)</span>}
         <HiChevronDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
       </Popover.Button>
 
@@ -31,56 +32,60 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
         <Popover.Panel className="absolute right-0 z-10 mt-2 flex w-screen max-w-min">
           <div className="w-60 shrink rounded-lg bg-white pt-3 pb-1 text-sm leading-6 shadow-lg ring-1 ring-black ring-opacity-5">
             <div className="flex flex-col">
-              <span className="mb-1 px-4 text-sm text-gray-500">Phase</span>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("all")}>
-                <input
-                  id="phase-all"
-                  aria-describedby="Toutes les phases"
-                  name="phase-all"
-                  type="radio"
-                  className="h-4 w-4 cursor-pointer"
-                  readOnly
-                  checked={notesPhase === "all"}
-                />
-                <span className="text-sm font-normal leading-5 text-gray-700">Tous</span>
-              </div>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("inscription")}>
-                <input
-                  id="phase-inscription"
-                  aria-describedby="Phase inscription"
-                  name="phase-inscription"
-                  type="radio"
-                  className="h-4 w-4 cursor-pointer"
-                  readOnly
-                  checked={notesPhase === "inscription"}
-                />
-                <span className="text-sm font-normal leading-5 text-gray-700">Inscription</span>
-              </div>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("sejour")}>
-                <input
-                  id="phase-sejour"
-                  aria-describedby="Phase séjour"
-                  name="phase-sejour"
-                  type="radio"
-                  className="h-4 w-4 cursor-pointer"
-                  readOnly
-                  checked={notesPhase === "sejour"}
-                />
-                <span className="text-sm font-normal leading-5 text-gray-700">Séjour</span>
-              </div>
-              <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("engagement")}>
-                <input
-                  id="phase-engagement"
-                  aria-describedby="Phase engagement"
-                  name="phase-engagement"
-                  type="radio"
-                  className="h-4 w-4 cursor-pointer"
-                  readOnly
-                  checked={notesPhase === "engagement"}
-                />
-                <span className="text-sm font-normal leading-5 text-gray-700">Engagement</span>
-              </div>
-              <hr className="my-2 text-gray-100" />
+              {role === ROLES.HEAD_CENTER ? null : (
+                <>
+                  <span className="mb-1 px-4 text-sm text-gray-500">Phase</span>
+                  <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("all")}>
+                    <input
+                      id="phase-all"
+                      aria-describedby="Toutes les phases"
+                      name="phase-all"
+                      type="radio"
+                      className="h-4 w-4 cursor-pointer"
+                      readOnly
+                      checked={notesPhase === "all"}
+                    />
+                    <span className="text-sm font-normal leading-5 text-gray-700">Tous</span>
+                  </div>
+                  <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("inscription")}>
+                    <input
+                      id="phase-inscription"
+                      aria-describedby="Phase inscription"
+                      name="phase-inscription"
+                      type="radio"
+                      className="h-4 w-4 cursor-pointer"
+                      readOnly
+                      checked={notesPhase === "inscription"}
+                    />
+                    <span className="text-sm font-normal leading-5 text-gray-700">Inscription</span>
+                  </div>
+                  <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("sejour")}>
+                    <input
+                      id="phase-sejour"
+                      aria-describedby="Phase séjour"
+                      name="phase-sejour"
+                      type="radio"
+                      className="h-4 w-4 cursor-pointer"
+                      readOnly
+                      checked={notesPhase === "sejour"}
+                    />
+                    <span className="text-sm font-normal leading-5 text-gray-700">Séjour</span>
+                  </div>
+                  <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("engagement")}>
+                    <input
+                      id="phase-engagement"
+                      aria-describedby="Phase engagement"
+                      name="phase-engagement"
+                      type="radio"
+                      className="h-4 w-4 cursor-pointer"
+                      readOnly
+                      checked={notesPhase === "engagement"}
+                    />
+                    <span className="text-sm font-normal leading-5 text-gray-700">Engagement</span>
+                  </div>
+                  <hr className="my-2 text-gray-100" />
+                </>
+              )}
               <span className="mb-1 px-4 text-sm text-gray-500">Période</span>
               <div
                 className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50"
