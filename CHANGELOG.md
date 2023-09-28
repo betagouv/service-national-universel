@@ -1,3 +1,11 @@
+## [1.341.1](https://github.com/betagouv/service-national-universel/compare/v1.341.0...v1.341.1) (2023-09-28)
+
+
+### Bug Fixes
+
+* **lib:** date cohort ([754aa08](https://github.com/betagouv/service-national-universel/commit/754aa08bbd2f679b5c601da6b4d8bf0e9737078c))
+* **lib:** date cohort patch 2 ([b264a76](https://github.com/betagouv/service-national-universel/commit/b264a765dabe3e042e0a55aed5063f05641806f0))
+
 # [1.341.0](https://github.com/betagouv/service-national-universel/compare/v1.340.1...v1.341.0) (2023-09-27)
 
 
