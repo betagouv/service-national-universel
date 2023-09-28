@@ -14,21 +14,27 @@ import { getPasswordErrorMessage } from "../../../utils";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState({});
-  const keyList = ["firstName", "lastName", "email", "emailConfirm", "password", "confirmPassword"];
+  const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
 
+  const trimmedPhone = data?.phone?.replace(/\s/g, "");
   const trimmedEmail = data?.email?.trim();
   const trimmedEmailConfirm = data?.emailConfirm?.trim();
 
   const validate = () => {
     let errors = {};
+
+    if (data?.phone && !isPhoneNumberWellFormated(trimmedPhone, data?.phoneZone)) {
+      errors.phone = PHONE_ZONES[data?.phoneZone]?.errorMessage;
+    }
+
     //Email
     if (trimmedEmail && !validator.isEmail(trimmedEmail)) {
       errors.email = "L'e-mail renseigné est invalide";
@@ -109,7 +115,7 @@ export default function StepProfil() {
           <h2 className="text-base font-bold my-4">Mes identifiants de connexion</h2>
           <p className="pl-3 border-l-4 border-l-indigo-500">Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte volontaire.</p>
 
-          <div className="grid grid-cols-1 grid-rows-4 gap-6 md:grid-cols-2 md:grid-rows-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <label className="w-full">
               E-mail
               <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} type="email" />

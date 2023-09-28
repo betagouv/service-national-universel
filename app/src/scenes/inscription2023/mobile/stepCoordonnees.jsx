@@ -153,8 +153,8 @@ export default function StepCoordonnees() {
     birthCityZip,
     birthCity,
     gender,
-    phone,
-    phoneZone,
+    // phone,
+    // phoneZone,
     livesInFrance,
     addressVerified,
     address,
@@ -204,8 +204,8 @@ export default function StepCoordonnees() {
         birthCity: young.birthCity || data.birthCity,
         birthCityZip: young.birthCityZip || data.birthCityZip,
         gender: young.gender || data.gender,
-        phone: young.phone || data.phone,
-        phoneZone: young.phoneZone || data.phoneZone,
+        // phone: young.phone || data.phone,
+        // phoneZone: young.phoneZone || data.phoneZone,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
         addressVerified: young.addressVerified || data.addressVerified,
         address: young.address || data.address,
@@ -241,16 +241,16 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [phone, birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary, phoneZone]);
+  }, [birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
-  const trimmedPhone = phone && phone.replace(/\s/g, "");
+  // const trimmedPhone = phone && phone.replace(/\s/g, "");
 
   const getErrors = () => {
     let errors = {};
 
-    if (phone && !isPhoneNumberWellFormated(trimmedPhone, phoneZone)) {
-      errors.phone = PHONE_ZONES[phoneZone]?.errorMessage;
-    }
+    // if (phone && !isPhoneNumberWellFormated(trimmedPhone, phoneZone)) {
+    //   errors.phone = PHONE_ZONES[phoneZone]?.errorMessage;
+    // }
 
     if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
       errors.birthCityZip = errorMessages.zip;
@@ -451,7 +451,7 @@ export default function StepCoordonnees() {
 
       updates.country = FRANCE;
       updates.moreInformation = moreInformation.toString();
-      updates.phone = trimmedPhone;
+      // updates.phone = trimmedPhone;
 
       try {
         const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/correction", updates);

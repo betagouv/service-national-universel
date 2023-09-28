@@ -149,13 +149,13 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       birthCountry: needRequired(Joi.string().trim(), isRequired),
       birthCity: needRequired(Joi.string().trim(), isRequired),
       birthCityZip: Joi.string().trim().allow(null, ""),
-      phone: needRequired(Joi.string().trim(), isRequired),
-      phoneZone: needRequired(
-        Joi.string()
-          .trim()
-          .valid(...PHONE_ZONES_NAMES_ARR),
-        isRequired,
-      ),
+      // phone: needRequired(Joi.string().trim(), isRequired),
+      // phoneZone: needRequired(
+      //   Joi.string()
+      //     .trim()
+      //     .valid(...PHONE_ZONES_NAMES_ARR),
+      //   isRequired,
+      // ),
       situation: Joi.alternatives().conditional("schooled", {
         is: "true",
         then: needRequired(
