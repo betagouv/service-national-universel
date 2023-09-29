@@ -47,9 +47,6 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     if (filter?.sort) {
       filter.sort(temp);
     }
-    if (filter?.translate) {
-      filter.translate(temp);
-    }
 
     setOptionsVisible(temp);
   }, [data]);
@@ -142,6 +139,9 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                     <>
                       {optionsVisible
                         ?.sort((a, b) => {
+                          if (filter?.translate) {
+                            return filter.translate(a.key)?.toString().localeCompare(filter.translate(b.key)?.toString());
+                          }
                           a.key.toString().localeCompare(b.key.toString());
                         })
 
