@@ -22,6 +22,7 @@ function getNewYoungFixture(fields = {}) {
     birthCityZip: faker.address.zipCode(),
     email: faker.internet.email().toLowerCase(),
     phone: faker.phone.phoneNumber(),
+    phoneZone: "FRANCE",
     gender: faker.name.gender(),
     birthdateAt: faker.date.past(1, "01/01/2007").toISOString(),
     cohort: "Juillet 2023",
