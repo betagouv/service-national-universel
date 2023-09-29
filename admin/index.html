@@ -22,9 +22,9 @@
     </script>
     <script type="module" src="/src/index.jsx"></script>
     <script>
-      if (url.search("https://admin.beta-snu.dev") !== -1) {
+      if ("%MODE%" === "staging") {
         window.Userback = window.Userback || {};
-        Userback.access_token = "41690|84705|cKpMu1PpxNEcPH1w014sdGe9G";
+        Userback.access_token = "%VITE_USERBACK_ACCESS_TOKEN%";
         (function (d) {
           var s = d.createElement("script");
           s.async = true;
