@@ -59,25 +59,11 @@ const addressFields = ["address", "zip", "city", "cityCode", "region", "departme
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [
-  ...birthPlaceFields,
-  ...addressFields,
-  "gender",
-  "phone",
-  "phoneZone",
-  "situation",
-  "livesInFrance",
-  "handicap",
-  "allergies",
-  "ppsBeneficiary",
-  "paiBeneficiary",
-];
+const commonFields = [...birthPlaceFields, ...addressFields, "gender", "situation", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
 
 const commonRequiredFields = [
   ...birthPlaceFields,
   "gender",
-  "phone",
-  "phoneZone",
   "situation",
   "livesInFrance",
   "address",
@@ -134,6 +120,7 @@ export default function StepCoordonnees() {
   const [wasBornInFrance, setWasBornInFrance] = useState("true");
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
+  console.log("🚀 ~ file: stepCoordonnees.jsx:137 ~ StepCoordonnees ~ errors:", errors);
   const [corrections, setCorrections] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
   const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);
