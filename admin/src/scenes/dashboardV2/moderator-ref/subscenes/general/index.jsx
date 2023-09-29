@@ -140,6 +140,8 @@ export default function Index() {
     try {
       const { ok, code, data: cohorts } = await api.get(`/cohort`);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes", translate(code));
+      console.log(cohorts);
+      console.log(cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name));
       setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name));
     } catch (e) {
       capture(e);
@@ -282,7 +284,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
               title="Dossier"
               number={stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION]}
               content="dossiers d'inscription sont en attente de validation."
-              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
+              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished?.join("~")}`}
               btnLabel="À instruire"
             />
           )}
@@ -291,7 +293,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
               title="Dossier"
               number={stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_CORRECTION]}
               content="dossiers d'inscription corrigés sont à instruire de nouveau."
-              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
+              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished?.join("~")}`}
               btnLabel="À instruire"
             />
           )}
@@ -300,7 +302,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
               title="Dossier"
               number={stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_CORRECTION]}
               content="dossiers d'inscription en attente de correction."
-              link={`/inscription?status=WAITING_CORRECTION&cohort=${cohortsNotFinished.join("~")}`}
+              link={`/inscription?status=WAITING_CORRECTION&cohort=${cohortsNotFinished?.join("~")}`}
               btnLabel="À relancer"
             />
           )}
