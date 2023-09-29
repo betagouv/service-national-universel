@@ -24,20 +24,21 @@ import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
 
 export default function Consentement({ step, parentId }) {
-  const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
-
-  const [errors, setErrors] = useState({});
-  const [saving, setSaving] = React.useState(false);
-  const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
-  const [data, setData] = useState(getDataForConsentStep(young, parentId));
-
   if (!young) return <Loader />;
-
   if (isReturningParent(young, parentId)) {
     const route = parentId === 2 ? "done-parent2" : "done";
     return <Redirect to={`/representants-legaux/${route}?token=${token}`} />;
   }
+  return <ConsentementForm young={young} token={token} step={step} parentId={parentId} />;
+}
+
+function ConsentementForm({ young, token, step, parentId }) {
+  const history = useHistory();
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = React.useState(false);
+  const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
+  const [data, setData] = useState(getDataForConsentStep(young, parentId));
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
