@@ -140,8 +140,6 @@ export default function Index() {
     try {
       const { ok, code, data: cohorts } = await api.get(`/cohort`);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes", translate(code));
-      console.log(cohorts);
-      console.log(cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name));
       setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name));
     } catch (e) {
       capture(e);
