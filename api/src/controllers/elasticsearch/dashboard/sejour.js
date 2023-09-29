@@ -253,27 +253,22 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
 
 router.post("/head-center", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   // creation de la Query avec filtres pour récupèrer les infos des jeunes
+  const aggsFilter = {};
+  aggsFilter.filter = {
+    bool: {
+      must: [],
+      filter: [],
+    },
+  };
   const buildESRequestBodyForYoung = (queryFilters, centersId) => {
-    const aggsFilter = {
-      filter: {
-        bool: {
-          must: [],
-        },
-      },
-    };
-    // aggsFilter.filter = {
-    //   bool: {
-    //     must: [],
-    //     filter: [{ terms: { "statusPhase1.keyword": queryFilters?.statusPhase1?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) } }],
-    //   },
-    // };
+    console.log("queryFilters", queryFilters);
     const bodyYoung = {
       query: {
         bool: {
           must: { match_all: {} },
           filter: [
             { terms: { "cohesionCenterId.keyword": centersId } },
-            queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
+            queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
         },
@@ -311,117 +306,7 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
 
     return bodyYoung;
   };
-  // création de la query pour récupèrer les infos des centres
-  const buildESRequestBodyForCohesion = (filters) => {
-    const bodyCohesion = {
-      query: {
-        bool: {
-          must: { match_all: {} },
-          filter: [
-            filters.region?.length ? { terms: { "region.keyword": filters.region } } : null,
-            filters.department?.length ? { terms: { "department.keyword": filters.department } } : null,
-            filters.academy?.length ? { terms: { "academy.keyword": filters.academy } } : null,
-            filters.cohorts?.length ? { terms: { "cohorts.keyword": filters.cohorts } } : null,
-          ].filter(Boolean),
-        },
-      },
-      aggs: {
-        typology: { terms: { field: "typology.keyword", size: ES_NO_LIMIT } },
-        domains: { terms: { field: "domain.keyword", size: ES_NO_LIMIT } },
-        capacity: { sum: { field: "placesTotal" } },
-      },
-      size: ES_NO_LIMIT,
-    };
 
-    return bodyCohesion;
-  };
-  // Création de la Query pour récupérer les info de la Session
-  const buildESRequestBodyForSession = (cohesionCenterId, filters) => {
-    const bodySession = {
-      query: {
-        bool: {
-          must: { match_all: {} },
-          filter: [{ terms: { cohesionCenterId } }, filters.cohorts?.length ? { terms: { "cohort.keyword": filters.cohorts } } : null].filter(Boolean),
-        },
-      },
-      aggs: {
-        placesTotal: { sum: { field: "placesTotal" } },
-        placesLeft: { sum: { field: "placesLeft" } },
-        status: { terms: { field: "status.keyword" } },
-        timeSchedule: { terms: { field: "hasTimeSchedule.keyword" } },
-      },
-      size: ES_NO_LIMIT,
-    };
-
-    return bodySession;
-  };
-  // Creation de la Query pour récupérer les informations pour l'affichages des centres
-  const buildESRequestBodyForSessionCenter = (filters, sessionList) => {
-    const sessionPhase1Id = sessionList.map((session) => session._id).filter((id) => id);
-    const body = {
-      query: {
-        bool: {
-          must: { match_all: {} },
-          filter: [
-            filters.status?.length ? { terms: { "status.keyword": filters.status } } : null,
-            filters.statusPhase1?.length ? { terms: { "statusPhase1.keyword": filters.statusPhase1 } } : null,
-            sessionPhase1Id.length ? { terms: { "sessionPhase1Id.keyword": sessionPhase1Id } } : null,
-          ].filter(Boolean),
-        },
-      },
-      aggs: {
-        session: {
-          terms: { field: "sessionPhase1Id.keyword", size: ES_NO_LIMIT },
-          aggs: {
-            presence: { terms: { field: "cohesionStayPresence.keyword" } },
-            presenceJDM: { terms: { field: "presenceJDM.keyword" } },
-          },
-        },
-      },
-      size: 0,
-    };
-
-    return body;
-  };
-  // à partir de la query pour afficher les Centres on va créer notre objet à retourner au Front.
-  const processESResponse = (response, sessionList) => {
-    const sessionAggreg = response.body.aggregations.session.buckets.reduce((acc, session) => {
-      acc[session.key] = {
-        total: session.doc_count,
-        presence: session.presence.buckets.reduce((acc, presence) => {
-          acc[presence.key] = presence.doc_count;
-          return acc;
-        }, {}),
-        presenceJDM: session.presenceJDM.buckets.reduce((acc, presenceJDM) => {
-          acc[presenceJDM.key] = presenceJDM.doc_count;
-          return acc;
-        }, {}),
-      };
-      return acc;
-    }, {});
-
-    const sessionByCenter = sessionList.reduce((acc, session) => {
-      if (!acc[session.cohesionCenterId]) {
-        acc[session.cohesionCenterId] = {
-          centerId: session.cohesionCenterId,
-          centerName: session.nameCentre,
-          centerCity: session.cityCentre,
-          department: session.department,
-          region: session.region,
-          total: sessionAggreg[session._id]?.total || 0,
-          presence: sessionAggreg[session._id]?.presence?.false || 0,
-          presenceJDM: sessionAggreg[session._id]?.presenceJDM?.false || 0,
-        };
-      } else {
-        acc[session.cohesionCenterId].total += sessionAggreg[session._id]?.total || 0;
-        acc[session.cohesionCenterId].presence += sessionAggreg[session._id]?.presence?.false || 0;
-        acc[session.cohesionCenterId].presenceJDM += sessionAggreg[session._id]?.presenceJDM?.false || 0;
-      }
-      return acc;
-    }, {});
-
-    return Object.values(sessionByCenter);
-  };
   // Dans cette fonction on utilise notre Query sur les Young et on constitue notre objet pour le Front.
   const getYoungForSejourDasboard = async (queryFilters, centersId) => {
     const youngRequestBodyForCohesiongYoung = buildESRequestBodyForYoung(queryFilters, centersId);
@@ -430,6 +315,7 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
     let resultYoung = {};
     resultYoung.statusPhase1 = YoungCenter.aggregations.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
     resultYoung.statusPhase1Total = YoungCenter.hits.total.value;
+    resultYoung.sanitary = YoungCenter.aggregations.sanitary.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
     resultYoung.sanitaryTotal = YoungCenter.aggregations.sanitary.doc_count;
     resultYoung.participation = YoungCenter.aggregations.participation.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
     resultYoung.participationTotal = YoungCenter.aggregations.participation.doc_count;
@@ -441,44 +327,9 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
 
     return resultYoung;
   };
-  // Dans cette fonction on utilise nos Deux Query (Session Cohesion) afin de créer notre objet pour le Front.
-  const getCenterAndSessionInfoForSejourDashboard = async (filters) => {
-    const esRequestBodyForCohesion = buildESRequestBodyForCohesion(filters);
-    const responseCohesion = await esClient.search({ index: "cohesioncenter", body: esRequestBodyForCohesion });
-    if (!responseCohesion?.body?.aggregations || !responseCohesion?.body?.hits)
-      return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterAndSessionInfoForSejourDashboard" });
-    let resultCenter = {};
-    resultCenter.typology = responseCohesion.body.aggregations.typology.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-    resultCenter.domains = responseCohesion.body.aggregations.domains.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-    resultCenter.capacity = responseCohesion.body.aggregations.capacity.value;
-    resultCenter.totalCenter = responseCohesion.body.hits.total.value;
-
-    const cohesionCenterId = responseCohesion.body.hits.hits.map((e) => e._id);
-    const esRequestForSession = buildESRequestBodyForSession(cohesionCenterId, filters);
-    const responseSession = await esClient.search({ index: "sessionphase1", body: esRequestForSession });
-    if (!responseSession?.body?.aggregations) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterAndSessionInfoForSejourDashboard" });
-    resultCenter.placesTotalSession = responseSession.body.aggregations.placesTotal.value;
-    resultCenter.placesLeftSession = responseSession.body.aggregations.placesLeft.value;
-    resultCenter.status = responseSession.body.aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
-    resultCenter.timeSchedule = responseSession.body.aggregations.timeSchedule.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
-    resultCenter.totalSession = responseSession.body.hits.total.value;
-
-    return { resultCenter, responseSession };
-  };
-  // Dans cette fonction on utilise notre Query Session Center afin de créer notre objet pour afficher les centres sur le Front.
-  const getCenterInfoFromYoungForSejourDashboard = async (responseSession, filters) => {
-    if (!responseSession?.body?.hits) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterInfoFromYoungForSejourDashboard" });
-    const sessionList = responseSession.body.hits.hits.map((e) => ({ ...e._source, _id: e._id }));
-    const esRequestBody = buildESRequestBodyForSessionCenter(filters, sessionList);
-    const response = await esClient.search({ index: "young", body: esRequestBody });
-    if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterInfoFromYoungForSejourDashboard" });
-    const sessionByCenter = processESResponse(response, sessionList);
-
-    return sessionByCenter;
-  };
 
   try {
-    const filterFields = ["cohorts", "status"];
+    const filterFields = ["cohort", "status"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const allowedRoles = [ROLES.HEAD_CENTER];
@@ -487,14 +338,12 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
     }
     const sessions = await SessionPhase1Model.find({
       headCenterId: req.user._id,
-      cohort: queryFilters.cohorts?.length ? queryFilters.cohorts : null,
+      cohort: queryFilters.cohort?.length ? queryFilters.cohort : null,
     });
     const centersId = sessions.map((session) => session.cohesionCenterId);
     const resultYoung = await getYoungForSejourDasboard(queryFilters, centersId);
-    //const { resultCenter, responseSession } = await getCenterAndSessionInfoForSejourDashboard(queryFilters, centersId);
-    //const sessionByCenter = await getCenterInfoFromYoungForSejourDashboard(responseSession, queryFilters, centersId);
 
-    return res.status(200).send({ /* resultCenter, sessionByCenter, */ resultYoung });
+    return res.status(200).send({ resultYoung });
   } catch (error) {
     capture(error);
     res.status(500).send({ error: ERRORS.SERVER_ERROR });

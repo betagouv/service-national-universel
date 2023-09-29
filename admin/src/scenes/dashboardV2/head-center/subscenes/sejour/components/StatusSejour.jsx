@@ -5,10 +5,12 @@ import queryString from "query-string";
 
 export default function StatusSejour({ statusPhase1, total, filter }) {
   const WAITING_AFFECTATION = statusPhase1?.WAITING_AFFECTATION || 0;
+  const WAITING_LIST = statusPhase1?.WAITING_LIST || 0;
   const AFFECTED = statusPhase1?.AFFECTED || 0;
   const DONE = statusPhase1?.DONE || 0;
   const NOT_DONE = statusPhase1?.NOT_DONE || 0;
   const EXEMPTED = statusPhase1?.EXEMPTED || 0;
+  const WITHDRAWN = statusPhase1?.WITHDRAWM || 0;
 
   const filterWithoutStatusPhase1 = { ...filter };
   delete filterWithoutStatusPhase1.statusPhase1;
@@ -44,11 +46,11 @@ export default function StatusSejour({ statusPhase1, total, filter }) {
           />
           <StatusText
             status="Sur liste complémentaire"
-            nb={DONE || 0}
-            percentage={total && DONE ? ((DONE / total) * 100).toFixed(0) : 0}
+            nb={WAITING_LIST || 0}
+            percentage={total && WAITING_LIST ? ((WAITING_LIST / total) * 100).toFixed(0) : 0}
             filter={filterWithoutStatusPhase1}
             base="/volontaire"
-            filtersUrl={[queryString.stringify({ statusPhase1: "DONE" })]}
+            filtersUrl={[queryString.stringify({ statusPhase1: "WAITING_LIST" })]}
           />
         </div>
         <div className="flex w-[10%] items-center justify-center">
@@ -73,11 +75,11 @@ export default function StatusSejour({ statusPhase1, total, filter }) {
           />
           <StatusText
             status="Désistée"
-            nb={EXEMPTED || 0}
-            percentage={total && EXEMPTED ? ((EXEMPTED / total) * 100).toFixed(0) : 0}
+            nb={WITHDRAWN || 0}
+            percentage={total && WITHDRAWN ? ((WITHDRAWN / total) * 100).toFixed(0) : 0}
             filter={filterWithoutStatusPhase1}
             base="/volontaire"
-            filtersUrl={[queryString.stringify({ statusPhase1: "EXEMPTED" })]}
+            filtersUrl={[queryString.stringify({ statusPhase1: "WITHDRAWN" })]}
           />
         </div>
       </div>
@@ -102,16 +104,4 @@ function StatusText({ status, nb, percentage, filter, filtersUrl, base }) {
       <p className="text-sm text-gray-400">({percentage}%)</p>
     </Link>
   );
-}
-
-{
-  /* <div className="flex w-[80%] items-center justify-start gap-2">
-  <span className="w-[20%] text-lg font-bold text-gray-900">{nb}</span>
-  <div className="flex w-[80%] items-center text-left text-sm text-gray-600">
-    {status}
-    {infoPanel && <MoreInfoPanel className="inline-block">{infoPanel}</MoreInfoPanel>}
-  </div>
-</div>
-<p className="text-sm text-gray-400">({percentage}%)</p>
-</div> */
 }

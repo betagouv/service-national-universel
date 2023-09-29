@@ -4,7 +4,7 @@ import { getNewLink } from "@/utils";
 import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { COHORTS, ROLES, YOUNG_STATUS, translateInscriptionStatus } from "snu-lib";
+import { COHORTS, YOUNG_STATUS, translate } from "snu-lib";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "../../../moderator-ref/subscenes/sejour/components/BoxWithPercentage";
@@ -14,14 +14,14 @@ import StatusSejour from "./components/StatusSejour";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
+  const session = useSelector((state) => state.Auth.sessionPhase1);
 
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
-    cohorts: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
+    cohort: [COHORTS[COHORTS.length - 2]],
   });
   const [filterArray, setFilterArray] = useState([]);
   const [data, setData] = useState({});
-  const [dataCenter, setDataCenter] = useState({});
 
   useEffect(() => {
     let filters = [
@@ -29,31 +29,30 @@ export default function Index() {
         id: "status",
         name: "Statut",
         fullValue: "Tous",
-        options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translateInscriptionStatus(status) })),
+        options: [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN].map((status) => ({ key: status, label: translate(status) })),
       },
       {
-        id: "cohorts",
+        id: "cohort",
         name: "Cohorte",
-        fullValue: "Toutes",
-        options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
-        sort: (e) => orderCohort(e),
+        fullValue: `${session?.cohort}`,
+        options: [{ key: session?.cohort, label: session?.cohort }],
       },
     ].filter((e) => e);
     setFilterArray(filters);
-  }, []);
+    setSelectedFilters({ ...selectedFilters, cohort: [session?.cohort] });
+  }, [session]);
 
   const queryCenter = async () => {
-    const { resultCenter, sessionByCenter, resultYoung } = await api.post("/elasticsearch/dashboard/sejour/head-center", {
+    const { resultYoung } = await api.post("/elasticsearch/dashboard/sejour/head-center", {
       filters: Object.fromEntries(Object.entries(selectedFilters)),
     });
     console.log(resultYoung);
-    //setDataCenter(resultCenter);
-    //setSessionByCenter(sessionByCenter);
     setData(resultYoung);
   };
-
   useEffect(() => {
-    queryCenter();
+    if (session?.cohort) {
+      queryCenter();
+    }
   }, [JSON.stringify(selectedFilters)]);
 
   return (
@@ -64,8 +63,8 @@ export default function Index() {
         <div className="flex items-stretch gap-4 ">
           <div className="flex w-[30%] flex-col gap-4">
             <BoxWithPercentage
-              total={data?.pdrTotal || 0}
-              number={data?.pdr?.NR + data?.pdr?.false || 0}
+              total={data?.sanitaryTotal || 0}
+              number={data?.sanitary?.false || 0}
               title="Fiches Sanitaires"
               subLabel="non receptionnées"
               redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ hasMeetingInformation: "false" })] })}
@@ -81,7 +80,7 @@ export default function Index() {
           <StatusSejour statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} />
         </div>
         <Presences presence={data?.presence} JDM={data?.JDM} depart={data?.depart} departTotal={data?.departTotal} departMotif={data?.departMotif} filter={selectedFilters} />
-        <Details selectedFilter={selectedFilters} />
+        <Details selectedFilters={selectedFilters} />
       </div>
     </DashboardContainer>
   );

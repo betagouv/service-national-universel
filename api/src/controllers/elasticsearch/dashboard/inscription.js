@@ -5,7 +5,8 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ES_NO_LIMIT, COHORTS } = require("snu-lib");
+const { ES_NO_LIMIT, COHORTS, ROLES } = require("snu-lib");
+const SessionPhase1Model = require("../../../models/sessionPhase1");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -92,11 +93,20 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     const filterFields = ["status", "cohort", "academy", "departement"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    let centersId = [];
+    if (req.user.role === ROLES.HEAD_CENTER) {
+      const sessions = await SessionPhase1Model.find({
+        headCenterId: req.user._id,
+        cohort: queryFilters.cohort?.length ? queryFilters.cohort : [],
+      });
+      centersId = sessions.map((session) => session.cohesionCenterId);
+    }
     const body = {
       query: {
         bool: {
           must: { match_all: {} },
           filter: [
+            req.user.role === ROLES.HEAD_CENTER ? { terms: { "cohesionCenterId.keyword": centersId } } : null,
             queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
