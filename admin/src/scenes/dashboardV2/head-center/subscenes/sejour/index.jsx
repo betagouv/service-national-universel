@@ -8,9 +8,9 @@ import { COHORTS, ROLES, YOUNG_STATUS, translateInscriptionStatus } from "snu-li
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "../../../moderator-ref/subscenes/sejour/components/BoxWithPercentage";
-import MoreInfo from "../../../moderator-ref/subscenes/sejour/components/MoreInfo";
+import Details from "../../../components/inscription/Details";
 import Presences from "../../../moderator-ref/subscenes/sejour/components/Presences";
-import StatusPhase1 from "../../../moderator-ref/subscenes/sejour/components/StatusPhase1";
+import StatusSejour from "./components/StatusSejour";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -41,18 +41,32 @@ export default function Index() {
     ].filter((e) => e);
     setFilterArray(filters);
   }, []);
+
+/*   const queryCenter = async () => {
+    const { resultCenter, sessionByCenter, resultYoung } = await api.post("/elasticsearch/dashboard/sejour/moderator", {
+      filters: Object.fromEntries(Object.entries(selectedFilters)),
+    });
+    setDataCenter(resultCenter);
+    //setSessionByCenter(sessionByCenter);
+    setData(resultYoung);
+  };
+
+  useEffect(() => {
+    queryCenter();
+  }, [JSON.stringify(selectedFilters)]); */
+
   return (
     <DashboardContainer active="sejour" availableTab={["general", "sejour"]}>
       <div className="flex flex-col gap-8">
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Volontaires</h1>
+        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Général</h1>
         <div className="flex items-stretch gap-4 ">
           <div className="flex w-[30%] flex-col gap-4">
             <BoxWithPercentage
               total={data?.pdrTotal || 0}
               number={data?.pdr?.NR + data?.pdr?.false || 0}
-              title="Point de rassemblement"
-              subLabel="restants à confirmer"
+              title="Fiches Sanitaires"
+              subLabel="non receptionnées"
               redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ hasMeetingInformation: "false" })] })}
             />
             <BoxWithPercentage
@@ -63,10 +77,10 @@ export default function Index() {
               redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ youngPhase1Agreement: "false" })] })}
             />
           </div>
-          <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} />
+          <StatusSejour statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} />
         </div>
         <Presences presence={data?.presence} JDM={data?.JDM} depart={data?.depart} departTotal={data?.departTotal} departMotif={data?.departMotif} filter={selectedFilters} />
-        <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} filter={selectedFilters} />
+        <Details selectedFilter={selectedFilters} />
       </div>
     </DashboardContainer>
   );
