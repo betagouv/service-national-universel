@@ -42,18 +42,19 @@ export default function Index() {
     setFilterArray(filters);
   }, []);
 
-/*   const queryCenter = async () => {
-    const { resultCenter, sessionByCenter, resultYoung } = await api.post("/elasticsearch/dashboard/sejour/moderator", {
+  const queryCenter = async () => {
+    const { resultCenter, sessionByCenter, resultYoung } = await api.post("/elasticsearch/dashboard/sejour/head-center", {
       filters: Object.fromEntries(Object.entries(selectedFilters)),
     });
-    setDataCenter(resultCenter);
+    console.log(resultYoung);
+    //setDataCenter(resultCenter);
     //setSessionByCenter(sessionByCenter);
     setData(resultYoung);
   };
 
   useEffect(() => {
     queryCenter();
-  }, [JSON.stringify(selectedFilters)]); */
+  }, [JSON.stringify(selectedFilters)]);
 
   return (
     <DashboardContainer active="sejour" availableTab={["general", "sejour"]}>

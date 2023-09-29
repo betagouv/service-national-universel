@@ -252,24 +252,37 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
 });
 
 router.post("/head-center", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  const center = await SessionPhase1Model.find({ name: center.cohorts });
   // creation de la Query avec filtres pour récupèrer les infos des jeunes
-  const buildESRequestBodyForYoung = (queryFilters) => {
-    const aggsFilter = {};
+  const buildESRequestBodyForYoung = (queryFilters, centersId) => {
+    const aggsFilter = {
+      filter: {
+        bool: {
+          must: [],
+        },
+      },
+    };
+    // aggsFilter.filter = {
+    //   bool: {
+    //     must: [],
+    //     filter: [{ terms: { "statusPhase1.keyword": queryFilters?.statusPhase1?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) } }],
+    //   },
+    // };
     const bodyYoung = {
       query: {
         bool: {
           must: { match_all: {} },
           filter: [
+            { terms: { "cohesionCenterId.keyword": centersId } },
             queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
             queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
         },
       },
       aggs: {
-        pdr: {
+        statusPhase1: { terms: { field: "statusPhase1.keyword" } },
+        sanitary: {
           ...aggsFilter,
-          aggs: { names: { terms: { field: "hasMeetingInformation.keyword", missing: "NR", size: ES_NO_LIMIT } } },
+          aggs: { names: { terms: { field: "cohesionStayMedicalFileReceived.keyword", size: ES_NO_LIMIT } } },
         },
         participation: {
           ...aggsFilter,
@@ -410,14 +423,14 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
     return Object.values(sessionByCenter);
   };
   // Dans cette fonction on utilise notre Query sur les Young et on constitue notre objet pour le Front.
-  const getYoungForSejourDasboard = async (queryFilters) => {
-    const youngRequestBodyForCohesiongYoung = buildESRequestBodyForYoung(queryFilters);
+  const getYoungForSejourDasboard = async (queryFilters, centersId) => {
+    const youngRequestBodyForCohesiongYoung = buildESRequestBodyForYoung(queryFilters, centersId);
     const responseYoung = await esClient.search({ index: "young", body: youngRequestBodyForCohesiongYoung });
     const YoungCenter = responseYoung.body;
     let resultYoung = {};
     resultYoung.statusPhase1 = YoungCenter.aggregations.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
     resultYoung.statusPhase1Total = YoungCenter.hits.total.value;
-    resultYoung.pdrTotal = YoungCenter.aggregations.pdr.doc_count;
+    resultYoung.sanitaryTotal = YoungCenter.aggregations.sanitary.doc_count;
     resultYoung.participation = YoungCenter.aggregations.participation.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
     resultYoung.participationTotal = YoungCenter.aggregations.participation.doc_count;
     resultYoung.presence = YoungCenter.aggregations.precense.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
@@ -465,18 +478,23 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
   };
 
   try {
-    const filterFields = ["statusPhase1", "region", "department", "cohorts", "academy", "status"];
+    const filterFields = ["cohorts", "status"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.HEAD_CENTER];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const resultYoung = await getYoungForSejourDasboard(queryFilters);
-    const { resultCenter, responseSession } = await getCenterAndSessionInfoForSejourDashboard(queryFilters);
-    const sessionByCenter = await getCenterInfoFromYoungForSejourDashboard(responseSession, queryFilters);
+    const sessions = await SessionPhase1Model.find({
+      headCenterId: req.user._id,
+      cohort: queryFilters.cohorts?.length ? queryFilters.cohorts : null,
+    });
+    const centersId = sessions.map((session) => session.cohesionCenterId);
+    const resultYoung = await getYoungForSejourDasboard(queryFilters, centersId);
+    //const { resultCenter, responseSession } = await getCenterAndSessionInfoForSejourDashboard(queryFilters, centersId);
+    //const sessionByCenter = await getCenterInfoFromYoungForSejourDashboard(responseSession, queryFilters, centersId);
 
-    return res.status(200).send({ resultCenter, sessionByCenter, resultYoung });
+    return res.status(200).send({ /* resultCenter, sessionByCenter, */ resultYoung });
   } catch (error) {
     capture(error);
     res.status(500).send({ error: ERRORS.SERVER_ERROR });
