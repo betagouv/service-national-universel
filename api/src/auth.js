@@ -7,7 +7,7 @@ const config = require("./config");
 const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, TRUST_TOKEN_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
@@ -21,6 +21,11 @@ class Auth {
     try {
       const { error, value } = Joi.object({
         email: Joi.string().lowercase().trim().email().required(),
+        phone: Joi.string().trim().required(),
+        phoneZone: Joi.string()
+          .trim()
+          .valid(...PHONE_ZONES_NAMES_ARR)
+          .required(),
         firstName: validateFirstName().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().required(),
@@ -49,6 +54,8 @@ class Auth {
 
       const {
         email,
+        phone,
+        phoneZone,
         firstName,
         lastName,
         password,
@@ -83,6 +90,8 @@ class Auth {
 
       const user = await this.model.create({
         email,
+        phone,
+        phoneZone,
         firstName,
         lastName,
         password,

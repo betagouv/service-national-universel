@@ -33,6 +33,8 @@ export default function StepConfirm() {
   const onSubmit = async () => {
     const values = {
       email: data.email,
+      phone: data.phone,
+      phoneZone: data.phoneZone,
       firstName: data.firstName,
       lastName: data.lastName,
       frenchNationality: data.frenchNationality,
