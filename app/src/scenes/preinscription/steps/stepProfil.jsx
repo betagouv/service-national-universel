@@ -13,20 +13,28 @@ import plausibleEvent from "../../../services/plausible";
 import { getPasswordErrorMessage } from "../../../utils";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
+import PhoneField from "@/components/dsfr/forms/PhoneField";
+import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState({});
-  const keyList = ["firstName", "lastName", "email", "emailConfirm", "password", "confirmPassword"];
+  const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
 
+  const trimmedPhone = data?.phone?.replace(/\s/g, "");
   const trimmedEmail = data?.email?.trim();
   const trimmedEmailConfirm = data?.emailConfirm?.trim();
 
   const validate = () => {
     let errors = {};
+
+    if (data?.phone && !isPhoneNumberWellFormated(trimmedPhone, data?.phoneZone)) {
+      errors.phone = PHONE_ZONES[data?.phoneZone]?.errorMessage;
+    }
+
     //Email
     if (trimmedEmail && !validator.isEmail(trimmedEmail)) {
       errors.email = "L'e-mail renseigné est invalide";
@@ -80,34 +88,49 @@ export default function StepProfil() {
       <ProgressBar />
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"} title="Créez votre compte">
         <div className="space-y-5">
-          <div className="flex flex-col gap-1">
-            <label>Prénom du volontaire</label>
+          <label className="w-full">
+            Prénom du volontaire
             <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} />
             {error.firstName && <span className="text-sm text-red-500">{error.firstName}</span>}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-base text-[#161616]">Nom du volontaire</label>
+          </label>
+
+          <label className="w-full">
+            Nom du volontaire
             <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
             {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
-          </div>
+          </label>
 
-          <div className="grid grid-rows-2 gap-4 md:grid-cols-2 md:grid-rows-1">
-            <div className="flex flex-col gap-1">
-              <label className="text-base text-[#161616]">E-mail</label>
+          <PhoneField
+            label="Téléphone"
+            onChange={(e) => setData({ ...data, phone: e })}
+            onChangeZone={(e) => setData({ ...data, phoneZone: e })}
+            value={data.phone}
+            zoneValue={data.phoneZone}
+            placeholder={PHONE_ZONES[data.phoneZone]?.example}
+            error={error.phone || error.phoneZone}
+            className="mt-3"
+          />
+
+          <hr className="my-4" />
+          <h2 className="text-base font-bold my-4">Mes identifiants de connexion</h2>
+          <p className="pl-3 border-l-4 border-l-indigo-500">Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte volontaire.</p>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <label className="w-full">
+              E-mail
               <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} type="email" />
               {error.email ? <span className="text-sm text-red-500">{error.email}</span> : null}
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-base text-[#161616]">Confirmez votre e-mail</label>
+            </label>
+
+            <label className="w-full">
+              Confirmez votre e-mail
               <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} type="email" />
               {error.emailConfirm ? <span className="text-sm text-red-500">{error.emailConfirm}</span> : null}
-            </div>
-          </div>
+            </label>
 
-          <div className="grid grid-rows-2 gap-4 md:grid-cols-2 md:grid-rows-1">
-            <div className="flex flex-col gap-1">
-              <label className="text-base text-[#161616]">Mot de passe</label>
-              <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
+            <label className="w-full">
+              Mot de passe
+              <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2 mt-2">
                 <input
                   className="w-full bg-inherit"
                   type={showPassword ? "text" : "password"}
@@ -123,10 +146,11 @@ export default function StepProfil() {
               <p className={`text-sm ${error?.password ? "text-red-500" : " text-[#3A3A3A]"}`}>
                 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
               </p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-base text-[#161616]">Confirmez votre mot de passe</label>
-              <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
+            </label>
+
+            <label className="w-full">
+              Confirmez votre mot de passe
+              <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2 mt-2">
                 <input
                   className="w-full bg-inherit"
                   type={showConfirmPassword ? "text" : "password"}
@@ -140,7 +164,7 @@ export default function StepProfil() {
                 )}
               </div>
               {error.confirmPassword ? <span className="text-sm text-red-500">{error.confirmPassword}</span> : null}
-            </div>
+            </label>
           </div>
 
           <div className="flex flex-col gap-1">

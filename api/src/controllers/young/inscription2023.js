@@ -149,13 +149,6 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       birthCountry: needRequired(Joi.string().trim(), isRequired),
       birthCity: needRequired(Joi.string().trim(), isRequired),
       birthCityZip: Joi.string().trim().allow(null, ""),
-      phone: needRequired(Joi.string().trim(), isRequired),
-      phoneZone: needRequired(
-        Joi.string()
-          .trim()
-          .valid(...PHONE_ZONES_NAMES_ARR),
-        isRequired,
-      ),
       situation: Joi.alternatives().conditional("schooled", {
         is: "true",
         then: needRequired(
@@ -237,8 +230,6 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
-    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
 
     if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
 
@@ -570,6 +561,11 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       email: Joi.string().lowercase().trim().email().required(),
+      phone: Joi.string().trim().required(),
+      phoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .required(),
     };
     const { error, value } = Joi.object(profilSchema).validate(req.body, { stripUnknown: true });
 

@@ -66,7 +66,7 @@ export const getStepUrl = (name, STEP_LIST) => {
 
 const WAITING_CORRECTION_LINK = [
   {
-    field: ["firstName", "lastName", "email"],
+    field: ["firstName", "lastName", "phone", "email"],
     redirect: "/inscription2023/correction/profil",
     step: "profil",
   },
@@ -113,7 +113,6 @@ const WAITING_CORRECTION_LINK = [
       "birthCountry",
       "birthCity",
       "birthCityZip",
-      "phone",
       "situation",
       "livesInFrance",
       "addressVerified",

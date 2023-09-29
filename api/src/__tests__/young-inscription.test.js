@@ -196,8 +196,6 @@ describe("Young", () => {
         birthCountry: "France",
         birthCity: "Paris",
         birthCityZip: "75008",
-        phone: "0600010203",
-        phoneZone: "FRANCE",
         situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
         livesInFrance: "true",
         addressVerified: "true",
@@ -231,7 +229,6 @@ describe("Young", () => {
         ...coordonneeObj,
         gender: "male",
         handicap: "false",
-        phone: "0601020304",
       };
 
       res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(correctCoordonneeObj);
@@ -714,6 +711,8 @@ describe("Young", () => {
         firstName: "John",
         lastName: "DOE",
         email: "john@doe.com",
+        phone: "600000000",
+        phoneZone: "FRANCE",
       };
       let res = await request(getAppHelper()).put("/young/inscription2023/profil").send(profilObj);
       expect(res.status).toBe(404);
@@ -731,6 +730,8 @@ describe("Young", () => {
         firstName: faker.name.firstName().toLowerCase(),
         lastName: faker.name.lastName().toUpperCase(),
         email: faker.internet.email().toLowerCase(),
+        phone: "600000000",
+        phoneZone: "FRANCE",
       };
 
       let res = await request(getAppHelper()).put("/young/inscription2023/profil").send(profilObj);
