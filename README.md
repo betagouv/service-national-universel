@@ -16,10 +16,8 @@ Il est conseillé de lire le fichier `README.md` de chacun de ces services.
 Voir le `README.md` de chacun des services.
 
 Pour run les principales app :
-
-- `git config --global submodule.recurse true` is highly recommended
-- `npm i`
-- `npm run dev`
+npm i
+npm run dev
 
 ## Tests et déploiement
 

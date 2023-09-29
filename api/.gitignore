@@ -2,4 +2,5 @@
 /build
 .env*
 /src/scripts/
+*scripts*
 /coverage
