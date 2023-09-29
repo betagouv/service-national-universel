@@ -103,7 +103,7 @@ export default function Index({ ...props }) {
         }
       }
       if (allSessions.data.length === 0) setSessions([]);
-      const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
+      const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[allSessions?.data.length - 1]?.cohort;
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
         allSessions.data = allSessions.data.map((session) => {
           return {
@@ -114,7 +114,7 @@ export default function Index({ ...props }) {
         allSessions.data.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         setSessions(allSessions.data);
 
-        if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
+        if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[allSessions?.data.length - 1]);
       } else {
         const sessionFiltered = allSessions.data
           .filter((session) => session.headCenterId === user._id)
@@ -219,8 +219,6 @@ export default function Index({ ...props }) {
   }
 
   if (!center) return <Loader />;
-
-  console.log(focusedCohortData);
 
   return (
     <>
