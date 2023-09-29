@@ -34,8 +34,6 @@ import { environment, supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
-import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AdressSelect from "../components/AdressSelect";
@@ -154,8 +152,6 @@ export default function StepCoordonnees() {
     birthCityZip,
     birthCity,
     gender,
-    // phone,
-    // phoneZone,
     livesInFrance,
     addressVerified,
     address,
@@ -205,8 +201,6 @@ export default function StepCoordonnees() {
         birthCity: young.birthCity || data.birthCity,
         birthCityZip: young.birthCityZip || data.birthCityZip,
         gender: young.gender || data.gender,
-        // phone: young.phone || data.phone,
-        // phoneZone: young.phoneZone || data.phoneZone,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
         addressVerified: young.addressVerified || data.addressVerified,
         address: young.address || data.address,
@@ -244,14 +238,8 @@ export default function StepCoordonnees() {
     setErrors(getErrors());
   }, [birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
-  // const trimmedPhone = phone && phone.replace(/\s/g, "");
-
   const getErrors = () => {
     let errors = {};
-
-    // if (phone && !isPhoneNumberWellFormated(trimmedPhone, phoneZone)) {
-    //   errors.phone = PHONE_ZONES[phoneZone]?.errorMessage;
-    // }
 
     if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
       errors.birthCityZip = errorMessages.zip;
@@ -452,7 +440,6 @@ export default function StepCoordonnees() {
 
       updates.country = FRANCE;
       updates.moreInformation = moreInformation.toString();
-      // updates.phone = trimmedPhone;
 
       try {
         const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/correction", updates);
@@ -581,16 +568,6 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        {/* <PhoneField
-          label="Votre téléphone"
-          onChange={updateData("phone")}
-          onChangeZone={updateData("phoneZone")}
-          value={phone}
-          zoneValue={phoneZone}
-          placeholder={PHONE_ZONES[phoneZone]?.example}
-          error={errors.phone || errors.phoneZone}
-          correction={corrections.phone}
-        /> */}
         <RadioButton
           label="Je réside..."
           options={inFranceOrAbroadOptions}
