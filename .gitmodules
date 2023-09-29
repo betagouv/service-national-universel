@@ -1,3 +1,4 @@
-[submodule "service-national-universel-scripts"]
-path = api/scripts/service-national-universel-scripts
-url = https://github.com/selego/service-national-universel-scripts.git
+
+[submodule "api/scripts/service-national-universel-scripts"]
+	path = api/scripts/service-national-universel-scripts
+	url = https://github.com/selego/service-national-universel-scripts.git
