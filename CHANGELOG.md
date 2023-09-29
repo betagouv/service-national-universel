@@ -1,3 +1,16 @@
+# [1.342.0](https://github.com/betagouv/service-national-universel/compare/v1.341.1...v1.342.0) (2023-09-29)
+
+
+### Bug Fixes
+
+* **admin:** staging overide balleen problem ([44490dd](https://github.com/betagouv/service-national-universel/commit/44490dd3282c0b74ea825d2fe20e8d5ff2ec7a40))
+
+
+### Features
+
+* **admin:** environment variables ([#3057](https://github.com/betagouv/service-national-universel/issues/3057)) ([80b43f3](https://github.com/betagouv/service-national-universel/commit/80b43f3b557a79d719ca3e041dae92fcb1cab466))
+* **app/api:** Préinscription : ajout de la saisie du numéro de téléphone ([#3037](https://github.com/betagouv/service-national-universel/issues/3037)) ([4935e34](https://github.com/betagouv/service-national-universel/commit/4935e3432e44bfd592b3ca890d8c497f6aca6e08))
+
 ## [1.341.1](https://github.com/betagouv/service-national-universel/compare/v1.341.0...v1.341.1) (2023-09-28)
 
 
