@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
-import { formatDateFR, translate, translateGrade } from "snu-lib";
+import { PHONE_ZONES, formatDateFR, translate, translateGrade } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
@@ -90,44 +90,44 @@ export default function StepConfirm() {
       <ProgressBar />
       <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="space-y-4">
-          <div className="my-2 flex flex-row items-center justify-between">
+        <div className="space-y-2">
+          <div className="my-2 flex items-center justify-between">
             <p className="text-lg font-semibold text-[#161616]">Mon éligibilité</p>
             <Link to="./eligibilite">
               <EditPen />
             </Link>
           </div>
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[#666666]">Niveau de scolarité&nbsp;:</p>
+          <div className="flex items-center justify-between text-sm">
+            <p className="text-[#666666]">Niveau de scolarité&nbsp;:</p>
             <p className="text-right text-[#161616]">{translateGrade(data.scolarity)}</p>
           </div>
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[#666666]">Date de naissance&nbsp;:</p>
+          <div className="flex items-center justify-between text-sm">
+            <p className="text-[#666666]">Date de naissance&nbsp;:</p>
             <p className="text-right text-[#161616]">{formatDateFR(data.birthDate)}</p>
           </div>
           {data.school ? (
             <>
               {data.school?.country && (
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-[#666666]">Pays de l&apos;établissement&nbsp;:</p>
+                <div className="flex items-center justify-between text-sm">
+                  <p className="text-[#666666]">Pays de l&apos;établissement&nbsp;:</p>
                   <p className="text-right capitalize text-[#161616]">{data.school?.country?.toLowerCase()}</p>
                 </div>
               )}
               {data.school?.city && (
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-[#666666]">Commune de l&apos;établissement&nbsp;:</p>
+                <div className="flex items-center justify-between text-sm">
+                  <p className="text-[#666666]">Commune de l&apos;établissement&nbsp;:</p>
                   <p className="text-right text-[#161616]">{data.school.city}</p>
                 </div>
               )}
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-[#666666]">Nom de l&apos;établissement&nbsp;:</p>
+              <div className="flex items-center justify-between text-sm">
+                <p className="text-[#666666]">Nom de l&apos;établissement&nbsp;:</p>
                 <p className="truncate text-right text-[#161616]">{data.school.fullName}</p>
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-[#666666]">Code postal&nbsp;:</p>
-              <p className="text-base text-[#161616]">{data.zip}</p>
+            <div className="flex items-center justify-between text-sm">
+              <p className="text-[#666666]">Code postal&nbsp;:</p>
+              <p className="text-[#161616]">{data.zip}</p>
             </div>
           )}
 
@@ -137,28 +137,28 @@ export default function StepConfirm() {
               <EditPen />
             </Link>
           </div>
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[#666666]">Prénom&nbsp;:</p>
+          <div className="flex items-center justify-between text-sm">
+            <p className="text-[#666666]">Prénom du volontaire&nbsp;:</p>
             <p className="text-right text-[#161616]">{data.firstName}</p>
           </div>
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[#666666]">Nom&nbsp;:</p>
+          <div className="flex items-center justify-between  text-sm">
+            <p className="text-[#666666]">Nom du volontaire&nbsp;:</p>
             <p className="text-right text-[#161616]">{data.lastName}</p>
           </div>
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[#666666]">Email&nbsp;:</p>
+          <div className="flex items-center justify-between text-sm">
+            <p className="text-[#666666]">Téléphone&nbsp;:</p>
+            <p className="text-right text-[#161616]">
+              {PHONE_ZONES[data.phoneZone].code} {data.phone}
+            </p>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <p className="text-[#666666]">Email&nbsp;:</p>
             <p className="text-right text-[#161616]">{data.email}</p>
           </div>
         </div>
         <hr className="my-3 md:my-4 h-px border-0 md:bg-gray-200" />
         <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>
-        <SignupButtonContainer
-          onClickNext={() => onSubmit()}
-          labelNext="Recevoir un code d'activation par e-mail"
-          onClickPrevious={() => history.push("/preinscription/profil")}
-          disabled={Object.values(error).length}
-          collapsePrevious={true}
-        />
+        <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, recevoir un code d'activation par e-mail" disabled={Object.values(error).length} />
       </DSFRContainer>
     </>
   );
