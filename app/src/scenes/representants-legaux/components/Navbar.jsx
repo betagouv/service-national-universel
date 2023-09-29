@@ -32,7 +32,7 @@ const next = {
 const Navbar = ({ step, onSave }) => {
   const desktop = useDevice() === "desktop";
   return (
-    <div className="w-full bg-[#f9f6f2] px-3  py-3 text-[#161616]">
+    <div className="w-full bg-[#f9f6f2] px-3  py-[1rem] md:pt-[2rem] md:pb-[0rem] text-[#161616]">
       <div className={`flex flex-col justify-center ${desktop && "mx-auto my-0 w-1/2"}`}>
         <div className="flex justify-between">
           <div>

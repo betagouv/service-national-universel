@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useContext } from "react";
+import { Redirect, useHistory } from "react-router-dom";
 import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
@@ -9,21 +9,19 @@ import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegaux
 import { isReturningParent } from "../commons";
 import { BorderButton } from "../components/Buttons";
 import Navbar from "../components/Navbar";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
 
-  useEffect(() => {
-    if (young) {
-      if (isReturningParent(young, parentId)) {
-        const route = parentId === 2 ? "done-parent2" : "done";
-        history.push(`/representants-legaux/${route}?token=${token}`);
-      }
-    }
-  }, [young]);
-
   if (!young) return <Loader />;
+
+  if (isReturningParent(young, parentId)) {
+    const route = parentId === 2 ? "done-parent2" : "done";
+    return <Redirect to={`/representants-legaux/${route}?token=${token}`} />;
+  }
 
   const translateNonNecessary = (status) => {
     if (status === "NOT_ELIGIBLE") return "est non éligible";
@@ -32,6 +30,7 @@ export default function Presentation({ step, parentId }) {
   };
 
   const sejourDate = COHESION_STAY_LIMIT_DATE[young.cohort];
+  const title = parentId === 2 ? `${young.firstName} s'est inscrit(e) au SNU !` : `${young.firstName} souhaite s'inscrire au SNU !`;
 
   function onSubmit() {
     const route = parentId === 2 ? "verification-parent2" : "verification";
@@ -39,23 +38,15 @@ export default function Presentation({ step, parentId }) {
   }
   if (["NOT_ELIGIBLE", "ABANDONED", "REFUSED"].includes(young.status))
     return (
-      <>
-        <div className="bg-white p-4 text-[#161616]">
-          <div className="flex flex-col gap-4">
-            <h1 className="text-[22px] font-bold">Votre accord n&apos;est plus requis</h1>
-            <div>Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</div>
-          </div>
-        </div>
-      </>
+      <DSFRContainer title="Votre accord n'est plus requis">
+        <p className="mb-8">Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</p>
+      </DSFRContainer>
     );
   return (
     <>
       <Navbar step={step} />
-      <div className="bg-white p-4 text-[#161616]">
-        <div className="flex flex-col gap-4">
-          <h1 className="text-[22px] font-bold">
-            {parentId === 2 ? <>{young.firstName} s&apos;est inscrit(e) au SNU&nbsp;!</> : <>{young.firstName} souhaite s&apos;inscrire au SNU&nbsp;!</>}
-          </h1>
+      <>
+        <DSFRContainer title={title}>
           <p className="mb-8 text-sm text-[#161616]">
             {parentId === 2 ? (
               <>Nous avons besoin de votre consentement au droit à l’image.</>
@@ -107,18 +98,13 @@ export default function Presentation({ step, parentId }) {
               )}
             </div>
           </div>
-        </div>
-      </div>
-      <div className="fixed bottom-0 z-50 w-full">
-        <div className="flex flex-col gap-2 bg-white p-4 shadow-ninaInverted">
-          <button className="flex w-full cursor-pointer items-center justify-center bg-[#000091] p-2 text-white" onClick={onSubmit}>
-            Continuer vers la vérification
-          </button>
-          <div className="text-center text-[13px] text-[#161616]">
-            Votre consentement ne sera recueilli qu’à la <b>troisième étape</b> de ce formulaire
-          </div>
-        </div>
-      </div>
+          <SignupButtonContainer
+            onClickNext={onSubmit}
+            labelNext="Continuer vers la vérification"
+            text="Votre consentement ne sera recueilli qu’à la troisième étape de ce formulaire"
+          />
+        </DSFRContainer>
+      </>
     </>
   );
 }
