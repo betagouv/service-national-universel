@@ -1,11 +1,12 @@
+import queryString from "query-string";
 import React, { useEffect, useRef, useState } from "react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
-import { translate, YOUNG_SITUATIONS, YOUNG_STATUS } from "snu-lib";
-import api from "../../../../services/api";
-import { FilterComponent } from "../FilterDashBoard";
-import { BarChart, FullDoughnut, graphColors, Legend, Legends } from "../graphs";
-import { getLink as getOldLink } from "../../../../utils";
 import { Link } from "react-router-dom";
+import { YOUNG_SITUATIONS, YOUNG_STATUS, translate } from "snu-lib";
+import api from "../../../../services/api";
+import { getNewLink } from "../../../../utils";
+import { FilterComponent } from "../FilterDashBoard";
+import { BarChart, FullDoughnut, Legend, graphColors } from "../graphs";
 
 export default function Details({ selectedFilters }) {
   const [age, setAge] = useState({});
@@ -42,7 +43,7 @@ export default function Details({ selectedFilters }) {
     setSituation(res?.situation || {});
     setQpv(res?.qpv || {});
     setRural(res?.rural || {});
-    setSpecificSituation({
+    let specific = {
       handicap: res?.handicap || {},
       allergies: res?.allergies || {},
       handicapInSameDepartment: res?.handicapInSameDepartment || {},
@@ -50,7 +51,14 @@ export default function Details({ selectedFilters }) {
       ppsBeneficiary: res?.ppsBeneficiary || {},
       paiBeneficiary: res?.paiBeneficiary || {},
       specificAmenagment: res?.specificAmenagment || {},
+    };
+
+    Object.keys(specific).forEach((e) => {
+      const total = Object.values(specific[e]).reduce((acc, curr) => acc + curr, 0);
+      let percent = total ? Math.round(((specific[e].true || 0) / total) * 100) + "%" : "-";
+      specific[e] = { true: specific[e].true || 0, false: specific[e].false || 0, percent };
     });
+    setSpecificSituation(specific);
   }
 
   useEffect(() => {
@@ -92,8 +100,8 @@ export default function Details({ selectedFilters }) {
             maxLegends={2}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SEXE=%5B"male"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SEXE=%5B"female"%5D'] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ gender: "male" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ gender: "female" })] }),
             ]}
           />
         </div>
@@ -107,13 +115,13 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"2ndeGT"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"1ereGT"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"2ndePro"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"1erePro"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"3eme"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"Autre"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"CAP"%5D'] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "2ndeGT" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "1ereGT" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "2ndePro" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "1erePro" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "3eme" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "Autre" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "CAP" })] }),
             ]}
           />
           <FullDoughnut
@@ -124,9 +132,17 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SITUATION=%5B"GENERAL_SCHOOL"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SITUATION=%5B"PROFESSIONAL_SCHOOL"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SITUATION=%5B"SPECIALIZED_SCHOOL"%5D'] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ situation: "GENERAL_SCHOOL" })] }),
+              getNewLink({
+                base: `/inscription`,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ situation: "PROFESSIONAL_SCHOOL" })],
+              }),
+              getNewLink({
+                base: `/inscription`,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ situation: "SPECIALIZED_SCHOOL" })],
+              }),
             ]}
           />
         </div>
@@ -139,20 +155,34 @@ export default function Details({ selectedFilters }) {
               specificSituation?.paiBeneficiary?.true || 0,
               specificSituation?.allergies?.true || 0,
             ]}
+            tooltips={[
+              specificSituation?.handicap?.percent || 0,
+              specificSituation?.ppsBeneficiary?.percent || 0,
+              specificSituation?.paiBeneficiary?.percent || 0,
+              specificSituation?.allergies?.percent || 0,
+            ]}
             noValue
             className="h-[150px]"
           />
           <div className="grid grid-cols-2 gap-10">
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['HANDICAP=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ handicap: "true" })] })}
+              target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="En situation de handicap" value={specificSituation.handicap.true || 0} color={graphColors[4][0]} />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['PPS=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ ppsBeneficiary: "true" })] })}
+              target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="Bénéficiaire d’un PPS" value={specificSituation.ppsBeneficiary.true || 0} color={graphColors[4][1]} />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['PAI=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ paiBeneficiary: "true" })] })}
+              target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="Bénéficiaire d’un PAI" value={specificSituation.paiBeneficiary.true || 0} color={graphColors[4][2]} />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['ALLERGIES=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ allergies: "true" })] })}
+              target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="Allergie / intolérance" value={specificSituation.allergies.true || 0} color={graphColors[4][3]} />
             </Link>
           </div>
@@ -161,11 +191,21 @@ export default function Details({ selectedFilters }) {
 
           <div className="flex w-full flex-row justify-between">
             <Link
-              to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SPECIFIC_AMENAGEMENT=%5B"true"%5D'] })}
+              to={getNewLink({
+                base: `/inscription`,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ specificAmenagment: "true" })],
+              })}
               target="_blank">
               <Legend className="!flex-col text-center" name="Aménagement spécifique" value={specificSituation.specificAmenagment.true || 0} color={graphColors[1][0]} />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SAME_DEPARTMENT=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({
+                base: `/inscription`,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ handicapInSameDepartment: "true" })],
+              })}
+              target="_blank">
               <Legend
                 className="!flex-col text-center"
                 name="Affectation dans le département de résidence"
@@ -173,7 +213,13 @@ export default function Details({ selectedFilters }) {
                 color={graphColors[1][0]}
               />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['PMR=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({
+                base: `/inscription`,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ reducedMobilityAccess: "true" })],
+              })}
+              target="_blank">
               <Legend
                 className="!flex-col text-center"
                 name="Aménagement pour mobilité réduite"
@@ -193,8 +239,8 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['QPV=%5B"true"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['QPV=%5B""%2C"false"%5D'] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ qpv: "true" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ qpv: "false" })] }),
             ]}
           />
 
@@ -206,8 +252,8 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['RURAL=%5B"true"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['RURAL=%5B"false"%5D'] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ isRegionRural: "true" })] }),
+              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ isRegionRural: "false" })] }),
             ]}
           />
         </div>

@@ -1,3 +1,86 @@
+## [1.341.1](https://github.com/betagouv/service-national-universel/compare/v1.341.0...v1.341.1) (2023-09-28)
+
+
+### Bug Fixes
+
+* **lib:** date cohort ([754aa08](https://github.com/betagouv/service-national-universel/commit/754aa08bbd2f679b5c601da6b4d8bf0e9737078c))
+* **lib:** date cohort patch 2 ([b264a76](https://github.com/betagouv/service-national-universel/commit/b264a765dabe3e042e0a55aed5063f05641806f0))
+
+# [1.341.0](https://github.com/betagouv/service-national-universel/compare/v1.340.1...v1.341.0) (2023-09-27)
+
+
+### Bug Fixes
+
+* **admin:** footer prod / dev ([2fb3d4d](https://github.com/betagouv/service-national-universel/commit/2fb3d4df565b59531116f821b9d3096ac9dc00ce))
+* **api:** count total result when search with elasticsearch ([#3054](https://github.com/betagouv/service-national-universel/issues/3054)) ([1aed213](https://github.com/betagouv/service-national-universel/commit/1aed213b5d46c00f719b1ec918979853760f6bec))
+* **app:** fix address combobox  POC for DROMS ([32a4199](https://github.com/betagouv/service-national-universel/commit/32a41999f61c5d7858a2180249c576eed9c718ae))
+
+
+### Features
+
+* **admin:** MEP new dashboard + sidebar pour les modérateur ([#3052](https://github.com/betagouv/service-national-universel/issues/3052)) ([de22e64](https://github.com/betagouv/service-national-universel/commit/de22e6490df8cf8bf14d48b1da6123b9f2fbb883))
+* **app:** Inscription: POC combobox adresse - staging only ([#3055](https://github.com/betagouv/service-national-universel/issues/3055)) ([e11b6bf](https://github.com/betagouv/service-national-universel/commit/e11b6bf3ff70010af58b5551baf75d2364da8635))
+* **app:** poc combobox adresse v2 ([8232e63](https://github.com/betagouv/service-national-universel/commit/8232e632b01b3144f1ea2a8e011631d991baec27))
+
+## [1.340.1](https://github.com/betagouv/service-national-universel/compare/v1.340.0...v1.340.1) (2023-09-26)
+
+
+### Bug Fixes
+
+* **admin:** dashboard engagement redirection mission ([#3049](https://github.com/betagouv/service-national-universel/issues/3049)) ([e6178e6](https://github.com/betagouv/service-national-universel/commit/e6178e6951167fa7c908d0d1007235393a58479a))
+* **admin:** dashboard retours Emmanuel ([#3050](https://github.com/betagouv/service-national-universel/issues/3050)) ([955401e](https://github.com/betagouv/service-national-universel/commit/955401e3b219a9af4d0c9872c49ebc0dfb894b94))
+* **admin:** graph tooltip font weight ([13fcba2](https://github.com/betagouv/service-national-universel/commit/13fcba273b30d55abb58ad3a41227bbd1adb0566))
+
+# [1.340.0](https://github.com/betagouv/service-national-universel/compare/v1.339.0...v1.340.0) (2023-09-25)
+
+
+### Bug Fixes
+
+* **app:** Add redirection for old ticket path ([2d6b50c](https://github.com/betagouv/service-national-universel/commit/2d6b50c006c2b9bb78abfeadec332320a7acf4e2))
+
+
+### Features
+
+* **admin/api:** retour test bertille ([#3047](https://github.com/betagouv/service-national-universel/issues/3047)) ([5d70e7d](https://github.com/betagouv/service-national-universel/commit/5d70e7dbf0afe7f37e78156aa436ea1b6dee96c3))
+
+# [1.339.0](https://github.com/betagouv/service-national-universel/compare/v1.338.0...v1.339.0) (2023-09-24)
+
+
+### Features
+
+* **admin:** statut phase dashboard admin refacto ([780da95](https://github.com/betagouv/service-national-universel/commit/780da95adbf8373e1b0164d1594fb85dbef71072))
+
+# [1.338.0](https://github.com/betagouv/service-national-universel/compare/v1.337.0...v1.338.0) (2023-09-22)
+
+
+### Bug Fixes
+
+* **admin:** check adresse mission on create ([3a52537](https://github.com/betagouv/service-national-universel/commit/3a52537c6fabf1960e6bd6c8fd9d16b04fc154e4))
+* **admin:** dashboard retours Bertille & bugfixs ([#3024](https://github.com/betagouv/service-national-universel/issues/3024)) ([fb171dc](https://github.com/betagouv/service-national-universel/commit/fb171dc147753bfb2cc6c32e31019cce1c6c42ec))
+* **admin:** date picker dashboard engagement [#3043](https://github.com/betagouv/service-national-universel/issues/3043) ([0478dae](https://github.com/betagouv/service-national-universel/commit/0478daec2b2e291f83b77a63abc7a0743d6587e3))
+* structures with ES ([#3041](https://github.com/betagouv/service-national-universel/issues/3041)) ([407e3c3](https://github.com/betagouv/service-national-universel/commit/407e3c3319029a5b924eae8a4d42aecd82b2e5d0))
+
+
+### Features
+
+* **admin:** remove dev tab dashboard ([#3035](https://github.com/betagouv/service-national-universel/issues/3035)) ([2cb2c88](https://github.com/betagouv/service-national-universel/commit/2cb2c88d47a960bb4babfc1aa6116ddf303c2d68))
+* **admin/api:** add link in todo dashboard moderator ([#3021](https://github.com/betagouv/service-national-universel/issues/3021)) ([e29c3a7](https://github.com/betagouv/service-national-universel/commit/e29c3a7d0bfa4fac0d46f3e97570da3b6518f7b2))
+* **admin/api:** dashboard volontaires equivalence mig ([#3023](https://github.com/betagouv/service-national-universel/issues/3023)) ([ba8321c](https://github.com/betagouv/service-national-universel/commit/ba8321c6f6828223accaf1630320e5f8f7c4fe79))
+
+# [1.337.0](https://github.com/betagouv/service-national-universel/compare/v1.336.0...v1.337.0) (2023-09-21)
+
+
+### Bug Fixes
+
+* **analytics:** bug crons ([5b4d9e9](https://github.com/betagouv/service-national-universel/commit/5b4d9e9f7011276489207a6d09f5b4fc0fe40cc4))
+* **analytics:** crons sentry/codeclimate/uptime ([23cce4e](https://github.com/betagouv/service-national-universel/commit/23cce4e7ceb87ff5dc6e4dd5f1d95b99a0e50cc6))
+* **api:** async missing ([1e0a38a](https://github.com/betagouv/service-national-universel/commit/1e0a38a7c6fb860a3362ebae7b399bcfa0b5bbe5))
+
+
+### Features
+
+* **admin:** Add userback ([8157092](https://github.com/betagouv/service-national-universel/commit/8157092dac65b3fd11cb1aae20e7ec4a485849ea))
+
 # [1.336.0](https://github.com/betagouv/service-national-universel/compare/v1.335.0...v1.336.0) (2023-09-20)
 
 

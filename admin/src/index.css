@@ -47,14 +47,14 @@
 @font-face {
   font-family: "Marianne";
   src: local("Marianne"), url("./fonts/Marianne/Marianne-Bold_Italic.woff") format("woff");
-  font-weight: 700;
+  font-weight: 600;
   font-style: italic;
 }
 
 @font-face {
   font-family: "Marianne";
   src: local("Marianne"), url("./fonts/Marianne/Marianne-Bold.woff") format("woff");
-  font-weight: 700;
+  font-weight: 600;
   font-style: normal;
 }
 
@@ -272,7 +272,7 @@ h4 {
   margin: 0 5px;
 }
 .reactive-result .pagination a.active {
-  font-weight: 700;
+  font-weight: 600;
 }
 .reactive-result .pagination a:first-child {
   background-image: url("/src/assets/left.svg");

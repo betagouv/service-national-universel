@@ -1,3 +1,4 @@
+import queryString from "query-string";
 import React, { useEffect, useMemo, useState } from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
@@ -10,13 +11,13 @@ import api from "../../../../../services/api";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import StatutPhase from "../../../components/inscription/StatutPhase";
 
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import plausibleEvent from "../../../../../services/plausible";
-import { getLink as getOldLink } from "../../../../../utils";
+import { getNewLink } from "../../../../../utils";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import Details from "../../../components/inscription/Details";
 import TabSchool from "../../../components/inscription/TabSchool";
 import ExportReport from "./ExportReport";
-import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -47,7 +48,7 @@ export default function Index() {
             id: "academy",
             name: "Académie",
             fullValue: "Toutes",
-            options: academyOptions,
+            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
           }
         : null,
       {
@@ -103,7 +104,7 @@ export default function Index() {
   return (
     <DashboardContainer
       active="inscription"
-      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
+      availableTab={["general", "engagement", "sejour", "inscription"]}
       navChildren={
         <div className="flex items-center gap-2">
           <ExportReport filter={selectedFilters} />
@@ -133,11 +134,11 @@ export default function Index() {
             goal={goal}
             showTooltips={true}
             legendUrls={[
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] }),
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
             ]}
           />
         </div>
@@ -176,7 +177,7 @@ function filterByRegionAndDepartement(e, filters, user) {
 }
 
 async function getCurrentInscriptions(filters) {
-  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", {filters: filters} );
+  const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", { filters: filters });
   // if (!responses.length) return {};
   return api.getAggregations(responses);
 }

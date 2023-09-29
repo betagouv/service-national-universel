@@ -54,6 +54,7 @@ import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
 import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
+import { FEATURES_NAME, isFeatureEnabled } from "./features";
 
 import * as Sentry from "@sentry/react";
 import ModalCGU from "./components/modals/ModalCGU";
@@ -89,7 +90,6 @@ export default function App() {
             {/* Authentification nécessaire */}
             <SentryRoute path="/" component={Home} />
           </Switch>
-          {environment === "production" ? <Footer /> : null}
         </div>
       </Router>
     </Sentry.ErrorBoundary>
@@ -205,11 +205,20 @@ const Home = (props) => {
 
   return (
     <div>
-      {environment === "production" ? <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} /> : null}
+      {!isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role) ? (
+        <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} />
+      ) : null}
       <div className="flex">
-        {environment === "production" ? <Drawer open={drawerVisible} onOpen={setDrawerVisible} /> : <SideBar sessionsList={sessionPhase1List} />}
+        {!isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role) ? <Drawer open={drawerVisible} onOpen={setDrawerVisible} /> : <SideBar sessionsList={sessionPhase1List} />}
         <div className="flex flex-col w-full">
-          <div className={environment === "production" ? (drawerVisible ? `flex-1 ml-[220px] min-h-screen` : `flex-1 lg:ml-[220px] min-h-screen`) : `flex-1  min-h-screen`}>
+          <div
+            className={
+              !isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role)
+                ? drawerVisible
+                  ? `flex-1 ml-[220px] min-h-screen`
+                  : `flex-1 lg:ml-[220px] min-h-screen`
+                : `flex-1  min-h-screen`
+            }>
             <Switch>
               <RestrictedRoute path="/structure" component={Structure} />
               <RestrictedRoute path="/settings" component={Settings} />
@@ -242,14 +251,14 @@ const Home = (props) => {
               {/* Only for developper eyes... */}
               {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
               {/* DASHBOARD */}
-              {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
-              {environment === "production" && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
-              {environment === "production" && <RestrictedRoute path="/" component={renderDashboard} />}
-              {environment !== "production" && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
-              {environment !== "production" && <RestrictedRoute path="/" component={renderDashboardV2} />}
+              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
+              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
+              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/" component={renderDashboard} />}
+              {isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
+              {isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/" component={renderDashboardV2} />}
             </Switch>
           </div>
-          {environment !== "production" ? <Footer /> : null}
+          <Footer />
         </div>
       </div>
       <ModalCGU

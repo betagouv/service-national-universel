@@ -11,7 +11,7 @@ export const FilterDashBoard = ({ selectedFilters, setSelectedFilters, filterArr
     <div className="flex w-full flex-row justify-between rounded-lg border-[1px] border-gray-200 bg-white py-4 px-4">
       <div className="flex h-[50px] flex-row items-center justify-center gap-2 self-start">
         <FilterSvg className="h-4 w-4 text-gray-300" />
-        <div className="text-lg font-bold text-gray-900">Filtrer</div>
+        <div className="text-lg font-bold text-gray-900">Filtres</div>
       </div>
       <div className="w-7/10 flex flex-row flex-wrap items-center justify-end gap-2">
         {filterArray.map((filter) => (
@@ -36,27 +36,29 @@ export const FilterComponent = ({ filter, selectedFilters, setSelectedFilters, m
           {selectedFilterValues?.length === filter.options?.length ? (
             <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">{filter?.fullValue}</div>
           ) : selectedFilterValues.length > 0 ? (
-            selectedFilterValues.map((item, index) => {
-              const label = filter.options.find((option) => option.key === item)?.label;
-              if (index > maxItems - 1) {
-                if (index === selectedFilterValues.length - 1) {
-                  return (
-                    <div key={item}>
-                      <ToolTipView selectedFilterValues={selectedFilterValues} filter={filter} />
-                      <div data-tip="" data-for={"tooltip-filtre" + filter.id} className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">
-                        +{index - maxItems + 1}
+            selectedFilterValues
+              .sort((a, b) => a.localeCompare(b))
+              .map((item, index) => {
+                const label = filter.options.find((option) => option.key === item)?.label;
+                if (index > maxItems - 1) {
+                  if (index === selectedFilterValues.length - 1) {
+                    return (
+                      <div key={item}>
+                        <ToolTipView selectedFilterValues={selectedFilterValues} filter={filter} />
+                        <div data-tip="" data-for={"tooltip-filtre" + filter.id} className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">
+                          +{index - maxItems + 1}
+                        </div>
                       </div>
-                    </div>
-                  );
+                    );
+                  }
+                  return null;
                 }
-                return null;
-              }
-              return (
-                <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
-                  {label}
-                </div>
-              );
-            })
+                return (
+                  <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
+                    {label}
+                  </div>
+                );
+              })
           ) : (
             <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500">{filter?.fullValue ? filter.fullValue : "Choisir"}</div>
           )}
@@ -154,7 +156,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
       leave="transition ease-in duration-150"
       leaveFrom="opacity-100 translate-y-0"
       leaveTo="opacity-0 translate-y-1">
-      <Popover.Panel className={`absolute right-0 z-20 w-[305px] translate-y-[4px]`}>
+      <Popover.Panel className={`absolute right-0 z-30 w-[305px] translate-y-[4px]`}>
         <div ref={ref} className="rounded-lg shadow-lg ">
           <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
             {filter?.customComponent ? (

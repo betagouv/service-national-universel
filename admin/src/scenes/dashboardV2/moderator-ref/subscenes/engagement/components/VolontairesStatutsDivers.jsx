@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import DashboardBox from "../../../../components/ui/DashboardBox";
-import api from "../../../../../../services/api";
+import api from "@/services/api";
 import { translate, translateApplication } from "snu-lib";
 import Tabs from "../../../../../phase0/components/Tabs";
 import StatusTable from "../../../../components/ui/StatusTable";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function VolontairesStatutsDivers({ filters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -18,14 +20,13 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
   const tabs = [
     { value: "phase2", label: "Mission de phase 2" },
     { value: "contract", label: "Contrats d'engagement" },
-    { value: "equivalence", label: "Demandes d'équivalence de MIG" },
   ];
 
   async function loadData() {
     setError(null);
     setLoading(true);
     try {
-      const result = await api.post(`/dashboard/engagement/volontaires-statuts-divers`, { filters });
+      const result = await api.post(`/elasticsearch/dashboard/engagement/status-divers`, { filters });
       if (result.ok) {
         let statuses = {};
 
@@ -33,16 +34,28 @@ export default function VolontairesStatutsDivers({ filters, className = "" }) {
           if (statuses[status.category] === undefined) {
             statuses[status.category] = [];
           }
-          let url = '/volontaire?STATUS=%5B"VALIDATED"%5D';
+          let url = "";
           switch (status.category) {
             case "phase2":
-              url += `&APPLICATION_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+              url += getNewLink(
+                {
+                  base: `/volontaire`,
+                  filter: filters,
+                  filtersUrl: [queryString.stringify({ phase2ApplicationStatus: encodeURIComponent(status.status) })],
+                },
+                "session",
+              );
               break;
             case "contract":
-              url += `&CONTRACT_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
+              url += getNewLink(
+                {
+                  base: `/volontaire`,
+                  filter: filters,
+                  filtersUrl: [queryString.stringify({ statusPhase2Contract: encodeURIComponent(status.status) })],
+                },
+                "session",
+              );
               break;
-            case "equivalence":
-              url += `&EQUIVALENCE_STATUS=%5B"${encodeURIComponent(status.status)}"%5D`;
           }
 
           statuses[status.category].push({

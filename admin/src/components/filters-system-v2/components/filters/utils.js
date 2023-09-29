@@ -122,3 +122,19 @@ export const orderCohort = (cohorts) => {
   cohorts.sort((a, b) => b.date - a.date);
   return cohorts;
 };
+
+export const transformExistingField = (data) => {
+  const newData = [
+    { key: "true", doc_count: 0 },
+    { key: "false", doc_count: 0 },
+  ];
+  data.map((d) => {
+    console.log(d);
+    if (d.key === "N/A" || d.key === "") {
+      newData.find((e) => e.key === "false").doc_count += d.doc_count;
+    } else {
+      newData.find((e) => e.key === "true").doc_count += d.doc_count;
+    }
+  });
+  return newData;
+};

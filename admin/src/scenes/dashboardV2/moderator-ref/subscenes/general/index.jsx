@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 
+import queryString from "query-string";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, translate, DASHBOARD_TODOS_FUNCTIONS } from "snu-lib";
+import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../../../sentry";
-import { translate } from "snu-lib";
-import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import api from "../../../../../services/api";
-import { getLink as getOldLink } from "../../../../../utils";
+import { getNewLink } from "../../../../../utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import KeyNumbers from "../../../components/KeyNumbers";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
 import InfoMessage from "../../../components/ui/InfoMessage";
@@ -17,8 +19,7 @@ import Engagement from "../../../components/ui/icons/Engagement";
 import Inscription from "../../../components/ui/icons/Inscription";
 import Sejour from "../../../components/ui/icons/Sejour";
 import VolontaireSection from "./components/VolontaireSection";
-import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
-import KeyNumbers from "../../../components/KeyNumbers";
+import { Link } from "react-router-dom";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -29,6 +30,8 @@ export default function Index() {
 
   const [stats, setStats] = useState({});
   const [message, setMessage] = useState([]);
+
+  const [cohortsNotFinished, setCohortsNotFinished] = useState([]);
 
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
@@ -52,7 +55,7 @@ export default function Index() {
           id: "academy",
           name: "Académie",
           fullValue: "Toutes",
-          options: academyOptions,
+          options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
         }
       : null,
     {
@@ -82,7 +85,6 @@ export default function Index() {
     const res = await getCurrentInscriptions(selectedFilters);
     setVolontairesData(res);
   }
-
   async function fetchInOutCohort() {
     const res = await getInAndOutCohort(selectedFilters);
     setInAndOutCohort(res);
@@ -111,7 +113,7 @@ export default function Index() {
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateStats = async (id) => {
       const response = await api.post("/elasticsearch/dashboard/general/todo", { filters: { meetingPointIds: [id], cohort: [] } });
       const s = response.data;
@@ -130,21 +132,33 @@ export default function Index() {
       setMessage(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération des messages");
+    }
+  };
+
+  const getCohorts = async () => {
+    try {
+      const { ok, code, data: cohorts } = await api.get(`/cohort`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes", translate(code));
+      setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name));
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes");
     }
   };
 
   React.useEffect(() => {
     getMessage();
+    getCohorts();
   }, []);
 
   return (
-    <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}>
+    <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription"]}>
       <div className="flex flex-col gap-8 mb-4">
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
-          <Actus stats={stats} />
+          <Actus stats={stats} user={user} cohortsNotFinished={cohortsNotFinished} />
           <KeyNumbers />
         </div>
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
@@ -163,11 +177,11 @@ export default function Index() {
             goal={goal}
             showTooltips={true}
             legendUrls={[
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] }),
-              getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
+              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
             ]}
           />
         </div>
@@ -177,7 +191,15 @@ export default function Index() {
   );
 }
 
-const NoteContainer = ({ title, number, content, btnLabel }) => {
+const NotePlaceholder = () => {
+  return (
+    <div className="flex h-36 w-full items-center justify-center rounded-lg bg-gray-50">
+      <div className="text-sm text-center text-gray-400">Aucune notification</div>
+    </div>
+  );
+};
+
+const NoteContainer = ({ title, number, content, btnLabel, link }) => {
   return (
     <div className="flex h-36 w-full flex-col justify-between rounded-lg bg-blue-50 py-3.5 px-3">
       <div className="flex flex-col gap-2">
@@ -187,20 +209,23 @@ const NoteContainer = ({ title, number, content, btnLabel }) => {
           {content}
         </p>
       </div>
-      <div className="flex justify-end">
-        <button className="flex items-center gap-2 rounded-full bg-blue-600 py-1 pr-2 pl-3 text-xs font-medium text-white">
-          <span>{btnLabel}</span>
-          <HiChevronRight className="h-4 w-4" />
-        </button>
-      </div>
+      {link && (
+        <div className="flex justify-end">
+          <Link className="flex items-center gap-2 rounded-full bg-blue-600 py-1 pr-2 pl-3 text-xs font-medium text-white" to={link}>
+            <span>{btnLabel}</span>
+            <HiChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
 
-function Actus({ stats }) {
+function Actus({ stats, user, cohortsNotFinished }) {
   const [fullNote, setFullNote] = useState(false);
 
   function shouldShow(parent, key, index = null) {
+    true;
     if (fullNote) return true;
 
     const entries = Object.entries(parent);
@@ -236,6 +261,10 @@ function Actus({ stats }) {
       </div>
     );
 
+  const totalInscription = total(stats.inscription);
+  const totalSejour = total(stats.sejour);
+  const totalEngagement = total(stats.engagement);
+
   return (
     <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
       <div className="grid grid-cols-3 gap-4">
@@ -243,266 +272,283 @@ function Actus({ stats }) {
           <div className="flex items-center gap-3">
             <Inscription />
             <div className="text-sm font-bold leading-5 text-gray-900">Inscriptions</div>
-            <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.inscription)}</div>
+            <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!totalInscription ? "text-gray-400" : "text-blue-600"}`}>
+              {totalInscription}
+            </div>
           </div>
-          {shouldShow(stats.inscription, "inscription_en_attente_de_validation") && (
+          {!totalInscription && <NotePlaceholder />}
+          {shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION) && (
             <NoteContainer
               title="Dossier"
-              number={stats.inscription.inscription_en_attente_de_validation}
-              content="dossier d’inscriptions sont en attente de validation."
+              number={stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION]}
+              content="dossiers d'inscription sont en attente de validation."
+              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À instruire"
             />
           )}
-          {shouldShow(stats.inscription, "inscription_corrigé_à_instruire_de_nouveau") && (
+          {shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_CORRECTION) && (
             <NoteContainer
               title="Dossier"
-              number={stats.inscription.inscription_corrigé_à_instruire_de_nouveau}
-              content="dossiers d’inscription corrigés sont à instruire de nouveau."
+              number={stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_CORRECTION]}
+              content="dossiers d'inscription corrigés sont à instruire de nouveau."
+              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À instruire"
             />
           )}
-          {shouldShow(stats.inscription, "inscription_en_attente_de_correction") && (
+          {shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_CORRECTION) && (
             <NoteContainer
               title="Dossier"
-              number={stats.inscription.inscription_en_attente_de_correction}
-              content="dossiers d’inscription en attente de correction."
+              number={stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_CORRECTION]}
+              content="dossiers d'inscription en attente de correction."
+              link={`/inscription?status=WAITING_CORRECTION&cohort=${cohortsNotFinished.join("~")}`}
               btnLabel="À relancer"
             />
           )}
-          {stats.inscription.inscription_en_attente_de_validation_cohorte.map(
+          {stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT].map(
             (item, key) =>
-              shouldShow(stats.inscription, "inscription_en_attente_de_validation_cohorte", key) && (
+              shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT, key) && (
                 <NoteContainer
-                  key={"inscription_en_attente_de_validation_cohorte" + item.cohort}
-                  title="Droit à l'image"
+                  key={DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT + item.cohort}
+                  title="Dossier"
                   number={item.count}
-                  content={`dossiers d’inscription en attente de validation pour le séjour de ${item.cohort}`}
+                  content={`dossiers d'inscription en attente de validation pour le séjour de ${item.cohort}`}
+                  link={`/inscription?cohort=${item.cohort}&status=WAITING_VALIDATION`}
                   btnLabel="À relancer"
                 />
               ),
           )}
-          {stats.inscription.inscription_sans_accord_renseigné.map(
+          {/* {stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT].map(
             (item, key) =>
-              shouldShow(stats.inscription, "inscription_sans_accord_renseigné", key) && (
+              shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT, key) && (
                 <NoteContainer
-                  key={"inscription_sans_accord_renseigné" + item.cohort}
-                  title="Droit à l'image"
+                  key={DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT + item.cohort}
+                  title=""
                   number={item.count}
                   content={`volontaires sans accord renseigné pour le séjour de ${item.cohort}`}
+                  link={`volontaire?status=VALIDATED~WAITING_LIST&cohort=${item.cohort}&parentAllowSNU=N/A`}
                   btnLabel="À relancer"
                 />
               ),
-          )}
+          )} */}
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <Sejour />
             <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
-            <div className=" rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.sejour)}</div>
+            <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!totalSejour ? "text-gray-400" : "text-blue-600"}`}>{totalSejour}</div>
           </div>
-          {stats.sejour.sejour_rassemblement_non_confirmé.map(
+          {!totalSejour && <NotePlaceholder />}
+          {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejour_rassemblement_non_confirmé", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED, key) && (
                 <NoteContainer
                   title="Point de rassemblement"
-                  key={"sejour_rassemblement_non_confirmé" + item.cohort}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED + item.cohort}
                   number={item.count}
-                  content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  content={`volontaires n'ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  link={`/volontaire?status=VALIDATED&hasMeetingInformation=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
                   btnLabel="À déclarer"
                 />
               ),
           )}
-          {stats.sejour.sejour_participation_non_confirmée.map(
+          {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejour_participation_non_confirmée", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED, key) && (
                 <NoteContainer
                   title="Point de rassemblement"
-                  key={"sejour_participation_non_confirmée" + item.cohort}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED + item.cohort}
                   number={item.count}
-                  content={`volontaires n’ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                  content={`volontaires n'ont pas confirmé leur participation pour le séjour de ${item.cohort}`}
+                  link={`/volontaire?status=VALIDATED&youngPhase1Agreement=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
                   btnLabel="À déclarer"
                 />
               ),
           )}
-          {stats.sejour.sejour_point_de_rassemblement_à_déclarer.map(
+          {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejour_point_de_rassemblement_à_déclarer", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE, key) && (
                 <NoteContainer
                   title="Point de rassemblement"
-                  key={"sejour_point_de_rassemblement_à_déclarer" + item.cohort + item.department}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
+                  link={`/point-de-rassemblement/liste/liste-points?cohort=${item.cohort}&department=${item.department}`}
                   btnLabel="À déclarer"
                 />
               ),
           )}
-          {stats.sejour.sejour_emploi_du_temps_non_déposé.map(
+          {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejour_emploi_du_temps_non_déposé", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED, key) && (
                 <NoteContainer
                   title="Emploi du temps"
-                  key={"sejour_emploi_du_temps_non_déposé" + item.cohort}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED + item.cohort}
                   number={item.count}
-                  content={`emplois du temps n’ont pas été déposés. ${item.cohort}`}
+                  content={`emplois du temps n'ont pas été déposés. ${item.cohort}`}
+                  link={`/centre/liste/session?hasTimeSchedule=false&cohort=${item.cohort}`}
                   btnLabel="À relancer"
                 />
               ),
           )}
-          {stats.sejour.sejour_contact_à_renseigner.map(
+          {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejour_contact_à_renseigner", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL, key) && (
                 <NoteContainer
                   title="Contact"
-                  key={"sejour_contact_à_renseigner" + item.cohort + item.department}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
+                  link={user.role === ROLES.REFERENT_DEPARTMENT ? `/team` : null}
                   btnLabel="À renseigner"
                 />
               ),
           )}
-          {stats.sejour.sejour_volontaires_à_contacter.map(
+          {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejour_volontaires_à_contacter", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT, key) && (
                 <NoteContainer
                   title="Cas particuliers"
-                  key={"sejour_volontaires_à_contacter" + item.cohort}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT + item.cohort}
                   number={item.count}
                   content={`volontaires à contacter pour préparer leur accueil pour le séjour de ${item.cohort}`}
+                  link={null}
                   btnLabel="À contacter"
                 />
               ),
           )}
-          {stats.sejour.sejour_chef_de_centre.map(
+          {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejour_chef_de_centre", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL, key) && (
                 <NoteContainer
                   title="Chef de centre"
-                  key={"sejour_chef_de_centre" + item.cohort}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL + item.cohort}
                   number={item.count}
                   content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
+                  link={`centre/liste/session?headCenterExist=false&cohort=${item.cohort}`}
                   btnLabel="À renseigner"
                 />
               ),
           )}
-          {stats.sejour.sejour_centre_à_déclarer.map(
+          {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejour_centre_à_déclarer", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE, key) && (
                 <NoteContainer
                   title="Centre"
-                  key={"sejour_centre_à_déclarer" + item.cohort + item.department}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE + item.cohort + item.department}
                   number=""
                   content={`Au moins 1 centre est en attente de déclaration pour le séjour de ${item.cohort} (${item.department})`}
+                  link={`/centre/liste/session?cohort=${item.cohort}&department=${item.department}`}
                   btnLabel="À déclarer"
                 />
               ),
           )}
-          {stats.sejour.sejourPointage.map(
+          {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejourPointage", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN, key) && (
                 <NoteContainer
                   title="Pointage"
-                  key={"sejourPointage" + item.cohort}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN + item.cohort}
                   number={item.count}
-                  content={`centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de ${item.cohort}`}
+                  content={`centres n'ont pas pointés tous leurs volontaires à l'arrivée au séjour de ${item.cohort}`}
+                  link={null}
                   btnLabel="À renseigner"
                 />
               ),
           )}
-          {stats.sejour.sejour_pointage_jdm.map(
+          {/* ON A PLUS LA JDM DE MEMOIRE */}
+          {/* {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN_JDM].map(
             (item, key) =>
-              shouldShow(stats.sejour, "sejour_pointage_jdm", key) && (
+              shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN_JDM, key) && (
                 <NoteContainer
                   title="Pointage"
-                  key={"sejour_pointage_jdm" + item.cohort}
+                  key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN_JDM + item.cohort}
                   number={item.count}
-                  content={`centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de ${item.cohort}`}
+                  content={`centres n'ont pas pointés tous leurs volontaires à la JDM sur le séjour de ${item.cohort}`}
+                  link={null}
                   btnLabel="À renseigner"
                 />
               ),
-          )}
+          )} */}
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <Engagement />
             <div className="text-sm font-bold leading-5 text-gray-900">Engagement</div>
-            <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.engagement)}</div>
+            <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!totalEngagement ? "text-gray-400" : "text-blue-600"}`}>
+              {totalEngagement}
+            </div>
           </div>
-          {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
+          {!totalEngagement && <NotePlaceholder />}
+          {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.CONTRACT_TO_EDIT) && (
             <NoteContainer
               title="Contrat"
-              number={stats.engagement.engagement_contrat_à_éditer}
-              content="contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature."
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.CONTRACT_TO_EDIT]}
+              content="contrats d'engagement sont à éditer par la structure d'accueil et à envoyer en signature."
               btnLabel="À suivre"
+              link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=DRAFT`}
             />
           )}
-          {shouldShow(stats.engagement, "engagement_contrat_en_attente_de_signature") && (
+          {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.CONTRACT_TO_SIGN) && (
             <NoteContainer
               title="Contrat"
-              number={stats.engagement.engagement_contrat_en_attente_de_signature}
-              content="contrats d’engagement sont en attente de signature."
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.CONTRACT_TO_SIGN]}
+              content="contrats d'engagement sont en attente de signature."
               btnLabel="À suivre"
+              link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=SENT`}
             />
           )}
-          {shouldShow(stats.engagement, "engagement_dossier_militaire_en_attente_de_validation") && (
+          {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MILITARY_FILE_TO_VALIDATE) && (
             <NoteContainer
               title="Dossier d’éligibilité"
-              number={stats.engagement.engagement_dossier_militaire_en_attente_de_validation}
-              content="dossiers d’éligibilité en préparation militaire sont en attente de vérification."
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MILITARY_FILE_TO_VALIDATE]}
+              content="dossiers d'éligibilité en préparation militaire sont en attente de vérification."
               btnLabel="À vérifier"
+              link={`/volontaire?status=VALIDATED&statusMilitaryPreparationFiles=WAITING_VERIFICATION`}
             />
           )}
-          {shouldShow(stats.engagement, "engagement_mission_en_attente_de_validation") && (
+          {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MISSION_TO_VALIDATE) && (
             <NoteContainer
               title="Mission"
-              number={stats.engagement.engagement_mission_en_attente_de_validation}
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MISSION_TO_VALIDATE]}
               content="missions sont en attente de validation."
               btnLabel="À instruire"
+              link={`/mission?status=WAITING_VALIDATION`}
             />
           )}
-          {shouldShow(stats.engagement, "engagement_phase3_en_attente_de_validation") && (
+          {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.PHASE3_TO_VALIDATE) && (
             <NoteContainer
               title="Phase 3"
-              number={stats.engagement.engagement_phase3_en_attente_de_validation}
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.PHASE3_TO_VALIDATE]}
               content="demandes de validation de phase 3 à suivre."
               btnLabel="À suivre"
+              link={`/volontaire?status=VALIDATED&statusPhase3=WAITING_VALIDATION`}
             />
           )}
-          {stats.engagement.engagement_contrat_à_renseigner.map(
-            (item, key) =>
-              shouldShow(stats.engagement, "engagement_contrat_à_renseigner", key) && (
-                <NoteContainer
-                  title="Contact"
-                  key={"engagement_contrat_à_renseigner" + item.cohort + item.department}
-                  number=""
-                  content={`Au moins 1 représentant de l’État est à renseigner pour le séjour de ${item.cohort} (${item.department})`}
-                  btnLabel="À renseigner"
-                />
-              ),
-          )}
-          {shouldShow(stats.engagement, "volontaires_à_suivre_sans_contrat") && (
+
+          {/* {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT) && (
             <NoteContainer
               title="Volontaires"
-              number={stats.engagement.volontaires_à_suivre_sans_contrat}
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT]}
               content="volontaires ayant commencé leur mission sans contrat signé"
               btnLabel="À suivre"
             />
           )}
-          {shouldShow(stats.engagement, "volontaires_à_suivre_sans_statut") && (
+          {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS) && (
             <NoteContainer
               title="Volontaires"
-              number={stats.engagement.volontaires_à_suivre_sans_statut}
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS]}
               content="volontaires ayant commencé leur mission sans statut à jour"
               btnLabel="À suivre"
             />
           )}
-          {shouldShow(stats.engagement, "volontaires_à_suivre_achevé_sans_statut") && (
+          {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END) && (
             <NoteContainer
               title="Volontaires"
-              number={stats.engagement.volontaires_à_suivre_achevé_sans_statut}
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END]}
               content="volontaires ayant achevé leur mission sans statut à jour"
               btnLabel="À suivre"
             />
-          )}
+          )} */}
         </div>
       </div>
       <div className="flex justify-center">

@@ -19,7 +19,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import api from "../../services/api";
 import { Title } from "../pointDeRassemblement/components/common";
 import { Badge, TabItem } from "./components/commons";
-import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
+import { orderCohort, transformExistingField } from "../../components/filters-system-v2/components/filters/utils";
 
 import { useHistory, useParams } from "react-router-dom";
 
@@ -115,6 +115,13 @@ const ListSession = ({ firstSession }) => {
     { title: "Places restantes", name: "placesLeft", missingLabel: "Non renseignée" },
     { title: "Emploi du temps", name: "hasTimeSchedule", missingLabel: "Non renseignée", translate: translate },
     { title: "Projet Pédagogique", name: "hasPedagoProject", missingLabel: "Non renseignée", translate: translate },
+    {
+      title: "Chef de centre renseigné",
+      name: "headCenterExist",
+      missingLabel: "Non renseigné",
+      transformData: transformExistingField,
+      translate,
+    },
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", missingLabel: "Non renseignée" });
 

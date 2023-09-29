@@ -30,42 +30,6 @@ router.post("/refresh", authMiddleware, async (req, res) => {
   }
 });
 
-// Compter les jeunes qui ont changé de statut dans une période
-// Pour 1..n départements ou 1..n régions ou au global
-router.post(
-  "/young-status/count",
-  authMiddleware,
-  validationMiddleware(
-    Joi.object({
-      region: Joi.string(),
-      department: Joi.array().items(Joi.string()),
-      status: Joi.string().valid("VALIDATED", "WAITING_VALIDATION", "WITHDRAWN").required(),
-      startDate: Joi.string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/)
-        .required(),
-      endDate: Joi.string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/)
-        .required(),
-    }).oxor("region", "department"),
-  ),
-  async ({ body }, res) => {
-    try {
-      let result;
-      if (body.region?.length) {
-        result = await logsByDayUserStatusChangeEventRepository.countByStatusAndRegion(body.status, body.region, body.startDate, body.endDate);
-      } else if (body.department?.length) {
-        result = await logsByDayUserStatusChangeEventRepository.countByStatusAndDepartment(body.status, body.department, body.startDate, body.endDate);
-      } else {
-        result = await logsByDayUserStatusChangeEventRepository.countByStatus(body.status, body.startDate, body.endDate);
-      }
-      return res.status(200).send({ ok: true, data: result });
-    } catch (error) {
-      capture(error);
-      res.status(500).send({ ok: false, code: "Error in young-status" });
-    }
-  },
-);
-
 // Compter les jeunes qui ont changé de cohorte dans une période
 // Pour 1..n départements ou 1..n régions ou au global
 router.post(

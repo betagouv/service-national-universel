@@ -62,8 +62,6 @@ function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, custo
     } else {
       aggs[key] = { filter, aggs: { names: { histogram: { field: key, interval: 1, min_doc_count: 1 } } } };
     }
-    //add agg for count all of documents that maths the query
-    aggs.count = { filter: { bool: { must: [], filter } }, aggs: { total: { value_count: { field: "_id" } } } };
   }
   return aggs;
 }
@@ -93,8 +91,10 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   const search = (queryFilters.searchbar || []).filter((e) => e.trim()).length ? searchSubQuery(queryFilters.searchbar, searchFields) : null;
   // Hits request body
   const hitsRequestBody = { query: getMainQuery(), size, from: page * size, sort: buildSort(sort) };
+  let countAggsQuery = unsafeStrucuredClone({ bool: { must: [], filter: contextFilters } });
   if (search) {
     hitsRequestBody.query.bool.must.push(search);
+    countAggsQuery.bool.must.push(search);
     // We want to sort by score if there a search.
     delete hitsRequestBody.sort;
   }
@@ -102,9 +102,12 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
     const keyWithoutKeyword = key.replace(".keyword", "");
     if (!queryFilters[keyWithoutKeyword]?.length) continue;
     hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
+    countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
   }
   // Aggs request body
   const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters, customQueries), size: 0, track_total_hits: true };
+  //add agg for count all of documents that maths the query
+  aggsRequestBody.aggs.count = { filter: countAggsQuery, aggs: { total: { value_count: { field: "_id" } } } };
   return { hitsRequestBody, aggsRequestBody };
 }
 

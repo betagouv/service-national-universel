@@ -12,10 +12,19 @@ const formatWeekdayName = (day) => {
 };
 
 export default function DatePicker({ value, onChange, disabled, fromYear, toYear, mode = "single" }) {
-  const defaultMonth = mode === "single" ? dayjs(value).toUtcLocally().toDate() : dayjs(value?.from).toUtcLocally().toDate();
+  const defaultMonth =
+    mode === "single"
+      ? value
+        ? dayjs(value).toUtcLocally().toDate()
+        : dayjs(new Date()).toUtcLocally().toDate()
+      : value?.from
+      ? dayjs(value?.from).toUtcLocally().toDate()
+      : dayjs(new Date()).toUtcLocally().toDate();
   const selected =
     mode === "single"
-      ? dayjs(value).toUtcLocally().toDate()
+      ? value
+        ? dayjs(value).toUtcLocally().toDate()
+        : undefined
       : { from: value?.from ? dayjs(value?.from).toUtcLocally().toDate() : undefined, to: value?.to ? dayjs(value?.to).toUtcLocally().toDate() : undefined };
 
   return (
@@ -31,8 +40,8 @@ export default function DatePicker({ value, onChange, disabled, fromYear, toYear
       toYear={toYear}
       selected={selected}
       onSelect={(date) => {
-        if (mode === "range") return onChange({ from: dayjs(date.from).toUtc().toDate(), to: dayjs(date.to).toUtc().toDate() });
-        onChange(dayjs(date).toUtc().toDate());
+        if (mode === "range") return onChange({ from: date?.from ? dayjs(date.from).toUtc().toDate() : undefined, to: date?.to ? dayjs(date.to).toUtc().toDate() : undefined });
+        onChange(date ? dayjs(date).toUtc().toDate() : undefined);
       }}
     />
   );

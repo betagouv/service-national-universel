@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
 import { formatDateFR, translate, translateGrade } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
@@ -7,16 +9,17 @@ import { PreInscriptionContext } from "../../../context/PreInscriptionContextPro
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
+import InfoMessage from "../components/InfoMessage";
 
 export default function StepConfirm() {
   const [error, setError] = useState({});
-  const [data, setData, removePersistedData] = React.useContext(PreInscriptionContext);
+  const [data, removePersistedData] = React.useContext(PreInscriptionContext);
+  const dispatch = useDispatch();
 
   const history = useHistory();
 
@@ -58,13 +61,20 @@ export default function StepConfirm() {
     if (values.schooled === "true") values.grade = data.scolarity;
 
     try {
-      // eslint-disable-next-line no-unused-vars
-      const { user, code, ok } = await api.post("/young/signup", values);
-      if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
-      plausibleEvent("Phase0/CTA preinscription - inscription");
-      setData({ ...data, step: PREINSCRIPTION_STEPS.DONE });
-      removePersistedData();
-      history.push("/preinscription/done");
+      const { code, ok } = await api.post("/young/signup", values);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+      } else {
+        plausibleEvent("Phase0/CTA preinscription - inscription");
+      }
+      const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
+      if (young) {
+        if (token) api.setToken(token);
+        dispatch(setYoung(young));
+        removePersistedData();
+      }
+      // after connection young is automatically redirected to /preinscription/email-validation
+      history.push("/preinscription/email-validation");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
         setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
@@ -140,10 +150,11 @@ export default function StepConfirm() {
             <p className="text-right text-[#161616]">{data.email}</p>
           </div>
         </div>
-
+        <hr className="my-3 md:my-4 h-px border-0 md:bg-gray-200" />
+        <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>
         <SignupButtonContainer
           onClickNext={() => onSubmit()}
-          labelNext="M'inscrire au SNU"
+          labelNext="Recevoir un code d'activation par e-mail"
           onClickPrevious={() => history.push("/preinscription/profil")}
           disabled={Object.values(error).length}
           collapsePrevious={true}

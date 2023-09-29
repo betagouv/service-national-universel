@@ -5,6 +5,7 @@ import { formatStringLongDate, ROLES, translate, translateApplication, translate
 import api from "../services/api";
 import { translateModelFields } from "./translateFieldsModel";
 import { environment } from "../config";
+import dayjs from "dayjs";
 export * from "snu-lib";
 export * from "./translateFieldsModel";
 
@@ -182,15 +183,23 @@ export const getNewLink = ({ base = "/", filter, filtersUrl = [] }, from) => {
   Object.keys(filter).forEach((key) => {
     if (key === "cohorts" && from === "center") return;
     if (key === "cohort" && from === "session") return;
+
     if (filter[key]?.length) {
-      filtersUrl.push(`${key}=${replaceSpacesNewList(filter[key]?.map((c) => `${c}`)?.join(","))}`);
+      filtersUrl.push(`${key}=${replaceSpacesNewList(filter[key]?.map((c) => `${c}`)?.join("~"))}`);
     }
   });
   if (filter?.cohorts?.length && from === "center") {
-    filtersUrl.push(`cohorts=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
+    filtersUrl.push(`cohorts=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join("~"))}`);
   }
   if (filter?.cohorts?.length && from === "session") {
-    filtersUrl.push(`cohort=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join(","))}`);
+    filtersUrl.push(`cohort=${replaceSpacesNewList(filter?.cohorts?.map((c) => `${c}`)?.join("~"))}`);
+  }
+
+  if (filter.start) {
+    filtersUrl.push(`fromDate=${dayjs(filter.start).format("YYYY-MM-DD")}`);
+  }
+  if (filter.end) {
+    filtersUrl.push(`toDate=${dayjs(filter.end).format("YYYY-MM-DD")}`);
   }
 
   let res = base;

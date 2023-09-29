@@ -248,6 +248,8 @@ const ES_NO_LIMIT = 10_000;
 
 const SENDINBLUE_TEMPLATES = {
   SIGNIN_2FA: "1317",
+  SIGNUP_EMAIL_VALIDATION: "1316",
+  PROFILE_EMAIL_VALIDATION: "1347",
   FORGOT_PASSWORD: "1308",
 
   invitationReferent: {
@@ -338,6 +340,8 @@ const SENDINBLUE_TEMPLATES = {
     INSCRIPTION_REMIND_CORRECTION: "1285",
     INSCRIPTION_WAITING_LIST: "1286",
     INSCRIPTION_REFUSED: "1246",
+    INSCRIPTION_END_IN_PROGRESS_ELIGIBLE: "1271",
+    INSCRIPTION_END_IN_PROGRESS_NOT_ELIGIBLE: "1270",
     INSTRUCTION_END_WAITING_VALIDATION_ELIGIBLE: "978",
     INSTRUCTION_END_WAITING_VALIDATION_NOT_ELIGIBLE: "1268",
     INSTRUCTION_END_WAITING_CORRECTION_ELIGIBLE: "936",
@@ -532,21 +536,21 @@ const START_DATE_SESSION_PHASE1 = {
 };
 
 const START_DATE_PHASE1 = {
-  2019: new Date("06/09/2019"),
-  2020: new Date("06/14/2021"),
-  2021: new Date("06/14/2021"),
-  "Février 2022": new Date("02/06/2022"),
-  "Juin 2022": new Date("06/05/2022"),
-  "Juillet 2022": new Date("06/27/2022"),
+  2019: new Date("06/16/2019"),
+  2020: new Date("06/21/2021"),
+  2021: new Date("06/21/2021"),
+  "Février 2022": new Date("02/13/2022"),
+  "Juin 2022": new Date("06/12/2022"),
+  "Juillet 2022": new Date("07/03/2022"),
 };
 
 const END_DATE_PHASE1 = {
-  2019: new Date("06/29/2019"),
-  2020: new Date("07/03/2021"),
-  2021: new Date("07/03/2021"),
-  "Février 2022": new Date("02/26/2022"),
-  "Juin 2022": new Date("06/25/2022"),
-  "Juillet 2022": new Date("07/16/2022"),
+  2019: new Date("06/28/2019"),
+  2020: new Date("07/02/2021"),
+  2021: new Date("07/02/2021"),
+  "Février 2022": new Date("02/25/2022"),
+  "Juin 2022": new Date("06/24/2022"),
+  "Juillet 2022": new Date("07/15/2022"),
 };
 
 const PHASE1_YOUNG_ACCESS_LIMIT = {

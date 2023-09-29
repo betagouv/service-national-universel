@@ -6,7 +6,7 @@ import { getStepFromUrlParam, PREINSCRIPTION_STEPS_LIST } from "../../../utils/n
 
 const ProgressBar = () => {
   const { step } = useParams();
-  const currentStep = getStepFromUrlParam(step, PREINSCRIPTION_STEPS_LIST) || "ELIGIBILITE";
+  const currentStep = getStepFromUrlParam(step, PREINSCRIPTION_STEPS_LIST);
   const device = useDevice();
 
   return ["ELIGIBILITE", "SEJOUR", "PROFIL"].includes(currentStep) ? (

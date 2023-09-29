@@ -6,6 +6,8 @@ import api from "../../../../../../services/api";
 import { translate } from "snu-lib/translation";
 import StatusTable from "../../../../components/ui/StatusTable";
 import { LoadingDoughnut } from "../../../../components/ui/loading";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function SectionStructures({ filters }) {
   const [loading, setLoading] = useState(true);
@@ -15,78 +17,54 @@ export default function SectionStructures({ filters }) {
   const [structures, setStructures] = useState(null);
 
   useEffect(() => {
-    loadData();
-  }, [filters]);
+    (async () => {
+      const res = await api.post("/elasticsearch/dashboard/engagement/structures", {
+        filters: Object.fromEntries(Object.entries(filters)),
+      });
 
-  async function loadData() {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await api.post(`/dashboard/engagement/structures`, { filters });
-      if (result.ok) {
-        let total = 0;
-        let national = 0;
-        let byStatus = {};
-
-        for (const structure of result.data) {
-          if (byStatus[structure._id.legalStatus] === undefined) {
-            byStatus[structure._id.legalStatus] = {
-              _id: structure._id.legalStatus,
-              total: 0,
-              national: 0,
-              types: [],
+      setTotalStructures(res.hits?.total?.value);
+      setNationalStructures(res.aggregations?.total_with_network_name?.doc_count);
+      setStructures(
+        res.aggregations?.by_legal_status?.buckets.map((structure) => {
+          structure.types = structure.by_type.buckets.map((type) => {
+            return {
+              _id: type.key,
+              total: type.doc_count,
             };
-          }
-          byStatus[structure._id.legalStatus].total += structure.total;
-          byStatus[structure._id.legalStatus].national += structure.national;
-          byStatus[structure._id.legalStatus].types.push({
-            _id: structure._id.type,
-            total: structure.total,
-            national: structure.national,
           });
-
-          total += structure.total;
-          national += structure.national;
-        }
-
-        setTotalStructures(total);
-        setNationalStructures(national);
-
-        setStructures(
-          Object.values(byStatus).map((structure) => ({
-            _id: structure._id,
-            label: translate(structure._id),
-            total: structure.total,
-            national: structure.national,
+          return {
+            _id: structure.key,
+            label: translate(structure.key),
+            total: structure.doc_count,
             info: getInfoPanel(structure),
-          })),
-        );
-      } else {
-        console.log("error : ", result);
-        setError("Erreur: impossible de charger les données.");
-      }
-    } catch (err) {
-      console.log("Error loading structures data", err);
-      setError("Erreur: impossible de charger les données.");
-    }
-    setLoading(false);
-  }
+          };
+        }),
+      );
+      setLoading(false);
+    })();
+  }, [filters]);
 
   function getInfoPanel(structure) {
     const total = structure.types ? structure.types.reduce((acc, type) => acc + type.total, 0) : 0;
 
-    switch (structure._id) {
+    switch (structure.key) {
       case "PRIVATE":
       case "PUBLIC":
         return (
           <div className="p-8">
-            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure.key)}</div>
             <FullDoughnut
               legendSide="right"
               maxLegends={3}
               labels={structure.types.map((type) => translate(type._id))}
               values={structure.types.map((type) => Math.round((type.total / total) * 100))}
-              legendUrls={structure.types.map((type) => `/structure?LEGAL_STATUS=%5B"${structure._id}"%5D&TYPE=%5B"${type._id}"%5D`)}
+              legendUrls={structure.types.map((type) =>
+                getNewLink({
+                  base: `/structure`,
+                  filter: filters,
+                  filtersUrl: [queryString.stringify({ legalStatus: structure.key, types: type._id })],
+                }),
+              )}
               valueSuffix="%"
               tooltips={structure.types.map((type) => type.total)}
             />
@@ -98,12 +76,16 @@ export default function SectionStructures({ filters }) {
             status: translate(type._id),
             nb: type.total,
             percentage: Math.round((type.total / total) * 100),
-            url: `/structure?LEGAL_STATUS=%5B"ASSOCIATION"%5D&TYPE=%5B"${type._id}"%5D`,
+            url: getNewLink({
+              base: `/structure`,
+              filter: filters,
+              filtersUrl: [queryString.stringify({ legalStatus: "ASSOCIATION", types: type._id })],
+            }),
           };
         });
         return (
           <div className="p-8">
-            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure._id)}</div>
+            <div className="mb-4 text-base font-bold text-gray-900">{translate(structure.key)}</div>
             <StatusTable statuses={statuses} />
           </div>
         );
@@ -112,7 +94,6 @@ export default function SectionStructures({ filters }) {
         return null;
     }
   }
-
   return (
     <Section title="Structures">
       {error ? (
@@ -120,10 +101,13 @@ export default function SectionStructures({ filters }) {
       ) : (
         <div className="flex">
           <div className="mr-4 flex flex-[0_0_332px] flex-col">
-            <DashboardBox title="Structures" className="grow" to="/structure">
+            <DashboardBox title="Structures" className="grow" to={getNewLink({ base: `/structure`, filter: filters })}>
               {loading ? <LoadingDoughnut /> : <div className="text-2xl font-bold hover:text-gray-900">{totalStructures}</div>}
             </DashboardBox>
-            <DashboardBox title="Affiliées à un réseau national" className="grow" to="/structure">
+            <DashboardBox
+              title="Affiliées à un réseau national"
+              className="grow"
+              to={getNewLink({ base: `/structure`, filter: filters, filtersUrl: [queryString.stringify({ networkExist: true })] })}>
               {loading ? <LoadingDoughnut /> : <div className="text-2xl font-bold">{nationalStructures}</div>}
             </DashboardBox>
           </div>
@@ -138,7 +122,13 @@ export default function SectionStructures({ filters }) {
                 maxLegends={2}
                 labels={structures.map((structure) => structure.label)}
                 values={structures.map((structure) => structure.total)}
-                legendUrls={structures.map((structure) => `/structure?LEGAL_STATUS=%5B"${structure._id}"%5D`)}
+                legendUrls={structures.map((structure) =>
+                  getNewLink({
+                    base: `/structure`,
+                    filter: filters,
+                    filtersUrl: [queryString.stringify({ legalStatus: structure._id })],
+                  }),
+                )}
                 tooltipsPercent
                 className="justify-center"
                 legendInfoPanels={structures.map((structure) => structure.info)}

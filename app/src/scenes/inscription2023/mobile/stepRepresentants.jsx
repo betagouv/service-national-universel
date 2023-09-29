@@ -4,10 +4,8 @@ import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Error from "../../../components/error";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
-import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -21,6 +19,8 @@ import Input from "../components/Input";
 import Navbar from "../components/Navbar";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -255,13 +255,7 @@ export default function StepRepresentants() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <div className="bg-white p-4 text-[#161616]">
-        <div className="mt-2 flex w-full items-center justify-between">
-          <h1 className="text-xl font-bold">Mes représentants légaux</h1>
-          <a href={supportLink} target="_blank" rel="noreferrer">
-            <QuestionMarkBlueCircle />
-          </a>
-        </div>
+      <DSFRContainer title="Mes représentants légaux" supportLink={supportLink}>
         <div className="mt-2 text-sm text-[#666666]">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
         <hr className="my-4 h-px border-0 bg-gray-200" />
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
@@ -272,13 +266,13 @@ export default function StepRepresentants() {
           <div className="flex-1 text-sm text-[#3A3A3A]">Je ne possède pas de second(e) représentant(e) légal(e)</div>
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
-      </div>
+        {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
+          <SignupButtonContainer onClickNext={onCorrection} onClickPrevious={() => history.push("/")} disabled={loading} />
+        ) : (
+          <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
+        )}
+      </DSFRContainer>
       <Help supportLink={supportLink} />
-      {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-        <StickyButton text="Corriger" onClickPrevious={() => history.push("/")} onClick={onCorrection} disabled={loading} />
-      ) : (
-        <StickyButton text="Continuer" onClickPrevious={() => history.push("/inscription2023/consentement")} onClick={onSubmit} disabled={loading} />
-      )}
     </>
   );
 }

@@ -122,13 +122,13 @@ export default function FullDoughnut({
       // filter values
       if (totalValues !== 0) {
         for (let i = 0, n = values.length; i < n; ++i) {
-          if (values[i] / totalValues >= 0.01) {
-            completeValues.push({
-              value: values[i],
-              legend: legends[i],
-              tooltip: tooltips ? tooltips[i] : null,
-            });
-          }
+          // if (values[i] / totalValues >= 0.01) {
+          completeValues.push({
+            value: values[i],
+            legend: legends[i],
+            tooltip: tooltips ? tooltips[i] : null,
+          });
+          // }
         }
       }
 
@@ -205,7 +205,7 @@ export default function FullDoughnut({
   let mainClass = "flex items-center";
   // let graphClass = `relative w-[${CANVAS_SIZE}px] h-[${CANVAS_SIZE}px] shrink-0 grow-0`;
   let graphClass = `relative w-[208px] h-[208px] shrink-0 grow-0`;
-  let legendsClass = "shrink-0";
+  let legendsClass = "";
   let legendClass = "";
   let legendValueClass = "flex items-center";
   let legendDotClass = "mr-2";

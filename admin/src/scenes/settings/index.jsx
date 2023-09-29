@@ -47,7 +47,7 @@ export default function Settings() {
 
   const getCohort = async () => {
     try {
-      const { ok, data: reponseCohort } = await await api.get("/cohort/" + cohort);
+      const { ok, data: reponseCohort } = await api.get("/cohort/" + cohort);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du séjour");
       }
