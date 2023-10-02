@@ -77,7 +77,7 @@ export default function StepConfirm() {
       history.push("/preinscription/email-validation");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
-        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
+        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom, date de naissance et numéro de téléphone)." });
       else {
         capture(e);
         setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
