@@ -14,6 +14,7 @@
     "@headlessui/react": "1.7.17",
     "@heroicons/react": "^2.0.18",
     "@sentry/nextjs": "7.64.0",
+    "autoprefixer": "^10.4.16",
     "emoji-regex": "^10.2.1",
     "next": "^13.4.12",
     "react": "18.2.0",
