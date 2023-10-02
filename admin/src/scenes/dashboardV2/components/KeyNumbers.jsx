@@ -45,17 +45,25 @@ export default function KeyNumbers({ role }) {
         </div>
         <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} role={role} />
       </div>
-      <div className="overflow-hidden">
-        {notes?.map((note) => (
-          <Note key={note.id} note={note} />
-        ))}
-      </div>
-      <div className="mt-auto p-2 flex justify-center">
-        <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setOpen(!open)}>
-          <span>{open ? "Voir moins" : "Voir plus"}</span>
-          {open ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
-        </button>
-      </div>
+      {!notes?.length ? (
+        <div className={`flex flex-col my-auto gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
+          <div className="text-slate-300 py-8 m-auto text-center animate-pulse text-xl">Chargement des chiffres clés</div>
+        </div>
+      ) : (
+        <div className="overflow-hidden">
+          {notes?.map((note) => (
+            <Note key={note.id} note={note} />
+          ))}
+        </div>
+      )}
+      {notes?.length > 7 && (
+        <div className="mt-auto p-2 flex justify-center">
+          <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setOpen(!open)}>
+            <span>{open ? "Voir moins" : "Voir plus"}</span>
+            {open ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
