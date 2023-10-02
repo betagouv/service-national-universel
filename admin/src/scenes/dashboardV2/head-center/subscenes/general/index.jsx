@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { ROLES, translate } from "snu-lib";
-import { capture } from "../../../../../sentry";
-import api from "../../../../../services/api";
+import { capture } from "@/sentry";
+import api from "@/services/api";
 import DashboardContainer from "../../../components/DashboardContainer";
 import KeyNumbers from "../../../components/KeyNumbers";
 import InfoMessage from "../../../components/ui/InfoMessage";
@@ -16,7 +16,7 @@ export default function Index() {
   const [stats, setStats] = useState({});
   const [message, setMessage] = useState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateStats = async (id) => {
       const response = await api.post("/elasticsearch/dashboard/general/todo", { filters: { meetingPointIds: [id], cohort: [] } });
       const s = response.data;
@@ -39,7 +39,7 @@ export default function Index() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     getMessage();
   }, []);
 
