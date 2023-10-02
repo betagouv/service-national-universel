@@ -20,7 +20,7 @@ const {
   ROLES,
   isLigneBusDemandeDeModificationOpen,
 } = require("snu-lib");
-const { ObjectId } = require("mongodb");
+const { ObjectId } = require("mongoose").Types;
 const { sendTemplate } = require("../../sendinblue");
 const config = require("../../config");
 
