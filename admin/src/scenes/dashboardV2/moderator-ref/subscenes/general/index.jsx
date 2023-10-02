@@ -4,7 +4,7 @@ import queryString from "query-string";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, translate } from "snu-lib";
+import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, translate, DASHBOARD_TODOS_FUNCTIONS } from "snu-lib";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../../../sentry";
 import api from "../../../../../services/api";
@@ -35,11 +35,11 @@ export default function Index() {
 
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
-  const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
+  const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList?.map((r) => ({ key: r, label: r }));
   const academyOptions =
     user.role === ROLES.REFERENT_REGION
-      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
-      : academyList.map((a) => ({ key: a, label: a }));
+      ? [...new Set(region2department[user.region]?.map((d) => departmentToAcademy[d]))]?.map((a) => ({ key: a, label: a }))
+      : academyList?.map((a) => ({ key: a, label: a }));
 
   const filterArray = [
     ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
@@ -68,7 +68,7 @@ export default function Index() {
       id: "cohort",
       name: "Cohorte",
       fullValue: "Toutes",
-      options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+      options: COHORTS?.map((cohort) => ({ key: cohort, label: cohort })),
       sort: (e) => orderCohort(e),
     },
   ].filter((e) => e);
@@ -113,10 +113,11 @@ export default function Index() {
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateStats = async (id) => {
       const response = await api.post("/elasticsearch/dashboard/general/todo", { filters: { meetingPointIds: [id], cohort: [] } });
       const s = response.data;
+      console.log(s);
       setStats(s);
     };
     updateStats();
@@ -140,7 +141,7 @@ export default function Index() {
     try {
       const { ok, code, data: cohorts } = await api.get(`/cohort`);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes", translate(code));
-      setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name));
+      setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now())?.map((e) => e.name));
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes");
@@ -155,7 +156,7 @@ export default function Index() {
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription"]}>
       <div className="flex flex-col gap-8 mb-4">
-        {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
+        {message?.length ? message?.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
           <Actus stats={stats} user={user} cohortsNotFinished={cohortsNotFinished} />
@@ -264,6 +265,7 @@ function Actus({ stats, user, cohortsNotFinished }) {
   const totalInscription = total(stats.inscription);
   const totalSejour = total(stats.sejour);
   const totalEngagement = total(stats.engagement);
+  const shouldShowMore = totalInscription > 3 || totalSejour > 3 || totalEngagement > 3;
 
   return (
     <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
@@ -276,52 +278,55 @@ function Actus({ stats, user, cohortsNotFinished }) {
               {totalInscription}
             </div>
           </div>
-          {!totalInscription && <NotePlaceholder />}
-          {shouldShow(stats.inscription, "inscription_en_attente_de_validation") && (
-            <NoteContainer
-              title="Dossier"
-              number={stats.inscription.inscription_en_attente_de_validation}
-              content="dossiers d'inscription sont en attente de validation."
-              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
-              btnLabel="À instruire"
-            />
-          )}
-          {shouldShow(stats.inscription, "inscription_corrigé_à_instruire_de_nouveau") && (
-            <NoteContainer
-              title="Dossier"
-              number={stats.inscription.inscription_corrigé_à_instruire_de_nouveau}
-              content="dossiers d'inscription corrigés sont à instruire de nouveau."
-              link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished.join("~")}`}
-              btnLabel="À instruire"
-            />
-          )}
-          {shouldShow(stats.inscription, "inscription_en_attente_de_correction") && (
-            <NoteContainer
-              title="Dossier"
-              number={stats.inscription.inscription_en_attente_de_correction}
-              content="dossiers d'inscription en attente de correction."
-              link={`/inscription?status=WAITING_CORRECTION&cohort=${cohortsNotFinished.join("~")}`}
-              btnLabel="À relancer"
-            />
-          )}
-          {stats.inscription.inscription_en_attente_de_validation_cohorte.map(
-            (item, key) =>
-              shouldShow(stats.inscription, "inscription_en_attente_de_validation_cohorte", key) && (
+          {!totalInscription ? (
+            <NotePlaceholder />
+          ) : (
+            <>
+              {shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION) && (
                 <NoteContainer
-                  key={"inscription_en_attente_de_validation_cohorte" + item.cohort}
                   title="Dossier"
-                  number={item.count}
-                  content={`dossiers d'inscription en attente de validation pour le séjour de ${item.cohort}`}
-                  link={`/inscription?cohort=${item.cohort}&status=WAITING_VALIDATION`}
+                  number={stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION]}
+                  content="dossiers d'inscription sont en attente de validation."
+                  link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished?.join("~")}`}
+                  btnLabel="À instruire"
+                />
+              )}
+              {shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_CORRECTION) && (
+                <NoteContainer
+                  title="Dossier"
+                  number={stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_CORRECTION]}
+                  content="dossiers d'inscription corrigés sont à instruire de nouveau."
+                  link={`/inscription?status=WAITING_VALIDATION&cohort=${cohortsNotFinished?.join("~")}`}
+                  btnLabel="À instruire"
+                />
+              )}
+              {shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_CORRECTION) && (
+                <NoteContainer
+                  title="Dossier"
+                  number={stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_CORRECTION]}
+                  content="dossiers d'inscription en attente de correction."
+                  link={`/inscription?status=WAITING_CORRECTION&cohort=${cohortsNotFinished?.join("~")}`}
                   btnLabel="À relancer"
                 />
-              ),
-          )}
-          {/* {stats.inscription.inscription_sans_accord_renseigné.map(
+              )}
+              {stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT]?.map(
+                (item, key) =>
+                  shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT, key) && (
+                    <NoteContainer
+                      key={DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT + item.cohort}
+                      title="Dossier"
+                      number={item.count}
+                      content={`dossiers d'inscription en attente de validation pour le séjour de ${item.cohort}`}
+                      link={`/inscription?cohort=${item.cohort}&status=WAITING_VALIDATION`}
+                      btnLabel="À relancer"
+                    />
+                  ),
+              )}
+              {/* {stats.inscription[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT]?.map(
             (item, key) =>
-              shouldShow(stats.inscription, "inscription_sans_accord_renseigné", key) && (
+              shouldShow(stats.inscription, DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT, key) && (
                 <NoteContainer
-                  key={"inscription_sans_accord_renseigné" + item.cohort}
+                  key={DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT + item.cohort}
                   title=""
                   number={item.count}
                   content={`volontaires sans accord renseigné pour le séjour de ${item.cohort}`}
@@ -330,6 +335,8 @@ function Actus({ stats, user, cohortsNotFinished }) {
                 />
               ),
           )} */}
+            </>
+          )}
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -337,138 +344,155 @@ function Actus({ stats, user, cohortsNotFinished }) {
             <div className="text-sm font-bold leading-5 text-gray-900">Séjours</div>
             <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!totalSejour ? "text-gray-400" : "text-blue-600"}`}>{totalSejour}</div>
           </div>
-          {!totalSejour && <NotePlaceholder />}
-          {stats.sejour.sejour_rassemblement_non_confirmé.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_rassemblement_non_confirmé", key) && (
-                <NoteContainer
-                  title="Point de rassemblement"
-                  key={"sejour_rassemblement_non_confirmé" + item.cohort}
-                  number={item.count}
-                  content={`volontaires n'ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
-                  link={`/volontaire?status=VALIDATED&hasMeetingInformation=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
-                  btnLabel="À déclarer"
-                />
-              ),
+          {!totalSejour ? (
+            <NotePlaceholder />
+          ) : (
+            <>
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED, key) && (
+                    <NoteContainer
+                      title="Point de rassemblement"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED + item.cohort}
+                      number={item.count}
+                      content={`volontaires n'ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
+                      link={`/volontaire?status=VALIDATED&hasMeetingInformation=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
+                      btnLabel="À déclarer"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED, key) && (
+                    <NoteContainer
+                      title="Point de rassemblement"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED + item.cohort}
+                      number={item.count}
+                      content={`volontaires n'ont pas confirmé leur participation pour le séjour de ${item.cohort}`}
+                      link={`/volontaire?status=VALIDATED&youngPhase1Agreement=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
+                      btnLabel="À déclarer"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE, key) && (
+                    <NoteContainer
+                      title="Point de rassemblement"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE + item.cohort + item.department}
+                      number=""
+                      content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
+                      link={`/point-de-rassemblement/liste/liste-points?cohort=${item.cohort}&department=${item.department}`}
+                      btnLabel="À déclarer"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED, key) && (
+                    <NoteContainer
+                      title="Emploi du temps"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED + item.cohort}
+                      number={item.count}
+                      content={`emplois du temps n'ont pas été déposés. ${item.cohort}`}
+                      link={`/centre/liste/session?hasTimeSchedule=false&cohort=${item.cohort}`}
+                      btnLabel="À relancer"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED, key) && (
+                    <NoteContainer
+                      title="Projet pédagogique"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED + item.cohort}
+                      number={item.count}
+                      content={`projets pédagogiques n'ont pas été déposés. ${item.cohort}`}
+                      link={`/centre/liste/session?hasPedagoProject=false&cohort=${item.cohort}`}
+                      btnLabel="À relancer"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL, key) && (
+                    <NoteContainer
+                      title="Contact"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL + item.cohort + item.department}
+                      number=""
+                      content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
+                      link={user.role === ROLES.REFERENT_DEPARTMENT ? `/team` : null}
+                      btnLabel="À renseigner"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT, key) && (
+                    <NoteContainer
+                      title="Cas particuliers"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT + item.cohort}
+                      number={item.count}
+                      content={`volontaires à contacter pour préparer leur accueil pour le séjour de ${item.cohort}`}
+                      link={null}
+                      btnLabel="À contacter"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL, key) && (
+                    <NoteContainer
+                      title="Chef de centre"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL + item.cohort}
+                      number={item.count}
+                      content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
+                      link={`centre/liste/session?headCenterExist=false&cohort=${item.cohort}`}
+                      btnLabel="À renseigner"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE, key) && (
+                    <NoteContainer
+                      title="Centre"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE + item.cohort + item.department}
+                      number=""
+                      content={`Au moins 1 centre est en attente de déclaration pour le séjour de ${item.cohort} (${item.department})`}
+                      link={`/centre/liste/session?cohort=${item.cohort}&department=${item.department}`}
+                      btnLabel="À déclarer"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN, key) && (
+                    <NoteContainer
+                      title="Pointage"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN + item.cohort}
+                      number={item.count}
+                      content={`centres n'ont pas pointés tous leurs volontaires à l'arrivée au séjour de ${item.cohort}`}
+                      link={null}
+                      btnLabel="À renseigner"
+                    />
+                  ),
+              )}
+              {stats.sejour[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MODIFICATION_REQUEST]?.map(
+                (item, key) =>
+                  shouldShow(stats.sejour, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MODIFICATION_REQUEST, key) && (
+                    <NoteContainer
+                      title="Plan de transport"
+                      key={DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MODIFICATION_REQUEST + item.cohort}
+                      number={item.count}
+                      content={`demandes de modification du plan de transport sont à traiter pour le séjour de ${item.cohort}`}
+                      link={`/ligne-de-bus/demande-de-modification?cohort=${item.cohort}`}
+                      btnLabel="À traiter"
+                    />
+                  ),
+              )}
+            </>
           )}
-          {stats.sejour.sejour_participation_non_confirmée.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_participation_non_confirmée", key) && (
-                <NoteContainer
-                  title="Point de rassemblement"
-                  key={"sejour_participation_non_confirmée" + item.cohort}
-                  number={item.count}
-                  content={`volontaires n'ont pas confirmé leur participation pour le séjour de ${item.cohort}`}
-                  link={`/volontaire?status=VALIDATED&youngPhase1Agreement=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
-                  btnLabel="À déclarer"
-                />
-              ),
-          )}
-          {stats.sejour.sejour_point_de_rassemblement_à_déclarer.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_point_de_rassemblement_à_déclarer", key) && (
-                <NoteContainer
-                  title="Point de rassemblement"
-                  key={"sejour_point_de_rassemblement_à_déclarer" + item.cohort + item.department}
-                  number=""
-                  content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
-                  link={`/point-de-rassemblement/liste/liste-points?cohort=${item.cohort}&department=${item.department}`}
-                  btnLabel="À déclarer"
-                />
-              ),
-          )}
-          {stats.sejour.sejour_emploi_du_temps_non_déposé.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_emploi_du_temps_non_déposé", key) && (
-                <NoteContainer
-                  title="Emploi du temps"
-                  key={"sejour_emploi_du_temps_non_déposé" + item.cohort}
-                  number={item.count}
-                  content={`emplois du temps n'ont pas été déposés. ${item.cohort}`}
-                  link={`/centre/liste/session?hasTimeSchedule=false&cohort=${item.cohort}`}
-                  btnLabel="À relancer"
-                />
-              ),
-          )}
-          {stats.sejour.sejour_contact_à_renseigner.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_contact_à_renseigner", key) && (
-                <NoteContainer
-                  title="Contact"
-                  key={"sejour_contact_à_renseigner" + item.cohort + item.department}
-                  number=""
-                  content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
-                  link={user.role === ROLES.REFERENT_DEPARTMENT ? `/team` : null}
-                  btnLabel="À renseigner"
-                />
-              ),
-          )}
-          {stats.sejour.sejour_volontaires_à_contacter.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_volontaires_à_contacter", key) && (
-                <NoteContainer
-                  title="Cas particuliers"
-                  key={"sejour_volontaires_à_contacter" + item.cohort}
-                  number={item.count}
-                  content={`volontaires à contacter pour préparer leur accueil pour le séjour de ${item.cohort}`}
-                  link={null}
-                  btnLabel="À contacter"
-                />
-              ),
-          )}
-          {stats.sejour.sejour_chef_de_centre.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_chef_de_centre", key) && (
-                <NoteContainer
-                  title="Chef de centre"
-                  key={"sejour_chef_de_centre" + item.cohort}
-                  number={item.count}
-                  content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
-                  link={`centre/liste/session?headCenterExist=false&cohort=${item.cohort}`}
-                  btnLabel="À renseigner"
-                />
-              ),
-          )}
-          {stats.sejour.sejour_centre_à_déclarer.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_centre_à_déclarer", key) && (
-                <NoteContainer
-                  title="Centre"
-                  key={"sejour_centre_à_déclarer" + item.cohort + item.department}
-                  number=""
-                  content={`Au moins 1 centre est en attente de déclaration pour le séjour de ${item.cohort} (${item.department})`}
-                  link={`/centre/liste/session?cohort=${item.cohort}&department=${item.department}`}
-                  btnLabel="À déclarer"
-                />
-              ),
-          )}
-          {stats.sejour.sejourPointage.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejourPointage", key) && (
-                <NoteContainer
-                  title="Pointage"
-                  key={"sejourPointage" + item.cohort}
-                  number={item.count}
-                  content={`centres n'ont pas pointés tous leurs volontaires à l'arrivée au séjour de ${item.cohort}`}
-                  link={null}
-                  btnLabel="À renseigner"
-                />
-              ),
-          )}
-          {/* ON A PLUS LA JDM DE MEMOIRE */}
-          {/* {stats.sejour.sejour_pointage_jdm.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_pointage_jdm", key) && (
-                <NoteContainer
-                  title="Pointage"
-                  key={"sejour_pointage_jdm" + item.cohort}
-                  number={item.count}
-                  content={`centres n'ont pas pointés tous leurs volontaires à la JDM sur le séjour de ${item.cohort}`}
-                  link={null}
-                  btnLabel="À renseigner"
-                />
-              ),
-          )} */}
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
@@ -478,84 +502,92 @@ function Actus({ stats, user, cohortsNotFinished }) {
               {totalEngagement}
             </div>
           </div>
-          {!totalEngagement && <NotePlaceholder />}
-          {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
-            <NoteContainer
-              title="Contrat"
-              number={stats.engagement.engagement_contrat_à_éditer}
-              content="contrats d'engagement sont à éditer par la structure d'accueil et à envoyer en signature."
-              btnLabel="À suivre"
-              link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=DRAFT`}
-            />
-          )}
-          {shouldShow(stats.engagement, "engagement_contrat_en_attente_de_signature") && (
-            <NoteContainer
-              title="Contrat"
-              number={stats.engagement.engagement_contrat_en_attente_de_signature}
-              content="contrats d'engagement sont en attente de signature."
-              btnLabel="À suivre"
-              link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=SENT`}
-            />
-          )}
-          {shouldShow(stats.engagement, "engagement_dossier_militaire_en_attente_de_validation") && (
-            <NoteContainer
-              title="Dossier d’éligibilité"
-              number={stats.engagement.engagement_dossier_militaire_en_attente_de_validation}
-              content="dossiers d'éligibilité en préparation militaire sont en attente de vérification."
-              btnLabel="À vérifier"
-              link={`/volontaire?status=VALIDATED&statusMilitaryPreparationFiles=WAITING_VERIFICATION`}
-            />
-          )}
-          {shouldShow(stats.engagement, "engagement_mission_en_attente_de_validation") && (
-            <NoteContainer
-              title="Mission"
-              number={stats.engagement.engagement_mission_en_attente_de_validation}
-              content="missions sont en attente de validation."
-              btnLabel="À instruire"
-              link={`/mission?status=WAITING_VALIDATION`}
-            />
-          )}
-          {shouldShow(stats.engagement, "engagement_phase3_en_attente_de_validation") && (
-            <NoteContainer
-              title="Phase 3"
-              number={stats.engagement.engagement_phase3_en_attente_de_validation}
-              content="demandes de validation de phase 3 à suivre."
-              btnLabel="À suivre"
-              link={`/volontaire?status=VALIDATED&statusPhase3=WAITING_VALIDATION`}
-            />
-          )}
-          {/* {shouldShow(stats.engagement, "volontaires_à_suivre_sans_contrat") && (
+          {!totalEngagement ? (
+            <NotePlaceholder />
+          ) : (
+            <>
+              {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.CONTRACT_TO_EDIT) && (
+                <NoteContainer
+                  title="Contrat"
+                  number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.CONTRACT_TO_EDIT]}
+                  content="contrats d'engagement sont à éditer par la structure d'accueil et à envoyer en signature."
+                  btnLabel="À suivre"
+                  link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=DRAFT`}
+                />
+              )}
+              {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.CONTRACT_TO_SIGN) && (
+                <NoteContainer
+                  title="Contrat"
+                  number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.CONTRACT_TO_SIGN]}
+                  content="contrats d'engagement sont en attente de signature."
+                  btnLabel="À suivre"
+                  link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=SENT`}
+                />
+              )}
+              {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MILITARY_FILE_TO_VALIDATE) && (
+                <NoteContainer
+                  title="Dossier d’éligibilité"
+                  number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MILITARY_FILE_TO_VALIDATE]}
+                  content="dossiers d'éligibilité en préparation militaire sont en attente de vérification."
+                  btnLabel="À vérifier"
+                  link={`/volontaire?status=VALIDATED&statusMilitaryPreparationFiles=WAITING_VERIFICATION`}
+                />
+              )}
+              {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MISSION_TO_VALIDATE) && (
+                <NoteContainer
+                  title="Mission"
+                  number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MISSION_TO_VALIDATE]}
+                  content="missions sont en attente de validation."
+                  btnLabel="À instruire"
+                  link={`/mission?status=WAITING_VALIDATION`}
+                />
+              )}
+              {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.PHASE3_TO_VALIDATE) && (
+                <NoteContainer
+                  title="Phase 3"
+                  number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.PHASE3_TO_VALIDATE]}
+                  content="demandes de validation de phase 3 à suivre."
+                  btnLabel="À suivre"
+                  link={`/volontaire?status=VALIDATED&statusPhase3=WAITING_VALIDATION`}
+                />
+              )}
+
+              {/* {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT) && (
             <NoteContainer
               title="Volontaires"
-              number={stats.engagement.volontaires_à_suivre_sans_contrat}
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT]}
               content="volontaires ayant commencé leur mission sans contrat signé"
               btnLabel="À suivre"
             />
           )}
-          {shouldShow(stats.engagement, "volontaires_à_suivre_sans_statut") && (
+          {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS) && (
             <NoteContainer
               title="Volontaires"
-              number={stats.engagement.volontaires_à_suivre_sans_statut}
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS]}
               content="volontaires ayant commencé leur mission sans statut à jour"
               btnLabel="À suivre"
             />
           )}
-          {shouldShow(stats.engagement, "volontaires_à_suivre_achevé_sans_statut") && (
+          {shouldShow(stats.engagement, DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END) && (
             <NoteContainer
               title="Volontaires"
-              number={stats.engagement.volontaires_à_suivre_achevé_sans_statut}
+              number={stats.engagement[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END]}
               content="volontaires ayant achevé leur mission sans statut à jour"
               btnLabel="À suivre"
             />
           )} */}
+            </>
+          )}
         </div>
       </div>
-      <div className="flex justify-center">
-        <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullNote(!fullNote)}>
-          <span>{fullNote ? "Voir moins" : "Voir plus"}</span>
-          {fullNote ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
-        </button>
-      </div>
+      {shouldShowMore && (
+        <div className="flex justify-center">
+          <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullNote(!fullNote)}>
+            <span>{fullNote ? "Voir moins" : "Voir plus"}</span>
+            {fullNote ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -576,12 +608,12 @@ const getInscriptionGoals = async () => {
     return [];
   }
   const result = responses.hits.hits;
-  result.map((e) => {
+  result?.map((e) => {
     const { department, region, academy, cohort, max } = e._source;
     dataMerged[department] = { cohort, department, region, academy, max: (dataMerged[department]?.max ? dataMerged[department].max : 0) + max };
   });
 
-  return result.map((e) => e._source);
+  return result?.map((e) => e._source);
 };
 
 async function getCurrentInscriptions(filters) {

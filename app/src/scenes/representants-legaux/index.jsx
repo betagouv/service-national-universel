@@ -2,18 +2,6 @@ import React from "react";
 import { Switch } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 
-import useDevice from "../../hooks/useDevice";
-
-import DesktopPresentation from "./desktop/presentation";
-import DesktopVerification from "./desktop/verification";
-import DesktopConsentement from "./desktop/consentement";
-import DesktopCniInvalide from "./desktop/cni-invalide";
-import DesktopCniInvalideDone from "./desktop/cni-invalide-done";
-import DesktopDone from "./desktop/done";
-import DesktopTokenInvalide from "./desktop/token-invalide";
-import DesktopImageRights from "./desktop/image-rights";
-import DesktopImageRightsDone from "./desktop/image-rights-done";
-
 import MobileDone from "./mobile/done";
 import MobileConsentement from "./mobile/consentement";
 import MobilePresentation from "./mobile/presentation";
@@ -24,9 +12,7 @@ import MobileTokenInvalide from "./mobile/token-invalide";
 import MobileImageRights from "./mobile/image-rights";
 import MobileImageRightsDone from "./mobile/image-rights-done";
 
-import Header from "@/components/dsfr/layout/Header";
-import HeaderMenu from "@/components/dsfr/nav/Menu";
-import Footer from "@/components/dsfr/layout/Footer";
+import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import FranceConnectCallback from "./components/FranceConnectCallback";
 import RepresentantsLegauxContextProvider from "../../context/RepresentantsLegauxContextProvider";
 
@@ -49,42 +35,30 @@ const STEPS = {
 };
 
 const Step = ({ step }) => {
-  const device = useDevice();
-  const [isOpen, setIsOpen] = React.useState(false);
-
   function renderStep(step) {
-    if (step === STEPS.TOKEN_INVALIDE) return device === "desktop" ? <DesktopTokenInvalide step={step} /> : <MobileTokenInvalide step={step} />;
-    if (step === STEPS.CNI_INVALIDE) return device === "desktop" ? <DesktopCniInvalide step={step} /> : <MobileCniInvalide step={step} />;
-    if (step === STEPS.CNI_INVALIDE_DONE) return device === "desktop" ? <DesktopCniInvalideDone step={step} /> : <MobileCniInvalideDone step={step} />;
+    if (step === STEPS.TOKEN_INVALIDE) return <MobileTokenInvalide step={step} />;
+    if (step === STEPS.CNI_INVALIDE) return <MobileCniInvalide step={step} />;
+    if (step === STEPS.CNI_INVALIDE_DONE) return <MobileCniInvalideDone step={step} />;
 
-    if (step === STEPS.PRESENTATION) return device === "desktop" ? <DesktopPresentation step={step} parentId={1} /> : <MobilePresentation step={step} parentId={1} />;
-    if (step === STEPS.VERIFICATION) return device === "desktop" ? <DesktopVerification step={step} parentId={1} /> : <MobileVerification step={step} parentId={1} />;
-    if (step === STEPS.CONSENTEMENT) return device === "desktop" ? <DesktopConsentement step={step} parentId={1} /> : <MobileConsentement step={step} parentId={1} />;
-    if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone step={step} parentId={1} /> : <MobileDone step={step} parentId={1} />;
+    if (step === STEPS.PRESENTATION) return <MobilePresentation step={step} parentId={1} />;
+    if (step === STEPS.VERIFICATION) return <MobileVerification step={step} parentId={1} />;
+    if (step === STEPS.CONSENTEMENT) return <MobileConsentement step={step} parentId={1} />;
+    if (step === STEPS.DONE) return <MobileDone step={step} parentId={1} />;
 
-    if (step === STEPS.PRESENTATION_PARENT2) return device === "desktop" ? <DesktopPresentation step={step} parentId={2} /> : <MobilePresentation step={step} parentId={2} />;
-    if (step === STEPS.VERIFICATION_PARENT2) return device === "desktop" ? <DesktopVerification step={step} parentId={2} /> : <MobileVerification step={step} parentId={2} />;
-    if (step === STEPS.CONSENTEMENT_PARENT2) return device === "desktop" ? <DesktopConsentement step={step} parentId={2} /> : <MobileConsentement step={step} parentId={2} />;
-    if (step === STEPS.DONE_PARENT2) return device === "desktop" ? <DesktopDone step={step} parentId={2} /> : <MobileDone step={step} parentId={2} />;
+    if (step === STEPS.PRESENTATION_PARENT2) return <MobilePresentation step={step} parentId={2} />;
+    if (step === STEPS.VERIFICATION_PARENT2) return <MobileVerification step={step} parentId={2} />;
+    if (step === STEPS.CONSENTEMENT_PARENT2) return <MobileConsentement step={step} parentId={2} />;
+    if (step === STEPS.DONE_PARENT2) return <MobileDone step={step} parentId={2} />;
 
-    if (step === STEPS.IMAGE_RIGHTS) return device === "desktop" ? <DesktopImageRights step={step} parentId={1} /> : <MobileImageRights step={step} parentId={1} />;
-    if (step === STEPS.IMAGE_RIGHTS_DONE) return device === "desktop" ? <DesktopImageRightsDone step={step} parentId={1} /> : <MobileImageRightsDone step={step} parentId={1} />;
-    if (step === STEPS.IMAGE_RIGHTS_PARENT2) return device === "desktop" ? <DesktopImageRights step={step} parentId={2} /> : <MobileImageRights step={step} parentId={2} />;
-    if (step === STEPS.IMAGE_RIGHTS_DONE_PARENT2) {
-      return device === "desktop" ? <DesktopImageRightsDone step={step} parentId={2} /> : <MobileImageRightsDone step={step} parentId={2} />;
-    }
+    if (step === STEPS.IMAGE_RIGHTS) return <MobileImageRights step={step} parentId={1} />;
+    if (step === STEPS.IMAGE_RIGHTS_DONE) return <MobileImageRightsDone step={step} parentId={1} />;
+    if (step === STEPS.IMAGE_RIGHTS_PARENT2) return <MobileImageRights step={step} parentId={2} />;
+    if (step === STEPS.IMAGE_RIGHTS_DONE_PARENT2) return <MobileImageRightsDone step={step} parentId={2} />;
 
-    return device === "desktop" ? <DesktopPresentation step={step} /> : <MobilePresentation step={step} />;
+    return <MobilePresentation step={step} />;
   }
 
-  return (
-    <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
-      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} title="Inscription du volontaire" />
-      {renderStep(step)}
-      {device === "desktop" ? <Footer /> : null}
-    </div>
-  );
+  return <DSFRLayout title="Inscription du volontaire">{renderStep(step)}</DSFRLayout>;
 };
 
 export default function Index() {

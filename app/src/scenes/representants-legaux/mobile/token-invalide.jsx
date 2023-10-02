@@ -1,17 +1,16 @@
 import React from "react";
-import logo from "../../../assets/logo-snu.png";
+import { supportURL } from "@/config";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 
 export default function TokenInvalide() {
   return (
-    <div className="h-100 m-6 flex flex-col items-center justify-center">
-      <img src={logo} alt="logo" className="w-56 pb-8" />
-      <div className="pb-4 text-center text-3xl">Vous n&apos;avez pas les droits d&apos;accès à cette page !</div>
-      <div className="mt-4 text-center text-lg text-gray-500">
+    <DSFRContainer title="Vous n'avez pas les droits d'accès à cette page">
+      <p className="mb-8">
         Besoin d&apos;aide&nbsp;?{" "}
-        <a rel="noreferrer" href="/public-besoin-d-aide" target="_blank" className="scale-105 cursor-pointer hover:underline">
+        <a rel="noreferrer" href={supportURL} target="_blank" className="scale-105 cursor-pointer hover:underline">
           Cliquez ici
         </a>
-      </div>
-    </div>
+      </p>
+    </DSFRContainer>
   );
 }

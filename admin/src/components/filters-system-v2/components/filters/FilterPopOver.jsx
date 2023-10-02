@@ -47,6 +47,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     if (filter?.sort) {
       filter.sort(temp);
     }
+
     setOptionsVisible(temp);
   }, [data]);
 
@@ -100,6 +101,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const handleCustomComponent = (value) => {
     setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: value } });
   };
+
   return (
     <Transition
       as={Fragment}

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
@@ -15,7 +15,8 @@ import VerifyAddress from "../../inscription2023/components/VerifyAddress";
 import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
-import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getDataForConsentStep } from "../utils";
@@ -23,16 +24,21 @@ import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
 
 export default function Consentement({ step, parentId }) {
-  const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
   if (!young) return <Loader />;
+  if (isReturningParent(young, parentId)) {
+    const route = parentId === 2 ? "done-parent2" : "done";
+    return <Redirect to={`/representants-legaux/${route}?token=${token}`} />;
+  }
+  return <ConsentementForm young={young} token={token} step={step} parentId={parentId} />;
+}
 
+function ConsentementForm({ young, token, step, parentId }) {
+  const history = useHistory();
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = React.useState(false);
   const [imageRightsExplanationShown, setImageRightsExplanationShown] = useState(false);
   const [data, setData] = useState(getDataForConsentStep(young, parentId));
-
-  if (isReturningParent(young, parentId)) return done();
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
@@ -230,7 +236,7 @@ export default function Consentement({ step, parentId }) {
   return (
     <>
       <Navbar step={step} />
-      <div className="bg-white px-3 py-4 text-[#161616]">
+      <DSFRContainer title="Apporter votre consentement">
         <div className="flex flex-col">
           <h1 className="mb-1  text-[22px] font-bold text-[#21213F]">Apporter votre consentement</h1>
           <div className="mb-[24px] text-[14px] leading-[20px] text-[#666666]">
@@ -350,54 +356,7 @@ export default function Consentement({ step, parentId }) {
             </div>
           )}
           {(data.allowSNU || parentId === 2) && (
-            <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-32">
-              {/*<AuthorizeBlock
-                title="Utilisation d’autotests COVID"
-                value={data.allowCovidAutotest}
-                onChange={(e) => setData({ ...data, allowCovidAutotest: e })}
-                error={errors.allowCovidAutotest}>
-                <div className="mb-3">
-                  La réalisation d’autotests antigéniques sur prélèvement nasal par l’enfant dont je suis titulaire de l’autorité parentale, et, en cas de résultat positif, la
-                  communication communication communication de celui-ci au directeur académiques des services académiques, à l’ARS, au chef de centre et aux personnes habilitées par
-                  ce dernier.{" "}
-                  {!covidAutoTestExplanationShown && (
-                    <a className="underline whitespace-nowrap" href="#" onClick={toggleCovidAutoTestExplanationShown}>
-                      Lire plus
-                    </a>
-                  )}
-                </div>
-                {covidAutoTestExplanationShown && (
-                  <>
-                    <div className="mb-3">
-                      Vous avez souhaité que votre enfant participe au séjour de cohésion du SNU. L’épidémie actuelle de COVID-19 nécessite de prendre des mesures de prévention et de
-                      santé publique pour :
-                      <ul className="list-disc ml-4">
-                        <li>Garantir la sécurité de tous, volontaires et cadres</li>
-                        <li>Permettre à chacun de participer à la totalité du séjour et éviter un éventuel retour à domicile ou un isolement en cas de contamination.</li>
-                      </ul>
-                    </div>
-                    <div className="mb-3">
-                      En complément du test PCR, antigénique ou autotest recommandé avant le départ en séjour, des autotests antigéniques sur prélèvement nasal pourront être réalisés
-                      durant le séjour en présence de signes évocateurs de la covid-19, de cas confirmés ou de cas contacts.
-                    </div>
-                    <h3>Protocole sanitaire de l’année 2022-2023</h3>
-                    <div className="mb-3">
-                      Durant le séjour de cohésion, des séances permettant la réalisation d’autotests pourraient être organisées en cas de nécessité, sous l’encadrement d’un
-                      infirmier ou d’un cadre formé à la réalisation du prélèvement. Ces tests permettant de vivre en collectivité dans des conditions de sécurité sont fortement
-                      recommandés mais non obligatoires. S’ils sont pratiqués, seuls seront concernés les volontaires ayant remis lors de leur inscription le consentement écrit
-                      représentant légal.
-                    </div>
-                    <div className="mb-3">
-                      Votre consentement est également requis pour que les résultats des autotests puissent être transmis au chef de centre et aux personnes habilitées par ce
-                      dernier, au directeur académique des services de l’éducation et à l’ARS en cas de résultat positif. Le consentement à la réalisation des autotests et à la
-                      transmission des données est recueilli par le biais du formulaire que vous trouverez ci-joint et qui est à téléverser depuis le compte volontaire.
-                    </div>
-                    <a className="underline" href="#" onClick={toggleCovidAutoTestExplanationShown}>
-                      Lire moins
-                    </a>
-                  </>
-                )}
-              </AuthorizeBlock>*/}
+            <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-8">
               <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
                 <div className="mb-3">
                   Le Ministère de l’Education Nationale et de la Jeunesse, ses partenaires et les journalistes dûment accrédités par les services communication du ministère et/ou
@@ -431,8 +390,8 @@ export default function Consentement({ step, parentId }) {
           )}
           {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
         </div>
-      </div>
-      <StickyButton onClickPrevious={onPrevious} onClick={onSubmit} disabled={saving} text="Je valide" />
+        <SignupButtonContainer onClickNext={onSubmit} labelNext="Je valide" onClickPrevious={onPrevious} disabled={saving} />
+      </DSFRContainer>
     </>
   );
 }

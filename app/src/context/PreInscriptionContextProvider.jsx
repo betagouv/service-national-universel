@@ -8,6 +8,8 @@ const defaultState = {
   step: PREINSCRIPTION_STEPS.ELIGIBILITE,
   firstName: "",
   lastName: "",
+  phone: "",
+  phoneZone: "",
   email: "",
   emailConfirm: "",
   password: "",

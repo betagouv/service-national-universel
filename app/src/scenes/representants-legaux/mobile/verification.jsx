@@ -10,9 +10,9 @@ import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
 import dayjs from "dayjs";
 import Check from "../components/Check";
-import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import { supportURL } from "../../../config";
-import Footer from "@/components/dsfr/layout/Footer";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
@@ -70,9 +70,7 @@ export default function Verification({ step, parentId }) {
   return (
     <>
       <Navbar step={step} />
-      <div className="bg-white p-3 text-[#161616]">
-        <h1 className="leading-40 mb-2 text-[24px] font-bold leading-[32px] text-[#21213F]">Voici les informations transmises par {young.firstName}</h1>
-
+      <DSFRContainer title={`Voici les informations transmises par ${young.firstName}`}>
         <div className="mb-[32px] mt-2 space-y-2 text-[14px] leading-[20px] text-[#666666]">
           {parentId === 2 ? (
             <p>
@@ -100,7 +98,7 @@ export default function Verification({ step, parentId }) {
 
         {parentId === 1 && (
           <>
-            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-32">
+            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-8">
               <Check checked={certified} onChange={(e) => setCertified(e)}>
                 Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
                 <a
@@ -116,9 +114,8 @@ export default function Verification({ step, parentId }) {
             {error && <div className="my-2 ml-[40px] text-[14px] leading-[19px] text-[#CE0500]">{error}</div>}
           </>
         )}
-      </div>
-      <Footer />
-      <StickyButton text={"Suivant"} onClick={() => onNext()} onClickPrevious={onPrevious} disabled={saving} />
+        <SignupButtonContainer onClickNext={onNext} onClickPrevious={onPrevious} disabled={saving} />
+      </DSFRContainer>
     </>
   );
 }

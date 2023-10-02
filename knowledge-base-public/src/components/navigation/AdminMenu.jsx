@@ -8,13 +8,27 @@ import Link from "next/link";
 import { Popover, Transition } from "@headlessui/react";
 import { translateRoleBDC } from "../../utils/constants";
 import { HiOutlineLogout, HiOutlineUser, HiCheck } from "react-icons/hi";
+import { environment } from "../../config";
 
 export default function AdminMenu() {
-  const { mutate, user } = useUser();
+  const { mutate, user: originalUser } = useUser();
   const { setSeeAs, seeAs, roles } = useContext(SeeAsContext);
-  const categoryAccessibleReferent = ["structure", "head_center", "young", "visitor"];
   const { cache } = useSWRConfig();
-  const withSeeAs = ["admin", "referent_department", "referent_region", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
+
+  const getModifiedRole = (role) => {
+    return role === "referent_department" || role === "referent_region" ? "referent" : role;
+  };
+
+  const user =
+    environment === "production"
+      ? originalUser
+      : {
+          ...originalUser,
+          role: getModifiedRole(originalUser.role),
+        };
+
+  const categoryAccessibleReferent = ["referent", "admin", "structure", "head_center", "young", "visitor", "public"];
+  const withSeeAs = ["admin", "referent", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
 
   const onLogout = async (event) => {
     event.preventDefault();
