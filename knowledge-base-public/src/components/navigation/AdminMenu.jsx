@@ -1,4 +1,4 @@
-import { Fragment, useContext } from "react";
+import { Fragment, useContext, useEffect } from "react";
 import useUser from "../../hooks/useUser";
 import SeeAsContext from "../../contexts/seeAs";
 import { useSWRConfig } from "swr";
@@ -27,8 +27,14 @@ export default function AdminMenu() {
           role: getModifiedRole(originalUser.role),
         };
 
-  const categoryAccessibleReferent = ["referent", "admin", "structure", "head_center", "young", "visitor", "public"];
+  const categoryAccessibleReferent = ["referent", "structure", "head_center", "young", "visitor"];
   const withSeeAs = ["admin", "referent", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
+
+  useEffect(() => {
+    if (user && user.role && seeAs === null) {
+      setSeeAs(user.role);
+    }
+  }, [user, setSeeAs, seeAs]);
 
   const onLogout = async (event) => {
     event.preventDefault();
@@ -36,7 +42,7 @@ export default function AdminMenu() {
     mutate(null);
     cache.clear();
   };
-
+  console.log(seeAs);
   return (
     <>
       {withSeeAs && (
