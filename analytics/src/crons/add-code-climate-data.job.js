@@ -8,8 +8,13 @@ const slack = require("../slack");
 
 module.exports.handler = async function () {
   const date = new Date();
-  const yesterday = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate() - 1}`;
-  // filter[to] and filter[from] query paramerets
+  date.setDate(date.getDate() - 1); // this will set the date object to the previous day
+
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0"); // padStart ensures the month is always 2 digits
+  const dd = String(date.getDate()).padStart(2, "0"); // padStart ensures the day is always 2 digits
+
+  const yesterday = `${yyyy}/${mm}/${dd}`;
 
   try {
     const url = `https://api.codeclimate.com/v1/repos/6034fa54fc4de61073009538/metrics/technical_debt_ratio?filter[from]=${yesterday}&filter[to]=${yesterday}`;
@@ -18,6 +23,7 @@ module.exports.handler = async function () {
       headers: { "Content-Type": "application/json" },
     });
     const { data } = await response.json();
+    console.log("DAT", data);
     const technical_debt_ratio = data.attributes.points[0].value;
 
     const url_test_coverage = `https://api.codeclimate.com/v1/repos/6034fa54fc4de61073009538/metrics/test_coverage?filter[from]=${yesterday}&filter[to]=${yesterday}`;
@@ -26,12 +32,14 @@ module.exports.handler = async function () {
     });
     const { data: data_test_coverage } = await response_test_coverage.json();
     const test_coverage = data_test_coverage.attributes.points[0].value;
+    console.log("test_coverage", test_coverage);
 
     codeClimate.create({
       technical_debt_ratio,
       test_coverage,
       date: yesterday,
     });
+    console.log("Data was added successfully!");
     slack.success({ title: "CodeClimate Add Data crons", text: "Data was added successfully!" });
   } catch (error) {
     capture(error);
