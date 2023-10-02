@@ -114,19 +114,27 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE] = async (user, { ses
   return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE]: service.missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts) };
 };
 
-service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED] = async (user, { twoWeeksBeforeSessionStart: cohorts }) => {
-  if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [] };
+service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSessionStart: cohorts }) => {
+  if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [], [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [] };
 
   const response = await esClient.msearch({
     index: "sessionphase1",
     body: buildArbitratyNdJson(
+      // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
       { index: "sessionphase1", type: "_doc" },
       withAggs(queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasTimeSchedule.keyword": ["false"] } }])),
+
+      //Projet pédagogique (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
+      { index: "sessionphase1", type: "_doc" },
+      withAggs(queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasPedagoProject.keyword": ["false"] } }])),
     ),
   });
-
   return {
     [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: response.body.responses[0].aggregations.cohort.buckets.map((e) => ({
+      cohort: e.key,
+      count: e.doc_count,
+    })),
+    [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: response.body.responses[1].aggregations.cohort.buckets.map((e) => ({
       cohort: e.key,
       count: e.doc_count,
     })),
@@ -258,41 +266,24 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfter
   return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: checkin };
 };
 
-service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN_JDM] = async (user, { twoWeeksAfterSessionEnd: cohorts }) => {
-  if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN_JDM]: [] };
+service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MODIFICATION_REQUEST] = async (user, { notFinished: cohorts }) => {
+  if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MODIFICATION_REQUEST]: [] };
 
   const response = await esClient.msearch({
-    index: "young",
+    index: "modificationbus",
     body: buildArbitratyNdJson(
-      ...cohorts.flatMap((cohort) => {
-        return [
-          { index: "young", type: "_doc" },
-          withAggs(
-            queryFromFilter(user.role, user.region, user.department, [
-              { terms: { "cohort.keyword": [cohort] } },
-              { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
-              { bool: { must_not: { exists: { field: "presenceJDM.keyword" } } } },
-            ]),
-            "sessionPhase1Id.keyword",
-          ),
-        ];
-      }),
+      // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
+      { index: "modificationbus", type: "_doc" },
+      withAggs(queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "status.keyword": ["PENDING"] } }])),
     ),
   });
 
-  const checkinJdm = [];
-  for (let i = 0; i < response.body.responses.length; i++) {
-    const r = response.body.responses[i];
-    const cohort = cohorts[i];
-    const sessionCount = r.aggregations.sessionPhase1Id.buckets.reduce((acc, e) => {
-      if (e.doc_count > 0) acc++;
-      return acc;
-    }, 0);
-    if (sessionCount > 0) {
-      checkinJdm.push({ cohort, count: sessionCount });
-    }
-  }
-  return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN_JDM]: checkinJdm };
+  return {
+    [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MODIFICATION_REQUEST]: response.body.responses[0].aggregations.cohort.buckets.map((e) => ({
+      cohort: e.key,
+      count: e.doc_count,
+    })),
+  };
 };
 
 service.departmentsFromTableRepartition = async (user, cohorts) => {

@@ -16,6 +16,7 @@ const DASHBOARD_TODOS_FUNCTIONS = {
     IMAGE_RIGHT: "image_right",
   },
   SEJOUR: {
+    DOCS: "docs",
     // Point de rassemblement (À suivre) X volontaires n’ont pas confirmé leur point de rassemblement
     // sejour_rassemblement_non_confirmé
     MEETING_POINT_NOT_CONFIRMED: "meeting_point_not_confirmed",
@@ -31,6 +32,8 @@ const DASHBOARD_TODOS_FUNCTIONS = {
     // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
     // sejour_emploi_du_temps_non_déposé
     SCHEDULE_NOT_UPLOADED: "schedule_not_uploaded",
+    // Projet pédagogique (À relancer) X projets pédagogiques n’ont pas été déposés pour le séjour de [Février 2023 -C].
+    PROJECT_NOT_UPLOADED: "project_not_uploaded",
     // Contact (À renseigner) Au moins 1 contact de convocation doit être renseigné pour le séjour de [Février 2023-C].
     // sejour_contact_à_renseigner
     CONTACT_TO_FILL: "contact_to_fill",
@@ -43,9 +46,8 @@ const DASHBOARD_TODOS_FUNCTIONS = {
     // Pointage. X centres n’ont pas pointés tous leurs volontaires à l’arrivée au séjour de [Février 2023-C] (A renseigner)
     // sejour_pointage
     CHECKIN: "checkin",
-    // Pointage. X centres n’ont pas pointés tous leurs volontaires à la JDM sur le séjour de [Février 2023-C] (A renseigner)
-    // sejour_pointage_jdm
-    CHECKIN_JDM: "checkin_jdm",
+    //Plan de transport (À traiter) X demandes de modification du plan de transport sont à traiter pour le séjour de [Février 2023-C].
+    MODIFICATION_REQUEST: "modification_request",
   },
   ENGAGEMENT: {
     BASIC: "basic",
@@ -76,6 +78,4 @@ const DASHBOARD_TODOS_FUNCTIONS = {
   },
 };
 
-export {
-  DASHBOARD_TODOS_FUNCTIONS,
-};
+export { DASHBOARD_TODOS_FUNCTIONS };
