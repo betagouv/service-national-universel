@@ -1,8 +1,6 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import CompleteInscription from "../../assets/icons/CompleteInscription";
-import { GrAttachment } from "react-icons/gr";
 import plausibleEvent from "../../services/plausible";
 import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
@@ -26,23 +24,27 @@ export default function Done() {
     <>
       <ProgressBar />
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
-        <h1 className="text-2xl font-semibold text-[#161616]">Bienvenue {young.firstName} ! Vous avez complété votre pré-inscription.</h1>
-        <p className="mt-4 text-sm text-[#3A3A3A]">
-          Vous pouvez dès à présent <strong>compléter</strong> votre inscription ou <strong>la reprendre à tout moment</strong> depuis le mail envoyé à {young.email}, ou depuis
-          &quot;Se connecter&quot;
+        <h1 className="text-3xl font-semibold">
+          Bienvenue {young.firstName} 🎉
+          <br />
+          Votre compte volontaire a été créé.
+        </h1>
+        <p className="py-2 mt-2 text-gray-600">
+          Vous pouvez dès à présent <strong>finaliser votre inscription</strong> ou la reprendre à tout moment depuis le mail envoyé à {young.email}, ou depuis l’écran de
+          connexion.
         </p>
-        <div className="mt-4 border-x-[1px] border-t-[1px] border-b-4 border-b-[#000091] px-3 pt-2 pb-7">
-          <CompleteInscription />
-          <div className="mt-4 text-base font-semibold text-[#161616]">Finalisez votre inscription en 8 minutes</div>
-          <div className="mt-2 text-sm">Vous pouvez d&apos;ores et déjà préparer le document suivant :</div>
-          <div className="mt-4 flex flex-row items-center gap-4">
-            <div className="flex items-center rounded-full bg-[#EEEEEE] p-2">
-              <GrAttachment className="text-[#3A3A3A]" />
-            </div>
-            <div className="text-sm text-[#3A3A3A]">Carte d&apos;identité ou passeport</div>
+        <p className="py-2 text-gray-600">Attention, une inscription complète est indispensable pour valider votre candidature au SNU.</p>
+        <hr className="mt-4" />
+        <h2 className="text-lg font-semibold">Préparez le document suivant :</h2>
+        <div className="flex py-2 gap-4 mb-2">
+          <div className="flex-none">image</div>
+          <div className="space-y-2">
+            <p>Pièce d&apos;identité</p>
+            <p className="text-xs text-gray-500">Carte Nationale d’Identité ou Passeport</p>
           </div>
         </div>
-        <SignupButtonContainer onClickNext={handleClick} labelNext="Compléter mon inscription" />
+
+        <SignupButtonContainer onClickNext={handleClick} labelNext="Finaliser mon inscription" />
       </DSFRContainer>
     </>
   );
