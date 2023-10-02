@@ -4,6 +4,9 @@ import { departmentLookUp } from "snu-lib";
 export default function AdressSelect({ data, setData }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [number, setNumber] = useState("");
+  const [streetName, setStreetName] = useState("");
 
   // https://adresse.data.gouv.fr/api-doc/adresse
   // Types de résultats :
@@ -46,7 +49,18 @@ export default function AdressSelect({ data, setData }) {
       region: getDepartmentAndRegionFromContext(option.properties.context).region,
       location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
     });
+    setSelected(option);
     setQuery("");
+  };
+
+  const handleChangeNumber = (e) => {
+    setNumber(e.target.value);
+    setData({ ...data, adress: e.target.value + " " + selected.properties.name });
+  };
+
+  const handleChangeStreetName = (e) => {
+    setStreetName(e.target.value);
+    setData({ ...data, adress: number + " " + e.target.value });
   };
 
   return (
@@ -69,7 +83,6 @@ export default function AdressSelect({ data, setData }) {
                   ))}
               </>
             )}
-
             {streets.length > 0 && (
               <>
                 <p className="p-2 font-bold bg-[#EEEEEE]">Voie</p>
@@ -80,7 +93,6 @@ export default function AdressSelect({ data, setData }) {
                   ))}
               </>
             )}
-
             {localities.length > 0 && (
               <>
                 <p className="p-2 font-bold bg-[#EEEEEE]">Lieu-dit</p>
@@ -91,7 +103,6 @@ export default function AdressSelect({ data, setData }) {
                   ))}
               </>
             )}
-
             {municipalities.length > 0 && (
               <>
                 <p className="p-2 font-bold bg-[#EEEEEE]">Commune</p>
@@ -109,6 +120,27 @@ export default function AdressSelect({ data, setData }) {
         )}
       </div>
 
+      {selected?.properties.type === "street" && (
+        <label className="flex flex-col gap-1">
+          Numéro
+          <input type="text" value={number} onChange={handleChangeNumber} className="border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2" />
+        </label>
+      )}
+
+      {selected?.properties.type === "municipality" && (
+        <div className="flex gap-8">
+          <label className="flex flex-col gap-1 w-20">
+            Numéro
+            <input type="text" value={number} onChange={handleChangeNumber} className="border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2" />
+          </label>
+
+          <label className="flex flex-col gap-1 w-full">
+            Libellé de voie
+            <input type="text" value={streetName} onChange={handleChangeStreetName} className="border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2" />
+          </label>
+        </div>
+      )}
+
       <div className="flex gap-8">
         <label className="flex flex-col gap-1 w-full text-gray-400">
           Code postal
@@ -121,7 +153,7 @@ export default function AdressSelect({ data, setData }) {
         </label>
       </div>
 
-      <label className="flex flex-col gap-1 mt-2">
+      {/* <label className="flex flex-col gap-1 mt-2">
         Complément d'adresse
         <textarea
           type="text"
@@ -129,7 +161,7 @@ export default function AdressSelect({ data, setData }) {
           onChange={(e) => setData({ ...data, addressComplement: e.target.value })}
           className="border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2"
         />
-      </label>
+      </label> */}
     </div>
   );
 }
