@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import queryString from "query-string";
 import { Link } from "react-router-dom/cjs/react-router-dom.min";
-import { ROLES, getNewLink, translate, MISSION_STATUS, APPLICATION_STATUS, CONTRACT_STATUS } from "@/utils";
+import { ROLES, getNewLink } from "@/utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import InformationCircle from "@/assets/icons/InformationCircle";
 import ReactTooltip from "react-tooltip";
@@ -45,7 +45,8 @@ export default function Index() {
         if (user.role === ROLES.RESPONSIBLE) setStructureId([user.structureId]);
         if (user.role === ROLES.SUPERVISOR) {
           let networkName = data.networkName;
-          const { responses } = await API.post(`/elasticsearch/structure/search`, { filters: { searchbar: [], networkName: [networkName] }, size: 50 });
+          const { responses } = await API.post(`/elasticsearch/structure/search`, { filters: { searchbar: [], networkName: [networkName] }, size: 100 });
+          console.log(responses);
           setStructureId(
             responses[0].hits?.hits.map((item) => {
               return item._id;
