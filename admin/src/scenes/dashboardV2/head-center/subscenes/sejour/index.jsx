@@ -105,6 +105,7 @@ export default function Index() {
           filter={selectedFilters}
           sessionId={sessionId}
           centerId={centerId}
+          cohort={cohort}
         />
         <Details selectedFilters={selectedFilters} sessionId={sessionId} centerId={centerId} />
       </div>

@@ -161,7 +161,7 @@ const Home = (props) => {
           const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
           if (!ok) return console.log(`Error: ${code}`);
 
-          const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
+          const sessions = data.sort((a, b) => COHESION_STAY_END[b.cohort] - COHESION_STAY_END[a.cohort]);
           const now = new Date();
           now.setHours(0, 0, 0, 0);
 
