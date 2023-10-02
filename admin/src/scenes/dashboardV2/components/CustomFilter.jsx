@@ -16,7 +16,7 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
   return (
     <Popover className="relative">
       <Popover.Button className="inline-flex items-center gap-x-1 text-sm font-bold text-gray-500 outline-none">
-        {role === ROLES.RESPONSIBLE || role === ROLES.SUPERVISOR ? <span>Filtres (1)</span> : <span>Filtres (2)</span>}
+        {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(role) ? <span>Filtres (1)</span> : <span>Filtres (2)</span>}
         <HiChevronDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
       </Popover.Button>
 
@@ -31,7 +31,7 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
         <Popover.Panel className="absolute right-0 z-10 mt-2 flex w-screen max-w-min">
           <div className="w-60 shrink rounded-lg bg-white pt-3 pb-1 text-sm leading-6 shadow-lg ring-1 ring-black ring-opacity-5">
             <div className="flex flex-col">
-              {role === ROLES.RESPONSIBLE || role === ROLES.SUPERVISOR ? null : (
+              {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(role) ? null : (
                 <>
                   <span className="mb-1 px-4 text-sm text-gray-500">Phase</span>
                   <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("all")}>

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { ROLES, translate } from "snu-lib";
-import { capture } from "../../../../../sentry";
-import api from "../../../../../services/api";
+import { capture } from "@/sentry";
+import api from "@/services/api";
 import DashboardContainer from "../../../components/DashboardContainer";
 import KeyNumbers from "../../../components/KeyNumbers";
 import InfoMessage from "../../../components/ui/InfoMessage";
@@ -16,7 +16,7 @@ export default function Index() {
   const [stats, setStats] = useState({});
   const [message, setMessage] = useState([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const updateStats = async (id) => {
       const response = await api.post("/elasticsearch/dashboard/general/todo", { filters: { meetingPointIds: [id], cohort: [] } });
       const s = response.data;
@@ -39,7 +39,7 @@ export default function Index() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     getMessage();
   }, []);
 
@@ -134,46 +134,46 @@ function Actus({ stats }) {
       </div>
       <div className="grid grid-cols-3 gap-4">
         {!total(stats.engagement) && <NotePlaceholder />}
-        {shouldShow(stats.engagement, "engagement_contrat_à_éditer") && (
+        {shouldShow(stats.engagement, "contract_to_edit") && (
           <NoteContainer
             title="Contrat"
-            number={stats.engagement.engagement_contrat_à_éditer}
+            number={stats.engagement.contract_to_edit}
             content="contrats d'engagement sont à éditer par la structure d'accueil et à envoyer en signature."
             btnLabel="À suivre"
             link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=DRAFT`}
           />
         )}
-        {shouldShow(stats.engagement, "engagement_contrat_en_attente_de_signature") && (
+        {shouldShow(stats.engagement, "contract_to_sign") && (
           <NoteContainer
             title="Contrat"
-            number={stats.engagement.engagement_contrat_en_attente_de_signature}
+            number={stats.engagement.contract_to_sign}
             content="contrats d'engagement sont en attente de signature."
             btnLabel="À suivre"
             link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=SENT`}
           />
         )}
-        {shouldShow(stats.engagement, "engagement_dossier_militaire_en_attente_de_validation") && (
+        {shouldShow(stats.engagement, "military_file_to_validate") && (
           <NoteContainer
             title="Dossier d’éligibilité"
-            number={stats.engagement.engagement_dossier_militaire_en_attente_de_validation}
+            number={stats.engagement.military_file_to_validate}
             content="dossiers d'éligibilité en préparation militaire sont en attente de vérification."
             btnLabel="À vérifier"
             link={`/volontaire?status=VALIDATED&statusMilitaryPreparationFiles=WAITING_VERIFICATION`}
           />
         )}
-        {shouldShow(stats.engagement, "engagement_mission_en_attente_de_validation") && (
+        {shouldShow(stats.engagement, "mission_to_validate") && (
           <NoteContainer
             title="Mission"
-            number={stats.engagement.engagement_mission_en_attente_de_validation}
+            number={stats.engagement.mission_to_validate}
             content="missions sont en attente de validation."
             btnLabel="À instruire"
             link={`/mission?status=WAITING_VALIDATION`}
           />
         )}
-        {shouldShow(stats.engagement, "engagement_phase3_en_attente_de_validation") && (
+        {shouldShow(stats.engagement, "phase3_to_validate") && (
           <NoteContainer
             title="Phase 3"
-            number={stats.engagement.engagement_phase3_en_attente_de_validation}
+            number={stats.engagement.phase3_to_validate}
             content="demandes de validation de phase 3 à suivre."
             btnLabel="À suivre"
             link={`/volontaire?status=VALIDATED&statusPhase3=WAITING_VALIDATION`}

@@ -21,7 +21,7 @@ import {
   translateContractStatus,
   translateApplicationFileType,
   formatStringDateTimezoneUTC,
-} from "../../utils";
+} from "@/utils";
 import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import Panel from "./panel";
 
