@@ -1,10 +1,9 @@
-/* import StatusText from "./StatusText"; */
 import queryString from "query-string";
 import { Link } from "react-router-dom";
 import { getNewLink } from "../../../../../../utils";
 import React from "react";
 
-export default function OccupationBarVertical({ percentage, nbDepart, departMotif, filter }) {
+export default function OccupationBarVertical({ percentage, nbDepart, departMotif, filter, sessionId, centerId }) {
   let height = `h-0`;
   let bgColor = "bg-blue-700";
   let occupationPercentage = percentage * 100;
@@ -52,7 +51,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
             nb={exclusion}
             percentage={nbDepart ? Math.floor((exclusion / nbDepart) * 100) : 0}
             filter={filter}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/tableau-de-pointage`}
             filtersUrl={[queryString.stringify({ departSejourMotif: "Exclusion" })]}
           />
           <StatusText
@@ -60,7 +59,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
             nb={forceMajeure}
             percentage={nbDepart ? Math.floor((forceMajeure / nbDepart) * 100) : 0}
             filter={filter}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/tableau-de-pointage`}
             filtersUrl={[queryString.stringify({ departSejourMotif: "Cas de force majeure pour le volontaire" })]}
           />
           <StatusText
@@ -68,7 +67,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
             nb={annulation}
             percentage={nbDepart ? Math.floor((annulation / nbDepart) * 100) : 0}
             filter={filter}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/tableau-de-pointage`}
             filtersUrl={[queryString.stringify({ departSejourMotif: "Annulation du séjour ou mesure d’éviction sanitaire" })]}
           />
           <StatusText
@@ -76,7 +75,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
             nb={autre}
             percentage={nbDepart ? Math.floor((autre / nbDepart) * 100) : 0}
             filter={filter}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/tableau-de-pointage`}
             filtersUrl={[queryString.stringify({ departSejourMotif: "Autre" })]}
           />
         </div>

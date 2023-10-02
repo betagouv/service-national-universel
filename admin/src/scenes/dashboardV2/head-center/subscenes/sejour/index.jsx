@@ -8,7 +8,7 @@ import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "../../../moderator-ref/subscenes/sejour/components/BoxWithPercentage";
 import Details from "./components/Details";
-import Presences from "../../../moderator-ref/subscenes/sejour/components/Presences";
+import Presences from "./components/Presences";
 import StatusSejour from "./components/StatusSejour";
 
 export default function Index() {
