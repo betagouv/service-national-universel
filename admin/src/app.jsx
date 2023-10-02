@@ -161,7 +161,7 @@ const Home = (props) => {
           const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
           if (!ok) return console.log(`Error: ${code}`);
 
-          const sessions = data.sort((a, b) => COHESION_STAY_END[b.cohort] - COHESION_STAY_END[a.cohort]);
+          const sessions = data.sort((a, b) => COHESION_STAY_END[a.cohort] - COHESION_STAY_END[b.cohort]);
           const now = new Date();
           now.setHours(0, 0, 0, 0);
 
@@ -171,7 +171,7 @@ const Home = (props) => {
             sessions.find((s) => {
               const limit = COHESION_STAY_END[s.cohort].setDate(COHESION_STAY_END[s.cohort].getDate() + 3);
               return limit >= now;
-            }) || sessions[0];
+            }) || sessions[sessions.length - 1];
 
           setSessionPhase1List(sessions.reverse());
           dispatch(setSessionPhase1(activeSession));
