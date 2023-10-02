@@ -3,7 +3,7 @@ import { getNewLink } from "@/utils";
 import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { COHORTS, YOUNG_STATUS, translate } from "snu-lib";
+import { YOUNG_STATUS, translate } from "snu-lib";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "../../../moderator-ref/subscenes/sejour/components/BoxWithPercentage";
@@ -14,21 +14,25 @@ import StatusSejour from "./components/StatusSejour";
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
   const session = useSelector((state) => state.Auth.sessionPhase1);
-
-  const cohort = session?.cohort;
-  const sessionId = session?._id;
-  const centerId = session?.cohesionCenterId;
+  const [cohort, setCohort] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
+  const [centerId, setCenterId] = useState(null);
 
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
     cohort: [cohort],
+    cohesionCenterId: [centerId],
   });
   const [filterArray, setFilterArray] = useState([]);
   const [data, setData] = useState({});
 
   useEffect(() => {
-    getCentersId();
-  }, []);
+    if (session) {
+      setSessionId(session._id);
+      setCenterId(session.cohesionCenterId);
+      setCohort(session.cohort);
+    }
+  }, [session]);
 
   useEffect(() => {
     let filters = [
@@ -46,27 +50,18 @@ export default function Index() {
       },
     ].filter((e) => e);
     setFilterArray(filters);
-    setSelectedFilters({ ...selectedFilters, cohort: [cohort] });
-  }, [session, cohort]);
+    setSelectedFilters({ ...selectedFilters, cohort: [cohort], cohesionCenterId: [centerId] });
+  }, [session, cohort, centerId]);
 
   useEffect(() => {
     queryCenter();
-  }, [JSON.stringify(selectedFilters), cohort, centerId]);
+  }, [JSON.stringify(selectedFilters)]);
 
   const queryCenter = async () => {
     const { resultYoung } = await api.post("/elasticsearch/dashboard/sejour/head-center", {
       filters: Object.fromEntries(Object.entries(selectedFilters)),
     });
     setData(resultYoung);
-  };
-
-  const getCentersId = async () => {
-    const { ok, data } = await api.get(`/session-phase1/headCenter/${user._id}`);
-    if (!ok) return;
-    setSelectedFilters({
-      ...selectedFilters,
-      cohesionCenterId: data.map((session) => session.cohesionCenterId),
-    });
   };
 
   return (
