@@ -1,3 +1,20 @@
+# [1.343.0](https://github.com/betagouv/service-national-universel/compare/v1.342.0...v1.343.0) (2023-10-02)
+
+
+### Bug Fixes
+
+* **analytics:** bug date crons code climate ([#3064](https://github.com/betagouv/service-national-universel/issues/3064)) ([2b2551d](https://github.com/betagouv/service-national-universel/commit/2b2551d4f2904a99208aa9e08a7e7a87ccbfda35))
+* **analytics:** bug nom et type pour crons analytics dans la db postgre  ([#3070](https://github.com/betagouv/service-national-universel/issues/3070)) ([4048ab7](https://github.com/betagouv/service-national-universel/commit/4048ab7f2ad453e6408967de42ab55daca83db00))
+* **app:** add back swc/plugin-styled-components ([9946bc4](https://github.com/betagouv/service-national-universel/commit/9946bc4a7d59c9764efbbf125d29490ac4c867a5))
+* **bdc:** put back autoprefixer ([ecf3ce9](https://github.com/betagouv/service-national-universel/commit/ecf3ce98b67a32422c0bbcb8434e338706cf6e4e))
+
+
+### Features
+
+* **admin:** finition todo moderateur ([#3061](https://github.com/betagouv/service-national-universel/issues/3061)) ([7653dca](https://github.com/betagouv/service-national-universel/commit/7653dcac2655716ee893bfa031950022117f7b50))
+* **app:** POC adress combobox v2 (staging only) [#3063](https://github.com/betagouv/service-national-universel/issues/3063) ([f9097f1](https://github.com/betagouv/service-national-universel/commit/f9097f1ace1b05c0a11b75007300f7974cd8f8b1))
+* **app:** poc combobox address v3 (staging only) ([74990bc](https://github.com/betagouv/service-national-universel/commit/74990bc03abf8afd06f9110af4b93fa88f45bf25))
+
 # [1.342.0](https://github.com/betagouv/service-national-universel/compare/v1.341.1...v1.342.0) (2023-09-29)
 
 
