@@ -120,7 +120,6 @@ export default function StepCoordonnees() {
   const [wasBornInFrance, setWasBornInFrance] = useState("true");
   const [data, setData] = useState(defaultState);
   const [errors, setErrors] = useState({});
-  console.log("🚀 ~ file: stepCoordonnees.jsx:137 ~ StepCoordonnees ~ errors:", errors);
   const [corrections, setCorrections] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
   const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);

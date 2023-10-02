@@ -185,6 +185,7 @@ const Schema = new mongoose.Schema({
   },
   phone: {
     type: String,
+    unique: true,
     documentation: {
       description: "Numéro de télephone du volontaire",
     },
