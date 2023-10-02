@@ -35,6 +35,9 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
 
     if (!validator.isEmail(value.email)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    const phoneExists = await YoungObject.exists({ phone: value.phone, phoneZone: value.phoneZone, _id: { $ne: young._id } });
+    if (phoneExists) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
