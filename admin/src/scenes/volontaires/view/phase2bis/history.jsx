@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 
 import HistoricComponent from "../../../../components/views/Historic";
 import { capture } from "../../../../sentry";
@@ -8,7 +8,7 @@ import api from "../../../../services/api";
 import YoungHeader from "../../../phase0/components/YoungHeader";
 import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
 
-export default function history({ young, onChange }) {
+export default function History({ young, onChange }) {
   const [contract, setContract] = useState(null);
   const [application, setApplication] = useState(null);
   let { applicationId } = useParams();
