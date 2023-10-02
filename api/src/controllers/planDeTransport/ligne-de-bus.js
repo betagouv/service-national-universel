@@ -29,7 +29,7 @@ const {
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const Joi = require("joi");
-const { ObjectId } = require("mongodb");
+const { ObjectId } = require("mongoose").Types;
 const mongoose = require("mongoose");
 const { sendTemplate } = require("../../sendinblue");
 const { ADMIN_URL } = require("../../config");

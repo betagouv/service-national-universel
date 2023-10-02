@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory, Link, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
-import { useParams } from "react-router";
 import validator from "validator";
 
 import { CENTER_ROLES, ROLES, translate, SENDINBLUE_TEMPLATES } from "../../../utils";

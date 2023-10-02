@@ -1,7 +1,6 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
-import { useParams } from "react-router";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 
 import api from "../../../services/api";
 import { appURL } from "../../../config";
