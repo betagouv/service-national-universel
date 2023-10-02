@@ -28,14 +28,14 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const count = await YoungObject.countDocuments({
+    const exists = await YoungObject.exists({
       phone: value.phone,
       phoneZone: value.phoneZone,
-      firstName: value.firstName,
-      lastName: value.lastName,
+      firstName: young.firstName,
+      lastName: young.lastName,
       _id: { $ne: young._id },
     });
-    if (count >= 1) return res.status(400).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    if (exists) return res.status(400).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
     if (!isPhoneNumberWellFormated(value.phone, value.phoneZone)) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
