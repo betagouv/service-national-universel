@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const { db } = require("../services/databases/postgresql.service");
 
 const codeClimate = db.define(
-  "codeClimate",
+  "code_climate",
   {
     technical_debt_ratio: DataTypes.STRING,
     test_coverage: DataTypes.STRING,
