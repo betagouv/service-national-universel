@@ -147,13 +147,6 @@ export default function Index() {
               {!loading && !error && (
                 <div className="flex min-w-[30%] flex-col gap-2 w-full">
                   <StatusText
-                    status="En attente de vérification d'éligibilité"
-                    nb={valuesApplication.APPLICATION.WAITING_VERIFICATION?.nb || 0}
-                    percentage={valuesApplication.APPLICATION.WAITING_VERIFICATION?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "WAITING_VERIFICATION" })]}
-                    base="/volontaire/list/all"
-                  />
-                  <StatusText
                     status="Refusée"
                     nb={valuesApplication.APPLICATION.REFUSED?.nb || 0}
                     percentage={valuesApplication.APPLICATION.REFUSED?.percentage || 0}
