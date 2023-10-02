@@ -8,8 +8,13 @@ const slack = require("../slack");
 
 module.exports.handler = async function () {
   const date = new Date();
-  const yesterday = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate() - 1}`;
-  // filter[to] and filter[from] query paramerets
+  date.setDate(date.getDate() - 1); // this will set the date object to the previous day
+
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0"); // padStart ensures the month is always 2 digits
+  const dd = String(date.getDate()).padStart(2, "0"); // padStart ensures the day is always 2 digits
+
+  const yesterday = `${yyyy}/${mm}/${dd}`;
 
   try {
     const url = `https://api.codeclimate.com/v1/repos/6034fa54fc4de61073009538/metrics/technical_debt_ratio?filter[from]=${yesterday}&filter[to]=${yesterday}`;
