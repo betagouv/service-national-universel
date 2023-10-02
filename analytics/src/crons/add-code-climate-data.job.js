@@ -14,7 +14,7 @@ module.exports.handler = async function () {
   const mm = String(date.getMonth() + 1).padStart(2, "0"); // padStart ensures the month is always 2 digits
   const dd = String(date.getDate()).padStart(2, "0"); // padStart ensures the day is always 2 digits
 
-  const yesterday = `${yyyy}/${mm}/${dd}`;
+  const yesterday = `${yyyy}-${mm}-${dd}`;
 
   try {
     const url = `https://api.codeclimate.com/v1/repos/6034fa54fc4de61073009538/metrics/technical_debt_ratio?filter[from]=${yesterday}&filter[to]=${yesterday}`;

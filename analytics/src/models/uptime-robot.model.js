@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const { db } = require("../services/databases/postgresql.service");
 
 const uptimeRobot = db.define(
-  "uptimeRobot",
+  "uptime_robot",
   {
     uptime_ratio: DataTypes.STRING,
     monitor_id: DataTypes.STRING,
