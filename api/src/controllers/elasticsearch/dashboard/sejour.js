@@ -260,14 +260,13 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
       filter: [],
     },
   };
-  const buildESRequestBodyForYoung = (queryFilters, centersId) => {
-    console.log("queryFilters", queryFilters);
+  const buildESRequestBodyForYoung = (queryFilters) => {
     const bodyYoung = {
       query: {
         bool: {
           must: { match_all: {} },
           filter: [
-            { terms: { "cohesionCenterId.keyword": centersId } },
+            queryFilters.cohesionCenterId?.length ? { terms: { "cohesionCenterId.keyword": queryFilters.cohesionCenterId } } : null,
             queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
@@ -329,19 +328,14 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
   };
 
   try {
-    const filterFields = ["cohort", "status"];
+    const filterFields = ["cohort", "status", "cohesionCenterId"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const allowedRoles = [ROLES.HEAD_CENTER];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const sessions = await SessionPhase1Model.find({
-      headCenterId: req.user._id,
-      cohort: queryFilters.cohort?.length ? queryFilters.cohort : null,
-    });
-    const centersId = sessions.map((session) => session.cohesionCenterId);
-    const resultYoung = await getYoungForSejourDasboard(queryFilters, centersId);
+    const resultYoung = await getYoungForSejourDasboard(queryFilters);
 
     return res.status(200).send({ resultYoung });
   } catch (error) {

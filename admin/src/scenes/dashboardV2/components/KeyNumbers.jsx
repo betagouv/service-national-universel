@@ -23,7 +23,6 @@ export default function KeyNumbers({ role }) {
   async function fetchData() {
     try {
       const res = await API.post("/elasticsearch/dashboard/general/key-numbers", { startDate, endDate, phase });
-      console.log(res);
       if (!res.ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des chiffres clés", res.error);
       }

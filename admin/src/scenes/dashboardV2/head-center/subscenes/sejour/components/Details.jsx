@@ -2,13 +2,12 @@ import queryString from "query-string";
 import React, { useEffect, useRef, useState } from "react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import { Link } from "react-router-dom";
-import { YOUNG_SITUATIONS, YOUNG_STATUS, translate } from "snu-lib";
-import api from "../../../../services/api";
-import { getNewLink } from "../../../../utils";
-import { FilterComponent } from "../FilterDashBoard";
-import { BarChart, FullDoughnut, Legend, graphColors } from "../graphs";
+import { YOUNG_SITUATIONS } from "snu-lib";
+import api from "../../../../../../services/api";
+import { getNewLink } from "../../../../../../utils";
+import { BarChart, FullDoughnut, Legend, graphColors } from "../../../../components/graphs";
 
-export default function Details({ selectedFilters }) {
+export default function Details({ selectedFilters, sessionId, centerId }) {
   const [age, setAge] = useState({});
   const [sexe, setSexe] = useState({});
   const [grade, setGrade] = useState({});
@@ -18,18 +17,8 @@ export default function Details({ selectedFilters }) {
   const [specificSituation, setSpecificSituation] = useState({});
   const [selectedDetail, setSelectedDetail] = useState("age");
 
-  const [selectedFiltersBottom, setSelectedFiltersBottom] = React.useState({});
-  const filterArrayBottom = [
-    {
-      id: "status",
-      name: "Statuts",
-      fullValue: "Tous",
-      options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translate(status) })),
-    },
-  ];
-
   async function fetchDetailInscriptions() {
-    const res = await getDetailInscriptions({ ...selectedFilters, ...selectedFiltersBottom });
+    const res = await getDetailInscriptions({ ...selectedFilters });
     // get all the years from the res object
     const objectYears = {};
     Object.keys(res?.age || {}).forEach((e) => {
@@ -63,17 +52,12 @@ export default function Details({ selectedFilters }) {
 
   useEffect(() => {
     fetchDetailInscriptions();
-  }, [selectedFiltersBottom, selectedFilters]);
+  }, [selectedFilters]);
 
   return (
     <div className="flex w-[40%] flex-col items-center rounded-lg bg-white py-6 px-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="flex w-full flex-row justify-between">
         <div className="text-base font-bold text-gray-900">En détail</div>
-        <div className="flex flex-col items-end">
-          {filterArrayBottom.map((filter) => (
-            <FilterComponent key={filter.id} filter={filter} selectedFilters={selectedFiltersBottom} setSelectedFilters={setSelectedFiltersBottom} maxItems={2} />
-          ))}
-        </div>
       </div>
       {/* Filter to chose displayed graphs */}
       <div className="py-8">
@@ -100,8 +84,8 @@ export default function Details({ selectedFilters }) {
             maxLegends={2}
             tooltipsPercent={true}
             legendUrls={[
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ gender: "male" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ gender: "female" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ gender: "male" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ gender: "female" })] }),
             ]}
           />
         </div>
@@ -115,13 +99,13 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "2ndeGT" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "1ereGT" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "2ndePro" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "1erePro" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "3eme" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "Autre" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "CAP" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ grade: "2ndeGT" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ grade: "1ereGT" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ grade: "2ndePro" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ grade: "1erePro" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ grade: "3eme" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ grade: "Autre" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ grade: "CAP" })] }),
             ]}
           />
           <FullDoughnut
@@ -132,15 +116,19 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ situation: "GENERAL_SCHOOL" })] }),
               getNewLink({
-                base: `/inscription`,
-                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                base: `/centre/${centerId}/${sessionId}/general`,
+                filter: { ...selectedFilters },
+                filtersUrl: [queryString.stringify({ situation: "GENERAL_SCHOOL" })],
+              }),
+              getNewLink({
+                base: `/centre/${centerId}/${sessionId}/general`,
+                filter: { ...selectedFilters },
                 filtersUrl: [queryString.stringify({ situation: "PROFESSIONAL_SCHOOL" })],
               }),
               getNewLink({
-                base: `/inscription`,
-                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                base: `/centre/${centerId}/${sessionId}/general`,
+                filter: { ...selectedFilters },
                 filtersUrl: [queryString.stringify({ situation: "SPECIALIZED_SCHOOL" })],
               }),
             ]}
@@ -166,22 +154,22 @@ export default function Details({ selectedFilters }) {
           />
           <div className="grid grid-cols-2 gap-10">
             <Link
-              to={getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ handicap: "true" })] })}
+              to={getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ handicap: "true" })] })}
               target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="En situation de handicap" value={specificSituation.handicap.true || 0} color={graphColors[4][0]} />
             </Link>
             <Link
-              to={getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ ppsBeneficiary: "true" })] })}
+              to={getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ ppsBeneficiary: "true" })] })}
               target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="Bénéficiaire d’un PPS" value={specificSituation.ppsBeneficiary.true || 0} color={graphColors[4][1]} />
             </Link>
             <Link
-              to={getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ paiBeneficiary: "true" })] })}
+              to={getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ paiBeneficiary: "true" })] })}
               target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="Bénéficiaire d’un PAI" value={specificSituation.paiBeneficiary.true || 0} color={graphColors[4][2]} />
             </Link>
             <Link
-              to={getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ allergies: "true" })] })}
+              to={getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ allergies: "true" })] })}
               target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="Allergie / intolérance" value={specificSituation.allergies.true || 0} color={graphColors[4][3]} />
             </Link>
@@ -192,8 +180,8 @@ export default function Details({ selectedFilters }) {
           <div className="flex w-full flex-row justify-between">
             <Link
               to={getNewLink({
-                base: `/inscription`,
-                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                base: `/centre/${centerId}/${sessionId}/general`,
+                filter: { ...selectedFilters },
                 filtersUrl: [queryString.stringify({ specificAmenagment: "true" })],
               })}
               target="_blank">
@@ -201,8 +189,8 @@ export default function Details({ selectedFilters }) {
             </Link>
             <Link
               to={getNewLink({
-                base: `/inscription`,
-                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                base: `/centre/${centerId}/${sessionId}/general`,
+                filter: { ...selectedFilters },
                 filtersUrl: [queryString.stringify({ handicapInSameDepartment: "true" })],
               })}
               target="_blank">
@@ -215,8 +203,8 @@ export default function Details({ selectedFilters }) {
             </Link>
             <Link
               to={getNewLink({
-                base: `/inscription`,
-                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                base: `/centre/${centerId}/${sessionId}/general`,
+                filter: { ...selectedFilters },
                 filtersUrl: [queryString.stringify({ reducedMobilityAccess: "true" })],
               })}
               target="_blank">
@@ -239,8 +227,8 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ qpv: "true" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ qpv: "false" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ qpv: "true" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ qpv: "false" })] }),
             ]}
           />
 
@@ -252,8 +240,8 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ isRegionRural: "true" })] }),
-              getNewLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ isRegionRural: "false" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ isRegionRural: "true" })] }),
+              getNewLink({ base: `/centre/${centerId}/${sessionId}/general`, filter: { ...selectedFilters }, filtersUrl: [queryString.stringify({ isRegionRural: "false" })] }),
             ]}
           />
         </div>

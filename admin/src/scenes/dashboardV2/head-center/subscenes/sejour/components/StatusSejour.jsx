@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { getNewLink } from "@/utils";
 import queryString from "query-string";
 
-export default function StatusSejour({ statusPhase1, total, filter }) {
+export default function StatusSejour({ statusPhase1, total, filter, sessionId, centerId }) {
   const WAITING_AFFECTATION = statusPhase1?.WAITING_AFFECTATION || 0;
   const WAITING_LIST = statusPhase1?.WAITING_LIST || 0;
   const AFFECTED = statusPhase1?.AFFECTED || 0;
@@ -25,7 +25,7 @@ export default function StatusSejour({ statusPhase1, total, filter }) {
             nb={WAITING_AFFECTATION}
             percentage={total && WAITING_AFFECTATION ? ((WAITING_AFFECTATION / total) * 100).toFixed(0) : 0}
             filter={filterWithoutStatusPhase1}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/general`}
             filtersUrl={[queryString.stringify({ statusPhase1: "WAITING_AFFECTATION" })]}
           />
           <StatusText
@@ -33,7 +33,7 @@ export default function StatusSejour({ statusPhase1, total, filter }) {
             nb={AFFECTED || 0}
             percentage={total && AFFECTED ? ((AFFECTED / total) * 100).toFixed(0) : 0}
             filter={filterWithoutStatusPhase1}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/general`}
             filtersUrl={[queryString.stringify({ statusPhase1: "AFFECTED" })]}
           />
           <StatusText
@@ -41,7 +41,7 @@ export default function StatusSejour({ statusPhase1, total, filter }) {
             nb={DONE || 0}
             percentage={total && DONE ? ((DONE / total) * 100).toFixed(0) : 0}
             filter={filterWithoutStatusPhase1}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/general`}
             filtersUrl={[queryString.stringify({ statusPhase1: "DONE" })]}
           />
           <StatusText
@@ -49,7 +49,7 @@ export default function StatusSejour({ statusPhase1, total, filter }) {
             nb={WAITING_LIST || 0}
             percentage={total && WAITING_LIST ? ((WAITING_LIST / total) * 100).toFixed(0) : 0}
             filter={filterWithoutStatusPhase1}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/general`}
             filtersUrl={[queryString.stringify({ statusPhase1: "WAITING_LIST" })]}
           />
         </div>
@@ -62,7 +62,7 @@ export default function StatusSejour({ statusPhase1, total, filter }) {
             nb={NOT_DONE || 0}
             percentage={total && NOT_DONE ? ((NOT_DONE / total) * 100).toFixed(0) : 0}
             filter={filterWithoutStatusPhase1}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/general`}
             filtersUrl={[queryString.stringify({ statusPhase1: "NOT_DONE" })]}
           />
           <StatusText
@@ -70,7 +70,7 @@ export default function StatusSejour({ statusPhase1, total, filter }) {
             nb={EXEMPTED || 0}
             percentage={total && EXEMPTED ? ((EXEMPTED / total) * 100).toFixed(0) : 0}
             filter={filterWithoutStatusPhase1}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/general`}
             filtersUrl={[queryString.stringify({ statusPhase1: "EXEMPTED" })]}
           />
           <StatusText
@@ -78,7 +78,7 @@ export default function StatusSejour({ statusPhase1, total, filter }) {
             nb={WITHDRAWN || 0}
             percentage={total && WITHDRAWN ? ((WITHDRAWN / total) * 100).toFixed(0) : 0}
             filter={filterWithoutStatusPhase1}
-            base="/volontaire"
+            base={`/centre/${centerId}/${sessionId}/general`}
             filtersUrl={[queryString.stringify({ statusPhase1: "WITHDRAWN" })]}
           />
         </div>

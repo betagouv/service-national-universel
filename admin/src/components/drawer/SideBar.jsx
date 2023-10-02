@@ -44,7 +44,6 @@ const SideBar = (props) => {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
   const newTickets = useSelector((state) => state.Tickets.new);
   const openedTickets = useSelector((state) => state.Tickets.open);
-
   //Check if the sidebar is open or not in the local storage
   useEffect(() => {
     if (localStorage?.getItem("sideBarOpen") === "true") setOpen(true);
