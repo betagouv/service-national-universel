@@ -20,6 +20,7 @@ import { getCohortNameList } from "@/services/cohort.service";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
 
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
@@ -32,13 +33,9 @@ export default function Index() {
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
-  const fetchCohorts = async () => {
-    const cohorts = await getCohortNameList();
-    setSelectedFilters({ ...selectedFilters, cohorts });
-  };
-
   useEffect(() => {
-    fetchCohorts();
+    const cohortsFilters = getCohortNameList(cohorts);
+    setSelectedFilters({ ...selectedFilters, cohorts: cohortsFilters });
   }, []);
 
   useEffect(() => {

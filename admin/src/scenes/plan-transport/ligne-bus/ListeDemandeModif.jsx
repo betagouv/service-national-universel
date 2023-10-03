@@ -22,6 +22,7 @@ export default function ListeDemandeModif() {
   const [tagsOptions, setTagsOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const history = useHistory();
 
   const [data, setData] = useState([]);
@@ -30,14 +31,10 @@ export default function ListeDemandeModif() {
   const [paramData, setParamData] = useState({ page: 0 });
   const [size, setSize] = useState(10);
 
-  const fetchCohorts = async () => {
-    const cohortList = await getCohortSelectOptions();
+  useEffect(() => {
+    const cohortList = getCohortSelectOptions(cohorts);
     setCohortList(cohortList);
     if (!cohort) setCohort(cohortList[0].value);
-  };
-
-  useEffect(() => {
-    fetchCohorts();
   }, []);
 
   const getTags = async () => {

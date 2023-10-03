@@ -13,6 +13,7 @@ import { getCohortSelectOptions } from "@/services/cohort.service";
 export default function Regional() {
   const [cohortList, setCohortList] = useState([]);
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
   const region = urlParams.get("region");
   useDocumentTitle(`Table de répartition - ${region}`);
@@ -20,13 +21,10 @@ export default function Regional() {
 
   const [openReverseView, setOpenReverseView] = useState(false);
 
-  const fetchCohorts = async () => {
-    const cohortList = await getCohortSelectOptions();
-    setCohortList(cohortList);
-  };
-
   useEffect(() => {
-    fetchCohorts();
+    const cohortList = getCohortSelectOptions(cohorts);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[0].value);
   }, []);
 
   return (

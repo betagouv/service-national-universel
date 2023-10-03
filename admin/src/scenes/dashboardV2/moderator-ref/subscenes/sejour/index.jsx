@@ -32,6 +32,7 @@ import { getCohortNameList } from "@/services/cohort.service";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
 
   //useStates
   const [selectedFilters, setSelectedFilters] = useState({
@@ -53,13 +54,9 @@ export default function Index() {
       ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
       : academyList.map((a) => ({ key: a, label: a }));
 
-  const fetchCohorts = async () => {
-    const cohorts = await getCohortNameList();
-    setSelectedFilters({ ...selectedFilters, cohort: cohorts });
-  };
-
   useEffect(() => {
-    fetchCohorts();
+    const cohortsFilters = getCohortNameList(cohorts);
+    setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
   }, []);
 
   useEffect(() => {

@@ -19,20 +19,17 @@ import { getCohortSelectOptions } from "@/services/cohort.service";
 
 const ChangeYoungs = () => {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
+  const cohorts = useSelector((state) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
   const defaultCohort = user.role === ROLES.ADMIN && sessionPhase1 ? sessionPhase1.cohort : undefined;
   const [cohort, setCohort] = useState(urlParams.get("cohort") || defaultCohort);
   const [cohortList, setCohortList] = useState();
   const history = useHistory();
 
-  const fetchCohorts = async () => {
-    const cohortList = await getCohortSelectOptions();
+  useEffect(() => {
+    const cohortList = getCohortSelectOptions(cohorts);
     setCohortList(cohortList);
     if (!cohort) setCohort(cohortList[0].value);
-  };
-
-  useEffect(() => {
-    fetchCohorts();
   }, []);
 
   if (!cohort || !cohortList) return <Loader />;

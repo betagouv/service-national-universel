@@ -23,6 +23,7 @@ import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
+  const cohorts = useSelector((state) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = useState(urlParams.get("cohort"));
   const [cohortList, setCohortList] = useState([]);
@@ -62,14 +63,10 @@ export default function Settings() {
     }
   };
 
-  const fetchCohorts = async () => {
-    const cohortList = await getCohortSelectOptions(true);
-    setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[cohortList.length - 1].value);
-  };
-
   useEffect(() => {
-    fetchCohorts();
+    const cohortList = getCohortSelectOptions(cohorts, true);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[0].value);
   }, []);
 
   useEffect(() => {

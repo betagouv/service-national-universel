@@ -16,6 +16,7 @@ import { getCohortSelectOptions } from "@/services/cohort.service";
 export default function National() {
   useDocumentTitle("Table de répartition");
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const [cohort, setCohort] = useState(getDefaultCohort());
   const [cohortList, setCohortList] = useState([]);
   const [youngsByRegion, setYoungsByRegion] = useState([]);
@@ -26,14 +27,10 @@ export default function National() {
   const [data, setData] = useState([]);
   const history = useHistory();
 
-  const fetchCohorts = async () => {
-    const cohortList = await getCohortSelectOptions();
+  useEffect(() => {
+    const cohortList = getCohortSelectOptions(cohorts);
     setCohortList(cohortList);
     if (!cohort) setCohort(cohortList[0].value);
-  };
-
-  useEffect(() => {
-    fetchCohorts();
   }, []);
 
   function getDefaultCohort() {

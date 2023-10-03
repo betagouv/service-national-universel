@@ -17,6 +17,7 @@ import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
+  const cohorts = useSelector((state) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
   const defaultCohort = user.role === ROLES.ADMIN && sessionPhase1 ? sessionPhase1.cohort : undefined;
   const [cohort, setCohort] = useState(urlParams.get("cohort") || defaultCohort);
@@ -25,14 +26,10 @@ export default function List() {
   const [hasValue, setHasValue] = useState(false);
   const history = useHistory();
 
-  const fetchCohorts = async () => {
-    const cohortList = await getCohortSelectOptions();
+  useEffect(() => {
+    const cohortList = getCohortSelectOptions(cohorts);
     setCohortList(cohortList);
     if (!cohort) setCohort(cohortList[0].value);
-  };
-
-  useEffect(() => {
-    fetchCohorts();
   }, []);
 
   const getPlanDetransport = async () => {

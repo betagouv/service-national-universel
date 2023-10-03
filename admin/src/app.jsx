@@ -64,6 +64,7 @@ import Team from "./scenes/team";
 
 import SideBar from "./components/drawer/SideBar";
 import useDocumentTitle from "./hooks/useDocumentTitle";
+import { getCohorts } from "./services/cohort.service";
 
 initSentry();
 initApi();
@@ -147,6 +148,8 @@ const Home = (props) => {
         if (res.user) dispatch(setUser(res.user));
         //Load session phase 1 for head center before stop loading
         if (res.user.role !== ROLES.HEAD_CENTER) setLoading(false);
+        const cohorts = await getCohorts();
+        if (cohorts) dispatch({ type: "SET_COHORTS", payload: cohorts });
       } catch (e) {
         console.log(e);
         setLoading(false);

@@ -22,6 +22,8 @@ import { getCohortNameList } from "@/services/cohort.service";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
+
   const [inscriptionGoals, setInscriptionGoals] = useState();
 
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
@@ -81,13 +83,10 @@ export default function Index() {
     const res = await getCurrentInscriptions(selectedFilters);
     setInscriptionDetailObject(res);
   }
-  const fetchCohorts = async () => {
-    const cohorts = await getCohortNameList();
-    setSelectedFilters({ cohort: cohorts });
-  };
 
   useEffect(() => {
-    fetchCohorts();
+    const cohortsFilters = getCohortNameList(cohorts);
+    setSelectedFilters({ cohort: cohortsFilters });
   }, []);
 
   useEffect(() => {

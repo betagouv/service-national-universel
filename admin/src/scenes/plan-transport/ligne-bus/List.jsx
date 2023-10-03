@@ -22,22 +22,20 @@ import ListPanel from "./modificationPanel/List";
 import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function List() {
-  const [cohortList, setCohortList] = useState([]);
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const [cohortList, setCohortList] = useState([]);
   const urlParams = new URLSearchParams(window.location.search);
-  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : "Juillet 2023";
+  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : undefined;
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
   const history = useHistory();
 
-  const fetchCohorts = async () => {
-    const cohortList = await getCohortSelectOptions();
-    setCohortList(cohortList);
-  };
-
   useEffect(() => {
-    fetchCohorts();
+    const cohortList = getCohortSelectOptions(cohorts);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[0].value);
   }, []);
 
   const getPlanDetransport = async () => {

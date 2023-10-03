@@ -19,6 +19,7 @@ let filterOptionsCache = null;
 export default function Historic() {
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = useState(urlParams.get("cohort"));
   const [cohortList, setCohortList] = useState([]);
@@ -30,14 +31,10 @@ export default function Historic() {
   const [exporting, setExporting] = useState(false);
   const history = useHistory();
 
-  const fetchCohorts = async () => {
-    const cohortList = await getCohortSelectOptions();
-    setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[cohortList.lenght - 1].value);
-  };
-
   useEffect(() => {
-    fetchCohorts();
+    const cohortList = getCohortSelectOptions(cohorts);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[0].value);
   }, []);
 
   useEffect(() => {

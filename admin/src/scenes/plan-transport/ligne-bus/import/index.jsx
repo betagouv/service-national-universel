@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+
 import { Title } from "../../components/commons";
 import Select from "../../components/Select";
 import Download from "./components/Download";
@@ -8,6 +10,7 @@ import Resum from "./components/Resum";
 import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function Index(props) {
+  const cohorts = useSelector((state) => state.Cohorts);
   const [cohortList, setCohortList] = useState([]);
   const cohort = new URLSearchParams(props.location.search).get("cohort");
   const [steps, setSteps] = useState([
@@ -17,13 +20,9 @@ export default function Index(props) {
   ]);
   const [summary, setSummary] = useState(null);
 
-  const fetchCohorts = async () => {
-    const cohortList = await getCohortSelectOptions();
-    setCohortList(cohortList);
-  };
-
   useEffect(() => {
-    fetchCohorts();
+    const cohortList = getCohortSelectOptions(cohorts);
+    setCohortList(cohortList);
   }, []);
 
   const nextStep = () => {

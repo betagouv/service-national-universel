@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import * as FileSaver from "file-saver";
-import { ROLES, translate, getCohortPeriod } from "snu-lib";
+import { ROLES, translate } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 
 import { Title } from "../plan-transport/components/commons";
@@ -11,15 +11,17 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import ExportBox from "./components/ExportBox";
 import { useSelector } from "react-redux";
+import { getCohortSelectOptions } from "@/services/cohort.service";
 
 const exportDateKeys = ["cohesionCenters", "youngsBeforeSession", "youngsAfterSession"];
 
 const DSNJExport = () => {
+  const user = useSelector((state) => state.Auth.user);
+  const cohortList = useSelector((state) => state.Cohorts);
   const [cohortId, setCohortId] = useState(null);
   const [cohorts, setCohorts] = useState([]);
   const [cohortOptions, setCohortOptions] = useState([]);
   const [isLDownloadingByKey, setDownloadingByKey] = useState({});
-  const user = useSelector((state) => state.Auth.user);
   useDocumentTitle("Export DSNJ");
 
   useEffect(() => {
@@ -27,9 +29,7 @@ const DSNJExport = () => {
   }, []);
 
   const getCohorts = async () => {
-    const { data: cohortsWithExportDates, ok } = await api.get("/cohort");
-    if (!ok) return toastr.error("Impossible de récupérer la date des exports", "");
-    const cohortList = cohortsWithExportDates.map(({ snuId, dateEnd, dsnjExportDates }) => {
+    const cohorts = cohortList.map(({ snuId, dateEnd, dsnjExportDates }) => {
       // export available until 1 month after the cohort
       const exportsAvailableUntil = new Date(dateEnd);
       exportsAvailableUntil.setMonth(exportsAvailableUntil.getMonth() + 1);
@@ -40,11 +40,8 @@ const DSNJExport = () => {
         exportsAvailableUntil,
       };
     });
-    setCohorts(cohortList);
-    const formattedCohortOptions = cohortsWithExportDates.map((cohort) => ({
-      label: `Séjour <b>${getCohortPeriod(cohort)}</b>`,
-      value: cohort.snuId,
-    }));
+    setCohorts(cohorts);
+    const formattedCohortOptions = getCohortSelectOptions(cohortList);
     setCohortOptions(formattedCohortOptions);
     setCohortId(formattedCohortOptions[0].value);
   };

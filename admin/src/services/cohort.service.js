@@ -40,13 +40,11 @@ export const getCohorts = async () => {
   }
 };
 
-export const getCohortNameList = async () => {
-  const cohorts = await getCohorts();
+export const getCohortNameList = (cohorts) => {
   return cohorts.map((cohort) => cohort.name);
 };
 
-export const getCohortSelectOptions = async (short = false) => {
-  const cohorts = await getCohorts();
+export const getCohortSelectOptions = (cohorts, short = false) => {
   if (short) return cohorts.map((cohort) => ({ value: cohort.name, label: cohort.name }));
   return cohorts.map((cohort) => ({ value: cohort.name, label: `Séjour ${getCohortPeriod(cohort, true)}` }));
 };
