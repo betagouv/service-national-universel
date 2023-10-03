@@ -1,14 +1,14 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import GrayArrow from "@/assets/gray-arrow.svg";
+import { RiAttachmentFill } from "react-icons/ri";
 import plausibleEvent from "../../services/plausible";
 import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { capture } from "../../sentry";
 import ProgressBar from "./components/ProgressBar";
 import { supportURL } from "@/config";
-import GrayArrow from "@/assets/gray-arrow.svg";
-import { RiAttachmentFill } from "react-icons/ri";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young);
