@@ -6,12 +6,13 @@ import { useSelector } from "react-redux";
 import { YOUNG_STATUS } from "snu-lib";
 import DashboardContainer from "../../../components/DashboardContainer";
 import BoxWithPercentage from "../../../moderator-ref/subscenes/sejour/components/BoxWithPercentage";
-import Details from "./components/Details";
-import Presences from "./components/Presences";
-import StatusSejour from "./components/StatusSejour";
+import Details from "@/scenes/dashboardV2/components/inscription/Details";
+import Presences from "../../../moderator-ref/subscenes/sejour/components/Presences";
+import StatusPhase1 from "../../../moderator-ref/subscenes/sejour/components/StatusPhase1";
 
 export default function Index() {
   const session = useSelector((state) => state.Auth.sessionPhase1);
+  const user = useSelector((state) => state.Auth.user);
   const [cohort, setCohort] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [centerId, setCenterId] = useState(null);
@@ -75,7 +76,7 @@ export default function Index() {
                   })}
                 />
               </div>
-              <StatusSejour statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} sessionId={sessionId} centerId={centerId} />
+              <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} role={user.role} sessionId={sessionId} centerId={centerId} />
             </div>
             <Presences
               presence={data?.presence}
@@ -84,11 +85,12 @@ export default function Index() {
               departTotal={data?.departTotal}
               departMotif={data?.departMotif}
               filter={selectedFilters}
+              role={user.role}
               sessionId={sessionId}
               centerId={centerId}
-              cohort={cohort}
+              cohortHeadCenter={cohort}
             />
-            <Details selectedFilters={selectedFilters} sessionId={sessionId} centerId={centerId} />
+            <Details selectedFilters={selectedFilters} role={user.role} sessionId={sessionId} centerId={centerId} />
           </>
         )}
       </div>
