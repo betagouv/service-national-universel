@@ -36,7 +36,7 @@ export default function StepConfirm() {
     ) {
       setHasHandicap(true);
     }
-}, []);
+  }, []);
 
   const onSubmit = async () => {
     setLoading(true);
