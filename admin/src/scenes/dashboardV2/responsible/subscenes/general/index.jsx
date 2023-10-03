@@ -125,7 +125,7 @@ function Actus({ stats }) {
         <div className="text-slate-300 py-8 m-auto text-center animate-pulse text-xl">Chargement des actualités</div>
       </div>
     );
-
+  console.log(stats);
   return (
     <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
       <div className="flex items-center gap-3">
@@ -152,57 +152,6 @@ function Actus({ stats }) {
             link={`/volontaire?status=VALIDATED&statusPhase2=IN_PROGRESS~WAITING_REALISATION&phase2ApplicationStatus=VALIDATED~IN_PROGRESS&statusPhase2Contract=SENT`}
           />
         )}
-        {shouldShow(stats.engagement, "military_file_to_validate") && (
-          <NoteContainer
-            title="Dossier d’éligibilité"
-            number={stats.engagement.military_file_to_validate}
-            content="dossiers d'éligibilité en préparation militaire sont en attente de vérification."
-            btnLabel="À vérifier"
-            link={`/volontaire?status=VALIDATED&statusMilitaryPreparationFiles=WAITING_VERIFICATION`}
-          />
-        )}
-        {shouldShow(stats.engagement, "mission_to_validate") && (
-          <NoteContainer
-            title="Mission"
-            number={stats.engagement.mission_to_validate}
-            content="missions sont en attente de validation."
-            btnLabel="À instruire"
-            link={`/mission?status=WAITING_VALIDATION`}
-          />
-        )}
-        {shouldShow(stats.engagement, "phase3_to_validate") && (
-          <NoteContainer
-            title="Phase 3"
-            number={stats.engagement.phase3_to_validate}
-            content="demandes de validation de phase 3 à suivre."
-            btnLabel="À suivre"
-            link={`/volontaire?status=VALIDATED&statusPhase3=WAITING_VALIDATION`}
-          />
-        )}
-        {/* {shouldShow(stats.engagement, "volontaires_à_suivre_sans_contrat") && (
-            <NoteContainer
-              title="Volontaires"
-              number={stats.engagement.volontaires_à_suivre_sans_contrat}
-              content="volontaires ayant commencé leur mission sans contrat signé"
-              btnLabel="À suivre"
-            />
-          )}
-          {shouldShow(stats.engagement, "volontaires_à_suivre_sans_statut") && (
-            <NoteContainer
-              title="Volontaires"
-              number={stats.engagement.volontaires_à_suivre_sans_statut}
-              content="volontaires ayant commencé leur mission sans statut à jour"
-              btnLabel="À suivre"
-            />
-          )}
-          {shouldShow(stats.engagement, "volontaires_à_suivre_achevé_sans_statut") && (
-            <NoteContainer
-              title="Volontaires"
-              number={stats.engagement.volontaires_à_suivre_achevé_sans_statut}
-              content="volontaires ayant achevé leur mission sans statut à jour"
-              btnLabel="À suivre"
-            />
-          )} */}
       </div>
       {stats?.engagement.length > 9 ? (
         <div className="flex justify-center">
