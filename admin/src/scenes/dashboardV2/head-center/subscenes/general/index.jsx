@@ -50,7 +50,6 @@ export default function Index() {
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
           <Actus stats={stats} user={user} />
-          <KeyNumbers role={user.role} />
         </div>
       </div>
     </DashboardContainer>
@@ -87,7 +86,7 @@ const NoteContainer = ({ title, number, content, btnLabel, link }) => {
   );
 };
 
-function Actus({ stats }) {
+function Actus({ stats, user }) {
   const [fullNote, setFullNote] = useState(false);
 
   function shouldShow(parent, key, index = null) {
@@ -118,16 +117,16 @@ function Actus({ stats }) {
     }
     return limit;
   }
-
+  const width = user.role === ROLES.HEAD_CENTER ? "w-full" : "w-[70%]";
   if (!stats.sejour)
     return (
-      <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
+      <div className={`${width} flex flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
         <div className="text-slate-300 py-8 m-auto text-center animate-pulse text-xl">Chargement des actualités</div>
       </div>
     );
-  console.log(stats?.sejour);
+
   return (
-    <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
+    <div className={`${width} flex flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
       <div className="flex items-center gap-3">
         <div className="text-sm font-bold leading-5 text-gray-900">A faire</div>
         <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.sejour)}</div>

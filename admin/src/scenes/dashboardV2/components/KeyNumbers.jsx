@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Inscription from "./ui/icons/Inscription";
 import CustomFilter from "../moderator-ref/subscenes/general/components/CustomFilter";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
@@ -9,16 +9,12 @@ import Engagement from "./ui/icons/Engagement";
 import { toastr } from "react-redux-toastr";
 import { ROLES } from "snu-lib";
 
-export default function KeyNumbers({ role }) {
+export default function KeyNumbers() {
   const [open, setOpen] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [phase, setPhase] = useState("all");
   const [notes, setNotes] = useState(null);
-
-  useEffect(() => {
-    if (role === ROLES.HEAD_CENTER) setPhase("sejour");
-  }, []);
 
   async function fetchData() {
     try {
@@ -43,27 +39,20 @@ export default function KeyNumbers({ role }) {
           <div className="text-sm font-bold leading-5 text-gray-900">Chiffres clés</div>
           <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">{notes?.length || 0}</div>
         </div>
-        <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} role={role} />
+        <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} />
       </div>
-      {!notes?.length ? (
-        <div className={`flex flex-col my-auto gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
-          <div className="text-slate-300 py-8 m-auto text-center animate-pulse text-xl">Chargement des chiffres clés</div>
-        </div>
-      ) : (
-        <div className="overflow-hidden">
-          {notes?.map((note) => (
-            <Note key={note.id} note={note} />
-          ))}
-        </div>
-      )}
-      {notes?.length > 7 && (
-        <div className="mt-auto p-2 flex justify-center">
-          <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setOpen(!open)}>
-            <span>{open ? "Voir moins" : "Voir plus"}</span>
-            {open ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
-          </button>
-        </div>
-      )}
+      <div className="overflow-hidden">
+        {notes?.map((note) => (
+          <Note key={note.id} note={note} />
+        ))}
+      </div>
+
+      <div className="mt-auto p-2 flex justify-center">
+        <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setOpen(!open)}>
+          <span>{open ? "Voir moins" : "Voir plus"}</span>
+          {open ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
+        </button>
+      </div>
     </div>
   );
 }

@@ -3,16 +3,14 @@ import { getNewLink } from "@/utils";
 import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS, translate } from "snu-lib";
+import { YOUNG_STATUS } from "snu-lib";
 import DashboardContainer from "../../../components/DashboardContainer";
-import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import BoxWithPercentage from "../../../moderator-ref/subscenes/sejour/components/BoxWithPercentage";
 import Details from "./components/Details";
 import Presences from "./components/Presences";
 import StatusSejour from "./components/StatusSejour";
 
 export default function Index() {
-  const user = useSelector((state) => state.Auth.user);
   const session = useSelector((state) => state.Auth.sessionPhase1);
   const [cohort, setCohort] = useState(null);
   const [sessionId, setSessionId] = useState(null);
@@ -20,10 +18,7 @@ export default function Index() {
 
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
-    cohort: [cohort],
-    cohesionCenterId: [centerId],
   });
-  const [filterArray, setFilterArray] = useState([]);
   const [data, setData] = useState({});
 
   useEffect(() => {
@@ -35,26 +30,11 @@ export default function Index() {
   }, [session]);
 
   useEffect(() => {
-    let filters = [
-      {
-        id: "status",
-        name: "Statut",
-        fullValue: "Tous",
-        options: [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN].map((status) => ({ key: status, label: translate(status) })),
-      },
-      {
-        id: "cohort",
-        name: "Cohorte",
-        fullValue: `${session?.cohort}`,
-        options: [{ key: cohort, label: cohort }],
-      },
-    ].filter((e) => e);
-    setFilterArray(filters);
     setSelectedFilters({ ...selectedFilters, cohort: [cohort], cohesionCenterId: [centerId] });
   }, [session, cohort, centerId]);
 
   useEffect(() => {
-    queryCenter();
+    if (selectedFilters?.cohort && selectedFilters?.cohesionCenterId) queryCenter();
   }, [JSON.stringify(selectedFilters)]);
 
   const queryCenter = async () => {
@@ -67,47 +47,50 @@ export default function Index() {
   return (
     <DashboardContainer active="sejour" availableTab={["general", "sejour"]}>
       <div className="flex flex-col gap-8">
-        <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">Général</h1>
-        <div className="flex items-stretch gap-4 ">
-          <div className="flex w-[30%] flex-col gap-4">
-            <BoxWithPercentage
-              total={data?.sanitaryTotal || 0}
-              number={data?.sanitary?.false || 0}
-              title="Fiches Sanitaires"
-              subLabel="non receptionnées"
-              redirect={getNewLink({
-                base: `/centre/${centerId}/${sessionId}/fiche-sanitaire`,
-                filter: selectedFilters,
-                filtersUrl: [queryString.stringify({ cohesionStayMedicalFileReceived: "false" })],
-              })}
+        {selectedFilters?.cohort && selectedFilters?.cohesionCenterId && (
+          <>
+            <div className="flex items-stretch gap-4 ">
+              <div className="flex w-[30%] flex-col gap-4">
+                <BoxWithPercentage
+                  total={data?.sanitaryTotal || 0}
+                  number={data?.sanitary?.false || 0}
+                  title="Fiches Sanitaires"
+                  subLabel="non receptionnées"
+                  redirect={getNewLink({
+                    base: `/centre/${centerId}/${sessionId}/fiche-sanitaire`,
+                    filter: selectedFilters,
+                    filtersUrl: [queryString.stringify({ cohesionStayMedicalFileReceived: "false" })],
+                  })}
+                />
+                <BoxWithPercentage
+                  total={data?.participationTotal || 0}
+                  number={data?.participation?.false || 0}
+                  title="Participation"
+                  subLabel="restants à confirmer"
+                  redirect={getNewLink({
+                    base: `/centre/${centerId}/${sessionId}/general`,
+                    filter: selectedFilters,
+                    filtersUrl: [queryString.stringify({ youngPhase1Agreement: "false" })],
+                  })}
+                />
+              </div>
+              <StatusSejour statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} sessionId={sessionId} centerId={centerId} />
+            </div>
+            <Presences
+              presence={data?.presence}
+              JDM={data?.JDM}
+              depart={data?.depart}
+              departTotal={data?.departTotal}
+              departMotif={data?.departMotif}
+              filter={selectedFilters}
+              sessionId={sessionId}
+              centerId={centerId}
+              cohort={cohort}
             />
-            <BoxWithPercentage
-              total={data?.participationTotal || 0}
-              number={data?.participation?.false || 0}
-              title="Participation"
-              subLabel="restants à confirmer"
-              redirect={getNewLink({
-                base: `/centre/${centerId}/${sessionId}/general`,
-                filter: selectedFilters,
-                filtersUrl: [queryString.stringify({ youngPhase1Agreement: "false" })],
-              })}
-            />
-          </div>
-          <StatusSejour statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} sessionId={sessionId} centerId={centerId} />
-        </div>
-        <Presences
-          presence={data?.presence}
-          JDM={data?.JDM}
-          depart={data?.depart}
-          departTotal={data?.departTotal}
-          departMotif={data?.departMotif}
-          filter={selectedFilters}
-          sessionId={sessionId}
-          centerId={centerId}
-          cohort={cohort}
-        />
-        <Details selectedFilters={selectedFilters} sessionId={sessionId} centerId={centerId} />
+            <Details selectedFilters={selectedFilters} sessionId={sessionId} centerId={centerId} />
+          </>
+        )}
       </div>
     </DashboardContainer>
   );
