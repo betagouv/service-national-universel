@@ -120,16 +120,6 @@ export default function Index() {
               {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
               {!loading && !error && (
                 <div className="flex min-w-[30%] flex-col gap-2 w-full">
-                  {isPrepaMilitary ? (
-                    <StatusText
-                      status="En attente de verification d'éligibilité"
-                      nb={valuesApplication.APPLICATION.WAITING_VERIFICATION?.nb || 0}
-                      percentage={valuesApplication.APPLICATION.WAITING_VERIFICATION?.percentage || 0}
-                      filtersUrl={[queryString.stringify({ status: "WAITING_VERIFICATION" })]}
-                      base="/volontaire/list/all"
-                      tooltip={true}
-                    />
-                  ) : null}
                   <StatusText
                     status="En attente de validation"
                     nb={valuesApplication.APPLICATION.WAITING_VALIDATION?.nb || 0}
@@ -147,6 +137,16 @@ export default function Index() {
               {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
               {!loading && !error && (
                 <div className="flex min-w-[30%] flex-col gap-2 w-full">
+                  {isPrepaMilitary ? (
+                    <StatusText
+                      status="En attente de verification d'éligibilité"
+                      nb={valuesApplication.APPLICATION.WAITING_VERIFICATION?.nb || 0}
+                      percentage={valuesApplication.APPLICATION.WAITING_VERIFICATION?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "WAITING_VERIFICATION" })]}
+                      base="/volontaire/list/all"
+                      tooltip={true}
+                    />
+                  ) : null}
                   <StatusText
                     status="Refusée"
                     nb={valuesApplication.APPLICATION.REFUSED?.nb || 0}
@@ -165,7 +165,7 @@ export default function Index() {
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-5 rounded-lg bg-white px-8 py-6 w-1/2 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-6 rounded-lg bg-white px-8 py-6 w-1/2 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
             <div className="flex align-middle">
               <p className="text-base font-bold leading-5 text-gray-900">Volontaires au sein de votre structure</p>
               <div className="bg-blue-100 px-3 py-1 text-xs font-medium rounded-full ml-2 flex self-start">
