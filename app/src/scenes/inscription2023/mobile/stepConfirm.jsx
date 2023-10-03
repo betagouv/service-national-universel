@@ -24,19 +24,19 @@ export default function StepConfirm() {
 
   React.useEffect(() => {
     if (
-      young.handicap ||
-      young.allergies ||
-      young.ppsBeneficiary ||
-      young.paiBeneficiary ||
-      young.specificAmenagment ||
-      young.reducedMobilityAccess ||
-      young.handicapInSameDepartment ||
-      young.highSkilledActivity ||
-      young.highSkilledActivityInSameDepartment
+      young.handicap === "true" ||
+      young.allergies === "true" ||
+      young.ppsBeneficiary === "true" ||
+      young.paiBeneficiary === "true" ||
+      young.specificAmenagment === "true" ||
+      young.reducedMobilityAccess === "true" ||
+      young.handicapInSameDepartment === "true" ||
+      young.highSkilledActivity === "true" ||
+      young.highSkilledActivityInSameDepartment === "true"
     ) {
       setHasHandicap(true);
     }
-  }, []);
+}, []);
 
   const onSubmit = async () => {
     setLoading(true);
