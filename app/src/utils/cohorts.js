@@ -30,7 +30,7 @@ function isCohortsInitialized() {
 
 export function getCohort(name) {
   if (isCohortsInitialized()) {
-    return cohorts.find((c) => c.name === name);
+    return cohorts.find((c) => c.name === name) || name;
   } else {
     return undefined;
   }

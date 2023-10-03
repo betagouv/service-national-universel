@@ -47,6 +47,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   }, [young]);
 
+  // @todo: fix for old cohorts
   const getCohort = async () => {
     try {
       setLoading(true);

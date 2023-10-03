@@ -12,8 +12,7 @@ const getCohortNames = (with2023 = true, withToCome = false, withOld = false, ol
 };
 
 const getCohortPeriod = (cohort, withBold = false) => {
-  //@todo : remove this after à venir and old cohort refacto
-  if (!cohort.dateStart || !cohort.dateEnd) return cohort.name;
+  if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
   const startDate = new Date(cohort.dateStart);
   const endDate = new Date(cohort.dateEnd);
   const endDateformatOptions = { year: "numeric", month: "long", day: "numeric" };
@@ -36,6 +35,19 @@ const getCohortPeriodTemp = (young) => {
   const { cohort, region } = young;
   if ([...regionsListDROMS, "Polynésie française"].includes(region)) {
     return "du 4 au 16 Juillet 2023";
+  }
+  if (!cohort.dateStart || !cohort.dateEnd) {
+    const cohortName = cohort.name || cohort;
+    switch (cohortName) {
+      case "Février 2022":
+        return "du 13 au 25 Février 2022";
+      case "Juin 2022":
+        return "du 12 au 24 Juin 2022";
+      case "Juillet 2022":
+        return "du 3 au 15 Juillet 2022";
+      default:
+        return cohortName;
+    }
   }
   return getCohortPeriod(cohort);
 };

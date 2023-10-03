@@ -15,7 +15,7 @@ import { setYoung } from "../../redux/auth/actions";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { capture } from "../../sentry";
-import { calculateAge, getCohortPeriodTemp, getCohortPeriod } from "snu-lib";
+import { calculateAge, getCohortPeriodTemp } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 
 export default function ChangeSejour() {
