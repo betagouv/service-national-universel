@@ -7,7 +7,6 @@ import API from "../../../services/api";
 import Sejour from "./ui/icons/Sejour";
 import Engagement from "./ui/icons/Engagement";
 import { toastr } from "react-redux-toastr";
-import { ROLES } from "snu-lib";
 
 export default function KeyNumbers() {
   const [open, setOpen] = useState(false);
@@ -46,7 +45,6 @@ export default function KeyNumbers() {
           <Note key={note.id} note={note} />
         ))}
       </div>
-
       <div className="mt-auto p-2 flex justify-center">
         <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setOpen(!open)}>
           <span>{open ? "Voir moins" : "Voir plus"}</span>

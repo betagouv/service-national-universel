@@ -81,7 +81,6 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
                 <span className="text-sm font-normal leading-5 text-gray-700">Engagement</span>
               </div>
               <hr className="my-2 text-gray-100" />
-
               <span className="mb-1 px-4 text-sm text-gray-500">Période</span>
               <div
                 className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50"
