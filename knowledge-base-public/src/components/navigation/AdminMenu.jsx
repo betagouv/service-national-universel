@@ -19,13 +19,10 @@ export default function AdminMenu() {
     return role === "referent_department" || role === "referent_region" ? "referent" : role;
   };
 
-  const user =
-    environment === "production"
-      ? originalUser
-      : {
-          ...originalUser,
-          role: getModifiedRole(originalUser.role),
-        };
+  const user = {
+    ...originalUser,
+    role: getModifiedRole(originalUser.role),
+  };
 
   const categoryAccessibleReferent = ["referent", "structure", "head_center", "young", "visitor"];
   const withSeeAs = ["admin", "referent", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
@@ -42,7 +39,7 @@ export default function AdminMenu() {
     mutate(null);
     cache.clear();
   };
-  console.log(seeAs);
+
   return (
     <>
       {withSeeAs && (

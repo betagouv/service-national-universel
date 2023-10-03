@@ -15,13 +15,10 @@ const Wrapper = ({ home, children }) => {
     return role === "referent_department" || role === "referent_region" ? "referent" : role;
   };
 
-  const user =
-    environment === "production"
-      ? originalUser
-      : {
-          ...originalUser,
-          role: getModifiedRole(originalUser.role),
-        };
+  const user = {
+    ...originalUser,
+    role: getModifiedRole(originalUser.role),
+  };
 
   const withSeeAs = ["admin", "referent", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
   const withSeeAsPublicAndYoung = ["public", "young"].includes(seeAs);
