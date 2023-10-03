@@ -1,67 +1,8 @@
 import React, { useState } from "react";
 import { departmentLookUp } from "snu-lib";
+import Option from "./AddressOption";
 
-export default function AdressSelect({ data, setData }) {
-  const [selected, setSelected] = useState(null);
-
-  if (data.zip) return <DisplayAddress data={data} setData={setData} selected={selected} />;
-  return <SearchAddress data={data} setData={setData} setSelected={setSelected} />;
-}
-
-function DisplayAddress({ data, setData, selected }) {
-  const disabled = selected?.properties.type === "housenumber";
-  const resetData = () => {
-    setData({ ...data, address: "", addressVerified: "false", zip: "", city: "", department: "", region: "", location: null });
-  };
-
-  return (
-    <div className="flex flex-col gap-2">
-      {(!selected || disabled) && (
-        <label className="flex flex-col gap-1 w-full text-gray-400">
-          Adresse
-          <input
-            type="text"
-            value={data.address}
-            onChange={(e) => setData({ ...data, address: e.target.value })}
-            disabled
-            className="bg-[#EEEEEE] disabled:bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 disabled:text-gray-400 border-b-2 border-gray-800 disabled:border-[#EEEEEE]"
-          />
-        </label>
-      )}
-
-      <div className="flex flex-col md:flex-row gap-2 md:gap-8">
-        <label className="flex flex-col gap-1 w-full text-gray-400">
-          Code postal
-          <input type="text" value={data.zip} disabled className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-400" />
-        </label>
-
-        <label className="flex flex-col gap-1 w-full text-gray-400">
-          Ville
-          <input type="text" value={data.city} disabled className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-400" />
-        </label>
-      </div>
-
-      {selected && !disabled && (
-        <label className="flex flex-col gap-1 w-full text-gray-800">
-          Compléter mon adresse (numéro, voie, lieu-dit, autre information)
-          <input
-            type="text"
-            value={data.address}
-            onChange={(e) => setData({ ...data, address: e.target.value })}
-            disabled={disabled}
-            className="bg-[#EEEEEE] disabled:bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 disabled:text-gray-400 border-b-2 border-gray-800 disabled:border-[#EEEEEE]"
-          />
-        </label>
-      )}
-
-      <button onClick={resetData} className="text-blue-600 text-left py-2 w-fit">
-        Rechercher une autre adresse
-      </button>
-    </div>
-  );
-}
-
-function SearchAddress({ data, setData, setSelected }) {
+export default function AddressSearch({ data, setData }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
 
@@ -99,13 +40,13 @@ function SearchAddress({ data, setData, setSelected }) {
       ...data,
       addressVerified: "true",
       address: option.properties.type !== "municipality" ? option.properties.name : "",
+      addressType: option.properties.type,
       zip: option.properties.postcode,
       city: option.properties.city,
       department: getDepartmentAndRegionFromContext(option.properties.context).department,
       region: getDepartmentAndRegionFromContext(option.properties.context).region,
       location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
     });
-    setSelected(option);
     setQuery("");
   };
 
@@ -172,17 +113,5 @@ function SearchAddress({ data, setData, setSelected }) {
         )}
       </div>
     </>
-  );
-}
-
-function Option({ option, handleSelect }) {
-  return (
-    <button key={option.properties.id} onClick={() => handleSelect(option)} className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
-      <p>{option.properties.name}</p>
-      <p>
-        {option.properties.city}
-        {option.properties.postcode && " - " + option.properties.postcode}
-      </p>
-    </button>
   );
 }

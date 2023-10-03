@@ -23,7 +23,7 @@ import {
 } from "../utils";
 
 import api from "../../../services/api";
-import VerifyAddress from "../components/VerifyAddress";
+import AddressCombobox from "@/components/dsfr/forms/AddressCombobox";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import Toggle from "../../../components/dsfr/forms/toggle";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -36,7 +36,6 @@ import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
-import AdressSelect from "../components/AdressSelect";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -637,20 +636,10 @@ export default function StepCoordonnees() {
             <Input value={city} label="Ville" onChange={updateAddressToVerify("city")} error={errors.city} correction={corrections?.city} />
           </>
         )}
-        {environment === "production" && (
-          <VerifyAddress
-            address={address}
-            disabled={isVerifyAddressDisabled}
-            zip={zip}
-            city={city}
-            onSuccess={onVerifyAddress(true)}
-            onFail={onVerifyAddress()}
-            isVerified={addressVerified === "true"}
-          />
-        )}
 
-        {data && environment !== "production" && <AdressSelect data={data} setData={setData} />}
+        <AddressCombobox data={data} setData={setData} />
 
+        {/* TODO: change errors */}
         <ErrorMessage>{errors.addressVerified}</ErrorMessage>
         <Select
           label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
