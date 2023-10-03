@@ -1,17 +1,20 @@
 const { ExtraErrorData, RewriteFrames } = require("@sentry/integrations");
 const { captureException: sentryCaptureException, captureMessage: sentryCaptureMessage, Integrations: NodeIntegrations, init, Handlers, autoDiscoverNodePerformanceMonitoringIntegrations } = require("@sentry/node");
-const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE } = require("./config");
+const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, ENVIRONMENT } = require("./config");
 
 function initSentry(app) {
-  init({
-    enabled: Boolean(SENTRY_URL),
-    dsn: SENTRY_URL,
-    environment: "analytics",
-    normalizeDepth: 16,
-    integrations: [new ExtraErrorData({ depth: 16 }), new RewriteFrames({ root: process.cwd() }), new NodeIntegrations.Http({ tracing: true }), new NodeIntegrations.Modules(), ...autoDiscoverNodePerformanceMonitoringIntegrations()],
-    tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
-    ignoreErrors: [/^No error$/, /__show__deepen/, /_avast_submit/, /Access is denied/, /anonymous function: captureException/, /Blocked a frame with origin/, /can't redefine non-configurable property "userAgent"/, /change_ua/, /console is not defined/, /cordova/, /DataCloneError/, /Error: AccessDeny/, /event is not defined/, /feedConf/, /ibFindAllVideos/, /myGloFrameList/, /SecurityError/, /MyIPhoneApp/, /snapchat.com/, /vid_mate_check is not defined/, /win\.document\.body/, /window\._sharedData\.entry_data/, /window\.regainData/, /ztePageScrollModule/],
-  });
+  if (ENVIRONMENT !== "development") {
+    // Evite le spam sentry en local
+    init({
+      enabled: Boolean(SENTRY_URL),
+      dsn: SENTRY_URL,
+      environment: "analytics",
+      normalizeDepth: 16,
+      integrations: [new ExtraErrorData({ depth: 16 }), new RewriteFrames({ root: process.cwd() }), new NodeIntegrations.Http({ tracing: true }), new NodeIntegrations.Modules(), ...autoDiscoverNodePerformanceMonitoringIntegrations()],
+      tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
+      ignoreErrors: [/^No error$/, /__show__deepen/, /_avast_submit/, /Access is denied/, /anonymous function: captureException/, /Blocked a frame with origin/, /can't redefine non-configurable property "userAgent"/, /change_ua/, /console is not defined/, /cordova/, /DataCloneError/, /Error: AccessDeny/, /event is not defined/, /feedConf/, /ibFindAllVideos/, /myGloFrameList/, /SecurityError/, /MyIPhoneApp/, /snapchat.com/, /vid_mate_check is not defined/, /win\.document\.body/, /window\._sharedData\.entry_data/, /window\.regainData/, /ztePageScrollModule/],
+    });
+  }
 
   // The request handler must be the first middleware on the app
   app.use(Handlers.requestHandler());
