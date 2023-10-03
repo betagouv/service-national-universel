@@ -81,6 +81,7 @@ const Schema = new mongoose.Schema({
 
   inscriptionEndDate: { type: Date, required: true },
   instructionEndDate: { type: Date, required: true },
+  inscriptionModificationEndDate: { type: Date },
 
   buffer: {
     type: Number,

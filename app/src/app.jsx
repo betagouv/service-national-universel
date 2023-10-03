@@ -49,7 +49,7 @@ import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
-import { cohortsInit, canYoungResumePhase1 } from "./utils/cohorts";
+import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
 
 initSentry();
 initApi();
@@ -152,15 +152,15 @@ const MandatoryLogIn = () => {
           api.setToken(null);
           dispatch(setYoung(null));
         }
+        await cohortsInit();
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
+          const cohort = await getCohort(user.cohort);
           if (environment !== "production") {
-            const forceEmailValidation =
-              user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(user.cohort, user, environment);
+            const forceEmailValidation = user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(cohort);
             if (forceEmailValidation) return history.push("/preinscription");
           }
-          await cohortsInit();
         }
       } catch (e) {
         console.log(e);
@@ -176,7 +176,7 @@ const MandatoryLogIn = () => {
     const queryObject = { disconnected: 1 };
     if (pathname) queryObject.redirect = `${pathname}${search}`;
 
-    return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
+    return history.push(`/auth?${queryString.stringify(queryObject)}`);
   }
 
   return (
@@ -193,6 +193,7 @@ const Espace = () => {
   // const [isModalMondayOpen, setIsModalMondayOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
@@ -228,7 +229,7 @@ const Espace = () => {
 
   const forceRedirectInscription =
     [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
-    (inscriptionModificationOpenForYoungs(young.cohort, young, environment) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
+    (inscriptionModificationOpenForYoungs(cohort) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (

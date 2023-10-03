@@ -10,10 +10,11 @@ import { capture } from "../../sentry";
 import API from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { inscriptionModificationOpenForYoungs, translate, YOUNG_STATUS } from "../../utils";
-import { environment } from "../../config";
+import { getCohort } from "@/utils/cohorts";
 
 export default function WaitingValidation() {
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -55,7 +56,7 @@ export default function WaitingValidation() {
               </div>
               <hr className="text-gray-200" />
               <div>
-                {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(young.cohort, young, environment) && (
+                {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(cohort) && (
                   <button
                     className="rounded-lg border-[1px] border-blue-600 bg-white  py-2.5 px-3 text-sm font-medium leading-5 !text-blue-600 transition duration-150 ease-in-out hover:!bg-blue-600 hover:!text-white"
                     onClick={goToInscription}>
@@ -95,7 +96,7 @@ export default function WaitingValidation() {
               </div>
             </div>
             <hr className="text-gray-200" />
-            {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(young.cohort, young, environment) && (
+            {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(cohort) && (
               <button
                 className="mt-4 rounded-lg border-[1px] border-blue-600 bg-white  py-2.5 px-3 text-sm font-medium leading-5 !text-blue-600 transition duration-150 ease-in-out hover:!bg-blue-600 hover:!text-white"
                 onClick={goToInscription}>
