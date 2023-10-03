@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from "react";
-
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
-import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { ROLES, translate } from "snu-lib";
+import { translate } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import DashboardContainer from "../../../components/DashboardContainer";
-import KeyNumbers from "../../../components/KeyNumbers";
 import InfoMessage from "../../../components/ui/InfoMessage";
 import { Link } from "react-router-dom";
 
 export default function Index() {
-  const user = useSelector((state) => state.Auth.user);
   const [stats, setStats] = useState({});
   const [message, setMessage] = useState([]);
 
@@ -49,7 +45,7 @@ export default function Index() {
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
-          <Actus stats={stats} user={user} />
+          <Actus stats={stats} />
         </div>
       </div>
     </DashboardContainer>
@@ -86,7 +82,7 @@ const NoteContainer = ({ title, number, content, btnLabel, link }) => {
   );
 };
 
-function Actus({ stats, user }) {
+function Actus({ stats }) {
   const [fullNote, setFullNote] = useState(false);
 
   function shouldShow(parent, key, index = null) {
@@ -117,61 +113,22 @@ function Actus({ stats, user }) {
     }
     return limit;
   }
-  const width = user.role === ROLES.HEAD_CENTER ? "w-full" : "w-[70%]";
+
   if (!stats.sejour)
     return (
-      <div className={`${width} flex flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
+      <div className={`w-full flex flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
         <div className="text-slate-300 py-8 m-auto text-center animate-pulse text-xl">Chargement des actualités</div>
       </div>
     );
 
   return (
-    <div className={`${width} flex flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
+    <div className={`w-full flex flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
       <div className="flex items-center gap-3">
         <div className="text-sm font-bold leading-5 text-gray-900">A faire</div>
         <div className="rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none text-blue-600">{total(stats.sejour)}</div>
       </div>
       <div className="grid grid-cols-3 gap-4">
         {!total(stats.sejour) && <NotePlaceholder />}
-        {stats.sejour.meeting_point_not_confirmed.map(
-          (item, key) =>
-            shouldShow(stats.sejour, "meeting_point_not_confirmed", key) && (
-              <NoteContainer
-                title="Point de rassemblement"
-                key={"meeting_point_not_confirmed" + item.cohort}
-                number={item.count}
-                content={`volontaires n'ont pas confirmé leur point de rassemblement pour le séjour de ${item.cohort}`}
-                link={`/volontaire?status=VALIDATED&hasMeetingInformation=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
-                btnLabel="À déclarer"
-              />
-            ),
-        )}
-        {stats.sejour.participation_not_confirmed.map(
-          (item, key) =>
-            shouldShow(stats.sejour, "participation_not_confirmed", key) && (
-              <NoteContainer
-                title="Point de rassemblement"
-                key={"participation_not_confirmed" + item.cohort}
-                number={item.count}
-                content={`volontaires n'ont pas confirmé leur participation pour le séjour de ${item.cohort}`}
-                link={`/volontaire?status=VALIDATED&youngPhase1Agreement=false~N/A&statusPhase1=AFFECTED&cohort=${item.cohort}`}
-                btnLabel="À déclarer"
-              />
-            ),
-        )}
-        {stats.sejour.meeting_point_to_declare.map(
-          (item, key) =>
-            shouldShow(stats.sejour, "meeting_point_to_declare", key) && (
-              <NoteContainer
-                title="Point de rassemblement"
-                key={"meeting_point_to_declare" + item.cohort + item.department}
-                number=""
-                content={`Au moins 1 point de rassemblement est à déclarer pour le séjour de ${item.cohort} (${item.department})`}
-                link={`/point-de-rassemblement/liste/liste-points?cohort=${item.cohort}&department=${item.department}`}
-                btnLabel="À déclarer"
-              />
-            ),
-        )}
         {stats.sejour.schedule_not_uploaded.map(
           (item, key) =>
             shouldShow(stats.sejour, "schedule_not_uploaded", key) && (
@@ -182,18 +139,6 @@ function Actus({ stats, user }) {
                 content={`emplois du temps n'ont pas été déposés. ${item.cohort}`}
                 link={`/centre/liste/session?hasTimeSchedule=false&cohort=${item.cohort}`}
                 btnLabel="À relancer"
-              />
-            ),
-        )}
-        {stats.sejour.contact_to_fill.map(
-          (item, key) =>
-            shouldShow(stats.sejour, "contact_to_fill", key) && (
-              <NoteContainer
-                title="Contact"
-                key={"contact_to_fill" + item.cohort + item.department}
-                number=""
-                content={`Au moins 1 contact de convocation doit être renseigné pour le séjour de ${item.cohort} (${item.department})`}
-                btnLabel="À renseigner"
               />
             ),
         )}
@@ -210,32 +155,6 @@ function Actus({ stats, user }) {
               />
             ),
         )}
-        {stats.sejour.center_manager_to_fill.map(
-          (item, key) =>
-            shouldShow(stats.sejour, "center_manager_to_fill", key) && (
-              <NoteContainer
-                title="Chef de centre"
-                key={"center_manager_to_fill" + item.cohort}
-                number={item.count}
-                content={`chefs de centre sont à renseigner pour le séjour de  ${item.cohort}`}
-                link={`centre/liste/session?headCenterExist=false&cohort=${item.cohort}`}
-                btnLabel="À renseigner"
-              />
-            ),
-        )}
-        {stats.sejour.center_to_declare.map(
-          (item, key) =>
-            shouldShow(stats.sejour, "center_to_declare", key) && (
-              <NoteContainer
-                title="Centre"
-                key={"center_to_declare" + item.cohort + item.department}
-                number=""
-                content={`Au moins 1 centre est en attente de déclaration pour le séjour de ${item.cohort} (${item.department})`}
-                link={`/centre/liste/session?cohort=${item.cohort}&department=${item.department}`}
-                btnLabel="À déclarer"
-              />
-            ),
-        )}
         {stats.sejour.checkin.map(
           (item, key) =>
             shouldShow(stats.sejour, "checkin", key) && (
@@ -249,20 +168,6 @@ function Actus({ stats, user }) {
               />
             ),
         )}
-        {/* ON A PLUS LA JDM DE MEMOIRE */}
-        {/* {stats.sejour.sejour_pointage_jdm.map(
-            (item, key) =>
-              shouldShow(stats.sejour, "sejour_pointage_jdm", key) && (
-                <NoteContainer
-                  title="Pointage"
-                  key={"sejour_pointage_jdm" + item.cohort}
-                  number={item.count}
-                  content={`centres n'ont pas pointés tous leurs volontaires à la JDM sur le séjour de ${item.cohort}`}
-                  link={null}
-                  btnLabel="À renseigner"
-                />
-              ),
-          )} */}
       </div>
       {stats?.sejour.length > 9 ? (
         <div className="flex justify-center">
