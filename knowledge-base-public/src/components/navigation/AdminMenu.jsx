@@ -39,6 +39,7 @@ export default function AdminMenu() {
     mutate(null);
     cache.clear();
   };
+
   return (
     <>
       {withSeeAs && (
