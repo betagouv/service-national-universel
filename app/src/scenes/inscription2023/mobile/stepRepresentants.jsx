@@ -263,9 +263,9 @@ export default function StepRepresentants() {
         <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="flex items-center gap-4">
           <CheckBox checked={!isParent2Visible} onChange={(e) => setIsParent2Visible(!e)} />
-          <div className="flex-1 text-sm text-[#3A3A3A]">Je ne possède pas de second(e) représentant(e) légal(e)</div>
+          <div className="flex-1 text-sm text-[#3A3A3A]">Je renseigne un(e) second(e) représentant(e) légal(e)</div>
         </div>
-        {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
+        {!isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
         {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
           <SignupButtonContainer onClickNext={onCorrection} onClickPrevious={() => history.push("/")} disabled={loading} />
         ) : (
