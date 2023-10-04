@@ -16,15 +16,15 @@ export default function Index() {
   const sessionId = sessionPhase1._id;
   const centerId = sessionPhase1.cohesionCenterId;
 
-  const [selectedFilters, setSelectedFilters] = useState({
+  const selectedFilters = {
     status: [YOUNG_STATUS.VALIDATED],
     cohort: [cohort],
-  });
+  };
   const [data, setData] = useState({});
 
   useEffect(() => {
     queryCenter();
-  }, [JSON.stringify(selectedFilters)]);
+  }, []);
 
   const queryCenter = async () => {
     const { resultYoung } = await api.post("/elasticsearch/dashboard/sejour/head-center", {

@@ -321,6 +321,10 @@ function canPutSpecificDateOnSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
+function canSeeYoungInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+}
+
 function isSessionEditionOpen(actor, cohort) {
   switch (actor?.role) {
     case ROLES.ADMIN:
@@ -907,4 +911,5 @@ export {
   canPutSpecificDateOnSessionPhase1,
   isBusEditionOpen,
   canCheckIfRefExist,
+  canSeeYoungInfo,
 };

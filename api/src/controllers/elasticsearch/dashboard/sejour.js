@@ -252,6 +252,8 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
 });
 
 router.post("/head-center", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  if (req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  const session = await SessionPhase1Model.findOne({ headCenterId: req.user._id, cohort: req.body.filters.cohort });
   // creation de la Query avec filtres pour récupèrer les infos des jeunes
   const aggsFilter = {};
   aggsFilter.filter = {
@@ -266,7 +268,7 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
         bool: {
           must: { match_all: {} },
           filter: [
-            queryFilters.cohesionCenterId?.length ? { terms: { "cohesionCenterId.keyword": queryFilters.cohesionCenterId } } : null,
+            { terms: { "sessionPhase1Id.keyword": [session._id] } },
             queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
