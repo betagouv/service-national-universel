@@ -115,8 +115,9 @@ router.get("/ticketscount", passport.authenticate("referent", { session: false, 
     const user = await ReferentObject.findById(req.user._id);
     let query = {};
     if (user.role === ROLES.REFERENT_DEPARTMENT)
-      query = { department: user.department, subject: "J'ai une question", role: { $in: ["young", "young exterior"] }, canal: "PLATFORM" };
-    if (user.role === ROLES.REFERENT_REGION) query = { region: user.region, subject: "J'ai une question", role: { $in: ["young", "young exterior"] }, canal: "PLATFORM" };
+      query = { department: user.department, subject: "J'ai une question", role: { $in: ["young", "young exterior", "parent", "responsible"] }, canal: "PLATFORM" };
+    if (user.role === ROLES.REFERENT_REGION)
+      query = { region: user.region, subject: "J'ai une question", role: { $in: ["young", "young exterior", "parent", "responsible"] }, canal: "PLATFORM" };
 
     const { ok, data } = await zammood.api(`/v0/ticket/count`, {
       method: "POST",
