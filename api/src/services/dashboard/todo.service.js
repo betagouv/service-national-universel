@@ -50,6 +50,11 @@ service.todosByRole = async (user) => {
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
     case ROLES.HEAD_CENTER:
+      functionsByRole = {
+        inscription: [],
+        sejour: [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN],
+        engagement: [],
+      };
       break;
     default:
       break;

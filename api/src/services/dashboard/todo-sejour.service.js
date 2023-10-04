@@ -122,11 +122,13 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSe
     body: buildArbitratyNdJson(
       // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
       { index: "sessionphase1", type: "_doc" },
-      withAggs(queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasTimeSchedule.keyword": ["false"] } }])),
+      withAggs(queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasTimeSchedule.keyword": ["false"] } }], user._id)),
 
       //Projet pédagogique (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
       { index: "sessionphase1", type: "_doc" },
-      withAggs(queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasPedagoProject.keyword": ["false"] } }])),
+      withAggs(
+        queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasPedagoProject.keyword": ["false"] } }], user._id),
+      ),
     ),
   });
   return {
@@ -231,7 +233,26 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL] = async (user, 
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfterSessionEnd: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
-
+  console.log(
+    JSON.stringify({
+      index: "young",
+      body: buildArbitratyNdJson(
+        ...cohorts.flatMap((cohort) => {
+          return [
+            { index: "young", type: "_doc" },
+            withAggs(
+              queryFromFilter(user.role, user.region, user.department, [
+                { terms: { "cohort.keyword": [cohort] } },
+                { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+                { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } },
+              ]),
+              "sessionPhase1Id.keyword",
+            ),
+          ];
+        }),
+      ),
+    }),
+  );
   const response = await esClient.msearch({
     index: "young",
     body: buildArbitratyNdJson(
