@@ -35,13 +35,12 @@ export default function StepRepresentants() {
   const parent2Keys = ["parent2Status", "parent2FirstName", "parent2LastName"];
   const [loading, setLoading] = React.useState(false);
   const [errors, setErrors] = React.useState({});
-  const [isParent2Visible, setIsParent2Visible] = React.useState(true);
+  const [isParent2Visible, setIsParent2Visible] = React.useState(young?.parent2Status);
   const dispatch = useDispatch();
   const { step } = useParams();
-
   const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) history.push("/");
-
+  
   const [data, setData] = React.useState({
     parent1Status: young.parent1Status || "",
     parent1FirstName: young.parent1FirstName || "",
@@ -56,7 +55,7 @@ export default function StepRepresentants() {
     parent2Phone: young.parent2Phone || "",
     parent2PhoneZone: young.parent2PhoneZone || "",
   });
-
+  
   const trimmedParent1Phone = data.parent1Phone && data.parent1Phone.replace(/\s/g, "");
   const trimmedParent2Phone = data.parent2Phone && data.parent2Phone.replace(/\s/g, "");
   const trimmedParent1Email = data.parent1Email && data.parent1Email.trim();
@@ -262,10 +261,10 @@ export default function StepRepresentants() {
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
         <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="flex items-center gap-4">
-          <CheckBox checked={!isParent2Visible} onChange={(e) => setIsParent2Visible(!e)} />
-          <div className="flex-1 text-sm text-[#3A3A3A]">Je renseigne un(e) second(e) représentant(e) légal(e)</div>
+          <CheckBox checked={isParent2Visible} onChange={(e) => setIsParent2Visible(e)} />
+          <div className="flex-1 text-sm text-[#3A3A3A]">Je ne possède pas de second(e) représentant(e) légal(e)</div>
         </div>
-        {!isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
+        {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
         {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
           <SignupButtonContainer onClickNext={onCorrection} onClickPrevious={() => history.push("/")} disabled={loading} />
         ) : (
