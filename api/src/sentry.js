@@ -70,18 +70,18 @@ function initSentry(app) {
         /ztePageScrollModule/,
       ],
     });
-
-    // The request handler must be the first middleware on the app
-    app.use(Handlers.requestHandler());
-
-    // TracingHandler creates a trace for every incoming request
-    app.use(Handlers.tracingHandler());
-
-    return () => {
-      // The error handler must be before any other error middleware and after all controllers
-      app.use(Handlers.errorHandler());
-    };
   }
+
+  // The request handler must be the first middleware on the app
+  app.use(Handlers.requestHandler());
+
+  // TracingHandler creates a trace for every incoming request
+  app.use(Handlers.tracingHandler());
+
+  return () => {
+    // The error handler must be before any other error middleware and after all controllers
+    app.use(Handlers.errorHandler());
+  };
 }
 
 function capture(err, contexte) {
