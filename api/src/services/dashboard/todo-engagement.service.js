@@ -309,4 +309,185 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTE
   return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END]: result.length };
 };
 
+service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END] = async (user) => {
+  const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
+  if (user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = user.region;
+  if (user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: user.department };
+  const query = [
+    {
+      $match: {
+        status: { $nin: ["VALIDATED"] },
+        youngId: { $exists: true, $ne: "N/A" },
+        missionId: { $exists: true },
+      },
+    },
+    {
+      $addFields: {
+        youngObjectId: {
+          $toObjectId: "$youngId",
+        },
+        missionObjectId: {
+          $toObjectId: "$missionId",
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "youngs",
+        localField: "youngObjectId",
+        foreignField: "_id",
+        as: "youngInfo",
+      },
+    },
+    {
+      $unwind: "$youngInfo",
+    },
+    {
+      $match: match,
+    },
+    {
+      $lookup: {
+        from: "missions",
+        localField: "missionObjectId",
+        foreignField: "_id",
+        as: "missionInfo",
+      },
+    },
+    {
+      $unwind: "$missionInfo",
+    },
+    {
+      $match: {
+        "missionInfo.endAt": { $lt: new Date() },
+      },
+    },
+    {
+      $limit: 1000,
+    },
+  ];
+  const result = await ApplicationModel.aggregate(query);
+  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END]: result.length };
+};
+
+service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = async (user) => {
+  const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
+  if (user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = user.region;
+  if (user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: user.department };
+  const query = [
+    {
+      $match: {
+        status: { $nin: ["IN_PROGRESS"] },
+        youngId: { $exists: true, $ne: "N/A" },
+        missionId: { $exists: true },
+      },
+    },
+    {
+      $addFields: {
+        youngObjectId: {
+          $toObjectId: "$youngId",
+        },
+        missionObjectId: {
+          $toObjectId: "$missionId",
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "youngs",
+        localField: "youngObjectId",
+        foreignField: "_id",
+        as: "youngInfo",
+      },
+    },
+    {
+      $unwind: "$youngInfo",
+    },
+    {
+      $match: match,
+    },
+    {
+      $lookup: {
+        from: "missions",
+        localField: "missionObjectId",
+        foreignField: "_id",
+        as: "missionInfo",
+      },
+    },
+    {
+      $unwind: "$missionInfo",
+    },
+    {
+      $match: {
+        "missionInfo.startAt": { $lt: new Date() },
+        "missionInfo.endAt": { $gt: new Date() },
+      },
+    },
+    {
+      $limit: 1000,
+    },
+  ];
+  const result = await ApplicationModel.aggregate(query);
+  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START]: result.length };
+};
+
+service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START] = async (user) => {
+  const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
+  if (user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = user.region;
+  if (user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: user.department };
+  const query = [
+    {
+      $match: {
+        contractStatus: { $nin: ["VALIDATED"] },
+        youngId: { $exists: true, $ne: "N/A" },
+        missionId: { $exists: true },
+      },
+    },
+    {
+      $addFields: {
+        youngObjectId: {
+          $toObjectId: "$youngId",
+        },
+        missionObjectId: {
+          $toObjectId: "$missionId",
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "youngs",
+        localField: "youngObjectId",
+        foreignField: "_id",
+        as: "youngInfo",
+      },
+    },
+    {
+      $unwind: "$youngInfo",
+    },
+    {
+      $match: match,
+    },
+    {
+      $lookup: {
+        from: "missions",
+        localField: "missionObjectId",
+        foreignField: "_id",
+        as: "missionInfo",
+      },
+    },
+    {
+      $unwind: "$missionInfo",
+    },
+    {
+      $match: {
+        "missionInfo.startAt": { $lt: new Date() },
+      },
+    },
+    {
+      $limit: 1000,
+    },
+  ];
+  const result = await ApplicationModel.aggregate(query);
+  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START]: result.length };
+};
+
 module.exports = service;

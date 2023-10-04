@@ -132,7 +132,7 @@ export default function Todos({ user }) {
       break;
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
-      columns.push(columnEngagement);
+      columns.push({ ...columnEngagement, title: `À faire` });
       break;
     default:
       columns.push(columnInscription, columnSejour, columnEngagement);
@@ -166,7 +166,7 @@ export default function Todos({ user }) {
             {!column.total ? (
               <NotePlaceholder />
             ) : (
-              Object.keys(column.data).map((key) => {
+              Object.keys(column.data || {}).map((key) => {
                 // Some todo in (Inscription, Sejour, Engagement) are arrays (ex: WAITING_VALIDATION_BY_COHORT)
                 // So we need to map on it
                 // { count: number, cohort: string }[]
