@@ -99,6 +99,7 @@ export default function App() {
 const Home = (props) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
+
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
 
@@ -144,10 +145,12 @@ const Home = (props) => {
         }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
+        //Load session phase 1 for head center before stop loading
+        if (res.user.role !== ROLES.HEAD_CENTER) setLoading(false);
       } catch (e) {
         console.log(e);
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchData();
   }, []);
@@ -175,6 +178,7 @@ const Home = (props) => {
 
           setSessionPhase1List(sessions.reverse());
           dispatch(setSessionPhase1(activeSession));
+          setLoading(false);
         } catch (e) {
           capture(e);
         }
