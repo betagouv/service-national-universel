@@ -129,6 +129,7 @@ function validateProgram(program) {
 }
 
 function validateContract(program) {
+  // TODO: Improve validation and differentiate between draft and final contract.
   return Joi.object()
     .keys({
       youngId: Joi.string().allow(null, ""),
