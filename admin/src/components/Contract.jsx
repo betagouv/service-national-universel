@@ -28,6 +28,15 @@ function validateEmail(value) {
   return error;
 }
 
+function validateMissionDuration(value) {
+  if (!value) return "La durée est obligatoire";
+  // Value must be an integer between 1 and 99
+  const regex = new RegExp("^[1-9][0-9]?$|^100$");
+  if (!regex.test(value.toString())) {
+    return "Veuillez saisir un nombre entier entre 1 et 99.";
+  }
+}
+
 export default function Contract({ young }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
@@ -505,7 +514,7 @@ export default function Contract({ young }) {
                           jusqu’au
                           <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} />
                           <br /> Le volontaire effectuera un total de
-                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} type="number" />
+                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} type="number" validate={validateMissionDuration} />
                           heures de MIG.
                         </div>
                         <h3>c) Conditions d’exercice des missions</h3>
@@ -598,7 +607,7 @@ export default function Contract({ young }) {
                           effectue la procédure de fin de mission sur la plateforme.
                           <br />
                           La validation est conditionnée à la réalisation de
-                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
+                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} validate={validateMissionDuration} />
                           heures de mission au minimum au sein de la structure.
                           <br />
                           La mission est accomplie de manière continue, ou dans la limite de la période d’une année, de manière discontinue.
