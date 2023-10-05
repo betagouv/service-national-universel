@@ -20,7 +20,6 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
   const [fullNote, setFullNote] = useState(false);
 
   function shouldShow(parent, key, index = null) {
-    true;
     if (fullNote) return true;
 
     const entries = Object.entries(parent);
