@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
+import queryString from "query-string";
 
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
 import CGU from "./scenes/CGU";
@@ -140,7 +141,10 @@ const Home = (props) => {
           api.setToken(null);
           dispatch(setUser(null));
           setLoading(false);
-          return (window.location.href = "/auth?disconnected=1");
+          return (window.location.href = `/auth?${queryString.stringify({
+            disconnected: 1,
+            redirect: window.location.pathname,
+          })}`);
         }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
