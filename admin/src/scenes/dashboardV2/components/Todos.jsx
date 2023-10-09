@@ -65,6 +65,9 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
   const columnEngagement = { icon: <Engagement />, title: "Engagement", total: totalEngagement, data: stats.engagement };
   const columns = [];
   switch (user.role) {
+    case ROLES.HEAD_CENTER:
+      columns.push(columnInscription, columnSejour);
+      break;
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
       columns.push(columnEngagement);
