@@ -1,8 +1,9 @@
-const { DASHBOARD_TODOS_FUNCTIONS } = require("snu-lib");
+const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
 const { queryFromFilter, withAggs } = require("./todo.helper");
 const service = {};
+const sessionPhase1Model = require("../../models/sessionPhase1");
 
 service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.BASIC] = async (user, { notFinished: cohorts }) => {
   const response = await esClient.msearch({
@@ -62,20 +63,20 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT] = as
 
 service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT] = async (user, { assignementOpen: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT]: [] };
-
+  let filters = [
+    { terms: { "cohort.keyword": cohorts } },
+    { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } },
+    { bool: { should: [{ term: { parentAllowSNU: "N/A" } }, { bool: { must_not: { exists: { field: "parentAllowSNU" } } } }], minimum_should_match: 1 } },
+  ];
+  if (user.role === ROLES.HEAD_CENTER) {
+    const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
+    if (session?._id) {
+      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
+    }
+  }
   const response = await esClient.msearch({
     index: "young",
-    body: buildArbitratyNdJson(
-      { index: "young", type: "_doc" },
-      withAggs(
-        queryFromFilter(user.role, user.region, user.department, [
-          { terms: { "cohort.keyword": cohorts } },
-          { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } },
-          { bool: { should: [{ term: { parentAllowSNU: "N/A" } }, { bool: { must_not: { exists: { field: "parentAllowSNU" } } } }], minimum_should_match: 1 } },
-        ]),
-        "cohort.keyword",
-      ),
-    ),
+    body: buildArbitratyNdJson({ index: "young", type: "_doc" }, withAggs(queryFromFilter(user.role, user.region, user.department, filters), "cohort.keyword")),
   });
 
   return {

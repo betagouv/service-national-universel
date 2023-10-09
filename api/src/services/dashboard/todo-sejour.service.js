@@ -1,8 +1,9 @@
-const { DASHBOARD_TODOS_FUNCTIONS, ES_NO_LIMIT } = require("snu-lib");
+const { DASHBOARD_TODOS_FUNCTIONS, ES_NO_LIMIT, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
 const { queryFromFilter, withAggs } = require("./todo.helper");
 const service = {};
+const sessionPhase1Model = require("../../models/sessionPhase1");
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED] = async (user, { oneWeekBeforepdrChoiceLimitDate: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED]: [] };
@@ -116,19 +117,23 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE] = async (user, { ses
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSessionStart: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [], [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [] };
-
+  let filters = [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasPedagoProject.keyword": ["false"] } }];
+  if (user.role === ROLES.HEAD_CENTER) {
+    const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
+    if (session?._id) {
+      filters.push({ ids: { values: [session._id] } });
+    }
+  }
   const response = await esClient.msearch({
     index: "sessionphase1",
     body: buildArbitratyNdJson(
       // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
       { index: "sessionphase1", type: "_doc" },
-      withAggs(queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasTimeSchedule.keyword": ["false"] } }], user._id)),
+      withAggs(queryFromFilter(user.role, user.region, user.department, filters)),
 
       //Projet pédagogique (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
       { index: "sessionphase1", type: "_doc" },
-      withAggs(
-        queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasPedagoProject.keyword": ["false"] } }], user._id),
-      ),
+      withAggs(queryFromFilter(user.role, user.region, user.department, filters)),
     ),
   });
   return {
@@ -181,24 +186,24 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL] = async (user, { seven
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT] = async (user, { twoDaysAfterSessionStart: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT]: [] };
-
+  let filters = [
+    { terms: { "cohort.keyword": cohorts } },
+    {
+      bool: {
+        should: [{ term: { ppsBeneficiary: "true" } }, { term: { paiBeneficiary: "true" } }, { term: { allergies: "true" } }, { term: { handicap: "true" } }],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+  if (user.role === ROLES.HEAD_CENTER) {
+    const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
+    if (session?._id) {
+      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
+    }
+  }
   const response = await esClient.msearch({
     index: "young",
-    body: buildArbitratyNdJson(
-      { index: "young", type: "_doc" },
-      withAggs(
-        queryFromFilter(user.role, user.region, user.department, [
-          { terms: { "cohort.keyword": cohorts } },
-          {
-            bool: {
-              should: [{ term: { ppsBeneficiary: "true" } }, { term: { paiBeneficiary: "true" } }, { term: { allergies: "true" } }, { term: { handicap: "true" } }],
-              minimum_should_match: 1,
-            },
-          },
-        ]),
-        "cohort.keyword",
-      ),
-    ),
+    body: buildArbitratyNdJson({ index: "young", type: "_doc" }, withAggs(queryFromFilter(user.role, user.region, user.department, filters), "cohort.keyword")),
   });
 
   return {
@@ -233,40 +238,20 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL] = async (user, 
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfterSessionEnd: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
-  console.log(
-    JSON.stringify({
-      index: "young",
-      body: buildArbitratyNdJson(
-        ...cohorts.flatMap((cohort) => {
-          return [
-            { index: "young", type: "_doc" },
-            withAggs(
-              queryFromFilter(user.role, user.region, user.department, [
-                { terms: { "cohort.keyword": [cohort] } },
-                { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
-                { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } },
-              ]),
-              "sessionPhase1Id.keyword",
-            ),
-          ];
-        }),
-      ),
-    }),
-  );
+  let filters = [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } }];
+  if (user.role === ROLES.HEAD_CENTER) {
+    const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
+    if (session?._id) {
+      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
+    }
+  }
   const response = await esClient.msearch({
     index: "young",
     body: buildArbitratyNdJson(
       ...cohorts.flatMap((cohort) => {
         return [
           { index: "young", type: "_doc" },
-          withAggs(
-            queryFromFilter(user.role, user.region, user.department, [
-              { terms: { "cohort.keyword": [cohort] } },
-              { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
-              { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } },
-            ]),
-            "sessionPhase1Id.keyword",
-          ),
+          withAggs(queryFromFilter(user.role, user.region, user.department, [...filters, { terms: { "cohort.keyword": [cohort] } }]), "sessionPhase1Id.keyword"),
         ];
       }),
     ),

@@ -1,14 +1,7 @@
 const { ROLES } = require("snu-lib");
 const helpers = {};
 
-helpers.queryFromFilter = (
-  role,
-  region,
-  department,
-  filter,
-  user_id,
-  { regionField = "region.keyword", departmentField = "department.keyword", headCenterField = "headCenterId.keyword" } = {},
-) => {
+helpers.queryFromFilter = (role, region, department, filter, { regionField = "region.keyword", departmentField = "department.keyword" } = {}) => {
   const body = {
     size: 0,
     track_total_hits: 1000, // We don't need the exact number of hits when more than 1000.
@@ -16,7 +9,6 @@ helpers.queryFromFilter = (
   };
   if (role === ROLES.REFERENT_REGION) body.query.bool.filter.push({ term: { [regionField]: region } });
   if (role === ROLES.REFERENT_DEPARTMENT) body.query.bool.filter.push({ terms: { [departmentField]: department } });
-  if (role === ROLES.HEAD_CENTER) body.query.bool.filter.push({ term: { [headCenterField]: user_id } });
   return body;
 };
 
