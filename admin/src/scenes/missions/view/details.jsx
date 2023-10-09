@@ -151,51 +151,11 @@ export default function DetailsView({ mission, setMission, getMission }) {
     await updateMission([...valuesToUpdate, "startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
   };
 
-  // const onSubmit = () => {
-  //   setLoading(true);
-  //   const error = {};
-  //   const baseError = "Ce champ est obligatoire";
-  //   valuesToCheck.map((val) => {
-  //     if (!values[val]) error[val] = baseError;
-  //   });
-  //   if (mission?.isJvaMission === "false" && !values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
-  //   //check duration only if specified
-  //   if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
-  //   if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
-
-  //   setErrors(error);
-  //   if (Object.keys(error).length > 0) {
-  //     toastr.error("Oups, le formulaire est incomplet");
-  //     return setLoading(false);
-  //   }
-
-  //   // open modal to confirm is mission has to change status
-  // if ((values.description !== mission.description || values.actions !== mission.actions) && mission.status !== "WAITING_VALIDATION") return setModalConfirmation(true);
-  //   updateMission(valuesToUpdate);
-  // };
-
   useEffect(() => {
     if (values.period.length === 0 || (values.period.length === 1 && values.period[0] === "WHENEVER")) {
       setValues({ ...values, subPeriod: [] });
     }
   }, [values.period]);
-
-  // const onSubmitBottom = () => {
-  //   setLoadingBottom(true);
-  //   const error = {};
-  //   if (values.startAt < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date est incorrect";
-  //   if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
-  //   if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
-  //   if (values.placesTotal < mission.placesTotal && mission.placesLeft - (mission.placesTotal - values.placesTotal) < 0)
-  //     error.placesTotal = "Il y a plus de candidatures que de places";
-
-  //   setErrorsBottom(error);
-  //   if (Object.keys(error).length > 0) {
-  //     toastr.error("Oups, le formulaire est incomplet");
-  //     return setLoadingBottom(false);
-  //   }
-  //   updateMission(["startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
-  // };
 
   const updateMission = async (valuesToUpdate) => {
     try {
@@ -373,40 +333,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   )}
                 </>
               )}
-
-              {/* {mission.status !== MISSION_STATUS.ARCHIVED && (
-                <>
-                  {!editing ? (
-                    <button
-                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      onClick={() => setEditing(true)}
-                      disabled={loading}>
-                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                      Modifier
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={() => {
-                          setEditing(false);
-                          setValues({ ...mission });
-                          setErrors({});
-                        }}
-                        disabled={loading}>
-                        Annuler
-                      </button>
-                      <button
-                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={onSubmitForm}
-                        disabled={loading}>
-                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-                        Enregistrer les changements
-                      </button>
-                    </div>
-                  )}
-                </>
-              )} */}
             </div>
             <div className="flex flex-wrap gap-14">
               <div className="flex min-w-[350px] flex-1 flex-col gap-4">
@@ -748,39 +674,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
               <div className="text-lg font-medium text-gray-900">
                 <div>Dates et places disponibles</div>
               </div>
-              {/* {mission.status !== MISSION_STATUS.ARCHIVED && (
-                <>
-                  {!editing ? (
-                    <button
-                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      onClick={() => setEditing(true)}
-                      disabled={loadingBottom}>
-                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                      Modifier
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={() => {
-                          setEditing(false);
-                          setValues({ ...mission });
-                          setErrorsBottom({});
-                        }}
-                        disabled={loading}>
-                        Annuler
-                      </button>
-                      <button
-                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={onSubmitForm}
-                        disabled={loadingBottom}>
-                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-                        Enregistrer les changements
-                      </button>
-                    </div>
-                  )}
-                </>
-              )} */}
               {mission.status !== MISSION_STATUS.ARCHIVED && (
                 <>
                   {!editing ? (
