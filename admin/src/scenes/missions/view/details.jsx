@@ -161,9 +161,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
     try {
       // build object from array of keys
       const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {});
-      console.log(valuesToSend);
       if (valuesToSend.addressVerified) valuesToSend.addressVerified = valuesToSend.addressVerified.toString();
-      console.log(valuesToSend);
       const { ok, code, data: missionReturned } = await api.put(`/mission/${values._id}`, valuesToSend);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
