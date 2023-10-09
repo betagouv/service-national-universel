@@ -7,6 +7,7 @@ import api from "@/services/api";
 import DashboardContainer from "../../../components/DashboardContainer";
 import InfoMessage from "../../../components/ui/InfoMessage";
 import { Link } from "react-router-dom";
+import Todos from "../../../components/Todos";
 
 export default function Index() {
   const [stats, setStats] = useState({});
@@ -45,7 +46,7 @@ export default function Index() {
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
-          <Actus stats={stats} />
+          <Todos stats={stats} user={user} cohortsNotFinished={cohortsNotFinished} />
         </div>
       </div>
     </DashboardContainer>
