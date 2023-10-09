@@ -95,12 +95,9 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                 // { count: number, cohort: string }[]
                 if (Array.isArray(column.data[key])) {
                   return column.data[key].map((item, index) => {
-                    console.log(item);
                     if (!shouldShow(column.data, key, index)) return null;
                     const note = getNoteData(key, user);
-                    console.log(key, note);
                     if (!note) return null;
-                    console.log(note);
                     return (
                       <NoteContainer
                         key={key + index + item?.cohort + item?.department}

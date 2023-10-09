@@ -1,4 +1,4 @@
-const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
+const { DASHBOARD_TODOS_FUNCTIONS, ROLES, region2department } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
 const ApplicationModel = require("../../models/application");
@@ -98,18 +98,28 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC] = async (user) => {
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER] = async (user) => {
+  const role = user.role;
+
   const response = await esClient.msearch({
     index: "departmentservice",
     body: buildArbitratyNdJson(
       { index: "departmentservice", type: "_doc" },
       withAggs(
-        queryFromFilter(user.role, user.region, user.department, [
-          {
+        {
+          size: 0,
+          track_total_hits: 1000, // We don't need the exact number of hits when more than 1000.
+          query: {
             bool: {
-              must_not: { exists: { field: "representantEtat.email.keyword" } },
+              must: { match_all: {} },
+              filter: {
+                bool: {
+                  must: [{ terms: { "department.keyword": role === ROLES.REFERENT_DEPARTMENT ? user.department : region2department[user.region] } }],
+                  must_not: { exists: { field: "representantEtat.email.keyword" } },
+                },
+              },
             },
           },
-        ]),
+        },
         "department.keyword",
       ),
     ),

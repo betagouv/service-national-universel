@@ -171,7 +171,7 @@ const getNoteData = (key, user) => {
     [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER]: {
       title: "Contrat",
       content: "représentant de l'État est à renseigner pour le département $1",
-      link: "/team",
+      link: "/equipe",
       args: ["department"],
       btnLabel: "À traiter",
     },
