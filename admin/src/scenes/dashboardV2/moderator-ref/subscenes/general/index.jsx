@@ -10,12 +10,10 @@ import api from "@/services/api";
 import { getNewLink } from "@/utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
-import KeyNumbers from "../../../components/KeyNumbers";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import HorizontalBar from "../../../components/graphs/HorizontalBar";
-import InfoMessage from "../../../components/ui/InfoMessage";
 import VolontaireSection from "./components/VolontaireSection";
-import Todos from "../../../components/Todos";
+import GeneralView from "../../../components/GeneralView";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -23,9 +21,6 @@ export default function Index() {
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [volontairesData, setVolontairesData] = useState();
   const [inAndOutCohort, setInAndOutCohort] = useState();
-
-  const [stats, setStats] = useState({});
-  const [message, setMessage] = useState([]);
 
   const [cohortsNotFinished, setCohortsNotFinished] = useState([]);
 
@@ -109,29 +104,6 @@ export default function Index() {
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
 
-  useEffect(() => {
-    const updateStats = async (id) => {
-      const response = await api.post("/elasticsearch/dashboard/general/todo", { filters: { meetingPointIds: [id], cohort: [] } });
-      const s = response.data;
-      setStats(s);
-    };
-    updateStats();
-  }, []);
-
-  const getMessage = async () => {
-    try {
-      const { ok, code, data: response } = await api.get(`/alerte-message`);
-
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
-      }
-      setMessage(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des messages");
-    }
-  };
-
   const getCohorts = async () => {
     try {
       const { ok, code, data: cohorts } = await api.get(`/cohort`);
@@ -144,19 +116,13 @@ export default function Index() {
   };
 
   React.useEffect(() => {
-    getMessage();
     getCohorts();
   }, []);
 
   return (
     <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription"]}>
       <div className="flex flex-col gap-8 mb-4">
-        {message?.length ? message?.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
-        <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
-        <div className="flex w-full gap-4">
-          <Todos stats={stats} user={user} cohortsNotFinished={cohortsNotFinished} />
-          <KeyNumbers />
-        </div>
+        <GeneralView cohortsNotFinished={cohortsNotFinished} />
         <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">Inscriptions</h1>
         <div className="rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
