@@ -9,7 +9,7 @@ import Todos from "../../../components/Todos";
 import { useSelector } from "react-redux";
 
 export default function Index() {
-  const { user, sessionPhase1 } = useSelector((state) => state.Auth.user);
+  const user = useSelector((state) => state.Auth.user);
   const [stats, setStats] = useState({});
   const [message, setMessage] = useState([]);
 
@@ -46,7 +46,7 @@ export default function Index() {
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
-          <Todos stats={stats} user={user} cohortsNotFinished={sessionPhase1.cohort} />
+          <Todos stats={stats} user={user} cohortsNotFinished={null} />
         </div>
       </div>
     </DashboardContainer>
