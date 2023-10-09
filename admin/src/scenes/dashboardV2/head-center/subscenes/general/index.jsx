@@ -46,7 +46,7 @@ export default function Index() {
         {message?.length ? message.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
-          <Todos stats={stats} user={user} cohortsNotFinished={null} />
+          <Todos stats={stats} user={user} />
         </div>
       </div>
     </DashboardContainer>
