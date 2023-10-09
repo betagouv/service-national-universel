@@ -95,25 +95,27 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                 // { count: number, cohort: string }[]
                 if (Array.isArray(column.data[key])) {
                   return column.data[key].map((item, index) => {
+                    console.log(item);
                     if (!shouldShow(column.data, key, index)) return null;
                     const note = getNoteData(key, user);
+                    console.log(key, note);
                     if (!note) return null;
+                    console.log(note);
                     return (
                       <NoteContainer
                         key={key + index + item?.cohort + item?.department}
                         title={note.title}
                         number={item.count}
                         content={note.content.replace("$1", item[note.args?.[0]] ?? "").replace("$2", item[note.args?.[1]] ?? "")}
-                        link={note.link
-                          .replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
-                          .replace("$1", item[note.args?.[0]] ?? "")
-                          .replace("$2", item[note.args?.[1]] ?? "")}
+                        link={note?.link
+                          ?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
+                          ?.replace("$1", item[note.args?.[0]] ?? "")
+                          ?.replace("$2", item[note.args?.[1]] ?? "")}
                         btnLabel={note.btnLabel}
                       />
                     );
                   });
                 }
-
                 // Other todo are not arrays so we can display the number directly
                 if (!shouldShow(column.data, key)) return null;
                 const note = getNoteData(key, user);
@@ -124,7 +126,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                     title={note.title}
                     number={column.data[key]}
                     content={note.content}
-                    link={note.link.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
+                    link={note?.link?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
                     btnLabel={note.btnLabel}
                   />
                 );

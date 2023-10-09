@@ -75,6 +75,10 @@ const DASHBOARD_TODOS_FUNCTIONS = {
     // Volontaires (À suivre) X volontaires ayant achevé leur mission sans statut à jour
     // volontaires_à_suivre_achevé_sans_statut
     YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END: "young_to_follow_without_status_after_end",
+    // Équivalence (À vérifier) X demandes d’équivalence MIG sont en attente de vérification.
+    EQUIVALENCE_WAITING_VERIFICATION: "equivalence_waiting_verification",
+    //Contrat (À renseigner) 1 représentant de l’État est à renseigner.
+    STRUCTURE_MANAGER: "structure_manager",
   },
 };
 

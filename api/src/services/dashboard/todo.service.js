@@ -50,6 +50,12 @@ service.todosByRole = async (user) => {
         ],
         engagement: [
           //TODO : check with PO's here
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC,
+          // TODO: optimize theses queries using ES instead of mongo.
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT,
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS,
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END,
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER,
         ],
       };
       break;
@@ -70,6 +76,8 @@ service.todosByRole = async (user) => {
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL,
+          //TODO : Schéma d’affectation. X volontaires prévus en trop dans le [Nom du département]
+          //TODO : Intra-départemental. X volontaires demandant une affectation intradépartementale pour le séjour de [Février 2023 - C] (à suivre)
         ],
         engagement: [
           DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC,
@@ -77,8 +85,7 @@ service.todosByRole = async (user) => {
           DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT,
           DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS,
           DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END,
-          // TODO : Équivalence (À vérifier) X demandes d’équivalence MIG sont en attente de vérification.
-          // TODO : Contrat (À renseigner) 1 représentant de l’État est à renseigner.
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER,
         ],
       };
       break;

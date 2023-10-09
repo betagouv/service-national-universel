@@ -92,6 +92,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     const filterFields = ["status", "cohort", "academy", "departement"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     const body = {
       query: {
         bool: {
