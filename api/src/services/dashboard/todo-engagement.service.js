@@ -112,7 +112,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER] = async (user) =
               must: { match_all: {} },
               filter: {
                 bool: {
-                  must: [{ terms: { "department.keyword": role === ROLES.REFERENT_DEPARTMENT ? user.department : region2department[user.region] } }],
+                  must: [{ terms: { "department.keyword": user.role === ROLES.REFERENT_DEPARTMENT ? user.department : region2department[user.region] } }],
                   must_not: { exists: { field: "representantEtat.email.keyword" } },
                 },
               },
