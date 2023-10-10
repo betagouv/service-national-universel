@@ -104,10 +104,10 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                         title={note.title}
                         number={item.count}
                         content={note.content.replace("$1", item[note.args?.[0]] ?? "").replace("$2", item[note.args?.[1]] ?? "")}
-                        link={note?.link
+                        link={note.link
                           ?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
-                          ?.replace("$1", item[note.args?.[0]] ?? "")
-                          ?.replace("$2", item[note.args?.[1]] ?? "")}
+                          .replace("$1", item[note.args?.[0]] ?? "")
+                          .replace("$2", item[note.args?.[1]] ?? "")}
                         btnLabel={note.btnLabel}
                       />
                     );
