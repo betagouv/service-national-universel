@@ -281,7 +281,15 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
         toDate: Joi.date(),
         hebergement: Joi.boolean(),
       }),
-      page: Joi.number().integer().min(0).default(0),
+      page: Joi.number()
+        .integer()
+        .default(0)
+        .custom((value, helpers) => {
+          if (value < 0) {
+            return 0;
+          }
+          return value;
+        }),
       size: Joi.number().integer().min(0).default(20),
       sort: Joi.string().allow("geo", "recent", "short", "long").default("geo"),
     });
