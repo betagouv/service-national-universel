@@ -9,6 +9,11 @@ const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 
 router.post("/moderator", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   // creation de la Query avec filtres pour récupèrer les infos des jeunes
+  const { user } = req;
+  const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+  if (!allowedRoles.includes(user.role)) {
+    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  }
   const buildESRequestBodyForYoung = (queryFilters) => {
     const aggsFilter = {};
     if (queryFilters?.statusPhase1?.length) {
@@ -22,13 +27,19 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     const bodyYoung = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
+            //context filter
             queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
             queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
             queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
             queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
+          ].filter(Boolean),
+          filter: [
+            //query
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
+            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
           ].filter(Boolean),
         },
       },
@@ -62,7 +73,6 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
       size: 0,
       track_total_hits: true,
     };
-
     return bodyYoung;
   };
   // création de la query pour récupèrer les infos des centres
@@ -70,12 +80,18 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     const bodyCohesion = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
+            //context filters
             filters.region?.length ? { terms: { "region.keyword": filters.region } } : null,
             filters.department?.length ? { terms: { "department.keyword": filters.department } } : null,
             filters.academy?.length ? { terms: { "academy.keyword": filters.academy } } : null,
             filters.cohorts?.length ? { terms: { "cohorts.keyword": filters.cohorts } } : null,
+          ].filter(Boolean),
+          filter: [
+            //query
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
+            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
           ].filter(Boolean),
         },
       },
@@ -86,7 +102,6 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
       },
       size: ES_NO_LIMIT,
     };
-
     return bodyCohesion;
   };
   // Création de la Query pour récupérer les info de la Session
