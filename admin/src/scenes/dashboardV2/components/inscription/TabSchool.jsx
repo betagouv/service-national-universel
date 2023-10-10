@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import api from "../../../../services/api";
 import { getNewLink, replaceSpaces } from "../../../../utils";
+import queryString from "query-string";
 
 const PAGE_SIZE = 6;
 
@@ -71,7 +72,9 @@ export default function TabSchool({ filters }) {
       <div className="flex w-full flex-row justify-between">
         <div className="flex items-center gap-3">
           <div className="text-base font-bold text-gray-900">Liste des établissements</div>
-          <Link to={getNewLink({ base: `/etablissement/liste-jeunes`, filter: filters, filtersUrl: [] })} target={"_blank"}>
+          <Link
+            to={getNewLink({ base: `/etablissement/liste-jeunes`, filter: filters, filtersUrl: [queryString.stringify({ departmentName: filters.department })] })}
+            target={"_blank"}>
             <HiOutlineExternalLink className="h-5 w-5 cursor-pointer text-gray-400" />
           </Link>
         </div>

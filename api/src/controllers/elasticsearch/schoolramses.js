@@ -71,7 +71,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     // Context filters
     let contextFilters = [];
     if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "departmentName.keyword": req.user.department } });
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
