@@ -98,7 +98,6 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC] = async (user) => {
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER] = async (user) => {
-  const role = user.role;
 
   const response = await esClient.msearch({
     index: "departmentservice",
