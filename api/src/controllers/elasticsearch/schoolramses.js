@@ -19,7 +19,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
             filter: [
               { terms: { "schoolId.keyword": schoolsIds } },
               req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
-              req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": req.user.region } } : null,
+              req.user.role === ROLES.REFERENT_REGION ? { term: { "region.keyword": req.user.region } } : null,
               queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
               queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             ].filter(Boolean),
@@ -67,6 +67,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     // Body params validation
     const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    console.log(queryFilters);
 
     // Context filters
     let contextFilters = [];
