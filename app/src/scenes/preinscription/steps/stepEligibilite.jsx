@@ -136,8 +136,8 @@ export default function StepEligibilite() {
             {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
           </div>
 
-          <div className="flex flex-col gap-4 md:flex-row">
-            <div className="flex w-full flex-col md:w-1/2">
+          <div className="flex flex-col gap-4">
+            <div className="flex w-full flex-col">
               <SearchableSelect
                 label="Niveau de scolarité"
                 value={data.scolarity}
@@ -154,6 +154,11 @@ export default function StepEligibilite() {
               <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
+            {/* <label className="flex-start mt-2 flex w-full flex-col text-base md:w-1/2">
+              Date de naissance
+              <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} error={error.birthDate} />
+              {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
+            </label> */}
           </div>
 
           {data.scolarity && (
