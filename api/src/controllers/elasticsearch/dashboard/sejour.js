@@ -7,6 +7,8 @@ const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
 const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 
+// TODO: Guard all requests according to roles
+
 router.post("/moderator", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   // creation de la Query avec filtres pour récupèrer les infos des jeunes
   const buildESRequestBodyForYoung = (queryFilters) => {
