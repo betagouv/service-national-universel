@@ -47,8 +47,8 @@ const SideBar = (props) => {
 
   //Check if the sidebar is open or not in the local storage
   useEffect(() => {
-    if (localStorage?.getItem("sideBarOpen") === "true") setOpen(true);
-    else setOpen(false);
+    if (localStorage?.getItem("sideBarOpen") === "false") setOpen(false);
+    else setOpen(true);
   }, []);
 
   //Close the sidebar if the device becomes mobile
