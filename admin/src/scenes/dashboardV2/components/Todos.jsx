@@ -123,7 +123,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                     title={note.title}
                     number={column.data[key]}
                     content={note.content}
-                    link={note?.link?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
+                    link={note.link?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
                     btnLabel={note.btnLabel}
                   />
                 );
