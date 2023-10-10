@@ -105,7 +105,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                         number={item.count}
                         content={note.content.replace("$1", item[note.args?.[0]] ?? "").replace("$2", item[note.args?.[1]] ?? "")}
                         link={note.link
-                          .replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
+                          ?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
                           .replace("$1", item[note.args?.[0]] ?? "")
                           .replace("$2", item[note.args?.[1]] ?? "")}
                         btnLabel={note.btnLabel}
@@ -113,7 +113,6 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                     );
                   });
                 }
-
                 // Other todo are not arrays so we can display the number directly
                 if (!shouldShow(column.data, key)) return null;
                 const note = getNoteData(key, user);
@@ -124,7 +123,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                     title={note.title}
                     number={column.data[key]}
                     content={note.content}
-                    link={note.link.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
+                    link={note.link?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
                     btnLabel={note.btnLabel}
                   />
                 );

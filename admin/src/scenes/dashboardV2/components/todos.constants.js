@@ -162,6 +162,19 @@ const getNoteData = (key, user) => {
       link: null,
       btnLabel: "À suivre",
     },
+    [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.EQUIVALENCE_WAITING_VERIFICATION]: {
+      title: "Équivalence",
+      content: "demandes d'équivalence MIG sont en attente de vérification",
+      link: "/volontaire?status=VALIDATED&status_equivalence=WAITING_VERIFICATION",
+      btnLabel: "À traiter",
+    },
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER]: {
+      title: "Contrat",
+      content: "représentant de l'État est à renseigner pour le département $1",
+      link: "/equipe",
+      args: ["department"],
+      btnLabel: "À traiter",
+    },
   };
   return NOTES[key];
 };

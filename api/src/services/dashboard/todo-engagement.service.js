@@ -1,8 +1,8 @@
-const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
+const { DASHBOARD_TODOS_FUNCTIONS, ROLES, region2department } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
 const ApplicationModel = require("../../models/application");
-const { queryFromFilter } = require("./todo.helper");
+const { queryFromFilter, withAggs } = require("./todo.helper");
 const service = {};
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC] = async (user) => {
@@ -72,6 +72,18 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC] = async (user) => {
         regionField: "youngRegion",
         departmentField: "youngDepartment",
       }),
+      // Équivalence (À vérifier) X demandes d’équivalence MIG sont en attente de vérification.
+      { index: "young", type: "_doc" },
+      queryFromFilter(
+        user.role,
+        user.region,
+        user.department,
+        [{ terms: { "status.keyword": ["VALIDATED"] } }, { terms: { "status_equivalence.keyword": ["WAITING_VERIFICATION"] } }],
+        {
+          regionField: "youngRegion",
+          departmentField: "youngDepartment",
+        },
+      ),
     ),
   });
   const results = response.body.responses;
@@ -81,6 +93,42 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC] = async (user) => {
     [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MILITARY_FILE_TO_VALIDATE]: results[2].hits.total.value,
     [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.MISSION_TO_VALIDATE]: results[3].hits.total.value,
     [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.PHASE3_TO_VALIDATE]: results[4].hits.total.value,
+    [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.EQUIVALENCE_WAITING_VERIFICATION]: results[5].hits.total.value,
+  };
+};
+
+service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER] = async (user) => {
+
+  const response = await esClient.msearch({
+    index: "departmentservice",
+    body: buildArbitratyNdJson(
+      { index: "departmentservice", type: "_doc" },
+      withAggs(
+        {
+          size: 0,
+          track_total_hits: 1000, // We don't need the exact number of hits when more than 1000.
+          query: {
+            bool: {
+              must: { match_all: {} },
+              filter: {
+                bool: {
+                  must: [{ terms: { "department.keyword": user.role === ROLES.REFERENT_DEPARTMENT ? user.department : region2department[user.region] } }],
+                  must_not: { exists: { field: "representantEtat.email.keyword" } },
+                },
+              },
+            },
+          },
+        },
+        "department.keyword",
+      ),
+    ),
+  });
+
+  return {
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER]: response.body.responses[0].aggregations.department.buckets.map((e) => ({
+      department: e.key,
+      count: e.doc_count,
+    })),
   };
 };
 

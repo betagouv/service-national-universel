@@ -71,7 +71,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT] = async (user, { assi
         queryFromFilter(user.role, user.region, user.department, [
           { terms: { "cohort.keyword": cohorts } },
           { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } },
-          { bool: { should: [{ term: { parentAllowSNU: "N/A" } }, { bool: { must_not: { exists: { field: "parentAllowSNU" } } } }], minimum_should_match: 1 } },
+          { bool: { should: [{ term: { imageRight: "N/A" } }, { bool: { must_not: { exists: { field: "imageRight" } } } }], minimum_should_match: 1 } },
         ]),
         "cohort.keyword",
       ),
