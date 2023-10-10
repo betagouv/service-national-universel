@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { ROLES } from "snu-lib";
-
+import api from "@/services/api";
+import { toastr } from "react-redux-toastr";
+import { translate } from "snu-lib";
+import { capture } from "@/sentry";
 import getNoteData from "./todos.constants";
 import Engagement from "./ui/icons/Engagement";
 import Inscription from "./ui/icons/Inscription";
@@ -16,9 +19,34 @@ import Sejour from "./ui/icons/Sejour";
 // 5. Add a new entry in getNoteData() (see ./todos.constants.js)
 // 6. Verify the columns to assign per role (see below line ~67)
 
-export default function Todos({ stats, user, cohortsNotFinished }) {
+export default function Todos({ user }) {
   const [fullNote, setFullNote] = useState(false);
+  const [stats, setStats] = useState({});
+  const [cohortsNotFinished, setCohortsNotFinished] = useState([]);
 
+  const getCohorts = async () => {
+    try {
+      const { ok, code, data: cohorts } = await api.get(`/cohort`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes", translate(code));
+      setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now())?.map((e) => e.name));
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes");
+    }
+  };
+
+  useEffect(() => {
+    getCohorts();
+  }, []);
+
+  useEffect(() => {
+    const updateStats = async () => {
+      const response = await api.post("/elasticsearch/dashboard/general/todo");
+      const s = response.data;
+      setStats(s);
+    };
+    updateStats();
+  }, []);
   function shouldShow(parent, key, index = null) {
     if (fullNote) return true;
     const entries = Object.entries(parent);
@@ -85,6 +113,9 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
       columns.push(columnEngagement);
+      break;
+    case ROLES.HEAD_CENTER:
+      columns.push(columnInscription, columnSejour);
       break;
     default:
       columns.push(columnInscription, columnSejour, columnEngagement);

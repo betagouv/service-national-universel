@@ -44,6 +44,7 @@ import DashboardHeadCenterV2 from "./scenes/dashboardV2/head-center";
 import DashboardV2 from "./scenes/dashboardV2/moderator-ref";
 import DashboardResponsibleV2 from "./scenes/dashboardV2/responsible";
 import DashboardVisitorV2 from "./scenes/dashboardV2/visitor";
+import DashboardTest from "./scenes/dashboardV2";
 
 import Loader from "./components/Loader";
 import Drawer from "./components/drawer";
@@ -120,11 +121,12 @@ const Home = (props) => {
   };
 
   const renderDashboardV2 = () => {
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <DashboardV2 />;
+    /* if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <DashboardV2 />;
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsibleV2 />;
     if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenterV2 />;
     if (user?.role === ROLES.VISITOR) return <DashboardVisitorV2 />;
-    return null;
+    return null; */
+    if (user?.role) return <DashboardTest />;
   };
 
   const renderVolontaire = () => {
