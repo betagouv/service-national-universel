@@ -179,7 +179,7 @@ const getNoteData = (key, user) => {
     },
     [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END]: {
       title: "Volontaires",
-      content: "volontaires ayant commencé leur mission à mettre à jour",
+      content: "volontaires ayant achevé leur mission à mettre à jour",
       link: null,
       btnLabel: "À actualiser",
     },

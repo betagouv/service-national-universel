@@ -1,7 +1,6 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ROLES, region2department } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
-const ApplicationModel = require("../../models/application");
 const { queryFromFilter, withAggs } = require("./todo.helper");
 const service = {};
 
@@ -98,7 +97,6 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC] = async (user) => {
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER] = async (user) => {
-
   const response = await esClient.msearch({
     index: "departmentservice",
     body: buildArbitratyNdJson(
@@ -133,361 +131,308 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER] = async (user) =
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT] = async (user) => {
-  const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
-  if (user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = user.region;
-  if (user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: user.department };
-  const query = [
-    {
-      $match: {
-        status: { $in: ["IN_PROGRESS"] },
-        // statusPhase2: { $in: ["IN_PROGRESS", "WAITING_REALISATION"] },
-        contractStatus: { $nin: ["VALIDATED"] },
-        youngId: { $exists: true, $ne: "N/A" },
-        missionId: { $exists: true },
-      },
-    },
-    {
-      $addFields: {
-        youngObjectId: {
-          $toObjectId: "$youngId",
-        },
-        missionObjectId: {
-          $toObjectId: "$missionId",
+  const missions = await esClient.search({
+    index: "mission",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            { range: { startAt: { gt: "now" } } },
+            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+          ].filter(Boolean),
         },
       },
     },
-    {
-      $lookup: {
-        from: "youngs",
-        localField: "youngObjectId",
-        foreignField: "_id",
-        as: "youngInfo",
+  });
+
+  const missionIds = missions.body.hits.hits.map((e) => e._id);
+  const applications = await esClient.search({
+    index: "application",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          must_not: {
+            term: {
+              "contractStatus.keyword": "VALIDATED",
+            },
+          },
+          filter: [{ terms: { "missionId.keyword": missionIds } }, { terms: { "status.keyword": ["IN_PROGRESS"] } }],
+        },
       },
     },
-    {
-      $unwind: "$youngInfo",
-    },
-    {
-      $match: match,
-    },
-    {
-      $lookup: {
-        from: "missions",
-        localField: "missionObjectId",
-        foreignField: "_id",
-        as: "missionInfo",
+  });
+
+  const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
+  const youngs = await esClient.search({
+    index: "young",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { _id: youngIds } }, { terms: { "statusPhase2.keyword": ["IN_PROGRESS"] } }, { terms: { "status.keyword": ["VALIDATED"] } }],
+        },
       },
     },
-    {
-      $unwind: "$missionInfo",
-    },
-    {
-      $match: {
-        "missionInfo.startAt": { $gt: new Date() },
-      },
-    },
-  ];
-  const result = await ApplicationModel.aggregate(query);
-  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT]: result.length };
+  });
+
+  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT]: youngs.body.hits.total.value };
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS] = async (user) => {
-  const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
-  if (user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = user.region;
-  if (user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: user.department };
-  const query = [
-    {
-      $match: {
-        status: { $in: ["VALIDATED"] },
-        youngId: { $exists: true, $ne: "N/A" },
-        missionId: { $exists: true },
-      },
-    },
-    {
-      $addFields: {
-        youngObjectId: {
-          $toObjectId: "$youngId",
-        },
-        missionObjectId: {
-          $toObjectId: "$missionId",
+  const missions = await esClient.search({
+    index: "mission",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            { range: { startAt: { lt: "now" } } },
+            { range: { endAt: { gt: "now" } } },
+            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+          ].filter(Boolean),
         },
       },
     },
-    {
-      $lookup: {
-        from: "youngs",
-        localField: "youngObjectId",
-        foreignField: "_id",
-        as: "youngInfo",
+  });
+
+  const missionIds = missions.body.hits.hits.map((e) => e._id);
+  const applications = await esClient.search({
+    index: "application",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { "missionId.keyword": missionIds } }, { terms: { "status.keyword": ["VALIDATED"] } }],
+        },
       },
     },
-    {
-      $unwind: "$youngInfo",
-    },
-    {
-      $match: match,
-    },
-    {
-      $lookup: {
-        from: "missions",
-        localField: "missionObjectId",
-        foreignField: "_id",
-        as: "missionInfo",
+  });
+
+  const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
+  const youngs = await esClient.search({
+    index: "young",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { _id: youngIds } }, { terms: { "statusPhase2.keyword": ["IN_PROGRESS"] } }, { terms: { "status.keyword": ["VALIDATED"] } }],
+        },
       },
     },
-    {
-      $unwind: "$missionInfo",
-    },
-    {
-      $match: {
-        "missionInfo.startAt": { $gt: new Date() },
-        "missionInfo.endAt": { $lt: new Date() },
-      },
-    },
-  ];
-  const result = await ApplicationModel.aggregate(query);
-  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS]: result.length };
+  });
+
+  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS]: youngs.body.hits.total.value };
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END] = async (user) => {
-  const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
-  if (user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = user.region;
-  if (user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: user.department };
-  const query = [
-    {
-      $match: {
-        status: { $in: ["VALIDATED", "IN_PROGRESS"] },
-        youngId: { $exists: true, $ne: "N/A" },
-        missionId: { $exists: true },
-      },
-    },
-    {
-      $addFields: {
-        youngObjectId: {
-          $toObjectId: "$youngId",
-        },
-        missionObjectId: {
-          $toObjectId: "$missionId",
+  const missions = await esClient.search({
+    index: "mission",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            { range: { endAt: { lt: "now" } } },
+            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+          ].filter(Boolean),
         },
       },
     },
-    {
-      $lookup: {
-        from: "youngs",
-        localField: "youngObjectId",
-        foreignField: "_id",
-        as: "youngInfo",
+  });
+
+  const missionIds = missions.body.hits.hits.map((e) => e._id);
+  const applications = await esClient.search({
+    index: "application",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { "missionId.keyword": missionIds } }, { terms: { "status.keyword": ["VALIDATED", "IN_PROGRESS"] } }],
+        },
       },
     },
-    {
-      $unwind: "$youngInfo",
-    },
-    {
-      $match: match,
-    },
-    {
-      $lookup: {
-        from: "missions",
-        localField: "missionObjectId",
-        foreignField: "_id",
-        as: "missionInfo",
+  });
+
+  const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
+  const youngs = await esClient.search({
+    index: "young",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { _id: youngIds } }, { terms: { "statusPhase2.keyword": ["IN_PROGRESS"] } }, { terms: { "status.keyword": ["VALIDATED"] } }],
+        },
       },
     },
-    {
-      $unwind: "$missionInfo",
-    },
-    {
-      $match: {
-        "missionInfo.endAt": { $lt: new Date() },
-      },
-    },
-    {
-      $limit: 1000,
-    },
-  ];
-  const result = await ApplicationModel.aggregate(query);
-  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END]: result.length };
+  });
+
+  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END]: youngs.body.hits.total.value };
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END] = async (user) => {
-  const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
-  if (user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = user.region;
-  if (user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: user.department };
-  const query = [
-    {
-      $match: {
-        status: { $nin: ["VALIDATED"] },
-        youngId: { $exists: true, $ne: "N/A" },
-        missionId: { $exists: true },
-      },
-    },
-    {
-      $addFields: {
-        youngObjectId: {
-          $toObjectId: "$youngId",
-        },
-        missionObjectId: {
-          $toObjectId: "$missionId",
+  const missions = await esClient.search({
+    index: "mission",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            { range: { endAt: { lt: "now" } } },
+            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+          ].filter(Boolean),
         },
       },
     },
-    {
-      $lookup: {
-        from: "youngs",
-        localField: "youngObjectId",
-        foreignField: "_id",
-        as: "youngInfo",
+  });
+
+  const missionIds = missions.body.hits.hits.map((e) => e._id);
+  const applications = await esClient.search({
+    index: "application",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          must_not: {
+            term: {
+              "status.keyword": "VALIDATED",
+            },
+          },
+          filter: [{ terms: { "missionId.keyword": missionIds } }],
+        },
       },
     },
-    {
-      $unwind: "$youngInfo",
-    },
-    {
-      $match: match,
-    },
-    {
-      $lookup: {
-        from: "missions",
-        localField: "missionObjectId",
-        foreignField: "_id",
-        as: "missionInfo",
+  });
+
+  const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
+  const youngs = await esClient.search({
+    index: "young",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { _id: youngIds } }, { terms: { "statusPhase2.keyword": ["IN_PROGRESS"] } }, { terms: { "status.keyword": ["VALIDATED"] } }],
+        },
       },
     },
-    {
-      $unwind: "$missionInfo",
-    },
-    {
-      $match: {
-        "missionInfo.endAt": { $lt: new Date() },
-      },
-    },
-    {
-      $limit: 1000,
-    },
-  ];
-  const result = await ApplicationModel.aggregate(query);
-  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END]: result.length };
+  });
+
+  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END]: youngs.body.hits.total.value };
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = async (user) => {
-  const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
-  if (user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = user.region;
-  if (user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: user.department };
-  const query = [
-    {
-      $match: {
-        status: { $nin: ["IN_PROGRESS"] },
-        youngId: { $exists: true, $ne: "N/A" },
-        missionId: { $exists: true },
-      },
-    },
-    {
-      $addFields: {
-        youngObjectId: {
-          $toObjectId: "$youngId",
-        },
-        missionObjectId: {
-          $toObjectId: "$missionId",
+  const missions = await esClient.search({
+    index: "mission",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            { range: { startAt: { lt: "now" } } },
+            { range: { endAt: { gt: "now" } } },
+            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+          ].filter(Boolean),
         },
       },
     },
-    {
-      $lookup: {
-        from: "youngs",
-        localField: "youngObjectId",
-        foreignField: "_id",
-        as: "youngInfo",
+  });
+
+  const missionIds = missions.body.hits.hits.map((e) => e._id);
+  const applications = await esClient.search({
+    index: "application",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { "missionId.keyword": missionIds } }, { terms: { "status.keyword": ["IN_PROGRESS"] } }],
+        },
       },
     },
-    {
-      $unwind: "$youngInfo",
-    },
-    {
-      $match: match,
-    },
-    {
-      $lookup: {
-        from: "missions",
-        localField: "missionObjectId",
-        foreignField: "_id",
-        as: "missionInfo",
+  });
+
+  const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
+  const youngs = await esClient.search({
+    index: "young",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { _id: youngIds } }, { terms: { "statusPhase2.keyword": ["IN_PROGRESS"] } }, { terms: { "status.keyword": ["VALIDATED"] } }],
+        },
       },
     },
-    {
-      $unwind: "$missionInfo",
-    },
-    {
-      $match: {
-        "missionInfo.startAt": { $lt: new Date() },
-        "missionInfo.endAt": { $gt: new Date() },
-      },
-    },
-    {
-      $limit: 1000,
-    },
-  ];
-  const result = await ApplicationModel.aggregate(query);
-  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START]: result.length };
+  });
+
+  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START]: youngs.body.hits.total.value };
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START] = async (user) => {
-  const match = { "youngInfo.statusPhase2": "IN_PROGRESS", "youngInfo.status": "VALIDATED" };
-  if (user.role === ROLES.REFERENT_REGION) match["youngInfo.region"] = user.region;
-  if (user.role === ROLES.REFERENT_DEPARTMENT) match["youngInfo.department"] = { $in: user.department };
-  const query = [
-    {
-      $match: {
-        contractStatus: { $nin: ["VALIDATED"] },
-        youngId: { $exists: true, $ne: "N/A" },
-        missionId: { $exists: true },
-      },
-    },
-    {
-      $addFields: {
-        youngObjectId: {
-          $toObjectId: "$youngId",
-        },
-        missionObjectId: {
-          $toObjectId: "$missionId",
+  const missions = await esClient.search({
+    index: "mission",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            { range: { startAt: { lt: "now" } } },
+            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+          ].filter(Boolean),
         },
       },
     },
-    {
-      $lookup: {
-        from: "youngs",
-        localField: "youngObjectId",
-        foreignField: "_id",
-        as: "youngInfo",
+  });
+
+  const missionIds = missions.body.hits.hits.map((e) => e._id);
+  const applications = await esClient.search({
+    index: "application",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          must_not: {
+            term: {
+              "contractStatus.keyword": "VALIDATED",
+            },
+          },
+          filter: [{ terms: { "missionId.keyword": missionIds } }, { terms: { "status.keyword": ["VALIDATED", "IN_PROGRESS"] } }],
+        },
       },
     },
-    {
-      $unwind: "$youngInfo",
-    },
-    {
-      $match: match,
-    },
-    {
-      $lookup: {
-        from: "missions",
-        localField: "missionObjectId",
-        foreignField: "_id",
-        as: "missionInfo",
+  });
+
+  const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
+  const youngs = await esClient.search({
+    index: "young",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ terms: { _id: youngIds } }, { terms: { "statusPhase2.keyword": ["IN_PROGRESS"] } }, { terms: { "status.keyword": ["VALIDATED"] } }],
+        },
       },
     },
-    {
-      $unwind: "$missionInfo",
-    },
-    {
-      $match: {
-        "missionInfo.startAt": { $lt: new Date() },
-      },
-    },
-    {
-      $limit: 1000,
-    },
-  ];
-  const result = await ApplicationModel.aggregate(query);
-  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START]: result.length };
+  });
+
+  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START]: youngs.body.hits.total.value };
 };
 
 module.exports = service;
