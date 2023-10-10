@@ -1,11 +1,6 @@
 import React from "react";
-
-import DashboardContainer from "../../../components/DashboardContainer";
+import General from "../../../components/General";
 
 export default function Index() {
-  return (
-    <DashboardContainer active="general" availableTab={["general", "engagement"]}>
-      <div>Général</div>
-    </DashboardContainer>
-  );
+  return <General />;
 }

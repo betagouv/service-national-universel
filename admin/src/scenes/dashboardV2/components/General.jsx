@@ -21,7 +21,6 @@ export default function Index() {
         return ["general", "engagement", "sejour", "inscription"];
     }
   })();
-  console.log(availableTab);
   return (
     <DashboardContainer active="general" availableTab={availableTab}>
       <div className="flex flex-col gap-8 mb-4">

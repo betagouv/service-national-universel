@@ -53,7 +53,6 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
     }
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
-    console.log(JSON.stringify(queryFilters, null, 2));
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const body = {
