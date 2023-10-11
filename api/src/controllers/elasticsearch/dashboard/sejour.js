@@ -260,6 +260,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     const filterFields = ["statusPhase1", "region", "department", "cohorts", "academy", "status"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    //@todo refacto this part with middleware
     const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

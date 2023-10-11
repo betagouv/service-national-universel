@@ -13,6 +13,7 @@ router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: f
   try {
     const { user } = req;
 
+    //@todo refacto this part with middleware
     const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -45,6 +46,7 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
   try {
     const { user } = req;
 
+    //@todo refacto this part with middleware
     const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -95,6 +97,7 @@ router.post("/youngsReport", passport.authenticate(["referent"], { session: fals
     const { user } = req;
     const { filters, department } = req.body;
 
+    //@todo refacto this part with middleware
     const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
     if (!allowedRoles.includes(user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -132,6 +135,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
   try {
     const { user } = req;
 
+    //@todo refacto this part with middleware
     const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -287,6 +291,8 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
 router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user } = req;
+
+    //@todo refacto this part with middleware
     const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
     if (!allowedRoles.includes(user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -385,6 +391,7 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
   try {
     const { user } = req;
 
+    //@todo refacto this part with middleware
     const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
