@@ -114,18 +114,10 @@ export default function TabSchool({ filters }) {
             youngBySchool?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((school) => (
               <tr key={school?.key} className="flex h-1/6 cursor-default items-center border-b-[1px] border-gray-100 py-3 hover:bg-gray-50">
                 <td className="flex w-[80%] flex-col gap-1">
-                  <Link
-                    to={`/inscription?SCHOOL=%5B"${replaceSpaces(school.schoolName)}"%5D`}
-                    target="_blank"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    className="cursor-pointer">
-                    <p className="w-[90%] truncate text-sm font-bold leading-6 text-gray-900">{school.schoolName}</p>
-                    <p className="text-xs leading-4 text-gray-500">
-                      {school?.schoolCity} • {school.schoolZip}
-                    </p>
-                  </Link>
+                  <p className="w-[90%] truncate text-sm font-bold leading-6 text-gray-900">{school.schoolName}</p>
+                  <p className="text-xs leading-4 text-gray-500">
+                    {school?.schoolCity} • {school.schoolZip}
+                  </p>
                 </td>
 
                 <td className="flex w-[20%] flex-col gap-1 ">
