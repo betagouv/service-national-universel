@@ -29,7 +29,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
             // context filter
             queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
             queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-            queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
+            queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
@@ -84,7 +84,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
             filters.region?.length ? { terms: { "region.keyword": filters.region } } : null,
             filters.department?.length ? { terms: { "department.keyword": filters.department } } : null,
             filters.academy?.length ? { terms: { "academy.keyword": filters.academy } } : null,
-            filters.cohorts?.length ? { terms: { "cohorts.keyword": filters.cohorts } } : null,
+            filters.cohort?.length ? { terms: { "cohort.keyword": filters.cohort } } : null,
           ].filter(Boolean),
           filter: [
             //query
@@ -109,7 +109,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
       query: {
         bool: {
           //context filter
-          must: [{ match_all: {} }, { terms: { cohesionCenterId } }, filters.cohorts?.length ? { terms: { "cohort.keyword": filters.cohorts } } : null].filter(Boolean),
+          must: [{ match_all: {} }, { terms: { cohesionCenterId } }, filters.cohort?.length ? { terms: { "cohort.keyword": filters.cohort } } : null].filter(Boolean),
           filter: [
             //query
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
@@ -257,7 +257,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
   };
 
   try {
-    const filterFields = ["statusPhase1", "region", "department", "cohorts", "academy", "status"];
+    const filterFields = ["statusPhase1", "region", "department", "cohort", "academy", "status"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     //@todo refacto this part with middleware
