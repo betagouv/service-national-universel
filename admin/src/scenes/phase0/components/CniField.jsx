@@ -157,7 +157,7 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   async function previewCni(cniFile) {
     try {
       const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + cniFile._id);
-      return `data:${result.mimeType};base64,${btoa(String.fromCharCode(...new Uint8Array(result.data.data)))}`;
+      return `data:${result.mimeType};base64,${encodeURI(btoa(String.fromCharCode(...new Uint8Array(result.data.data))))}`;
     } catch (err) {
       toastr.error("Impossible de télécharger la pièce. Veuillez réessayer dans quelques instants.");
     }
@@ -268,7 +268,11 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                 </div>
                 {file.previewUrl && (
                   <div className="flex justify-center">
-                    <img src={file.previewUrl} className="max-h-[200px] pt-[12px]" />
+                    {file.previewUrl.includes("data:application/pdf") ? (
+                      <iframe src={file.previewUrl} className="pt-[12px]" style={{ width: "100%", height: "200px", border: 0 }}></iframe>
+                    ) : (
+                      <img src={file.previewUrl} className="max-h-[200px] pt-[12px]" />
+                    )}
                   </div>
                 )}
               </div>
