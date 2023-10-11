@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export default function DatePickerList({ value, onChange, disabled = false }) {
+export default function DatePickerDsfr({ value, onChange, disabled = false }) {
   const [day, setDay] = useState(() => (value ? value.getDate().toString().padStart(2, "0") : ""));
   const [month, setMonth] = useState(() => (value ? (value.getMonth() + 1).toString().padStart(2, "0") : ""));
   const [year, setYear] = useState(() => (value ? value.getFullYear().toString() : ""));
@@ -19,6 +19,8 @@ export default function DatePickerList({ value, onChange, disabled = false }) {
     const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     if (y % 400 === 0 || (y % 100 !== 0 && y % 4 === 0)) monthLength[1] = 29;
+
+    if (y.toString().length !== 4) newErrors.push("yearLength");
 
     if (!(y > 1900 && y < 2100)) newErrors.push("year");
 
@@ -57,7 +59,7 @@ export default function DatePickerList({ value, onChange, disabled = false }) {
           type="text"
           value={day}
           onChange={handleDayChange}
-          placeholder="JJ"
+          placeholder="Jour"
           maxLength="2"
           disabled={disabled}
         />
@@ -72,7 +74,7 @@ export default function DatePickerList({ value, onChange, disabled = false }) {
           type="text"
           value={month}
           onChange={handleMonthChange}
-          placeholder="MM"
+          placeholder="Mois"
           maxLength="2"
           disabled={disabled}
         />
@@ -87,7 +89,7 @@ export default function DatePickerList({ value, onChange, disabled = false }) {
           type="text"
           value={year}
           onChange={handleYearChange}
-          placeholder="AAAA"
+          placeholder="Année"
           maxLength="4"
           disabled={disabled}
         />
@@ -95,6 +97,7 @@ export default function DatePickerList({ value, onChange, disabled = false }) {
       {errors.includes("day") && <p className="text-red-500">Jour invalide</p>}
       {errors.includes("month") && <p className="text-red-500">Mois invalide</p>}
       {errors.includes("year") && <p className="text-red-500">Année invalide</p>}
+      {errors.includes("yearLength") && <p className="text-red-500">L'année doit être au format YYYY</p>}
     </div>
   );
 }
