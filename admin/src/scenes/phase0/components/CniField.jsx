@@ -131,17 +131,12 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   }, [filesToUpload, category, date]);
 
   useEffect(() => {
-    (async () => {
-      if (blockUpload) return setFilesToUpload(young.filesToUpload);
-      if (young && young.files && young.files.cniFiles) {
-        for (const file of young.files.cniFiles) {
-          file.previewUrl = await previewCni(file);
-        }
-        setCniFiles(young.files.cniFiles);
-      } else {
-        setCniFiles([]);
-      }
-    })();
+    if (blockUpload) return setFilesToUpload(young.filesToUpload);
+    if (young && young.files && young.files.cniFiles) {
+      setCniFiles(young.files.cniFiles);
+    } else {
+      setCniFiles([]);
+    }
   }, [young]);
 
   async function downloadCni(cniFile) {
@@ -149,15 +144,6 @@ function CniModal({ young, onClose, mode, blockUpload }) {
       const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + cniFile._id);
       const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
       download(blob, result.fileName);
-    } catch (err) {
-      toastr.error("Impossible de télécharger la pièce. Veuillez réessayer dans quelques instants.");
-    }
-  }
-
-  async function previewCni(cniFile) {
-    try {
-      const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + cniFile._id);
-      return `data:${result.mimeType};base64,${btoa(String.fromCharCode(...new Uint8Array(result.data.data)))}`;
     } catch (err) {
       toastr.error("Impossible de télécharger la pièce. Veuillez réessayer dans quelques instants.");
     }
@@ -252,25 +238,18 @@ function CniModal({ young, onClose, mode, blockUpload }) {
         <div className="p-[24px]">
           {cniFiles.length > 0 || (blockUpload && filesToUpload?.length > 0) ? (
             cniFiles.map((file) => (
-              <div key={file._id} className="border-b-[1px] border-b-[#E5E7EB] py-[12px]">
-                <div className="mt-[8px] flex items-center justify-between text-[12px] last:border-b-[0px]">
-                  <div className="">
-                    <p>{file.name}</p>
-                    <p className="truncate text-xs text-gray-500">
-                      {translate(file.category)}
-                      {file.side && ` - ${file.side}`}
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <DownloadButton className="ml-[8px] flex-[0_0_32px]" onClick={() => downloadCni(file)} />
-                    <DeleteButton className="ml-[8px] flex-[0_0_32px]" onClick={() => deleteCni(file)} />
-                  </div>
+              <div key={file._id} className="mt-[8px] flex items-center justify-between border-b-[1px] border-b-[#E5E7EB] py-[12px] text-[12px] last:border-b-[0px]">
+                <div className="">
+                  <p>{file.name}</p>
+                  <p className="truncate text-xs text-gray-500">
+                    {translate(file.category)}
+                    {file.side && ` - ${file.side}`}
+                  </p>
                 </div>
-                {file.previewUrl && (
-                  <div className="flex justify-center">
-                    <img src={file.previewUrl} className="max-h-[200px] pt-[12px]" />
-                  </div>
-                )}
+                <div className="flex items-center">
+                  <DownloadButton className="ml-[8px] flex-[0_0_32px]" onClick={() => downloadCni(file)} />
+                  <DeleteButton className="ml-[8px] flex-[0_0_32px]" onClick={() => deleteCni(file)} />
+                </div>
               </div>
             ))
           ) : young?.latestCNIFileCategory === "deleted" ? (
