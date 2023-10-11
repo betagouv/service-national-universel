@@ -29,12 +29,6 @@ function computeYoungFilter(filters, user) {
   if (filters && filters.status && filters.status.length > 0) {
     matchs.status = { $in: filters.status };
   }
-  if (filters && filters.region && filters.region.length > 0) {
-    matchs.region = { $in: filters.region };
-  }
-  if (filters && filters.department && filters.department.length > 0) {
-    matchs.department = { $in: filters.department };
-  }
   if (filters && filters.academies && filters.academies.length > 0) {
     matchs.academy = { $in: filters.academies };
   }
@@ -46,23 +40,24 @@ function computeYoungFilter(filters, user) {
   }
 
   // Roles
+  // Roles
   if (user.role === ROLES.REFERENT_REGION) {
     matchs.region = user.region;
+  } else if (filters && filters.region && filters.region.length > 0) {
+    matchs.region = { $in: filters.region };
   }
+
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
     matchs.department = { $in: filters.department.length ? filters.department.filter((d) => user.department.includes(d)) : user.department };
+  } else if (filters && filters.department && filters.department.length > 0) {
+    matchs.department = { $in: filters.department };
   }
   return matchs;
 }
 
 function computeMissionFilter(filters, user) {
   let matchs = {};
-  if (filters && filters.region && filters.region.length > 0) {
-    matchs.region = { $in: filters.region };
-  }
-  if (filters && filters.department && filters.department.length > 0) {
-    matchs.department = { $in: filters.department };
-  }
+
   if (filters && filters.start) {
     matchs.endAt = { $gte: filters.start };
   }
@@ -90,10 +85,16 @@ function computeMissionFilter(filters, user) {
   // Roles
   if (user.role === ROLES.REFERENT_REGION) {
     matchs.region = user.region;
+  } else if (filters && filters.region && filters.region.length > 0) {
+    matchs.region = { $in: filters.region };
   }
+
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
     matchs.department = { $in: filters.department.length ? filters.department.filter((d) => user.department.includes(d)) : user.department };
+  } else if (filters && filters.department && filters.department.length > 0) {
+    matchs.department = { $in: filters.department };
   }
+
   return matchs;
 }
 
