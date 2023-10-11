@@ -13,7 +13,7 @@ router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: f
   try {
     const { user } = req;
 
-    //@todo refacto this part with middleware
+    // TODO: refacto this part with middleware
     const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

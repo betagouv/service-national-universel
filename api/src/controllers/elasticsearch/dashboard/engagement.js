@@ -6,88 +6,104 @@ const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
 const { ES_NO_LIMIT, ROLES } = require("snu-lib");
-const allowRoles = require("../../../middlewares/role.middleware");
 
 // TODO: Guard all requests according to roles
 
-router.post(
-  "/status-divers",
-  passport.authenticate(["referent"], { session: false, failWithError: true }),
-  allowRoles([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION]),
-  async (req, res) => {
-    try {
-      const filterFields = ["status", "cohorts", "academy", "department", "region"];
-      const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-      const body = {
-        query: {
-          bool: {
-            must: { match_all: {} },
-            filter: [
-              queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
-              queryFilters?.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
-              queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
-              queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-              queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
-            ].filter(Boolean),
-          },
-        },
-        aggs: {
-          phase2ApplicationStatus: {
-            terms: {
-              field: "phase2ApplicationStatus.keyword",
-              size: ES_NO_LIMIT,
-            },
-          },
-          statusPhase2Contract: {
-            terms: {
-              field: "statusPhase2Contract.keyword",
-              size: ES_NO_LIMIT,
-            },
-          },
-        },
-        size: 0,
-      };
-
-      const reponse = await esClient.search({ index: "young", body: body });
-      if (!reponse?.body) {
-        return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
-      }
-      //format data
-      const phase2ApplicationStatus = reponse?.body?.aggregations?.phase2ApplicationStatus?.buckets;
-      const totalPhase2 = phase2ApplicationStatus?.reduce((acc, current) => acc + current.doc_count, 0);
-      const statusPhase2Contract = reponse?.body?.aggregations?.statusPhase2Contract?.buckets;
-      const totalContract = statusPhase2Contract?.reduce((acc, current) => acc + current.doc_count, 0);
-
-      const data = [];
-      for (const current of phase2ApplicationStatus) {
-        data.push({ category: "phase2", status: current.key, value: current.doc_count, percentage: totalPhase2 ? current.doc_count / totalPhase2 : 0 });
-      }
-      for (const current of statusPhase2Contract) {
-        data.push({ category: "contract", status: current.key, value: current.doc_count, percentage: totalContract ? current.doc_count / totalContract : 0 });
-      }
-
-      return res.status(200).send({ ok: true, data });
-    } catch (error) {
-      capture(error);
-      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+router.post("/status-divers", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-  },
-);
+
+    const filterFields = ["status", "cohorts", "academy", "department", "region"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const body = {
+      query: {
+        bool: {
+          must: [
+            { match_all: {} },
+            queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
+            queryFilters?.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
+            queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+            queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+          ].filter(Boolean),
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
+          ].filter(Boolean),
+        },
+      },
+      aggs: {
+        phase2ApplicationStatus: {
+          terms: {
+            field: "phase2ApplicationStatus.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+        statusPhase2Contract: {
+          terms: {
+            field: "statusPhase2Contract.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+      },
+      size: 0,
+    };
+
+    const reponse = await esClient.search({ index: "young", body: body });
+    if (!reponse?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    //format data
+    const phase2ApplicationStatus = reponse?.body?.aggregations?.phase2ApplicationStatus?.buckets;
+    const totalPhase2 = phase2ApplicationStatus?.reduce((acc, current) => acc + current.doc_count, 0);
+    const statusPhase2Contract = reponse?.body?.aggregations?.statusPhase2Contract?.buckets;
+    const totalContract = statusPhase2Contract?.reduce((acc, current) => acc + current.doc_count, 0);
+
+    const data = [];
+    for (const current of phase2ApplicationStatus) {
+      data.push({ category: "phase2", status: current.key, value: current.doc_count, percentage: totalPhase2 ? current.doc_count / totalPhase2 : 0 });
+    }
+    for (const current of statusPhase2Contract) {
+      data.push({ category: "contract", status: current.key, value: current.doc_count, percentage: totalContract ? current.doc_count / totalContract : 0 });
+    }
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 router.post("/structures", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["region", "departement"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
             queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
             queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+          ].filter(Boolean),
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -129,6 +145,12 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
 
 router.post("/status-de-phases", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["status", "cohorts", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -136,13 +158,18 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
             queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
             queryFilters?.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
-            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
             queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+          ].filter(Boolean),
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -189,6 +216,12 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
 
 router.post("/mission-proposed-places", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["region", "department", "start", "end", "source"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -211,8 +244,12 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
     const body = {
       query: {
         bool: {
-          must: { term: { "status.keyword": "VALIDATED" } },
-          filter: filters.filter(Boolean),
+          must: [{ term: { "status.keyword": "VALIDATED" } }, ...filters.filter(Boolean)],
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
+          ].filter(Boolean),
         },
       },
       aggs: {
@@ -249,6 +286,12 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
 
 router.post("/mission-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -271,8 +314,12 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: filters.filter(Boolean),
+          must: [{ match_all: {} }, ...filters.filter(Boolean)],
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
+          ].filter(Boolean),
         },
       },
       aggs: {
