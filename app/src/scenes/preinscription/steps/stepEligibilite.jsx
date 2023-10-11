@@ -16,7 +16,7 @@ import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
+import DatePickerDsfr from "../../../components/dsfr/forms/DatePickerDsfr";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
@@ -58,7 +58,7 @@ export default function StepEligibilite() {
     // Birthdate
     // ? Check age ?
     if (!data?.birthDate) {
-      errors.birthDate = "Vous devez choisir une date de naissance";
+      errors.birthDate = "Vous devez choisir une date de naissance valide";
     }
 
     if (data.scolarity) {
@@ -149,16 +149,11 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className="flex-start mt-2 flex w-full flex-col text-base md:w-1/2">
+            <label className="flex-start mt-2 flex w-full flex-col text-base">
               Date de naissance
-              <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+              <DatePickerDsfr value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
-            {/* <label className="flex-start mt-2 flex w-full flex-col text-base md:w-1/2">
-              Date de naissance
-              <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} error={error.birthDate} />
-              {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
-            </label> */}
           </div>
 
           {data.scolarity && (
