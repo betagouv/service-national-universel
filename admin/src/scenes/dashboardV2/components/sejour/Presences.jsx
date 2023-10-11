@@ -1,7 +1,7 @@
 import React from "react";
-import FullDoughnut from "../../../../components/graphs/FullDoughnut";
+import FullDoughnut from "../graphs/FullDoughnut";
 import OccupationBarVertical from "./OccupationBarVertical";
-import { getNewLink } from "../../../../../../utils";
+import { getNewLink } from "../../../../utils";
 import queryString from "query-string";
 import { ROLES, COHORTS_BEFORE_JULY_2023 } from "snu-lib/constants";
 
@@ -26,26 +26,27 @@ export default function Presences({ presence, JDM, depart, departTotal, departMo
             getNewLink({ base: base, filter, filtersUrl: [queryString.stringify({ cohesionStayPresence: "N/A" })] }, "session"),
           ]}
         />
-        {COHORTS_BEFORE_JULY_2023.includes(cohortHeadCenter) && (
-          <>
-            <div className="flex items-center justify-center">
-              <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
-            </div>
-            <FullDoughnut
-              title="Présence à la JDM"
-              legendSide="bottom"
-              labels={["Oui", "Non", "Non renseigné"]}
-              values={[JDM?.true || 0, JDM?.false || 0, JDM?.NR || 0]}
-              maxLegends={3}
-              tooltipsPercent={true}
-              legendUrls={[
-                getNewLink({ base: base, filter, filtersUrl: [queryString.stringify({ presenceJDM: "true" })] }, "session"),
-                getNewLink({ base: base, filter, filtersUrl: [queryString.stringify({ presenceJDM: "false" })] }, "session"),
-                getNewLink({ base: base, filter, filtersUrl: [queryString.stringify({ presenceJDM: "N/A" })] }, "session"),
-              ]}
-            />
-          </>
-        )}
+        {COHORTS_BEFORE_JULY_2023.includes(cohortHeadCenter) ||
+          (cohortHeadCenter === null && (
+            <>
+              <div className="flex items-center justify-center">
+                <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
+              </div>
+              <FullDoughnut
+                title="Présence à la JDM"
+                legendSide="bottom"
+                labels={["Oui", "Non", "Non renseigné"]}
+                values={[JDM?.true || 0, JDM?.false || 0, JDM?.NR || 0]}
+                maxLegends={3}
+                tooltipsPercent={true}
+                legendUrls={[
+                  getNewLink({ base: base, filter, filtersUrl: [queryString.stringify({ presenceJDM: "true" })] }, "session"),
+                  getNewLink({ base: base, filter, filtersUrl: [queryString.stringify({ presenceJDM: "false" })] }, "session"),
+                  getNewLink({ base: base, filter, filtersUrl: [queryString.stringify({ presenceJDM: "N/A" })] }, "session"),
+                ]}
+              />
+            </>
+          ))}
         <div className="flex items-center justify-center">
           <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
         </div>

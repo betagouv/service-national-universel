@@ -5,7 +5,7 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1 } = require("snu-lib");
+const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1, YOUNG_STATUS } = require("snu-lib");
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
 router.post("/moderator", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -269,6 +269,7 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
           must: { match_all: {} },
           filter: [
             { terms: { "sessionPhase1Id.keyword": [session._id] } },
+            { term: { "status.keyword": YOUNG_STATUS.VALIDATED } },
             queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),

@@ -45,16 +45,6 @@ export default function StatusPhase1({ statusPhase1, total, filter, role, sessio
             base={base}
             filtersUrl={[queryString.stringify({ statusPhase1: "DONE" })]}
           />
-          {role === ROLES.HEAD_CENTER && (
-            <StatusText
-              status="Sur liste complémentaire"
-              nb={WAITING_LIST || 0}
-              percentage={total && WAITING_LIST ? ((WAITING_LIST / total) * 100).toFixed(0) : 0}
-              filter={filterWithoutStatusPhase1}
-              base={`/centre/${centerId}/${sessionId}/general`}
-              filtersUrl={[queryString.stringify({ statusPhase1: "WAITING_LIST" })]}
-            />
-          )}
         </div>
         <div className="flex w-[10%] items-center justify-center">
           <div className="h-3/5 w-[1px] border-r-[1px] border-gray-300"></div>
@@ -76,16 +66,6 @@ export default function StatusPhase1({ statusPhase1, total, filter, role, sessio
             base={base}
             filtersUrl={[queryString.stringify({ statusPhase1: "EXEMPTED" })]}
           />
-          {role === ROLES.HEAD_CENTER && (
-            <StatusText
-              status="Désistée"
-              nb={WITHDRAWN || 0}
-              percentage={total && WITHDRAWN ? ((WITHDRAWN / total) * 100).toFixed(0) : 0}
-              filter={filterWithoutStatusPhase1}
-              base={`/centre/${centerId}/${sessionId}/general`}
-              filtersUrl={[queryString.stringify({ statusPhase1: "WITHDRAWN" })]}
-            />
-          )}
         </div>
       </div>
     </div>

@@ -38,6 +38,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
   }
 
   function total(parent) {
+    if (!parent) return 0;
     const entries = Object.entries(parent);
     let limit = 0;
     for (let i = 0; i < entries.length; i++) {
@@ -48,7 +49,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
     return limit;
   }
 
-  if (!stats.inscription)
+  if (Object.entries(stats || {}).length === 0)
     return (
       <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
         <div className="text-slate-300 py-8 m-auto text-center animate-pulse text-xl">Chargement des actualités</div>
@@ -66,7 +67,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
   const columns = [];
   switch (user.role) {
     case ROLES.HEAD_CENTER:
-      columns.push(columnInscription, columnSejour);
+      columns.push({ ...columnSejour, title: "À faire" });
       break;
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
@@ -78,7 +79,10 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
   }
 
   return (
-    <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!fullNote ? "h-[584px]" : "h-fit"}`}>
+    <div
+      className={`flex ${user.role !== ROLES.HEAD_CENTER ? "w-[70%]" : "w-full"} flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${
+        !fullNote ? "h-[584px]" : "h-fit"
+      }`}>
       <div className="grid grid-cols-3 gap-4">
         {columns.map((column) => (
           <div key={column.title} className="flex flex-col gap-4">
@@ -92,7 +96,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
             {!column.total ? (
               <NotePlaceholder />
             ) : (
-              Object.keys(column.data).map((key) => {
+              Object.keys(column.data || {}).map((key) => {
                 // Some todo in (Inscription, Sejour, Engagement) are arrays (ex: WAITING_VALIDATION_BY_COHORT)
                 // So we need to map on it
                 // { count: number, cohort: string }[]

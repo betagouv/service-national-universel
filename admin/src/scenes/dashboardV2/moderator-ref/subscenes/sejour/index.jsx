@@ -21,12 +21,12 @@ import {
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
-import BoxWithPercentage from "./components/BoxWithPercentage";
+import BoxWithPercentage from "../../../components/sejour/BoxWithPercentage";
 import CardCenterCapacity from "./components/CardCenterCapacity";
 import MoreInfo from "./components/MoreInfo";
 import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
-import Presences from "./components/Presences";
-import StatusPhase1 from "./components/StatusPhase1";
+import Presences from "../../../components/sejour/Presences";
+import StatusPhase1 from "../../../components/sejour/StatusPhase1";
 import TabSession from "./components/TabSession";
 
 export default function Index() {

@@ -5,10 +5,10 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { YOUNG_STATUS } from "snu-lib";
 import DashboardContainer from "../../../components/DashboardContainer";
-import BoxWithPercentage from "../../../moderator-ref/subscenes/sejour/components/BoxWithPercentage";
+import BoxWithPercentage from "../../../components/sejour/BoxWithPercentage";
 import Details from "@/scenes/dashboardV2/components/inscription/Details";
-import Presences from "../../../moderator-ref/subscenes/sejour/components/Presences";
-import StatusPhase1 from "../../../moderator-ref/subscenes/sejour/components/StatusPhase1";
+import Presences from "../../../components/sejour/Presences";
+import StatusPhase1 from "../../../components/sejour/StatusPhase1";
 
 export default function Index() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
