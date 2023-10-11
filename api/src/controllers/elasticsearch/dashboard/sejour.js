@@ -84,7 +84,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
             filters.region?.length ? { terms: { "region.keyword": filters.region } } : null,
             filters.department?.length ? { terms: { "department.keyword": filters.department } } : null,
             filters.academy?.length ? { terms: { "academy.keyword": filters.academy } } : null,
-            filters.cohort?.length ? { terms: { "cohort.keyword": filters.cohort } } : null,
+            filters.cohort?.length ? { terms: { "cohorts.keyword": filters.cohort } } : null,
           ].filter(Boolean),
           filter: [
             //query
