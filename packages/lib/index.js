@@ -13,7 +13,7 @@ const isInRuralArea = (v) => {
 function isEndOfInscriptionManagement2021() {
   return new Date() > new Date(2021, 4, 7); // greater than 7 mai 2021 morning
 }
-
+// 
 //force redeploy
 
 function inscriptionModificationOpenForYoungs(cohort, young, env) {
