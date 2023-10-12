@@ -100,6 +100,7 @@ export default function App() {
 const Home = (props) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
+  const { pathname, search } = useLocation();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
 
@@ -202,6 +203,7 @@ const Home = (props) => {
   }, [user]);
 
   if (loading) return <Loader />;
+  if (!user) return <Redirect to={`/auth?${queryString.stringify({ redirect: `${pathname}${search}` })}`} />;
 
   return (
     <div>
@@ -285,14 +287,7 @@ const limitedAccess = {
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
   const { pathname } = useLocation();
-
   const user = useSelector((state) => state.Auth.user);
-  if (!user) {
-    return (window.location.href = `/auth?${queryString.stringify({
-      disconnected: 1,
-      redirect: window.location.pathname,
-    })}`);
-  }
 
   const matchRoute = limitedAccess[user.role]?.authorised.some((route) => pathname.includes(route));
 
