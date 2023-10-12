@@ -62,12 +62,13 @@ export default function Signin() {
                     }
                     if (token) api.setToken(token);
                     if (user) {
+                      dispatch(setUser(user));
                       if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
                       if (redirect) {
                         captureMessage("Invalid redirect url", { extra: { redirect } });
                         toastr.error("Url de redirection invalide : " + redirect);
+                        return history.push("/");
                       }
-                      dispatch(setUser(user));
                     }
                   } catch (e) {
                     actions.setFieldValue("password", "");
