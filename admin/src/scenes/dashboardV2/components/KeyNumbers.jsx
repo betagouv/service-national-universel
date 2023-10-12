@@ -41,7 +41,7 @@ export default function KeyNumbers() {
         <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} />
       </div>
       <div className="overflow-hidden">{notes?.length ? notes?.map((note) => <Note key={note.id} note={note} />) : <NotePlaceholder />}</div>
-      {notes?.length > 5 && (
+      {notes?.length > 6 && (
         <div className="mt-auto p-2 flex justify-center">
           <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setOpen(!open)}>
             <span>{open ? "Voir moins" : "Voir plus"}</span>
