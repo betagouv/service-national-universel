@@ -34,7 +34,10 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
 
   if (Object.entries(stats || {}).length === 0)
     return (
-      <div className={`flex w-[70%] flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
+      <div
+        className={`flex ${
+          user.role !== ROLES.HEAD_CENTER ? "w-[70%]" : "w-full"
+        } flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
         <div className="text-slate-300 py-8 m-auto text-center animate-pulse text-xl">Chargement des actualités</div>
       </div>
     );
@@ -43,9 +46,9 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
   const totalSejour = total(stats.sejour);
   const totalEngagement = total(stats.engagement);
 
+  //Pour chef de centre on a besoin d'une fonction qui permet de "déplier" l'objet stats
   function flattenObject(obj) {
     const result = {};
-
     for (const key in obj) {
       if (typeof obj[key] === "object" && !Array.isArray(obj[key])) {
         const subObject = flattenObject(obj[key]);
@@ -56,7 +59,6 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
         result[key] = obj[key];
       }
     }
-
     return result;
   }
   const allStats = flattenObject(stats);
@@ -95,75 +97,6 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
           ))}
         </div>
       )}
-      {/*              <div key={columns[0].title} className="flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <div className="text-sm font-bold leading-5 text-gray-900">{columns[0].title}</div>
-          <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!columns[0].total ? "text-gray-400" : "text-blue-600"}`}>
-            {columns[0].total}
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          {!columns[0].total ? (
-            <NotePlaceholder />
-          ) : (
-            <RenderCard column={columns[0]} user={user} cohortsNotFinished={cohortsNotFinished} fullNote={fullNote} maxItemColumn={maxItemColumn} />
-          )}
-        </div>  
-       {columns.map((column) => (
-          <div key={column.title} className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              {column.icon}
-              <div className="text-sm font-bold leading-5 text-gray-900">{column.title}</div>
-              <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!column.total ? "text-gray-400" : "text-blue-600"}`}>
-                {column.total}
-              </div>
-            </div>
-            {!column.total ? (
-              <NotePlaceholder />
-            ) : (
-              Object.keys(column.data || {}).map((key) => {
-                // Some todo in (Inscription, Sejour, Engagement) are arrays (ex: WAITING_VALIDATION_BY_COHORT)
-                // So we need to map on it
-                // { count: number, cohort: string }[]
-                if (Array.isArray(column.data[key])) {
-                  return column.data[key].map((item, index) => {
-                    if (!shouldShow(column.data, key, index)) return null;
-                    const note = getNoteData(key, user);
-                    if (!note) return null;
-                    return (
-                      <NoteContainer
-                        key={key + index + item?.cohort + item?.department}
-                        title={note.title}
-                        number={item.count}
-                        content={note.content.replace("$1", item[note.args?.[0]] ?? "").replace("$2", item[note.args?.[1]] ?? "")}
-                        link={note.link
-                          .replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
-                          .replace("$1", item[note.args?.[0]] ?? "")
-                          .replace("$2", item[note.args?.[1]] ?? "")}
-                        btnLabel={note.btnLabel}
-                      />
-                    );
-                  });
-                }
-
-                // Other todo are not arrays so we can display the number directly
-                if (!shouldShow(column.data, key)) return null;
-                const note = getNoteData(key, user);
-                if (!note) return null;
-                return (
-                  <NoteContainer
-                    key={key}
-                    title={note.title}
-                    number={column.data[key]}
-                    content={note.content}
-                    link={note.link.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
-                    btnLabel={note.btnLabel}
-                  />
-                );
-              })
-            )}
-          </div>
-        ))} */}
       {shouldShowMore && (
         <div className="flex justify-center">
           <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setFullNote(!fullNote)}>
@@ -177,24 +110,6 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
 }
 
 const RenderColumns = ({ columns, user, cohortsNotFinished, fullNote, maxItemColumn, solo = false }) => {
-  return (
-    <div key={columns.title} className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <div className="text-sm font-bold leading-5 text-gray-900">{columns.title}</div>
-        <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!columns.total ? "text-gray-400" : "text-blue-600"}`}>{columns.total}</div>
-      </div>
-      {!columns.total ? (
-        <NotePlaceholder />
-      ) : (
-        <div className={solo ? "grid grid-cols-3 gap-4" : "flex flex-col gap-4"}>
-          <RenderCard column={columns} user={user} cohortsNotFinished={cohortsNotFinished} fullNote={fullNote} maxItemColumn={maxItemColumn} />
-        </div>
-      )}
-    </div>
-  );
-};
-
-const RenderCard = ({ column, user, cohortsNotFinished, fullNote, maxItemColumn }) => {
   function shouldShow(parent, key, max, index = null) {
     if (fullNote) return true;
     const entries = Object.entries(parent);
@@ -211,46 +126,62 @@ const RenderCard = ({ column, user, cohortsNotFinished, fullNote, maxItemColumn 
     }
     return false;
   }
-  return Object.keys(column.data || {}).map((key) => {
-    // Some todo in (Inscription, Sejour, Engagement) are arrays (ex: WAITING_VALIDATION_BY_COHORT)
-    // So we need to map on it
-    // { count: number, cohort: string }[]
-    if (Array.isArray(column.data[key])) {
-      return column.data[key].map((item, index) => {
-        if (!shouldShow(column.data, key, maxItemColumn, index)) return null;
-        const note = getNoteData(key, user);
-        if (!note) return null;
-        return (
-          <NoteContainer
-            key={key + index + item?.cohort + item?.department}
-            title={note.title}
-            number={item.count}
-            content={note.content.replace("$1", item[note.args?.[0]] ?? "").replace("$2", item[note.args?.[1]] ?? "")}
-            link={note.link
-              .replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
-              .replace("$1", item[note.args?.[0]] ?? "")
-              .replace("$2", item[note.args?.[1]] ?? "")}
-            btnLabel={note.btnLabel}
-          />
-        );
-      });
-    }
 
-    // Other todo are not arrays so we can display the number directly
-    if (!shouldShow(column.data, key, maxItemColumn)) return null;
-    const note = getNoteData(key, user);
-    if (!note) return null;
-    return (
-      <NoteContainer
-        key={key}
-        title={note.title}
-        number={column.data[key]}
-        content={note.content}
-        link={note.link.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
-        btnLabel={note.btnLabel}
-      />
-    );
-  });
+  return (
+    <div key={columns.title} className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <div className="text-sm font-bold leading-5 text-gray-900">{columns.title}</div>
+        <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!columns.total ? "text-gray-400" : "text-blue-600"}`}>{columns.total}</div>
+      </div>
+      {!columns.total ? (
+        <NotePlaceholder />
+      ) : (
+        <div className={solo ? "grid grid-cols-3 gap-4" : "flex flex-col gap-4"}>
+          {/* <RenderCard column={columns} user={user} cohortsNotFinished={cohortsNotFinished} fullNote={fullNote} maxItemColumn={maxItemColumn} /> */}
+          {Object.keys(columns.data || {}).map((key) => {
+            // Some todo in (Inscription, Sejour, Engagement) are arrays (ex: WAITING_VALIDATION_BY_COHORT)
+            // So we need to map on it
+            // { count: number, cohort: string }[]
+            if (Array.isArray(columns.data[key])) {
+              return columns.data[key].map((item, index) => {
+                if (!shouldShow(columns.data, key, maxItemColumn, index)) return null;
+                const note = getNoteData(key, user);
+                if (!note) return null;
+                return (
+                  <NoteContainer
+                    key={key + index + item?.cohort + item?.department}
+                    title={note.title}
+                    number={item.count}
+                    content={note.content.replace("$1", item[note.args?.[0]] ?? "").replace("$2", item[note.args?.[1]] ?? "")}
+                    link={note.link
+                      .replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
+                      .replace("$1", item[note.args?.[0]] ?? "")
+                      .replace("$2", item[note.args?.[1]] ?? "")}
+                    btnLabel={note.btnLabel}
+                  />
+                );
+              });
+            }
+
+            // Other todo are not arrays so we can display the number directly
+            if (!shouldShow(columns.data, key, maxItemColumn)) return null;
+            const note = getNoteData(key, user);
+            if (!note) return null;
+            return (
+              <NoteContainer
+                key={key}
+                title={note.title}
+                number={columns.data[key]}
+                content={note.content}
+                link={note.link.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
+                btnLabel={note.btnLabel}
+              />
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 };
 
 const NotePlaceholder = () => {
