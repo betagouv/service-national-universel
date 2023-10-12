@@ -76,7 +76,17 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT] = async (user, { assi
   }
   const response = await esClient.msearch({
     index: "young",
-    body: buildArbitratyNdJson({ index: "young", type: "_doc" }, withAggs(queryFromFilter(user.role, user.region, user.department, filters), "cohort.keyword")),
+    body: buildArbitratyNdJson(
+      { index: "young", type: "_doc" },
+      withAggs(
+        queryFromFilter(user.role, user.region, user.department, [
+          { terms: { "cohort.keyword": cohorts } },
+          { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } },
+          { bool: { should: [{ term: { imageRight: "N/A" } }, { bool: { must_not: { exists: { field: "imageRight" } } } }], minimum_should_match: 1 } },
+        ]),
+        "cohort.keyword",
+      ),
+    ),
   });
 
   return {
