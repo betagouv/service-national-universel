@@ -1,6 +1,6 @@
 import { Transition, Popover } from "@headlessui/react";
 import React, { Fragment, useEffect, useState } from "react";
-import DatePicker from "../../../../../../components/ui/forms/DatePicker";
+import DatePicker from "../../../components/ui/forms/DatePicker";
 import { HiChevronDown } from "react-icons/hi";
 import dayjs from "@/utils/dayjs.utils";
 

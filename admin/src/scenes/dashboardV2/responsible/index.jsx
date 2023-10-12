@@ -4,7 +4,7 @@ import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
 
 import Engagement from "./subscenes/engagement";
-import General from "./subscenes/general";
+import General from "../components/General";
 
 export default function Index() {
   useDocumentTitle("Tableau de bord");
