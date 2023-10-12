@@ -17,7 +17,6 @@ export default function Index() {
   const centerId = sessionPhase1.cohesionCenterId;
 
   const selectedFilters = {
-    status: [YOUNG_STATUS.VALIDATED],
     cohort: [cohort],
   };
   const [data, setData] = useState({});
