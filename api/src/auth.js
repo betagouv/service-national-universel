@@ -81,7 +81,7 @@ class Auth {
       const formatedDate = birthdateAt;
       formatedDate.setUTCHours(11, 0, 0);
 
-      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
+      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate, phone, phoneZone });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
       let sessions = await getFilteredSessions(value);
