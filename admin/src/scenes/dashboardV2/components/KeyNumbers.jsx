@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Inscription from "./ui/icons/Inscription";
 import CustomFilter from "../moderator-ref/subscenes/general/components/CustomFilter";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
@@ -27,7 +27,7 @@ export default function KeyNumbers() {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (startDate && endDate) fetchData();
   }, [startDate, endDate, phase]);
 
@@ -40,17 +40,15 @@ export default function KeyNumbers() {
         </div>
         <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} />
       </div>
-      <div className="overflow-hidden">
-        {notes?.map((note) => (
-          <Note key={note.id} note={note} />
-        ))}
-      </div>
-      <div className="mt-auto p-2 flex justify-center">
-        <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setOpen(!open)}>
-          <span>{open ? "Voir moins" : "Voir plus"}</span>
-          {open ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
-        </button>
-      </div>
+      <div className="overflow-hidden">{notes?.length ? notes?.map((note) => <Note key={note.id} note={note} />) : <NotePlaceholder />}</div>
+      {notes?.length > 5 && (
+        <div className="mt-auto p-2 flex justify-center">
+          <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => setOpen(!open)}>
+            <span>{open ? "Voir moins" : "Voir plus"}</span>
+            {open ? <HiChevronUp className="h-5 w-5" /> : <HiChevronDown className="h-5 w-5" />}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -71,3 +69,11 @@ function Note({ note }) {
     </div>
   );
 }
+
+const NotePlaceholder = () => {
+  return (
+    <div className="flex h-36 w-full items-center justify-center rounded-lg bg-gray-50">
+      <div className="text-sm text-center text-gray-400">Aucune notification</div>
+    </div>
+  );
+};
