@@ -56,8 +56,7 @@ export default function StepEligibilite() {
       errors.scolarity = "Choisissez un niveau de scolarité";
     }
     // Birthdate
-    // ? Check age ?
-    if (!data?.birthDate) {
+    if (!data?.birthDate || !dayjs(data.birthDate).isValid()) {
       errors.birthDate = "Vous devez choisir une date de naissance valide";
     }
 

@@ -1,47 +1,29 @@
 import React, { useEffect, useState } from "react";
 
 export default function DatePickerDsfr({ value, onChange, disabled = false }) {
-  const [day, setDay] = useState(() => (value ? value.getDate().toString().padStart(2, "0") : ""));
-  const [month, setMonth] = useState(() => (value ? (value.getMonth() + 1).toString().padStart(2, "0") : ""));
-  const [year, setYear] = useState(() => (value ? value.getFullYear().toString() : ""));
-  const [errors, setErrors] = useState([]);
+  const [day, setDay] = useState(() => (value ? value.getDate() : ""));
+  const [month, setMonth] = useState(() => (value ? value.getMonth() + 1 : ""));
+  const [year, setYear] = useState(() => (value ? value.getFullYear() : ""));
 
   useEffect(() => {
-    if (value) {
-      setDay(value.getDate().toString().padStart(2, "0"));
-      setMonth((value.getMonth() + 1).toString().padStart(2, "0"));
-      setYear(value.getFullYear().toString());
+    if (day && month && year) {
+      const dayString = day.toString();
+      const monthString = month.toString();
+      const dateString = `${year}-${monthString.length === 1 ? `0${monthString}` : monthString}-${dayString.length === 1 ? `0${dayString}` : dayString}T00:00:00`;
+      const newDate = new Date(dateString);
+      onChange(newDate);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [day, month, year]);
+
+  useEffect(() => {
+    if (!day && !month && !year) {
+      setDay(value.getDate());
+      setMonth(value.getMonth() + 1);
+      setYear(value.getFullYear());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
-
-  const validateDate = (d, m, y) => {
-    let newErrors = [];
-    const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-    if (y % 400 === 0 || (y % 100 !== 0 && y % 4 === 0)) monthLength[1] = 29;
-
-    if (y.toString().length !== 4) newErrors.push("yearLength");
-
-    if (!(y > 1900 && y < 2100)) newErrors.push("year");
-
-    if (!(m > 0 && m < 13)) newErrors.push("month");
-    else if (!(d > 0 && d <= monthLength[m - 1])) newErrors.push("day");
-
-    setErrors(newErrors);
-    return newErrors.length === 0;
-  };
-
-  useEffect(() => {
-    if (day.length === 2 && month.length === 2 && year.length === 4) {
-      const isValidDate = validateDate(parseInt(day), parseInt(month), parseInt(year));
-      if (isValidDate) {
-        const newDate = new Date(year, month - 1, day);
-        if (!value || value.getTime() !== newDate.getTime()) {
-          onChange(newDate);
-        }
-      }
-    }
-  }, [day, month, year, onChange, value]);
 
   const handleDayChange = (e) => setDay(e.target.value);
   const handleMonthChange = (e) => setMonth(e.target.value);
@@ -56,7 +38,7 @@ export default function DatePickerDsfr({ value, onChange, disabled = false }) {
         <input
           id="day"
           className="w-full bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] border-black px-4 py-2"
-          type="text"
+          type="number"
           value={day}
           onChange={handleDayChange}
           placeholder="Jour"
@@ -71,7 +53,7 @@ export default function DatePickerDsfr({ value, onChange, disabled = false }) {
         <input
           id="month"
           className="w-full bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] border-black px-4 py-2"
-          type="text"
+          type="number"
           value={month}
           onChange={handleMonthChange}
           placeholder="Mois"
@@ -86,7 +68,7 @@ export default function DatePickerDsfr({ value, onChange, disabled = false }) {
         <input
           id="year"
           className="w-full bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] border-black px-4 py-2"
-          type="text"
+          type="number"
           value={year}
           onChange={handleYearChange}
           placeholder="Année"
@@ -94,10 +76,6 @@ export default function DatePickerDsfr({ value, onChange, disabled = false }) {
           disabled={disabled}
         />
       </div>
-      {errors.includes("day") && <p className="text-red-500">Jour invalide</p>}
-      {errors.includes("month") && <p className="text-red-500">Mois invalide</p>}
-      {errors.includes("year") && <p className="text-red-500">Année invalide</p>}
-      {errors.includes("yearLength") && <p className="text-red-500">L'année doit être au format YYYY</p>}
     </div>
   );
 }
