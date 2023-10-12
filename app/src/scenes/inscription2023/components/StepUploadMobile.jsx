@@ -48,7 +48,6 @@ export default function StepUploadMobile({ recto, setRecto, verso, setVerso, dat
         </>
       );
     if (step === "date") return <ExpirationDate />;
-    {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
   }
 
   function resetState() {

@@ -6,6 +6,7 @@ export default function DatePickerDsfr({ value, onChange, disabled = false }) {
   const [year, setYear] = useState(() => (value ? value.getFullYear() : ""));
 
   useEffect(() => {
+    console.log("Checking day, month, year", day, month, year, value);
     if (day && month && year) {
       const dayString = day.toString();
       const monthString = month.toString();
@@ -17,6 +18,7 @@ export default function DatePickerDsfr({ value, onChange, disabled = false }) {
   }, [day, month, year]);
 
   useEffect(() => {
+    console.log("Checking value", day, month, year, value);
     if (value && !day && !month && !year) {
       setDay(value.getDate());
       setMonth(value.getMonth() + 1);
