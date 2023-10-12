@@ -203,7 +203,12 @@ const Home = (props) => {
   }, [user]);
 
   if (loading) return <Loader />;
-  if (!user) return <Redirect to={`/auth?${queryString.stringify({ redirect: `${pathname}${search}`, disconnected: 1 })}`} />;
+  if (!user) {
+    const queryObject = { disconnected: 1 };
+    if (pathname) queryObject.redirect = `${pathname}${search}`;
+
+    return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
+  }
 
   return (
     <div>

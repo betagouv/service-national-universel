@@ -172,7 +172,12 @@ const MandatoryLogIn = () => {
   }, []);
 
   if (loading) return <Loader />;
-  if (!user) return <Redirect to={`/auth?${queryString.stringify({ disconnected: 1, redirect: `${pathname}${search}` })}`} />;
+  if (!user) {
+    const queryObject = { disconnected: 1 };
+    if (pathname) queryObject.redirect = `${pathname}${search}`;
+
+    return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
+  }
 
   return (
     <Switch>
