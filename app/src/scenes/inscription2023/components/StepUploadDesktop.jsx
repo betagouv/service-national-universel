@@ -107,8 +107,6 @@ export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, da
 
 function ExpirationDate({ date, setDate, onChange, corrections, category }) {
   const young = useSelector((state) => state.Auth.young);
-  const [cniExpirationDate, setCniExpirationDate] = useState(young?.latestCNIFileExpirationDate || new Date());
-  const cniExpirationDateToDate = new Date(cniExpirationDate);
   return (
     <>
       <hr className="my-8 h-px border-0 bg-gray-200" />
@@ -137,8 +135,13 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
       <div>
         <label className="flex-start mt-2 flex w-full flex-col text-base">
           Date d&apos;expiration
-          <DatePickerDsfr value={cniExpirationDateToDate} onChange={(date) => setCniExpirationDate(date)} />
-          {/* {error.cniExpirationDate ? <span className="text-sm text-red-500">{error.cniExpirationDate}</span> : null} */}
+          <DatePickerDsfr
+            value={date}
+            onChange={(date) => {
+              setDate(date);
+              onChange && onChange();
+            }}
+          />
         </label>
       </div>
     </>

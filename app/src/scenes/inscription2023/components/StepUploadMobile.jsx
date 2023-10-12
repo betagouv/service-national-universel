@@ -13,8 +13,6 @@ import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonCont
 
 export default function StepUploadMobile({ recto, setRecto, verso, setVerso, date, setDate, error, setError, loading, setLoading, corrections, category, onSubmit, onCorrect }) {
   const young = useSelector((state) => state.Auth.young);
-  const [cniExpirationDate, setCniExpirationDate] = useState(young?.latestCNIFileExpirationDate || new Date());
-  const cniExpirationDateToDate = new Date(cniExpirationDate);
   const [step, setStep] = useState(getStep());
   const [checked, setChecked] = useState({
     "Toutes les informations sont lisibles": false,
@@ -50,6 +48,7 @@ export default function StepUploadMobile({ recto, setRecto, verso, setVerso, dat
         </>
       );
     if (step === "date") return <ExpirationDate />;
+    {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
   }
 
   function resetState() {
@@ -201,13 +200,7 @@ export default function StepUploadMobile({ recto, setRecto, verso, setVerso, dat
         <div className="mx-auto w-3/4">
           <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
         </div>
-        <div>
-          <label className="flex-start mt-2 flex w-full flex-col text-base">
-            Date d&apos;expiration
-            <DatePickerDsfr value={cniExpirationDateToDate} onChange={(date) => setCniExpirationDate(date)} />
-            {/* {error.cniExpirationDate ? <span className="text-sm text-red-500">{error.cniExpirationDate}</span> : null} */}
-          </label>
-        </div>
+        <DatePickerDsfr value={date} onChange={(date) => handleChange(date)} />
       </>
     );
   }

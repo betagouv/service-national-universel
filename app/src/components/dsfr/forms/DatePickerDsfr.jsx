@@ -30,7 +30,7 @@ export default function DatePickerDsfr({ value, onChange, disabled = false }) {
   const handleYearChange = (e) => setYear(e.target.value);
 
   return (
-    <div className="mt-2 flex w-full items-start justify-start gap-8 flex-row">
+    <div className="mt-2 flex w-full items-start justify-start gap-3 md:gap-8 flex-row">
       <div className="flex flex-col items-start mb-2 flex-grow">
         <label htmlFor="day" className="text-[#666666] text-sm mb-2 ml-1">
           Exemple: 14
