@@ -15,15 +15,12 @@ import Help from "../components/Help";
 import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
 import Info from "../../../components/info";
-import DatePickerDsfr from "../../../components/dsfr/forms/DatePickerDsfr";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 export default function StepDocuments() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  const [cniExpirationDate, setCniExpirationDate] = useState(young?.latestCNIFileExpirationDate || new Date());
-  const cniExpirationDateToDate = new Date(cniExpirationDate);
   const [error, setError] = useState({});
   const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "latestCNIFileExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
   const disabledUpload = young?.files.cniFiles.length > 2;
@@ -45,19 +42,10 @@ export default function StepDocuments() {
     },
   ];
 
-  const disabled = !young?.files?.cniFiles?.length;
+  const disabled = !young?.files?.cniFiles?.length || !young?.latestCNIFileExpirationDate;
 
   async function onSubmit() {
-    let errors = {};
-
-  
-    if (!cniExpirationDate?.cniExpirationDate) {
-      errors.cniExpirationDate = "Vous devez remplir un format de Date valide";
-    }
-
-    setError(errors);
-    
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: cniExpirationDate });
+    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: young.latestCNIFileExpirationDate });
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
@@ -117,11 +105,6 @@ export default function StepDocuments() {
             </div>
           </div>
         ))}
-        <label className="flex-start mt-2 flex w-full flex-col text-base">
-          Date d'expiration
-          <DatePickerDsfr value={cniExpirationDateToDate} onChange={(date) => setCniExpirationDate(date)} />
-          {error.cniExpirationDate ? <span className="text-sm text-red-500">{error.cniExpirationDate}</span> : null}
-        </label>
         <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/representants")} disabled={disabled} />
       </DSFRContainer>
       <Help supportLink={supportLink} />

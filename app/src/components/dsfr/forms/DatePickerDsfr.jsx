@@ -17,7 +17,7 @@ export default function DatePickerDsfr({ value, onChange, disabled = false }) {
   }, [day, month, year]);
 
   useEffect(() => {
-    if (!day && !month && !year) {
+    if (value && !day && !month && !year) {
       setDay(value.getDate());
       setMonth(value.getMonth() + 1);
       setYear(value.getFullYear());

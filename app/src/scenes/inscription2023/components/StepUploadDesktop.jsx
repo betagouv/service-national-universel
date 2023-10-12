@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { ID } from "../utils";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
-import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
+import DatePickerDsfr from "../../../components/dsfr/forms/DatePickerDsfr";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
@@ -107,6 +107,8 @@ export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, da
 
 function ExpirationDate({ date, setDate, onChange, corrections, category }) {
   const young = useSelector((state) => state.Auth.young);
+  const [cniExpirationDate, setCniExpirationDate] = useState(young?.latestCNIFileExpirationDate || new Date());
+  const cniExpirationDateToDate = new Date(cniExpirationDate);
   return (
     <>
       <hr className="my-8 h-px border-0 bg-gray-200" />
@@ -127,18 +129,17 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
                 {e.message && ` : ${e.message}`}
               </ErrorMessage>
             ))}
-          <p className="mt-4 text-gray-800">Date d&apos;expiration</p>
-          <DatePickerList
-            value={date}
-            onChange={(date) => {
-              setDate(date);
-              onChange && onChange();
-            }}
-          />
         </div>
         <div className="w-1/2">
           <img className="mx-auto h-32" src={ID[category].imgDate} alt={ID.title} />
         </div>
+      </div>
+      <div>
+        <label className="flex-start mt-2 flex w-full flex-col text-base">
+          Date d&apos;expiration
+          <DatePickerDsfr value={cniExpirationDateToDate} onChange={(date) => setCniExpirationDate(date)} />
+          {/* {error.cniExpirationDate ? <span className="text-sm text-red-500">{error.cniExpirationDate}</span> : null} */}
+        </label>
       </div>
     </>
   );
