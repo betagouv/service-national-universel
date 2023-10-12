@@ -141,10 +141,6 @@ const Home = (props) => {
           api.setToken(null);
           dispatch(setUser(null));
           setLoading(false);
-          return (window.location.href = `/auth?${queryString.stringify({
-            disconnected: 1,
-            redirect: window.location.pathname,
-          })}`);
         }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
@@ -292,8 +288,10 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
 
   const user = useSelector((state) => state.Auth.user);
   if (!user) {
-    const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    return <Redirect to={{ search: redirect ? `?redirect=${redirect}&unauthorized=1` : "", pathname: "/auth" }} />;
+    return (window.location.href = `/auth?${queryString.stringify({
+      disconnected: 1,
+      redirect: window.location.pathname,
+    })}`);
   }
 
   const matchRoute = limitedAccess[user.role]?.authorised.some((route) => pathname.includes(route));
