@@ -47,14 +47,15 @@ export default function Signin() {
       const invitationToken = urlParams.get("token");
       const { data: young, token } = await api.post(`/young/signup_invite`, { email, password, invitationToken: invitationToken });
       if (young) {
+        if (token) api.setToken(token);
+        dispatch(setYoung(young));
+        await cohortsInit();
         if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
         if (redirect) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
           toastr.error("Url de redirection invalide : " + redirect);
+          return history.push("/");
         }
-        if (token) api.setToken(token);
-        dispatch(setYoung(young));
-        await cohortsInit();
       }
     } catch (e) {
       console.log(e);

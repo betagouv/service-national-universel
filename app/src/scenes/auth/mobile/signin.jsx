@@ -47,14 +47,15 @@ export default function Signin() {
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
       if (young) {
+        if (token) api.setToken(token);
+        dispatch(setYoung(young));
+        await cohortsInit();
         if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
         if (redirect) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
           toastr.error("Url de redirection invalide : " + redirect);
+          return history.push("/");
         }
-        if (token) api.setToken(token);
-        dispatch(setYoung(young));
-        await cohortsInit();
       }
     } catch (e) {
       setPassword("");

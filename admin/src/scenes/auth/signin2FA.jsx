@@ -33,12 +33,13 @@ export default function Signin() {
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {
+        dispatch(setUser(response.user));
         if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
         if (redirect) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
           toastr.error("Url de redirection invalide : " + redirect);
+          return history.push("/");
         }
-        dispatch(setUser(response.user));
       }
     } catch (e) {
       setLoading(false);
