@@ -35,18 +35,27 @@ export default function Todos({ user }) {
     }
   };
 
-  useEffect(() => {
-    getCohorts();
-  }, []);
+  const updateStats = async () => {
+    const response = await api.post("/elasticsearch/dashboard/general/todo");
+    const s = response.data;
+    const filteredStats = {};
+    Object.entries(s).forEach(([key, value]) => {
+      const filteredValue = {};
+      Object.entries(value).forEach(([subKey, item]) => {
+        if (item !== 0 && (!Array.isArray(item) || item.length > 0)) {
+          filteredValue[subKey] = item;
+        }
+      });
+      filteredStats[key] = filteredValue;
+    });
+    setStats(filteredStats);
+  };
 
   useEffect(() => {
-    const updateStats = async () => {
-      const response = await api.post("/elasticsearch/dashboard/general/todo");
-      const s = response.data;
-      setStats(s);
-    };
+    getCohorts();
     updateStats();
   }, []);
+
   function shouldShow(parent, key, index = null) {
     if (fullNote) return true;
     const entries = Object.entries(parent);
@@ -101,6 +110,7 @@ export default function Todos({ user }) {
   const columnTodo3 = { data: {} };
 
   const columns = [];
+
   switch (user.role) {
     case ROLES.HEAD_CENTER:
       Object.entries({ ...columnInscription.data, ...columnSejour.data }).forEach(([key, value], index) => {
@@ -113,9 +123,6 @@ export default function Todos({ user }) {
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
       columns.push(columnEngagement);
-      break;
-    case ROLES.HEAD_CENTER:
-      columns.push(columnInscription, columnSejour);
       break;
     default:
       columns.push(columnInscription, columnSejour, columnEngagement);
