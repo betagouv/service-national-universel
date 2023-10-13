@@ -38,16 +38,16 @@ export default function StepUploadMobile({ recto, setRecto, verso, setVerso, dat
   }
 
   function renderStep(step) {
-    if (step === "recto") return <Recto />;
-    if (step === "verso") return <Verso />;
+    if (step === "recto") return <Recto corrections={corrections} category={category} setRecto={setRecto} setStep={setStep} setHasChanged={setHasChanged} />;
+    if (step === "verso") return <Verso corrections={corrections} category={category} setVerso={setVerso} setStep={setStep} setHasChanged={setHasChanged} />;
     if (step === "verify")
       return (
         <>
           <Gallery recto={recto} verso={verso} />
-          <Verify />
+          <Verify checked={checked} setChecked={setChecked} />
         </>
       );
-    if (step === "date") return <ExpirationDate />;
+    if (step === "date") return <ExpirationDate corrections={corrections} category={category} young={young} date={date} setDate={setDate} setHasChanged={setHasChanged} />;
   }
 
   function resetState() {
@@ -88,121 +88,123 @@ export default function StepUploadMobile({ recto, setRecto, verso, setVerso, dat
         ))}
     </>
   );
+}
 
-  function Recto() {
-    async function handleChange(e) {
-      const image = await resizeImage(e.target.files[0]);
-      if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
+function Recto({ corrections, category, setRecto, setStep, setHasChanged }) {
+  async function handleChange(e) {
+    const image = await resizeImage(e.target.files[0]);
+    if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
 
-      setRecto(image);
-      setHasChanged(true);
-      setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
-    }
-
-    return (
-      <>
-        <div className="mb-4">
-          {corrections
-            ?.filter(({ field }) => field == "cniFile")
-            ?.map((e) => (
-              <ErrorMessage key={e._id} className="">
-                <strong>{translateCorrectionReason(e.reason)}</strong>
-                {e.message && ` : ${e.message}`}
-              </ErrorMessage>
-            ))}
-        </div>
-        <div className="mb-4 flex w-full items-center justify-center">
-          <img src={ID[category]?.imgFront} alt={ID[category]?.title} />
-        </div>
-        <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
-        <button className="flex w-full">
-          <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
-            {category === "passport" ? "Scannez le document" : "Scannez le recto du document"}
-          </label>
-        </button>
-      </>
-    );
+    setRecto(image);
+    setHasChanged(true);
+    setStep(corrections?.some(({ reason }) => reason === "MISSING_FRONT") || category === "passport" ? "verify" : "verso");
   }
 
-  function Verso() {
-    async function handleChange(e) {
-      const image = await resizeImage(e.target.files[0]);
-      if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
+  return (
+    <>
+      <div className="mb-4">
+        {corrections
+          ?.filter(({ field }) => field == "cniFile")
+          ?.map((e) => (
+            <ErrorMessage key={e._id} className="">
+              <strong>{translateCorrectionReason(e.reason)}</strong>
+              {e.message && ` : ${e.message}`}
+            </ErrorMessage>
+          ))}
+      </div>
+      <div className="mb-4 flex w-full items-center justify-center">
+        <img src={ID[category]?.imgFront} alt={ID[category]?.title} />
+      </div>
+      <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
+      <button className="flex w-full">
+        <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
+          {category === "passport" ? "Scannez le document" : "Scannez le recto du document"}
+        </label>
+      </button>
+    </>
+  );
+}
 
-      setVerso(image);
-      setHasChanged(true);
-      setStep("verify");
-    }
+function Verso({ corrections, category, setVerso, setStep, setHasChanged }) {
+  async function handleChange(e) {
+    const image = await resizeImage(e.target.files[0]);
+    if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
 
-    return (
-      <>
-        <div className="mb-4">
-          {corrections
-            ?.filter(({ field }) => field == "cniFile")
-            ?.map((e) => (
-              <ErrorMessage key={e._id}>
-                <strong>{translateCorrectionReason(e.reason)}</strong>
-                {e.message && ` : ${e.message}`}
-              </ErrorMessage>
-            ))}
-        </div>
-        <div className="mb-4 flex w-full items-center justify-center">{ID[category].imgBack && <img src={ID[category]?.imgBack} alt={ID[category]?.title} />}</div>
-        <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
-        <button className="flex w-full">
-          <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
-            Scannez le verso du document
-          </label>
-        </button>
-      </>
-    );
+    setVerso(image);
+    setHasChanged(true);
+    setStep("verify");
   }
 
-  function Verify() {
-    return (
-      <>
-        <p className="my-4 text-lg font-semibold text-gray-800">Vérifiez les points suivants</p>
-        {Object.entries(checked).map(([key, value]) => (
-          <div className="my-2 flex items-center" key={key}>
-            <CheckBox type="checkbox" checked={value} onChange={() => setChecked({ ...checked, [key]: !checked[key] })} />
-            <span className="ml-2 mr-2">{key}</span>
-          </div>
-        ))}
-      </>
-    );
-  }
+  return (
+    <>
+      <div className="mb-4">
+        {corrections
+          ?.filter(({ field }) => field == "cniFile")
+          ?.map((e) => (
+            <ErrorMessage key={e._id}>
+              <strong>{translateCorrectionReason(e.reason)}</strong>
+              {e.message && ` : ${e.message}`}
+            </ErrorMessage>
+          ))}
+      </div>
+      <div className="mb-4 flex w-full items-center justify-center">{ID[category].imgBack && <img src={ID[category]?.imgBack} alt={ID[category]?.title} />}</div>
+      <input type="file" id="file-upload" name="file-upload" accept="image/*" onChange={handleChange} className="hidden" />
+      <button className="flex w-full">
+        <label htmlFor="file-upload" className="flex w-full items-center justify-center bg-[#000091] p-2 text-white">
+          Scannez le verso du document
+        </label>
+      </button>
+    </>
+  );
+}
 
-  function ExpirationDate() {
-    function handleChange(date) {
-      setDate(date);
-      setHasChanged(true);
-    }
+function Verify({ checked, setChecked }) {
+  return (
+    <>
+      <p className="my-4 text-lg font-semibold text-gray-800">Vérifiez les points suivants</p>
+      {Object.entries(checked).map(([key, value]) => (
+        <div className="my-2 flex items-center" key={key}>
+          <CheckBox type="checkbox" checked={value} onChange={() => setChecked({ ...checked, [key]: !checked[key] })} />
+          <span className="ml-2 mr-2">{key}</span>
+        </div>
+      ))}
+    </>
+  );
+}
 
-    return (
-      <>
-        <div className="mb-4">
-          {corrections
-            ?.filter(({ field }) => field === "latestCNIFileExpirationDate")
-            ?.map((e) => (
-              <ErrorMessage key={e._id}>
-                <strong>Date d&apos;expiration incorrecte</strong>
-                {e.message && ` : ${e.message}`}
-              </ErrorMessage>
-            ))}
+function ExpirationDate({ corrections, category, young, date, setDate, setHasChanged }) {
+
+  return (
+    <>
+      <div className="mb-4">
+        {corrections
+          ?.filter(({ field }) => field === "latestCNIFileExpirationDate")
+          ?.map((e) => (
+            <ErrorMessage key={e._id}>
+              <strong>Date d&apos;expiration incorrecte</strong>
+              {e.message && ` : ${e.message}`}
+            </ErrorMessage>
+          ))}
+      </div>
+      <div className="text-xl font-medium">Renseignez la date d’expiration</div>
+      {young.cohort !== "à venir" && (
+        <div className="my-2 text-gray-600">
+          Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+          ).
         </div>
-        <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-        {young.cohort !== "à venir" && (
-          <div className="my-2 text-gray-600">
-            Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
-            ).
-          </div>
-        )}
-        <div className="mx-auto w-3/4">
-          <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
-        </div>
-        <DatePickerDsfr value={date} onChange={(date) => handleChange(date)} />
-      </>
-    );
-  }
+      )}
+      <div className="mx-auto w-3/4">
+        <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
+      </div>
+      <DatePickerDsfr
+        value={date}
+        onChange={(date) => {
+          setDate(date);
+          setHasChanged(true);
+        }}
+      />
+    </>
+  );
 }
 
 function Gallery({ recto, verso }) {
