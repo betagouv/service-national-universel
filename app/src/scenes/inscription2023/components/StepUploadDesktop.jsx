@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { ID } from "../utils";
+import dayjs from "dayjs";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
 import DatePickerDsfr from "../../../components/dsfr/forms/DatePickerDsfr";
@@ -14,7 +15,11 @@ export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, da
   const young = useSelector((state) => state.Auth.young);
   const [hasChanged, setHasChanged] = useState(false);
   const isEnabled = validate();
+
   function validate() {
+    if (!dayjs(date).isValid()) {
+      return false;
+    }
     if (corrections?.length) {
       return hasChanged && !loading && !error.text;
     } else {

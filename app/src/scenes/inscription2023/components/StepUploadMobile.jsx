@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { resizeImage } from "../../../services/file.service";
 import { ID } from "../utils";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
+import dayjs from "dayjs";
 
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import DatePickerDsfr from "../../../components/dsfr/forms/DatePickerDsfr";
@@ -23,6 +24,9 @@ export default function StepUploadMobile({ recto, setRecto, verso, setVerso, dat
   const isEnabled = validate();
 
   function validate() {
+    if (!dayjs(date).isValid()) {
+      return false;
+    }
     if (corrections?.length) {
       return hasChanged && !loading && !error.text;
     } else {
