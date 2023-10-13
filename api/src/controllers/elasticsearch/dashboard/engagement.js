@@ -6,6 +6,7 @@ const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
 const { ES_NO_LIMIT, ROLES } = require("snu-lib");
+const { buildMissionContext } = require("../utils");
 
 // TODO: Guard all requests according to roles
 
@@ -287,9 +288,16 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
 router.post("/mission-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // TODO: refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    let missionContextFilters = [];
+    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(req.user.role)) {
+      const { missionContextFilters: mCtxFilters, missionContextError } = await buildMissionContext(req.user);
+      if (missionContextError) return res.status(missionContextError.status).send(missionContextError.body);
+      missionContextFilters = mCtxFilters;
     }
 
     const filterFields = ["department", "region", "structureId"];
@@ -320,6 +328,7 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
             // roles
             req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
             req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
+            ...missionContextFilters,
           ].filter(Boolean),
         },
       },
@@ -371,6 +380,19 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
 
 router.post("/application-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    let missionContextFilters = [];
+    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(req.user.role)) {
+      const { missionContextFilters: mCtxFilters, missionContextError } = await buildMissionContext(req.user);
+      if (missionContextError) return res.status(missionContextError.status).send(missionContextError.body);
+      missionContextFilters = mCtxFilters;
+    }
+
     const filterFields = ["department", "region", "structureId"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -384,8 +406,13 @@ router.post("/application-status", passport.authenticate("referent", { session: 
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: filters.filter(Boolean),
+          must: [{ match_all: {} }, ...filters.filter(Boolean)],
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "missionRegion.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": req.user.department } } : null,
+            ...missionContextFilters,
+          ].filter(Boolean),
         },
       },
       aggs: {

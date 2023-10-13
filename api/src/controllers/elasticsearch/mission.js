@@ -1,38 +1,13 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
-const { ERRORS, isYoung, isReferent } = require("../../utils");
+const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
-const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
-const StructureObject = require("../../models/structure");
+const { joiElasticSearch, buildNdJson, buildRequestBody, buildMissionContext } = require("./utils");
 const { serializeMissions } = require("../../utils/es-serializer");
 const Joi = require("joi");
-
-async function buildMissionContext(user) {
-  const contextFilters = [];
-
-  // A young can only see validated missions.
-  if (isYoung(user)) contextFilters.push({ term: { "status.keyword": "VALIDATED" } });
-  if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
-
-  // A responsible cans only see their structure's missions.
-  if (user.role === ROLES.RESPONSIBLE) {
-    if (!user.structureId) return { missionContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push({ terms: { "structureId.keyword": [user.structureId] } });
-  }
-
-  // A supervisor can only see their structures' missions.
-  if (user.role === ROLES.SUPERVISOR) {
-    if (!user.structureId) return { missionContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
-    contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
-  }
-
-  return { missionContextFilters: contextFilters };
-}
 
 router.post("/:action(search|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
