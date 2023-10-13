@@ -94,7 +94,8 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
       (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
     ) {
-      const availableSessions = await getFilteredSessions({ ...young, ...value });
+      // @todo eligibility is based on address, should be based on school address.
+      const availableSessions = await getFilteredSessions({ grade: young.grade, birthdateAt: young.birthdateAt, ...value });
 
       const cohort = value.cohort ? value.cohort : young.cohort;
       const status = value.status ? value.status : young.status;
