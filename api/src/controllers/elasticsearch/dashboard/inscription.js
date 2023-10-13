@@ -5,7 +5,7 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ES_NO_LIMIT, COHORTS, ROLES, canSeeYoungInfo, region2department } = require("snu-lib");
+const { ES_NO_LIMIT, COHORTS, ROLES, canSeeYoungInfo, region2department, YOUNG_STATUS } = require("snu-lib");
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -98,6 +98,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     if (req.user.role === ROLES.HEAD_CENTER) {
       session = await SessionPhase1Model.findOne({ headCenterId: req.user._id, cohort: queryFilters.cohort });
     }
+    console.log(queryFilters);
     const body = {
       query: {
         bool: {
@@ -105,6 +106,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
             { match_all: {} },
             //context fitler
             session ? { terms: { "sessionPhase1Id.keyword": [session._id] } } : null,
+            session ? { term: { "status.keyword": YOUNG_STATUS.VALIDATED } } : null,
             queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,

@@ -8,7 +8,6 @@ import { ROLES, COHORTS_BEFORE_JULY_2023 } from "snu-lib/constants";
 export default function Presences({ presence, JDM, depart, departTotal, departMotif, filter, role, sessionId, centerId, cohortHeadCenter = null }) {
   const departPercentage = departTotal ? depart?.true / departTotal : 0;
   const base = role === ROLES.HEAD_CENTER ? `/centre/${centerId}/${sessionId}/tableau-de-pointage` : "/volontaire";
-  console.log(sessionId);
   return (
     <div className="flex flex-col gap-10 rounded-lg bg-white px-6 pt-8 pb-16 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <p className="text-base font-bold leading-5 text-gray-900">La présence en chiffres</p>
