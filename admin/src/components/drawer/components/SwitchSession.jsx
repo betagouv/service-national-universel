@@ -30,7 +30,7 @@ export default function SwitchSession({ sideBarOpen, sessionsList, sessionPhase1
     history.push("/");
   };
 
-  if (!sessionPhase1 || !sessionsList.length) return null;
+  if (!sessionPhase1 || !sessionsList?.length) return null;
 
   return (
     <div>

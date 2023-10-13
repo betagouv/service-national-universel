@@ -133,6 +133,8 @@ export default function Todos({ user }) {
   }
   const shouldShowMore = totalInscription > 3 || totalSejour > 3 || totalEngagement > 3;
 
+  if (columns.every((item) => item.total === 0)) return <NotePlaceholder />;
+
   return (
     <div
       className={`flex ${user.role !== ROLES.HEAD_CENTER ? "w-[70%]" : "w-full"} flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${
