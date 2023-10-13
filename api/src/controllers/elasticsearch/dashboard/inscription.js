@@ -98,7 +98,6 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     if (req.user.role === ROLES.HEAD_CENTER) {
       session = await SessionPhase1Model.findOne({ headCenterId: req.user._id, cohort: queryFilters.cohort });
     }
-    console.log(queryFilters);
     const body = {
       query: {
         bool: {
