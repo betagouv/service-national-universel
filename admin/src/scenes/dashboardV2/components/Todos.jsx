@@ -39,6 +39,8 @@ export default function Todos({ user }) {
     const response = await api.post("/elasticsearch/dashboard/general/todo");
     const s = response.data;
     const filteredStats = {};
+
+    // Remove empty values
     Object.entries(s).forEach(([key, value]) => {
       const filteredValue = {};
       Object.entries(value).forEach(([subKey, item]) => {
@@ -48,6 +50,7 @@ export default function Todos({ user }) {
       });
       filteredStats[key] = filteredValue;
     });
+
     setStats(filteredStats);
   };
 
