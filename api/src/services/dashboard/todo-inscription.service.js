@@ -70,10 +70,10 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT] = async (user, { assi
   ];
   if (user.role === ROLES.HEAD_CENTER) {
     const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
-    if (session?._id) {
-      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
-    } else {
+    if (!session?._id) {
       return { [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT]: [] };
+    } else {
+      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
     }
   }
   const response = await esClient.msearch({

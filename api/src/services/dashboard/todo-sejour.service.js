@@ -121,13 +121,13 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSe
 
   if (user.role === ROLES.HEAD_CENTER) {
     const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
-    if (session?._id) {
-      filters.push({ ids: { values: [session._id] } });
-    } else {
+    if (!session?._id) {
       return {
         [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [],
         [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [],
       };
+    } else {
+      filters.push({ ids: { values: [session._id] } });
     }
   }
   const response = await esClient.msearch({
@@ -203,10 +203,10 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT] = async (user, { twoD
   ];
   if (user.role === ROLES.HEAD_CENTER) {
     const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
-    if (session?._id) {
-      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
-    } else {
+    if (!session?._id) {
       return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT]: [] };
+    } else {
+      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
     }
   }
   const response = await esClient.msearch({
@@ -249,10 +249,10 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfter
   let filters = [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } }];
   if (user.role === ROLES.HEAD_CENTER) {
     const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
-    if (session?._id) {
-      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
-    } else {
+    if (!session?._id) {
       return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
+    } else {
+      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
     }
   }
   const response = await esClient.msearch({
