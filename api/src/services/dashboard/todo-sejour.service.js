@@ -246,7 +246,6 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfter
     if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
     filters.push(contextFilters);
   }
-
   const response = await esClient.msearch({
     index: "young",
     body: buildArbitratyNdJson(

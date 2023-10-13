@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { ROLES } from "snu-lib";
+import { useSelector } from "react-redux";
 
 import getNoteData from "./todos.constants";
 import Engagement from "./ui/icons/Engagement";
@@ -18,6 +19,9 @@ import Sejour from "./ui/icons/Sejour";
 
 export default function Todos({ stats, user, cohortsNotFinished }) {
   const [fullNote, setFullNote] = useState(false);
+  const sessionPhase1 = useSelector((state) => state.Auth.sessionPhase1);
+  const sessionId = sessionPhase1?._id;
+  const centerId = sessionPhase1?.cohesionCenterId;
 
   function shouldShow(parent, key, index = null) {
     if (fullNote) return true;
@@ -134,7 +138,9 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                         link={note.link
                           ?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
                           .replace("$1", item[note.args?.[0]] ?? "")
-                          .replace("$2", item[note.args?.[1]] ?? "")}
+                          .replace("$2", item[note.args?.[1]] ?? "")
+                          .replace("$centerId", centerId ?? "")
+                          .replace("$sessionId", sessionId ?? "")}
                         btnLabel={note.btnLabel}
                       />
                     );
@@ -150,7 +156,10 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
                     title={note.title}
                     number={column.data[key]}
                     content={note.content}
-                    link={note.link?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
+                    link={note.link
+                      ?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
+                      .replace("$centerId", centerId ?? "")
+                      .replace("$sessionId", sessionId ?? "")}
                     btnLabel={note.btnLabel}
                   />
                 );
