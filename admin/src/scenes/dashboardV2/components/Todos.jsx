@@ -76,6 +76,8 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
   const columnTodo2 = { data: {} };
   const columnTodo3 = { data: {} };
 
+  let shouldShowMore = false;
+
   const columns = [];
   switch (user.role) {
     case ROLES.HEAD_CENTER:
@@ -85,6 +87,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
         if (index % 3 === 2) columnTodo3.data[key] = value;
       });
       columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo1.data) }, { ...columnTodo3, total: total(columnTodo1.data) });
+      shouldShowMore = totalInscription + totalSejour + totalEngagement > 9;
       break;
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
@@ -92,13 +95,9 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
       break;
     default:
       columns.push(columnInscription, columnSejour, columnEngagement);
+      shouldShowMore = totalInscription > 3 || totalSejour > 3 || totalEngagement > 3;
       break;
   }
-  console.log(columns);
-  console.log();
-  const shouldShowMore = columns.every((item) => "title" in item)
-    ? totalInscription > 3 || totalSejour > 3 || totalEngagement > 3
-    : totalInscription + totalSejour + totalEngagement > 9;
 
   return (
     <div
