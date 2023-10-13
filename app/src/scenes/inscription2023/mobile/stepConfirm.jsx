@@ -99,9 +99,9 @@ export default function StepConfirm() {
           {hasHandicap ? (
             <>
               <Details title="Handicap" value={translate(young.handicap)} />
-              <Details title="Allergies" value={translate(young.allergies)} />
               <Details title="PPS" value={translate(young.ppsBeneficiary)} />
               <Details title="PAI" value={translate(young.paiBeneficiary)} />
+              <Details title="Allergies" value={translate(young.allergies)} />
               <Details title="Aménagement spécifique" value={translate(young.specificAmenagment)} />
               <Details title="A besoin d'un aménagement pour mobilité réduite" value={translate(young.reducedMobilityAccess)} />
               <Details title="Doit être affecté dans son département de résidence" value={translate(young.handicapInSameDepartment)} />

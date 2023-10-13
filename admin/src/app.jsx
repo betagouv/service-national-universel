@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
+import queryString from "query-string";
 
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
 import CGU from "./scenes/CGU";
@@ -99,6 +100,7 @@ export default function App() {
 const Home = (props) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
+  const { pathname, search } = useLocation();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
 
@@ -140,7 +142,6 @@ const Home = (props) => {
           api.setToken(null);
           dispatch(setUser(null));
           setLoading(false);
-          return (window.location.href = "/auth?disconnected=1");
         }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
@@ -205,6 +206,12 @@ const Home = (props) => {
   }, [user]);
 
   if (loading) return <Loader />;
+  if (!user) {
+    const queryObject = { disconnected: 1 };
+    if (pathname) queryObject.redirect = `${pathname}${search}`;
+
+    return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
+  }
 
   return (
     <div>
@@ -288,12 +295,7 @@ const limitedAccess = {
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
   const { pathname } = useLocation();
-
   const user = useSelector((state) => state.Auth.user);
-  if (!user) {
-    const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    return <Redirect to={{ search: redirect ? `?redirect=${redirect}&unauthorized=1` : "", pathname: "/auth" }} />;
-  }
 
   const matchRoute = limitedAccess[user.role]?.authorised.some((route) => pathname.includes(route));
 

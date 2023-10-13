@@ -106,6 +106,14 @@ export default function StatutPhase({ values, filter }) {
             base="/inscription"
           />
           <StatusText
+            status="Désistées"
+            nb={values.WITHDRAWN || 0}
+            percentage={computePercentage(values.WITHDRAWN)}
+            filter={filter}
+            filtersUrl={[[queryString.stringify({ status: "WITHDRAWN" })]]}
+            base="/volontaire"
+          />
+          <StatusText
             status="Supprimées"
             nb={values.DELETED || 0}
             percentage={computePercentage(values.DELETED)}

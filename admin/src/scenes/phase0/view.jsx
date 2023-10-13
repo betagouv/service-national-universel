@@ -601,7 +601,9 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     setSaving(true);
     if (validate()) {
       try {
-        const result = await api.put(`/young-edition/${young._id}/identite`, data);
+        // eslint-disable-next-line no-unused-vars
+        const { applications, ...dataToSend } = data;
+        const result = await api.put(`/young-edition/${young._id}/identite`, dataToSend);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
           setSectionMode(globalMode);

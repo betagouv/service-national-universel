@@ -5,10 +5,18 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ES_NO_LIMIT, COHORTS } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES } = require("snu-lib");
+
+// TODO: Guard all requests according to roles
 
 router.post("/status-divers", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["status", "cohorts", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -16,13 +24,18 @@ router.post("/status-divers", passport.authenticate(["referent"], { session: fal
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
             queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
             queryFilters?.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
-            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
             queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+          ].filter(Boolean),
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -70,16 +83,27 @@ router.post("/status-divers", passport.authenticate(["referent"], { session: fal
 
 router.post("/structures", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["region", "departement"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
             queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
             queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+          ].filter(Boolean),
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -121,6 +145,12 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
 
 router.post("/status-de-phases", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["status", "cohorts", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -128,13 +158,18 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
             queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
             queryFilters?.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
-            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
             queryFilters?.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+          ].filter(Boolean),
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -181,6 +216,12 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
 
 router.post("/mission-proposed-places", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["region", "department", "start", "end", "source"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -203,8 +244,12 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
     const body = {
       query: {
         bool: {
-          must: { term: { "status.keyword": "VALIDATED" } },
-          filter: filters.filter(Boolean),
+          must: [{ term: { "status.keyword": "VALIDATED" } }, ...filters.filter(Boolean)],
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
+          ].filter(Boolean),
         },
       },
       aggs: {
@@ -241,6 +286,12 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
 
 router.post("/mission-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -263,8 +314,12 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: filters.filter(Boolean),
+          must: [{ match_all: {} }, ...filters.filter(Boolean)],
+          filter: [
+            // roles
+            req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
+            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
+          ].filter(Boolean),
         },
       },
       aggs: {

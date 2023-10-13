@@ -29,7 +29,7 @@ export default function FooterComponent() {
           </li>
           <li>
             <a href="https://snu.gouv.fr/accessibilite/" target="_blank" rel="noreferrer">
-              Accessibilité
+              Accessibilité&nbsp;:&nbsp;non conforme
             </a>
           </li>
           <li>
@@ -48,8 +48,7 @@ export default function FooterComponent() {
             </a>
           </li>
         </ul>
-        <p>Tous droits réservés - Ministère de l&apos;éducation nationale et de la jeunesse - {new Date().getFullYear()}</p>
-        <ul>
+        <ul className="mt-[8px]">
           <li>
             <a href="https://www.gouvernement.fr/" target="_blank" rel="noreferrer">
               gouvernement.fr
@@ -86,29 +85,44 @@ export default function FooterComponent() {
             </a>
           </li>
         </ul>
+        <p className="mt-[24px]">Tous droits réservés - Ministère de l&apos;éducation nationale et de la jeunesse - {new Date().getFullYear()}</p>
       </Container>
     </Footer>
   );
 }
 
 const Footer = styled.footer`
+  padding: 16px 0;
+  min-height: 108px;
   text-align: center;
-  font-size: 14px;
-  padding: 5px 0;
-  background: #fff;
-  ul {
-    margin: 10px 0;
-  }
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 400;
+  background: #f3f4f6;
   li {
     display: inline-block;
-    margin: 5px 10px;
+    padding: 0 24px;
+    border-right: 1px solid #d1d5db;
+    &:last-child {
+      border-right: none;
+    }
   }
   p,
   a {
-    margin: 0;
     color: #6f7f98;
+  }
+  a {
+    margin: 0;
   }
   a:hover {
     color: #000;
+  }
+
+  @media (max-width: 768px) {
+    li {
+      display: block;
+      padding: 0;
+      border-right: none;
+    }
   }
 `;

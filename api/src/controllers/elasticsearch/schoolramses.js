@@ -19,7 +19,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
             filter: [
               { terms: { "schoolId.keyword": schoolsIds } },
               req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
-              req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": req.user.region } } : null,
+              req.user.role === ROLES.REFERENT_REGION ? { term: { "region.keyword": req.user.region } } : null,
               queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
               queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             ].filter(Boolean),
@@ -68,10 +68,11 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+
     // Context filters
     let contextFilters = [];
     if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "departmentName.keyword": req.user.department } });
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({

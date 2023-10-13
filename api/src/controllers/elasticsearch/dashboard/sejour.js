@@ -10,7 +10,7 @@ const SessionPhase1Model = require("../../../models/sessionPhase1");
 
 router.post("/moderator", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   // creation de la Query avec filtres pour récupèrer les infos des jeunes
-  const buildESRequestBodyForYoung = (queryFilters) => {
+  const buildESRequestBodyForYoung = (queryFilters, user) => {
     const aggsFilter = {};
     if (queryFilters?.statusPhase1?.length) {
       aggsFilter.filter = {
@@ -23,13 +23,19 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     const bodyYoung = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
+            // context filter
             queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
             queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-            queryFilters.cohorts?.length ? { terms: { "cohort.keyword": queryFilters.cohorts } } : null,
+            queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
+          ].filter(Boolean),
+          filter: [
+            //query
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
+            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
           ].filter(Boolean),
         },
       },
@@ -67,16 +73,22 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     return bodyYoung;
   };
   // création de la query pour récupèrer les infos des centres
-  const buildESRequestBodyForCohesion = (filters) => {
+  const buildESRequestBodyForCohesion = (filters, user) => {
     const bodyCohesion = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
+            // context filter
             filters.region?.length ? { terms: { "region.keyword": filters.region } } : null,
             filters.department?.length ? { terms: { "department.keyword": filters.department } } : null,
             filters.academy?.length ? { terms: { "academy.keyword": filters.academy } } : null,
-            filters.cohorts?.length ? { terms: { "cohorts.keyword": filters.cohorts } } : null,
+            filters.cohort?.length ? { terms: { "cohorts.keyword": filters.cohort } } : null,
+          ].filter(Boolean),
+          filter: [
+            //query
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
+            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
           ].filter(Boolean),
         },
       },
@@ -91,12 +103,17 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     return bodyCohesion;
   };
   // Création de la Query pour récupérer les info de la Session
-  const buildESRequestBodyForSession = (cohesionCenterId, filters) => {
+  const buildESRequestBodyForSession = (cohesionCenterId, filters, user) => {
     const bodySession = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [{ terms: { cohesionCenterId } }, filters.cohorts?.length ? { terms: { "cohort.keyword": filters.cohorts } } : null].filter(Boolean),
+          //context filter
+          must: [{ match_all: {} }, { terms: { cohesionCenterId } }, filters.cohort?.length ? { terms: { "cohort.keyword": filters.cohort } } : null].filter(Boolean),
+          filter: [
+            //query
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
+            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
+          ].filter(Boolean),
         },
       },
       aggs: {
@@ -111,16 +128,22 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     return bodySession;
   };
   // Creation de la Query pour récupérer les informations pour l'affichages des centres
-  const buildESRequestBodyForSessionCenter = (filters, sessionList) => {
+  const buildESRequestBodyForSessionCenter = (filters, sessionList, user) => {
     const sessionPhase1Id = sessionList.map((session) => session._id).filter((id) => id);
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
+            // context filter
             filters.status?.length ? { terms: { "status.keyword": filters.status } } : null,
             filters.statusPhase1?.length ? { terms: { "statusPhase1.keyword": filters.statusPhase1 } } : null,
             sessionPhase1Id.length ? { terms: { "sessionPhase1Id.keyword": sessionPhase1Id } } : null,
+          ].filter(Boolean),
+          filter: [
+            //query
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
+            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
           ].filter(Boolean),
         },
       },
@@ -178,8 +201,8 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     return Object.values(sessionByCenter);
   };
   // Dans cette fonction on utilise notre Query sur les Young et on constitue notre objet pour le Front.
-  const getYoungForSejourDasboard = async (queryFilters) => {
-    const youngRequestBodyForCohesiongYoung = buildESRequestBodyForYoung(queryFilters);
+  const getYoungForSejourDasboard = async (queryFilters, user) => {
+    const youngRequestBodyForCohesiongYoung = buildESRequestBodyForYoung(queryFilters, user);
     const responseYoung = await esClient.search({ index: "young", body: youngRequestBodyForCohesiongYoung });
     const YoungCenter = responseYoung.body;
     let resultYoung = {};
@@ -197,8 +220,8 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     return resultYoung;
   };
   // Dans cette fonction on utilise nos Deux Query (Session Cohesion) afin de créer notre objet pour le Front.
-  const getCenterAndSessionInfoForSejourDashboard = async (filters) => {
-    const esRequestBodyForCohesion = buildESRequestBodyForCohesion(filters);
+  const getCenterAndSessionInfoForSejourDashboard = async (filters, user) => {
+    const esRequestBodyForCohesion = buildESRequestBodyForCohesion(filters, user);
     const responseCohesion = await esClient.search({ index: "cohesioncenter", body: esRequestBodyForCohesion });
     if (!responseCohesion?.body?.aggregations || !responseCohesion?.body?.hits)
       return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterAndSessionInfoForSejourDashboard" });
@@ -209,7 +232,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     resultCenter.totalCenter = responseCohesion.body.hits.total.value;
 
     const cohesionCenterId = responseCohesion.body.hits.hits.map((e) => e._id);
-    const esRequestForSession = buildESRequestBodyForSession(cohesionCenterId, filters);
+    const esRequestForSession = buildESRequestBodyForSession(cohesionCenterId, filters, user);
     const responseSession = await esClient.search({ index: "sessionphase1", body: esRequestForSession });
     if (!responseSession?.body?.aggregations) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterAndSessionInfoForSejourDashboard" });
     resultCenter.placesTotalSession = responseSession.body.aggregations.placesTotal.value;
@@ -221,10 +244,10 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     return { resultCenter, responseSession };
   };
   // Dans cette fonction on utilise notre Query Session Center afin de créer notre objet pour afficher les centres sur le Front.
-  const getCenterInfoFromYoungForSejourDashboard = async (responseSession, filters) => {
+  const getCenterInfoFromYoungForSejourDashboard = async (responseSession, filters, user) => {
     if (!responseSession?.body?.hits) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterInfoFromYoungForSejourDashboard" });
     const sessionList = responseSession.body.hits.hits.map((e) => ({ ...e._source, _id: e._id }));
-    const esRequestBody = buildESRequestBodyForSessionCenter(filters, sessionList);
+    const esRequestBody = buildESRequestBodyForSessionCenter(filters, sessionList, user);
     const response = await esClient.search({ index: "young", body: esRequestBody });
     if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterInfoFromYoungForSejourDashboard" });
     const sessionByCenter = processESResponse(response, sessionList);
@@ -233,16 +256,18 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
   };
 
   try {
-    const filterFields = ["statusPhase1", "region", "department", "cohorts", "academy", "status"];
+    const filterFields = ["statusPhase1", "region", "department", "cohort", "academy", "status"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    //@todo refacto this part with middleware
     const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const resultYoung = await getYoungForSejourDasboard(queryFilters);
-    const { resultCenter, responseSession } = await getCenterAndSessionInfoForSejourDashboard(queryFilters);
-    const sessionByCenter = await getCenterInfoFromYoungForSejourDashboard(responseSession, queryFilters);
+    const { user } = req;
+    const resultYoung = await getYoungForSejourDasboard(queryFilters, user);
+    const { resultCenter, responseSession } = await getCenterAndSessionInfoForSejourDashboard(queryFilters, user);
+    const sessionByCenter = await getCenterInfoFromYoungForSejourDashboard(responseSession, queryFilters, user);
 
     return res.status(200).send({ resultCenter, sessionByCenter, resultYoung });
   } catch (error) {

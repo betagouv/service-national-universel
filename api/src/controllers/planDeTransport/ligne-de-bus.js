@@ -728,7 +728,15 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     const { error: errorQuery, value: valueQuery } = Joi.object({
       offset: Joi.number(),
       limit: Joi.number().default(PATCHES_COUNT_PER_PAGE),
-      page: Joi.number(),
+      page: Joi.number()
+        .integer()
+        .default(0)
+        .custom((value, helpers) => {
+          if (value < 0) {
+            return 0;
+          }
+          return value;
+        }),
       op: Joi.string(),
       path: Joi.string(),
       userId: Joi.string(),

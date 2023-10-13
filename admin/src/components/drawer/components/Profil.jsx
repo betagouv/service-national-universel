@@ -51,7 +51,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
       await api.post(`/referent/logout`);
       dispatch(setUser(null));
       toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
-      return history.go("/auth");
+      return history.push("/auth");
     } catch (e) {
       toastr.error("Oups une erreur est survenue lors de la déconnexion", { timeOut: 10000 });
       setIsLoggingOut(false);

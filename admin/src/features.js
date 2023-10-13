@@ -9,19 +9,22 @@ const ENVS = {
 
 // List of features
 const FEATURES_NAME = {
-  // TODO: to remove when deployed
   SIDEBAR: "sidebar",
-  // TODO: to remove when deployed
   DASHBOARD: "dashboard",
+  FLEXIBLE_REDIRECT: "flexibleRedirect",
 };
 
 // If the environment is not defined then the feature is enabled
 const features = {
   [FEATURES_NAME.SIDEBAR]: {
-    [ENVS.production]: [ROLES.ADMIN],
+    [ENVS.production]: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION],
   },
   [FEATURES_NAME.DASHBOARD]: {
-    [ENVS.production]: [ROLES.ADMIN],
+    [ENVS.production]: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION],
+  },
+  [FEATURES_NAME.FLEXIBLE_REDIRECT]: {
+    [ENVS.production]: [],
+    [ENVS.staging]: [],
   },
 };
 
