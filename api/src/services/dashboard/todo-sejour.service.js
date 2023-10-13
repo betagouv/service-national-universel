@@ -117,11 +117,17 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE] = async (user, { ses
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSessionStart: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [], [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [] };
-  let filters = [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasPedagoProject.keyword": ["false"] } }];
+  let filters = [{ terms: { "cohort.keyword": cohorts } }];
+
   if (user.role === ROLES.HEAD_CENTER) {
     const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
     if (session?._id) {
       filters.push({ ids: { values: [session._id] } });
+    } else {
+      return {
+        [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [],
+        [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [],
+      };
     }
   }
   const response = await esClient.msearch({
@@ -129,11 +135,11 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSe
     body: buildArbitratyNdJson(
       // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
       { index: "sessionphase1", type: "_doc" },
-      withAggs(queryFromFilter(user.role, user.region, user.department, filters)),
+      withAggs(queryFromFilter(user.role, user.region, user.department, [...filters, { terms: { "hasTimeSchedule.keyword": ["false"] } }])),
 
       //Projet pédagogique (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
       { index: "sessionphase1", type: "_doc" },
-      withAggs(queryFromFilter(user.role, user.region, user.department, filters)),
+      withAggs(queryFromFilter(user.role, user.region, user.department, [...filters, { terms: { "hasPedagoProject.keyword": ["false"] } }])),
     ),
   });
   return {
@@ -199,6 +205,8 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT] = async (user, { twoD
     const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
     if (session?._id) {
       filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
+    } else {
+      return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT]: [] };
     }
   }
   const response = await esClient.msearch({
@@ -243,6 +251,8 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfter
     const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
     if (session?._id) {
       filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
+    } else {
+      return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
     }
   }
   const response = await esClient.msearch({
