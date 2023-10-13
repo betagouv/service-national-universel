@@ -8,7 +8,6 @@ const { joiElasticSearch } = require("../utils");
 const { ES_NO_LIMIT, COHORTS, ROLES, canSeeYoungInfo, region2department, YOUNG_STATUS } = require("snu-lib");
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
-
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user } = req;
@@ -136,7 +135,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     const { user } = req;
 
     //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
