@@ -1,5 +1,5 @@
 import React from "react";
-import RoundRatio from "../../../../components/graphs/RoundRatio";
+import RoundRatio from "../graphs/RoundRatio";
 import { Link } from "react-router-dom";
 
 export default function BoxWithPercentage({ total, title, number, subLabel, redirect }) {

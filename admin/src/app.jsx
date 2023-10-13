@@ -145,10 +145,12 @@ const Home = (props) => {
         }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
+        //Load session phase 1 for head center before stop loading
+        if (res.user.role !== ROLES.HEAD_CENTER) setLoading(false);
       } catch (e) {
         console.log(e);
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchData();
   }, []);
@@ -172,10 +174,11 @@ const Home = (props) => {
             sessions.find((s) => {
               const limit = COHESION_STAY_END[s.cohort].setDate(COHESION_STAY_END[s.cohort].getDate() + 3);
               return limit >= now;
-            }) || sessions[0];
+            }) || sessions[sessions.length - 1];
 
           setSessionPhase1List(sessions.reverse());
           dispatch(setSessionPhase1(activeSession));
+          setLoading(false);
         } catch (e) {
           capture(e);
         }
