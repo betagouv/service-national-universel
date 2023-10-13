@@ -132,7 +132,12 @@ export default function Todos({ user }) {
       break;
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
-      columns.push({ ...columnEngagement, title: `À faire` });
+      Object.entries({ ...columnEngagement.data }).forEach(([key, value], index) => {
+        if (index % 3 === 0) columnTodo1.data[key] = value;
+        if (index % 3 === 1) columnTodo2.data[key] = value;
+        if (index % 3 === 2) columnTodo3.data[key] = value;
+      });
+      columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo1.data) }, { ...columnTodo3, total: total(columnTodo1.data) });
       break;
     default:
       columns.push(columnInscription, columnSejour, columnEngagement);
