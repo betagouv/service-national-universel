@@ -1,9 +1,8 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ES_NO_LIMIT, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
-const { queryFromFilter, withAggs } = require("./todo.helper");
+const { queryFromFilter, withAggs, buildFilterForHC } = require("./todo.helper");
 const service = {};
-const sessionPhase1Model = require("../../models/sessionPhase1");
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED] = async (user, { oneWeekBeforepdrChoiceLimitDate: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED]: [] };
@@ -117,19 +116,15 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE] = async (user, { ses
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSessionStart: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [], [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [] };
+
   let filters = [{ terms: { "cohort.keyword": cohorts } }];
 
   if (user.role === ROLES.HEAD_CENTER) {
-    const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
-    if (!session?._id) {
-      return {
-        [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [],
-        [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [],
-      };
-    } else {
-      filters.push({ ids: { values: [session._id] } });
-    }
+    let contextFilters = await buildFilterForHC(user, cohorts);
+    if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [], [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [] };
+    filters.push(contextFilters);
   }
+
   const response = await esClient.msearch({
     index: "sessionphase1",
     body: buildArbitratyNdJson(
@@ -201,14 +196,13 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT] = async (user, { twoD
       },
     },
   ];
+
   if (user.role === ROLES.HEAD_CENTER) {
-    const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
-    if (!session?._id) {
-      return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT]: [] };
-    } else {
-      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
-    }
+    let contextFilters = await buildFilterForHC(user, cohorts);
+    if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT]: [] };
+    filters.push(contextFilters);
   }
+
   const response = await esClient.msearch({
     index: "young",
     body: buildArbitratyNdJson({ index: "young", type: "_doc" }, withAggs(queryFromFilter(user.role, user.region, user.department, filters), "cohort.keyword")),
@@ -248,12 +242,9 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfter
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
   let filters = [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } }];
   if (user.role === ROLES.HEAD_CENTER) {
-    const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
-    if (!session?._id) {
-      return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
-    } else {
-      filters.push({ term: { "sessionPhase1Id.keyword": session._id } });
-    }
+    let contextFilters = await buildFilterForHC(user, cohorts);
+    if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
+    filters.push(contextFilters);
   }
   const response = await esClient.msearch({
     index: "young",

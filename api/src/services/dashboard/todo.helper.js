@@ -1,5 +1,6 @@
 const { ROLES } = require("snu-lib");
 const helpers = {};
+const sessionPhase1Model = require("../../models/sessionPhase1");
 
 helpers.queryFromFilter = (role, region, department, filter, { regionField = "region.keyword", departmentField = "department.keyword" } = {}) => {
   const body = {
@@ -17,6 +18,15 @@ helpers.withAggs = (body, fieldName = "cohort.keyword") => {
     ...body,
     aggs: { [fieldName.replace(".keyword", "")]: { terms: { field: fieldName, size: 1000 } } },
   };
+};
+
+helpers.buildFilterForHC = async (user, cohorts) => {
+  const session = await sessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
+  if (!session?._id) {
+    return false;
+  } else {
+    return { ids: { values: [session._id] } };
+  }
 };
 
 module.exports = helpers;
