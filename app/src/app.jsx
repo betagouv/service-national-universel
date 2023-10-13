@@ -3,6 +3,7 @@ import "./index.css";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
+import queryString from "query-string";
 
 import { setYoung } from "./redux/auth/actions";
 import { toastr } from "react-redux-toastr";
@@ -92,6 +93,7 @@ export default function App() {
 const OptionalLogIn = () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.Auth.young);
 
   const location = useLocation();
 
@@ -108,7 +110,6 @@ const OptionalLogIn = () => {
         if (ok && user) {
           dispatch(setYoung(user));
           await cohortsInit();
-          if (location.pathname.includes("/auth")) return <Redirect to="/" />;
         }
       } catch (e) {
         console.log(e);
@@ -120,6 +121,7 @@ const OptionalLogIn = () => {
   }, []);
 
   if (loading) return <Loader />;
+  if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
 
   return (
     <Switch>
@@ -136,8 +138,10 @@ const OptionalLogIn = () => {
 };
 
 const MandatoryLogIn = () => {
+  const { pathname, search } = useLocation();
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
   useEffect(() => {
@@ -147,7 +151,6 @@ const MandatoryLogIn = () => {
         if (!ok) {
           api.setToken(null);
           dispatch(setYoung(null));
-          return <Redirect to="/auth" />;
         }
         if (token) api.setToken(token);
         if (ok && user) {
@@ -169,6 +172,12 @@ const MandatoryLogIn = () => {
   }, []);
 
   if (loading) return <Loader />;
+  if (!user) {
+    const queryObject = { disconnected: 1 };
+    if (pathname) queryObject.redirect = `${pathname}${search}`;
+
+    return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
+  }
 
   return (
     <Switch>
@@ -211,12 +220,6 @@ const Espace = () => {
       });
     }
   }, [young]);
-
-  if (!young) {
-    const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    if (redirect === "inscription") return <Redirect to="/preinscription" />;
-    else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}&disconnected=1` : "", pathname: "/auth" }} />;
-  }
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 

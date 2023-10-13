@@ -16,27 +16,21 @@ import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonCont
 export default function StepConfirm() {
   const young = useSelector((state) => state.Auth.young);
   const [modal, setModal] = React.useState({ isOpen: false });
-  const [hasHandicap, setHasHandicap] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
   const history = useHistory();
   const dispatch = useDispatch();
 
-  React.useEffect(() => {
-    if (
-      young.handicap ||
-      young.allergies ||
-      young.ppsBeneficiary ||
-      young.paiBeneficiary ||
-      young.specificAmenagment ||
-      young.reducedMobilityAccess ||
-      young.handicapInSameDepartment ||
-      young.highSkilledActivity ||
-      young.highSkilledActivityInSameDepartment
-    ) {
-      setHasHandicap(true);
-    }
-  }, []);
+  const hasHandicap =
+    young?.handicap === "true" ||
+    young?.allergies === "true" ||
+    young?.ppsBeneficiary === "true" ||
+    young?.paiBeneficiary === "true" ||
+    young?.specificAmenagment === "true" ||
+    young?.reducedMobilityAccess === "true" ||
+    young?.handicapInSameDepartment === "true" ||
+    young?.highSkilledActivity === "true" ||
+    young?.highSkilledActivityInSameDepartment === "true";
 
   const onSubmit = async () => {
     setLoading(true);
@@ -105,9 +99,9 @@ export default function StepConfirm() {
           {hasHandicap ? (
             <>
               <Details title="Handicap" value={translate(young.handicap)} />
-              <Details title="Allergies" value={translate(young.allergies)} />
               <Details title="PPS" value={translate(young.ppsBeneficiary)} />
               <Details title="PAI" value={translate(young.paiBeneficiary)} />
+              <Details title="Allergies" value={translate(young.allergies)} />
               <Details title="Aménagement spécifique" value={translate(young.specificAmenagment)} />
               <Details title="A besoin d'un aménagement pour mobilité réduite" value={translate(young.reducedMobilityAccess)} />
               <Details title="Doit être affecté dans son département de résidence" value={translate(young.handicapInSameDepartment)} />

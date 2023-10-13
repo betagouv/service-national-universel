@@ -15,7 +15,7 @@ export default function SignupButtonContainer({
   return (
     <div className="fixed bottom-0 left-0 mx-auto w-full bg-white py-4 px-[1rem] shadow-ninaInverted md:relative md:px-0 md:shadow-none ">
       <hr className="mb-8 hidden h-px border-0 bg-gray-200 md:block" />
-      <div className={`flex ${!collapsePrevious && "flex-col-reverse md:flex-row"} justify-center gap-2 md:justify-end`}>
+      <div className={`flex ${!collapsePrevious && "flex-col-reverse md:flex-row"} justify-center gap-2 md:justify-end items-center`}>
         {onClickPrevious && (
           <SecondaryButton className={`${collapsePrevious ? "w-auto" : "w-full md:w-auto"} `} onClick={onClickPrevious}>
             {onClickNext && collapsePrevious ? <FiChevronLeft className="block md:hidden" /> : <p className="block w-64 md:hidden">{labelPrevious}</p>}
@@ -28,7 +28,7 @@ export default function SignupButtonContainer({
           </PrimaryButton>
         )}
       </div>
-      <p className="md:text-right text-sm mt-3">{text}</p>
+      {text && <p className="md:text-right text-sm mt-3">{text}</p>}
     </div>
   );
 }

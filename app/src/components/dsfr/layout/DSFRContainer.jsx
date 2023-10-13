@@ -3,7 +3,7 @@ import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle
 
 export default function DSFRContainer({ title, subtitle, children, supportLink }) {
   return (
-    <main className="md:my-10 text-gray-800 mx-auto w-full bg-white px-[1rem] py-[2rem] shadow-sm md:w-[56rem] md:px-[6rem] md:pt-[4rem]">
+    <main className="relative md:my-10 text-gray-800 mx-auto w-full bg-white px-[1rem] py-[2rem] shadow-sm md:w-[56rem] md:px-[6rem] md:pt-[4rem]">
       {title && (
         <>
           <div className="flex items-center justify-between">

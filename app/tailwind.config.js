@@ -67,9 +67,11 @@ module.exports = {
       },
       font: {
         sans: ["Ubuntu", "ui-sans-serif", "system-ui"],
+        caveat: ["Caveat", "cursive"],
       },
       fontFamily: {
         ubuntu: ["Marianne", "Ubuntu", "ui-sans-serif", "system-ui"],
+        caveat: ["Caveat", "cursive"],
       },
       width: {
         "screen-1/4": "25vw",

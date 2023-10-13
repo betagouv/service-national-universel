@@ -116,7 +116,15 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
     filters: Joi.object(
       ["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string().allow("")).max(200) }), {}),
     ),
-    page: Joi.number().integer().min(0).default(0),
+    page: Joi.number()
+      .integer()
+      .default(0)
+      .custom((value, helpers) => {
+        if (value < 0) {
+          return 0;
+        }
+        return value;
+      }),
     sort: Joi.object({
       field: Joi.string().valid(...sortFields),
       order: Joi.string().valid("asc", "desc"),

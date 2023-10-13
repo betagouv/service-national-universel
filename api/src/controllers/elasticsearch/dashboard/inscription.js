@@ -5,12 +5,30 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ES_NO_LIMIT, COHORTS } = require("snu-lib");
+const { ES_NO_LIMIT, COHORTS, ROLES, canSeeYoungInfo, region2department, YOUNG_STATUS } = require("snu-lib");
+const SessionPhase1Model = require("../../../models/sessionPhase1");
+
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { user } = req;
+
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const body = {
-      query: { bool: { must: { match_all: {} } } },
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
+          ].filter(Boolean),
+        },
+      },
       size: ES_NO_LIMIT,
     };
     const responseInscription = await esClient.search({ index: "inscriptiongoal", body: body });
@@ -26,18 +44,32 @@ router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: f
 
 router.post("/youngBySchool", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["status", "cohort", "academy", "departement"];
+    const { user } = req;
+
+    //@todo refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
+            //context filter
             queryFilters.region?.length ? { terms: { "schoolRegion.keyword": queryFilters.region } } : null,
             queryFilters.department?.length ? { terms: { "schoolDepartment.keyword": queryFilters.department } } : null,
             queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+          ].filter(Boolean),
+          filter: [
+            //query
+            user.role === ROLES.REFERENT_REGION ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "schoolDepartment.keyword": user.department } } : null,
           ].filter(Boolean),
         },
       },
@@ -60,14 +92,26 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
   }
 });
 
-router.post("/youngsReport", async (req, res) => {
+router.post("/youngsReport", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { user } = req;
     const { filters, department } = req.body;
+
+    //@todo refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (user.role === ROLES.REFERENT_REGION && !region2department[user.region].includes(department))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (user.role === ROLES.REFERENT_DEPARTMENT && !user.department.includes(department)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
+          must: [{ match_all: {} }],
           filter: [{ terms: { "cohort.keyword": filters?.cohort } }, { term: { "department.keyword": department } }],
         },
       },
@@ -89,18 +133,55 @@ router.post("/youngsReport", async (req, res) => {
 
 router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["status", "cohort", "academy", "departement"];
+    const { user } = req;
+
+    //@todo refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    let session = null;
+    if (req.user.role === ROLES.HEAD_CENTER) {
+      session = await SessionPhase1Model.findOne({ headCenterId: req.user._id, cohort: queryFilters.cohort });
+    }
+
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
+            //context fitler
+            session ? { terms: { "sessionPhase1Id.keyword": [session._id] } } : null,
+            session ? { term: { "status.keyword": YOUNG_STATUS.VALIDATED } } : null,
             queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
-            queryFilters?.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
             queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
+          ].filter(Boolean),
+          filter: [
+            user.role === ROLES.REFERENT_REGION
+              ? {
+                  bool: {
+                    should: [
+                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": [user.region] } }] } },
+                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": [user.region] } }] } },
+                    ],
+                  },
+                }
+              : null,
+            user.role === ROLES.REFERENT_DEPARTMENT
+              ? {
+                  bool: {
+                    should: [
+                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": user.department } }] } },
+                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": user.department } }] } },
+                    ],
+                  },
+                }
+              : null,
           ].filter(Boolean),
         },
       },
@@ -187,11 +268,20 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
       size: 0,
     };
     if (queryFilters?.region?.length)
-      body.query.bool.filter.push({
+      body.query.bool.must.push({
         bool: {
           should: [
             { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": queryFilters.region } }] } },
             { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": queryFilters.region } }] } },
+          ],
+        },
+      });
+    if (queryFilters?.department?.length)
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },
+            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": queryFilters.department } }] } },
           ],
         },
       });
@@ -207,7 +297,15 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
 
 router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const filterFields = ["status", "cohort", "academy", "departement"];
+    const { user } = req;
+
+    //@todo refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const cohortList = queryFilters?.cohort?.length ? queryFilters.cohort : COHORTS;
@@ -235,14 +333,40 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
     }, {});
 
     const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
+      query: {
+        bool: {
+          must: [{ match_all: {} }],
+          filter: [
+            user.role === ROLES.REFERENT_REGION
+              ? {
+                  bool: {
+                    should: [
+                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": [user.region] } }] } },
+                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": [user.region] } }] } },
+                    ],
+                  },
+                }
+              : null,
+            user.role === ROLES.REFERENT_DEPARTMENT
+              ? {
+                  bool: {
+                    should: [
+                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": user.department } }] } },
+                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": user.department } }] } },
+                    ],
+                  },
+                }
+              : null,
+          ].filter(Boolean),
+        },
+      },
       aggs,
       size: 0,
     };
 
-    if (queryFilters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": queryFilters.academy } });
+    if (queryFilters?.academy?.length) body.query.bool.must.push({ terms: { "academy.keyword": queryFilters.academy } });
     if (queryFilters?.region?.length)
-      body.query.bool.filter.push({
+      body.query.bool.must.push({
         bool: {
           should: [
             { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": queryFilters.region } }] } },
@@ -250,7 +374,16 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
           ],
         },
       });
-    if (queryFilters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": queryFilters.department } });
+
+    if (queryFilters?.department?.length)
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },
+            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": queryFilters.department } }] } },
+          ],
+        },
+      });
 
     const result = await esClient.search({ index: "young", body: body });
     const response = result.body;
@@ -263,16 +396,47 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
 
 router.post("/youngForInscription", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    const { user } = req;
+
+    //@todo refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const filterFields = ["statusPhase1", "statusPhase2", "statusPhase3", "status", "cohort", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const body = {
       query: {
         bool: {
-          must: { match_all: {} },
-          filter: [
+          must: [
+            { match_all: {} },
+
             queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+          ].filter(Boolean),
+          filter: [
+            user.role === ROLES.REFERENT_REGION
+              ? {
+                  bool: {
+                    should: [
+                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": [user.region] } }] } },
+                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": [user.region] } }] } },
+                    ],
+                  },
+                }
+              : null,
+            user.role === ROLES.REFERENT_DEPARTMENT
+              ? {
+                  bool: {
+                    should: [
+                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": user.department } }] } },
+                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": user.department } }] } },
+                    ],
+                  },
+                }
+              : null,
           ].filter(Boolean),
         },
       },
@@ -308,7 +472,7 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
     };
 
     if (queryFilters?.region?.length)
-      body.query.bool.filter.push({
+      body.query.bool.must.push({
         bool: {
           should: [
             { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": queryFilters.region } }] } },
@@ -318,7 +482,7 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
       });
 
     if (queryFilters?.department?.length)
-      body.query.bool.filter.push({
+      body.query.bool.must.push({
         bool: {
           should: [
             { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },

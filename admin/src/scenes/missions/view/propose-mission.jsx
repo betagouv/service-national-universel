@@ -21,7 +21,7 @@ export default function ProposeMission({ mission, updateMission }) {
 
   //Filters
   const filterArray = [
-    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     {
       title: "Statut phase 2",
       name: "statusPhase2",

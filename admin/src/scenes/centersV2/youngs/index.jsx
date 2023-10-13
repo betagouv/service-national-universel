@@ -82,6 +82,13 @@ export default function CenterYoungIndex() {
       translate: translate,
     },
     {
+      title: "Situation",
+      name: "situation",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
       title: "Handicap",
       name: "handicap",
       parentGroup: "Dossier",
@@ -97,6 +104,13 @@ export default function CenterYoungIndex() {
       title: "PAI",
       name: "paiBeneficiary",
       parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Région rurale",
+      name: "isRegionRural",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
       translate: translate,
     },
     {
