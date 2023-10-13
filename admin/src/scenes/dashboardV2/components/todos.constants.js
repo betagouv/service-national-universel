@@ -29,7 +29,7 @@ const getNoteData = (key, user) => {
       btnLabel: "À relancer",
     },
     [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT]: {
-      title: "",
+      title: "Dossier",
       content: "volontaires sans accord renseigné pour le séjour de $1",
       link: "volontaire?status=VALIDATED~WAITING_LIST&cohort=$1&parentAllowSNU=N/A",
       args: ["cohort"],

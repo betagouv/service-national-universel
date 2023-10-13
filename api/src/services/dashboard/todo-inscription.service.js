@@ -1,7 +1,7 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
-const { queryFromFilter, withAggs, buildFilterForHC } = require("./todo.helper");
+const { queryFromFilter, withAggs, buildFilterContext } = require("./todo.helper");
 const service = {};
 
 service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.BASIC] = async (user, { notFinished: cohorts }) => {
@@ -68,10 +68,11 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT] = async (user, { assi
     { bool: { should: [{ term: { imageRight: "N/A" } }, { bool: { must_not: { exists: { field: "imageRight" } } } }], minimum_should_match: 1 } },
   ];
   if (user.role === ROLES.HEAD_CENTER) {
-    let contextFilters = await buildFilterForHC(user, cohorts);
+    let contextFilters = await buildFilterContext(user, cohorts, "young");
     if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT]: [] };
     filters.push(contextFilters);
   }
+
   const response = await esClient.msearch({
     index: "young",
     body: buildArbitratyNdJson({ index: "young", type: "_doc" }, withAggs(queryFromFilter(user.role, user.region, user.department, filters), "cohort.keyword")),

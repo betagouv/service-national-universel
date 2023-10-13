@@ -1,7 +1,7 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ES_NO_LIMIT, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
-const { queryFromFilter, withAggs, buildFilterForHC } = require("./todo.helper");
+const { queryFromFilter, withAggs, buildFilterContext } = require("./todo.helper");
 const service = {};
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED] = async (user, { oneWeekBeforepdrChoiceLimitDate: cohorts }) => {
@@ -120,7 +120,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSe
   let filters = [{ terms: { "cohort.keyword": cohorts } }];
 
   if (user.role === ROLES.HEAD_CENTER) {
-    let contextFilters = await buildFilterForHC(user, cohorts);
+    let contextFilters = await buildFilterContext(user, cohorts, "sessionphase1");
     if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [], [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [] };
     filters.push(contextFilters);
   }
@@ -198,7 +198,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT] = async (user, { twoD
   ];
 
   if (user.role === ROLES.HEAD_CENTER) {
-    let contextFilters = await buildFilterForHC(user, cohorts);
+    let contextFilters = await buildFilterContext(user, cohorts, "young");
     if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT]: [] };
     filters.push(contextFilters);
   }
@@ -242,10 +242,11 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfter
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
   let filters = [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } }];
   if (user.role === ROLES.HEAD_CENTER) {
-    let contextFilters = await buildFilterForHC(user, cohorts);
+    let contextFilters = await buildFilterContext(user, cohorts, "young");
     if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
     filters.push(contextFilters);
   }
+
   const response = await esClient.msearch({
     index: "young",
     body: buildArbitratyNdJson(
