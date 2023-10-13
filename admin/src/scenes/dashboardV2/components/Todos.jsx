@@ -94,7 +94,11 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
       columns.push(columnInscription, columnSejour, columnEngagement);
       break;
   }
-  const shouldShowMore = totalInscription > 3 || totalSejour > 3 || totalEngagement > 3;
+  console.log(columns);
+  console.log();
+  const shouldShowMore = columns.every((item) => "title" in item)
+    ? totalInscription > 3 || totalSejour > 3 || totalEngagement > 3
+    : totalInscription + totalSejour + totalEngagement > 9;
 
   return (
     <div
