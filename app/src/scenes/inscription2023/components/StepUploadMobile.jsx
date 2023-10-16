@@ -6,7 +6,7 @@ import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 import dayjs from "dayjs";
 
 import CheckBox from "../../../components/dsfr/forms/checkbox";
-import DatePickerDsfr from "../../../components/dsfr/forms/DatePickerDsfr";
+import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
@@ -177,7 +177,6 @@ function Verify({ checked, setChecked }) {
 }
 
 function ExpirationDate({ corrections, category, young, date, setDate, setHasChanged }) {
-
   return (
     <>
       <div className="mb-4">
@@ -200,7 +199,7 @@ function ExpirationDate({ corrections, category, young, date, setDate, setHasCha
       <div className="mx-auto w-3/4">
         <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
       </div>
-      <DatePickerDsfr
+      <DatePicker
         value={date}
         onChange={(date) => {
           setDate(date);

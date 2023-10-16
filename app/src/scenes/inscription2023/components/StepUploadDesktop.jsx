@@ -4,7 +4,7 @@ import { ID } from "../utils";
 import dayjs from "dayjs";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
-import DatePickerDsfr from "../../../components/dsfr/forms/DatePickerDsfr";
+import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
@@ -140,7 +140,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
       <div>
         <label className="flex-start mt-2 flex w-full flex-col text-base">
           Date d&apos;expiration
-          <DatePickerDsfr
+          <DatePicker
             value={date}
             onChange={(date) => {
               setDate(date);

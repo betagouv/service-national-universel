@@ -16,7 +16,7 @@ import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePickerDsfr from "../../../components/dsfr/forms/DatePickerDsfr";
+import DatePickerDsfr from "../../../components/dsfr/forms/DatePicker";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";

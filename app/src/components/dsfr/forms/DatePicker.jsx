@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 
-export default function DatePickerDsfr({ value, onChange, disabled = false }) {
+export default function DatePicker({ value, onChange, disabled = false }) {
   const [day, setDay] = useState(() => (value ? value.getDate() : ""));
   const [month, setMonth] = useState(() => (value ? value.getMonth() + 1 : ""));
   const [year, setYear] = useState(() => (value ? value.getFullYear() : ""));
 
   useEffect(() => {
-    console.log("Checking day, month, year", day, month, year, value);
     if (day && month && year) {
       const dayString = day.toString();
       const monthString = month.toString();
