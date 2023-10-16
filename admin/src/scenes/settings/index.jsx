@@ -238,7 +238,7 @@ export default function Settings() {
           </div>
           {/* TODO implementer parametres sur la plateforme */}
           {/* Inscriptions (phase 0) */}
-          {/* <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex flex-col w-full gap-8">
               <p className="text-gray-900 leading-5 text-lg font-medium">Inscriptions (phase 0)</p>
               <div className="flex">
@@ -304,7 +304,7 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
 
           {/* TODO implementer parametres sur la plateforme */}
           {/* Préparation des affectations et des transports (phase 1) */}
