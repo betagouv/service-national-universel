@@ -1,5 +1,5 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ROLES, region2department } = require("snu-lib");
-const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
+const { buildArbitratyNdJson, buildMissionContext } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
 const { queryFromFilter, withAggs } = require("./todo.helper");
 const service = {};
@@ -131,6 +131,15 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER] = async (user) =
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT] = async (user) => {
+  let missionContextFilters = [];
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+    const { missionContextFilters: mCtxF, missionContextError } = await buildMissionContext(user);
+    if (missionContextError) {
+      throw new Error(missionContextError.status, missionContextError.body);
+    }
+    missionContextFilters = mCtxF;
+  }
+
   const missions = await esClient.search({
     index: "mission",
     body: {
@@ -141,8 +150,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT] =
             { range: { startAt: { gt: "now" } } },
             user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
-            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
-            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            ...missionContextFilters,
           ].filter(Boolean),
         },
       },
@@ -184,6 +192,15 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT] =
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS] = async (user) => {
+  let missionContextFilters = [];
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+    const { missionContextFilters: mCtxF, missionContextError } = await buildMissionContext(user);
+    if (missionContextError) {
+      throw new Error(missionContextError.status, missionContextError.body);
+    }
+    missionContextFilters = mCtxF;
+  }
+
   const missions = await esClient.search({
     index: "mission",
     body: {
@@ -195,8 +212,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS] = a
             { range: { endAt: { gt: "now" } } },
             user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
-            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
-            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            ...missionContextFilters,
           ].filter(Boolean),
         },
       },
@@ -233,6 +249,15 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS] = a
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END] = async (user) => {
+  let missionContextFilters = [];
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+    const { missionContextFilters: mCtxF, missionContextError } = await buildMissionContext(user);
+    if (missionContextError) {
+      throw new Error(missionContextError.status, missionContextError.body);
+    }
+    missionContextFilters = mCtxF;
+  }
+
   const missions = await esClient.search({
     index: "mission",
     body: {
@@ -243,8 +268,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTE
             { range: { endAt: { lt: "now" } } },
             user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
-            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
-            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            ...missionContextFilters,
           ].filter(Boolean),
         },
       },
@@ -281,6 +305,15 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTE
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END] = async (user) => {
+  let missionContextFilters = [];
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+    const { missionContextFilters: mCtxF, missionContextError } = await buildMissionContext(user);
+    if (missionContextError) {
+      throw new Error(missionContextError.status, missionContextError.body);
+    }
+    missionContextFilters = mCtxF;
+  }
+
   const missions = await esClient.search({
     index: "mission",
     body: {
@@ -291,8 +324,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END] = async 
             { range: { endAt: { lt: "now" } } },
             user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
-            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
-            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            ...missionContextFilters,
           ].filter(Boolean),
         },
       },
@@ -334,6 +366,15 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END] = async 
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = async (user) => {
+  let missionContextFilters = [];
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+    const { missionContextFilters: mCtxF, missionContextError } = await buildMissionContext(user);
+    if (missionContextError) {
+      throw new Error(missionContextError.status, missionContextError.body);
+    }
+    missionContextFilters = mCtxF;
+  }
+
   const missions = await esClient.search({
     index: "mission",
     body: {
@@ -345,8 +386,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = asyn
             { range: { endAt: { gt: "now" } } },
             user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
-            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
-            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            ...missionContextFilters,
           ].filter(Boolean),
         },
       },
@@ -383,6 +423,15 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = asyn
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START] = async (user) => {
+  let missionContextFilters = [];
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+    const { missionContextFilters: mCtxF, missionContextError } = await buildMissionContext(user);
+    if (missionContextError) {
+      throw new Error(missionContextError.status, missionContextError.body);
+    }
+    missionContextFilters = mCtxF;
+  }
+
   const missions = await esClient.search({
     index: "mission",
     body: {
@@ -393,8 +442,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AF
             { range: { startAt: { lt: "now" } } },
             user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
-            user.role === ROLES.RESPONSIBLE ? { terms: { "structureId.keyword": [user.structureId] } } : null,
-            user.role === ROLES.SUPERVISOR ? { terms: { "structureId.keyword": [user.structureId] } } : null,
+            ...missionContextFilters,
           ].filter(Boolean),
         },
       },
