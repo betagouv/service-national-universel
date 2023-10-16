@@ -10,6 +10,7 @@ import getNoteData from "./todos.constants";
 import Engagement from "./ui/icons/Engagement";
 import Inscription from "./ui/icons/Inscription";
 import Sejour from "./ui/icons/Sejour";
+import { useSelector } from "react-redux";
 
 // Adding Todos to a user role dashboard
 // 1. Import <Todos /> in the dashboard/general component
@@ -23,6 +24,9 @@ export default function Todos({ user }) {
   const [fullNote, setFullNote] = useState(false);
   const [stats, setStats] = useState({});
   const [cohortsNotFinished, setCohortsNotFinished] = useState([]);
+  const sessionPhase1 = useSelector((state) => state.Auth.sessionPhase1);
+  const sessionId = sessionPhase1?._id;
+  const centerId = sessionPhase1?.cohesionCenterId;
 
   const getCohorts = async () => {
     try {
