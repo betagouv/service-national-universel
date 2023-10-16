@@ -535,25 +535,33 @@ export default function List() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((hit) => (
-                      <Hit
-                        key={hit._id}
-                        hit={hit}
-                        currentTab={tab}
-                        mission={missions.find((m) => m._id.toString() === hit.missionId.toString())}
-                        onClick={() => handleClick(hit)}
-                        opened={panel?.application?._id === hit._id}
-                        selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
-                        onSelect={(newItem) =>
-                          setYoungSelected((prev) => {
-                            if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
-                              return prev.filter((e) => e._id.toString() !== newItem._id.toString());
-                            }
-                            return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
-                          })
-                        }
-                      />
-                    ))}
+                    {data.map((hit) => {
+                      const mission = missions.find((m) => m._id.toString() === hit.missionId.toString());
+                      if (!mission) {
+                        captureMessage("Error with application / No missionId :", { extra: { hit, missions } });
+                        return null;
+                      }
+
+                      return (
+                        <Hit
+                          key={hit._id}
+                          hit={hit}
+                          currentTab={tab}
+                          mission={mission}
+                          onClick={() => handleClick(hit)}
+                          opened={panel?.application?._id === hit._id}
+                          selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
+                          onSelect={(newItem) =>
+                            setYoungSelected((prev) => {
+                              if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
+                                return prev.filter((e) => e._id.toString() !== newItem._id.toString());
+                              }
+                              return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
+                            })
+                          }
+                        />
+                      );
+                    })}
                   </tbody>
                 </Table>
               }
