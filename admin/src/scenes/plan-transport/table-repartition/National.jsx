@@ -56,7 +56,7 @@ export default function National() {
     (async () => {
       try {
         setLoadingQuery(true);
-
+        if (!cohort) return;
         await getRepartitionRegion();
 
         //get youngs by region

@@ -146,10 +146,11 @@ const Home = (props) => {
         }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
-        //Load session phase 1 for head center before stop loading
-        if (res.user.role !== ROLES.HEAD_CENTER) setLoading(false);
         const cohorts = await getCohorts();
         if (cohorts) dispatch({ type: "SET_COHORTS", payload: cohorts });
+
+        //Load session phase 1 for head center before stop loading
+        if (res.user.role !== ROLES.HEAD_CENTER) setLoading(false);
       } catch (e) {
         console.log(e);
         setLoading(false);

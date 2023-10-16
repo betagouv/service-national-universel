@@ -41,7 +41,8 @@ const DSNJExport = () => {
       };
     });
     setCohorts(cohorts);
-    const formattedCohortOptions = getCohortSelectOptions(cohortList);
+    //@todo: do not use snuId in queries
+    const formattedCohortOptions = getCohortSelectOptions(cohortList.map((c) => ({ ...c, name: c.snuId })));
     setCohortOptions(formattedCohortOptions);
     setCohortId(formattedCohortOptions[0].value);
   };

@@ -17,6 +17,7 @@ const { YOUNG_STATUS, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, SENDINBLUE_TE
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
 
+// /!\ WARNING /!\ Only works if the instructionEndDate is set to midnight UTC +/- 30 minutes
 const HOURS_BEFORE_END_REMINDER = 48 - 14; // à 14h la veille
 const MS_BEFORE_END_REMINDER = HOURS_BEFORE_END_REMINDER * 60 * 60 * 1000; // la même chose en ms
 const MS_THIRTY_MINUTES = 30 * 60 * 1000;
@@ -55,7 +56,6 @@ async function getCohortsEndingTomorrow() {
   const month = now.getMonth() + 1;
   const todayDate = new Date(`${now.getFullYear()}-${month < 9 ? "0" + month : month}-${now.getDate()}T14:00:00.000Z`);
   const today = todayDate.valueOf();
-  //@todo: needs to be tested
   const sessions2023 = await CohortModel.find({});
   return sessions2023
     .filter((session) => {
