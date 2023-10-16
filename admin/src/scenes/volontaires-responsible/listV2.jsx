@@ -611,7 +611,7 @@ const Hit = ({ hit, onClick, selected, onSelect, currentTab, opened, mission }) 
             )}
           </div>
           <div className="flex flex-col items-start">
-            <div className="text-sm font-bold">{mission?.name}</div>
+            <div className="text-sm font-bold">{mission.name}</div>
             <div className={`text-xs ${selected ? "text-white" : "text-[#718096]"}`}>A candidaté le {formatDateFRTimezoneUTC(hit.createdAt)}</div>
           </div>
         </div>
