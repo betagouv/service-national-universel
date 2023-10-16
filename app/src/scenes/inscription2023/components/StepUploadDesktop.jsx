@@ -1,15 +1,16 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { ID } from "../utils";
-import { formatDateFR, translateCorrectionReason } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 import dayjs from "dayjs";
+import { formatDateFR, translateCorrectionReason } from "snu-lib";
+
 import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import FileImport from "@/components/dsfr/forms/FileImport";
-import { getCohort } from "@/utils/cohorts";
 
 export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, date, setDate, error, setError, loading, setLoading, corrections, category, onSubmit, onCorrect }) {
   const young = useSelector((state) => state.Auth.young);
@@ -120,7 +121,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
           <div className="text-xl font-medium">Renseignez la date d’expiration</div>
           {young.cohort !== "à venir" && (
             <div className="mt-2 mb-8 leading-loose text-gray-600">
-              Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(getCohort(young.cohort).dateStart)}
+              Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(formatDateFR(getCohort(young.cohort).dateStart))}
               ).
             </div>
           )}
@@ -135,7 +136,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
         </div>
         <div className="w-1/2">
           <img className="mx-auto h-32" src={ID[category].imgDate} alt={ID.title} />
-        </div
+        </div>
       </div>
       <div>
         <label className="flex-start mt-2 flex w-full flex-col text-base">

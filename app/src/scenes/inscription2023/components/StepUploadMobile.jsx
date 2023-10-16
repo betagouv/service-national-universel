@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { resizeImage } from "../../../services/file.service";
 import { ID } from "../utils";
-import dayjs from "dayjs";
+import { getCohort } from "@/utils/cohorts";
 import { formatDateFR, translateCorrectionReason } from "snu-lib";
+import dayjs from "dayjs";
 
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import DatePicker from "../../../components/dsfr/forms/DatePicker";
@@ -11,7 +12,6 @@ import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
-import { getCohort } from "@/utils/cohorts";
 
 export default function StepUploadMobile({ recto, setRecto, verso, setVerso, date, setDate, error, setError, loading, setLoading, corrections, category, onSubmit, onCorrect }) {
   const young = useSelector((state) => state.Auth.young);
@@ -172,7 +172,6 @@ function Verify({ checked, setChecked }) {
           <CheckBox type="checkbox" checked={value} onChange={() => setChecked({ ...checked, [key]: !checked[key] })} />
           <span className="ml-2 mr-2">{key}</span>
         </div>
-<<<<<<< HEAD
       ))}
     </>
   );
@@ -194,19 +193,8 @@ function ExpirationDate({ corrections, category, young, date, setDate, setHasCha
       <div className="text-xl font-medium">Renseignez la date d’expiration</div>
       {young.cohort !== "à venir" && (
         <div className="my-2 text-gray-600">
-          Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+          Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(getCohort(young.cohort).dateStart)}
           ).
-=======
-        <div className="text-xl font-medium">Renseignez la date d’expiration</div>
-        {young.cohort !== "à venir" && (
-          <div className="my-2 text-gray-600">
-            Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(getCohort(young.cohort).dateStart)}
-            ).
-          </div>
-        )}
-        <div className="mx-auto w-3/4">
-          <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
->>>>>>> 5f9ae1c16 (remove session2023 from inscription step upload)
         </div>
       )}
       <div className="mx-auto w-3/4">
