@@ -89,12 +89,16 @@ service.todosByRole = async (user) => {
         ],
       };
       break;
-    case ROLES.SUPERVISOR:
-    case ROLES.RESPONSIBLE:
     case ROLES.HEAD_CENTER:
       functionsByRole = {
         inscription: [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT],
         sejour: [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT],
+      };
+      break;
+    case ROLES.SUPERVISOR:
+    case ROLES.RESPONSIBLE:
+      functionsByRole = {
+        sejour: [],
         engagement: [
           DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END,
           DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START,
