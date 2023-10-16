@@ -1,7 +1,7 @@
-const { DASHBOARD_TODOS_FUNCTIONS } = require("snu-lib");
+const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
-const { queryFromFilter, withAggs } = require("./todo.helper");
+const { queryFromFilter, withAggs, buildFilterContext } = require("./todo.helper");
 const service = {};
 
 service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.BASIC] = async (user, { notFinished: cohorts }) => {
@@ -62,20 +62,20 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT] = as
 
 service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT] = async (user, { assignementOpen: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT]: [] };
+  let filters = [
+    { terms: { "cohort.keyword": cohorts } },
+    { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } },
+    { bool: { should: [{ term: { imageRight: "N/A" } }, { bool: { must_not: { exists: { field: "imageRight" } } } }], minimum_should_match: 1 } },
+  ];
+  if (user.role === ROLES.HEAD_CENTER) {
+    let contextFilters = await buildFilterContext(user, cohorts, "young");
+    if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT]: [] };
+    filters.push(contextFilters);
+  }
 
   const response = await esClient.msearch({
     index: "young",
-    body: buildArbitratyNdJson(
-      { index: "young", type: "_doc" },
-      withAggs(
-        queryFromFilter(user.role, user.region, user.department, [
-          { terms: { "cohort.keyword": cohorts } },
-          { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } },
-          { bool: { should: [{ term: { imageRight: "N/A" } }, { bool: { must_not: { exists: { field: "imageRight" } } } }], minimum_should_match: 1 } },
-        ]),
-        "cohort.keyword",
-      ),
-    ),
+    body: buildArbitratyNdJson({ index: "young", type: "_doc" }, withAggs(queryFromFilter(user.role, user.region, user.department, filters), "cohort.keyword")),
   });
 
   return {
