@@ -604,7 +604,7 @@ const Hit = ({ hit, onClick, selected, onSelect, currentTab, opened, mission }) 
       <td className={`${bgColor}`}>
         <div className="flex flex-row items-center gap-4">
           <div>
-            {mission.isJvaMission === "true" ? (
+            {mission?.isJvaMission === "true" ? (
               <img src={Img2} width="36" height="36" className="mx-auto min-w-[36px] group-hover:scale-105" />
             ) : (
               <img src={Img} width="36" height="36" className="mx-auto min-w-[36px] group-hover:scale-105" />
