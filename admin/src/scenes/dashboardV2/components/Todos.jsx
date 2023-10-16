@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
 import { ROLES } from "snu-lib";
-import { useSelector } from "react-redux";
-
+import api from "@/services/api";
+import { toastr } from "react-redux-toastr";
+import { translate } from "snu-lib";
+import { capture } from "@/sentry";
 import getNoteData from "./todos.constants";
 import Engagement from "./ui/icons/Engagement";
 import Inscription from "./ui/icons/Inscription";
 import Sejour from "./ui/icons/Sejour";
+import { useSelector } from "react-redux";
 
 // Adding Todos to a user role dashboard
 // 1. Import <Todos /> in the dashboard/general component
@@ -17,11 +20,48 @@ import Sejour from "./ui/icons/Sejour";
 // 5. Add a new entry in getNoteData() (see ./todos.constants.js)
 // 6. Verify the columns to assign per role (see below line ~67)
 
-export default function Todos({ stats, user, cohortsNotFinished }) {
+export default function Todos({ user }) {
   const [fullNote, setFullNote] = useState(false);
+  const [stats, setStats] = useState({});
+  const [cohortsNotFinished, setCohortsNotFinished] = useState([]);
   const sessionPhase1 = useSelector((state) => state.Auth.sessionPhase1);
   const sessionId = sessionPhase1?._id;
   const centerId = sessionPhase1?.cohesionCenterId;
+
+  const getCohorts = async () => {
+    try {
+      const { ok, code, data: cohorts } = await api.get(`/cohort`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes", translate(code));
+      setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now())?.map((e) => e.name));
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes");
+    }
+  };
+
+  const updateStats = async () => {
+    const response = await api.post("/elasticsearch/dashboard/general/todo");
+    const s = response.data;
+    const filteredStats = {};
+
+    // Remove empty values
+    Object.entries(s).forEach(([key, value]) => {
+      const filteredValue = {};
+      Object.entries(value).forEach(([subKey, item]) => {
+        if (item !== 0 && (!Array.isArray(item) || item.length > 0)) {
+          filteredValue[subKey] = item;
+        }
+      });
+      filteredStats[key] = filteredValue;
+    });
+
+    setStats(filteredStats);
+  };
+
+  useEffect(() => {
+    getCohorts();
+    updateStats();
+  }, []);
 
   function shouldShow(parent, key, index = null) {
     if (fullNote) return true;
@@ -79,6 +119,7 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
   let shouldShowMore = false;
 
   const columns = [];
+
   switch (user.role) {
     case ROLES.HEAD_CENTER:
       Object.entries({ ...columnInscription.data, ...columnSejour.data }).forEach(([key, value], index) => {
@@ -98,6 +139,8 @@ export default function Todos({ stats, user, cohortsNotFinished }) {
       shouldShowMore = totalInscription > 3 || totalSejour > 3 || totalEngagement > 3;
       break;
   }
+
+  if (columns.every((item) => item.total === 0)) return <NotePlaceholder />;
 
   return (
     <div

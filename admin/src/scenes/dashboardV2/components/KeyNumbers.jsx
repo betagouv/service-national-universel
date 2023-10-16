@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Inscription from "./ui/icons/Inscription";
-import CustomFilter from "../moderator-ref/subscenes/general/components/CustomFilter";
+import CustomFilter from "./CustomFilter";
 import { HiChevronDown, HiChevronUp } from "react-icons/hi";
 import { capture } from "../../../sentry";
 import API from "../../../services/api";

@@ -1,34 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
-
 import queryString from "query-string";
-import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, translate } from "snu-lib";
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
-import { capture } from "@/sentry";
 import api from "@/services/api";
 import { getNewLink } from "@/utils";
-import DashboardContainer from "../../../components/DashboardContainer";
-import { FilterDashBoard } from "../../../components/FilterDashBoard";
-import KeyNumbers from "../../../components/KeyNumbers";
-import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
-import HorizontalBar from "../../../components/graphs/HorizontalBar";
-import InfoMessage from "../../../components/ui/InfoMessage";
-import VolontaireSection from "./components/VolontaireSection";
-import Todos from "../../../components/Todos";
+import { FilterDashBoard } from "@/scenes/dashboardV2/components/FilterDashBoard";
+import { getDepartmentOptions, getFilteredDepartment } from "@/scenes/dashboardV2/components/common";
+import HorizontalBar from "@/scenes/dashboardV2/components/graphs/HorizontalBar";
+import VolontaireSection from "./VolontaireSection";
 
-export default function Index() {
-  const user = useSelector((state) => state.Auth.user);
-
+export default function Index({ user }) {
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [volontairesData, setVolontairesData] = useState();
   const [inAndOutCohort, setInAndOutCohort] = useState();
-
-  const [stats, setStats] = useState({});
-  const [message, setMessage] = useState([]);
-
-  const [cohortsNotFinished, setCohortsNotFinished] = useState([]);
-
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList?.map((r) => ({ key: r, label: r }));
@@ -109,81 +94,34 @@ export default function Index() {
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
 
-  useEffect(() => {
-    const updateStats = async (id) => {
-      const response = await api.post("/elasticsearch/dashboard/general/todo", { filters: { meetingPointIds: [id], cohort: [] } });
-      const s = response.data;
-      setStats(s);
-    };
-    updateStats();
-  }, []);
-
-  const getMessage = async () => {
-    try {
-      const { ok, code, data: response } = await api.get(`/alerte-message`);
-
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération des messages", translate(code));
-      }
-      setMessage(response.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des messages");
-    }
-  };
-
-  const getCohorts = async () => {
-    try {
-      const { ok, code, data: cohorts } = await api.get(`/cohort`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes", translate(code));
-      setCohortsNotFinished(cohorts.filter((c) => new Date(c.dateEnd) > Date.now())?.map((e) => e.name));
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des cohortes");
-    }
-  };
-
-  React.useEffect(() => {
-    getMessage();
-    getCohorts();
-  }, []);
-
   return (
-    <DashboardContainer active="general" availableTab={["general", "engagement", "sejour", "inscription"]}>
-      <div className="flex flex-col gap-8 mb-4">
-        {message?.length ? message?.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
-        <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
-        <div className="flex w-full gap-4">
-          <Todos stats={stats} user={user} cohortsNotFinished={cohortsNotFinished} />
-          <KeyNumbers />
-        </div>
-        <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Inscriptions</h1>
-        <div className="rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-          <HorizontalBar
-            title="Objectif des inscriptions"
-            labels={["Sur liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
-            values={[
-              volontairesData?.VALIDATED?.total || 0,
-              volontairesData?.WAITING_LIST?.total || 0,
-              volontairesData?.WAITING_VALIDATION?.total || 0,
-              volontairesData?.WAITING_CORRECTION?.total || 0,
-              volontairesData?.IN_PROGRESS?.total || 0,
-            ]}
-            goal={goal}
-            showTooltips={true}
-            legendUrls={[
-              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
-              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
-              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
-              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
-              getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
-            ]}
-          />
-        </div>
-        <VolontaireSection volontairesData={volontairesData} inAndOutCohort={inAndOutCohort} filter={selectedFilters} />
+    <>
+      <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
+      <h1 className="text-[28px] font-bold leading-8 text-gray-900">Inscriptions</h1>
+      <div className="rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+        <HorizontalBar
+          title="Objectif des inscriptions"
+          labels={["Sur liste principale", "Sur liste complémentaire", "En attente de validation", "En attente de correction", "En cours"]}
+          values={[
+            volontairesData?.VALIDATED?.total || 0,
+            volontairesData?.WAITING_LIST?.total || 0,
+            volontairesData?.WAITING_VALIDATION?.total || 0,
+            volontairesData?.WAITING_CORRECTION?.total || 0,
+            volontairesData?.IN_PROGRESS?.total || 0,
+          ]}
+          goal={goal}
+          showTooltips={true}
+          legendUrls={[
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_LIST" })] }),
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_VALIDATION" })] }),
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "WAITING_CORRECTION" })] }),
+            getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
+          ]}
+        />
       </div>
-    </DashboardContainer>
+      <VolontaireSection volontairesData={volontairesData} inAndOutCohort={inAndOutCohort} filter={selectedFilters} />
+    </>
   );
 }
 
