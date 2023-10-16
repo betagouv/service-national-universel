@@ -112,6 +112,8 @@ export default function Todos({ user }) {
   const columnTodo2 = { data: {} };
   const columnTodo3 = { data: {} };
 
+  let shouldShowMore = false;
+
   const columns = [];
 
   switch (user.role) {
@@ -122,6 +124,7 @@ export default function Todos({ user }) {
         if (index % 3 === 2) columnTodo3.data[key] = value;
       });
       columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo1.data) }, { ...columnTodo3, total: total(columnTodo1.data) });
+      shouldShowMore = totalInscription + totalSejour + totalEngagement > 9;
       break;
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
@@ -129,9 +132,9 @@ export default function Todos({ user }) {
       break;
     default:
       columns.push(columnInscription, columnSejour, columnEngagement);
+      shouldShowMore = totalInscription > 3 || totalSejour > 3 || totalEngagement > 3;
       break;
   }
-  const shouldShowMore = totalInscription > 3 || totalSejour > 3 || totalEngagement > 3;
 
   if (columns.every((item) => item.total === 0)) return <NotePlaceholder />;
 
@@ -177,7 +180,9 @@ export default function Todos({ user }) {
                         link={note.link
                           ?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
                           .replace("$1", item[note.args?.[0]] ?? "")
-                          .replace("$2", item[note.args?.[1]] ?? "")}
+                          .replace("$2", item[note.args?.[1]] ?? "")
+                          .replace("$centerId", centerId ?? "")
+                          .replace("$sessionId", sessionId ?? "")}
                         btnLabel={note.btnLabel}
                       />
                     );
@@ -193,7 +198,10 @@ export default function Todos({ user }) {
                     title={note.title}
                     number={column.data[key]}
                     content={note.content}
-                    link={note.link?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))}
+                    link={note.link
+                      ?.replace("$cohortsNotFinished", cohortsNotFinished?.join("~"))
+                      .replace("$centerId", centerId ?? "")
+                      .replace("$sessionId", sessionId ?? "")}
                     btnLabel={note.btnLabel}
                   />
                 );

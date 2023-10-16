@@ -329,6 +329,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       value.parent2LastName = "";
       value.parent2Email = "";
       value.parent2Phone = "";
+      value.parent2PhoneZone = undefined;
       value.parent2Inscription2023Token = "";
     }
 

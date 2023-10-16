@@ -16,7 +16,7 @@ import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
+import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
@@ -56,9 +56,8 @@ export default function StepEligibilite() {
       errors.scolarity = "Choisissez un niveau de scolarité";
     }
     // Birthdate
-    // ? Check age ?
-    if (!data?.birthDate) {
-      errors.birthDate = "Vous devez choisir une date de naissance";
+    if (!data?.birthDate || !dayjs(data.birthDate).isValid()) {
+      errors.birthDate = "Vous devez choisir une date de naissance valide";
     }
 
     if (data.scolarity) {
@@ -136,8 +135,8 @@ export default function StepEligibilite() {
             {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
           </div>
 
-          <div className="flex flex-col gap-4 md:flex-row">
-            <div className="flex w-full flex-col md:w-1/2">
+          <div className="flex flex-col gap-4">
+            <div className="flex w-full flex-col">
               <SearchableSelect
                 label="Niveau de scolarité"
                 value={data.scolarity}
@@ -149,9 +148,9 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className="flex-start mt-2 flex w-full flex-col text-base md:w-1/2">
+            <label className="flex-start mt-2 flex w-full flex-col text-base">
               Date de naissance
-              <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+              <DatePicker value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           </div>

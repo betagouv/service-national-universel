@@ -18,9 +18,8 @@ jobs:
       - name: Fetch Git LFS objects
         run: git lfs fetch --all
 
-      - name: Clean the mirror repository
-        run: |
-          rm -rf /github/workspace/*
+      - name: Remove .github directory
+        run: rm -rf .github
 
       - name: Mirroring
         uses: pixta-dev/repository-mirroring-action@v1

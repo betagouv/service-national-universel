@@ -1,7 +1,7 @@
-const { DASHBOARD_TODOS_FUNCTIONS, ES_NO_LIMIT } = require("snu-lib");
+const { DASHBOARD_TODOS_FUNCTIONS, ES_NO_LIMIT, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
-const { queryFromFilter, withAggs } = require("./todo.helper");
+const { queryFromFilter, withAggs, buildFilterContext } = require("./todo.helper");
 const service = {};
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED] = async (user, { oneWeekBeforepdrChoiceLimitDate: cohorts }) => {
@@ -117,16 +117,24 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE] = async (user, { ses
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSessionStart: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [], [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [] };
 
+  let filters = [{ terms: { "cohort.keyword": cohorts } }];
+
+  if (user.role === ROLES.HEAD_CENTER) {
+    let contextFilters = await buildFilterContext(user, cohorts, "sessionphase1");
+    if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [], [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [] };
+    filters.push(contextFilters);
+  }
+
   const response = await esClient.msearch({
     index: "sessionphase1",
     body: buildArbitratyNdJson(
       // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
       { index: "sessionphase1", type: "_doc" },
-      withAggs(queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasTimeSchedule.keyword": ["false"] } }])),
+      withAggs(queryFromFilter(user.role, user.region, user.department, [...filters, { terms: { "hasTimeSchedule.keyword": ["false"] } }])),
 
       //Projet pédagogique (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
       { index: "sessionphase1", type: "_doc" },
-      withAggs(queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "hasPedagoProject.keyword": ["false"] } }])),
+      withAggs(queryFromFilter(user.role, user.region, user.department, [...filters, { terms: { "hasPedagoProject.keyword": ["false"] } }])),
     ),
   });
   return {
@@ -179,24 +187,25 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL] = async (user, { seven
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT] = async (user, { twoDaysAfterSessionStart: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT]: [] };
+  let filters = [
+    { terms: { "cohort.keyword": cohorts } },
+    {
+      bool: {
+        should: [{ term: { ppsBeneficiary: "true" } }, { term: { paiBeneficiary: "true" } }, { term: { allergies: "true" } }, { term: { handicap: "true" } }],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+
+  if (user.role === ROLES.HEAD_CENTER) {
+    let contextFilters = await buildFilterContext(user, cohorts, "young");
+    if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT]: [] };
+    filters.push(contextFilters);
+  }
 
   const response = await esClient.msearch({
     index: "young",
-    body: buildArbitratyNdJson(
-      { index: "young", type: "_doc" },
-      withAggs(
-        queryFromFilter(user.role, user.region, user.department, [
-          { terms: { "cohort.keyword": cohorts } },
-          {
-            bool: {
-              should: [{ term: { ppsBeneficiary: "true" } }, { term: { paiBeneficiary: "true" } }, { term: { allergies: "true" } }, { term: { handicap: "true" } }],
-              minimum_should_match: 1,
-            },
-          },
-        ]),
-        "cohort.keyword",
-      ),
-    ),
+    body: buildArbitratyNdJson({ index: "young", type: "_doc" }, withAggs(queryFromFilter(user.role, user.region, user.department, filters), "cohort.keyword")),
   });
 
   return {
@@ -231,21 +240,19 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL] = async (user, 
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfterSessionEnd: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
-
+  let filters = [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } }, { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } }];
+  if (user.role === ROLES.HEAD_CENTER) {
+    let contextFilters = await buildFilterContext(user, cohorts, "young");
+    if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
+    filters.push(contextFilters);
+  }
   const response = await esClient.msearch({
     index: "young",
     body: buildArbitratyNdJson(
       ...cohorts.flatMap((cohort) => {
         return [
           { index: "young", type: "_doc" },
-          withAggs(
-            queryFromFilter(user.role, user.region, user.department, [
-              { terms: { "cohort.keyword": [cohort] } },
-              { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
-              { bool: { must_not: { exists: { field: "cohesionStayPresence.keyword" } } } },
-            ]),
-            "sessionPhase1Id.keyword",
-          ),
+          withAggs(queryFromFilter(user.role, user.region, user.department, [...filters, { terms: { "cohort.keyword": [cohort] } }]), "sessionPhase1Id.keyword"),
         ];
       }),
     ),
