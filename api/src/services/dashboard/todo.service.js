@@ -98,7 +98,6 @@ service.todosByRole = async (user) => {
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
       functionsByRole = {
-        sejour: [],
         engagement: [
           DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END,
           DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START,
