@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { ID } from "../utils";
+import dayjs from "dayjs";
 import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
 
-import DatePickerList from "../../../components/dsfr/forms/DatePickerList";
+import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
@@ -14,7 +15,11 @@ export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, da
   const young = useSelector((state) => state.Auth.young);
   const [hasChanged, setHasChanged] = useState(false);
   const isEnabled = validate();
+
   function validate() {
+    if (!dayjs(date).isValid()) {
+      return false;
+    }
     if (corrections?.length) {
       return hasChanged && !loading && !error.text;
     } else {
@@ -127,18 +132,22 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
                 {e.message && ` : ${e.message}`}
               </ErrorMessage>
             ))}
-          <p className="mt-4 text-gray-800">Date d&apos;expiration</p>
-          <DatePickerList
+        </div>
+        <div className="w-1/2">
+          <img className="mx-auto h-32" src={ID[category].imgDate} alt={ID.title} />
+        </div>
+      </div>
+      <div>
+        <label className="flex-start mt-2 flex w-full flex-col text-base">
+          Date d&apos;expiration
+          <DatePicker
             value={date}
             onChange={(date) => {
               setDate(date);
               onChange && onChange();
             }}
           />
-        </div>
-        <div className="w-1/2">
-          <img className="mx-auto h-32" src={ID[category].imgDate} alt={ID.title} />
-        </div>
+        </label>
       </div>
     </>
   );
