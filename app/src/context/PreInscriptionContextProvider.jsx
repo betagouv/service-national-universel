@@ -1,5 +1,6 @@
 import React, { createContext, useState } from "react";
 import { PREINSCRIPTION_STEPS } from "../utils/navigation";
+import { PHONE_ZONES_NAMES } from "snu-lib";
 
 export const PreInscriptionContext = createContext();
 
@@ -9,7 +10,7 @@ const defaultState = {
   firstName: "",
   lastName: "",
   phone: "",
-  phoneZone: "",
+  phoneZone: PHONE_ZONES_NAMES.FRANCE,
   email: "",
   emailConfirm: "",
   password: "",

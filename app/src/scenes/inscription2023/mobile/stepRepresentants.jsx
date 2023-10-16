@@ -13,7 +13,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
+import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 import Help from "../components/Help";
 import Input from "../components/Input";
 import Navbar from "../components/Navbar";
@@ -40,22 +40,22 @@ export default function StepRepresentants() {
   const { step } = useParams();
   const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) history.push("/");
-  
+
   const [data, setData] = React.useState({
     parent1Status: young.parent1Status || "",
     parent1FirstName: young.parent1FirstName || "",
     parent1LastName: young.parent1LastName || "",
     parent1Email: young.parent1Email || "",
     parent1Phone: young.parent1Phone || "",
-    parent1PhoneZone: young.parent1PhoneZone || "",
+    parent1PhoneZone: young.parent1PhoneZone || PHONE_ZONES_NAMES.FRANCE,
     parent2Status: young.parent2Status || "",
     parent2FirstName: young.parent2FirstName || "",
     parent2LastName: young.parent2LastName || "",
     parent2Email: young.parent2Email || "",
     parent2Phone: young.parent2Phone || "",
-    parent2PhoneZone: young.parent2PhoneZone || "",
+    parent2PhoneZone: young.parent2PhoneZone || PHONE_ZONES_NAMES.FRANCE,
   });
-  
+
   const trimmedParent1Phone = data.parent1Phone && data.parent1Phone.replace(/\s/g, "");
   const trimmedParent2Phone = data.parent2Phone && data.parent2Phone.replace(/\s/g, "");
   const trimmedParent1Email = data.parent1Email && data.parent1Email.trim();
