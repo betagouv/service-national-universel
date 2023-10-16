@@ -16,7 +16,7 @@ import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePickerDsfr from "../../../components/dsfr/forms/DatePicker";
+import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
@@ -150,7 +150,7 @@ export default function StepEligibilite() {
             </div>
             <label className="flex-start mt-2 flex w-full flex-col text-base">
               Date de naissance
-              <DatePickerDsfr value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+              <DatePicker value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           </div>
