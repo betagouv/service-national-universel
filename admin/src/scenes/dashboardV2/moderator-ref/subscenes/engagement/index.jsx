@@ -34,11 +34,6 @@ export default function Index() {
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
   useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts);
-    setSelectedFilters({ ...selectedFilters, cohorts: cohortsFilters });
-  }, []);
-
-  useEffect(() => {
     let filters = [
       {
         id: "status",
@@ -87,6 +82,11 @@ export default function Index() {
       computeFilteredDepartment();
     }
   }, [JSON.stringify(selectedFilters)]);
+
+  useEffect(() => {
+    const cohortsFilters = getCohortNameList(cohorts);
+    setSelectedFilters({ ...selectedFilters, cohorts: cohortsFilters });
+  }, []);
 
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
