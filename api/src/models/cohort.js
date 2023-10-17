@@ -79,6 +79,7 @@ const Schema = new mongoose.Schema({
 
   eligibility: { type: Eligibility, required: true },
 
+  inscriptionStartDate: { type: Date, required: true },
   inscriptionEndDate: { type: Date, required: true },
   instructionEndDate: { type: Date, required: true },
   inscriptionModificationEndDate: { type: Date },

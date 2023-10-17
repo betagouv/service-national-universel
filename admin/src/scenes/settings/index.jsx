@@ -254,8 +254,26 @@ export default function Settings() {
                         </ul>
                       </ReactTooltip>
                     </div>
-                    <DatePickerInput mode="single" label="Ouverture" disabled={isLoading} readOnly={readOnly} />
-                    <DatePickerInput mode="range" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
+                    <DatePickerInput
+                      mode="single"
+                      isTime
+                      label="Ouverture"
+                      placeholder="Date et heure"
+                      value={data.inscriptionStartDate}
+                      onChange={(e) => setData({ ...data, inscriptionStartDate: e })}
+                      readOnly={readOnly}
+                      disabled={isLoading}
+                    />
+                    <DatePickerInput
+                      mode="single"
+                      isTime
+                      label="Fermeture"
+                      placeholder="Date et heure"
+                      value={data.inscriptionEndDate}
+                      onChange={(e) => setData({ ...data, inscriptionEndDate: e })}
+                      readOnly={readOnly}
+                      disabled={isLoading}
+                    />
                   </div>
                 </div>
                 <div className="flex w-[10%] justify-center items-center">
@@ -283,7 +301,16 @@ export default function Settings() {
                       </ReactTooltip>
                     </div>
                     <div className="flex gap-4 w-full">
-                      <DatePickerInput mode="single" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
+                      <DatePickerInput
+                        mode="single"
+                        isTime
+                        label="Fermeture"
+                        placeholder="Date"
+                        value={data.inscriptionModificationEndDate}
+                        onChange={(e) => setData({ ...data, inscriptionModificationEndDate: e })}
+                        readOnly={readOnly}
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
@@ -298,7 +325,16 @@ export default function Settings() {
                       </ReactTooltip>
                     </div>
                     <div className="flex gap-4 w-full">
-                      <DatePickerInput mode="single" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
+                      <DatePickerInput
+                        mode="single"
+                        isTime
+                        label="Fermeture"
+                        placeholder="Date"
+                        value={data.instructionEndDate}
+                        onChange={(e) => setData({ ...data, instructionEndDate: e })}
+                        readOnly={readOnly}
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
                 </div>
