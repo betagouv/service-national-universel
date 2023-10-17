@@ -17,16 +17,17 @@ export default function WaitingReinscription() {
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
-
   let textPrecision;
-  if (young.status === YOUNG_STATUS.WAITING_LIST && young.cohort === "à venir")
-    textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
-  else if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
-  else if (young.cohort === "à venir")
-    textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
-  else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
-    textPrecision = "En 2022, vous n'avez pas pu participer au séjour de cohésion.";
-  else return;
+  let textSecond;
+  if ((young.status === YOUNG_STATUS.WAITING_LIST || (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === "WAITING_AFFECTATION")) && young.cohort === "à venir")
+    textPrecision = "Vérifiez dès maintenant votre éligibilité !";
+  // else if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
+  // else if (young.cohort === "à venir")
+  //   textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
+  else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
+    textPrecision = "Votre Phase 1 n'a pas été validé.";
+    textSecond = "Pour la valider, inscrivez-vous pour participer à un prochain séjour !";
+  } else return;
 
   const onClickEligibilte = async () => {
     try {
@@ -51,17 +52,18 @@ export default function WaitingReinscription() {
         <div className="my-12 mx-10 w-full">
           <div className="flex items-center justify-between rounded-lg bg-white ">
             <div className="w-1/2 py-12 pl-10">
-              <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong> vous souhaitez vous réinscrire sur un séjour l'année prochaine ?
+              <div className="text-[48px] border-b pb-12 font-medium leading-tight tracking-tight text-gray-800">
+                <strong>{young.firstName},</strong> vous souhaitez vous inscrire sur un séjour en 2024 ?
               </div>
-              <div className="left-7 mt-5 text-base text-gray-800">{textPrecision}</div>
+              <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
+              <div className="left-7 mt-2 text-base text-gray-600">{textSecond}</div>
               <div className="flex w-fit flex-col items-stretch">
-                {/* <button
-                  className="mt-5 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
+                <button
+                  className="mt-4 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
                   disabled={loading}
                   onClick={onClickEligibilte}>
                   Vérifier mon éligibilité
-                </button> */}
+                </button>
               </div>
             </div>
             <img className="w-1/2 object-fill" src={Img3} />
@@ -73,16 +75,17 @@ export default function WaitingReinscription() {
         <div className="flex flex-col-reverse ">
           <div className="px-4 pb-4">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
-              <strong>{young.firstName},</strong> vous souhaitez vous réinscrire sur un séjour en 2023 ?
+              <strong>{young.firstName},</strong> vous souhaitez vous inscrire sur un séjour en 2024 ?
             </div>
             <div className="left-7 mt-3 text-[#738297]">{textPrecision}</div>
-            {/* <div className="left-7 mt-4 font-bold text-gray-800">Vérifiez dès maintenant votre éligibilité</div>
+            <div className="left-7 mt-3 text-[#738297]">{textSecond}</div>
+            <div className="left-7 mt-4 font-bold text-gray-800">Vérifiez dès maintenant votre éligibilité</div>
             <button
               className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
               disabled={loading}
               onClick={onClickEligibilte}>
               Vérifier mon éligibilité
-            </button> */}
+            </button>
           </div>
           <img src={Img2} />
         </div>
