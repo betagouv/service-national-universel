@@ -176,7 +176,7 @@ const MandatoryLogIn = () => {
     const queryObject = { disconnected: 1 };
     if (pathname) queryObject.redirect = `${pathname}${search}`;
 
-    return history.push(`/auth?${queryString.stringify(queryObject)}`);
+    return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
   }
 
   return (

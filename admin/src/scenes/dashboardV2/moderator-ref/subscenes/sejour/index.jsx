@@ -55,11 +55,6 @@ export default function Index() {
       : academyList.map((a) => ({ key: a, label: a }));
 
   useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts);
-    setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
-  }, []);
-
-  useEffect(() => {
     let filters = [
       {
         id: "status",
@@ -123,6 +118,13 @@ export default function Index() {
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
   }, [JSON.stringify(selectedFilters)]);
+
+  useEffect(() => {
+    const cohortsFilters = getCohortNameList(cohorts);
+    setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
+  }, []);
+
+
   return (
     <DashboardContainer
       active="sejour"

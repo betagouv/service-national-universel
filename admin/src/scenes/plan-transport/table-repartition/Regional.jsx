@@ -3,7 +3,7 @@ import { BsChevronDown } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { ROLES } from "snu-lib";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import { SubTitle, Title } from "../components/commons";
+import { Loading, SubTitle, Title } from "../components/commons";
 import Select from "../components/Select";
 import { InTable } from "./components/InTable";
 import { OutTable } from "./components/OutTable";
@@ -26,6 +26,8 @@ export default function Regional() {
     setCohortList(cohortList);
     if (!cohort) setCohort(cohortList[0].value);
   }, []);
+
+  if (!cohort) return <Loading />;
 
   return (
     <>
