@@ -56,7 +56,7 @@ export default function WaitingReinscription() {
                 <strong>{young.firstName},</strong> vous souhaitez vous inscrire sur un séjour en 2024 ?
               </div>
               <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
-              <div className="left-7 mt-2 text-base text-gray-600">{textSecond}</div>
+              {textSecond && <div className="left-7 mt-3 text-[#738297] pr-16">{textSecond}</div>}
               <div className="flex w-fit flex-col items-stretch">
                 <button
                   className="mt-4 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
@@ -77,9 +77,9 @@ export default function WaitingReinscription() {
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
               <strong>{young.firstName},</strong> vous souhaitez vous inscrire sur un séjour en 2024 ?
             </div>
-            <div className="left-7 mt-3 text-[#738297]">{textPrecision}</div>
-            <div className="left-7 mt-3 text-[#738297]">{textSecond}</div>
-            <div className="left-7 mt-4 font-bold text-gray-800">Vérifiez dès maintenant votre éligibilité</div>
+            <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
+            {textSecond && <div className="left-7 mt-3 text-[#738297]">{textSecond}</div>}
+            {/* <div className="left-7 mt-4 font-bold text-gray-800">Vérifiez dès maintenant votre éligibilité</div> */}
             <button
               className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
               disabled={loading}
