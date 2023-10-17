@@ -46,7 +46,7 @@ import ViewMessage from "./scenes/echanges/View";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { ENABLE_PM, YOUNG_STATUS } from "./utils";
-import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
+import { inscriptionModificationOpenForYoungs, youngCanChangeSession, reInscriptionModificationOpenForYoungs } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
@@ -224,12 +224,14 @@ const Espace = () => {
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
-  if (forceRedirectReinscription) return <Redirect to="/reinscription" />;
+  // à revoir quand le parcours de reinscriptionsera clair car pas de propriétés inscription à la base donc toujours FALSE
+  // const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
+  if (reInscriptionModificationOpenForYoungs(young)) return <Redirect to="/reinscription" />;
 
   const forceRedirectInscription =
-    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
-    (inscriptionModificationOpenForYoungs(cohort) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
+    inscriptionModificationOpenForYoungs(cohort) &&
+    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) &&
+    young.inscriptionStep2023 !== "DONE";
   if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
 
   return (

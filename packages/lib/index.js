@@ -23,12 +23,21 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-function reInscriptionModificationOpenForYoungs(cohort, env) {
-  if (env !== undefined && env !== "production") return true;
+// function reInscriptionModificationOpenForYoungs(cohort, env) {
+//   if (env !== undefined && env !== "production") return true;
 
-  switch (cohort) {
-    default:
-      return new Date() < new Date(2023, 4, 11); // before 11 mai 2023 morning
+//   switch (cohort) {
+//     default:
+//       return new Date() < new Date(2023, 4, 11); // before 11 mai 2023 morning
+//   }
+// }
+
+function reInscriptionModificationOpenForYoungs(young) {
+  const youngStatusForReinscription = ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "REINSCRIPTION"];
+  if (young.cohort === "à venir" && youngStatusForReinscription.includes(young.status)) {
+    return true;
+  } else {
+    return false;
   }
 }
 
