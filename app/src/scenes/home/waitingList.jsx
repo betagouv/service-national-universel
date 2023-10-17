@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { getCohort } from "../../utils/cohorts";
 import Clock from "../../assets/icons/Clock";
 import WaitingListContent from "./components/WaitingListContent";
-import { translate, translateCohortTemp } from "snu-lib";
+import { translate, getCohortPeriod } from "snu-lib";
 import JDMA from "../../components/JDMA";
 import { environment } from "../../config";
 import plausibleEvent from "../../services/plausible";
@@ -31,7 +31,7 @@ export default function WaitingList() {
                 <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
               </div>
               <div className="mt-2 text-xl font-bold text-[#242526]">
-                Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young)}.
+                Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {getCohortPeriod(cohort || young.cohort)}.
               </div>
 
               <hr className="text-gray-200" />
@@ -59,7 +59,7 @@ export default function WaitingList() {
               <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
             </div>
             <div className="mt-3 text-lg font-bold text-[#242526]">
-              Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {translateCohortTemp(young)}.
+              Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {getCohortPeriod(cohort || young.cohort)}.
             </div>
 
             <hr className="mt-3 text-gray-200" />

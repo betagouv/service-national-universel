@@ -12,6 +12,7 @@ const fileUpload = require("express-fileupload");
 
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
 const SessionPhase1 = require("../models/sessionPhase1");
@@ -70,7 +71,7 @@ const {
   YOUNG_STATUS_PHASE1,
   MILITARY_FILE_KEYS,
   department2region,
-  translateCohort,
+  getCohortPeriod,
   formatPhoneNumberFromPhoneZone,
   canCheckIfRefExist,
 } = require("snu-lib");
@@ -599,13 +600,14 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     }
 
     let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
+    const cohortObj = await CohortModel.findOne({ name: cohort });
+
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
-        cohort,
+        cohort: cohortObj ? getCohortPeriod(cohortObj) : cohort,
         motif: cohortChangeReason,
         message: validatedMessage.value,
-        cohortPeriod: translateCohort(cohort),
       },
     });
 

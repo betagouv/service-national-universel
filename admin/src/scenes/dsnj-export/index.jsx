@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import * as FileSaver from "file-saver";
-import { ROLES, sessions2023, translate } from "snu-lib";
+import { ROLES, translate } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 
 import { Title } from "../plan-transport/components/commons";
@@ -11,28 +11,17 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import ExportBox from "./components/ExportBox";
 import { useSelector } from "react-redux";
+import { getCohortSelectOptions } from "@/services/cohort.service";
 
 const exportDateKeys = ["cohesionCenters", "youngsBeforeSession", "youngsAfterSession"];
 
-const cohortOptions = sessions2023.map(({ id, dateStart, dateEnd }) => {
-  const options = { year: "numeric", month: "long", day: "numeric" };
-  const formatter = new Intl.DateTimeFormat("fr-FR", options);
-  const formattedStart = formatter.format(dateStart);
-  const formattedEnd = formatter.format(dateEnd);
-
-  const formattedRange = `${formattedStart} - ${formattedEnd}`;
-
-  return {
-    label: `Séjour <b>${formattedRange}</b>`,
-    value: id,
-  };
-});
-
 const DSNJExport = () => {
-  const [cohortId, setCohortId] = useState(cohortOptions[0].value);
-  const [cohorts, setCohorts] = useState([]);
-  const [isLDownloadingByKey, setDownloadingByKey] = useState({});
   const user = useSelector((state) => state.Auth.user);
+  const cohortList = useSelector((state) => state.Cohorts);
+  const [cohortId, setCohortId] = useState(null);
+  const [cohorts, setCohorts] = useState([]);
+  const [cohortOptions, setCohortOptions] = useState([]);
+  const [isLDownloadingByKey, setDownloadingByKey] = useState({});
   useDocumentTitle("Export DSNJ");
 
   useEffect(() => {
@@ -40,26 +29,22 @@ const DSNJExport = () => {
   }, []);
 
   const getCohorts = async () => {
-    const { data: cohortsWithExportDates, ok } = await api.get("/cohort");
-    if (!ok) return toastr.error("Impossible de récupérer la date des exports", "");
-    const cohortList = sessions2023.map(({ id, dateEnd }) => {
-      let dsnjExportDates = {};
-      const sessionWithExportDates = cohortsWithExportDates.find((current) => id === current.snuId);
-      if (sessionWithExportDates) {
-        dsnjExportDates = sessionWithExportDates.dsnjExportDates || {};
-      }
-
+    const cohorts = cohortList.map(({ snuId, dateEnd, dsnjExportDates }) => {
       // export available until 1 month after the cohort
-      const exportsAvailableUntil = new Date(dateEnd.getTime());
+      const exportsAvailableUntil = new Date(dateEnd);
       exportsAvailableUntil.setMonth(exportsAvailableUntil.getMonth() + 1);
 
       return {
-        id,
-        dsnjExportDates,
+        id: snuId,
+        dsnjExportDates: dsnjExportDates || {},
         exportsAvailableUntil,
       };
     });
-    setCohorts(cohortList);
+    setCohorts(cohorts);
+    //@todo: do not use snuId in queries
+    const formattedCohortOptions = getCohortSelectOptions(cohortList.map((c) => ({ ...c, name: c.snuId })));
+    setCohortOptions(formattedCohortOptions);
+    setCohortId(formattedCohortOptions[0].value);
   };
 
   const updateExportDate = (key) => async (date) => {

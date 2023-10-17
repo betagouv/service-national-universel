@@ -1,45 +1,20 @@
-const { YOUNG_STATUS, sessions2023, region2zone, oldSessions, getRegionForEligibility, regionsListDROMS, START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib");
+const { YOUNG_STATUS, region2zone, oldSessions, getRegionForEligibility, regionsListDROMS, START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
-const { ENVIRONMENT } = require("../config");
 
 async function getFilteredSessions(young) {
-  if (ENVIRONMENT !== "production") {
-    return [
-      {
-        id: "2023_10_NC",
-        name: "Octobre 2023 - NC",
-        dateStart: new Date("10/09/2023"),
-        dateEnd: new Date("10/20/2023"),
-        buffer: 99999,
-        event: "Phase0/CTA preinscription - sejour octobre NC",
-        eligibility: {
-          zones: ["NC"],
-          schoolLevels: ["NOT_SCOLARISE", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "CAP"],
-          bornAfter: new Date("10/22/2005"),
-          bornBefore: new Date("10/09/2008"),
-          inscriptionEndDate: new Date("2023-11-20T13:00:00.000Z"), // 20 décembre minuit heure de NC
-          instructionEndDate: new Date("2023-11-22T22:00:00.000Z"), // 22 décembre
-        },
-        numberOfCandidates: 120,
-        numberOfValidated: 100,
-        goal: 300,
-        goalReached: false,
-        isFull: false,
-      },
-    ];
-  }
+  const sessions2023 = await CohortModel.find({});
 
   const region = getRegionForEligibility(young);
   const sessions = sessions2023.filter(
     (session) =>
-      session.eligibility.zones.includes(region2zone[region]) &&
-      session.eligibility.schoolLevels.includes(young.grade) &&
-      session.eligibility.bornAfter <= young.birthdateAt &&
-      session.eligibility.bornBefore >= young.birthdateAt &&
-      (session.eligibility.inscriptionEndDate > Date.now() ||
-        ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.eligibility.instructionEndDate > Date.now())),
+      session.eligibility?.zones.includes(region2zone[region]) &&
+      session.eligibility?.schoolLevels.includes(young.grade) &&
+      session.eligibility?.bornAfter <= young.birthdateAt &&
+      session.eligibility?.bornBefore >= young.birthdateAt &&
+      ((session.inscriptionEndDate && session.inscriptionEndDate > Date.now()) ||
+        ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.instructionEndDate && session.instructionEndDate > Date.now())),
   );
 
   for (let session of sessions) {
@@ -49,6 +24,7 @@ async function getFilteredSessions(young) {
 }
 
 async function getAllSessions(young) {
+  const sessions2023 = await CohortModel.find({});
   const region = getRegionForEligibility(young);
   const sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
   const availableSessions = await getFilteredSessions(young);
@@ -59,6 +35,7 @@ async function getAllSessions(young) {
 }
 
 async function getPlaces(sessions, region) {
+  const sessions2023 = await CohortModel.find({});
   const sessionNames = sessions.map(({ name }) => name);
   const goals = await InscriptionGoalModel.aggregate([{ $match: { region, cohort: { $in: sessionNames } } }, { $group: { _id: "$cohort", total: { $sum: "$max" } } }]);
   const agg = await YoungModel.aggregate([
@@ -80,8 +57,16 @@ async function getPlaces(sessions, region) {
     },
   ]);
 
-  for (let session of sessions) {
-    if (sessions2023.includes(session)) {
+  const session2023Ids = sessions2023.map((s) => s._id.toString());
+  const sessionObj = sessions.map((session) => {
+    if (sessions2023.map((e) => e.name).includes(session.name)) {
+      return { ...session.toObject() };
+    }
+    return session;
+  });
+
+  for (let session of sessionObj) {
+    if (session._id && session2023Ids.includes(session._id.toString())) {
       session.numberOfCandidates = agg.find(({ _id }) => _id === session.name)?.candidates || 0;
       session.numberOfValidated = agg.find(({ _id }) => _id === session.name)?.validated || 0;
       session.goal = goals.find(({ _id }) => _id === session.name)?.total;
@@ -89,7 +74,8 @@ async function getPlaces(sessions, region) {
       session.isFull = session.goal <= 0 ? true : session.numberOfValidated >= session.goal;
     }
   }
-  return sessions;
+
+  return sessionObj;
 }
 
 async function getCohortsEndAfter(date) {
@@ -121,8 +107,9 @@ async function getCohortValidationDate(cohortName) {
   }
 }
 
-function getDepartureDateSession(meetingPoint, session, young, cohort) {
+async function getDepartureDateSession(meetingPoint, session, young, cohort) {
   // Compatibility with legacy sessions
+  const sessions2023 = await CohortModel.find({});
   if (!sessions2023.map((e) => e.name).includes(young.cohort)) {
     return START_DATE_PHASE1[young.cohort];
   }
@@ -143,7 +130,8 @@ function getDepartureDateSession(meetingPoint, session, young, cohort) {
   return new Date(cohortDateStart);
 }
 
-function getReturnDateSession(meetingPoint, session, young, cohort) {
+async function getReturnDateSession(meetingPoint, session, young, cohort) {
+  const sessions2023 = await CohortModel.find({});
   // Compatibility with legacy sessions
   if (!sessions2023.map((e) => e.name).includes(young.cohort)) {
     return END_DATE_PHASE1[young.cohort];

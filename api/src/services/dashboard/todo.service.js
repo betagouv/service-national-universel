@@ -1,4 +1,4 @@
-const { DASHBOARD_TODOS_FUNCTIONS, ROLES, sessions2023 } = require("snu-lib");
+const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
 const CohortModel = require("../../models/cohort");
 
 const services = {
@@ -106,8 +106,8 @@ service.todosByRole = async (user) => {
   const notFinished = all.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name);
   const notStarted = all.filter((c) => new Date(c.dateStart) > Date.now()).map((e) => e.name);
   const assignementOpen = all.filter((c) => Boolean(c.isAssignmentAnnouncementsOpenForYoung) && notFinished.includes(c)).map((e) => e.name);
-  const fiveDaysBeforeInscriptionEnd = sessions2023
-    .filter((c) => new Date(c.eligibility.instructionEndDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.eligibility.instructionEndDate) - Date.now() > 0)
+  const fiveDaysBeforeInscriptionEnd = all
+    .filter((c) => new Date(c.instructionEndDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.instructionEndDate) - Date.now() > 0)
     .map((e) => e.name);
   const oneWeekBeforepdrChoiceLimitDate = all
     .filter((c) => new Date(c.pdrChoiceLimitDate) - Date.now() < 7 * 24 * 60 * 60 * 1000 && new Date(c.pdrChoiceLimitDate) - Date.now() > 0)

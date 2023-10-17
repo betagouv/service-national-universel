@@ -1,4 +1,4 @@
-import { translate } from "snu-lib";
+import { getCohortPeriod, translate } from "snu-lib";
 import API from "./api";
 
 export const getCohortByName = async (cohortName) => {
@@ -38,4 +38,13 @@ export const getCohorts = async () => {
     console.error(err);
     return [];
   }
+};
+
+export const getCohortNameList = (cohorts) => {
+  return cohorts.map((cohort) => cohort.name);
+};
+
+export const getCohortSelectOptions = (cohorts, short = false) => {
+  if (short) return cohorts.map((cohort) => ({ value: cohort.name, label: cohort.name }));
+  return cohorts.map((cohort) => ({ value: cohort.name, label: `Séjour ${getCohortPeriod(cohort, true)}` }));
 };

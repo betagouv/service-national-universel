@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { resizeImage } from "../../../services/file.service";
 import { ID } from "../utils";
-import { formatDateFR, sessions2023, translateCorrectionReason } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
+import { formatDateFR, translateCorrectionReason } from "snu-lib";
 import dayjs from "dayjs";
 
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -192,7 +193,7 @@ function ExpirationDate({ corrections, category, young, date, setDate, setHasCha
       <div className="text-xl font-medium">Renseignez la date d’expiration</div>
       {young.cohort !== "à venir" && (
         <div className="my-2 text-gray-600">
-          Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+          Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(getCohort(young.cohort).dateStart)}
           ).
         </div>
       )}

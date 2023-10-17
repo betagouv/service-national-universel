@@ -20,6 +20,7 @@ const ReferentModel = require("../../models/referent");
 const SessionPhase1 = require("../../models/sessionPhase1");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
+const CohortModel = require("../../models/cohort");
 const AuthObject = require("../../auth");
 const LigneDeBusModel = require("../../models/PlanDeTransport/ligneBus");
 const YoungAuth = new AuthObject(YoungObject);
@@ -52,7 +53,7 @@ const {
   canViewYoungApplications,
   canEditPresenceYoung,
   canDeletePatchesHistory,
-  translateCohort,
+  getCohortPeriod,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS,
@@ -564,11 +565,13 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     }
 
     let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
+    const cohortObj = await CohortModel.findOne({ name: cohort });
+
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
         motif: cohortChangeReason,
-        cohortPeriod: translateCohort(cohort),
+        cohort: cohortObj ? getCohortPeriod(cohortObj) : cohort,
       },
     });
 
