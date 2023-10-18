@@ -51,7 +51,7 @@ export default function Index() {
     setFilterArray(filters);
   }, [departmentOptions]);
 
-  const [selectedFilters, setSelectedFilters] = React.useState({
+  const [selectedFilters, setSelectedFilters] = useState({
     cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
   });
 
