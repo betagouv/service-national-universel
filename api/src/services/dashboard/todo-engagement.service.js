@@ -304,66 +304,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTE
   return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END]: youngs.body.hits.total.value };
 };
 
-service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END] = async (user) => {
-  let missionContextFilters = [];
-  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
-    const { missionContextFilters: mCtxF, missionContextError } = await buildMissionContext(user);
-    if (missionContextError) {
-      throw new Error(missionContextError.status, missionContextError.body);
-    }
-    missionContextFilters = mCtxF;
-  }
-
-  const missions = await esClient.search({
-    index: "mission",
-    body: {
-      query: {
-        bool: {
-          must: { match_all: {} },
-          filter: [
-            { range: { endAt: { lt: "now" } } },
-            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
-            ...missionContextFilters,
-          ].filter(Boolean),
-        },
-      },
-    },
-  });
-
-  const missionIds = missions.body.hits.hits.map((e) => e._id);
-  const applications = await esClient.search({
-    index: "application",
-    body: {
-      query: {
-        bool: {
-          must: { match_all: {} },
-          must_not: {
-            term: {
-              "status.keyword": "VALIDATED",
-            },
-          },
-          filter: [{ terms: { "missionId.keyword": missionIds } }],
-        },
-      },
-    },
-  });
-
-  const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
-  const youngs = await esClient.search({
-    index: "young",
-    body: {
-      query: {
-        bool: {
-          must: { match_all: {} },
-          filter: [{ terms: { _id: youngIds } }, { terms: { "statusPhase2.keyword": ["IN_PROGRESS"] } }, { terms: { "status.keyword": ["VALIDATED"] } }],
-        },
-      },
-    },
-  });
-
-  return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END]: youngs.body.hits.total.value };
-};
+service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END] = async (user) => {};
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = async (user) => {
   let missionContextFilters = [];

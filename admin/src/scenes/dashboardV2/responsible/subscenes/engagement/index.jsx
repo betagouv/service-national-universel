@@ -126,7 +126,7 @@ export default function Index() {
                     percentage={valuesApplication.APPLICATION.WAITING_VALIDATION?.percentage || 0}
                     filtersUrl={[queryString.stringify({ status: "WAITING_VALIDATION" })]}
                     base="/volontaire/list/pending"
-                    icon={true}
+                    icon={!!valuesApplication.APPLICATION.WAITING_VALIDATION?.nb}
                   />
                 </div>
               )}
@@ -233,7 +233,7 @@ export default function Index() {
                     percentage={valuesApplication.CONTRACT.DRAFT?.percentage || 0}
                     filtersUrl={[queryString.stringify({ contractStatus: "DRAFT" })]}
                     base="/volontaire/list/all"
-                    icon={true}
+                    icon={!!valuesApplication.CONTRACT.DRAFT?.nb}
                   />
                 </div>
                 <div className="flex  items-center justify-center">
