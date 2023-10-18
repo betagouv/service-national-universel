@@ -26,7 +26,7 @@ function renderStepResponsive(step) {
 const Step = () => {
   const [data] = useContext(ReinscriptionContext);
   const { step } = useParams();
-
+  console.log(data, step);
   const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
   const fetchReinscriptionOpen = async () => {
@@ -45,18 +45,19 @@ const Step = () => {
 
   useEffect(() => {
     fetchReinscriptionOpen();
+    console.log(fetchReinscriptionOpen());
   }, []);
 
   const currentStep = getStepFromUrlParam(step, STEP_LIST, true);
-
+  console.log(currentStep);
   if (!currentStep) return <Redirect to="/reinscription" />;
 
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === data.step);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
 
-  if (currentStepIndex > eligibleStepIndex) {
-    return <Redirect to={`/reinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
-  }
+  //   if (currentStepIndex > eligibleStepIndex) {
+  //     return <Redirect to={`/reinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
+  //   }
 
   if (isReinscriptionOpenLoading) return <Loader />;
 
@@ -66,10 +67,9 @@ const Step = () => {
 };
 
 const ReinscriptionPublic = () => {
-  const young = useSelector((state) => state.Auth.young);
-  //   if (young && young.emailVerified === "false") return <Redirect to="/preinscription/email-validation" />;
-  if (young) return <Redirect to="/reinscription" />;
-
+  //   const young = useSelector((state) => state.Auth.young);
+  //   //   if (young && young.emailVerified === "false") return <Redirect to="/preinscription/email-validation" />;
+  //   if (young) return <Redirect to="/inscription2023" />;
   return (
     <Switch>
       <SentryRoute path="/reinscription/:step" component={Step} />;
@@ -78,7 +78,7 @@ const ReinscriptionPublic = () => {
   );
 };
 
-const PreInscriptionPrivate = () => {
+const ReinscriptionPrivate = () => {
   const young = useSelector((state) => state.Auth.young);
   if (!young) return <Redirect to="/preinscription" />;
   return (
@@ -89,15 +89,19 @@ const PreInscriptionPrivate = () => {
   );
 };
 
-export default function PreInscription() {
+export default function ReInscription() {
+    console.log("test 1")
   return (
-    <ReinscriptionContextProvider>
-      <DSFRLayout title="Reinscription du volontaire">
-        <Switch>
-          <SentryRoute path={["/preinscription/email-validation", "/preinscription/done"]} component={PreInscriptionPrivate} />;
-          <SentryRoute path="/reinscription/" component={ReinscriptionPublic} />;
-        </Switch>
-      </DSFRLayout>
-    </ReinscriptionContextProvider>
+    // <ReinscriptionContextProvider>
+    //   <DSFRLayout title="Reinscription du volontaire">
+    //     <Switch>
+    //       {/* <SentryRoute path={["/preinscription/email-validation", "/preinscription/done"]} component={ReinscriptionPrivate} />; */}
+    //       <SentryRoute path="/reinscription/" component={ReinscriptionPublic} />;
+    //     </Switch>
+    //   </DSFRLayout>
+    // </ReinscriptionContextProvider>
+    <>
+      <div>Hello world</div>
+    </>
   );
 }

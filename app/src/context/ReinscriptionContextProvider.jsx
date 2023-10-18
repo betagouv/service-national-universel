@@ -41,6 +41,8 @@ const getDefaultState = () => {
 };
 
 const ReinscriptionContextProvider = ({ children }) => {
+  console.log(children);
+  
   const [value, setValue] = useState(getDefaultState());
 
   const updateValue = (value = defaultState) => {

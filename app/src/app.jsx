@@ -231,7 +231,8 @@ const Espace = () => {
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
   // @todo specific screen on reinscription page when not open?
-  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
+  console.log("Checking if we should redirect to Reinscription", shouldForceRedirectToReinscription(young));
+  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscriptionTest" />;
   // if (reInscriptionModificationOpenForYoungs(environment) && shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
   if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
@@ -244,7 +245,7 @@ const Espace = () => {
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
           <SentryRoute exact path="/" component={Home} />
-          <SentryRoute path="/reinscription" component={ReInscription} />
+          <SentryRoute path="/reinscriptionTest" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
