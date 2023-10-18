@@ -23,22 +23,42 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-// function reInscriptionModificationOpenForYoungs(cohort, env) {
-//   if (env !== undefined && env !== "production") return true;
+function reInscriptionModificationOpenForYoungs(env) {
+  if (env !== undefined && env !== "production") return true;
 
-//   switch (cohort) {
-//     default:
-//       return new Date() < new Date(2023, 4, 11); // before 11 mai 2023 morning
-//   }
-// }
+  return new Date() >= new Date(2023, 10, 6, 8); // @todo: reInscription end date / should come from db
+}
 
-function reInscriptionModificationOpenForYoungs(young) {
+function shouldForceRedirectToReinscription(young) {
   const youngStatusForReinscription = ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "REINSCRIPTION"];
   if (young.cohort === "à venir" && youngStatusForReinscription.includes(young.status)) {
     return true;
   } else {
     return false;
   }
+}
+
+// @todo: a voir avec Elise: young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED
+function hasAccessToReinscription(young) {
+  if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
+    return true;
+  }
+  if (
+    young.status === YOUNG_STATUS.VALIDATED &&
+    ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
+  return (
+    young.cohort !== "à venir" &&
+    ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
+      (isInscriptionModificationOpen && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE"))
+  );
 }
 
 const getFilterLabel = (selected, placeholder = "Choisissez un filtre", prelabel = "") => {
@@ -198,6 +218,9 @@ export {
   inscriptionModificationOpenForYoungs,
   inscriptionCreationOpenForYoungs,
   reInscriptionModificationOpenForYoungs,
+  shouldForceRedirectToReinscription,
+  shouldForceRedirectToInscription,
+  hasAccessToReinscription,
   isInRuralArea,
   getFilterLabel,
   getSelectedFilterLabel,

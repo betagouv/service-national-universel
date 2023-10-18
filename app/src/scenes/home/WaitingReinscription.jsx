@@ -17,6 +17,8 @@ export default function WaitingReinscription() {
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
+
+  //@todo: check if reInscriptionModificationOpenForYoungs is true, otherwise display old messages
   let textPrecision;
   let textSecond;
   if ((young.status === YOUNG_STATUS.WAITING_LIST || (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === "WAITING_AFFECTATION")) && young.cohort === "à venir")

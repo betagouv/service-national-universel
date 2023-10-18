@@ -46,7 +46,13 @@ import ViewMessage from "./scenes/echanges/View";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { ENABLE_PM, YOUNG_STATUS } from "./utils";
-import { inscriptionModificationOpenForYoungs, youngCanChangeSession, reInscriptionModificationOpenForYoungs } from "snu-lib";
+import {
+  youngCanChangeSession,
+  inscriptionModificationOpenForYoungs,
+  reInscriptionModificationOpenForYoungs,
+  shouldForceRedirectToReinscription,
+  shouldForceRedirectToInscription,
+} from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
@@ -224,15 +230,11 @@ const Espace = () => {
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  // à revoir quand le parcours de reinscriptionsera clair car pas de propriétés inscription à la base donc toujours FALSE
-  // const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
-  if (reInscriptionModificationOpenForYoungs(young)) return <Redirect to="/reinscription" />;
+  // @todo specific screen on reinscription page when not open?
+  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
+  // if (reInscriptionModificationOpenForYoungs(environment) && shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
-  const forceRedirectInscription =
-    inscriptionModificationOpenForYoungs(cohort) &&
-    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) &&
-    young.inscriptionStep2023 !== "DONE";
-  if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
+  if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
 
   return (
     <>
