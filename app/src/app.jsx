@@ -188,6 +188,7 @@ const MandatoryLogIn = () => {
   return (
     <Switch>
       <SentryRoute path="/inscription2023" component={Inscription2023} />
+      <SentryRoute path="/reinscriptionTest" component={ReInscription} />
       <SentryRoute path="/" component={Espace} />
     </Switch>
   );
@@ -245,7 +246,6 @@ const Espace = () => {
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
           <SentryRoute exact path="/" component={Home} />
-          <SentryRoute path="/reinscriptionTest" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
