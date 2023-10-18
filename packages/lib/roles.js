@@ -790,7 +790,7 @@ function isSuperAdmin(actor) {
 }
 
 function canCheckIfRefExist(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR].includes(actor.role);
 }
 
 export {

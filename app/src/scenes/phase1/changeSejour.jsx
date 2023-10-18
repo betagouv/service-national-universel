@@ -8,14 +8,15 @@ import { Link, useHistory } from "react-router-dom";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, translateCohort, HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES } from "../../utils";
+import { translate, HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES } from "../../utils";
 import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
 import { setYoung } from "../../redux/auth/actions";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { capture } from "../../sentry";
-import { calculateAge, regionsListDROMS, translateCohortTemp } from "snu-lib";
+import { calculateAge, getCohortPeriodTemp } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 
 export default function ChangeSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -146,7 +147,7 @@ export default function ChangeSejour() {
                   <p>
                     <b>Une contrainte personnelle, familiale, scolaire ou professionnelle ?</b>
                     <br />
-                    Vous pouvez modifier les dates de votre séjour initialement prévu {translateCohortTemp(young)}.
+                    Vous pouvez modifier les dates de votre séjour initialement prévu {getCohortPeriodTemp({ ...young, cohort: getCohort(young.cohort) })}.
                   </p>
                   <p style={{ marginTop: 10, marginBottom: 9, fontSize: 14, fontWeight: 500 }}>Dates de séjour</p>
                   <ActionBox color="#ffffff" width="375px">
@@ -160,9 +161,8 @@ export default function ChangeSejour() {
                           {sejours.map((cohort) => {
                             return (
                               <DropdownItem key={cohort} className="dropdown-item" onClick={() => setNewSejour(cohort)}>
-                                {cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)
-                                  ? "Séjour du 5 au 17 Juillet"
-                                  : `Séjour ${translateCohort(cohort)}`}
+                                {/* {`Séjour ${getCohortPeriod(getCohort(cohort))}`} */}
+                                Séjour à venir
                               </DropdownItem>
                             );
                           })}
@@ -234,11 +234,8 @@ export default function ChangeSejour() {
                             <Badge
                               color="#0C7CFF"
                               backgroundColor="#F9FCFF"
-                              text={
-                                newSejour === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)
-                                  ? "Séjour du 5 au 17 Juillet"
-                                  : translateCohort(newSejour)
-                              }
+                              // text={`Séjour ${getCohortPeriod(getCohort(cohort))}`}
+                              text={`Séjour à venir`}
                               style={{ cursor: "default" }}
                             />
                             <div className="mt-2 text-xs">Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>

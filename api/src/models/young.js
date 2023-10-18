@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { ROLES_LIST, PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
+const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
@@ -210,44 +210,14 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    enum: [
-      "Octobre 2023 - NC",
-      "Juillet 2023",
-      "Juin 2023",
-      "Avril 2023 - B",
-      "Avril 2023 - A",
-      "Février 2023 - C",
-      "Juillet 2022",
-      "Juin 2022",
-      "Février 2022",
-      "2022",
-      "2021",
-      "2020",
-      "2019",
-      "à venir",
-    ],
+    enum: [...getCohortNames(true, true, true)],
     documentation: {
       description: "Cohorte",
     },
   },
   originalCohort: {
     type: String,
-    enum: [
-      "Octobre 2023 - NC",
-      "Juillet 2023",
-      "Juin 2023",
-      "Avril 2023 - B",
-      "Avril 2023 - A",
-      "Février 2023 - C",
-      "Juillet 2022",
-      "Juin 2022",
-      "Février 2022",
-      "2022",
-      "2021",
-      "2020",
-      "2019",
-      "à venir",
-    ],
+    enum: [...getCohortNames(true, true, true)],
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },

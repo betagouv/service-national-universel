@@ -371,6 +371,8 @@ export default function SchemaRepartition({ region, department }) {
     history.push(`/schema-repartition/${department2region[value]}/${value}?cohort=${cohort}`);
   };
 
+  if (!cohort) return <Loading />;
+
   return (
     <div>
       <Breadcrumbs items={[{ label: "Schéma de répartition", to: getSchemaRepartitionRoute() }]} />

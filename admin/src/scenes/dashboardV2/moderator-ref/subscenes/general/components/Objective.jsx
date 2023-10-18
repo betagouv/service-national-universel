@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import queryString from "query-string";
 import { toastr } from "react-redux-toastr";
-import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, translate } from "snu-lib";
+import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 import api from "@/services/api";
 import { getNewLink } from "@/utils";
@@ -9,12 +9,23 @@ import { FilterDashBoard } from "@/scenes/dashboardV2/components/FilterDashBoard
 import { getDepartmentOptions, getFilteredDepartment } from "@/scenes/dashboardV2/components/common";
 import HorizontalBar from "@/scenes/dashboardV2/components/graphs/HorizontalBar";
 import VolontaireSection from "./VolontaireSection";
+import { getCohortNameList } from "@/services/cohort.service";
+import { useSelector } from "react-redux";
 
 export default function Index({ user }) {
+  const cohorts = useSelector((state) => state.Cohorts);
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [volontairesData, setVolontairesData] = useState();
   const [inAndOutCohort, setInAndOutCohort] = useState();
   const [departmentOptions, setDepartmentOptions] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({
+    cohort: [],
+  });
+
+  useEffect(() => {
+    const cohortsFilters = getCohortNameList(cohorts);
+    setSelectedFilters({ cohort: cohortsFilters });
+  }, []);
 
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList?.map((r) => ({ key: r, label: r }));
   const academyOptions =
@@ -53,10 +64,6 @@ export default function Index({ user }) {
       sort: (e) => orderCohort(e),
     },
   ].filter((e) => e);
-
-  const [selectedFilters, setSelectedFilters] = React.useState({
-    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
-  });
 
   async function fetchInscriptionGoals() {
     const res = await getInscriptionGoals();

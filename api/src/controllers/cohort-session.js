@@ -6,6 +6,7 @@ const { ERRORS } = require("../utils");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 const { validateId } = require("../utils/validator");
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 const passport = require("passport");
 const { ROLES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
@@ -59,6 +60,22 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
   })(req, res);
+});
+
+router.get("/isInscriptionOpen/:sessionName?", async (req, res) => {
+  const cohortName = req.params.sessionName;
+  try {
+    if (cohortName) {
+      const cohort = await CohortModel.findOne({ name: cohortName });
+      if (!cohort) return res.status(400).send({ ok: true, data: false });
+      return res.send({ ok: true, data: new Date() < new Date(cohort.inscriptionEndDate) });
+    }
+    const cohorts = await CohortModel.find({});
+    return res.send({ ok: true, data: cohorts.some((c) => new Date() < new Date(c.inscriptionEndDate)) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
 });
 
 module.exports = router;

@@ -16,17 +16,20 @@ import plausibleEvent from "../../../../../services/plausible";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import ExportEngagementReport from "./components/ExportEngagementReport";
 import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
+import { getCohortNameList } from "@/services/cohort.service";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
 
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     academy: [],
     department: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
-    cohorts: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
+    cohorts: [],
   });
+
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
@@ -79,6 +82,11 @@ export default function Index() {
       computeFilteredDepartment();
     }
   }, [JSON.stringify(selectedFilters)]);
+
+  useEffect(() => {
+    const cohortsFilters = getCohortNameList(cohorts);
+    setSelectedFilters({ ...selectedFilters, cohorts: cohortsFilters });
+  }, []);
 
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =

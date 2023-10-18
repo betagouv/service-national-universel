@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
-import { ES_NO_LIMIT, ROLES } from "snu-lib";
+import { ROLES } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import Select from "../components/Select";
@@ -9,28 +9,36 @@ import API from "../../../services/api";
 import { Loading, regionList, SubTitle, Title } from "../components/commons";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { cohortList, parseQuery } from "../util";
+import { parseQuery } from "../util";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function National() {
   useDocumentTitle("Table de répartition");
   const user = useSelector((state) => state.Auth.user);
-  const [cohort, setCohort] = React.useState(getDefaultCohort());
-  const [youngsByRegion, setYoungsByRegion] = React.useState([]);
-  const [placesCenterByRegion, setPlacesCenterByRegion] = React.useState({});
-  const [loadingQuery, setLoadingQuery] = React.useState(false);
-  const [searchRegion, setSearchRegion] = React.useState("");
-  const [regions, setRegions] = React.useState(regionList);
-  const [data, setData] = React.useState([]);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const [cohort, setCohort] = useState(getDefaultCohort());
+  const [cohortList, setCohortList] = useState([]);
+  const [youngsByRegion, setYoungsByRegion] = useState([]);
+  const [placesCenterByRegion, setPlacesCenterByRegion] = useState({});
+  const [loadingQuery, setLoadingQuery] = useState(false);
+  const [searchRegion, setSearchRegion] = useState("");
+  const [regions, setRegions] = useState(regionList);
+  const [data, setData] = useState([]);
   const history = useHistory();
+
+  useEffect(() => {
+    const cohortList = getCohortSelectOptions(cohorts);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[0].value);
+  }, []);
 
   function getDefaultCohort() {
     const { cohort } = parseQuery(location.search);
     if (cohort) {
       return cohort;
-    } else {
-      return cohortList[0].value;
     }
+    return undefined;
   }
 
   const getRepartitionRegion = async () => {
@@ -48,7 +56,7 @@ export default function National() {
     (async () => {
       try {
         setLoadingQuery(true);
-
+        if (!cohort) return;
         await getRepartitionRegion();
 
         //get youngs by region

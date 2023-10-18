@@ -6,7 +6,7 @@ import { supportURL } from "../../../config";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { formatDateFR, sessions2023 } from "snu-lib";
+import { formatDateFR } from "snu-lib";
 import { translate } from "../../../utils";
 import { ID } from "../../inscription2023/utils";
 
@@ -16,6 +16,7 @@ import Help from "../../inscription2023/components/Help";
 import Navbar from "../components/Navbar";
 import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
+import { getCohort } from "@/utils/cohorts";
 
 export default function StepUpload() {
   const { category } = useParams();
@@ -123,7 +124,7 @@ export default function StepUpload() {
             <div className="text-xl font-medium">Renseignez la date d’expiration</div>
             {young.cohort !== "à venir" && (
               <div className="my-2 leading-loose text-gray-600">
-                Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(sessions2023.filter((e) => e.name === young.cohort)[0].dateStart)}
+                Votre pièce d’identité doit être valide à votre départ en séjour de cohésion (le {formatDateFR(getCohort(young.cohort).dateStart)}
                 ).
               </div>
             )}
