@@ -222,6 +222,14 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
 //create ticket for non authenticated users
 router.post("/ticket/form", async (req, res) => {
   try {
+    const existingYoung = await YoungObject.findOne({ email: req.body.email });
+
+    if (existingYoung) {
+      req.body.role = "young exterior";
+    } else {
+      req.body.role = "unknown";
+    }
+
     const obj = {
       email: req.body.email,
       subject: req.body.subject,
@@ -270,6 +278,7 @@ router.post("/ticket/form", async (req, res) => {
       { name: "role", value: role },
       { name: "page précédente", value: fromPage },
     ];
+
     const response = await zammood.api("/v0/message", {
       method: "POST",
       credentials: "include",
