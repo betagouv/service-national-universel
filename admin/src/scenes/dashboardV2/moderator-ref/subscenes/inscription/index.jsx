@@ -18,12 +18,13 @@ import { getDepartmentOptions, getFilteredDepartment } from "../../../components
 import Details from "../../../components/inscription/Details";
 import TabSchool from "../../../components/inscription/TabSchool";
 import ExportReport from "./ExportReport";
+import TotalInscription from "@/scenes/dashboardV2/components/inscription/TotalInscriptions";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
   const [inscriptionGoals, setInscriptionGoals] = useState();
-
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
+  const [totalInscriptions, setTotalInscriptions] = useState([]);
 
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
@@ -81,6 +82,11 @@ export default function Index() {
     setInscriptionDetailObject(res);
   }
 
+  async function fetchTotalInscriptions() {
+    const res = await getTotalInscriptions(selectedFilters);
+    setTotalInscriptions(res);
+  }
+
   useEffect(() => {
     fetchInscriptionGoals();
   }, []);
@@ -89,6 +95,7 @@ export default function Index() {
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
     fetchCurrentInscriptions();
+    fetchTotalInscriptions();
   }, [JSON.stringify(selectedFilters)]);
 
   const goal = useMemo(
@@ -142,6 +149,7 @@ export default function Index() {
             ]}
           />
         </div>
+        <TotalInscription totalInscriptions={totalInscriptions} goal={goal} />
         <StatutPhase values={inscriptionDetailObject} filter={selectedFilters} />
         <div className="flex gap-4">
           <Details selectedFilters={selectedFilters} />
@@ -178,6 +186,13 @@ function filterByRegionAndDepartement(e, filters, user) {
 
 async function getCurrentInscriptions(filters) {
   const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", { filters: filters });
-  // if (!responses.length) return {};
   return api.getAggregations(responses);
+}
+
+async function getTotalInscriptions(filters) {
+  const responses = await api.post("/elasticsearch/dashboard/inscription/totalYoungByDate", { filters: filters });
+  if (!responses || !responses?.aggregations?.aggs?.buckets) {
+    return [];
+  }
+  return responses?.aggregations?.aggs?.buckets;
 }

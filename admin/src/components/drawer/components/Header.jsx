@@ -8,6 +8,8 @@ export default function Header({ open, setOpen }) {
   //save the current state of the sidebar in the local storage
   const onChangeOpen = () => {
     localStorage?.setItem("sideBarOpen", !open);
+    window.dispatchEvent(new CustomEvent("sideBar"));
+
     setOpen(!open);
   };
   return (
