@@ -17,9 +17,9 @@ import { toastr } from "react-redux-toastr";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
-//   if (step === STEPS.INELIGIBLE) return <StepNonEligible />;
+  //   if (step === STEPS.INELIGIBLE) return <StepNonEligible />;
   if (step === STEPS.SEJOUR) return <StepSejour />;
-  if (step === STEPS.PROFIL) return <StepProfil />;
+  //   if (step === STEPS.PROFIL) return <StepProfil />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
 }
 
@@ -67,7 +67,7 @@ const Step = () => {
 
 const ReinscriptionPublic = () => {
   const young = useSelector((state) => state.Auth.young);
-//   if (young && young.emailVerified === "false") return <Redirect to="/preinscription/email-validation" />;
+  //   if (young && young.emailVerified === "false") return <Redirect to="/preinscription/email-validation" />;
   if (young) return <Redirect to="/reinscription" />;
 
   return (
@@ -83,8 +83,8 @@ const PreInscriptionPrivate = () => {
   if (!young) return <Redirect to="/preinscription" />;
   return (
     <Switch>
-      <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />;
-      <SentryRoute path="/preinscription/done" component={Done} />;
+      {/* <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />; */}
+      <SentryRoute path="/reinscription/done" component={Done} />;
     </Switch>
   );
 };
