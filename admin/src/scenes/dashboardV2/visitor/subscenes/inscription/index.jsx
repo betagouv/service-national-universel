@@ -10,7 +10,7 @@ import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import StatutPhase from "../../../components/inscription/StatutPhase";
 
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
-import plausibleEvent from "../../../../../services/plausible";
+import plausibleEvent from "@/services/plausible";
 import { getNewLink } from "../../../../../utils";
 import { getFilteredDepartment } from "../../../components/common";
 import Details from "../../../components/inscription/Details";
