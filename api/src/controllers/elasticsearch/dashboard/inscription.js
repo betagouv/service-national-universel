@@ -46,7 +46,7 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
     const { user } = req;
 
     //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -67,7 +67,7 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
           ].filter(Boolean),
           filter: [
             //query
-            user.role === ROLES.REFERENT_REGION ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "schoolDepartment.keyword": user.department } } : null,
           ].filter(Boolean),
         },
