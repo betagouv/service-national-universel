@@ -14,7 +14,6 @@ import plausibleEvent from "@/services/plausible";
 import { getNewLink } from "@/utils";
 import { getFilteredDepartment } from "../../../components/common";
 import Details from "../../../components/inscription/Details";
-import TabSchool from "../../../components/inscription/TabSchool";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
