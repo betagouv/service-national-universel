@@ -1,22 +1,13 @@
 import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
+import React from "react";
+import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import { setYoung } from "../../redux/auth/actions";
-import { capture } from "../../sentry";
-import API from "../../services/api";
-import plausibleEvent from "../../services/plausible";
-import { translate } from "../../utils";
 
 export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
-  const dispatch = useDispatch();
-
-  const [loading, setLoading] = useState(false);
 
   //@todo: check if reInscriptionModificationOpenForYoungs is true, otherwise display old messages
   let textPrecision;
@@ -32,19 +23,7 @@ export default function WaitingReinscription() {
   } else return;
 
   const onClickEligibilte = async () => {
-    try {
-      setLoading(true);
-      const { ok, code, data: responseData } = await API.put("/young/reinscription/goToReinscription");
-      if (!ok) throw new Error(translate(code));
-      dispatch(setYoung(responseData));
-
-      plausibleEvent("Phase0/CTA reinscription - home page");
-      return history.push("/reinscription/eligibilite");
-    } catch (e) {
-      setLoading(false);
-      capture(e);
-      toastr.error("Une erreur s'est produite :", translate(e.code));
-    }
+    return history.push("/reinscription");
   };
 
   return (
@@ -62,7 +41,6 @@ export default function WaitingReinscription() {
               <div className="flex w-fit flex-col items-stretch">
                 <button
                   className="mt-4 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
-                  disabled={loading}
                   onClick={onClickEligibilte}>
                   Vérifier mon éligibilité
                 </button>
@@ -84,7 +62,6 @@ export default function WaitingReinscription() {
             {/* <div className="left-7 mt-4 font-bold text-gray-800">Vérifiez dès maintenant votre éligibilité</div> */}
             <button
               className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
-              disabled={loading}
               onClick={onClickEligibilte}>
               Vérifier mon éligibilité
             </button>

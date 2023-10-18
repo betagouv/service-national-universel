@@ -46,13 +46,7 @@ import ViewMessage from "./scenes/echanges/View";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { ENABLE_PM, YOUNG_STATUS } from "./utils";
-import {
-  youngCanChangeSession,
-  inscriptionModificationOpenForYoungs,
-  reInscriptionModificationOpenForYoungs,
-  shouldForceRedirectToReinscription,
-  shouldForceRedirectToInscription,
-} from "snu-lib";
+import { youngCanChangeSession, inscriptionModificationOpenForYoungs, shouldForceRedirectToReinscription, shouldForceRedirectToInscription } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
@@ -188,7 +182,7 @@ const MandatoryLogIn = () => {
   return (
     <Switch>
       <SentryRoute path="/inscription2023" component={Inscription2023} />
-      <SentryRoute path="/reinscriptionTest" component={ReInscription} />
+      <SentryRoute path="/reinscription" component={ReInscription} />
       <SentryRoute path="/" component={Espace} />
     </Switch>
   );
@@ -197,7 +191,6 @@ const MandatoryLogIn = () => {
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
-  // const [isModalMondayOpen, setIsModalMondayOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
@@ -217,11 +210,6 @@ const Espace = () => {
       setIsModalCGUOpen(true);
     }
 
-    // ! To clean after departure. Or just keep it for later.
-    // if (young && young.cohort === "Juin 2023" && busLignesDepartLundi.includes(young.ligneId)) {
-    //   setIsModalMondayOpen(true);
-    // }
-
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
         if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
@@ -232,8 +220,7 @@ const Espace = () => {
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
   // @todo specific screen on reinscription page when not open?
-  console.log("Checking if we should redirect to Reinscription", shouldForceRedirectToReinscription(young));
-  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscriptionTest" />;
+  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
   // if (reInscriptionModificationOpenForYoungs(environment) && shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
   if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
@@ -266,7 +253,6 @@ const Espace = () => {
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
-      {/* <ModalMonday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} /> */}
     </>
   );
 };
