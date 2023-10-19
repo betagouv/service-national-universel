@@ -4,12 +4,12 @@ import api from "@/services/api";
 import ReinscriptionContextProvider, { ReinscriptionContext } from "../../context/ReinscriptionContextProvider";
 import { SentryRoute, capture } from "../../sentry";
 
+import { useSelector } from "react-redux";
 import StepEligibilite from "./steps/stepEligibilite";
-// import StepNonEligible from "./steps/stepNonEligible";
+import StepNonEligible from "./steps/stepNonEligible";
 import StepSejour from "./steps/stepSejour";
 import StepConfirm from "./steps/stepConfirm";
 
-import { useSelector } from "react-redux";
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import Loader from "@/components/Loader";
@@ -17,16 +17,24 @@ import { toastr } from "react-redux-toastr";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
-  //   if (step === STEPS.INELIGIBLE) return <StepNonEligible />;
+  if (step === STEPS.INELIGIBLE) return <StepNonEligible />;
   if (step === STEPS.SEJOUR) return <StepSejour />;
-  //   if (step === STEPS.PROFIL) return <StepProfil />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
 }
 
 const Step = () => {
-  const [data] = useContext(ReinscriptionContext);
+  const [data, updateValue] = useContext(ReinscriptionContext);
+  const young = useSelector((state) => state.Auth.young);
+
+  useEffect(() => {
+    updateValue({
+      ...data,
+      birthDate: young.birthdateAt,
+    });
+  }, [young]);
+
   const { step } = useParams();
-  console.log(data, step);
+  // console.log(data, step);
   const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
   const fetchReinscriptionOpen = async () => {
@@ -45,19 +53,18 @@ const Step = () => {
 
   useEffect(() => {
     fetchReinscriptionOpen();
-    console.log(fetchReinscriptionOpen());
+    // console.log(fetchReinscriptionOpen());
   }, []);
 
   const currentStep = getStepFromUrlParam(step, STEP_LIST, true);
-  console.log(currentStep);
+  // console.log(currentStep);
   if (!currentStep) return <Redirect to="/reinscription" />;
 
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === data.step);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
-
-  //   if (currentStepIndex > eligibleStepIndex) {
-  //     return <Redirect to={`/reinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
-  //   }
+  if (currentStepIndex > eligibleStepIndex) {
+    return <Redirect to={`/reinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
+  }
 
   if (isReinscriptionOpenLoading) return <Loader />;
 
@@ -66,42 +73,15 @@ const Step = () => {
   return renderStepResponsive(currentStep);
 };
 
-const ReinscriptionPublic = () => {
-  //   const young = useSelector((state) => state.Auth.young);
-  //   //   if (young && young.emailVerified === "false") return <Redirect to="/preinscription/email-validation" />;
-  //   if (young) return <Redirect to="/inscription2023" />;
-  return (
-    <Switch>
-      <SentryRoute path="/reinscription/:step" component={Step} />;
-      <SentryRoute path="/reinscription" component={Step} />;
-    </Switch>
-  );
-};
-
-const ReinscriptionPrivate = () => {
-  const young = useSelector((state) => state.Auth.young);
-  if (!young) return <Redirect to="/preinscription" />;
-  return (
-    <Switch>
-      {/* <SentryRoute path="/preinscription/email-validation" component={EmailValidation} />; */}
-      <SentryRoute path="/reinscription/done" component={Done} />;
-    </Switch>
-  );
-};
-
 export default function ReInscription() {
-    console.log("test 1")
   return (
-    // <ReinscriptionContextProvider>
-    //   <DSFRLayout title="Reinscription du volontaire">
-    //     <Switch>
-    //       {/* <SentryRoute path={["/preinscription/email-validation", "/preinscription/done"]} component={ReinscriptionPrivate} />; */}
-    //       <SentryRoute path="/reinscription/" component={ReinscriptionPublic} />;
-    //     </Switch>
-    //   </DSFRLayout>
-    // </ReinscriptionContextProvider>
-    <>
-      <div>Hello world</div>
-    </>
+    <ReinscriptionContextProvider>
+      <DSFRLayout title="Reinscription du volontaire">
+        <Switch>
+          <SentryRoute path="/reinscription/:step" component={Step} />;
+          <SentryRoute path="/reinscription" component={Step} />;
+        </Switch>
+      </DSFRLayout>
+    </ReinscriptionContextProvider>
   );
 }

@@ -33,57 +33,57 @@ export default function StepConfirm() {
     [error],
   );
 
-  //   const onSubmit = async () => {
-  //     const values = {
-  //       email: data.email,
-  //       phone: data.phone,
-  //       phoneZone: data.phoneZone,
-  //       firstName: data.firstName,
-  //       lastName: data.lastName,
-  //       frenchNationality: data.frenchNationality,
-  //       password: data.password,
-  //       birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
-  //       schooled: data.school ? "true" : "false",
-  //       schoolName: data.school?.fullName,
-  //       schoolType: data.school?.type,
-  //       schoolAddress: data.school?.address || data.school?.adresse,
-  //       schoolZip: data.school?.postCode || data.school?.postcode,
-  //       schoolCity: data.school?.city,
-  //       schoolDepartment: data.school?.departmentName || data.school?.department,
-  //       schoolRegion: data.school?.region,
-  //       schoolCountry: data.school?.country,
-  //       schoolId: data.school?.id,
-  //       zip: data.zip,
-  //       cohort: data.cohort,
-  //       grade: data.scolarity,
-  //     };
+    const onSubmit = async () => {
+      const values = {
+        email: data.email,
+        phone: data.phone,
+        phoneZone: data.phoneZone,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        frenchNationality: data.frenchNationality,
+        password: data.password,
+        birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
+        schooled: data.school ? "true" : "false",
+        schoolName: data.school?.fullName,
+        schoolType: data.school?.type,
+        schoolAddress: data.school?.address || data.school?.adresse,
+        schoolZip: data.school?.postCode || data.school?.postcode,
+        schoolCity: data.school?.city,
+        schoolDepartment: data.school?.departmentName || data.school?.department,
+        schoolRegion: data.school?.region,
+        schoolCountry: data.school?.country,
+        schoolId: data.school?.id,
+        zip: data.zip,
+        cohort: data.cohort,
+        grade: data.scolarity,
+      };
 
-  //     if (values.schooled === "true") values.grade = data.scolarity;
+      if (values.schooled === "true") values.grade = data.scolarity;
 
-  //     try {
-  //       const { code, ok } = await api.post("/young/signup", values);
-  //       if (!ok) {
-  //         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
-  //       } else {
-  //         plausibleEvent("Phase0/CTA preinscription - inscription");
-  //       }
-  //       const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
-  //       if (young) {
-  //         if (token) api.setToken(token);
-  //         dispatch(setYoung(young));
-  //         removePersistedData();
-  //       }
-  //       // after connection young is automatically redirected to /preinscription/email-validation
-  //       history.push("/preinscription/email-validation");
-  //     } catch (e) {
-  //       if (e.code === "USER_ALREADY_REGISTERED")
-  //         setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
-  //       else {
-  //         capture(e);
-  //         setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
-  //       }
-  //     }
-  //   };
+      try {
+        const { code, ok } = await api.post("/young/signup", values);
+        if (!ok) {
+          setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+        } else {
+          plausibleEvent("Phase0/CTA preinscription - inscription");
+        }
+        const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
+        if (young) {
+          if (token) api.setToken(token);
+          dispatch(setYoung(young));
+          removePersistedData();
+        }
+        // after connection young is automatically redirected to /preinscription/email-validation
+        history.push("/preinscription/email-validation");
+      } catch (e) {
+        if (e.code === "USER_ALREADY_REGISTERED")
+          setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
+        else {
+          capture(e);
+          setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
+        }
+      }
+    };
 
   return (
     <>
@@ -143,7 +143,7 @@ export default function StepConfirm() {
         </div>
         <div className="font-normal text-[#161616] pb-4">{COHESION_STAY_LIMIT_DATE[data?.cohort]}</div>
 
-        <hr />
+        {/* <hr />
 
         <div className="flex items-center justify-between my-6">
           <h1 className="text-lg font-semibold text-[#161616]">Mes informations personnelles</h1>
@@ -171,13 +171,13 @@ export default function StepConfirm() {
             <p className="text-gray-500">Email&nbsp;:</p>
             <p className="text-right">{data.email}</p>
           </div>
-        </div>
+        </div> */}
 
         {/* <hr className="my-6" />
         <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage> */}
 
         <SignupButtonContainer 
-        // onClickNext={() => onSubmit()}
+        onClickNext={() => onSubmit()}
          labelNext="Oui, recevoir un code d'activation par e-mail" disabled={Object.values(error).length} />
       </DSFRContainer>
     </>

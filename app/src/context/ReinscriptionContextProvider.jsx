@@ -13,6 +13,7 @@ const defaultState = {
   phoneZone: PHONE_ZONES_NAMES.FRANCE,
   email: "",
   emailConfirm: "",
+  birthDate: "",
   password: "",
   confirmPassword: "",
   acceptCGU: "false",
@@ -26,7 +27,7 @@ const SECRET_VALUE_KEYS = [
   { key: "rulesYoung", values: [] },
   { key: "step", values: [REINSCRIPTION_STEPS.CONFIRM], fallbackValue: REINSCRIPTION_STEPS.PROFIL },
 ];
-const LOCAL_STORAGE_KEY = "preinscription";
+const LOCAL_STORAGE_KEY = "reinscription";
 
 const getDefaultState = () => {
   const persistedState = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -41,7 +42,6 @@ const getDefaultState = () => {
 };
 
 const ReinscriptionContextProvider = ({ children }) => {
-  console.log(children);
   
   const [value, setValue] = useState(getDefaultState());
 

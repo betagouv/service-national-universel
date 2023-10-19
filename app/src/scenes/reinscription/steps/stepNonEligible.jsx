@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import { useHistory } from "react-router-dom";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
@@ -14,7 +14,7 @@ import { supportURL } from "@/config";
 export default function NonEligible() {
   const history = useHistory();
   // eslint-disable-next-line no-unused-vars
-  const [data, __, removePersistedData] = useContext(PreInscriptionContext);
+  const [data, __, removePersistedData] = useContext(ReinscriptionContext);
 
   const engagementPrograms = [
     {

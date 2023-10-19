@@ -35,7 +35,7 @@ export default function StepSejour() {
           </div>
         </>
       )} */}
-        <SignupButtonContainer onClickPrevious={() => history.push("/preinscription/")} />
+        <SignupButtonContainer onClickPrevious={() => history.push("/reinscription/")} />
       </DSFRContainer>
     </>
   );
@@ -49,9 +49,9 @@ function SessionButton(session) {
       key={session.id}
       className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
       onClick={() => {
-        setData({ ...data, cohort: session.name, step: REINSCRIPTION_STEPS.PROFIL });
+        setData({ ...data, cohort: session.name, step: REINSCRIPTION_STEPS.CONFIRM });
         plausibleEvent(session.event);
-        history.push("/preinscription/profil");
+        history.push("/reinscription/confirm");
       }}>
       <div>
         Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023

@@ -27,6 +27,7 @@ export default function StepEligibilite() {
   const [error, setError] = React.useState({});
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const isDisabled = true;
 
   const history = useHistory();
 
@@ -87,10 +88,10 @@ export default function StepEligibilite() {
     }
 
     setLoading(true);
-    plausibleEvent("Phase0/CTA preinscription - eligibilite");
+    plausibleEvent("Phase0/CTA reinscription - eligibilite");
     if (data.frenchNationality === "false") {
       setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
-      return history.push("/preinscription/noneligible");
+      return history.push("/reinscription/noneligible");
     }
     const res = await api.post("/cohort-session/eligibility/2023", {
       schoolDepartment: data.school?.departmentName,
@@ -106,17 +107,17 @@ export default function StepEligibilite() {
       setLoading(false);
     }
 
-    // if (res.data.msg) {
-    //   setData({ ...data, msg: res.data.msg, step: REINSCRIPTION_STEPS.INELIGIBLE });
-    //   return history.push("/preinscription/noneligible");
-    // }
+    if (res.data.msg) {
+      setData({ ...data, msg: res.data.msg, step: REINSCRIPTION_STEPS.INELIGIBLE });
+      return history.push("/reinscription/noneligible");
+    }
     const sessions = res.data;
-    // if (sessions.length === 0) {
-    //   setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: REINSCRIPTION_STEPS.INELIGIBLE });
-    //   return history.push("/preinscription/noneligible");
-    // }
+    if (sessions.length === 0) {
+      setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: REINSCRIPTION_STEPS.INELIGIBLE });
+      return history.push("/reinscription/noneligible");
+    }
     setData({ ...data, sessions, step: REINSCRIPTION_STEPS.SEJOUR });
-    return history.push("/preinscription/sejour");
+    return history.push("/reinscription/sejour");
   };
 
   return (
@@ -148,9 +149,9 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className="flex-start mt-2 flex w-full flex-col text-base">
+            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isDisabled ? 'text-[#929292]' : 'text-[#666666]'}`}>
               Date de naissance
-              <DatePicker value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} disabled={isDisabled} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           </div>

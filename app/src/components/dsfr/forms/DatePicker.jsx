@@ -17,7 +17,6 @@ export default function DatePicker({ value, onChange, disabled = false }) {
   }, [day, month, year]);
 
   useEffect(() => {
-    console.log("Checking value", day, month, year, value);
     if (value && !day && !month && !year) {
       setDay(value.getDate());
       setMonth(value.getMonth() + 1);
@@ -30,15 +29,18 @@ export default function DatePicker({ value, onChange, disabled = false }) {
   const handleMonthChange = (e) => setMonth(e.target.value);
   const handleYearChange = (e) => setYear(e.target.value);
 
+  const textColor = disabled ? "text-[#929292]" : "text-[#666666]";
+  const borderColor = disabled ? "border-[#929292]" : "border-black";
+
   return (
     <div className="mt-2 flex w-full items-start justify-start gap-3 md:gap-8 flex-row">
-      <div className="flex flex-col items-start mb-2 flex-grow">
-        <label htmlFor="day" className="text-[#666666] text-sm mb-2 ml-1">
+      <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
+        <label htmlFor="day" className={`text-sm mb-2 ml-1 ${textColor}`}>
           Exemple: 14
         </label>
         <input
           id="day"
-          className="w-full bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] border-black px-4 py-2"
+          className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
           type="number"
           value={day}
           onChange={handleDayChange}
@@ -47,13 +49,13 @@ export default function DatePicker({ value, onChange, disabled = false }) {
           disabled={disabled}
         />
       </div>
-      <div className="flex flex-col items-start mb-2 flex-grow">
-        <label htmlFor="month" className="text-[#666666] text-sm mb-2 ml-1">
+      <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
+        <label htmlFor="month" className={`text-sm mb-2 ml-1 ${textColor}`}>
           Exemple: 12
         </label>
         <input
           id="month"
-          className="w-full bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] border-black px-4 py-2"
+          className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
           type="number"
           value={month}
           onChange={handleMonthChange}
@@ -62,13 +64,13 @@ export default function DatePicker({ value, onChange, disabled = false }) {
           disabled={disabled}
         />
       </div>
-      <div className="flex flex-col items-start mb-2 flex-grow">
-        <label htmlFor="year" className="text-[#666666] text-sm mb-2 ml-1">
+      <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
+        <label htmlFor="year" className={`text-sm mb-2 ml-1 ${textColor}`}>
           Exemple: 2000
         </label>
         <input
           id="year"
-          className="w-full bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] border-black px-4 py-2"
+          className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
           type="number"
           value={year}
           onChange={handleYearChange}

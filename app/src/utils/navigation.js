@@ -19,7 +19,7 @@ export const PREINSCRIPTION_STEPS = {
 
 export const REINSCRIPTION_STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
-  // INELIGIBLE: "INELIGIBLE",
+  INELIGIBLE: "INELIGIBLE",
   SEJOUR: "SEJOUR",
   CONFIRM: "CONFIRM",
 };
@@ -56,7 +56,7 @@ export const PREINSCRIPTION_STEPS_LIST = [
 
 export const REINSCRIPTION_STEPS_LIST = [
   { name: PREINSCRIPTION_STEPS.ELIGIBILITE, url: "eligibilite" },
-  // { name: PREINSCRIPTION_STEPS.INELIGIBLE, url: "noneligible" },
+  { name: PREINSCRIPTION_STEPS.INELIGIBLE, url: "noneligible" },
   { name: PREINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
   { name: PREINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
 ];
