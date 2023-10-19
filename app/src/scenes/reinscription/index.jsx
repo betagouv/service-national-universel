@@ -30,6 +30,20 @@ const Step = () => {
     updateValue({
       ...data,
       birthDate: young.birthdateAt,
+      frenchNationality: young.frenchNationality,
+      scolarity: young.grade,
+      school: {
+        fullName: young.schoolName,
+        type: young.schoolType,
+        adresse: young.schoolAddress,
+        codeCity: young.schoolZip,
+        city: young.schoolCity,
+        departmentName: young.schoolDepartment,
+        region: young.schoolRegion,
+        country: young.schoolCountry,
+        id: young.schoolId,
+        postCode: young.schoolZip,
+      },
     });
   }, [young]);
 

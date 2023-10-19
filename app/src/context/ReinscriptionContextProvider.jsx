@@ -7,15 +7,10 @@ export const ReinscriptionContext = createContext();
 //set default value for uncontrolled input
 const defaultState = {
   step: REINSCRIPTION_STEPS.ELIGIBILITE,
-  firstName: "",
-  lastName: "",
-  phone: "",
-  phoneZone: PHONE_ZONES_NAMES.FRANCE,
-  email: "",
-  emailConfirm: "",
   birthDate: "",
-  password: "",
-  confirmPassword: "",
+  frenchNationality: "",
+  scolarity : "",
+  school: {},
   acceptCGU: "false",
   rulesYoung: "false",
 };
