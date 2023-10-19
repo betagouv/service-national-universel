@@ -148,8 +148,8 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT] =
           must: { match_all: {} },
           filter: [
             { range: { startAt: { gt: "now" } } },
-            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.REFERENT_REGION ? { term: { "region.keyword": user.region } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
             ...missionContextFilters,
           ].filter(Boolean),
         },
@@ -210,8 +210,8 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS] = a
           filter: [
             { range: { startAt: { lt: "now" } } },
             { range: { endAt: { gt: "now" } } },
-            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.REFERENT_REGION ? { term: { "region.keyword": user.region } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
             ...missionContextFilters,
           ].filter(Boolean),
         },
@@ -266,8 +266,8 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTE
           must: { match_all: {} },
           filter: [
             { range: { endAt: { lt: "now" } } },
-            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.REFERENT_REGION ? { term: { "region.keyword": user.region } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
             ...missionContextFilters,
           ].filter(Boolean),
         },
