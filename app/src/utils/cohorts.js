@@ -68,8 +68,9 @@ export function isCohortDone(cohortName, extraDays = 0) {
     const cohort = getCohort(cohortName);
     if (cohort && cohort.dateEnd) {
       const dateEnd = new Date(cohort.dateEnd);
-      dateEnd.setDate(dateEnd.getDate() + extraDays);
-      return dateEnd.valueOf() < Date.now();
+      const endDateDayStart = new Date(dateEnd.getUTCFullYear(), dateEnd.getUTCMonth(), dateEnd.getUTCDate(), 0, 0, 0);
+      endDateDayStart.setDate(dateEnd.getUTCDate() + extraDays);
+      return endDateDayStart.valueOf() < Date.now();
     }
     return false;
   }
