@@ -1,5 +1,8 @@
 const Joi = require("joi");
+const { ROLES, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../sentry");
+const { ERRORS, isYoung, isReferent } = require("../../utils");
+const StructureObject = require("../../models/structure");
 
 const ES_NO_LIMIT = 10000;
 
@@ -140,9 +143,57 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
   return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, size: value.size, error };
 }
 
+async function buildMissionContext(user) {
+  const contextFilters = [];
+
+  // A young can only see validated missions.
+  if (isYoung(user)) contextFilters.push({ term: { "status.keyword": "VALIDATED" } });
+  if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // A responsible cans only see their structure's missions.
+  if (user.role === ROLES.RESPONSIBLE) {
+    if (!user.structureId) return { missionContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    contextFilters.push({ terms: { "structureId.keyword": [user.structureId] } });
+  }
+
+  // A supervisor can only see their structures' missions.
+  if (user.role === ROLES.SUPERVISOR) {
+    if (!user.structureId) return { missionContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+  }
+
+  return { missionContextFilters: contextFilters };
+}
+
+async function buildApplicationContext(user) {
+  const contextFilters = [];
+
+  if (!canSearchInElasticSearch(user, "application")) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // A responsible can only see their structure's applications.
+  if (user.role === ROLES.RESPONSIBLE) {
+    if (!user.structureId) return { applicationContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    contextFilters.push({ terms: { "structureId.keyword": [user.structureId] } });
+    contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
+  }
+
+  // A supervisor can only see their structures' applications.
+  if (user.role === ROLES.SUPERVISOR) {
+    if (!user.structureId) return { applicationContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+    contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
+  }
+
+  return { applicationContextFilters: contextFilters };
+}
+
 module.exports = {
   buildNdJson,
   buildArbitratyNdJson,
   buildRequestBody,
   joiElasticSearch,
+  buildMissionContext,
+  buildApplicationContext,
 };

@@ -5,8 +5,9 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ES_NO_LIMIT, ROLES } = require("snu-lib");
-
+const { ES_NO_LIMIT, ROLES, APPLICATION_STATUS } = require("snu-lib");
+const { buildMissionContext } = require("../utils");
+const { buildApplicationContext } = require("../utils");
 // TODO: Guard all requests according to roles
 
 router.post("/status-divers", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -287,12 +288,19 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
 router.post("/mission-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // TODO: refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const filterFields = ["department", "region"];
+    let missionContextFilters = [];
+    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(req.user.role)) {
+      const { missionContextFilters: mCtxFilters, missionContextError } = await buildMissionContext(req.user);
+      if (missionContextError) return res.status(missionContextError.status).send(missionContextError.body);
+      missionContextFilters = mCtxFilters;
+    }
+
+    const filterFields = ["department", "region", "structureId"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -319,6 +327,7 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
             // roles
             req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [req.user.region] } } : null,
             req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
+            ...missionContextFilters,
           ].filter(Boolean),
         },
       },
@@ -360,6 +369,91 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
       total: bucket.total.value,
       left: bucket.left.value,
     }));
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/application-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    // TODO: refacto this part with middleware
+    const user = req.user;
+    const allowedRoles = [ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const { applicationContextFilters, applicationContextError } = await buildApplicationContext(user);
+    if (applicationContextError) {
+      return res.status(applicationContextError.status).send(applicationContextError.body);
+    }
+
+    const filterFields = ["department", "region", "structureId"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    let filters = [
+      queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
+      queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
+    ];
+
+    const body = {
+      query: {
+        bool: {
+          must: [{ match_all: {} }, ...filters.filter(Boolean)],
+          filter: [...applicationContextFilters].filter(Boolean),
+        },
+      },
+      aggs: {
+        by_status: {
+          terms: {
+            field: "status.keyword",
+            size: ES_NO_LIMIT,
+          },
+        },
+        by_contract_status: {
+          filter: {
+            bool: {
+              must: [],
+              filter: [{ terms: { "status.keyword": [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE] } }],
+            },
+          },
+          aggs: { names: { terms: { field: "contractStatus.keyword", size: ES_NO_LIMIT } } },
+        },
+      },
+      size: 0,
+    };
+
+    const response = await esClient.search({ index: "application", body: body });
+
+    if (!response?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const bucketsApplication = response.body.aggregations.by_status.buckets;
+    const bucketsContract = response.body.aggregations.by_contract_status.names.buckets;
+
+    const data = {
+      APPLICATION: bucketsApplication.reduce((acc, bucket) => {
+        const key = bucket.key;
+        acc[key] = {
+          nb: bucket.doc_count,
+          percentage: Math.round((bucket.doc_count / bucketsContract.reduce((acc, bucke) => acc + bucke.doc_count, 0)) * 100),
+        };
+        return acc;
+      }, {}),
+      CONTRACT: bucketsContract.reduce((acc, bucket) => {
+        const key = bucket.key;
+        acc[key] = {
+          nb: bucket.doc_count,
+          percentage: Math.round((bucket.doc_count / bucketsContract.reduce((acc, bucke) => acc + bucke.doc_count, 0)) * 100),
+        };
+        return acc;
+      }, {}),
+    };
 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
