@@ -5,9 +5,9 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ES_NO_LIMIT, ROLES } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, APPLICATION_STATUS } = require("snu-lib");
 const { buildMissionContext } = require("../utils");
-
+const { buildApplicationContext } = require("../utils");
 // TODO: Guard all requests according to roles
 
 router.post("/status-divers", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -381,16 +381,15 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
 router.post("/application-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     // TODO: refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
-    if (!allowedRoles.includes(req.user.role)) {
+    const user = req.user;
+    const allowedRoles = [ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
+    if (!allowedRoles.includes(user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    let missionContextFilters = [];
-    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(req.user.role)) {
-      const { missionContextFilters: mCtxFilters, missionContextError } = await buildMissionContext(req.user);
-      if (missionContextError) return res.status(missionContextError.status).send(missionContextError.body);
-      missionContextFilters = mCtxFilters;
+    const { applicationContextFilters, applicationContextError } = await buildApplicationContext(user);
+    if (applicationContextError) {
+      return res.status(applicationContextError.status).send(applicationContextError.body);
     }
 
     const filterFields = ["department", "region", "structureId"];
@@ -400,19 +399,13 @@ router.post("/application-status", passport.authenticate("referent", { session: 
     let filters = [
       queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
       queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-      queryFilters.structureId?.length ? { terms: { "structureId.keyword": queryFilters.structureId } } : null,
     ];
 
     const body = {
       query: {
         bool: {
           must: [{ match_all: {} }, ...filters.filter(Boolean)],
-          filter: [
-            // roles
-            req.user.role === ROLES.REFERENT_REGION ? { terms: { "missionRegion.keyword": [req.user.region] } } : null,
-            req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": req.user.department } } : null,
-            ...missionContextFilters,
-          ].filter(Boolean),
+          filter: [...applicationContextFilters].filter(Boolean),
         },
       },
       aggs: {
@@ -423,10 +416,13 @@ router.post("/application-status", passport.authenticate("referent", { session: 
           },
         },
         by_contract_status: {
-          terms: {
-            field: "contractStatus.keyword",
-            size: ES_NO_LIMIT,
+          filter: {
+            bool: {
+              must: [],
+              filter: [{ terms: { "status.keyword": [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE] } }],
+            },
           },
+          aggs: { names: { terms: { field: "contractStatus.keyword", size: ES_NO_LIMIT } } },
         },
       },
       size: 0,
@@ -439,7 +435,7 @@ router.post("/application-status", passport.authenticate("referent", { session: 
     }
 
     const bucketsApplication = response.body.aggregations.by_status.buckets;
-    const bucketsContract = response.body.aggregations.by_contract_status.buckets;
+    const bucketsContract = response.body.aggregations.by_contract_status.names.buckets;
 
     const data = {
       APPLICATION: bucketsApplication.reduce((acc, bucket) => {

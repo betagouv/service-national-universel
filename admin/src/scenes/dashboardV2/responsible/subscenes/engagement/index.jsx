@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import queryString from "query-string";
 import { Link } from "react-router-dom/cjs/react-router-dom.min";
-import { ROLES, getNewLink } from "@/utils";
+import { APPLICATION_STATUS, ROLES, getNewLink } from "@/utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import InformationCircle from "@/assets/icons/InformationCircle";
 import ReactTooltip from "react-tooltip";
@@ -23,6 +23,8 @@ export default function Index() {
 
   const [valuesApplication, setValuesApplication] = useState({});
   const [valuesMission, setValuesMission] = useState({});
+
+  const statusForRedirectContract = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE];
 
   let filters = { structureId: structureId };
   let missionFilters = {};
@@ -231,7 +233,7 @@ export default function Index() {
                     status="Brouillon"
                     nb={valuesApplication.CONTRACT.DRAFT?.nb || 0}
                     percentage={valuesApplication.CONTRACT.DRAFT?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ contractStatus: "DRAFT" })]}
+                    filtersUrl={[queryString.stringify({ contractStatus: "DRAFT", status: statusForRedirectContract.join("~") })]}
                     base="/volontaire/list/all"
                     icon={!!valuesApplication.CONTRACT.DRAFT?.nb}
                   />
@@ -244,7 +246,7 @@ export default function Index() {
                     status="Envoyés"
                     nb={valuesApplication.CONTRACT.SENT?.nb || 0}
                     percentage={valuesApplication.CONTRACT.SENT?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ contractStatus: "SENT" })]}
+                    filtersUrl={[queryString.stringify({ contractStatus: "SENT", status: statusForRedirectContract.join("~") })]}
                     base="/volontaire/list/all"
                   />
                 </div>
@@ -256,7 +258,7 @@ export default function Index() {
                     status="Signés"
                     nb={valuesApplication.CONTRACT.VALIDATED?.nb || 0}
                     percentage={valuesApplication.CONTRACT.VALIDATED?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ contractStatus: "VALIDATED" })]}
+                    filtersUrl={[queryString.stringify({ contractStatus: "VALIDATED", status: statusForRedirectContract.join("~") })]}
                     base="/volontaire/list/all"
                   />
                 </div>
