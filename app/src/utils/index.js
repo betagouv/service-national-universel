@@ -81,9 +81,10 @@ export function permissionReinscription(_y) {
   return false;
 }
 
+// from the end of the cohort's last day
 export function isYoungCanApplyToPhase2Missions(young) {
   const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
-  return isCohortDone(young.cohort) && hasYoungPhase1DoneOrExempted;
+  return isCohortDone(young.cohort, 1) && hasYoungPhase1DoneOrExempted;
 }
 
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
