@@ -14,6 +14,7 @@ import MultiSelect from "../../components/Multiselect";
 import api from "../../services/api";
 import { ENABLE_PM, legalStatus, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
+import validator from "validator";
 
 export default function Create() {
   const user = useSelector((state) => state.Auth.user);
@@ -22,6 +23,14 @@ export default function Create() {
   const [isLoading, setIsLoading] = useState(false);
 
   const redirect = new URLSearchParams(window.location.search).get("redirect");
+
+  function validateEmail(value) {
+    let error;
+    if (value && !validator.isEmail(value)) {
+      error = "L'e-mail est invalide";
+    }
+    return error;
+  }
 
   useEffect(() => {
     if (redirect) window.scrollTo(0, 0);
@@ -60,6 +69,13 @@ export default function Create() {
       onSubmit={async (values) => {
         try {
           setIsLoading(true);
+
+          const emailError = validateEmail(values.email);
+          if (emailError) {
+            toastr.error(emailError);
+            setIsLoading(false);
+            return;
+          }
           const { data: exist } = await api.post("/referent/exist", { email: values.email });
           if (exist) {
             toastr.warning("Utilisateur déjà inscrit", "Merci de vérifier si la structure existe déjà sur la plateforme");
