@@ -48,7 +48,6 @@ export default function Index() {
         if (user.role === ROLES.SUPERVISOR) {
           let networkName = data.networkName;
           const { responses } = await API.post(`/elasticsearch/structure/search`, { filters: { searchbar: [], networkName: [networkName] }, size: 100 });
-          console.log(responses);
           setStructureId(
             responses[0].hits?.hits.map((item) => {
               return item._id;
@@ -60,7 +59,6 @@ export default function Index() {
         toastr.error("Aucune structure n'a été trouvée.");
       }
     } catch (err) {
-      console.log("unable to check structure", err);
       toastr.error("Impossible de charger la structure.");
     }
   }
@@ -73,11 +71,9 @@ export default function Index() {
       if (result.ok) {
         setValuesApplication(result.data);
       } else {
-        console.log("error : ", result);
         setError("Erreur: impossible de charger les données.");
       }
     } catch (err) {
-      console.log("unable to load application statuts: ", err);
       setError("Erreur: impossible de charger les données.");
     }
     setLoading(false);
@@ -100,11 +96,9 @@ export default function Index() {
           }, {}),
         );
       } else {
-        console.log("error : ", result);
         setErrorMission("Erreur: impossible de charger les données.");
       }
     } catch (err) {
-      console.log("unable to load missions statuts: ", err);
       setErrorMission("Erreur: impossible de charger les données.");
     }
     setLoadingMission(false);

@@ -307,7 +307,6 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
     let filters = [
       queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
       queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
-      queryFilters.structureId?.length ? { terms: { "structureId.keyword": queryFilters.structureId } } : null,
       req.body.missionFilters.start?.length ? { range: { startAt: { gte: req.body.missionFilters.start } } } : null,
       req.body.missionFilters.end?.length ? { range: { endAt: { lte: req.body.missionFilters.end } } } : null,
     ];
