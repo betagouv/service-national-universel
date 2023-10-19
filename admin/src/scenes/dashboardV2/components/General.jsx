@@ -51,7 +51,7 @@ export default function Index() {
         <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
         <div className="flex w-full gap-4">
           <Todos user={user} />
-          {user.role !== ROLES.HEAD_CENTER && <KeyNumbers />}
+          {user.role !== ROLES.HEAD_CENTER && <KeyNumbers role={user.role} />}
         </div>
         {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && <Objective user={user} />}
       </div>
