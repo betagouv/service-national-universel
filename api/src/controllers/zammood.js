@@ -186,7 +186,6 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
     const { subject, message, author, formSubjectStep1, formSubjectStep2, files } = value;
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
@@ -222,6 +221,18 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
 //create ticket for non authenticated users
 router.post("/ticket/form", async (req, res) => {
   try {
+    let author;
+
+    if (req.body.role === "young" || req.body.role === "parent") {
+      author = req.body.role;
+      const existingYoung = await YoungObject.findOne({ email: req.body.email });
+      if (existingYoung) {
+        req.body.role = "young exterior";
+      } else {
+        req.body.role = "unknown";
+      }
+    }
+
     const obj = {
       email: req.body.email,
       subject: req.body.subject,
@@ -270,6 +281,7 @@ router.post("/ticket/form", async (req, res) => {
       { name: "role", value: role },
       { name: "page précédente", value: fromPage },
     ];
+
     const response = await zammood.api("/v0/message", {
       method: "POST",
       credentials: "include",
@@ -285,6 +297,7 @@ router.post("/ticket/form", async (req, res) => {
         formSubjectStep1,
         formSubjectStep2,
         files,
+        author,
       }),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });

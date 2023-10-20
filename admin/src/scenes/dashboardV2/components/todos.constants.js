@@ -35,6 +35,7 @@ const getNoteData = (key, user) => {
       args: ["cohort"],
       btnLabel: "À relancer",
     },
+
     // Sejour
     [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED]: {
       title: "Point de rassemblement",
@@ -113,6 +114,13 @@ const getNoteData = (key, user) => {
       args: ["cohort"],
       btnLabel: "À traiter",
     },
+    [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.EQUIVALENCE_WAITING_VERIFICATION]: {
+      title: "Équivalence",
+      content: "demandes d'équivalence MIG sont en attente de vérification",
+      link: "/volontaire?status=VALIDATED&status_equivalence=WAITING_VERIFICATION",
+      btnLabel: "À traiter",
+    },
+
     // Engagement
     [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.CONTRACT_TO_EDIT]: {
       title: "Contrat",
@@ -162,12 +170,6 @@ const getNoteData = (key, user) => {
       link: null,
       btnLabel: "À suivre",
     },
-    [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.EQUIVALENCE_WAITING_VERIFICATION]: {
-      title: "Équivalence",
-      content: "demandes d'équivalence MIG sont en attente de vérification",
-      link: "/volontaire?status=VALIDATED&status_equivalence=WAITING_VERIFICATION",
-      btnLabel: "À traiter",
-    },
     [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER]: {
       title: "Contrat",
       content: "représentant de l'État est à renseigner pour le département $1",
@@ -175,7 +177,26 @@ const getNoteData = (key, user) => {
       args: ["department"],
       btnLabel: "À traiter",
     },
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END]: {
+      title: "Volontaires",
+      content: "volontaires ayant achevé leur mission à mettre à jour",
+      link: null,
+      btnLabel: "À actualiser",
+    },
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START]: {
+      title: "Volontaires",
+      content: "volontaires ayant commencé leur mission à mettre à jour",
+      link: null,
+      btnLabel: "À actualiser",
+    },
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START]: {
+      title: "Volontaires",
+      content: "volontaires ayant commencé leur mission sans contrat signé",
+      link: null,
+      btnLabel: "À suivre",
+    },
   };
+
   return NOTES[key];
 };
 

@@ -17,6 +17,7 @@ const {
   isInRuralArea,
   PHONE_ZONES_NAMES_ARR,
   formatPhoneNumberFromPhoneZone,
+  getCohortNames,
 } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
@@ -398,7 +399,10 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
 router.put("/changeCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC").required(),
+      cohort: Joi.string()
+        .trim()
+        .valid(...getCohortNames())
+        .required(),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {

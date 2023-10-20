@@ -4,12 +4,13 @@ import DashboardContainer from "../../../components/DashboardContainer";
 
 import plausibleEvent from "../../../../../services/plausible";
 import ExportReport from "./ExportReport";
+import { getCohortNameList } from "@/services/cohort.service";
 
 import General from "@/scenes/dashboardV2/components/inscription/General";
 
 export default function Index() {
   const [selectedFilters, setSelectedFilters] = React.useState({
-    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
+    cohort: [],
   });
 
   return (

@@ -1,4 +1,4 @@
-const { DASHBOARD_TODOS_FUNCTIONS, ROLES, sessions2023 } = require("snu-lib");
+const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
 const CohortModel = require("../../models/cohort");
 
 const services = {
@@ -89,12 +89,22 @@ service.todosByRole = async (user) => {
         ],
       };
       break;
-    case ROLES.SUPERVISOR:
-    case ROLES.RESPONSIBLE:
     case ROLES.HEAD_CENTER:
       functionsByRole = {
         inscription: [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT],
         sejour: [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN, DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT],
+      };
+      break;
+    case ROLES.SUPERVISOR:
+    case ROLES.RESPONSIBLE:
+      functionsByRole = {
+        engagement: [
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_END,
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START,
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS,
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTER_END,
+          DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START,
+        ],
       };
       break;
     default:
@@ -106,8 +116,8 @@ service.todosByRole = async (user) => {
   const notFinished = all.filter((c) => new Date(c.dateEnd) > Date.now()).map((e) => e.name);
   const notStarted = all.filter((c) => new Date(c.dateStart) > Date.now()).map((e) => e.name);
   const assignementOpen = all.filter((c) => Boolean(c.isAssignmentAnnouncementsOpenForYoung) && notFinished.includes(c)).map((e) => e.name);
-  const fiveDaysBeforeInscriptionEnd = sessions2023
-    .filter((c) => new Date(c.eligibility.instructionEndDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.eligibility.instructionEndDate) - Date.now() > 0)
+  const fiveDaysBeforeInscriptionEnd = all
+    .filter((c) => new Date(c.instructionEndDate) - Date.now() < 5 * 24 * 60 * 60 * 1000 && new Date(c.instructionEndDate) - Date.now() > 0)
     .map((e) => e.name);
   const oneWeekBeforepdrChoiceLimitDate = all
     .filter((c) => new Date(c.pdrChoiceLimitDate) - Date.now() < 7 * 24 * 60 * 60 * 1000 && new Date(c.pdrChoiceLimitDate) - Date.now() > 0)

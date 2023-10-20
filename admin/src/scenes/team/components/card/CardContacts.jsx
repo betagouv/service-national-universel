@@ -1,14 +1,33 @@
 import React, { useEffect, useState } from "react";
 import ModalContacts from "../modal/ModalContacts";
-import { oldSessions, sessions2023 } from "snu-lib";
+import { oldSessions } from "snu-lib";
+import API from "@/services/api";
+import { capture } from "@/sentry";
 
 export default function CardContacts({ contacts, idServiceDep, getService }) {
   const [isOpen, setIsOpen] = useState(false);
   const [sortedContacts, setSortedContacts] = useState({});
   const [nbCohorts, setNbCohorts] = useState(0);
   const [cohorts, setCohorts] = useState([]);
+  const [sessions2023, setSessions2023] = useState([]);
 
   const [contactsFromCohort, setContactsFromCohort] = useState([]);
+
+  async function cohortsInit() {
+    try {
+      const result = await API.get("/cohort");
+      if (result.status === 401) {
+        return;
+      }
+      if (!result.ok) {
+        capture("Unable to load global cohorts data :" + JSON.stringify(result));
+      } else {
+        setSessions2023(result.data);
+      }
+    } catch (err) {
+      capture(err);
+    }
+  }
 
   const getInitials = (word) =>
     (word || "UK")
@@ -18,13 +37,18 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
       .toUpperCase();
 
   useEffect(() => {
-    if (contacts) {
+    cohortsInit();
+  }, []);
+
+  useEffect(() => {
+    if (contacts && sessions2023.length > 0) {
       let existCohort = [];
       let tempContact = {};
 
       // we take only the last 2 oldCohorts
       let oldCohorts = oldSessions.map((session) => session.name);
       oldCohorts = oldCohorts.slice(oldCohorts.length - 2, oldCohorts.length);
+      // @todo: needs to be tested
       const newCohorts = sessions2023.map((session) => session.name);
 
       const concatCohorts = [...oldCohorts, ...newCohorts];
@@ -44,7 +68,7 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
       setSortedContacts(tempContact);
       setContactsFromCohort(contacts.filter((contact) => concatCohorts.includes(contact.cohort)));
     }
-  }, [contacts]);
+  }, [contacts, sessions2023]);
 
   const handleShowModal = () => setIsOpen(true);
 

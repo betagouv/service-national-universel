@@ -1,13 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { youngCanChangeSession } from "snu-lib";
+import { getCohortPeriod, youngCanChangeSession } from "snu-lib";
 import clock from "../../assets/clock.svg";
 import edit from "../../assets/editIcon.svg";
 import hero from "../../assets/hero.png";
 import { supportURL } from "../../config";
-import { translateCohort } from "../../utils";
 import Container from "./components/Container";
 import Files from "./Files";
+import { getCohort } from "@/utils/cohorts";
 
 export default function WaitingList({ young }) {
   return (
@@ -19,7 +19,7 @@ export default function WaitingList({ young }) {
               Mon séjour de cohésion
               <br />
               <strong className="flex items-center">
-                {translateCohort(young.cohort)}{" "}
+                {getCohortPeriod(getCohort(young.cohort))}{" "}
                 {youngCanChangeSession(young) ? (
                   <Link to="/changer-de-sejour">
                     <img src={edit} alt="edit icon" className="ml-2 h-9 w-9 hover:h-10 hover:w-10 hover:cursor-pointer" />

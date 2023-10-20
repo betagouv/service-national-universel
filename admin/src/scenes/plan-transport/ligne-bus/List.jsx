@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -19,24 +19,24 @@ import { TabItem, Title, translateStatus } from "../components/commons";
 import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
-
-const cohortList = [
-  { label: "Séjour du <b>9 au 20 Octobre 2023</b>", value: "Octobre 2023 - NC" },
-  { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
-  { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
-  { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
-  { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
-  { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
-];
+import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const [cohortList, setCohortList] = useState([]);
   const urlParams = new URLSearchParams(window.location.search);
-  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : "Juillet 2023";
+  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : undefined;
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
   const history = useHistory();
+
+  useEffect(() => {
+    const cohortList = getCohortSelectOptions(cohorts);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[0].value);
+  }, []);
 
   const getPlanDetransport = async () => {
     try {

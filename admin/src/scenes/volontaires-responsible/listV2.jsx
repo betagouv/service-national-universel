@@ -18,9 +18,10 @@ import {
   getAge,
   translate,
   translateApplication,
+  translateContractStatus,
   translateApplicationFileType,
   formatStringDateTimezoneUTC,
-} from "../../utils";
+} from "@/utils";
 import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import Panel from "./panel";
 
@@ -86,7 +87,12 @@ export default function List() {
       missingLabel: "Non renseigné",
       translate: (e) => translateApplication(e),
     },
-
+    {
+      title: "Statut du Contrat",
+      name: "contractStatus",
+      missingLabel: "Non renseigné",
+      translate: (e) => translateContractStatus(e),
+    },
     {
       title: "Pièces jointes",
       name: "filesType",

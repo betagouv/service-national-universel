@@ -1,6 +1,7 @@
 import React from "react";
-import { translateCohort } from "snu-lib";
+import { getCohortPeriod } from "snu-lib";
 import { RiErrorWarningLine } from "react-icons/ri";
+import { getCohort } from "@/utils/cohorts";
 
 export default function Problem({ cohort }) {
   return (
@@ -13,12 +14,12 @@ export default function Problem({ cohort }) {
                 <h1 className="text-5xl">Mon séjour de cohésion</h1>
                 <div className="flex flex-row items-center">
                   <h1 className="text-5xl">
-                    <strong>{translateCohort(cohort)}</strong>
+                    <strong>{getCohortPeriod(getCohort(cohort))}</strong>
                   </h1>
                 </div>
               </div>
               <div className="mb-4 flex flex-col md:hidden">
-                <h1 className="text-sm text-gray-600 ">Séjour {translateCohort(cohort)}</h1>
+                <h1 className="text-sm text-gray-600 ">Séjour {getCohortPeriod(getCohort(cohort))}</h1>
               </div>
             </article>
           </section>

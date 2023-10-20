@@ -81,13 +81,13 @@ const phase1 = async (young) => {
   const session = await getSession(young);
   const cohort = await getCohort(young);
   const meetingPoint = await getMeetingPoint(young);
+  const departureDate = await getDepartureDateSession(meetingPoint, session, young, cohort);
+  const returnDate = await getReturnDateSession(meetingPoint, session, young, cohort);
+
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
     .replace(/{{COHORT}}/g, sanitizeAll({ ...END_DATE_PHASE1, ...PHASE1_YOUNG_ACCESS_LIMIT }[young.cohort].getYear() + 1900))
-    .replace(
-      /{{COHESION_DATE}}/g,
-      sanitizeAll(transportDatesToString(getDepartureDateSession(meetingPoint, session, young, cohort), getReturnDateSession(meetingPoint, session, young, cohort))),
-    )
+    .replace(/{{COHESION_DATE}}/g, sanitizeAll(transportDatesToString(departureDate, returnDate)))
     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
     .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))

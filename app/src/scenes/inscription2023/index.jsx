@@ -20,6 +20,7 @@ import { YOUNG_STATUS, inscriptionCreationOpenForYoungs, inscriptionModification
 import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
 import { environment } from "../../config";
+import { getCohort } from "@/utils/cohorts";
 
 function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
@@ -81,6 +82,7 @@ const StepCorrection = () => {
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
 
   if (!young) return <Redirect to="/preinscription" />;
 
@@ -99,12 +101,12 @@ export default function Index() {
   }
 
   // Si la periode de modification est finie, pour les volontaires en cours d'inscription qui n'ont pas encore été basculés sur "à venir"
-  if (!inscriptionCreationOpenForYoungs(young.cohort, false, environment) && young.status === YOUNG_STATUS.IN_PROGRESS) {
+  if (!inscriptionCreationOpenForYoungs(cohort) && young.status === YOUNG_STATUS.IN_PROGRESS) {
     return <InscriptionClosed />;
   }
 
   //si la periode de modification est finie
-  if (!inscriptionModificationOpenForYoungs(young.cohort, young, environment) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
+  if (!inscriptionModificationOpenForYoungs(cohort) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 

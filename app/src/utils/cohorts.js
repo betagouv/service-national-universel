@@ -1,6 +1,7 @@
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+
 import api from "../services/api";
 import { capture } from "../sentry";
-import { sessions2023 } from "snu-lib";
 import dayjs from "dayjs";
 let cohorts = null;
 let cohortsCachedAt = null;
@@ -29,7 +30,7 @@ function isCohortsInitialized() {
 
 export function getCohort(name) {
   if (isCohortsInitialized()) {
-    return cohorts.find((c) => c.name === name);
+    return cohorts.find((c) => c.name === name) || name;
   } else {
     return undefined;
   }
@@ -60,10 +61,6 @@ export function canChooseMeetingPointForCohort(cohortName) {
   return limitDate && dayjs().isBefore(limitDate);
 }
 
-export function getCohortDetail(cohortName) {
-  return sessions2023.find((c) => c.name === cohortName);
-}
-
 // start of the cohort's last day
 export function isCohortDone(cohortName, extraDays = 0) {
   if (["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"].includes(cohortName)) return true;
@@ -71,8 +68,9 @@ export function isCohortDone(cohortName, extraDays = 0) {
     const cohort = getCohort(cohortName);
     if (cohort && cohort.dateEnd) {
       const dateEnd = new Date(cohort.dateEnd);
-      dateEnd.setDate(dateEnd.getDate() + extraDays);
-      return dateEnd.valueOf() < Date.now();
+      const endDateDayStart = new Date(dateEnd.getUTCFullYear(), dateEnd.getUTCMonth(), dateEnd.getUTCDate(), 0, 0, 0);
+      endDateDayStart.setDate(dateEnd.getUTCDate() + extraDays);
+      return endDateDayStart.valueOf() < Date.now();
     }
     return false;
   }
@@ -88,19 +86,11 @@ export function isCohortNeedJdm(cohortName) {
   }
 }
 
-export function getCohortPeriod(cohort) {
-  const startDate = new Date(cohort.dateStart);
-  const endDate = new Date(cohort.dateEnd);
-  const endDateformatOptions = { year: "numeric", month: "long", day: "numeric" };
-  const startDateformatOptions = { day: "numeric" };
-  if (startDate.getMonth() !== endDate.getMonth()) {
-    startDateformatOptions.month = "long";
-  }
-  if (startDate.getFullYear() !== endDate.getFullYear()) {
-    startDateformatOptions.year = "numeric";
-  }
-  const formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions).format(startDate);
-  const formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
-
-  return `du ${formattedStart} au ${formattedEnd}`;
-}
+export const canYoungResumePhase1 = (y) => {
+  if (!isCohortsInitialized()) throw new Error("cohorts not initialized");
+  return (
+    cohorts.map((e) => e.name).includes(y.cohort) &&
+    y.status === YOUNG_STATUS.WITHDRAWN &&
+    ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.NOT_DONE].includes(y.statusPhase1)
+  );
+};

@@ -1,5 +1,5 @@
 import React from "react";
-import { getDepartureDate, getReturnDate, translateCohortTemp, transportDatesToString, youngCanChangeSession } from "snu-lib";
+import { getDepartureDate, getReturnDate, getCohortPeriod, transportDatesToString, youngCanChangeSession } from "snu-lib";
 import hero2 from "../../assets/hero-2.png";
 import heroBanner from "../../assets/hero-banner.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
@@ -33,7 +33,7 @@ export default function WaitingAffectation() {
           <article>
             <h1 className="mb-4 flex flex-col text-2xl leading-7 md:gap-3 md:text-[44px] md:text-5xl md:leading-12">
               <span>Mon séjour de cohésion</span>
-              <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : translateCohortTemp(young.cohort)}</strong>
+              <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : getCohortPeriod(young.cohort)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
             {allowedGrades.includes(young.grade) && (

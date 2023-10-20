@@ -28,15 +28,17 @@ import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "../../../components/sejour/Presences";
 import StatusPhase1 from "../../../components/sejour/StatusPhase1";
 import TabSession from "./components/TabSession";
+import { getCohortNameList } from "@/services/cohort.service";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
 
   //useStates
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
     statusPhase1: [YOUNG_STATUS_PHASE1.AFFECTED],
-    cohort: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"],
+    cohort: [],
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     department: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
     academy: [],
@@ -44,7 +46,6 @@ export default function Index() {
   const [filterArray, setFilterArray] = useState([]);
   const [data, setData] = useState({});
   const [dataCenter, setDataCenter] = useState({});
-  const [sessionList, setSessionList] = useState(null);
   const [sessionByCenter, setSessionByCenter] = useState(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
@@ -117,6 +118,13 @@ export default function Index() {
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
   }, [JSON.stringify(selectedFilters)]);
+
+  useEffect(() => {
+    const cohortsFilters = getCohortNameList(cohorts);
+    setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
+  }, []);
+
+
   return (
     <DashboardContainer
       active="sejour"
