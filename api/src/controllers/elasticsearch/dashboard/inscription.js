@@ -507,7 +507,7 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
     const { user } = req;
 
     //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -525,7 +525,7 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
           ].filter(Boolean),
 
           filter: [
-            user.role === ROLES.REFERENT_REGION
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
               ? {
                   bool: {
                     should: [

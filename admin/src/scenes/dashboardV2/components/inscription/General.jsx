@@ -9,6 +9,7 @@ import api from "@/services/api";
 import { FilterDashBoard } from "../../components/FilterDashBoard";
 import StatutPhase from "../../components/inscription/StatutPhase";
 import { getCohortNameList } from "@/services/cohort.service";
+import TotalInscription from "@/scenes/dashboardV2/components/inscription/TotalInscriptions";
 
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 import { getNewLink } from "@/utils";
@@ -22,6 +23,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
   const [inscriptionGoals, setInscriptionGoals] = useState();
 
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
+  const [totalInscriptions, setTotalInscriptions] = useState([]);
 
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
@@ -79,6 +81,11 @@ export default function General({ selectedFilters, setSelectedFilters }) {
     setInscriptionDetailObject(res);
   }
 
+  async function fetchTotalInscriptions() {
+    const res = await getTotalInscriptions(selectedFilters);
+    setTotalInscriptions(res);
+  }
+
   useEffect(() => {
     fetchInscriptionGoals();
   }, []);
@@ -87,6 +94,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
     fetchCurrentInscriptions();
+    fetchTotalInscriptions();
   }, [JSON.stringify(selectedFilters)]);
 
   const goal = useMemo(
@@ -124,6 +132,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
           ]}
         />
       </div>
+      <TotalInscription totalInscriptions={totalInscriptions} goal={goal} />
       <StatutPhase values={inscriptionDetailObject} filter={selectedFilters} />
       <div className="flex gap-4">
         <Details selectedFilters={selectedFilters} />
@@ -161,4 +170,12 @@ async function getCurrentInscriptions(filters) {
   const responses = await api.post("/elasticsearch/dashboard/inscription/youngForInscription", { filters: filters });
   // if (!responses.length) return {};
   return api.getAggregations(responses);
+}
+
+async function getTotalInscriptions(filters) {
+  const responses = await api.post("/elasticsearch/dashboard/inscription/totalYoungByDate", { filters: filters });
+  if (!responses || !responses?.aggregations?.aggs?.buckets) {
+    return [];
+  }
+  return responses?.aggregations?.aggs?.buckets;
 }
