@@ -1,17 +1,15 @@
+import React from "react";
+import InformationCircle from "@/assets/icons/InformationCircle";
+import api from "@/services/api";
 import { getNewLink } from "@/utils";
 import queryString from "query-string";
 import { useEffect, useState } from "react";
+import ReactTooltip from "react-tooltip";
 import { translate } from "snu-lib";
-import api from "../../../../../../services/api";
 import Tabs from "../../../../../phase0/components/Tabs";
 import { BarChart, graphColors } from "../../../../components/graphs";
 import DashboardBox from "../../../../components/ui/DashboardBox";
 import { LoadingBar } from "../../../../components/ui/loading";
-import React from "react";
-import { MdInfoOutline } from "react-icons/md";
-import ReactTooltip from "react-tooltip";
-import MoreInfoPanel from "@/scenes/dashboardV2/components/ui/MoreInformationPanel";
-import InformationCircle from "@/assets/icons/InformationCircle";
 
 export default function MissionsDetail({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
