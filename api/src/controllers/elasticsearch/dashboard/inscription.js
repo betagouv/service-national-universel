@@ -502,4 +502,74 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
   }
 });
 
+router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { user } = req;
+
+    //@todo refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const filterFields = ["cohort", "academy", "department", "region"];
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const body = {
+      query: {
+        bool: {
+          must: [
+            { match_all: {} },
+            queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+            queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
+          ].filter(Boolean),
+
+          filter: [
+            user.role === ROLES.REFERENT_REGION
+              ? {
+                  bool: {
+                    should: [
+                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": [user.region] } }] } },
+                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": [user.region] } }] } },
+                    ],
+                  },
+                }
+              : null,
+            user.role === ROLES.REFERENT_DEPARTMENT
+              ? {
+                  bool: {
+                    should: [
+                      { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": user.department } }] } },
+                      { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": user.department } }] } },
+                    ],
+                  },
+                }
+              : null,
+          ].filter(Boolean),
+        },
+      },
+      aggs: {
+        aggs: {
+          date_histogram: {
+            field: "createdAt",
+            calendar_interval: "1M",
+            format: "dd/MM/YYYY",
+          },
+        },
+      },
+      size: 0,
+    };
+
+    const responseYoung = await esClient.search({ index: "young", body: body });
+    if (!responseYoung?.body) {
+      return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    const youngCenter = responseYoung.body;
+    return res.status(200).send(youngCenter);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 module.exports = router;

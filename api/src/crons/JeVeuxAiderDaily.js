@@ -60,6 +60,8 @@ function addOneYear(date) {
 
 const TWO_HOURS = 2 * 60 * 60 * 1000;
 
+const structureException = ["14392"];
+
 const fetchMission = (page = 1) => {
   //preoprod : https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/
   //prod : https://www.jeveuxaider.gouv.fr/
@@ -89,6 +91,10 @@ const sync = async (result) => {
   for (let i = 0; i < result.data.length; i++) {
     try {
       const mission = result.data[i];
+
+      //stop sync for exception
+      if (structureException.includes(mission.structure.id)) continue;
+
       let structure = await StructureModel.findOne({ jvaStructureId: mission.structure.id });
       if (!structure) {
         // console.log("Create new struct");

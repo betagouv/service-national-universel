@@ -6,7 +6,7 @@ import { Formik, Field } from "formik";
 import { useHistory, useParams } from "react-router-dom";
 import { appURL, environment } from "../config";
 import { useSelector } from "react-redux";
-import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, copyToClipboard, formatDateFR } from "../utils";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, copyToClipboard, formatDateFR, translateModelFields } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
@@ -137,6 +137,15 @@ export default function Contract({ young }) {
 
   const onSubmit = async (values) => {
     try {
+      const emailFields = ["youngEmail", "parent1Email", "parent2Email", "projectManagerEmail", "structureManagerEmail"];
+
+      for (const field of emailFields) {
+        const error = validateEmail(values[field]);
+        if (error) {
+          toastr.error(`Erreur avec le champ ${translateModelFields("contract", field)}`, error);
+          return;
+        }
+      }
       values.sendMessage
         ? setLoadings({
             saveButton: false,
@@ -146,6 +155,7 @@ export default function Contract({ young }) {
             saveButton: true,
             submitButton: false,
           });
+
       const { ok, code } = await api.post(`/contract`, {
         ...values,
         missionDuration: values.missionDuration?.toString(),
