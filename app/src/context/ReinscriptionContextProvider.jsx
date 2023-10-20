@@ -1,6 +1,5 @@
 import React, { createContext, useState } from "react";
 import { REINSCRIPTION_STEPS } from "../utils/navigation";
-import { PHONE_ZONES_NAMES } from "snu-lib";
 
 export const ReinscriptionContext = createContext();
 
@@ -11,16 +10,14 @@ const defaultState = {
   frenchNationality: "",
   scolarity : "",
   school: {},
-  acceptCGU: "false",
-  rulesYoung: "false",
+  // acceptCGU: "false", à voir avec Elise 
+  // rulesYoung: "false",
 };
 
 const SECRET_VALUE_KEYS = [
-  { key: "password", values: [] },
-  { key: "confirmPassword", values: [] },
-  { key: "acceptCGU", values: [] },
-  { key: "rulesYoung", values: [] },
-  { key: "step", values: [REINSCRIPTION_STEPS.CONFIRM], fallbackValue: REINSCRIPTION_STEPS.PROFIL },
+  // { key: "acceptCGU", values: [] },
+  // { key: "rulesYoung", values: [] },
+  // { key: "step", values: [REINSCRIPTION_STEPS.CONFIRM], fallbackValue: REINSCRIPTION_STEPS.ELIGIBILITE },
 ];
 const LOCAL_STORAGE_KEY = "reinscription";
 

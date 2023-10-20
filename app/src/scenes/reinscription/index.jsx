@@ -30,7 +30,7 @@ const Step = () => {
     updateValue({
       ...data,
       birthDate: young.birthdateAt,
-      frenchNationality: young.frenchNationality,
+      // frenchNationality: young.frenchNationality,
       scolarity: young.grade,
       school: {
         fullName: young.schoolName,

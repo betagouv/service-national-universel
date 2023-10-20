@@ -49,9 +49,9 @@ export default function StepEligibilite() {
     let errors = {};
 
     // Nationality
-    if (!data?.frenchNationality) {
-      errors.frenchNationality = "Vous devez être français";
-    }
+    // if (!data?.frenchNationality) {
+    //   errors.frenchNationality = "Vous devez être français";
+    // }
     // Scolarity
     if (!data?.scolarity) {
       errors.scolarity = "Choisissez un niveau de scolarité";
@@ -125,7 +125,7 @@ export default function StepEligibilite() {
       <ProgressBar />
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
         <div className="space-y-5">
-          <div className="flex-start flex flex-col">
+          {/* <div className="flex-start flex flex-col">
             <div className="flex items-center">
               <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
               <div className="flex items-center">
@@ -134,7 +134,7 @@ export default function StepEligibilite() {
               </div>
             </div>
             {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
-          </div>
+          </div> */}
 
           <div className="flex flex-col gap-4">
             <div className="flex w-full flex-col">

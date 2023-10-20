@@ -13,6 +13,7 @@ const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, START_DATE_SES
 const { sendTemplate } = require("../../sendinblue");
 const { getFilteredSessions } = require("../../utils/cohort");
 
+// a check avant de supprimer
 router.put("/goToReinscription", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.user._id);
@@ -47,6 +48,7 @@ router.put("/goToReinscription", passport.authenticate("young", { session: false
   }
 });
 
+// a check avant de supprimer
 router.put("/eligibilite", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.user._id);
@@ -112,7 +114,6 @@ router.put("/noneligible", passport.authenticate("young", { session: false, fail
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.reinscriptionStep2023 = STEPS2023REINSCRIPTION.NONELIGIBLE;
     young.status = YOUNG_STATUS.NOT_ELIGIBLE;
 
     await young.save({ fromUser: req.user });
@@ -123,6 +124,7 @@ router.put("/noneligible", passport.authenticate("young", { session: false, fail
   }
 });
 
+// a merge avec le /done
 router.put("/changeCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -148,23 +150,25 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (session.goalReached) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+    // a revoir :
     value.reinscriptionStep2023 = STEPS2023REINSCRIPTION.DOCUMENTS;
 
-    let template = SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE;
-    const emailsTo = [];
-    if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
-    if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
-    if (emailsTo.length !== 0) {
-      await sendTemplate(template, {
-        emailTo: emailsTo,
-        params: {
-          cohort: value.cohort,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-          cta: `${config.APP_URL}/change-cohort`,
-        },
-      });
-    }
+    //  a VOIR plus tard pour l'envoi de mail
+    // let template = SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE;
+    // const emailsTo = [];
+    // if (young.parent1AllowSNU === "true") emailsTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+    // if (young?.parent2AllowSNU === "true") emailsTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+    // if (emailsTo.length !== 0) {
+    //   await sendTemplate(template, {
+    //     emailTo: emailsTo,
+    //     params: {
+    //       cohort: value.cohort,
+    //       youngFirstName: young.firstName,
+    //       youngName: young.lastName,
+    //       cta: `${config.APP_URL}/change-cohort`,
+    //     },
+    //   });
+    // }
     young.set(value);
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -174,6 +178,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
   }
 });
 
+// a chech avant de merge ou supprimer
 router.put("/consentement", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -203,6 +208,7 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
   }
 });
 
+// a checker avant de supprimer
 router.put("/documents", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.user._id);
@@ -245,6 +251,7 @@ router.put("/documents", passport.authenticate("young", { session: false, failWi
   }
 });
 
+// a merge avec /changeCohort
 router.put("/done", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.user._id);
