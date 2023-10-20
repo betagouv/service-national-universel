@@ -8,6 +8,7 @@ import { academyList, COHORTS, departmentToAcademy, REFERENT_ROLES, region2depar
 import api from "@/services/api";
 import { FilterDashBoard } from "../../components/FilterDashBoard";
 import StatutPhase from "../../components/inscription/StatutPhase";
+import { getCohortNameList } from "@/services/cohort.service";
 
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 import { getNewLink } from "@/utils";
@@ -17,6 +18,7 @@ import TabSchool from "../../components/inscription/TabSchool";
 
 export default function General({ selectedFilters, setSelectedFilters }) {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const [inscriptionGoals, setInscriptionGoals] = useState();
 
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
@@ -27,6 +29,11 @@ export default function General({ selectedFilters, setSelectedFilters }) {
   const academyOptions = [ROLES.VISITOR, ROLES.REFERENT_REGION].includes(user.role)
     ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
     : academyList.map((a) => ({ key: a, label: a }));
+
+  useEffect(() => {
+    const cohortsFilters = getCohortNameList(cohorts);
+    setSelectedFilters({ cohort: cohortsFilters });
+  }, []);
 
   useEffect(() => {
     let filters = [

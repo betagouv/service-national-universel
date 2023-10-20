@@ -4,7 +4,6 @@ import DashboardContainer from "../../../components/DashboardContainer";
 
 import plausibleEvent from "../../../../../services/plausible";
 import ExportReport from "./ExportReport";
-import { getCohortNameList } from "@/services/cohort.service";
 
 import General from "@/scenes/dashboardV2/components/inscription/General";
 
