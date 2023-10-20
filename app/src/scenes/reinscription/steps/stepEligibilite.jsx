@@ -9,8 +9,6 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { REINSCRIPTION_STEPS } from "../../../utils/navigation";
 
-import IconFrance from "../../../assets/IconFrance";
-import CheckBox from "../../../components/dsfr/forms/checkbox";
 import Input from "../../../components/dsfr/forms/input";
 import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
@@ -48,10 +46,6 @@ export default function StepEligibilite() {
   const onSubmit = async () => {
     let errors = {};
 
-    // Nationality
-    // if (!data?.frenchNationality) {
-    //   errors.frenchNationality = "Vous devez être français";
-    // }
     // Scolarity
     if (!data?.scolarity) {
       errors.scolarity = "Choisissez un niveau de scolarité";
@@ -89,10 +83,7 @@ export default function StepEligibilite() {
 
     setLoading(true);
     plausibleEvent("Phase0/CTA reinscription - eligibilite");
-    if (data.frenchNationality === "false") {
-      setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
-      return history.push("/reinscription/noneligible");
-    }
+
     const res = await api.post("/cohort-session/eligibility/2023", {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
@@ -125,17 +116,6 @@ export default function StepEligibilite() {
       <ProgressBar />
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
         <div className="space-y-5">
-          {/* <div className="flex-start flex flex-col">
-            <div className="flex items-center">
-              <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-              <div className="flex items-center">
-                <span className="ml-4 mr-2">Je suis de nationalité française</span>
-                <IconFrance />
-              </div>
-            </div>
-            {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
-          </div> */}
-
           <div className="flex flex-col gap-4">
             <div className="flex w-full flex-col">
               <SearchableSelect
@@ -149,7 +129,7 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isDisabled ? 'text-[#929292]' : 'text-[#666666]'}`}>
+            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isDisabled ? "text-[#929292]" : "text-[#666666]"}`}>
               Date de naissance
               <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} disabled={isDisabled} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}

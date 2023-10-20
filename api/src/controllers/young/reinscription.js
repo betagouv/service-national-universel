@@ -151,7 +151,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     if (session.goalReached) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // a revoir :
-    value.reinscriptionStep2023 = STEPS2023REINSCRIPTION.DOCUMENTS;
+    // value.reinscriptionStep2023 = STEPS2023REINSCRIPTION.DOCUMENTS;
 
     //  a VOIR plus tard pour l'envoi de mail
     // let template = SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE;
@@ -257,7 +257,8 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ reinscriptionStep2023: STEPS2023REINSCRIPTION.DONE });
+    // young.set({ reinscriptionStep2023: STEPS2023REINSCRIPTION.DONE });
+    young.set({ status: "REINSCRIPTION" });
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -266,5 +267,50 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+
+router.post("/updateYoung", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Vérification pour les paramètres de "changeCohort"
+    if (req.body.originalCohort && req.body.cohort) {
+      const { error, value } = Joi.object({
+        originalCohort: Joi.string()
+          .trim()
+          .valid(...getCohortNames(true, true, true))
+          .required(),
+        cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC").required(),
+        cohortChangeReason: Joi.string().trim().required(),
+      }).validate(req.body, { stripUnknown: true });
+
+      if (error) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const sessions = await getFilteredSessions(young);
+      const session = sessions.find(({ name }) => name === value.cohort);
+      if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (session.goalReached) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+      young.set(value);
+    }
+
+    // Vérification pour les paramètres de "done"
+    if (req.body.status === "REINSCRIPTION") {
+      young.set({ status: "REINSCRIPTION" });
+    }
+
+    await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 
 module.exports = router;
