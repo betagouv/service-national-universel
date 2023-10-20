@@ -4,6 +4,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "missionequivalence";
 const { UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
+const { generateRandomName, generateRandomEmail, generateAddress } = require("../utils/anonymise");
 
 const Schema = new mongoose.Schema({
   youngId: {
@@ -110,6 +111,16 @@ const Schema = new mongoose.Schema({
 
   createdAt: { type: Date, default: Date.now },
 });
+
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.message = "**** ********* **************";
+  doc.address = generateAddress();
+  doc.contactEmail = generateRandomEmail();
+  doc.contactFullName = generateRandomName() + generateRandomName();
+  doc.structureName = generateRandomName();
+  return doc;
+};
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {

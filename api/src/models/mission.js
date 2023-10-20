@@ -3,6 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "mission";
+const { generateAddress, generateRandomName } = require("../utils/anonymise");
 
 const Schema = new mongoose.Schema({
   sqlId: {
@@ -323,6 +324,17 @@ const Schema = new mongoose.Schema({
     },
   },
 });
+
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.name = `Mission ${generateRandomName()}`;
+  doc.description = "********* ******** ****************";
+  doc.address = generateAddress();
+  doc.actions = "action Test";
+  doc.structureName = "********";
+  doc.tutorName = "********** *******";
+  return doc;
+};
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {

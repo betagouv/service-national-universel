@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 const patchHistory = require("mongoose-patch-history").default;
+const { generateAddress } = require("../utils/anonymise");
 
 const MODELNAME = "meetingpoint";
 
@@ -86,6 +87,12 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
   deletedAt: { type: Date },
 });
+
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.departureAddress = generateAddress();
+  return doc;
+};
 
 Schema.virtual("user").set(function (user) {
   if (user) {

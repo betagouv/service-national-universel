@@ -7,6 +7,7 @@ const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
 const MODELNAME = "young";
+const { generateAddress, generateRandomName, generateRandomEmail, generateBirhtdate, getYoungLocation, generateNewPhoneNumber } = require("../utils/anonymise");
 
 const File = new mongoose.Schema({
   name: String,
@@ -1969,6 +1970,35 @@ Schema.pre("save", function (next) {
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
   return bcrypt.compare(p, user.password || "");
+};
+
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.email = generateRandomEmail();
+  doc.parent1Email = generateRandomEmail();
+  doc.parent2Email = generateRandomEmail();
+  doc.firstName = generateRandomName();
+  doc.lastName = generateRandomName();
+  doc.parent1FirstName = generateRandomName();
+  doc.parent1LastName = generateRandomName();
+  doc.parent2FirstName = generateRandomName();
+  doc.parent2LastName = generateRandomName();
+  doc.historic = {};
+  doc.phone = generateNewPhoneNumber();
+  doc.parent1Phone = generateNewPhoneNumber();
+  doc.parent2Phone = generateNewPhoneNumber();
+  doc.address = generateAddress();
+  doc.parent1Address = generateAddress();
+  doc.parent2Address = generateAddress();
+  doc.birthdateAt = generateBirhtdate();
+
+  const newLocation = getYoungLocation(doc.zip);
+  doc.location = {
+    lat: newLocation?.latitude || 0,
+    lon: newLocation?.longitude || 0,
+  };
+
+  return doc;
 };
 
 //Sync with sendinblue

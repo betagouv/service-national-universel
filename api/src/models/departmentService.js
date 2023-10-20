@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
+const { generateAddress, generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
 
 const MODELNAME = "departmentservice";
 
@@ -150,6 +151,32 @@ const Schema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
+
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.email = generateRandomEmail();
+  doc.contactPhone = generateNewPhoneNumber();
+  doc.address = generateAddress();
+  doc.directionName = generateRandomName();
+  doc.contactName = generateRandomName();
+  doc.contactMail = generateRandomEmail();
+  doc.contacts = [
+    {
+      cohort: "New Cohort",
+      contactName: "New Contact",
+      contactPhone: generateNewPhoneNumber(),
+      contactMail: generateRandomEmail(),
+    },
+  ];
+  doc.representantEtat = {
+    firstName: generateRandomName(),
+    lastName: generateRandomName(),
+    mobile: generateNewPhoneNumber(),
+    email: generateRandomEmail(),
+  };
+
+  return doc;
+};
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 

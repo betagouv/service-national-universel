@@ -3,6 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "contract";
+const { generateBirhtdate, generateNewPhoneNumber } = require("../utils/anonymise");
 
 const Schema = new mongoose.Schema({
   youngId: { type: String },
@@ -105,6 +106,37 @@ const Schema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
+
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.youngFirstName = "*******";
+  doc.youngLastName = "*******";
+  doc.youngBirthdate = generateBirhtdate();
+  doc.youngEmail = "*******@*******.***";
+  doc.youngAddress = "*********";
+  doc.parent1FirstName = "*******";
+  doc.parent1LastName = "*******";
+  doc.parent2FirstName = "*******";
+  doc.parent2LastName = "*******";
+  doc.parent1Email = "*******@*******.***";
+  doc.parent2Email = "*******@*******.***";
+  doc.parent1Adress = "*********";
+  doc.parent2Adress = "*********";
+  doc.missionName = "*********";
+  doc.missionAdress = "*********";
+  doc.missionZip = "*****";
+  doc.projectManagerFirstName = "*********";
+  doc.projectManagerLastName = "*********";
+  doc.projectManagerEmail = "*******@*******.***";
+  doc.structureName = "*********";
+  doc.structureManagerEmail = "*******@*******.***";
+  doc.structureManagerFirstName = "*********";
+  doc.structureManagerLastName = "*********";
+  doc.youngPhone = generateNewPhoneNumber();
+  doc.parent1Phone = generateNewPhoneNumber();
+  doc.parent2Phone = generateNewPhoneNumber();
+  return doc;
+};
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {

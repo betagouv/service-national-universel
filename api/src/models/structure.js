@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
+const { generateAddress, generateRandomName } = require("../utils/anonymise");
 
 const esClient = require("../es");
 
@@ -313,6 +314,19 @@ const Schema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
+
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.name = generateRandomName().toUpperCase();
+  doc.siret = "100 000 000 00000";
+  doc.address = generateAddress();
+  doc.website = "https://www.google.com";
+  doc.description = "******* **** *****";
+  doc.twitter = "www.twitter.com";
+  doc.facebook = "www.facebook.com";
+  doc.instagram = "www.instagram.com";
+  return doc;
+};
 
 Schema.virtual("user").set(function (user) {
   if (user) {

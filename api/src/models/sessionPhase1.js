@@ -176,6 +176,16 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.zipCenter = "00000";
+  doc.codeCenter = "00000";
+  doc.centerName = "********";
+  doc.cityCenter = "*********";
+  if (!["VALIDATED", "WAITING_VALIDATION"].includes(doc.status)) doc.status = "WAITING_VALIDATION";
+  return doc;
+};
+
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;

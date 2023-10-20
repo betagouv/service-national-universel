@@ -203,6 +203,17 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.youngEmail = "*****@*******.***";
+  doc.youngFirstName = "*********";
+  doc.youngLastName = "********";
+  doc.tutorName = "****** *********";
+  doc.missionName = "*************** ******";
+  doc.contractStatus = doc.contractStatus || "DRAFT";
+  return doc;
+};
+
 Schema.virtual("user").set(function (user) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;

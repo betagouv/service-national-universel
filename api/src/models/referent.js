@@ -4,6 +4,8 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
+const { generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
 
 const MODELNAME = "referent";
@@ -252,6 +254,16 @@ Schema.pre("save", async function (next) {
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
   return bcrypt.compare(p, user.password || "");
+};
+
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.phone = generateNewPhoneNumber();
+  doc.mobile = generateNewPhoneNumber();
+  doc.email = generateRandomEmail();
+  doc.firstName = generateRandomName();
+  doc.lastName = generateRandomName();
+  return doc;
 };
 
 //Sync with Sendinblue
