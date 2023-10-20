@@ -19,8 +19,8 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/dashboard/sejour" component={Sejour} />
-      <SentryRoute path="/dashboard" component={General} />
+      <SentryRoute path="/dashboard/todo" component={General} />
+      <SentryRoute path="/dashboard" component={Sejour} />
     </Switch>
   );
 }

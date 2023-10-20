@@ -107,7 +107,8 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
   return (
     <DashboardBox title="Détail des missions : préférences vs réalité" className={className}>
       <Tabs selected={selectedTab} tabs={tabs} onChange={setSelectedTab} className="my-6" />
-      <div className="my-4 flex justify-end">
+      <div className="my-4 flex justify-end items-center">
+        <p>Trier par : </p>
         <select className="" value={sort} onChange={selectSort}>
           {sortOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
