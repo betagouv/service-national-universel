@@ -73,28 +73,24 @@ export default function TabSchool({ filters }) {
       <div className="flex w-full flex-row justify-between">
         <div className="flex items-center gap-3">
           <div className="text-base font-bold text-gray-900">Liste des établissements</div>
-          {user.role === ROLES.REFERENT_REGION ? (
-            <Link
-              to={getNewLink({ base: `/etablissement/liste-jeunes`, filter: filters, filtersUrl: [queryString.stringify({ departmentName: filters.department })] })}
-              target={"_blank"}>
-              <HiOutlineExternalLink className="h-5 w-5 cursor-pointer text-gray-400" />
-            </Link>
-          ) : null}
+          <Link
+            to={getNewLink({ base: `/etablissement/liste-jeunes`, filter: filters, filtersUrl: [queryString.stringify({ departmentName: filters.department })] })}
+            target={"_blank"}>
+            <HiOutlineExternalLink className="h-5 w-5 cursor-pointer text-gray-400" />
+          </Link>
         </div>
-        {user.role === ROLES.REFERENT_REGION ? (
-          <div className="text-xs text-gray-600">
-            Export depuis le menu{" "}
-            <Link
-              to={`/inscription`}
-              target="_blank"
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              className="cursor-pointer text-blue-600">
-              Inscriptions
-            </Link>
-          </div>
-        ) : null}
+        <div className="text-xs text-gray-600">
+          Export depuis le menu{" "}
+          <Link
+            to={`/inscription`}
+            target="_blank"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            className="cursor-pointer text-blue-600">
+            Inscriptions
+          </Link>
+        </div>
       </div>
       <table className={`w-full table-fixed ${isLoading || noResult ? "h-full" : ""}`}>
         <thead>

@@ -23,16 +23,14 @@ export default function General({ selectedFilters, setSelectedFilters }) {
 
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
-  const regionOptions =
-    user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
-  const academyOptions =
-    user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
-      ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
-      : academyList.map((a) => ({ key: a, label: a }));
+  const regionOptions = [ROLES.VISITOR, ROLES.REFERENT_REGION].includes(user.role) ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
+  const academyOptions = [ROLES.VISITOR, ROLES.REFERENT_REGION].includes(user.role)
+    ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
+    : academyList.map((a) => ({ key: a, label: a }));
 
   useEffect(() => {
     let filters = [
-      ![ROLES.REFERENT_DEPARTMENT, user.role === ROLES.VISITOR].includes(user.role)
+      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
             id: "region",
             name: "Région",
@@ -40,7 +38,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
             options: regionOptions,
           }
         : null,
-      ![ROLES.REFERENT_DEPARTMENT, user.role === ROLES.VISITOR].includes(user.role)
+      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
             id: "academy",
             name: "Académie",
