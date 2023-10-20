@@ -2,7 +2,7 @@ const fetch = require("node-fetch");
 const queryString = require("querystring");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
-const { capture } = require("./sentry");
+const { capture, captureMessage } = require("./sentry");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 const { rateLimiterContactSIB } = require("./rateLimiters");
 
@@ -35,7 +35,7 @@ const api = async (path, options = {}) => {
     return true;
   } catch (e) {
     console.log("Erreur in sendinblue api", e);
-    capture(e);
+    capture(e, { extra: { path, options } });
   }
 };
 
@@ -56,7 +56,9 @@ async function sendSMS(phoneNumber, content, tag) {
     body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
-    if (!sms || sms?.code) throw new Error(JSON.stringify({ sms, body }));
+    if (!sms || sms?.code) {
+      captureMessage("Error sending an SMS", { extra: { sms, body } });
+    }
     if (ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
@@ -86,7 +88,9 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (!mail || mail?.code) throw new Error(JSON.stringify({ mail, body }));
+    if (!mail || mail?.code) {
+      captureMessage("Error sending an email", { extra: { mail, body } });
+    }
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -151,9 +155,15 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
 
     // * To delete once we put the email of the parent in the template
     const isParentTemplate = Object.values(SENDINBLUE_TEMPLATES.parent).some((value) => value == body?.templateId);
-    if (mail?.message == "email is missing in to" && isParentTemplate) throw new Error("Parent sans email : " + body?.to?.[0]?.name);
+    if (mail?.message == "email is missing in to" && isParentTemplate) {
+      captureMessage("Parent sans email", { extra: { mail, body } });
+      return;
+    }
 
-    if (!mail || mail?.code) throw new Error(JSON.stringify({ mail, body }));
+    if (!mail || mail?.code) {
+      captureMessage("Error sending a template", { extra: { mail, body } });
+      return;
+    }
     if (ENVIRONMENT !== "production" || force) {
       console.log(body, mail);
     }
