@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from "react";
-import DashboardBox from "../../../../components/ui/DashboardBox";
-import api from "../../../../../../services/api";
-import { translate } from "snu-lib";
-import Tabs from "../../../../../phase0/components/Tabs";
-import { BarChart, Legends } from "../../../../components/graphs";
-import { LoadingBar } from "../../../../components/ui/loading";
 import { getNewLink } from "@/utils";
 import queryString from "query-string";
+import { useEffect, useState } from "react";
+import { translate } from "snu-lib";
+import api from "../../../../../../services/api";
+import Tabs from "../../../../../phase0/components/Tabs";
+import { BarChart, graphColors } from "../../../../components/graphs";
+import DashboardBox from "../../../../components/ui/DashboardBox";
+import { LoadingBar } from "../../../../components/ui/loading";
+import React from "react";
+import { MdInfoOutline } from "react-icons/md";
+import ReactTooltip from "react-tooltip";
+import MoreInfoPanel from "@/scenes/dashboardV2/components/ui/MoreInformationPanel";
+import InformationCircle from "@/assets/icons/InformationCircle";
 
 export default function MissionsDetail({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -139,8 +144,25 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
               />
             ))}
           </div>
-          <div className="flex justify-center">
-            <Legends labels={["Missions validées", "Préférences volontaires"]} noValue />
+          <div className="flex justify-center gap-4">
+            <div className="flex flex-row-reverse items-center gap-2">
+              <div className="flex items-center gap-1">
+                <p className="text-xs text-gray-600">Missions validées</p>
+                <InformationCircle data-tip data-for="mission" className="cursor-pointer text-gray-400" />
+                <ReactTooltip id="mission" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
+                  <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Mission existante sur la plateforme avec le statut validé.</p>
+                </ReactTooltip>
+              </div>
+              <div className={`flex items-center`}>
+                <div className={`h-[10px] w-[10px] rounded-full`} style={{ backgroundColor: graphColors[2][0] }}></div>
+              </div>
+            </div>
+            <div className="flex flex-row-reverse items-center gap-2">
+              <div className="text-xs text-gray-600">Préférences volontaires</div>
+              <div className={`flex items-center`}>
+                <div className={`h-[10px] w-[10px] rounded-full`} style={{ backgroundColor: graphColors[2][1] }}></div>
+              </div>
+            </div>
           </div>
         </>
       )}
