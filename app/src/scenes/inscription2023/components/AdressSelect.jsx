@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { departmentLookUp } from "snu-lib";
+import { HiSearch } from "react-icons/hi";
 
 export default function AdressSelect({ data, setData }) {
   const [selected, setSelected] = useState(null);
@@ -113,7 +114,13 @@ function SearchAddress({ data, setData, setSelected }) {
     <>
       <label className="flex flex-col gap-1">
         Rechercher une adresse
-        <input type="text" value={query} onChange={handleChangeQuery} className="border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2" />
+        <span className="text-[#666666] text-xs mb-1">Si votre adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
+        <div className="relative">
+          <input type="text" value={query} onChange={handleChangeQuery} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />
+          <span className="material-icons absolute right-5 mt-[12px] text-lg">
+            <HiSearch />
+          </span>
+        </div>
       </label>
 
       <div className="relative">
