@@ -25,7 +25,7 @@ export default function StepEligibilite() {
   const [error, setError] = React.useState({});
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const isDisabled = true;
+  const isBirthdayModificationDisabled = true;
 
   const history = useHistory();
 
@@ -129,9 +129,9 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isDisabled ? "text-[#929292]" : "text-[#666666]"}`}>
+            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#666666]"}`}>
               Date de naissance
-              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} disabled={isDisabled} />
+              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} disabled={isBirthdayModificationDisabled} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           </div>

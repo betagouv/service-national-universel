@@ -1,8 +1,5 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
-import { translate } from "../../../utils";
-import { capture } from "../../../sentry";
 import { formatStringDate } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
@@ -10,13 +7,12 @@ import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupBut
 import { supportURL } from "../../../config";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
-import api from "../../../services/api";
 import ProgressBar from "../components/ProgressBar";
 import { REINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 export default function StepSejour() {
   const history = useHistory();
-  const [data, setData] = React.useContext(ReinscriptionContext);
+  const [data] = React.useContext(ReinscriptionContext);
   return (
     <>
       <ProgressBar />
@@ -29,23 +25,25 @@ export default function StepSejour() {
     </>
   );
 
-  function SessionButton(session) {
-    const [data, setData] = React.useContext(ReinscriptionContext);
-    const history = useHistory();
-    return (
-      <div
-        key={session.id}
-        className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
-        onClick={() => {
-          setData({ ...data, cohort: session.name, step: REINSCRIPTION_STEPS.CONFIRM, status: "REINSCRIPTION" });
-          plausibleEvent(session.event);
-          history.push("/reinscription/confirm");
-        }}>
-        <div>
-          Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
-        </div>
-        <ArrowRightBlueSquare />
+  
+}
+
+function SessionButton(session) {
+  const [data, setData] = React.useContext(ReinscriptionContext);
+  const history = useHistory();
+  return (
+    <div
+      key={session.id}
+      className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
+      onClick={() => {
+        setData({ ...data, cohort: session.name, step: REINSCRIPTION_STEPS.CONFIRM, status: "REINSCRIPTION" });
+        plausibleEvent(session.event);
+        history.push("/reinscription/confirm");
+      }}>
+      <div>
+        Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
       </div>
-    );
-  }
+      <ArrowRightBlueSquare />
+    </div>
+  );
 }

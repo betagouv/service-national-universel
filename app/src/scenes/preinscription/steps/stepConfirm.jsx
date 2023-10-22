@@ -58,8 +58,6 @@ export default function StepConfirm() {
       grade: data.scolarity,
     };
 
-    if (values.schooled === "true") values.grade = data.scolarity;
-
     try {
       const { code, ok } = await api.post("/young/signup", values);
       if (!ok) {

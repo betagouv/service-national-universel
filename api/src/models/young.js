@@ -363,6 +363,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // @deprecated
   reinscriptionStep2023: {
     type: String,
     enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "CONSENTEMENTS", "DOCUMENTS", "WAITING_CONSENT", "DONE"],
@@ -371,11 +372,12 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // also used for 2024
   inscriptionStep2023: {
     type: String,
     enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
     documentation: {
-      description: "Étape du tunnel d'inscription 2023",
+      description: "Étape du tunnel d'inscription 2023/2024",
     },
   },
 

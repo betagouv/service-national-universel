@@ -26,30 +26,27 @@ const Step = () => {
   const [data, updateValue] = useContext(ReinscriptionContext);
   const young = useSelector((state) => state.Auth.young);
   useEffect(() => {
-    if (!data.initialized) {
-      updateValue({
-        ...data,
-        birthDate: young.birthdateAt,
-        scolarity: young.grade,
-        school: {
-          fullName: young.schoolName,
-          type: young.schoolType,
-          adresse: young.schoolAddress,
-          codeCity: young.schoolZip,
-          city: young.schoolCity,
-          departmentName: young.schoolDepartment,
-          region: young.schoolRegion,
-          country: young.schoolCountry,
-          id: young.schoolId,
-          postCode: young.schoolZip,
-        },
-        initialized: true,
-      });
-    }
+    updateValue({
+      ...data,
+      birthDate: young.birthdateAt,
+      scolarity: young.grade,
+      school: {
+        fullName: young.schoolName,
+        type: young.schoolType,
+        adresse: young.schoolAddress,
+        codeCity: young.schoolZip,
+        city: young.schoolCity,
+        departmentName: young.schoolDepartment,
+        region: young.schoolRegion,
+        country: young.schoolCountry,
+        id: young.schoolId,
+        postCode: young.schoolZip,
+      },
+      zip: young.zip,
+    });
   }, []);
 
   const { step } = useParams();
-  // console.log(data, step);
   const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
   const fetchReinscriptionOpen = async () => {
@@ -68,11 +65,9 @@ const Step = () => {
 
   useEffect(() => {
     fetchReinscriptionOpen();
-    // console.log(fetchReinscriptionOpen());
   }, []);
 
   const currentStep = getStepFromUrlParam(step, STEP_LIST, true);
-  // console.log(currentStep);
   if (!currentStep) return <Redirect to="/reinscription" />;
 
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === data.step);

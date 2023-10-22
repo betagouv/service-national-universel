@@ -1,24 +1,19 @@
 import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import plausibleEvent from "../../services/plausible";
 import API from "../../services/api";
-import { permissionChangeCohort, permissionPhase2, permissionReinscription, translate, wasYoungExcluded } from "../../utils";
-import { capture } from "../../sentry";
-import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../redux/auth/actions";
-import Loader from "../../components/Loader";
+import { permissionChangeCohort, permissionPhase2, wasYoungExcluded } from "../../utils";
+
 import ChevronRight from "../../assets/icons/ChevronRight";
 import Engagement from "./components/Engagement";
 import dayjs from "dayjs";
 
 export default function Phase1NotDone() {
-  const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
-  const dispatch = useDispatch();
   const [sessionEndDate, setSessionEndDate] = useState(null);
 
   async function getSessionEndDate(cohort) {
@@ -31,22 +26,6 @@ export default function Phase1NotDone() {
     if (!young?.cohort) return;
     getSessionEndDate(young.cohort).then((date) => setSessionEndDate(date));
   }, [young]);
-
-  async function goToReinscription() {
-    try {
-      setLoading(true);
-      const { ok, code, data: responseData } = await API.put("/young/reinscription/goToReinscription");
-      if (!ok) throw new Error(translate(code));
-      dispatch(setYoung(responseData));
-
-      plausibleEvent("Phase1 Non réalisée/CTA reinscription - home page");
-      return history.push("/reinscription/eligibilite");
-    } catch (e) {
-      setLoading(false);
-      capture(e);
-      toastr.error("Une erreur s'est produite :", translate(e.code));
-    }
-  }
 
   return (
     <>
@@ -90,19 +69,6 @@ export default function Phase1NotDone() {
                     </button>
                   </div>
                 </>
-              )}
-              {permissionReinscription(young) && (
-                <div className="flex w-fit flex-col items-stretch">
-                  {loading ? (
-                    <Loader />
-                  ) : (
-                    <button
-                      className="bg-blue-[#FFFFFF] mt-5 w-full rounded-[10px] border-[1px]  border-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-blue-600 transition duration-150 ease-in-out hover:bg-blue-600 hover:text-white"
-                      onClick={goToReinscription}>
-                      Se réinscrire à un autre séjour
-                    </button>
-                  )}
-                </div>
               )}
             </div>
             <div className="hidden flex-none xl:block">
@@ -148,13 +114,6 @@ export default function Phase1NotDone() {
                     Réaliser ma mission d&apos;intérêt général
                   </button>
                 </>
-              )}
-              {permissionReinscription(young) && (
-                <button
-                  className="mt-5 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
-                  onClick={goToReinscription}>
-                  Se réinscrire à un autre séjour
-                </button>
               )}
             </div>
             <img src={Img2} alt="" />

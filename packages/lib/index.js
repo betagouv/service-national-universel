@@ -41,6 +41,7 @@ function shouldForceRedirectToReinscription(young) {
 
 // @todo: a voir avec Elise: young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED
 function hasAccessToReinscription(young) {
+  if (shouldForceRedirectToReinscription(young)) return true;
   if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
     return true;
   }

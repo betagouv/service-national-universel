@@ -425,7 +425,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     let { __v, ...newYoung } = value;
 
     if (newYoung.status === "REINSCRIPTION") {
-      newYoung.reinscriptionStep2023 = STEPS2023REINSCRIPTION.ELIGIBILITE;
       newYoung.cohesionStayPresence = undefined;
       newYoung.presenceJDM = undefined;
       newYoung.departSejourAt = undefined;
