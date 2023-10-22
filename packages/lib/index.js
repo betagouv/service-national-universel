@@ -237,6 +237,7 @@ export * from "./colors";
 export * from "./constants";
 export * from "./date";
 export * from "./excelExports";
+export * from "./features";
 export * from "./file";
 export * from "./phone-number";
 export * from "./plan-de-transport";

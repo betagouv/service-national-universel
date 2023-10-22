@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE, PHONE_ZONES, formatDateFR, translate, translateGrade } from "snu-lib";
+import { COHESION_STAY_LIMIT_DATE, PHONE_ZONES, formatDateFR, translate, translateGrade, isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
-import { supportURL } from "@/config";
+import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
 export default function StepConfirm() {
@@ -33,6 +33,8 @@ export default function StepConfirm() {
       }),
     [error],
   );
+
+  const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
 
   const onSubmit = async () => {
     const values = {
@@ -73,8 +75,8 @@ export default function StepConfirm() {
           dispatch(setYoung(young));
           removePersistedData();
         }
-        // after connection young is automatically redirected to /preinscription/email-validation
-        history.push("/preinscription/email-validation");
+
+        history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
       }
     } catch (e) {
       setLoading(false);
@@ -176,9 +178,13 @@ export default function StepConfirm() {
         </div>
 
         <hr className="my-6" />
-        <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>
+        {isEmailValidationEnabled && <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>}
 
-        <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, recevoir un code d'activation par e-mail" disabled={isLoading} />
+        <SignupButtonContainer
+          onClickNext={() => onSubmit()}
+          labelNext={isEmailValidationEnabled ? "Oui, recevoir un code d'activation par e-mail" : "M'inscrire au SNU"}
+          disabled={isLoading}
+        />
       </DSFRContainer>
     </>
   );

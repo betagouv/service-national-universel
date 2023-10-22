@@ -46,7 +46,14 @@ import ViewMessage from "./scenes/echanges/View";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { ENABLE_PM, YOUNG_STATUS } from "./utils";
-import { youngCanChangeSession, inscriptionModificationOpenForYoungs, shouldForceRedirectToReinscription, shouldForceRedirectToInscription } from "snu-lib";
+import {
+  youngCanChangeSession,
+  inscriptionModificationOpenForYoungs,
+  shouldForceRedirectToReinscription,
+  shouldForceRedirectToInscription,
+  isFeatureEnabled,
+  FEATURES_NAME,
+} from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
@@ -157,10 +164,11 @@ const MandatoryLogIn = () => {
         if (ok && user) {
           dispatch(setYoung(user));
           const cohort = await getCohort(user.cohort);
-          if (environment !== "production") {
-            const forceEmailValidation = user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(cohort);
-            if (forceEmailValidation) return history.push("/preinscription");
-          }
+
+          const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
+          const forceEmailValidation =
+            isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(cohort);
+          if (forceEmailValidation) return history.push("/preinscription");
         }
       } catch (e) {
         console.log(e);
