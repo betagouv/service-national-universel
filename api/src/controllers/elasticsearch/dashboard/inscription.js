@@ -4,8 +4,8 @@ const router = express.Router();
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
-const { joiElasticSearch, buildPlaceContext } = require("../utils");
-const { ES_NO_LIMIT, COHORTS, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo } = require("snu-lib");
+const { joiElasticSearch, buildReferentContext } = require("../utils");
+const { ES_NO_LIMIT, COHORTS, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -13,13 +13,13 @@ router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: f
     const { user } = req;
 
     if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const { placeContextFilters } = buildPlaceContext(req.user);
+    const { referentContextFilters } = buildReferentContext(req.user);
 
     const body = {
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [...placeContextFilters].filter(Boolean),
+          filter: [...referentContextFilters].filter(Boolean),
         },
       },
       size: ES_NO_LIMIT,
@@ -39,12 +39,11 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
   try {
     const { user } = req;
 
-    if (!canSeeDashboardInscriptionInfo(user) || user.role === ROLES.VISITOR) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { placeContextFilters } = buildPlaceContext(req.user);
 
     const body = {
       query: {
@@ -57,7 +56,11 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
             queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
           ].filter(Boolean),
-          filter: [...placeContextFilters].filter(Boolean),
+          filter: [
+            //query
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "schoolDepartment.keyword": user.department } } : null,
+          ].filter(Boolean),
         },
       },
       aggs: {
@@ -84,7 +87,7 @@ router.post("/youngsReport", passport.authenticate(["referent"], { session: fals
     const { user } = req;
     const { filters, department } = req.body;
 
-    if (!canSeeDashboardInscriptionInfo(user) || user.role === ROLES.VISITOR) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (user.role === ROLES.REFERENT_REGION && !region2department[user.region].includes(department))
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -118,7 +121,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
   try {
     const { user } = req;
 
-    if (!canSeeDashboardInscriptionInfo(user) && user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardInscriptionDetail(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -278,7 +281,7 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
   try {
     const { user } = req;
 
-    if (!canSeeDashboardInscriptionInfo(user) || user.role === ROLES.VISITOR) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });

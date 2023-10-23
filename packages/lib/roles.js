@@ -797,8 +797,16 @@ function canSeeDashboardSejourInfo(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
+function canSeeDashboardSejourHeadCenter(actor) {
+  return [ROLES.HEAD_CENTER].includes(actor.role);
+}
+
 function canSeeDashboardInscriptionInfo(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR].includes(actor.role);
+}
+
+function canSeeDashboardInscriptionDetail(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function canSeeDashboardEngagementInfo(actor) {
@@ -930,6 +938,8 @@ export {
   canCheckIfRefExist,
   canSeeDashboardSejourInfo,
   canSeeDashboardInscriptionInfo,
+  canSeeDashboardInscriptionDetail,
   canSeeDashboardEngagementInfo,
   canSeeDashboardEngagementStatus,
+  canSeeDashboardSejourHeadCenter,
 };
