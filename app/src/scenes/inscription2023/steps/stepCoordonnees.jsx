@@ -530,7 +530,7 @@ export default function StepCoordonnees() {
           error={errors?.livesInFrance}
           correction={corrections?.livesInFrance}
         />
-        {isFrenchResident && <AddressForm data={data} setData={setData} />}
+        {isFrenchResident && <AddressForm data={data} updateData={setData} />}
         {!isFrenchResident && (
           <SearchableSelect
             label="Pays de résidence"
@@ -572,7 +572,31 @@ export default function StepCoordonnees() {
               error={errors.hostRelationship}
               correction={corrections?.hostRelationship}
             />
-            <AddressForm data={data} setData={setData} addressOwner="host" />
+            <AddressForm
+              data={{
+                address: data.hostAddress,
+                addressType: data.hostAddressType,
+                addressVerified: data.hostAddressVerified,
+                city: data.hostCity,
+                zip: data.hostZip,
+                region: data.hostRegion,
+                department: data.hostDepartment,
+                location: data.hostLocation,
+              }}
+              updateData={(newData) =>
+                setData({
+                  ...data,
+                  hostAddress: newData.address,
+                  hostAddressType: newData.addressType,
+                  hostAddressVerified: newData.addressVerified,
+                  hostCity: newData.city,
+                  hostZip: newData.zip,
+                  hostRegion: newData.region,
+                  hostDepartment: newData.department,
+                  hostLocation: newData.location,
+                })
+              }
+            />
           </>
         )}
 
