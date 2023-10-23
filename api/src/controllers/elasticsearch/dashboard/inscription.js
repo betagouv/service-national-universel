@@ -559,6 +559,25 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
       },
       size: 0,
     };
+    if (queryFilters?.region?.length)
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": queryFilters.region } }] } },
+            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": queryFilters.region } }] } },
+          ],
+        },
+      });
+
+    if (queryFilters?.department?.length)
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },
+            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": queryFilters.department } }] } },
+          ],
+        },
+      });
 
     const responseYoung = await esClient.search({ index: "young", body: body });
     if (!responseYoung?.body) {
