@@ -804,6 +804,13 @@ const Schema = new mongoose.Schema({
       description: "Adresse pendant le snu du volontaire",
     },
   },
+  addressType: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+    documentation: {
+      description: "Type d'adresse du volontaire dans la Base adresse nationale",
+    },
+  },
   complementAddress: {
     type: String,
     documentation: {

@@ -1,68 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { departmentLookUp } from "snu-lib";
-import { HiSearch } from "react-icons/hi";
+import Option from "./AddressOption";
+import { FiSearch } from "react-icons/fi";
 
-export default function AdressSelect({ data, setData }) {
-  const [selected, setSelected] = useState(null);
-
-  if (data.zip) return <DisplayAddress data={data} setData={setData} selected={selected} />;
-  return <SearchAddress data={data} setData={setData} setSelected={setSelected} />;
-}
-
-function DisplayAddress({ data, setData, selected }) {
-  const disabled = selected?.properties.type === "housenumber";
-  const resetData = () => {
-    setData({ ...data, address: "", addressVerified: "false", zip: "", city: "", department: "", region: "", location: null });
-  };
-
-  return (
-    <div className="flex flex-col gap-2">
-      {(!selected || disabled) && (
-        <label className="flex flex-col gap-1 w-full text-gray-400">
-          Adresse
-          <input
-            type="text"
-            value={data.address}
-            onChange={(e) => setData({ ...data, address: e.target.value })}
-            disabled
-            className="bg-[#EEEEEE] disabled:bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 disabled:text-gray-400 border-b-2 border-gray-800 disabled:border-[#EEEEEE]"
-          />
-        </label>
-      )}
-
-      <div className="flex flex-col md:flex-row gap-2 md:gap-8">
-        <label className="flex flex-col gap-1 w-full text-gray-400">
-          Code postal
-          <input type="text" value={data.zip} disabled className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-400" />
-        </label>
-
-        <label className="flex flex-col gap-1 w-full text-gray-400">
-          Ville
-          <input type="text" value={data.city} disabled className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-400" />
-        </label>
-      </div>
-
-      {selected && !disabled && (
-        <label className="flex flex-col gap-1 w-full text-gray-800">
-          Compléter mon adresse (numéro, voie, lieu-dit, autre information)
-          <input
-            type="text"
-            value={data.address}
-            onChange={(e) => setData({ ...data, address: e.target.value })}
-            disabled={disabled}
-            className="bg-[#EEEEEE] disabled:bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 disabled:text-gray-400 border-b-2 border-gray-800 disabled:border-[#EEEEEE]"
-          />
-        </label>
-      )}
-
-      <button onClick={resetData} className="text-blue-600 text-left py-2 w-fit">
-        Rechercher une autre adresse
-      </button>
-    </div>
-  );
-}
-
-function SearchAddress({ data, setData, setSelected }) {
+export default function AddressSearch({ data, setData }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
 
@@ -77,6 +18,28 @@ function SearchAddress({ data, setData, setSelected }) {
   const streets = options.filter((option) => option.properties.type === "street");
   const localities = options.filter((option) => option.properties.type === "locality");
   const municipalities = options.filter((option) => option.properties.type === "municipality");
+
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setQuery("");
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        setQuery("");
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleChangeQuery = async (e) => {
     setQuery(e.target.value);
@@ -100,13 +63,13 @@ function SearchAddress({ data, setData, setSelected }) {
       ...data,
       addressVerified: "true",
       address: option.properties.type !== "municipality" ? option.properties.name : "",
+      addressType: option.properties.type,
       zip: option.properties.postcode,
       city: option.properties.city,
       department: getDepartmentAndRegionFromContext(option.properties.context).department,
       region: getDepartmentAndRegionFromContext(option.properties.context).region,
       location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
     });
-    setSelected(option);
     setQuery("");
   };
 
@@ -118,14 +81,14 @@ function SearchAddress({ data, setData, setSelected }) {
         <div className="relative">
           <input type="text" value={query} onChange={handleChangeQuery} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />
           <span className="material-icons absolute right-5 mt-[12px] text-lg">
-            <HiSearch />
+            <FiSearch />
           </span>
         </div>
       </label>
 
       <div className="relative">
         {query?.length > 2 && (
-          <div className="bg-white border flex flex-col absolute z-10 -top-4 w-full shadow">
+          <div ref={ref} className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
             {options.length > 0 ? (
               <>
                 {housenumbers.length > 0 && (
@@ -168,28 +131,15 @@ function SearchAddress({ data, setData, setSelected }) {
                       ))}
                   </>
                 )}
-                <button className="p-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white w-full" onClick={() => setQuery("")}>
-                  Fermer
-                </button>
               </>
             ) : (
-              <p className="p-3 text-gray-800 text-center">Aucun résultat. Essayez de saisir une commune ou un code postal.</p>
+              <p className="p-3 text-gray-800 text-center">
+                Votre adresse ne s'affiche pas ? Renseignez une <strong>commune</strong> ou un <strong>code postal</strong>.
+              </p>
             )}
           </div>
         )}
       </div>
     </>
-  );
-}
-
-function Option({ option, handleSelect }) {
-  return (
-    <button key={option.properties.id} onClick={() => handleSelect(option)} className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
-      <p>{option.properties.name}</p>
-      <p>
-        {option.properties.city}
-        {option.properties.postcode && " - " + option.properties.postcode}
-      </p>
-    </button>
   );
 }

@@ -35,7 +35,7 @@ import { getCorrectionByStep } from "../../../utils/navigation";
 import { apiAdress } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
-import AdressSelect from "../components/AdressSelect";
+import AddressForm from "@/components/dsfr/forms/AddressForm";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -530,7 +530,7 @@ export default function StepCoordonnees() {
           error={errors?.livesInFrance}
           correction={corrections?.livesInFrance}
         />
-        {isFrenchResident && <AdressSelect data={data} setData={setData} />}
+        {isFrenchResident && <AddressForm data={data} setData={setData} />}
         {!isFrenchResident && (
           <SearchableSelect
             label="Pays de résidence"
@@ -572,7 +572,7 @@ export default function StepCoordonnees() {
               error={errors.hostRelationship}
               correction={corrections?.hostRelationship}
             />
-            <AdressSelect data={data} setData={setData} />
+            <AddressForm data={data} setData={setData} />
           </>
         )}
 
