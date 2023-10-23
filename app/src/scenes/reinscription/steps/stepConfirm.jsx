@@ -17,7 +17,7 @@ import { supportURL } from "@/config";
 export default function StepConfirm() {
   const [error, setError] = useState({});
   const [data] = React.useContext(ReinscriptionContext);
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const history = useHistory();
 
@@ -39,14 +39,14 @@ export default function StepConfirm() {
     };
 
     try {
-      const { code, ok } = await api.post("/young/signup", values);
+      const { code, ok, data } = await api.put("/young/reinscription", values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
       } else {
-        // @todo plausible event
         plausibleEvent("Phase0/CTA reinscription - inscription");
+        dispatch(setYoung(data));
+        history.push("/inscription2023");
       }
-      history.push("/inscription2023");
     } catch (e) {
       capture(e);
       setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });

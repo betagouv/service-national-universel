@@ -24,8 +24,6 @@ export default function StepSejour() {
       </DSFRContainer>
     </>
   );
-
-  
 }
 
 function SessionButton(session) {
@@ -36,8 +34,8 @@ function SessionButton(session) {
       key={session.id}
       className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
       onClick={() => {
+        plausibleEvent(session.event.replace("inscription", "reinscription"));
         setData({ ...data, cohort: session.name, step: REINSCRIPTION_STEPS.CONFIRM, status: "REINSCRIPTION" });
-        plausibleEvent(session.event);
         history.push("/reinscription/confirm");
       }}>
       <div>

@@ -31,24 +31,17 @@ function reInscriptionModificationOpenForYoungs(env) {
 }
 
 function shouldForceRedirectToReinscription(young) {
-  const youngStatusForReinscription = ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "REINSCRIPTION"];
-  if (young.cohort === "à venir" && youngStatusForReinscription.includes(young.status)) {
-    return true;
-  } else {
-    return false;
-  }
+  return young.cohort === "à venir" && ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "REINSCRIPTION"].includes(young.status);
 }
 
-// @todo: a voir avec Elise: young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED
 function hasAccessToReinscription(young) {
   if (shouldForceRedirectToReinscription(young)) return true;
+
   if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
     return true;
   }
-  if (
-    young.status === YOUNG_STATUS.VALIDATED &&
-    ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
-  ) {
+
+  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") {
     return true;
   }
 

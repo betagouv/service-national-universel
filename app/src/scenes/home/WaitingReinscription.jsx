@@ -1,3 +1,4 @@
+import plausibleEvent from "@/services/plausible";
 import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
@@ -20,6 +21,7 @@ export default function WaitingReinscription() {
   } else return;
 
   const onClickEligibilte = async () => {
+    plausibleEvent("Phase0/CTA reinscription - home page");
     return history.push("/reinscription");
   };
 

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
@@ -9,9 +10,14 @@ import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
+import { setYoung } from "@/redux/auth/actions";
+import API from "@/services/api";
+import { toastr } from "react-redux-toastr";
 
 export default function NonEligible() {
   const history = useHistory();
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const engagementPrograms = [
     {
@@ -43,8 +49,12 @@ export default function NonEligible() {
       link: "https://www.reservistes.defense.gouv.fr/",
     },
   ];
-  const onClickButton = () => {
-    history.push("/");
+  const onClickButton = async () => {
+    setLoading(true);
+    await API.post(`/young/logout`);
+    dispatch(setYoung(null));
+    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
+    return history.push("/auth");
   };
 
   return (
@@ -52,7 +62,7 @@ export default function NonEligible() {
       <ProgressBar />
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
         <h1 className="text-[22px] font-bold">Nous n'avons pas trouvé de séjour qui correspond à votre situation.</h1>
-        <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
+        <p className="mb-2 mt-4 border-l-8 border-l-[#0a0a0d] pl-4">
           Les inscriptions sont actuellement uniquement ouvertes aux volontaires <strong>âgés de 15 à 17 ans</strong> et <strong>scolarisés en seconde</strong>{" "}
           <strong>en Nouvelle-Calédonie ou à Wallis-et-Futuna</strong>.
         </p>
@@ -63,7 +73,6 @@ export default function NonEligible() {
           </a>
           .
         </p>
-
         <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
         <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
           {engagementPrograms.map((program, index) => (
@@ -79,7 +88,7 @@ export default function NonEligible() {
             Voir plus de formes d’engagement
           </button>
         </div>
-        <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
+        <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" disabled={loading} />
       </DSFRContainer>
     </>
   );

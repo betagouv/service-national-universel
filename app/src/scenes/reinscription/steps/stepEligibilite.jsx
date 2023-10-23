@@ -7,6 +7,7 @@ import validator from "validator";
 import dayjs from "dayjs";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
+import { useDispatch } from "react-redux";
 import { REINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 import Input from "../../../components/dsfr/forms/input";
@@ -19,6 +20,7 @@ import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
+import { setYoung } from "@/redux/auth/actions";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(ReinscriptionContext);
@@ -26,6 +28,7 @@ export default function StepEligibilite() {
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const isBirthdayModificationDisabled = true;
+  const dispatch = useDispatch();
 
   const history = useHistory();
 
@@ -50,16 +53,12 @@ export default function StepEligibilite() {
     if (!data?.scolarity) {
       errors.scolarity = "Choisissez un niveau de scolarité";
     }
-    // Birthdate
-    if (!data?.birthDate || !dayjs(data.birthDate).isValid()) {
-      errors.birthDate = "Vous devez choisir une date de naissance valide";
-    }
 
     if (data.scolarity) {
       if (data.scolarity === "NOT_SCOLARISE") {
         // Zip du jeune
         // ! Vérifie que ça a la bouille d'un zipcode mais ds les faits, on peut mettre nimp en 5 chiffres
-        if (!data?.isAbroad && !(data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
+        if (!(data?.zip && validator.isPostalCode(data?.zip, "FR"))) {
           errors.zip = "Vous devez sélectionner un code postal";
         }
       } else {
@@ -84,31 +83,43 @@ export default function StepEligibilite() {
     setLoading(true);
     plausibleEvent("Phase0/CTA reinscription - eligibilite");
 
-    const res = await api.post("/cohort-session/eligibility/2023", {
-      schoolDepartment: data.school?.departmentName,
-      department: data.school?.department,
-      schoolRegion: data.school?.region,
-      birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
-      grade: data.scolarity,
-      zip: data.zip,
-    });
-    if (!res.ok) {
-      capture(res.code);
+    try {
+      const res = await api.post("/cohort-session/eligibility/2023", {
+        schoolDepartment: data.school?.departmentName,
+        department: data.school?.department,
+        schoolRegion: data.school?.region,
+        birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
+        grade: data.scolarity,
+        zip: data.zip,
+      });
+      if (!res.ok) {
+        capture(res.code);
+        setError({ text: "Impossible de vérifier votre éligibilité" });
+        setLoading(false);
+        return;
+      }
+
+      if (res.data.msg || res.data.length === 0) {
+        const { ok, data, code } = await api.put("/young/reinscription/not-eligible");
+        if (!ok) {
+          capture(code);
+          setError({ text: "Impossible de vérifier votre éligibilité" });
+          setLoading(false);
+          return;
+        }
+        dispatch(setYoung(res.data));
+        setData({ ...data, step: REINSCRIPTION_STEPS.INELIGIBLE });
+        return history.push("/reinscription/noneligible");
+      }
+
+      const sessions = res.data;
+      setData({ ...data, sessions, step: REINSCRIPTION_STEPS.SEJOUR });
+      return history.push("/reinscription/sejour");
+    } catch (error) {
+      capture(error);
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
-
-    if (res.data.msg) {
-      setData({ ...data, msg: res.data.msg, step: REINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/reinscription/noneligible");
-    }
-    const sessions = res.data;
-    if (sessions.length === 0) {
-      setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: REINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/reinscription/noneligible");
-    }
-    setData({ ...data, sessions, step: REINSCRIPTION_STEPS.SEJOUR });
-    return history.push("/reinscription/sejour");
   };
 
   return (
