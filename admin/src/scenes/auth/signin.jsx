@@ -11,8 +11,8 @@ import api from "../../services/api";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { formatToActualTime } from "snu-lib/date";
-import { FEATURES_NAME, isFeatureEnabled } from "../../features";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { captureMessage } from "../../sentry";
 
@@ -64,7 +64,8 @@ export default function Signin() {
                     if (token) api.setToken(token);
                     if (user) {
                       dispatch(setUser(user));
-                      if (isFeatureEnabled(FEATURES_NAME.FLEXIBLE_REDIRECT) ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
+                      if (isFeatureEnabled(FEATURES_NAME.FLEXIBLE_REDIRECT, undefined, environment) ? redirect : isValidRedirectUrl(redirect))
+                        return (window.location.href = redirect);
                       if (redirect) {
                         captureMessage("Invalid redirect url", { extra: { redirect } });
                         toastr.error("Url de redirection invalide : " + redirect);
