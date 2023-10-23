@@ -621,7 +621,7 @@ function canSearchInElasticSearch(actor, index) {
   if (index === "mission") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "school" || index === "schoolramses") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(actor.role);
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].includes(actor.role);
   } else if (index === "young-having-school-in-department") {
     return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young-having-school-in-region") {

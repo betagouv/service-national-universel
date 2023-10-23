@@ -13,7 +13,7 @@ router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: f
     const { user } = req;
 
     // TODO: refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -23,7 +23,7 @@ router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: f
         bool: {
           must: { match_all: {} },
           filter: [
-            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "region.keyword": [user.region] } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
           ].filter(Boolean),
         },
@@ -46,7 +46,7 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
     const { user } = req;
 
     //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -67,7 +67,7 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
           ].filter(Boolean),
           filter: [
             //query
-            user.role === ROLES.REFERENT_REGION ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "schoolDepartment.keyword": user.department } } : null,
           ].filter(Boolean),
         },
@@ -135,7 +135,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     const { user } = req;
 
     //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER, ROLES.VISITOR];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -161,7 +161,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
             queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
           filter: [
-            user.role === ROLES.REFERENT_REGION
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
               ? {
                   bool: {
                     should: [
@@ -398,7 +398,7 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
     const { user } = req;
 
     //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -416,7 +416,7 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
           ].filter(Boolean),
           filter: [
-            user.role === ROLES.REFERENT_REGION
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
               ? {
                   bool: {
                     should: [
@@ -507,7 +507,7 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
     const { user } = req;
 
     //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -525,7 +525,7 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
           ].filter(Boolean),
 
           filter: [
-            user.role === ROLES.REFERENT_REGION
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
               ? {
                   bool: {
                     should: [
@@ -559,6 +559,25 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
       },
       size: 0,
     };
+    if (queryFilters?.region?.length)
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": queryFilters.region } }] } },
+            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": queryFilters.region } }] } },
+          ],
+        },
+      });
+
+    if (queryFilters?.department?.length)
+      body.query.bool.must.push({
+        bool: {
+          should: [
+            { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolDepartment.keyword": queryFilters.department } }] } },
+            { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "department.keyword": queryFilters.department } }] } },
+          ],
+        },
+      });
 
     const responseYoung = await esClient.search({ index: "young", body: body });
     if (!responseYoung?.body) {
