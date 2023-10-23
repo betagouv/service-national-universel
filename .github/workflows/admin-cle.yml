@@ -1,7 +1,7 @@
 env:
   SUBFOLDER_NAME: admin
   APP_NAME: snu-cle-admin
-  ENVIRONMENT_NAME: snu-cle-staging
+  ENVIRONMENT_NAME: snu-cle-admin
 
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
   SLACK_COLOR: "#3278BD"
