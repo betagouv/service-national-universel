@@ -5,10 +5,11 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1, YOUNG_STATUS } = require("snu-lib");
+const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1, YOUNG_STATUS, canSeeDashboardSejourInfo } = require("snu-lib");
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
 router.post("/moderator", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  if (!canSeeDashboardSejourInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   // creation de la Query avec filtres pour récupèrer les infos des jeunes
   const buildESRequestBodyForYoung = (queryFilters, user) => {
     const aggsFilter = {};

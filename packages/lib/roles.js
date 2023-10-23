@@ -793,6 +793,22 @@ function canCheckIfRefExist(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR].includes(actor.role);
 }
 
+function canSeeDashboardSejourInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
+function canSeeDashboardInscriptionInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR].includes(actor.role);
+}
+
+function canSeeAllDashboardEngagementInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
+function canSeeDashboardEngagementInfo(actor) {
+  return [ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(actor.role);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -912,4 +928,8 @@ export {
   canPutSpecificDateOnSessionPhase1,
   isBusEditionOpen,
   canCheckIfRefExist,
+  canSeeDashboardSejourInfo,
+  canSeeDashboardInscriptionInfo,
+  canSeeAllDashboardEngagementInfo,
+  canSeeDashboardEngagementInfo,
 };
