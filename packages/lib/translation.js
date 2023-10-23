@@ -338,6 +338,8 @@ const translate = (value) => {
       return "De leur établissement";
     case "mobilityNearRelative":
       return "De l'hébergement d'un proche";
+    case "N/A":
+      return "Non renseigné";
     default:
       return value;
   }

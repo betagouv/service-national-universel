@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } from "react-icons/hi";
+import { ROLES } from "snu-lib";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import api from "../../../../services/api";
@@ -78,18 +79,20 @@ export default function TabSchool({ filters }) {
             <HiOutlineExternalLink className="h-5 w-5 cursor-pointer text-gray-400" />
           </Link>
         </div>
-        <div className="text-xs text-gray-600">
-          Export depuis le menu{" "}
-          <Link
-            to={`/inscription`}
-            target="_blank"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="cursor-pointer text-blue-600">
-            Inscriptions
-          </Link>
-        </div>
+        {user.role !== ROLES.VISITOR ? (
+          <div className="text-xs text-gray-600">
+            Export depuis le menu{" "}
+            <Link
+              to={`/inscription`}
+              target="_blank"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="cursor-pointer text-blue-600">
+              Inscriptions
+            </Link>
+          </div>
+        ) : null}
       </div>
       <table className={`w-full table-fixed ${isLoading || noResult ? "h-full" : ""}`}>
         <thead>

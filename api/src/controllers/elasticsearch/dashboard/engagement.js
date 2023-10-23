@@ -103,7 +103,7 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
         by_legal_status: {
           terms: {
             field: "legalStatus.keyword",
-            missing: "EMPTY",
+            missing: "N/A",
           },
           aggs: {
             by_type: {
