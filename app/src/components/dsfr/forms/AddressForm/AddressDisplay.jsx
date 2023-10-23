@@ -2,8 +2,8 @@ import React from "react";
 import { FiSearch } from "react-icons/fi";
 import { HiCheckCircle } from "react-icons/hi";
 
-export default function AddressDisplay({ data, setData }) {
-  const resetData = () => setData({ ...data, address: "", addressVerified: "false", zip: "", city: "", department: "", region: "", location: null, addressType: null });
+export default function AddressDisplay({ data, updateData }) {
+  const resetData = () => updateData({ address: "", addressVerified: "false", zip: "", city: "", department: "", region: "", location: null, addressType: null });
 
   return (
     <div className="flex flex-col gap-2">
@@ -11,7 +11,7 @@ export default function AddressDisplay({ data, setData }) {
         <label className="flex flex-col gap-2 w-full">
           Adresse
           <div className="flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
-            <input type="text" value={data.address} onChange={(e) => setData({ ...data, address: e.target.value })} disabled className="w-full text-gray-400" />
+            <input type="text" value={data.address} disabled className="w-full text-gray-400" />
             <HiCheckCircle />
           </div>
         </label>
@@ -21,7 +21,7 @@ export default function AddressDisplay({ data, setData }) {
           <input
             type="text"
             value={data.address}
-            onChange={(e) => setData({ ...data, address: e.target.value })}
+            onChange={(e) => updateData({ address: e.target.value })}
             className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 border-b-2 border-gray-800"
           />
         </label>

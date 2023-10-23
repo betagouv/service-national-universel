@@ -572,7 +572,7 @@ export default function StepCoordonnees() {
               error={errors.hostRelationship}
               correction={corrections?.hostRelationship}
             />
-            <AddressForm data={data} setData={setData} />
+            <AddressForm data={data} setData={setData} addressOwner="host" />
           </>
         )}
 

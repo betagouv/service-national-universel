@@ -1341,6 +1341,13 @@ const Schema = new mongoose.Schema({
       description: "Adresse de l'hébergeur",
     },
   },
+  hostAddressType: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+    documentation: {
+      description: "Type d'adresse de l'hébergeur",
+    },
+  },
   hostDepartment: {
     type: String,
     documentation: {

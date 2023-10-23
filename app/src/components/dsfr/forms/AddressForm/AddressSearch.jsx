@@ -3,7 +3,7 @@ import { departmentLookUp } from "snu-lib";
 import Option from "./AddressOption";
 import { FiSearch } from "react-icons/fi";
 
-export default function AddressSearch({ data, setData }) {
+export default function AddressSearch({ updateData }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
 
@@ -59,8 +59,7 @@ export default function AddressSearch({ data, setData }) {
   };
 
   const handleSelect = (option) => {
-    setData({
-      ...data,
+    updateData({
       addressVerified: "true",
       address: option.properties.type !== "municipality" ? option.properties.name : "",
       addressType: option.properties.type,
