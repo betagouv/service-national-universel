@@ -182,6 +182,20 @@ const Schema = new mongoose.Schema({
   deletedAt: { type: Date },
 });
 
+Schema.methods.anonymise = async function () {
+  const doc = await OBJ.findById(this._id);
+  doc.requestMessage = "******* ***** **************** *****";
+  doc.requestUserName = "******* *****";
+  doc.statusUserName = "******* *****";
+  doc.opinionUserName = "******* *****";
+  doc.messages = doc.messages.map((message) => {
+    message.message = "******* ***** **************** *****";
+    message.userName = "******* *****";
+    return message;
+  });
+  return doc;
+};
+
 Schema.virtual("user").set(function (user) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;
