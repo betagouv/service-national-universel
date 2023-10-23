@@ -4,14 +4,16 @@ const router = express.Router();
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
-const { joiElasticSearch } = require("../utils");
+const { joiElasticSearch, buildPlaceContext } = require("../utils");
 const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1, YOUNG_STATUS, canSeeDashboardSejourInfo } = require("snu-lib");
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
 router.post("/moderator", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   if (!canSeeDashboardSejourInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   // creation de la Query avec filtres pour récupèrer les infos des jeunes
-  const buildESRequestBodyForYoung = (queryFilters, user) => {
+  const { placeContextFilters } = buildPlaceContext(req.user);
+
+  const buildESRequestBodyForYoung = (queryFilters) => {
     const aggsFilter = {};
     if (queryFilters?.statusPhase1?.length) {
       aggsFilter.filter = {
@@ -33,11 +35,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
             queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
-          filter: [
-            //query
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
-            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
-          ].filter(Boolean),
+          filter: [...placeContextFilters].filter(Boolean),
         },
       },
       aggs: {

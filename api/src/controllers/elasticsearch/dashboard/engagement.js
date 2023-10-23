@@ -5,14 +5,14 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
-const { ES_NO_LIMIT, ROLES, APPLICATION_STATUS, canSeeAllDashboardEngagementInfo, canSeeDashboardEngagementInfo } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, APPLICATION_STATUS, canSeeDashboardEngagementInfo, canSeeDashboardEngagementStatus } = require("snu-lib");
 const { buildMissionContext } = require("../utils");
 const { buildApplicationContext } = require("../utils");
 // TODO: Guard all requests according to roles
 
 router.post("/status-divers", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canSeeAllDashboardEngagementInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardEngagementInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["status", "cohorts", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -80,7 +80,7 @@ router.post("/status-divers", passport.authenticate(["referent"], { session: fal
 
 router.post("/structures", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canSeeAllDashboardEngagementInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardEngagementInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["region", "departement"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -138,7 +138,7 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
 
 router.post("/status-de-phases", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canSeeAllDashboardEngagementInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardEngagementInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["status", "cohorts", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -205,7 +205,7 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
 
 router.post("/mission-proposed-places", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canSeeAllDashboardEngagementInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardEngagementInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["region", "department", "start", "end", "source"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -271,7 +271,7 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
 
 router.post("/mission-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canSeeAllDashboardEngagementInfo(req.user) && !canSeeDashboardEngagementInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardEngagementInfo(req.user) && !canSeeDashboardEngagementStatus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let missionContextFilters = [];
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(req.user.role)) {
@@ -360,7 +360,7 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
 router.post("/application-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user } = req;
-    if (!canSeeDashboardEngagementInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSeeDashboardEngagementStatus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { applicationContextFilters, applicationContextError } = await buildApplicationContext(user);
     if (applicationContextError) {

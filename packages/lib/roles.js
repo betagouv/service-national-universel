@@ -801,11 +801,11 @@ function canSeeDashboardInscriptionInfo(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR].includes(actor.role);
 }
 
-function canSeeAllDashboardEngagementInfo(actor) {
+function canSeeDashboardEngagementInfo(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-function canSeeDashboardEngagementInfo(actor) {
+function canSeeDashboardEngagementStatus(actor) {
   return [ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(actor.role);
 }
 
@@ -930,6 +930,6 @@ export {
   canCheckIfRefExist,
   canSeeDashboardSejourInfo,
   canSeeDashboardInscriptionInfo,
-  canSeeAllDashboardEngagementInfo,
   canSeeDashboardEngagementInfo,
+  canSeeDashboardEngagementStatus,
 };

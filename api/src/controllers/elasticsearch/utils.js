@@ -189,6 +189,17 @@ async function buildApplicationContext(user) {
   return { applicationContextFilters: contextFilters };
 }
 
+function buildPlaceContext(user) {
+  const contextFilters = [];
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    contextFilters.push({ terms: { "department.keyword": user.department } });
+  }
+  if (user.role === ROLES.REFERENT_REGION) {
+    contextFilters.push({ terms: { "region.keyword": [user.region] } });
+  }
+  return { placeContextFilters: contextFilters };
+}
+
 module.exports = {
   buildNdJson,
   buildArbitratyNdJson,
@@ -196,4 +207,5 @@ module.exports = {
   joiElasticSearch,
   buildMissionContext,
   buildApplicationContext,
+  buildPlaceContext,
 };
