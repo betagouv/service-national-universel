@@ -1,6 +1,6 @@
 env:
   SUBFOLDER_NAME: api
-  APP_NAME: snu-api-cle
+  APP_NAME: snu-cle-api
   ENVIRONMENT_NAME: snu-api-cle
 
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
