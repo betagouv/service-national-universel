@@ -265,6 +265,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
             message="La mission est en attente de validation. Son contenu va être vérifié par un référent SNU du département dans lequel se déroulera la mission dans les jours à venir."
           />
         ) : null}
+        {mission.status === MISSION_STATUS.DRAFT ? (
+          <InfoMessage
+            bg="bg-blue-700"
+            Icon={InfoCircleMission}
+            message='Si la mission reste au statut brouillon celle-ci ne sera pas étudiée et par conséquent le volontaire ne pourra pas y candidater. Pensez à modifier son statut en la passant "En attente de validation". (bouton en haut à droite de votre écran)'
+          />
+        ) : null}
         <div className="mb-8 rounded-xl bg-white pt-2 mt-8">
           <div className="flex flex-col rounded-xl bg-white px-8 pb-12">
             <div className="my-4 flex items-center justify-between">
