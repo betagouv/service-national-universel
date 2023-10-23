@@ -1,20 +1,21 @@
-import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
-import { AddButton, DeleteButton, DownloadButton, MiniTitle, MoreButton } from "./commons";
+import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
+import { AddButton, DeleteButton, EyeButton, MiniTitle, MoreButton } from "./commons";
 import React, { useEffect, useState } from "react";
-import api from "../../../services/api";
-import { download, translate } from "snu-lib";
+import api from "@/services/api";
+import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import CorrectionRequest from "./CorrectionRequest";
-import PencilAlt from "../../../assets/icons/PencilAlt";
+import PencilAlt from "@/assets/icons/PencilAlt";
 import CorrectedRequest from "./CorrectedRequest";
 import { Modal } from "reactstrap";
 import { BorderButton, PlainButton } from "./Buttons";
 import ConfirmationModal from "./ConfirmationModal";
-import Warning from "../../../assets/icons/Warning";
-import { capture } from "../../../sentry";
+import Warning from "@/assets/icons/Warning";
+import { capture } from "@/sentry";
 import Field from "./Field";
 import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
-import { resizeImage } from "../../../services/file.service";
+import { resizeImage } from "@/services/file.service";
+import queryString from "query-string";
 
 export function CniField({
   young,
@@ -133,35 +134,9 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   useEffect(() => {
     (async () => {
       if (blockUpload) return setFilesToUpload(young.filesToUpload);
-      if (young && young.files && young.files.cniFiles) {
-        for (const file of young.files.cniFiles) {
-          file.previewUrl = await previewCni(file);
-        }
-        setCniFiles(young.files.cniFiles);
-      } else {
-        setCniFiles([]);
-      }
+      setCniFiles(young?.files?.cniFiles || []);
     })();
   }, [young]);
-
-  async function downloadCni(cniFile) {
-    try {
-      const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + cniFile._id);
-      const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
-      download(blob, result.fileName);
-    } catch (err) {
-      toastr.error("Impossible de télécharger la pièce. Veuillez réessayer dans quelques instants.");
-    }
-  }
-
-  async function previewCni(cniFile) {
-    try {
-      const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + cniFile._id);
-      return `data:${result.mimeType};base64,${encodeURI(btoa(String.fromCharCode(...new Uint8Array(result.data.data))))}`;
-    } catch (err) {
-      toastr.error("Impossible de télécharger la pièce. Veuillez réessayer dans quelques instants.");
-    }
-  }
 
   function deleteCni(file) {
     setConfirmDeleteModal({ file });
@@ -262,19 +237,14 @@ function CniModal({ young, onClose, mode, blockUpload }) {
                     </p>
                   </div>
                   <div className="flex items-center">
-                    <DownloadButton className="ml-[8px] flex-[0_0_32px]" onClick={() => downloadCni(file)} />
+                    <EyeButton
+                      className="ml-[8px] flex-[0_0_32px]"
+                      href={api.apiURL + "/young/" + young._id + "/documents/cniFiles/" + file._id + "?" + queryString.stringify({ token: api.token, preview: 1 })}
+                      target="_blank"
+                    />
                     <DeleteButton className="ml-[8px] flex-[0_0_32px]" onClick={() => deleteCni(file)} />
                   </div>
                 </div>
-                {file.previewUrl && (
-                  <div className="flex justify-center">
-                    {file.previewUrl.includes("data:application/pdf") ? (
-                      <iframe src={file.previewUrl} className="pt-[12px]" style={{ width: "100%", height: "200px", border: 0 }}></iframe>
-                    ) : (
-                      <img src={file.previewUrl} className="max-h-[200px] pt-[12px]" />
-                    )}
-                  </div>
-                )}
               </div>
             ))
           ) : young?.latestCNIFileCategory === "deleted" ? (

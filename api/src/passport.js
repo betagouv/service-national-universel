@@ -10,7 +10,7 @@ const Referent = require("./models/referent");
 const { ROLES } = require("snu-lib");
 
 function getToken(req) {
-  let token = ExtractJwt.fromAuthHeaderWithScheme("JWT")(req);
+  let token = ExtractJwt.fromAuthHeaderWithScheme("JWT")(req) ?? req.query.token;
 
   // * On first call after refresh, the token is only in the cookie
   if (!token) {

@@ -1,5 +1,6 @@
 import React from "react";
 import Download from "../../../assets/icons/Download";
+import Eye from "../../../assets/icons/Eye";
 import Plus from "../../../assets/icons/Plus";
 import Bin from "../../../assets/Bin";
 
@@ -26,6 +27,18 @@ export function DownloadButton({ className = "", onClick = () => {}, href, targe
       </div>
     );
   }
+}
+
+export function EyeButton({ className = "", href, target, rel }) {
+  return (
+    <a
+      className={`group flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-[100px] bg-[#2563EB] hover:bg-[#DBEAFE] ${className}`}
+      href={href}
+      target={target}
+      rel={rel}>
+      <Eye className="h-[14px] w-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
+    </a>
+  );
 }
 
 export function MoreButton({ className = "", onClick = () => {} }) {

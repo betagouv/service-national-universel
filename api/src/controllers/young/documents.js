@@ -483,6 +483,14 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
       capture(e);
     }
 
+    if (req.query.preview) {
+      // Send preview to app
+      return res
+        .status(200)
+        .set({ "Content-Type": mime.lookup(young.files[key].id(fileId).name) })
+        .send(decryptedBuffer);
+    }
+
     // Send to app
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),

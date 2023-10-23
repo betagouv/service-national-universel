@@ -9,6 +9,7 @@ let fetch = window.fetch;
 class api {
   constructor() {
     this.token = "";
+    this.apiURL = apiURL;
   }
 
   goToAuth() {
@@ -31,7 +32,7 @@ class api {
 
         window.addEventListener("beforeunload", () => controller.abort());
 
-        const response = await fetch(`${apiURL}/referent/signin_token`, {
+        const response = await fetch(`${this.apiURL}/referent/signin_token`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
@@ -62,7 +63,7 @@ class api {
     window.addEventListener("beforeunload", () => controller.abort());
 
     const header = { index, type: "_doc" };
-    return fetch(`${apiURL}/es/${route || index}/_msearch${queryParam}`, {
+    return fetch(`${this.apiURL}/es/${route || index}/_msearch${queryParam}`, {
       retries: 3,
       retryDelay: 1000,
       retryOn: [502, 503, 504],
@@ -123,7 +124,7 @@ class api {
 
       window.addEventListener("beforeunload", () => controller.abort());
 
-      response = await fetch(`${apiURL}${path}`, {
+      response = await fetch(`${this.apiURL}${path}`, {
         retries: 3,
         retryDelay: 1000,
         retryOn: [502, 503, 504],
@@ -166,7 +167,7 @@ class api {
 
         window.addEventListener("beforeunload", () => controller.abort());
 
-        const response = await fetch(`${apiURL}${path}`, {
+        const response = await fetch(`${this.apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
@@ -204,7 +205,7 @@ class api {
 
         window.addEventListener("beforeunload", () => controller.abort());
 
-        const response = await fetch(`${apiURL}${path}`, {
+        const response = await fetch(`${this.apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
@@ -244,7 +245,7 @@ class api {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`${apiURL}${path}`, {
+        const response = await fetch(`${this.apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
@@ -278,7 +279,7 @@ class api {
 
     return new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`${apiURL}${path}`, {
+        const response = await fetch(`${this.apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
@@ -306,7 +307,7 @@ class api {
   remove(path) {
     return new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`${apiURL}${path}`, {
+        const response = await fetch(`${this.apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
@@ -334,7 +335,7 @@ class api {
     const formData = createFormDataForFileUpload(arr, properties);
     return new Promise(async (resolve, reject) => {
       try {
-        const response = await fetch(`${apiURL}${path}`, {
+        const response = await fetch(`${this.apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
@@ -368,7 +369,7 @@ class api {
 
         window.addEventListener("beforeunload", () => controller.abort());
 
-        const response = await fetch(`${apiURL}${path}`, {
+        const response = await fetch(`${this.apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
