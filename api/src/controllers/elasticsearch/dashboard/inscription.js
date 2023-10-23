@@ -4,7 +4,7 @@ const router = express.Router();
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
-const { joiElasticSearch } = require("../utils");
+const { joiElasticSearch, buildPlaceContext } = require("../utils");
 const { ES_NO_LIMIT, COHORTS, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo } = require("snu-lib");
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
@@ -13,15 +13,12 @@ router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: f
     const { user } = req;
 
     if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+    const { placeContextFilters } = buildPlaceContext(req.user);
     const body = {
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [
-            user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
-          ].filter(Boolean),
+          filter: [...placeContextFilters].filter(Boolean),
         },
       },
       size: ES_NO_LIMIT,
@@ -46,6 +43,7 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { placeContextFilters } = buildPlaceContext(req.user);
 
     const body = {
       query: {
@@ -58,11 +56,7 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
             queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
           ].filter(Boolean),
-          filter: [
-            //query
-            user.role === ROLES.REFERENT_REGION ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "schoolDepartment.keyword": user.department } } : null,
-          ].filter(Boolean),
+          filter: [...placeContextFilters].filter(Boolean),
         },
       },
       aggs: {
