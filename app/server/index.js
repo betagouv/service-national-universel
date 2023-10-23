@@ -30,7 +30,7 @@ if (process.env.PROD) {
   );
 }
 
-if (process.env.STAGING) {
+if (process.env.STAGING && !process.env.CLE) {
   app.use(
     forceDomain({
       hostname: "moncompte.beta-snu.dev",
