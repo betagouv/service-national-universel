@@ -1,4 +1,8 @@
-require("dotenv").config({ path: "./.env-staging" });
+const loadEnv = require("./env-manager");
+
+(async () => {
+  await loadEnv();
+})();
 
 // ! Ignore specific error
 const originalConsoleError = console.error;
