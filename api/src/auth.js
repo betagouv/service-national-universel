@@ -186,8 +186,6 @@ class Auth {
         if (config.ENVIRONMENT === "development") return false;
         if (config.ENVIRONMENT === "staging" && !user.email.match(regexp_exception_staging)) return false;
 
-        if (user.emailVerified === "false") return false;
-
         const trustToken = req.cookies[`trust_token-${user._id}`];
         if (!trustToken) return true;
         const isKnownBrowser = jwt.verify(trustToken, config.secret);
@@ -261,6 +259,9 @@ class Auth {
       user.set({ token2FA: null, token2FAExpires: null });
       user.set({ loginAttempts: 0, attempts2FA: 0 });
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
+      if (!user.emailVerified || user.emailVerified === "false") {
+        user.set({ emailVerified: "true" });
+      }
       await user.save();
 
       if (rememberMe) {

@@ -16,6 +16,9 @@ import InlineButton from "../../components/dsfr/ui/buttons/InlineButton";
 import DidNotReceiveActivationCodeModal from "./components/DidNotReceiveActivationCodeModal";
 import ModifyEmailModal from "./components/ModifyEmailModal";
 
+//@todo:
+// - move from preinscription folder to be reused for "class engagee" also /preinscription/email-validation => /email-validation
+// - add origin to query params to know where to redirect user after email validation (preinscription or class engagee)
 export default function StepEmailValidation() {
   const dispatch = useDispatch();
   const history = useHistory();
