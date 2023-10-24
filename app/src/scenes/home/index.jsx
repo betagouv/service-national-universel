@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
 
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, hasAccessToReinscription } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, hasAccessToReinscription, reInscriptionOpenForYoungs } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Banner from "./components/banner";
 import Default from "./default";
@@ -13,11 +13,13 @@ import Affected from "./Affected";
 import WaitingCorrectionV2 from "./waitingCorrectionV2";
 import WaitingList from "./waitingList";
 import WaitingReinscription from "./WaitingReinscription";
+import WaitingReinscriptionOld from "./WaitingReinscriptionOld";
 import WaitingValidation from "./waitingValidation";
 import Withdrawn from "./withdrawn";
 import Phase1NotDone from "./Phase1NotDone";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import FutureCohort from "./FutureCohort";
+import { environment } from "@/config";
 
 export default function Home() {
   useDocumentTitle("Accueil");
@@ -56,7 +58,8 @@ export default function Home() {
         </>
       );
     if (hasAccessToReinscription(young)) {
-      return <WaitingReinscription />;
+      // @todo: WaitingReinscriptionOld should be deleted and WaitingReinscription updated to handle both cases
+      return reInscriptionOpenForYoungs(environment) ? <WaitingReinscription /> : <WaitingReinscriptionOld />;
     }
     if (
       young.status === YOUNG_STATUS.VALIDATED &&

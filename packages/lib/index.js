@@ -24,10 +24,11 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-function reInscriptionModificationOpenForYoungs(env) {
+//@todo: check in cohort list
+function reInscriptionOpenForYoungs(env) {
   if (env !== undefined && env !== "production") return true;
 
-  return new Date() >= new Date(2023, 10, 6, 8); // @todo: reInscription end date / should come from db
+  return new Date() >= new Date(2023, 10, 6, 8);
 }
 
 function shouldForceRedirectToReinscription(young) {
@@ -214,7 +215,7 @@ export {
   isEndOfInscriptionManagement2021,
   inscriptionModificationOpenForYoungs,
   inscriptionCreationOpenForYoungs,
-  reInscriptionModificationOpenForYoungs,
+  reInscriptionOpenForYoungs,
   shouldForceRedirectToReinscription,
   shouldForceRedirectToInscription,
   hasAccessToReinscription,

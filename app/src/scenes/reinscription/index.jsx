@@ -1,8 +1,7 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { Redirect, Switch, useParams } from "react-router-dom";
-import api from "@/services/api";
 import ReinscriptionContextProvider, { ReinscriptionContext } from "../../context/ReinscriptionContextProvider";
-import { SentryRoute, capture } from "../../sentry";
+import { SentryRoute } from "../../sentry";
 
 import { useSelector } from "react-redux";
 import StepEligibilite from "./steps/stepEligibilite";
@@ -12,8 +11,9 @@ import StepConfirm from "./steps/stepConfirm";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import Loader from "@/components/Loader";
-import { toastr } from "react-redux-toastr";
+import { hasAccessToReinscription, reInscriptionOpenForYoungs } from "snu-lib";
+import FutureCohort from "../inscription2023/FutureCohort";
+import { environment } from "@/config";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -47,25 +47,6 @@ const Step = () => {
   }, []);
 
   const { step } = useParams();
-  const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
-  const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
-  const fetchReinscriptionOpen = async () => {
-    try {
-      const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen`);
-      if (!ok) {
-        capture(code);
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      setReinscriptionOpen(data);
-      setReinscriptionOpenLoading(false);
-    } catch (e) {
-      setReinscriptionOpenLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchReinscriptionOpen();
-  }, []);
 
   const currentStep = getStepFromUrlParam(step, STEP_LIST, true);
   if (!currentStep) return <Redirect to="/reinscription" />;
@@ -76,14 +57,16 @@ const Step = () => {
     return <Redirect to={`/reinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  if (isReinscriptionOpenLoading) return <Loader />;
-
-  if (!isReinscriptionOpen) return <Redirect to="/" />;
-
   return renderStepResponsive(currentStep);
 };
 
 export default function ReInscription() {
+  const young = useSelector((state) => state.Auth.young);
+
+  if (!hasAccessToReinscription(young)) return <Redirect to="/" />;
+
+  if (!reInscriptionOpenForYoungs(environment)) return <FutureCohort />;
+
   return (
     <ReinscriptionContextProvider>
       <DSFRLayout title="Reinscription du volontaire">
