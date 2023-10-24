@@ -7,6 +7,7 @@ export default function AddressDisplay({ data, updateData }) {
 
   return (
     <div className="flex flex-col gap-2">
+      {/* If the user selects a municipality, we allow them to input a street name and a housenumber, otherwise the address field is disabled */}
       {data?.addressType === "housenumber" ? (
         <label className="flex flex-col gap-2 w-full">
           Adresse

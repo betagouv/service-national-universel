@@ -2,28 +2,30 @@ import React, { useEffect, useRef, useState } from "react";
 import { departmentLookUp } from "snu-lib";
 import Option from "./AddressOption";
 import { FiSearch } from "react-icons/fi";
+import { apiAdress } from "@/services/api-adresse";
+import { toastr } from "react-redux-toastr";
 
 export default function AddressSearch({ updateData }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
-
-  // https://adresse.data.gouv.fr/api-doc/adresse
-  // Types de résultats :
-  //   housenumber : numéro « à la plaque »
-  //   street : position « à la voie », placé approximativement au centre de celle-ci
-  //   locality : lieu-dit
-  //   municipality : numéro « à la commune »
 
   const housenumbers = options.filter((option) => option.properties.type === "housenumber");
   const streets = options.filter((option) => option.properties.type === "street");
   const localities = options.filter((option) => option.properties.type === "locality");
   const municipalities = options.filter((option) => option.properties.type === "municipality");
 
-  const ref = useRef(null);
+  const dropdownRef = useRef(null);
+  const controllerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (controllerRef.current) controllerRef.current.abort();
+    };
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (ref.current && !ref.current.contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setQuery("");
       }
     }
@@ -44,9 +46,15 @@ export default function AddressSearch({ updateData }) {
   const handleChangeQuery = async (e) => {
     setQuery(e.target.value);
     if (e.target.value.length < 3) return;
-    const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${e.target.value}&limit=10`);
-    const json = await res.json();
-    setOptions(json.features);
+
+    // Abort previous request and refresh abort controller
+    if (controllerRef.current) controllerRef.current.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
+    const res = await apiAdress(e.target.value, { limit: 10 }, { signal: controller.signal });
+    if (res.error) return toastr.error("Erreur", "Une erreur est survenue lors de la recherche de votre adresse.", { timeOut: 10_000 });
+    setOptions(res.features);
   };
 
   const getDepartmentAndRegionFromContext = (context) => {
@@ -65,6 +73,7 @@ export default function AddressSearch({ updateData }) {
       addressType: option.properties.type,
       zip: option.properties.postcode,
       city: option.properties.city,
+      cityCode: option.properties.citycode,
       department: getDepartmentAndRegionFromContext(option.properties.context).department,
       region: getDepartmentAndRegionFromContext(option.properties.context).region,
       location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
@@ -87,7 +96,7 @@ export default function AddressSearch({ updateData }) {
 
       <div className="relative">
         {query?.length > 2 && (
-          <div ref={ref} className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
+          <div ref={dropdownRef} className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
             {options.length > 0 ? (
               <>
                 {housenumbers.length > 0 && (

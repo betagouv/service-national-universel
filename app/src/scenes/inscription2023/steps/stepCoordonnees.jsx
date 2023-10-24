@@ -53,7 +53,7 @@ const errorMessages = {
 };
 
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
-const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location"];
+const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified", "addressType"];
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
@@ -530,7 +530,7 @@ export default function StepCoordonnees() {
           error={errors?.livesInFrance}
           correction={corrections?.livesInFrance}
         />
-        {isFrenchResident && <AddressForm data={data} updateData={setData} />}
+        {isFrenchResident && <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} />}
         {!isFrenchResident && (
           <SearchableSelect
             label="Pays de résidence"

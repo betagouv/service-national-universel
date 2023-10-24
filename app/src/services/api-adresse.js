@@ -3,6 +3,11 @@ import { department2region, departmentLookUp } from "snu-lib/region-and-departme
 
 // https://adresse.data.gouv.fr/api-doc/adresse
 // Filtres possibles : postcode, citycode (INSEE), type, limit, autocomplete
+// Types de résultats :
+//   housenumber : numéro « à la plaque »
+//   street : position « à la voie », placé approximativement au centre de celle-ci
+//   locality : lieu-dit
+//   municipality : numéro « à la commune »
 
 const apiAdress = async (query, filters = {}, options = {}) => {
   let url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}`;

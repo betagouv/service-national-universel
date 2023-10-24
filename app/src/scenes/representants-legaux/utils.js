@@ -15,8 +15,7 @@ export function getDataForConsentStep(young, parentId) {
     phone: young[`parent${parentId}Phone`] ? young[`parent${parentId}Phone`] : "",
     phoneZone: young[`parent${parentId}PhoneZone`] ? young[`parent${parentId}PhoneZone`] : "",
     confirmAddress,
-    addressType: address.country && address.country !== FRANCE ? ABROAD : FRANCE,
-    addressVerified: young.addressParent1Verified === "true",
+    livesInFrance: address.country && address.country !== FRANCE ? ABROAD : FRANCE,
     ...address,
     allowSNU: stringToBoolean(young.parentAllowSNU),
     rightOlder: internalRules,
@@ -28,10 +27,12 @@ export function getDataForConsentStep(young, parentId) {
   };
 }
 
-function getAddress(young, parentId) {
+export function getAddress(young, parentId) {
   if (young[`parent${parentId}OwnAddress`] === "true")
     return {
       address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
+      addressVerified: young[`addressParent${parentId}Verified`] ? young[`addressParent${parentId}Verified`] : "false",
+      addressType: young[`parent${parentId}AddressType`] ? young[`parent${parentId}AddressType`] : "",
       addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
       zip: young[`parent${parentId}Zip`] ? young[`parent${parentId}Zip`] : "",
       city: young[`parent${parentId}City`] ? young[`parent${parentId}City`] : "",
@@ -44,6 +45,8 @@ function getAddress(young, parentId) {
 
   return {
     address: young.address ? young.address : "",
+    addressVerified: young.addressVerified ? young.addressVerified : "false",
+    addressType: young.addressType ? young.addressType : "",
     addressComplement: young.complementAddress ? young.complementAddress : "",
     zip: young.zip ? young.zip : "",
     city: young.city ? young.city : "",
