@@ -22,4 +22,12 @@ if (environment === "production") {
   baseDeConnaissanceURL = "https://support.snu.gouv.fr";
 }
 
-export { snuApiUrl, supportApiUrl, environment, adminURL, appURL, supportURL, baseDeConnaissanceURL };
+const S3PREFIX = "";
+
+let franceConnectUrl = "https://fcp.integ01.dev-franceconnect.fr/api/v1";
+
+if (environment === "production") {
+  franceConnectUrl = "https://app.francecon0nect.gouv.fr/api/v1";
+}
+
+export { snuApiUrl, supportApiUrl, S3PREFIX, environment, franceConnectUrl, adminURL, appURL, supportURL, baseDeConnaissanceURL };
