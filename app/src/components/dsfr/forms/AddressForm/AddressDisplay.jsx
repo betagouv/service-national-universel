@@ -1,8 +1,9 @@
+import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import React from "react";
 import { FiSearch } from "react-icons/fi";
 import { HiCheckCircle } from "react-icons/hi";
 
-export default function AddressDisplay({ data, updateData }) {
+export default function AddressDisplay({ data, updateData, correction }) {
   const resetData = () => updateData({ address: "", addressVerified: "false", zip: "", city: "", department: "", region: "", location: null, addressType: null });
 
   return (
@@ -46,6 +47,7 @@ export default function AddressDisplay({ data, updateData }) {
         </label>
       </div>
 
+      <ErrorMessage>{correction}</ErrorMessage>
       <button onClick={resetData} className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover ml-auto py-1 w-fit flex gap-2 items-center">
         <FiSearch />
         Rechercher une nouvelle adresse

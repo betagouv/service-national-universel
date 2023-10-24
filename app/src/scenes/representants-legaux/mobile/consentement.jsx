@@ -289,7 +289,7 @@ function ConsentementForm({ young, token, step, parentId }) {
               <>
                 <ResponsiveRadioButton label="Je réside..." options={livesInFranceOption} onChange={(e) => setData({ ...data, livesInFrance: e })} value={data.livesInFrance} />
                 {data.livesInFrance === FRANCE ? (
-                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} />
+                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} />
                 ) : (
                   <>
                     <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />

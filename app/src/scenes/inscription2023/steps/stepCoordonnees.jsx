@@ -184,6 +184,7 @@ export default function StepCoordonnees() {
         gender: young.gender || data.gender,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
         address: young.address || data.address,
+        addressType: young.addressType || data.addressType,
         city: young.city || data.city,
         zip: young.zip || data.zip,
         region: young.region || data.region,
@@ -530,7 +531,7 @@ export default function StepCoordonnees() {
           error={errors?.livesInFrance}
           correction={corrections?.livesInFrance}
         />
-        {isFrenchResident && <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} />}
+        {isFrenchResident && <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections?.address} />}
         {!isFrenchResident && (
           <SearchableSelect
             label="Pays de résidence"
@@ -572,31 +573,7 @@ export default function StepCoordonnees() {
               error={errors.hostRelationship}
               correction={corrections?.hostRelationship}
             />
-            <AddressForm
-              data={{
-                address: data.hostAddress,
-                addressType: data.hostAddressType,
-                addressVerified: data.hostAddressVerified,
-                city: data.hostCity,
-                zip: data.hostZip,
-                region: data.hostRegion,
-                department: data.hostDepartment,
-                location: data.hostLocation,
-              }}
-              updateData={(newData) =>
-                setData({
-                  ...data,
-                  hostAddress: newData.address,
-                  hostAddressType: newData.addressType,
-                  hostAddressVerified: newData.addressVerified,
-                  hostCity: newData.city,
-                  hostZip: newData.zip,
-                  hostRegion: newData.region,
-                  hostDepartment: newData.department,
-                  hostLocation: newData.location,
-                })
-              }
-            />
+            <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections?.address} />
           </>
         )}
 

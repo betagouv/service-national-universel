@@ -4,8 +4,9 @@ import Option from "./AddressOption";
 import { FiSearch } from "react-icons/fi";
 import { apiAdress } from "@/services/api-adresse";
 import { toastr } from "react-redux-toastr";
+import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
-export default function AddressSearch({ updateData }) {
+export default function AddressSearch({ updateData, error }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
 
@@ -148,6 +149,8 @@ export default function AddressSearch({ updateData }) {
           </div>
         )}
       </div>
+
+      <ErrorMessage>{error}</ErrorMessage>
     </>
   );
 }
