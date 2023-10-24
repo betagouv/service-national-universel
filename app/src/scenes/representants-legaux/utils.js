@@ -32,7 +32,7 @@ export function getAddress(young, parentId) {
     return {
       address: young[`parent${parentId}Address`] ? young[`parent${parentId}Address`] : "",
       addressVerified: young[`addressParent${parentId}Verified`] ? young[`addressParent${parentId}Verified`] : "false",
-      addressType: young[`parent${parentId}AddressType`] ? young[`parent${parentId}AddressType`] : "",
+      coordinatesAccuracyLevel: young[`parent${parentId}coordinatesAccuracyLevel`] ? young[`parent${parentId}coordinatesAccuracyLevel`] : "",
       addressComplement: young[`parent${parentId}ComplementAddress`] ? young[`parent${parentId}ComplementAddress`] : "",
       zip: young[`parent${parentId}Zip`] ? young[`parent${parentId}Zip`] : "",
       city: young[`parent${parentId}City`] ? young[`parent${parentId}City`] : "",
@@ -46,7 +46,7 @@ export function getAddress(young, parentId) {
   return {
     address: young.address ? young.address : "",
     addressVerified: young.addressVerified ? young.addressVerified : "false",
-    addressType: young.addressType ? young.addressType : "",
+    coordinatesAccuracyLevel: young.coordinatesAccuracyLevel ? young.coordinatesAccuracyLevel : "",
     addressComplement: young.complementAddress ? young.complementAddress : "",
     zip: young.zip ? young.zip : "",
     city: young.city ? young.city : "",

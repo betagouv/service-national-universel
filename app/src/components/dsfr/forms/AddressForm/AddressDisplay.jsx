@@ -4,12 +4,12 @@ import { FiSearch } from "react-icons/fi";
 import { HiCheckCircle } from "react-icons/hi";
 
 export default function AddressDisplay({ data, updateData, correction }) {
-  const resetData = () => updateData({ address: "", addressVerified: "false", zip: "", city: "", department: "", region: "", location: null, addressType: null });
+  const resetData = () => updateData({ address: "", addressVerified: "false", zip: "", city: "", department: "", region: "", location: null, coordinatesAccuracyLevel: null });
 
   return (
     <div className="flex flex-col gap-2">
       {/* If the user does not select a housenumber, we allow them to input address data, otherwise the address field is disabled */}
-      {data?.addressType === "housenumber" ? (
+      {data?.coordinatesAccuracyLevel === "housenumber" ? (
         <label className="flex flex-col gap-2 w-full">
           Adresse
           <div className="flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">

@@ -9,7 +9,7 @@ import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButt
 import Toggle from "../../../components/dsfr/forms/toggle";
 import { PHONE_ZONES, isPhoneNumberWellFormated, translate } from "snu-lib";
 import { FRANCE, ABROAD, translateError, stringToBoolean, isReturningParentForImageRights, API_CONSENT_IMAGE_RIGHTS } from "../commons";
-import VerifyAddress from "../../inscription2023/components/VerifyAddress";
+import AddressForm from "@/components/dsfr/forms/AddressForm";
 import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
@@ -18,7 +18,7 @@ import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonCont
 import PhoneField from "@/components/dsfr/forms/PhoneField";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress } from "../utils";
-import AddressForm from "@/components/dsfr/forms/AddressForm";
+import { getAddressOptions } from "@/services/api-adresse";
 
 export default function ImageRights({ parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -90,7 +90,7 @@ function ImageRightsForm({ young, token, parentId }) {
   const formattedAddress =
     young?.address + (young?.addressComplement ? " " + young?.addressComplement : "") + " " + young?.zip + " " + young?.city + (young?.country ? ", " + young?.country : "");
 
-  const livesInFranceOption = [
+  const addressTypeOptions = [
     { label: "En France (Métropolitaine ou Outre-mer)", value: FRANCE },
     { label: "À l’étranger", value: ABROAD },
   ];
@@ -106,7 +106,7 @@ function ImageRightsForm({ young, token, parentId }) {
         city: "",
         country: "",
         addressVerified: "false",
-        addressType: "",
+        coordinatesAccuracyLevel: "",
         cityCode: "",
         region: "",
         department: "",
@@ -288,9 +288,9 @@ function ImageRightsForm({ young, token, parentId }) {
             </div>
             {!data.confirmAddress && (
               <>
-                <ResponsiveRadioButton label="Je réside..." options={livesInFranceOption} onChange={(e) => setData({ ...data, addressType: e })} value={data.addressType} />
+                <ResponsiveRadioButton label="Je réside..." options={addressTypeOptions} onChange={(e) => setData({ ...data, addressType: e })} value={data.addressType} />
                 {data.livesInFrance === FRANCE ? (
-                  <AddressForm data={data} updateData={setData} error={errors.address} />
+                  <AddressForm data={data} updateData={setData} getOptions={getAddressOptions} error={errors.address} />
                 ) : (
                   <>
                     <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />

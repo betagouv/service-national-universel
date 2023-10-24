@@ -93,4 +93,55 @@ const formatResult = (suggestion) => {
   };
 };
 
-export { apiAdress, putLocation, getSuggestions, formatResult };
+function formatOption(option) {
+  return {
+    addressVerified: "true",
+    address: option.properties.type !== "municipality" ? option.properties.name : "",
+    coordinatesAccuracyLevel: option.properties.type,
+    zip: option.properties.postcode,
+    city: option.properties.city,
+    cityCode: option.properties.citycode,
+    department: getDepartmentAndRegionFromContext(option.properties.context).department,
+    region: getDepartmentAndRegionFromContext(option.properties.context).region,
+    location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
+  };
+}
+
+function getDepartmentAndRegionFromContext(context) {
+  // Context is given by BAN code, region. Variable length.
+  const contextArray = context.split(",");
+  if (contextArray.length === 2) {
+    // Nouvelle-Calédonie, Polynésie...
+    const departmentNumber = contextArray[0].trim();
+    const department = departmentLookUp[departmentNumber];
+    const region = contextArray[1].trim();
+    return { department, region };
+  }
+  const departmentNumber = contextArray[1].trim();
+  const department = departmentLookUp[departmentNumber];
+  const region = contextArray[2].trim();
+  return { department, region };
+}
+
+async function getAddressOptions(query, signal) {
+  // Call BAN API
+  const res = await apiAdress(query, { limit: 10 }, { signal });
+  if (res?.error) return [null, res.error];
+
+  // Format and group options
+  const formattedOptions = res.features?.map((option) => formatOption(option));
+  const housenumbers = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "housenumber");
+  const streets = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "street");
+  const localities = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "locality");
+  const municipalities = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "municipality");
+
+  const options = [];
+  if (housenumbers.length > 0) options.push({ label: "Numéro", options: housenumbers });
+  if (streets.length > 0) options.push({ label: "Voie", options: streets });
+  if (localities.length > 0) options.push({ label: "Lieu-dit", options: localities });
+  if (municipalities.length > 0) options.push({ label: "Commune", options: municipalities });
+
+  return [options, null];
+}
+
+export { apiAdress, putLocation, getSuggestions, formatResult, getAddressOptions };

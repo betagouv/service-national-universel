@@ -32,7 +32,7 @@ import { capture } from "../../../sentry";
 import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { apiAdress } from "../../../services/api-adresse";
+import { apiAdress, getAddressOptions } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -53,7 +53,7 @@ const errorMessages = {
 };
 
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
-const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified", "addressType"];
+const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified", "coordinatesAccuracyLevel"];
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
@@ -184,7 +184,7 @@ export default function StepCoordonnees() {
         gender: young.gender || data.gender,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
         address: young.address || data.address,
-        addressType: young.addressType || data.addressType,
+        coordinatesAccuracyLevel: young.coordinatesAccuracyLevel || data.coordinatesAccuracyLevel,
         city: young.city || data.city,
         zip: young.zip || data.zip,
         region: young.region || data.region,
@@ -531,7 +531,15 @@ export default function StepCoordonnees() {
           error={errors?.livesInFrance}
           correction={corrections?.livesInFrance}
         />
-        {isFrenchResident && <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections?.address} />}
+        {isFrenchResident && (
+          <AddressForm
+            data={data}
+            updateData={(newData) => setData({ ...data, ...newData })}
+            getOptions={getAddressOptions}
+            error={errors.address}
+            correction={corrections?.address}
+          />
+        )}
         {!isFrenchResident && (
           <SearchableSelect
             label="Pays de résidence"
@@ -573,7 +581,13 @@ export default function StepCoordonnees() {
               error={errors.hostRelationship}
               correction={corrections?.hostRelationship}
             />
-            <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections?.address} />
+            <AddressForm
+              data={data}
+              updateData={(newData) => setData({ ...data, ...newData })}
+              getOptions={getAddressOptions}
+              error={errors.address}
+              correction={corrections?.address}
+            />
           </>
         )}
 

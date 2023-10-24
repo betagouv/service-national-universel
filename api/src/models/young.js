@@ -804,7 +804,7 @@ const Schema = new mongoose.Schema({
       description: "Adresse pendant le snu du volontaire",
     },
   },
-  addressType: {
+  coordinatesAccuracyLevel: {
     type: String,
     enum: ["housenumber", "street", "locality", "municipality"],
     documentation: {
@@ -1074,7 +1074,7 @@ const Schema = new mongoose.Schema({
       description: "Adresse du parent 1",
     },
   },
-  parent1AddressType: {
+  parent1coordinatesAccuracyLevel: {
     type: String,
     enum: ["housenumber", "street", "locality", "municipality"],
   },
@@ -1225,7 +1225,7 @@ const Schema = new mongoose.Schema({
       description: "Adresse du parent 2",
     },
   },
-  parent2AddressType: {
+  parent2coordinatesAccuracyLevel: {
     type: String,
     enum: ["housenumber", "street", "locality", "municipality"],
   },
