@@ -316,16 +316,15 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.name = generateRandomName().toUpperCase();
-  doc.siret = "100 000 000 00000";
-  doc.address = generateAddress();
-  doc.website = "https://www.google.com";
-  doc.description = "******* **** *****";
-  doc.twitter = "www.twitter.com";
-  doc.facebook = "www.facebook.com";
-  doc.instagram = "www.instagram.com";
-  return doc;
+  this.name = generateRandomName().toUpperCase();
+  this.siret = "100 000 000 00000";
+  this.address = generateAddress();
+  this.website = "https://www.google.com";
+  this.description = "******* **** *****";
+  this.twitter = "www.twitter.com";
+  this.facebook = "www.facebook.com";
+  this.instagram = "www.instagram.com";
+  return this;
 };
 
 Schema.virtual("user").set(function (user) {

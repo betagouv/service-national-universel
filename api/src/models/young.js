@@ -1973,32 +1973,31 @@ Schema.methods.comparePassword = async function (p) {
 };
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.email = generateRandomEmail();
-  doc.parent1Email = generateRandomEmail();
-  doc.parent2Email = generateRandomEmail();
-  doc.firstName = generateRandomName();
-  doc.lastName = generateRandomName();
-  doc.parent1FirstName = generateRandomName();
-  doc.parent1LastName = generateRandomName();
-  doc.parent2FirstName = generateRandomName();
-  doc.parent2LastName = generateRandomName();
-  doc.historic = {};
-  doc.phone = generateNewPhoneNumber();
-  doc.parent1Phone = generateNewPhoneNumber();
-  doc.parent2Phone = generateNewPhoneNumber();
-  doc.address = generateAddress();
-  doc.parent1Address = generateAddress();
-  doc.parent2Address = generateAddress();
-  doc.birthdateAt = generateBirhtdate();
+  this.email = generateRandomEmail();
+  this.parent1Email = generateRandomEmail();
+  this.parent2Email = generateRandomEmail();
+  this.firstName = generateRandomName();
+  this.lastName = generateRandomName();
+  this.parent1FirstName = generateRandomName();
+  this.parent1LastName = generateRandomName();
+  this.parent2FirstName = generateRandomName();
+  this.parent2LastName = generateRandomName();
+  this.historic = {};
+  this.phone = generateNewPhoneNumber();
+  this.parent1Phone = generateNewPhoneNumber();
+  this.parent2Phone = generateNewPhoneNumber();
+  this.address = generateAddress();
+  this.parent1Address = generateAddress();
+  this.parent2Address = generateAddress();
+  this.birthdateAt = generateBirhtdate();
 
-  const newLocation = getYoungLocation(doc.zip);
-  doc.location = {
+  const newLocation = getYoungLocation(this.zip);
+  this.location = {
     lat: newLocation?.latitude || 0,
     lon: newLocation?.longitude || 0,
   };
 
-  return doc;
+  return this;
 };
 
 //Sync with sendinblue

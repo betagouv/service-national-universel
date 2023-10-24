@@ -257,13 +257,12 @@ Schema.methods.comparePassword = async function (p) {
 };
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.phone = generateNewPhoneNumber();
-  doc.mobile = generateNewPhoneNumber();
-  doc.email = generateRandomEmail();
-  doc.firstName = generateRandomName();
-  doc.lastName = generateRandomName();
-  return doc;
+  this.phone = generateNewPhoneNumber();
+  this.mobile = generateNewPhoneNumber();
+  this.email = generateRandomEmail();
+  this.firstName = generateRandomName();
+  this.lastName = generateRandomName();
+  return this;
 };
 
 //Sync with Sendinblue

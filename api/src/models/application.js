@@ -204,14 +204,13 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.youngEmail = "*****@*******.***";
-  doc.youngFirstName = "*********";
-  doc.youngLastName = "********";
-  doc.tutorName = "****** *********";
-  doc.missionName = "*************** ******";
-  doc.contractStatus = doc.contractStatus || "DRAFT";
-  return doc;
+  this.youngEmail = "*****@*******.***";
+  this.youngFirstName = "*********";
+  this.youngLastName = "********";
+  this.tutorName = "****** *********";
+  this.missionName = "*************** ******";
+  this.contractStatus = this.contractStatus || "DRAFT";
+  return this;
 };
 
 Schema.virtual("user").set(function (user) {

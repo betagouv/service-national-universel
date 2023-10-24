@@ -183,17 +183,16 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.requestMessage = "******* ***** **************** *****";
-  doc.requestUserName = "******* *****";
-  doc.statusUserName = "******* *****";
-  doc.opinionUserName = "******* *****";
-  doc.messages = doc.messages.map((message) => {
+  this.requestMessage = "******* ***** **************** *****";
+  this.requestUserName = "******* *****";
+  this.statusUserName = "******* *****";
+  this.opinionUserName = "******* *****";
+  this.messages = this.messages.map((message) => {
     message.message = "******* ***** **************** *****";
     message.userName = "******* *****";
     return message;
   });
-  return doc;
+  return this;
 };
 
 Schema.virtual("user").set(function (user) {

@@ -153,14 +153,13 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.email = generateRandomEmail();
-  doc.contactPhone = generateNewPhoneNumber();
-  doc.address = generateAddress();
-  doc.directionName = generateRandomName();
-  doc.contactName = generateRandomName();
-  doc.contactMail = generateRandomEmail();
-  doc.contacts = [
+  this.email = generateRandomEmail();
+  this.contactPhone = generateNewPhoneNumber();
+  this.address = generateAddress();
+  this.directionName = generateRandomName();
+  this.contactName = generateRandomName();
+  this.contactMail = generateRandomEmail();
+  this.contacts = [
     {
       cohort: "New Cohort",
       contactName: "New Contact",
@@ -168,14 +167,14 @@ Schema.methods.anonymise = async function () {
       contactMail: generateRandomEmail(),
     },
   ];
-  doc.representantEtat = {
+  this.representantEtat = {
     firstName: generateRandomName(),
     lastName: generateRandomName(),
     mobile: generateNewPhoneNumber(),
     email: generateRandomEmail(),
   };
 
-  return doc;
+  return this;
 };
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);

@@ -113,13 +113,12 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.message = "**** ********* **************";
-  doc.address = generateAddress();
-  doc.contactEmail = generateRandomEmail();
-  doc.contactFullName = generateRandomName() + generateRandomName();
-  doc.structureName = generateRandomName();
-  return doc;
+  this.message = "**** ********* **************";
+  this.address = generateAddress();
+  this.contactEmail = generateRandomEmail();
+  this.contactFullName = generateRandomName() + generateRandomName();
+  this.structureName = generateRandomName();
+  return this;
 };
 
 Schema.virtual("fromUser").set(function (fromUser) {

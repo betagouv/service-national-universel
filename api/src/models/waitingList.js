@@ -30,10 +30,9 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.mail = generateRandomEmail();
-  doc.birthdateAt = generateBirhtdate();
-  return doc;
+  this.mail = generateRandomEmail();
+  this.birthdateAt = generateBirhtdate();
+  return this;
 };
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);

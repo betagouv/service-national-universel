@@ -177,13 +177,12 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.zipCenter = "00000";
-  doc.codeCenter = "00000";
-  doc.centerName = "********";
-  doc.cityCenter = "*********";
-  if (!["VALIDATED", "WAITING_VALIDATION"].includes(doc.status)) doc.status = "WAITING_VALIDATION";
-  return doc;
+  this.zipCenter = "00000";
+  this.codeCenter = "00000";
+  this.centerName = "********";
+  this.cityCenter = "*********";
+  if (!["VALIDATED", "WAITING_VALIDATION"].includes(this.status)) this.status = "WAITING_VALIDATION";
+  return this;
 };
 
 Schema.virtual("fromUser").set(function (fromUser) {

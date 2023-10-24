@@ -326,14 +326,13 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = async function () {
-  const doc = await OBJ.findById(this._id);
-  doc.name = `Mission ${generateRandomName()}`;
-  doc.description = "********* ******** ****************";
-  doc.address = generateAddress();
-  doc.actions = "action Test";
-  doc.structureName = "********";
-  doc.tutorName = "********** *******";
-  return doc;
+  this.name = `Mission ${generateRandomName()}`;
+  this.description = "********* ******** ****************";
+  this.address = generateAddress();
+  this.actions = "action Test";
+  this.structureName = "********";
+  this.tutorName = "********** *******";
+  return this;
 };
 
 Schema.virtual("fromUser").set(function (fromUser) {
