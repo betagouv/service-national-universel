@@ -176,7 +176,7 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = async function () {
+Schema.methods.anonymise = function () {
   this.zipCenter = "00000";
   this.codeCenter = "00000";
   this.centerName = "********";

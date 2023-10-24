@@ -315,7 +315,7 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = async function () {
+Schema.methods.anonymise = function () {
   this.name = generateRandomName().toUpperCase();
   this.siret = "100 000 000 00000";
   this.address = generateAddress();

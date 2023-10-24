@@ -112,7 +112,7 @@ const Schema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = async function () {
+Schema.methods.anonymise = function () {
   this.message = "**** ********* **************";
   this.address = generateAddress();
   this.contactEmail = generateRandomEmail();

@@ -1972,7 +1972,7 @@ Schema.methods.comparePassword = async function (p) {
   return bcrypt.compare(p, user.password || "");
 };
 
-Schema.methods.anonymise = async function () {
+Schema.methods.anonymise = function () {
   this.email = generateRandomEmail();
   this.parent1Email = generateRandomEmail();
   this.parent2Email = generateRandomEmail();

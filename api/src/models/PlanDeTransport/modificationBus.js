@@ -182,7 +182,7 @@ const Schema = new mongoose.Schema({
   deletedAt: { type: Date },
 });
 
-Schema.methods.anonymise = async function () {
+Schema.methods.anonymise = function () {
   this.requestMessage = "******* ***** **************** *****";
   this.requestUserName = "******* *****";
   this.statusUserName = "******* *****";

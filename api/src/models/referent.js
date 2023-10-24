@@ -256,7 +256,7 @@ Schema.methods.comparePassword = async function (p) {
   return bcrypt.compare(p, user.password || "");
 };
 
-Schema.methods.anonymise = async function () {
+Schema.methods.anonymise = function () {
   this.phone = generateNewPhoneNumber();
   this.mobile = generateNewPhoneNumber();
   this.email = generateRandomEmail();

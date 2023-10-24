@@ -325,7 +325,7 @@ const Schema = new mongoose.Schema({
   },
 });
 
-Schema.methods.anonymise = async function () {
+Schema.methods.anonymise = function () {
   this.name = `Mission ${generateRandomName()}`;
   this.description = "********* ******** ****************";
   this.address = generateAddress();

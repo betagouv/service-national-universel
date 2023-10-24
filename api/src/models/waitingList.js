@@ -29,7 +29,7 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.methods.anonymise = async function () {
+Schema.methods.anonymise = function () {
   this.mail = generateRandomEmail();
   this.birthdateAt = generateBirhtdate();
   return this;
