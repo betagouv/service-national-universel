@@ -9,7 +9,7 @@ let SENTRY_TRACING_SAMPLE_RATE = import.meta.env.VITE_SENTRY_TRACING_SAMPLE_RATE
 let SENTRY_SESSION_SAMPLE_RATE = import.meta.env.VITE_SENTRY_SESSION_SAMPLE_RATE ?? 1.0;
 let SENTRY_ON_ERROR_SAMPLE_RATE = import.meta.env.VITE_SENTRY_ON_ERROR_SAMPLE_RATE ?? 1.0;
 
-let franceConnectUrl = import.meta.env.FRANCE_CONNECT_URL ?? "https://fcp.integ01.dev-franceconnect.fr/api/v1";
+let franceConnectUrl = import.meta.env.VITE_FRANCE_CONNECT_URL ?? "https://fcp.integ01.dev-franceconnect.fr/api/v1";
 
 export {
   apiURL,
