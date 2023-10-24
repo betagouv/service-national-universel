@@ -16,6 +16,7 @@ import DashboardHeadCenter from "./scenes/dashboard-head-center";
 import DashboardResponsible from "./scenes/dashboard-responsible";
 import DashboardVisitor from "./scenes/dashboard-visitor";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
+import DesignSystemPage from "./scenes/develop/DesignSystemPage";
 import DSNJExport from "./scenes/dsnj-export";
 import EditTransport from "./scenes/edit-transport";
 import Goal from "./scenes/goal";
@@ -263,7 +264,8 @@ const Home = (props) => {
               <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
               <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
               {/* Only for developper eyes... */}
-              {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+              {environment === "development" ? <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} /> : null}
+              {environment === "development" ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
               {/* DASHBOARD */}
               {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
               {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}

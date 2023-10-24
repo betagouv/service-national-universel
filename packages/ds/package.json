@@ -1,0 +1,42 @@
+{
+  "name": "@snu/ds",
+  "version": "1.0.0",
+  "description": "React components for SNU",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./src/index.ts",
+  "scripts": {
+    "dev": "npx tsc -w --jsx preserve -t ES2021 --outDir dist --noEmit false",
+    "build": "npx tsc --jsx preserve -t ES2021 --outDir dist --noEmit false",
+    "lint": "eslint src \"{**/*,*}.{js,ts,jsx,tsx}\"",
+    "lint:fix": "eslint src --ext .js,.ts --fix",
+    "lint:report": "eslint src --ext .js,.ts --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
+    "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\""
+  },
+  "author": "",
+  "license": "ISC",
+  "exports": {
+    ".": "./dist/index.js",
+    "./admin": "./dist/admin/index.js",
+    "./app": "./dist/app/index.js",
+    "./dsfr": "./dist/dsfr/index.js"
+  },
+  "peerDependencies": {
+    "react": "16.14.0"
+  },
+  "devDependencies": {
+    "@tsconfig/vite-react": "^2.0.1",
+    "@types/node": "^20.8.8",
+    "@types/react": "^18.2.31",
+    "@types/react-dom": "^18.2.14",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "eslint": "8.49.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "tailwindcss": "^3.2.2",
+    "typescript": "^5.2.2"
+  }
+}
