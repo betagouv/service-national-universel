@@ -31,7 +31,9 @@ function reInscriptionModificationOpenForYoungs(env) {
 }
 
 function shouldForceRedirectToReinscription(young) {
-  return young.cohort === "à venir" && ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "REINSCRIPTION"].includes(young.status);
+  return (
+    young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REINSCRIPTION].includes(young.status)
+  );
 }
 
 function hasAccessToReinscription(young) {
@@ -51,7 +53,7 @@ function hasAccessToReinscription(young) {
 function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
   return (
     young.cohort !== "à venir" &&
-    ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
+    ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
       (isInscriptionModificationOpen && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE"))
   );
 }

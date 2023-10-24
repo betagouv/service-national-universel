@@ -18,6 +18,7 @@ import InfoMessage from "../components/InfoMessage";
 
 export default function StepConfirm() {
   const [error, setError] = useState({});
+  const [isLoading, setLoading] = useState(false);
   const [data, removePersistedData] = React.useContext(PreInscriptionContext);
   const dispatch = useDispatch();
 
@@ -59,21 +60,24 @@ export default function StepConfirm() {
     };
 
     try {
+      setLoading(true);
       const { code, ok } = await api.post("/young/signup", values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+        setLoading(false);
       } else {
         plausibleEvent("Phase0/CTA preinscription - inscription");
+        const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
+        if (young) {
+          if (token) api.setToken(token);
+          dispatch(setYoung(young));
+          removePersistedData();
+        }
+        // after connection young is automatically redirected to /preinscription/email-validation
+        history.push("/preinscription/email-validation");
       }
-      const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
-      if (young) {
-        if (token) api.setToken(token);
-        dispatch(setYoung(young));
-        removePersistedData();
-      }
-      // after connection young is automatically redirected to /preinscription/email-validation
-      history.push("/preinscription/email-validation");
     } catch (e) {
+      setLoading(false);
       if (e.code === "USER_ALREADY_REGISTERED")
         setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
       else {
@@ -174,7 +178,7 @@ export default function StepConfirm() {
         <hr className="my-6" />
         <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>
 
-        <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, recevoir un code d'activation par e-mail" disabled={Object.values(error).length} />
+        <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, recevoir un code d'activation par e-mail" disabled={isLoading} />
       </DSFRContainer>
     </>
   );

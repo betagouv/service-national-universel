@@ -16,6 +16,7 @@ import { supportURL } from "@/config";
 
 export default function StepConfirm() {
   const [error, setError] = useState({});
+  const [isLoading, setLoading] = useState(false);
   const [data] = React.useContext(ReinscriptionContext);
   const dispatch = useDispatch();
 
@@ -39,15 +40,18 @@ export default function StepConfirm() {
     };
 
     try {
+      setLoading(true);
       const { code, ok, data } = await api.put("/young/reinscription", values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+        setLoading(false);
       } else {
         plausibleEvent("Phase0/CTA reinscription - inscription");
         dispatch(setYoung(data));
         history.push("/inscription2023");
       }
     } catch (e) {
+      setLoading(false);
       capture(e);
       setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
     }
@@ -111,7 +115,7 @@ export default function StepConfirm() {
         </div>
         <div className="font-normal text-[#161616] pb-4">{COHESION_STAY_LIMIT_DATE[data?.cohort]}</div>
 
-        <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, finaliser mon inscription" disabled={Object.values(error).length} />
+        <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, finaliser mon inscription" disabled={isLoading} />
       </DSFRContainer>
     </>
   );

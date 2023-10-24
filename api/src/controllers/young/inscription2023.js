@@ -362,7 +362,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
 
     const value = { informationAccuracy: "true", inscriptionStep2023: STEPS2023.WAITING_CONSENT };
 
-    if (young.status === "IN_PROGRESS" && !young?.inscriptionDoneDate) {
+    if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && !young?.inscriptionDoneDate) {
       // If latest ID proof has an invalid date, notify parent 1.
       if (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]) {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {

@@ -6,7 +6,7 @@ const Joi = require("joi");
 const YoungObject = require("../../models/young");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
-const { ERRORS } = require("../../utils");
+const { ERRORS, STEPS2023 } = require("../../utils");
 const { canUpdateYoungStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1, getCohortNames, hasAccessToReinscription } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 
@@ -67,6 +67,19 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     young.set({
       ...value,
       // @todo check reseted values
+      acceptCGU: undefined,
+      consentment: undefined,
+      inscriptionDoneDate: undefined,
+      inscriptionStep2023: STEPS2023.COORDONNEES,
+      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+
+      rulesParent1: undefined,
+      parentAllowSNU: undefined,
+      parent1DataVerified: undefined,
+      parent1AllowImageRights: undefined,
+      parent2AllowImageRights: undefined,
+      parent2AllowImageRightsReset: undefined,
+
       cohesionCenterId: undefined,
       sessionPhase1Id: undefined,
       meetingPointId: undefined,
@@ -81,14 +94,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       departSejourMotifComment: undefined,
       youngPhase1Agreement: "false",
       hasMeetingInformation: undefined,
-      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
       cohesionStayMedicalFileReceived: undefined,
-      parent1DataVerified: undefined,
-      rulesParent1: undefined,
-      parentAllowSNU: undefined,
-      parent1AllowImageRights: undefined,
-      parent2AllowImageRights: undefined,
-      parent2AllowImageRightsReset: undefined,
     });
 
     await young.save({ fromUser: req.user });
