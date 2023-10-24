@@ -64,6 +64,29 @@ function ConsentementForm({ young, token, step, parentId }) {
     setImageRightsExplanationShown(!imageRightsExplanationShown);
   }
 
+  function toggleConfirmAddress() {
+    if (data.confirmAddress) {
+      setData({
+        ...data,
+        confirmAddress: false,
+        address: "",
+        addressComplement: "",
+        zip: "",
+        city: "",
+        country: "",
+        addressVerified: "false",
+        addressType: "",
+        cityCode: "",
+        region: "",
+        department: "",
+        location: "",
+      });
+    } else {
+      const address = getAddress(young, parentId);
+      setData({ ...data, confirmAddress: true, ...address });
+    }
+  }
+
   function onPrevious() {
     const route = parentId === 2 ? "verification-parent2" : "verification";
     history.push(`/representants-legaux/${route}?token=${token}`);
@@ -216,29 +239,6 @@ function ConsentementForm({ young, token, step, parentId }) {
     }
   }
 
-  function handleToggleConfirmAddress() {
-    if (data.confirmAddress) {
-      setData({
-        ...data,
-        confirmAddress: false,
-        address: "",
-        addressComplement: "",
-        zip: "",
-        city: "",
-        country: "",
-        addressVerified: "false",
-        addressType: "",
-        cityCode: "",
-        region: "",
-        department: "",
-        location: "",
-      });
-    } else {
-      const address = getAddress(young, parentId);
-      setData({ ...data, confirmAddress: true, ...address, addressVerified: "true" });
-    }
-  }
-
   return (
     <>
       <Navbar step={step} />
@@ -282,7 +282,7 @@ function ConsentementForm({ young, token, step, parentId }) {
               <div className="flex-grow-1">
                 <b>Je réside</b> {formattedAddress}
               </div>
-              <Toggle onClick={handleToggleConfirmAddress} toggled={data.confirmAddress} />
+              <Toggle onClick={toggleConfirmAddress} toggled={data.confirmAddress} />
               {errors.confirmAddress ? <span className="text-sm text-red-500">{errors.confirmAddress}</span> : null}
             </div>
             {!data.confirmAddress && (

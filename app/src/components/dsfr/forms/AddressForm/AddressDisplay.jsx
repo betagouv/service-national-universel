@@ -8,12 +8,12 @@ export default function AddressDisplay({ data, updateData, correction }) {
 
   return (
     <div className="flex flex-col gap-2">
-      {/* If the user selects a municipality, we allow them to input a street name and a housenumber, otherwise the address field is disabled */}
+      {/* If the user does not select a housenumber, we allow them to input address data, otherwise the address field is disabled */}
       {data?.addressType === "housenumber" ? (
         <label className="flex flex-col gap-2 w-full">
           Adresse
           <div className="flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
-            <input type="text" value={data.address} disabled className="w-full text-gray-400" />
+            <input disabled type="text" value={data.address} className="w-full text-gray-400" />
             <HiCheckCircle />
           </div>
         </label>
