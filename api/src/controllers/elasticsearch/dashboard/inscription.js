@@ -4,7 +4,7 @@ const router = express.Router();
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
-const { joiElasticSearch, buildDashboardReferentContext } = require("../utils");
+const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
 const { ES_NO_LIMIT, COHORTS, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
@@ -13,13 +13,13 @@ router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: f
     const { user } = req;
 
     if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const { referentDashboardContextFilters } = buildDashboardReferentContext(req.user);
+    const { dashboardUserRoleContextFilters } = buildDashboardUserRoleContext(req.user);
 
     const body = {
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [...referentDashboardContextFilters].filter(Boolean),
+          filter: [...dashboardUserRoleContextFilters].filter(Boolean),
         },
       },
       size: ES_NO_LIMIT,
