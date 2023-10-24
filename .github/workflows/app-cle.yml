@@ -3,7 +3,8 @@ env:
   APP_NAME: snu-cle-app
   ENVIRONMENT_NAME: snu-app-cle
 
-name: Deploy staging app
+
+name: Deploy CLE app
 
 on:
   push:
