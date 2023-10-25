@@ -1991,7 +1991,6 @@ Schema.methods.anonymise = function () {
   this.parent2Address = generateAddress();
   this.birthdateAt = generateBirhtdate();
   this.engagedDescription = this.engagedDescription?.replace(/\S/g, "*");
-  this.notes = this.notes?.replace(/\S/g, "*");
   this.motivations = this.motivations?.replace(/\S/g, "*");
   this.parentConsentmentFilesCompliantInfo = this.parentConsentmentFilesCompliantInfo?.replace(/\S/g, "*");
   this.withdrawnReason = this.withdrawnReason?.replace(/\S/g, "*");
@@ -1999,6 +1998,14 @@ Schema.methods.anonymise = function () {
   this.correctionRequests = this.correctionRequests?.map((e) => {
     e.message = e.message?.replace(/\S/g, "*");
     e.reason = e.reason?.replace(/\S/g, "*");
+    return e;
+  });
+  this.notes = this.notes?.map((e) => {
+    e.note = e.note?.replace(/\S/g, "*");
+    if (e.referent) {
+      e.referent.firstName = e.referent.firstName?.replace(/\S/g, "*");
+      e.referent.lastName = e.referent.lastName?.replace(/\S/g, "*");
+    }
     return e;
   });
 
