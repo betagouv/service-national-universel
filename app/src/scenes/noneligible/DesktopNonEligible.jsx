@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
-import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
-import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
-import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
-import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
-import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
-import { capture } from "../../../sentry";
+import serviceCivique from "../../assets/programmes-engagement/service-civique.jpg";
+import jeVeuxAider from "../../assets/programmes-engagement/je-veux-aider.jpg";
+import reserveGendarmerie from "../../assets/programmes-engagement/reserve-gendarmerie.jpg";
+import reserveArmee from "../../assets/programmes-engagement/reserve-armees.jpg";
+import arrowRightBlue from "../../assets/arrowRightBlue.svg";
+import { capture } from "../../sentry";
 import { useDispatch, useSelector } from "react-redux";
-import API from "../../../services/api";
-import { setYoung } from "../../../redux/auth/actions";
+import API from "../../services/api";
+import { setYoung } from "../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 
 export default function NonEligible() {

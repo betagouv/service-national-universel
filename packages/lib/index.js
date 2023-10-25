@@ -24,13 +24,39 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-function reInscriptionModificationOpenForYoungs(cohort, env) {
+//@todo: check in cohort list
+function reInscriptionOpenForYoungs(env) {
   if (env !== undefined && env !== "production") return true;
 
-  switch (cohort) {
-    default:
-      return new Date() < new Date(2023, 4, 11); // before 11 mai 2023 morning
+  return new Date() >= new Date(2023, 10, 6, 8);
+}
+
+function shouldForceRedirectToReinscription(young) {
+  return (
+    young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REINSCRIPTION].includes(young.status)
+  );
+}
+
+function hasAccessToReinscription(young) {
+  if (shouldForceRedirectToReinscription(young)) return true;
+
+  if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
+    return true;
   }
+
+  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") {
+    return true;
+  }
+
+  return false;
+}
+
+function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
+  return (
+    young.cohort !== "à venir" &&
+    ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
+      (isInscriptionModificationOpen && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE"))
+  );
 }
 
 const getFilterLabel = (selected, placeholder = "Choisissez un filtre", prelabel = "") => {
@@ -189,7 +215,10 @@ export {
   isEndOfInscriptionManagement2021,
   inscriptionModificationOpenForYoungs,
   inscriptionCreationOpenForYoungs,
-  reInscriptionModificationOpenForYoungs,
+  reInscriptionOpenForYoungs,
+  shouldForceRedirectToReinscription,
+  shouldForceRedirectToInscription,
+  hasAccessToReinscription,
   isInRuralArea,
   getFilterLabel,
   getSelectedFilterLabel,

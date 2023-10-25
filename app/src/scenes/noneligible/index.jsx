@@ -4,8 +4,8 @@ import { Redirect } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 
 import DFSRLayout from "@/components/dsfr/layout/DSFRLayout";
-import MobileNonEligible from "../reinscription/mobile/stepNonEligible";
-import DesktopNonEligible from "../reinscription/desktop/stepNonEligible";
+import MobileNonEligible from "./MobileNonEligible";
+import DesktopNonEligible from "./DesktopNonEligible";
 
 import useDevice from "../../hooks/useDevice";
 

@@ -91,7 +91,10 @@ export default function Index() {
   }
 
   //il n'a pas acces a l'inscription
-  if (young?.status && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) {
+  if (
+    young?.status &&
+    ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REINSCRIPTION].includes(young?.status)
+  ) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 

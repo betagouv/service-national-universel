@@ -1,91 +1,80 @@
-import React from "react";
-import { useSelector } from "react-redux";
-import { Redirect, useParams } from "react-router-dom";
+import React, { useContext, useEffect } from "react";
+import { Redirect, Switch, useParams } from "react-router-dom";
+import ReinscriptionContextProvider, { ReinscriptionContext } from "../../context/ReinscriptionContextProvider";
 import { SentryRoute } from "../../sentry";
-import { environment } from "../../config";
 
-import MobileConsentements from "./mobile/stepConsentements";
-import MobileDocuments from "./mobile/stepDocuments";
-import MobileDone from "./mobile/stepDone";
-import MobileEligibilite from "./mobile/stepEligibilite";
-import MobileNonEligible from "./mobile/stepNonEligible";
-import MobileSejour from "./mobile/stepSejour";
-import MobileUpload from "./mobile/stepUpload";
+import { useSelector } from "react-redux";
+import StepEligibilite from "./steps/stepEligibilite";
+import StepNonEligible from "./steps/stepNonEligible";
+import StepSejour from "./steps/stepSejour";
+import StepConfirm from "./steps/stepConfirm";
 
-import DesktopConsentements from "./desktop/stepConsentements";
-import DesktopDocuments from "./desktop/stepDocuments";
-import DesktopDone from "./desktop/stepDone";
-import DesktopEligibilite from "./desktop/stepEligibilite";
-import DesktopNonEligible from "./desktop/stepNonEligible";
-import DesktopSejour from "./desktop/stepSejour";
-import DesktopUpload from "./desktop/stepUpload";
-
-import useDevice from "../../hooks/useDevice";
-
-import { reInscriptionModificationOpenForYoungs } from "snu-lib";
-import { getStepFromUrlParam, STEPS, STEP_LIST } from "./utils/navigation";
-import FutureCohort from "../inscription2023/FutureCohort";
+import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
+import { hasAccessToReinscription, reInscriptionOpenForYoungs } from "snu-lib";
+import FutureCohort from "../inscription2023/FutureCohort";
+import { environment } from "@/config";
 
-const getStepUrl = (name) => {
-  return STEP_LIST.find((step) => step.name === name)?.url;
-};
-
-function renderStep(step, device) {
-  if (step === STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
-  if (step === STEPS.NONELIGIBLE) return device === "desktop" ? <DesktopNonEligible /> : <MobileNonEligible />;
-  if (step === STEPS.SEJOUR) return device === "desktop" ? <DesktopSejour /> : <MobileSejour />;
-  if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements /> : <MobileConsentements />;
-  if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
-  if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
-  if (step === STEPS.WAITING_CONSENT) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
-  if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
-  return device === "desktop" ? <DesktopEligibilite /> : <MobileEligibilite />;
+function renderStepResponsive(step) {
+  if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
+  if (step === STEPS.INELIGIBLE) return <StepNonEligible />;
+  if (step === STEPS.SEJOUR) return <StepSejour />;
+  if (step === STEPS.CONFIRM) return <StepConfirm />;
 }
 
-const Step = ({ young: { reinscriptionStep2023: eligibleStep } }) => {
-  const device = useDevice();
+const Step = () => {
+  const [data, updateValue] = useContext(ReinscriptionContext);
+  const young = useSelector((state) => state.Auth.young);
+  useEffect(() => {
+    updateValue({
+      ...data,
+      birthDate: young.birthdateAt,
+      scolarity: young.grade,
+      school: {
+        fullName: young.schoolName,
+        type: young.schoolType,
+        adresse: young.schoolAddress,
+        codeCity: young.schoolZip,
+        city: young.schoolCity,
+        departmentName: young.schoolDepartment,
+        region: young.schoolRegion,
+        country: young.schoolCountry,
+        id: young.schoolId,
+        postCode: young.schoolZip,
+      },
+      zip: young.zip,
+    });
+  }, []);
+
   const { step } = useParams();
 
-  if (!eligibleStep) return <Redirect to={`/`} />;
+  const currentStep = getStepFromUrlParam(step, STEP_LIST, true);
+  if (!currentStep) return <Redirect to="/reinscription" />;
 
-  let currentStep = getStepFromUrlParam(step);
-  if (!currentStep) return <Redirect to={`/reinscription/${getStepUrl(eligibleStep)}`} />;
-
-  if (eligibleStep === STEPS.DONE && currentStep !== STEPS.DONE) return <Redirect to={`/reinscription/${getStepUrl(STEPS.DONE, STEP_LIST)}`} />;
-  if (eligibleStep === STEPS.WAITING_CONSENT && currentStep !== STEPS.WAITING_CONSENT) return <Redirect to={`/reinscription/${getStepUrl(STEPS.WAITING_CONSENT, STEP_LIST)}`} />;
-
-  const eligibleStepDetails = STEP_LIST.find((element) => element.name === eligibleStep);
-  const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === eligibleStep);
+  const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === data.step);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
-
-  const updatedEligibleStepIndex = eligibleStepDetails?.allowNext ? eligibleStepIndex + 1 : eligibleStepIndex;
-
-  if (currentStepIndex > updatedEligibleStepIndex) {
+  if (currentStepIndex > eligibleStepIndex) {
     return <Redirect to={`/reinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  return <DSFRLayout title="Réinscription">{renderStep(currentStep, device)}</DSFRLayout>;
+  return renderStepResponsive(currentStep);
 };
 
-export default function Index() {
+export default function ReInscription() {
   const young = useSelector((state) => state.Auth.young);
 
-  if (!young) return <Redirect to={{ pathname: "/" }} />;
+  if (!hasAccessToReinscription(young)) return <Redirect to="/" />;
 
-  //Il a fini son inscription
-  if (young.reinscriptionStep2023 === "DONE" && young.status === "VALIDATED") {
-    return <Redirect to={{ pathname: "/" }} />;
-  }
+  if (!reInscriptionOpenForYoungs(environment)) return <FutureCohort />;
 
-  if (young.cohort === "à venir") {
-    return <FutureCohort />;
-  }
-
-  //si la periode de modification est finie
-  if (!reInscriptionModificationOpenForYoungs(young.cohort, environment)) {
-    return <Redirect to={{ pathname: "/" }} />;
-  }
-
-  return <SentryRoute path="/reinscription/:step?/:category?" component={() => <Step young={young} />} />;
+  return (
+    <ReinscriptionContextProvider>
+      <DSFRLayout title="Reinscription du volontaire">
+        <Switch>
+          <SentryRoute path="/reinscription/:step" component={Step} />;
+          <SentryRoute path="/reinscription" component={Step} />;
+        </Switch>
+      </DSFRLayout>
+    </ReinscriptionContextProvider>
+  );
 }

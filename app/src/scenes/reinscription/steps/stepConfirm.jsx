@@ -1,49 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE, PHONE_ZONES, formatDateFR, translate, translateGrade } from "snu-lib";
+import { COHESION_STAY_LIMIT_DATE, formatDateFR, translate, translateGrade } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
-import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
-import InfoMessage from "../components/InfoMessage";
 
 export default function StepConfirm() {
   const [error, setError] = useState({});
   const [isLoading, setLoading] = useState(false);
-  const [data, removePersistedData] = React.useContext(PreInscriptionContext);
+  const [data] = React.useContext(ReinscriptionContext);
   const dispatch = useDispatch();
 
   const history = useHistory();
 
-  useEffect(
-    () =>
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: "smooth",
-      }),
-    [error],
-  );
-
   const onSubmit = async () => {
     const values = {
-      email: data.email,
-      phone: data.phone,
-      phoneZone: data.phoneZone,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      frenchNationality: data.frenchNationality,
-      password: data.password,
-      birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
       schooled: data.school ? "true" : "false",
       schoolName: data.school?.fullName,
       schoolType: data.school?.type,
@@ -61,29 +41,19 @@ export default function StepConfirm() {
 
     try {
       setLoading(true);
-      const { code, ok } = await api.post("/young/signup", values);
+      const { code, ok, data } = await api.put("/young/reinscription", values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
       } else {
-        plausibleEvent("Phase0/CTA preinscription - inscription");
-        const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
-        if (young) {
-          if (token) api.setToken(token);
-          dispatch(setYoung(young));
-          removePersistedData();
-        }
-        // after connection young is automatically redirected to /preinscription/email-validation
-        history.push("/preinscription/email-validation");
+        plausibleEvent("Phase0/CTA reinscription - inscription");
+        dispatch(setYoung(data));
+        history.push("/inscription2023");
       }
     } catch (e) {
       setLoading(false);
-      if (e.code === "USER_ALREADY_REGISTERED")
-        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
-      else {
-        capture(e);
-        setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
-      }
+      capture(e);
+      setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
     }
   };
 
@@ -145,40 +115,7 @@ export default function StepConfirm() {
         </div>
         <div className="font-normal text-[#161616] pb-4">{COHESION_STAY_LIMIT_DATE[data?.cohort]}</div>
 
-        <hr />
-
-        <div className="flex items-center justify-between my-6">
-          <h1 className="text-lg font-semibold text-[#161616]">Mes informations personnelles</h1>
-          <Link to="profil">
-            <EditPen />
-          </Link>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <p className="text-gray-500">Prénom du volontaire&nbsp;:</p>
-            <p className="text-right">{data.firstName}</p>
-          </div>
-          <div className="flex items-center justify-between  text-sm">
-            <p className="text-gray-500">Nom du volontaire&nbsp;:</p>
-            <p className="text-right">{data.lastName}</p>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <p className="text-gray-500">Téléphone&nbsp;:</p>
-            <p className="text-right">
-              {PHONE_ZONES[data.phoneZone].code} {data.phone}
-            </p>
-          </div>
-          <div className="flex items-center justify-between text-sm">
-            <p className="text-gray-500">Email&nbsp;:</p>
-            <p className="text-right">{data.email}</p>
-          </div>
-        </div>
-
-        <hr className="my-6" />
-        <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>
-
-        <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, recevoir un code d'activation par e-mail" disabled={isLoading} />
+        <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, finaliser mon inscription" disabled={isLoading} />
       </DSFRContainer>
     </>
   );

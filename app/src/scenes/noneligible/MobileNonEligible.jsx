@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
-import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
-import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
-import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
-import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
-import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
-import { setYoung } from "../../../redux/auth/actions";
-import { capture } from "../../../sentry";
-import API from "../../../services/api";
+import arrowRightBlue from "../../assets/arrowRightBlue.svg";
+import jeVeuxAider from "../../assets/programmes-engagement/je-veux-aider.jpg";
+import reserveArmee from "../../assets/programmes-engagement/reserve-armees.jpg";
+import reserveGendarmerie from "../../assets/programmes-engagement/reserve-gendarmerie.jpg";
+import serviceCivique from "../../assets/programmes-engagement/service-civique.jpg";
+import StickyButton from "../../components/dsfr/ui/buttons/stickyButton";
+import { setYoung } from "../../redux/auth/actions";
+import { capture } from "../../sentry";
+import API from "../../services/api";
 import { toastr } from "react-redux-toastr";
 
 export default function NonEligible() {

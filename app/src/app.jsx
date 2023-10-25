@@ -46,7 +46,7 @@ import ViewMessage from "./scenes/echanges/View";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { ENABLE_PM, YOUNG_STATUS } from "./utils";
-import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
+import { youngCanChangeSession, inscriptionModificationOpenForYoungs, shouldForceRedirectToReinscription, shouldForceRedirectToInscription } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
@@ -182,6 +182,7 @@ const MandatoryLogIn = () => {
   return (
     <Switch>
       <SentryRoute path="/inscription2023" component={Inscription2023} />
+      <SentryRoute path="/reinscription" component={ReInscription} />
       <SentryRoute path="/" component={Espace} />
     </Switch>
   );
@@ -190,7 +191,6 @@ const MandatoryLogIn = () => {
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
-  // const [isModalMondayOpen, setIsModalMondayOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
@@ -210,11 +210,6 @@ const Espace = () => {
       setIsModalCGUOpen(true);
     }
 
-    // ! To clean after departure. Or just keep it for later.
-    // if (young && young.cohort === "Juin 2023" && busLignesDepartLundi.includes(young.ligneId)) {
-    //   setIsModalMondayOpen(true);
-    // }
-
     if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
       getAvailableSessions(young).then((sessions) => {
         if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
@@ -224,13 +219,9 @@ const Espace = () => {
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
-  if (forceRedirectReinscription) return <Redirect to="/reinscription" />;
+  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
-  const forceRedirectInscription =
-    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
-    (inscriptionModificationOpenForYoungs(cohort) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
-  if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
+  if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
 
   return (
     <>
@@ -240,7 +231,6 @@ const Espace = () => {
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
           <SentryRoute exact path="/" component={Home} />
-          <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
@@ -261,7 +251,6 @@ const Espace = () => {
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
       <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
-      {/* <ModalMonday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} /> */}
     </>
   );
 };
