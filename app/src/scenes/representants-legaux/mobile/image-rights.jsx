@@ -289,8 +289,8 @@ function ImageRightsForm({ young, token, parentId }) {
             {!data.confirmAddress && (
               <>
                 <ResponsiveRadioButton label="Je réside..." options={addressTypeOptions} onChange={(e) => setData({ ...data, addressType: e })} value={data.addressType} />
-                {data.livesInFrance === FRANCE ? (
-                  <AddressForm data={data} updateData={setData} getOptions={getAddressOptions} error={errors.address} />
+                {data.addressType === FRANCE ? (
+                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} />
                 ) : (
                   <>
                     <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />
