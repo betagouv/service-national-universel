@@ -108,18 +108,15 @@ function formatOption(option) {
 }
 
 function getDepartmentAndRegionFromContext(context) {
-  // Context is given by BAN code, region. Variable length.
-  const contextArray = context.split(",");
-  if (contextArray.length === 2) {
-    // Nouvelle-Calédonie, Polynésie...
-    const departmentNumber = contextArray[0].trim();
-    const department = departmentLookUp[departmentNumber];
-    const region = contextArray[1].trim();
-    return { department, region };
-  }
-  const departmentNumber = contextArray[1].trim();
+  // Context has dept number as first element, department as second element (optional) and region as last element.
+  // For DROMS, it does not always have department as second element.
+  // Examples:
+  // ['50', ' Manche', ' Normandie']
+  // ['988', ' Nouvelle-Calédonie']
+  const arr = context.split(",");
+  const departmentNumber = arr[0].trim();
   const department = departmentLookUp[departmentNumber];
-  const region = contextArray[2].trim();
+  const region = arr[arr.length - 1].trim();
   return { department, region };
 }
 
