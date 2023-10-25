@@ -7,6 +7,9 @@ import Subheader from "./layout/Subheader";
 // UI
 import Button from "./ui/Button";
 
+//Form
+import InputText from "./form/InputText";
+
 export {
   // Layout
   Container,
@@ -16,4 +19,7 @@ export {
 
   // UI
   Button,
+
+  //Form
+  InputText,
 };
