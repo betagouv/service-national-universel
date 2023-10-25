@@ -17,7 +17,7 @@ export default function Container({ title, actions, children }: OwnProps) {
         )}
         {actions && <div>{actions}</div>}
       </div>
-      <div>{children}</div>
+      {children}
     </div>
   );
 }
