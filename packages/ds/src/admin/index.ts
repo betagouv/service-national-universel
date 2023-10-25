@@ -1,4 +1,4 @@
-// // Layout
+// Layout
 import Container from "./layout/Container";
 import Header from "./layout/Header";
 import Page from "./layout/Page";
