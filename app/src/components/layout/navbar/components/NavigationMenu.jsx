@@ -15,6 +15,7 @@ import Socials from "./Socials";
 import { GoTools } from "react-icons/go";
 import MenuLinkExternal from "./MenuLinkExternal";
 import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
+import { CiPalette } from "react-icons/ci";
 
 // WAITING FOR FINAL DECISION: What should we do with Phase 3?
 // Meanwhile we prevent 2024 cohorts' youngs from seeing the phase 3 in menu.
@@ -50,6 +51,7 @@ export default function NavigationMenu({ onClose = () => {} }) {
           onClose={onClose}
         />
         {environment === "development" && <MenuLink to="develop-assets" icon={<GoTools />} text="Dev tools" onClose={onClose} />}
+        {environment === "development" && <MenuLink to="design-system" icon={<CiPalette />} text="Design system" onClose={onClose} />}
       </ul>
       <Diagoriente />
       <Socials />

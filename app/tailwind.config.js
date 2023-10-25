@@ -2,6 +2,7 @@ const { Media } = require("reactstrap");
 const colors = require("tailwindcss/colors");
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
+  presets: [require("@snu/ds/tailwind.config")],
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   safelist: ["w-full", "w-auto", "w-10"],
   darkMode: Media, // or 'media' or 'class'
