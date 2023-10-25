@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE, formatDateFR, translate, translateGrade } from "snu-lib";
+import { formatDateFR, translate, translateGrade, getCohortPeriod } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
@@ -113,7 +114,7 @@ export default function StepConfirm() {
             <EditPen />
           </Link>
         </div>
-        <div className="font-normal text-[#161616] pb-4">{COHESION_STAY_LIMIT_DATE[data?.cohort]}</div>
+        <div className="font-normal text-[#161616] pb-4">{getCohortPeriod(getCohort(data?.cohort))}</div>
 
         <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, finaliser mon inscription" disabled={isLoading} />
       </DSFRContainer>
