@@ -1,13 +1,14 @@
 import { regionsListDROMS } from "./region-and-departments";
-const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
+const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "2022" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
 
+const oldCohortNames = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"]; //@todo: 2022 can be added to oldSessions and this list removed?
 const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
 
-const getCohortNames = (with2023 = true, withToCome = false, withOld = false, oldCount = 6) => {
+const getCohortNames = (with2023 = true, withToCome = false, withOld = false) => {
   let cohortNames = [];
   if (with2023) cohortNames = [...cohortNames, ...sessions2023CohortNames];
   if (withToCome) cohortNames = [...cohortNames, "à venir"];
-  if (withOld) cohortNames = [...oldSessions.slice(-oldCount).map((e) => e.name), ...cohortNames];
+  if (withOld) cohortNames = [...oldCohortNames, ...cohortNames];
   return cohortNames;
 };
 

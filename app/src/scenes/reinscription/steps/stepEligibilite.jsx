@@ -107,7 +107,7 @@ export default function StepEligibilite() {
           setLoading(false);
           return;
         }
-        dispatch(setYoung(res.data));
+        dispatch(setYoung(data));
         setData({ ...data, step: REINSCRIPTION_STEPS.INELIGIBLE });
         return history.push("/reinscription/noneligible");
       }
