@@ -325,8 +325,8 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = asyn
           filter: [
             { range: { startAt: { lt: "now" } } },
             { range: { endAt: { gt: "now" } } },
-            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.REFERENT_REGION ? { term: { "region.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
             ...missionContextFilters,
           ].filter(Boolean),
         },
@@ -381,8 +381,8 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AF
           must: { match_all: {} },
           filter: [
             { range: { startAt: { lt: "now" } } },
-            user.role === ROLES.REFERENT_REGION ? { term: { "missionRegion.keyword": user.region } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "missionDepartment.keyword": [user.department] } } : null,
+            user.role === ROLES.REFERENT_REGION ? { term: { "region.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
             ...missionContextFilters,
           ].filter(Boolean),
         },

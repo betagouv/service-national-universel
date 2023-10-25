@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
-import DashboardBox from "../../../../components/ui/DashboardBox";
-import api from "../../../../../../services/api";
-import { translate } from "snu-lib";
-import Tabs from "../../../../../phase0/components/Tabs";
-import { BarChart, Legends } from "../../../../components/graphs";
-import { LoadingBar } from "../../../../components/ui/loading";
+import React from "react";
+import InformationCircle from "@/assets/icons/InformationCircle";
+import api from "@/services/api";
 import { getNewLink } from "@/utils";
 import queryString from "query-string";
+import { useEffect, useState } from "react";
+import ReactTooltip from "react-tooltip";
+import { translate } from "snu-lib";
+import Tabs from "../../../../../phase0/components/Tabs";
+import { BarChart, graphColors } from "../../../../components/graphs";
+import DashboardBox from "../../../../components/ui/DashboardBox";
+import { LoadingBar } from "../../../../components/ui/loading";
 
 export default function MissionsDetail({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -102,7 +105,8 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
   return (
     <DashboardBox title="Détail des missions : préférences vs réalité" className={className}>
       <Tabs selected={selectedTab} tabs={tabs} onChange={setSelectedTab} className="my-6" />
-      <div className="my-4 flex justify-end">
+      <div className="my-4 flex justify-end items-center">
+        <p>Trier par : </p>
         <select className="" value={sort} onChange={selectSort}>
           {sortOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -139,8 +143,25 @@ export default function MissionsDetail({ filters, missionFilters, className = ""
               />
             ))}
           </div>
-          <div className="flex justify-center">
-            <Legends labels={["Missions validées", "Préférences volontaires"]} noValue />
+          <div className="flex justify-center gap-4">
+            <div className="flex flex-row-reverse items-center gap-2">
+              <div className="flex items-center gap-1">
+                <p className="text-xs text-gray-600">Missions validées</p>
+                <InformationCircle data-tip data-for="mission" className="cursor-pointer text-gray-400" />
+                <ReactTooltip id="mission" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md " tooltipRadius="6">
+                  <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Mission existante sur la plateforme avec le statut validé.</p>
+                </ReactTooltip>
+              </div>
+              <div className={`flex items-center`}>
+                <div className={`h-[10px] w-[10px] rounded-full`} style={{ backgroundColor: graphColors[2][0] }}></div>
+              </div>
+            </div>
+            <div className="flex flex-row-reverse items-center gap-2">
+              <div className="text-xs text-gray-600">Préférences volontaires</div>
+              <div className={`flex items-center`}>
+                <div className={`h-[10px] w-[10px] rounded-full`} style={{ backgroundColor: graphColors[2][1] }}></div>
+              </div>
+            </div>
           </div>
         </>
       )}

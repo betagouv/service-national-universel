@@ -674,7 +674,7 @@ export default function StepCoordonnees() {
                   error={errors.reducedMobilityAccess}
                 />
                 <RadioButton
-                  label="Avez-vous besoin d’être affecté(e) dans un centre de votre département de résidence ?"
+                  label="Pour le séjour de cohésion, avez-vous besoin d’être affecté(e) dans un centre proche de chez vous pour raison médicale ?"
                   options={booleanOptions}
                   onChange={updateData("handicapInSameDepartment")}
                   value={handicapInSameDepartment}

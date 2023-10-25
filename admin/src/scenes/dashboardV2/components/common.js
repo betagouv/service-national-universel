@@ -1,7 +1,7 @@
 import { academyToDepartments, department2region, departmentList, departmentToAcademy, region2department, ROLES } from "snu-lib";
 
 export const getFilteredDepartment = (setSelectedFilters, selectedFilters, setDepartmentOptions, user) => {
-  const departmentOptions = user.role === ROLES.REFERENT_REGION ? region2department[user.region] : departmentList;
+  const departmentOptions = user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? region2department[user.region] : departmentList;
   if (selectedFilters.academy?.length) {
     setSelectedFilters({ ...selectedFilters, department: selectedFilters?.department?.filter((d) => selectedFilters.academy?.includes(departmentToAcademy[d])) });
     return setDepartmentOptions(

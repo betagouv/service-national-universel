@@ -71,6 +71,7 @@ const ListStructure = () => {
       title: "Statut juridique",
       name: "legalStatus",
       missingLabel: "Non renseignée",
+      translate,
     },
     {
       title: "Type",
