@@ -35,12 +35,12 @@ export default function Header({
                     {item.href ? (
                       <a
                         href={item.href}
-                        className="text-gray-500 leading-[20px]"
+                        className="text-snu-red leading-[20px]"
                       >
                         {item.title}
                       </a>
                     ) : (
-                      <div className="text-gray-500 leading-[20px]">
+                      <div className="text-snu-red  leading-[20px]">
                         {item.title}
                       </div>
                     )}
@@ -57,7 +57,7 @@ export default function Header({
 
         {/* Title */}
         <div className="flex items-start justify-center">
-          <h1 className="text-gray-900 text-3xl font-bold leading-9 snu-purple-100">
+          <h1 className="text-3xl font-bold leading-9 text-snu-purple-600">
             {title}
           </h1>
           {titleComponent}
