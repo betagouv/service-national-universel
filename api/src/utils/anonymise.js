@@ -149,6 +149,7 @@ function generateBirhtdate() {
 }
 
 function getYoungLocation(zipCode) {
+  if (!zipCode) return null;
   const departements = [
     { nom: "Ain", code: "01", latitude: 46.20439, longitude: 5.22878 },
     { nom: "Aisne", code: "02", latitude: 49.5645, longitude: 3.62084 },

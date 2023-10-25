@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./.env-staging" });
+require("dotenv").config({ path: "./.env-staging-2" });
 
 // ! Ignore specific error
 const originalConsoleError = console.error;
