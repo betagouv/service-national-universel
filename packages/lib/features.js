@@ -1,5 +1,4 @@
 import { ROLES } from "snu-lib";
-import { environment } from "./config";
 
 const ENVS = {
   development: "development",
@@ -12,6 +11,7 @@ const FEATURES_NAME = {
   SIDEBAR: "sidebar",
   DASHBOARD: "dashboard",
   FLEXIBLE_REDIRECT: "flexibleRedirect",
+  EMAIL_VALIDATION: "emailValidation",
 };
 
 // If the environment is not defined then the feature is enabled
@@ -26,9 +26,13 @@ const features = {
     [ENVS.production]: [],
     [ENVS.staging]: [],
   },
+  [FEATURES_NAME.EMAIL_VALIDATION]: {
+    [ENVS.staging]: [],
+    [ENVS.development]: [],
+  },
 };
 
-function isFeatureEnabled(featureName, userRole) {
+function isFeatureEnabled(featureName, userRole, environment) {
   const feature = features[featureName];
   if (!feature || !ENVS[environment]) {
     return false;

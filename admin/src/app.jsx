@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
 import queryString from "query-string";
+import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
 import CGU from "./scenes/CGU";
@@ -55,7 +56,6 @@ import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
 import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
-import { FEATURES_NAME, isFeatureEnabled } from "./features";
 
 import * as Sentry from "@sentry/react";
 import ModalCGU from "./components/modals/ModalCGU";
@@ -219,15 +219,19 @@ const Home = (props) => {
 
   return (
     <div>
-      {!isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role) ? (
+      {!isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role, environment) ? (
         <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} />
       ) : null}
       <div className="flex">
-        {!isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role) ? <Drawer open={drawerVisible} onOpen={setDrawerVisible} /> : <SideBar sessionsList={sessionPhase1List} />}
+        {!isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role, environment) ? (
+          <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
+        ) : (
+          <SideBar sessionsList={sessionPhase1List} />
+        )}
         <div className="flex flex-col w-full">
           <div
             className={
-              !isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role)
+              !isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role, environment)
                 ? drawerVisible
                   ? `flex-1 ml-[220px] min-h-screen`
                   : `flex-1 lg:ml-[220px] min-h-screen`
@@ -265,11 +269,11 @@ const Home = (props) => {
               {/* Only for developper eyes... */}
               {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
               {/* DASHBOARD */}
-              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
-              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
-              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/" component={renderDashboard} />}
-              {isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
-              {isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role) && <RestrictedRoute path="/" component={renderDashboardV2} />}
+              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
+              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
+              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/" component={renderDashboard} />}
+              {isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
+              {isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/" component={renderDashboardV2} />}
             </Switch>
           </div>
           <Footer />

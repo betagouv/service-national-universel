@@ -18,7 +18,6 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
   try {
     const { value, error } = Joi.object({
       gender: Joi.string().valid("male", "female").required(),
-      email: Joi.string().trim().email().required(),
       phone: Joi.string().required(),
       phoneZone: Joi.string().required(),
     }).validate(req.body, { stripUnknown: true });
@@ -32,8 +31,6 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
-
-    if (!validator.isEmail(value.email)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     young.set(value);
     await young.save({ fromUser: req.user });
