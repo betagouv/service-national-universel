@@ -181,6 +181,7 @@ function getYoungLocation(zipCode) {
     { nom: "Finistère", code: "29", latitude: 48.079359, longitude: -4.32502 },
     { nom: "Corse-du-Sud", code: "2A", latitude: 41.927064, longitude: 8.734682 },
     { nom: "Haute-Corse", code: "2B", latitude: 42.663529, longitude: 9.449874 },
+    { nom: "Haute-Corse", code: "20", latitude: 42.663529, longitude: 9.449874 },
     { nom: "Gard", code: "30", latitude: 43.836699, longitude: 4.360054 },
     { nom: "Haute-Garonne", code: "31", latitude: 43.604652, longitude: 1.444209 },
     { nom: "Gers", code: "32", latitude: 43.64555, longitude: 0.586898 },
@@ -270,7 +271,7 @@ function getYoungLocation(zipCode) {
     };
   }
 
-  throw new Error(`No department found for zip code: ${zipCode}`);
+  return { latitude: 48.856614, longitude: 2.352222 };
 }
 
 function generateNewPhoneNumber() {
