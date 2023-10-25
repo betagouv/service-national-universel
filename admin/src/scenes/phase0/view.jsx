@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "@/utils/dayjs.utils";
-import { COHESION_STAY_START, START_DATE_SESSION_PHASE1, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
+import { START_DATE_SESSION_PHASE1, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -61,18 +61,23 @@ const PENDING_ACCORD = "en attente";
 
 export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
   const [requests, setRequests] = useState([]);
   const [processing, setProcessing] = useState(false);
-  const [footerMode, setFooterMode] = useState("NO_REQUEST");
+  const [cohort, setCohort] = useState(undefined);
   const [oldCohort, setOldCohort] = useState(true);
+  const [footerMode, setFooterMode] = useState("NO_REQUEST");
 
   useEffect(() => {
     if (young) {
       setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
-      setOldCohort(!COHESION_STAY_START[young.cohort] || dayjs(COHESION_STAY_START[young.cohort]).year() < 2023);
+      const currentCohort = cohorts.find((c) => c.name === young.cohort);
+      setCohort(currentCohort);
+      setOldCohort(!currentCohort);
     } else {
       setRequests([]);
+      setCohort(undefined);
       setOldCohort(true);
     }
   }, [young]);
@@ -258,7 +263,11 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           oldCohort={oldCohort}
           readonly={user.role === ROLES.HEAD_CENTER}
         />
-        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} readonly={user.role === ROLES.HEAD_CENTER} />}
+        {oldCohort ? (
+          <SectionOldConsentements young={young} />
+        ) : (
+          <SectionConsentements young={young} onChange={onChange} readonly={user.role === ROLES.HEAD_CENTER} cohort={cohort} />
+        )}
       </div>
       {globalMode === "correction" && (
         <>
@@ -1577,13 +1586,10 @@ const PARENT_STATUS_NAME = {
   representant: "Le représentant légal",
 };
 
-function SectionConsentements({ young, onChange, readonly = false }) {
+function SectionConsentements({ young, onChange, readonly = false, cohort }) {
   const [youngAge, setYoungAge] = useState("?");
   const [confirmModal, setConfirmModal] = useState(null);
   const [pdfDownloading, setPdfDownloading] = useState("");
-  const cohorts = useSelector((state) => state.Cohorts);
-
-  const cohort = cohorts.find((c) => c.name === young.cohort);
 
   useEffect(() => {
     if (young) {
