@@ -19,6 +19,7 @@ import Contact from "./scenes/contact";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
+import DesignSystemPage from "./scenes/develop/DesignSystemPage";
 import Diagoriente from "./scenes/diagoriente";
 import Engagement from "./scenes/engagement";
 import Footer from "./components/footer";
@@ -249,6 +250,7 @@ const Espace = () => {
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
           {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+          {environment === "development" && <SentryRoute path="/design-system" component={DesignSystemPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
           {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={ChangeSejour} /> : null}
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
