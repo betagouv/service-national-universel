@@ -1,8 +1,8 @@
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { COHESION_STAY_START, translate } from "snu-lib";
+import { translate } from "snu-lib";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import Loader from "../../../components/Loader";
@@ -19,6 +19,8 @@ export default function CniInvalide() {
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {}, [young]);
+
   if (!young) return <Loader />;
 
   if (young.parentStatementOfHonorInvalidId === "true" || young.parentStatementOfHonorInvalidId === "false") {
@@ -27,7 +29,7 @@ export default function CniInvalide() {
 
   const youngFullname = young.firstName + " " + young.lastName;
   const parentFullname = young.parent1FirstName + " " + young.parent1LastName;
-  const dateSejour = COHESION_STAY_START[young.cohort] ? dayjs(COHESION_STAY_START[young.cohort]).locale("fr").format("D MMMM YYYY") : young.cohort;
+  const dateSejour = cohort ? dayjs(cohort.dateStart).locale("fr").format("D MMMM YYYY") : young.cohort;
 
   async function onSubmit() {
     setSaving(true);
