@@ -6,4 +6,4 @@ type OwnProps = {
 
 export default function Page({ children }: OwnProps) {
   return <div className="p-8">{children}</div>;
-};
+}
