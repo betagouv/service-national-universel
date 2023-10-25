@@ -1,14 +1,19 @@
 import React from "react";
 
 type OwnProps = {
+<<<<<<< HEAD
   className?: string;
   topComponent?: React.ReactNode;
   title?: string;
   titleComponent?: React.ReactNode;
+=======
+  title?: string;
+>>>>>>> 9ace60be1 (Cle front/lib (#3130))
   actions?: React.ReactNode[];
   children?: React.ReactNode;
 };
 
+<<<<<<< HEAD
 export default function Container({
   className,
   topComponent,
@@ -43,6 +48,20 @@ export default function Container({
 
       {/* Children */}
       {children}
+=======
+export default function Container({ title, actions, children }: OwnProps) {
+  return (
+    <div className="flex flex-col items-start gap-6 mb-6 pt-6 pb-8 px-8 rounded-lg bg-white shadow-sm">
+      <div className="flex items-start gap-6">
+        {title && (
+          <div className="text-gray-900 text-lg font-medium leading-6">
+            {title}
+          </div>
+        )}
+        {actions && <div>{actions}</div>}
+      </div>
+      <div>{children}</div>
+>>>>>>> 9ace60be1 (Cle front/lib (#3130))
     </div>
   );
 }

@@ -4,7 +4,11 @@ const colors = require("tailwindcss/colors");
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
   presets: [require("@snu/ds/tailwind.config")],
+<<<<<<< HEAD
   content: ["./src/**/*.{js,ts,jsx,tsx}", "../packages/ds/dist/**/*.{js,jsx}"],
+=======
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+>>>>>>> 9ace60be1 (Cle front/lib (#3130))
   darkMode: Media, // or 'media' or 'class'
   theme: {
     minWidth: {

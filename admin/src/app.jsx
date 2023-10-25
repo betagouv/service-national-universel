@@ -268,10 +268,15 @@ const Home = (props) => {
               <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
               <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
               {/* Only for developper eyes... */}
+<<<<<<< HEAD
               {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? (
                 <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />
               ) : null}
               {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
+=======
+              {environment === "development" ? <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} /> : null}
+              {environment === "development" ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
+>>>>>>> 9ace60be1 (Cle front/lib (#3130))
               {/* DASHBOARD */}
               {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
               {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}

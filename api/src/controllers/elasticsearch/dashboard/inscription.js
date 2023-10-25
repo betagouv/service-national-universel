@@ -5,7 +5,11 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch } = require("../utils");
+<<<<<<< HEAD
 const { ES_NO_LIMIT, getCohortNames, ROLES, region2department, YOUNG_STATUS } = require("snu-lib");
+=======
+const { ES_NO_LIMIT, COHORTS, ROLES, region2department, YOUNG_STATUS } = require("snu-lib");
+>>>>>>> 9ace60be1 (Cle front/lib (#3130))
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
