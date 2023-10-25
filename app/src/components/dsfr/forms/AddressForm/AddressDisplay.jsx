@@ -3,7 +3,7 @@ import React from "react";
 import { FiSearch } from "react-icons/fi";
 import { HiCheckCircle } from "react-icons/hi";
 
-export default function AddressDisplay({ data, updateData, correction }) {
+export default function AddressDisplay({ data, updateData, error, correction }) {
   const resetData = () => updateData({ address: "", addressVerified: "false", zip: "", city: "", department: "", region: "", location: null, coordinatesAccuracyLevel: null });
 
   return (
@@ -18,15 +18,18 @@ export default function AddressDisplay({ data, updateData, correction }) {
           </div>
         </label>
       ) : (
-        <label className="flex flex-col gap-2 w-full text-gray-800">
-          Adresse
-          <input
-            type="text"
-            value={data.address}
-            onChange={(e) => updateData({ address: e.target.value })}
-            className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 border-b-2 border-gray-800"
-          />
-        </label>
+        <>
+          <label className="flex flex-col gap-2 w-full text-gray-800">
+            Adresse
+            <input
+              type="text"
+              value={data.address}
+              onChange={(e) => updateData({ address: e.target.value })}
+              className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 border-b-2 border-gray-800"
+            />
+          </label>
+          <ErrorMessage>{error}</ErrorMessage>
+        </>
       )}
 
       <div className="flex flex-col md:flex-row gap-2 md:gap-8">

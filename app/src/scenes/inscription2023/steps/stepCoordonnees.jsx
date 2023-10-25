@@ -184,6 +184,7 @@ export default function StepCoordonnees() {
         gender: young.gender || data.gender,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
         address: young.address || data.address,
+        addressVerified: young.addressVerified || data.addressVerified,
         coordinatesAccuracyLevel: young.coordinatesAccuracyLevel || data.coordinatesAccuracyLevel,
         city: young.city || data.city,
         zip: young.zip || data.zip,
