@@ -56,6 +56,7 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
       if (newFiles[i].size > 5000000) return toastr.error(`Ce fichier ${newFiles[i].name} est trop volumineux.`);
     }
     const res = await api.uploadFiles(`${path}`, newFiles);
+    if (!res?.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
     if (res.code === "FILE_CORRUPTED") {
       return toastr.error(
         "Le fichier semble corrompu",
@@ -63,7 +64,6 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
         { timeOut: 0 },
       );
     }
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
     toastr.success("Fichier téléversé");
     if (onChange) onChange(res);
     setFilesList(res.data);
@@ -81,19 +81,19 @@ export default function DndFileInput({ optional, value, name, errorMessage = req
   };
   async function handleDownload(fileId) {
     const res = await api.get(`${path}/${fileId}`);
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléchargement de votre fichier");
+    if (!res?.ok) return toastr.error("Une erreur s'est produite lors du téléchargement de votre fichier");
     return res;
   }
 
   async function handleDelete(fileId) {
     const res = await api.remove(`${path}/${fileId}`);
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors de la suppression de votre fichier");
+    if (!res?.ok) return toastr.error("Une erreur s'est produite lors de la suppression de votre fichier");
     setFilesList(res.data);
   }
 
   async function getList(path) {
     const res = await api.get(path);
-    if (!res.ok) return toastr.error("Une erreur s'est produite lors de la récupération de la liste de vos fichiers.");
+    if (!res?.ok) return toastr.error("Une erreur s'est produite lors de la récupération de la liste de vos fichiers.");
     setFilesList(res.data);
   }
 
