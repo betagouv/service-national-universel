@@ -1996,7 +1996,7 @@ Schema.methods.anonymise = function () {
   this.parentConsentmentFilesCompliantInfo = this.parentConsentmentFilesCompliantInfo?.replace(/\S/g, "*");
   this.withdrawnReason = this.withdrawnReason?.replace(/\S/g, "*");
   this.withdrawnMessage = this.withdrawnMessage?.replace(/\S/g, "*");
-  this.correctionRequests = this.correctionRequests.map((e) => {
+  this.correctionRequests = this.correctionRequests?.map((e) => {
     e.message = e.message?.replace(/\S/g, "*");
     e.reason = e.reason?.replace(/\S/g, "*");
     return e;
