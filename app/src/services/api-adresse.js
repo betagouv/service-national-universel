@@ -126,10 +126,12 @@ function getDepartmentAndRegionFromContext(context) {
 async function getAddressOptions(query, signal) {
   // Call BAN API
   const res = await apiAdress(query, { limit: 10 }, { signal });
-  if (res?.error) return [null, res.error];
+  if (res.error) return [null, res.error];
+  if (!res.features?.length) return [[], null];
 
   // Format and group options
-  const formattedOptions = res.features?.map((option) => formatOption(option));
+  const formattedOptions = res.features.map((option) => formatOption(option));
+
   const housenumbers = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "housenumber");
   const streets = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "street");
   const localities = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "locality");
