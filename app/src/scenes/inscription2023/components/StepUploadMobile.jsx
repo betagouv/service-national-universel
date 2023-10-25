@@ -13,14 +13,26 @@ import MyDocs from "../components/MyDocs";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import Verify from "./Verify";
 
-export default function StepUploadMobile({ recto, setRecto, verso, setVerso, date, setDate, error, setError, loading, setLoading, corrections, category, onSubmit, onCorrect }) {
+export default function StepUploadMobile({
+  recto,
+  setRecto,
+  verso,
+  setVerso,
+  date,
+  setDate,
+  error,
+  setError,
+  loading,
+  setLoading,
+  corrections,
+  category,
+  checked,
+  setChecked,
+  onSubmit,
+  onCorrect,
+}) {
   const young = useSelector((state) => state.Auth.young);
   const [step, setStep] = useState(getStep());
-  const [checked, setChecked] = useState({
-    "Toutes les informations sont lisibles": false,
-    "Le document n'est pas coupé": false,
-    "La photo est nette": false,
-  });
   const [hasChanged, setHasChanged] = useState(false);
   const isEnabled = validate();
 

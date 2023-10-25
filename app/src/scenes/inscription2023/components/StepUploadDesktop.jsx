@@ -14,12 +14,28 @@ import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonCont
 import FileImport from "@/components/dsfr/forms/FileImport";
 import Verify from "./Verify";
 
-export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, date, setDate, error, setError, loading, setLoading, corrections, category, onSubmit, onCorrect }) {
+export default function StepUploadDesktop({
+  recto,
+  setRecto,
+  verso,
+  setVerso,
+  date,
+  setDate,
+  error,
+  setError,
+  loading,
+  setLoading,
+  corrections,
+  category,
+  checked,
+  setChecked,
+  onSubmit,
+  onCorrect,
+}) {
   const young = useSelector((state) => state.Auth.young);
   const [hasChanged, setHasChanged] = useState(false);
   const isEnabled = validate();
   const [step, setStep] = useState(0);
-  const [checked, setChecked] = useState({ "Toutes les informations sont lisibles": false, "Le document n'est pas coupé": false, "La photo est nette": false });
   const history = useHistory();
 
   function validate() {
@@ -51,7 +67,7 @@ export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, da
           onClickPrevious={() => {
             setStep(0), resetState();
           }}
-          labelPrevious="Non, rcommencer"
+          labelPrevious="Non, recommencer"
         />
       </>
     );

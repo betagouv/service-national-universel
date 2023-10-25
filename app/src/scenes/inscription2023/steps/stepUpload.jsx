@@ -35,6 +35,11 @@ export default function StepUpload() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const expirationDate = dayjs(date).locale("fr").format("YYYY-MM-DD");
+  const [checked, setChecked] = useState({
+    "Toutes les informations sont lisibles": false,
+    "Le document n'est pas coupé": false,
+    "La photo est nette": false,
+  });
 
   async function uploadFiles(resetState) {
     const oversizedFiles = [recto, verso].filter((e) => e && e.size > 5000000).map((e) => e.name);
@@ -139,6 +144,8 @@ export default function StepUpload() {
             setLoading={setLoading}
             corrections={corrections}
             category={category}
+            checked={checked}
+            setChecked={setChecked}
             onSubmit={onSubmit}
             onCorrect={onCorrect}
           />
@@ -156,6 +163,8 @@ export default function StepUpload() {
             setLoading={setLoading}
             corrections={corrections}
             category={category}
+            checked={checked}
+            setChecked={setChecked}
             onSubmit={onSubmit}
             onCorrect={onCorrect}
           />
