@@ -94,6 +94,7 @@ const formatResult = (suggestion) => {
 };
 
 function formatOption(option) {
+  const { department, region } = getDepartmentAndRegionFromContext(option.properties.context);
   return {
     addressVerified: "true",
     address: option.properties.type !== "municipality" ? option.properties.name : "",
@@ -101,15 +102,14 @@ function formatOption(option) {
     zip: option.properties.postcode,
     city: option.properties.city,
     cityCode: option.properties.citycode,
-    department: getDepartmentAndRegionFromContext(option.properties.context).department,
-    region: getDepartmentAndRegionFromContext(option.properties.context).region,
+    department,
+    region,
     location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
   };
 }
 
 function getDepartmentAndRegionFromContext(context) {
-  // Context has dept number as first element, department as second element (optional) and region as last element.
-  // For DROMS, it does not always have department as second element.
+  // Context has the department number as first element, department name as an optional second element and region as the last element.
   // Examples:
   // ['50', ' Manche', ' Normandie']
   // ['988', ' Nouvelle-Calédonie']

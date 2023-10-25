@@ -1,6 +1,6 @@
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import React from "react";
-import { FiSearch } from "react-icons/fi";
+import { RiSearchLine } from "react-icons/ri";
 import { HiCheckCircle } from "react-icons/hi";
 
 export default function AddressDisplay({ data, updateData, error, correction }) {
@@ -52,7 +52,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
 
       <ErrorMessage>{correction}</ErrorMessage>
       <button onClick={resetData} className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover ml-auto py-1 w-fit flex gap-2 items-center">
-        <FiSearch />
+        <RiSearchLine />
         Rechercher une nouvelle adresse
       </button>
     </div>

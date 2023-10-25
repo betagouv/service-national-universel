@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import AddressDropdown from "./AddressDropdown";
-import { FiSearch } from "react-icons/fi";
+import { RiSearchLine } from "react-icons/ri";
 import { toastr } from "react-redux-toastr";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
@@ -63,7 +63,7 @@ export default function AddressSearch({ getOptions, updateData, error }) {
         <div className="relative">
           <input type="text" value={query} onChange={handleChangeQuery} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />
           <span className="material-icons absolute right-5 mt-[12px] text-lg">
-            <FiSearch />
+            <RiSearchLine />
           </span>
         </div>
       </label>
