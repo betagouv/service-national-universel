@@ -23,7 +23,8 @@ import GlobeIcon from "./icons/Globe";
 import InviteHeader from "./components/invite";
 import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
-import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, volontaireHeadCenterRegex } from "./utils";
+import { HiOutlineCommandLine } from "react-icons/hi2";
+import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, itemsDev, volontaireHeadCenterRegex } from "./utils";
 import useDevice from "../../hooks/useDevice";
 
 //Css !important becuse of bootstrap override
@@ -185,9 +186,12 @@ const SideBar = (props) => {
   const Admisnistrateur = () => (
     <MultiNavItem sideBarOpen={open} Icon={AdminIcon} title="Administrateurs" items={itemsAdministrateur} path={path} currentOpen={dropDownOpen} setCurrentOpen={setDropDownOpen} />
   );
+  const Dev = () => (
+    <MultiNavItem sideBarOpen={open} Icon={HiOutlineCommandLine} title="Dev" items={itemsDev} path={path} currentOpen={dropDownOpen} setCurrentOpen={setDropDownOpen} />
+  );
 
   //Components to display depending on user role
-  const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs];
+  const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs, Dev];
   const adminItems = [Dashboard, Volontaire, Inscriptions, SejoursAdmin, Engagement, Utilisateurs];
   const refItems = [Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
   const headCenterItems = [Dashboard, VolontaireHeadCenter, CentresHeadCenter, PlanDeTransport, Contenus, Utilisateurs];
