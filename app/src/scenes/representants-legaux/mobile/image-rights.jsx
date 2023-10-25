@@ -9,7 +9,7 @@ import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButt
 import Toggle from "../../../components/dsfr/forms/toggle";
 import { PHONE_ZONES, isPhoneNumberWellFormated, translate } from "snu-lib";
 import { FRANCE, ABROAD, translateError, stringToBoolean, isReturningParentForImageRights, API_CONSENT_IMAGE_RIGHTS } from "../commons";
-import VerifyAddress from "../../inscription2023/components/VerifyAddress";
+import AddressForm from "@/components/dsfr/forms/AddressForm";
 import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
@@ -17,6 +17,8 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
 import AuthorizeBlock from "../components/AuthorizeBlock";
+import { getAddress } from "../utils";
+import { getAddressOptions } from "@/services/api-adresse";
 
 export default function ImageRights({ parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -86,28 +88,35 @@ function ImageRightsForm({ young, token, parentId }) {
 
   // --- address
   const formattedAddress =
-    data.address + (data.addressComplement ? " " + data.addressComplement : "") + " " + data.zip + " " + data.city + (data.country ? ", " + data.country : "");
+    young?.address + (young?.addressComplement ? " " + young?.addressComplement : "") + " " + young?.zip + " " + young?.city + (young?.country ? ", " + young?.country : "");
 
   const addressTypeOptions = [
     { label: "En France (Métropolitaine ou Outre-mer)", value: FRANCE },
     { label: "À l’étranger", value: ABROAD },
   ];
 
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setData({
-      ...data,
-      addressVerified: true,
-      cityCode: suggestion.cityCode,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? suggestion.address : data.address,
-      zip: isConfirmed ? suggestion.zip : data.zip,
-      city: isConfirmed ? suggestion.city : data.city,
-    });
-    setErrors({ addressVerified: undefined });
-  };
+  function toggleConfirmAddress() {
+    if (data.confirmAddress) {
+      setData({
+        ...data,
+        confirmAddress: false,
+        address: "",
+        addressComplement: "",
+        zip: "",
+        city: "",
+        country: "",
+        addressVerified: "false",
+        coordinatesAccuracyLevel: "",
+        cityCode: "",
+        region: "",
+        department: "",
+        location: "",
+      });
+    } else {
+      const address = getAddress(young, parentId);
+      setData({ ...data, confirmAddress: true, ...address });
+    }
+  }
 
   // --- ui
   function toggleImageRightsExplanationShown(e) {
@@ -156,20 +165,18 @@ function ImageRightsForm({ young, token, parentId }) {
     }
 
     // --- address
-    if (!data.addressVerified) {
-      let validAddress = validate("address", "empty", validator.isEmpty(data.address, { ignore_whitespace: true }));
-      if (validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }))) {
-        validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
-      }
-      validAddress = validate("city", "empty", validator.isEmpty(data.city, { ignore_whitespace: true })) && validAddress;
+    let validAddress = validate("address", "empty", validator.isEmpty(data.address, { ignore_whitespace: true }));
+    if (validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }))) {
+      validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
+    }
+    validAddress = validate("city", "empty", validator.isEmpty(data.city, { ignore_whitespace: true })) && validAddress;
 
-      if (data.addressType === ABROAD) {
-        validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true })) && validAddress;
-      }
+    if (data.addressType === ABROAD) {
+      validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true })) && validAddress;
+    }
 
-      if (!validAddress) {
-        setData({ ...data, confirmAddress: false });
-      }
+    if (!validAddress) {
+      setData({ ...data, confirmAddress: false });
     }
 
     // --- accept
@@ -276,37 +283,28 @@ function ImageRightsForm({ young, token, parentId }) {
               <div className="flex-grow-1">
                 <b>Je réside</b> {formattedAddress}
               </div>
-              <Toggle onClick={() => setData({ ...data, confirmAddress: !data.confirmAddress })} toggled={data.confirmAddress} />
+              <Toggle onClick={toggleConfirmAddress} toggled={data.confirmAddress} />
               {errors.confirmAddress ? <span className="text-sm text-red-500">{errors.confirmAddress}</span> : null}
             </div>
             {!data.confirmAddress && (
               <>
                 <ResponsiveRadioButton label="Je réside..." options={addressTypeOptions} onChange={(e) => setData({ ...data, addressType: e })} value={data.addressType} />
-                <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />
-                <Input
-                  className=""
-                  value={data.addressComplement}
-                  label="Complément d'adresse"
-                  onChange={(e) => setData({ ...data, addressComplement: e })}
-                  error={errors.addressComplement}
-                />
-                <Input value={data.zip} label="Code postal" onChange={(e) => setData({ ...data, zip: e })} error={errors.zip} />
-                <Input value={data.city} label="Ville" onChange={(e) => setData({ ...data, city: e })} error={errors.city} />
-                {data.addressType === ABROAD ? (
-                  <Input className="" value={data.country} label="Pays de résidence" onChange={(e) => setData({ ...data, country: e })} error={errors.country} />
+                {data.addressType === FRANCE ? (
+                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} />
                 ) : (
-                  <div className="flex justify-end">
-                    <div className="w-[50%]">
-                      <VerifyAddress
-                        address={data.address}
-                        zip={data.zip}
-                        city={data.city}
-                        onSuccess={onVerifyAddress(true)}
-                        onFail={onVerifyAddress()}
-                        isVerified={data.addressVerified === true}
-                      />
-                    </div>
-                  </div>
+                  <>
+                    <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />
+                    <Input
+                      className=""
+                      value={data.addressComplement}
+                      label="Complément d'adresse"
+                      onChange={(e) => setData({ ...data, addressComplement: e })}
+                      error={errors.addressComplement}
+                    />
+                    <Input value={data.zip} label="Code postal" onChange={(e) => setData({ ...data, zip: e })} error={errors.zip} />
+                    <Input value={data.city} label="Ville" onChange={(e) => setData({ ...data, city: e })} error={errors.city} />
+                    <Input className="" value={data.country} label="Pays de résidence" onChange={(e) => setData({ ...data, country: e })} error={errors.country} />
+                  </>
                 )}
               </>
             )}

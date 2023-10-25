@@ -167,6 +167,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       }),
       livesInFrance: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
       addressVerified: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      coordinatesAccuracyLevel: needRequired(Joi.string().trim().valid("housenumber", "street", "locality", "municipality"), isRequired),
       country: needRequired(Joi.string().trim(), isRequired),
       city: needRequired(Joi.string().trim(), isRequired),
       zip: needRequired(Joi.string().trim(), isRequired),
@@ -229,7 +230,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     let { error, value } = Joi.object(coordonneeSchema).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
 
     if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
     }
 
     if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;

@@ -806,6 +806,13 @@ const Schema = new mongoose.Schema({
       description: "Adresse pendant le snu du volontaire",
     },
   },
+  coordinatesAccuracyLevel: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+    documentation: {
+      description: "Type d'adresse du volontaire dans la Base adresse nationale",
+    },
+  },
   complementAddress: {
     type: String,
     documentation: {
@@ -1069,6 +1076,10 @@ const Schema = new mongoose.Schema({
       description: "Adresse du parent 1",
     },
   },
+  parent1coordinatesAccuracyLevel: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+  },
   parent1ComplementAddress: {
     type: String,
     documentation: {
@@ -1216,6 +1227,10 @@ const Schema = new mongoose.Schema({
       description: "Adresse du parent 2",
     },
   },
+  parent2coordinatesAccuracyLevel: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+  },
   parent2ComplementAddress: {
     type: String,
     documentation: {
@@ -1318,6 +1333,8 @@ const Schema = new mongoose.Schema({
       description: "Lien de l'hébergeur avec le volontaire",
     },
   },
+
+  // TODO: cleanup host address fields (they are not used anymore).
   hostCity: {
     type: String,
     documentation: {

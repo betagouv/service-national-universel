@@ -3,16 +3,16 @@ import { useSelector } from "react-redux";
 import { Redirect, useParams } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 
-import StepConfirm from "./mobile/stepConfirm";
-import StepConsentements from "./mobile/stepConsentements";
-import StepCoordonnees from "./mobile/stepCoordonnees";
-import StepDocuments from "./mobile/stepDocuments";
-import StepDone from "./mobile/stepDone";
-import StepRepresentants from "./mobile/stepRepresentants";
-import StepUpload from "./mobile/stepUpload";
+import StepConfirm from "./steps/stepConfirm";
+import StepConsentements from "./steps/stepConsentements";
+import StepCoordonnees from "./steps/stepCoordonnees";
+import StepDocuments from "./steps/stepDocuments";
+import StepDone from "./steps/stepDone";
+import StepRepresentants from "./steps/stepRepresentants";
+import StepUpload from "./steps/stepUpload";
 
-import MobileCorrectionEligibilite from "./mobile/correction/stepEligibilite";
-import MobileCorrectionProfil from "./mobile/correction/stepProfil";
+import MobileCorrectionEligibilite from "./steps/correction/stepEligibilite";
+import MobileCorrectionProfil from "./steps/correction/stepProfil";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";

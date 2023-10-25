@@ -23,20 +23,19 @@ import {
 } from "../utils";
 
 import api from "../../../services/api";
-import VerifyAddress from "../components/VerifyAddress";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import Toggle from "../../../components/dsfr/forms/toggle";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { debounce, translate } from "../../../utils";
 import { capture } from "../../../sentry";
-import { environment, supportURL } from "../../../config";
+import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { apiAdress } from "../../../services/api-adresse";
+import { apiAdress, getAddressOptions } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
-import AdressSelect from "../components/AdressSelect";
+import AddressForm from "@/components/dsfr/forms/AddressForm";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -48,14 +47,13 @@ const getObjectWithEmptyData = (fields) => {
 
 const FRANCE = "France";
 const errorMessages = {
-  addressVerified: "Merci de vérifier l'adresse",
   phone: "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX",
   zip: "Le code postal n'est pas valide",
   hasSpecialSituation: "Merci de choisir au moins une option.",
 };
 
 const birthPlaceFields = ["birthCountry", "birthCity", "birthCityZip"];
-const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified"];
+const addressFields = ["address", "zip", "city", "cityCode", "region", "department", "location", "addressVerified", "coordinatesAccuracyLevel"];
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
@@ -89,7 +87,6 @@ const defaultState = {
   phone: "",
   phoneZone: "",
   livesInFrance: inFranceOrAbroadOptions[0].value,
-  addressVerified: "false",
   address: "",
   zip: "",
   city: "",
@@ -139,7 +136,6 @@ export default function StepCoordonnees() {
     birthCity,
     gender,
     livesInFrance,
-    addressVerified,
     address,
     zip,
     city,
@@ -165,7 +161,6 @@ export default function StepCoordonnees() {
   const wasBornInFranceBool = wasBornInFrance === "true";
   const isFrenchResident = livesInFrance === "true";
 
-  const isVerifyAddressDisabled = !address || !city || !zip;
   const moreInformation = handicap === "true" || ppsBeneficiary === "true" || paiBeneficiary === "true";
 
   useEffect(() => {
@@ -188,8 +183,9 @@ export default function StepCoordonnees() {
         birthCityZip: young.birthCityZip || data.birthCityZip,
         gender: young.gender || data.gender,
         livesInFrance: young.foreignCountry ? "false" : data.livesInFrance,
-        addressVerified: young.addressVerified || data.addressVerified,
         address: young.address || data.address,
+        addressVerified: young.addressVerified || data.addressVerified,
+        coordinatesAccuracyLevel: young.coordinatesAccuracyLevel || data.coordinatesAccuracyLevel,
         city: young.city || data.city,
         zip: young.zip || data.zip,
         region: young.region || data.region,
@@ -287,10 +283,6 @@ export default function StepCoordonnees() {
     }
   };
 
-  const updateAddressToVerify = (key) => (value) => {
-    setData({ ...data, [key]: value, addressVerified: "false" });
-  };
-
   const debouncedSuggestionsRequest = useCallback(
     debounce(async (value) => {
       try {
@@ -328,10 +320,6 @@ export default function StepCoordonnees() {
     if (!isFrenchResident) {
       fieldToUpdate.push(...foreignAddressFields);
       requiredFields.push(...requiredFieldsForeigner);
-    }
-
-    if (addressVerified !== "true") {
-      errors.addressVerified = errorMessages.addressVerified;
     }
 
     if (moreInformation) {
@@ -394,10 +382,6 @@ export default function StepCoordonnees() {
       requiredFields.push(...requiredFieldsForeigner);
     }
 
-    if (addressVerified !== "true") {
-      errors.addressVerified = errorMessages.addressVerified;
-    }
-
     if (moreInformation) {
       fieldToUpdate.push(...moreInformationFields);
       requiredFields.push(...requiredMoreInformationFields);
@@ -426,6 +410,7 @@ export default function StepCoordonnees() {
 
       updates.country = FRANCE;
       updates.moreInformation = moreInformation.toString();
+      updates.addressVerified = "true";
 
       try {
         const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/correction", updates);
@@ -471,6 +456,7 @@ export default function StepCoordonnees() {
 
     updates.country = FRANCE;
     updates.moreInformation = moreInformation.toString();
+    updates.addressVerified = "true";
 
     try {
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/save", updates);
@@ -485,22 +471,6 @@ export default function StepCoordonnees() {
       capture(e);
       toastr.error("Une erreur s'est produite :", translate(e.code));
     }
-  };
-
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setData({
-      ...data,
-      addressVerified: "true",
-      cityCode: suggestion.cityCode,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? suggestion.address : address,
-      zip: isConfirmed ? suggestion.zip : zip,
-      city: isConfirmed ? suggestion.city : city,
-    });
-    setErrors({ addressVerified: undefined });
   };
 
   const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`;
@@ -562,6 +532,15 @@ export default function StepCoordonnees() {
           error={errors?.livesInFrance}
           correction={corrections?.livesInFrance}
         />
+        {isFrenchResident && (
+          <AddressForm
+            data={data}
+            updateData={(newData) => setData({ ...data, ...newData })}
+            getOptions={getAddressOptions}
+            error={errors.address}
+            correction={corrections?.address}
+          />
+        )}
         {!isFrenchResident && (
           <SearchableSelect
             label="Pays de résidence"
@@ -572,35 +551,6 @@ export default function StepCoordonnees() {
             error={errors.foreignCountry}
             correction={corrections?.foreignCountry}
           />
-        )}
-        {environment === "production" && (
-          <>
-            <Input
-              value={isFrenchResident ? address : foreignAddress}
-              label="Adresse de résidence"
-              onChange={isFrenchResident ? updateAddressToVerify("address") : updateData("foreignAddress")}
-              error={isFrenchResident ? errors.address : errors.foreignAddress}
-              correction={isFrenchResident ? corrections?.address : corrections?.foreignAddress}
-            />
-            <div className="flex flex-col md:flex-row md:gap-8">
-              <Input
-                value={isFrenchResident ? zip : foreignZip}
-                label="Code postal"
-                onChange={isFrenchResident ? updateAddressToVerify("zip") : updateData("foreignZip")}
-                error={isFrenchResident ? errors.zip : errors.foreignZip}
-                correction={isFrenchResident ? corrections?.zip : corrections?.foreignZip}
-                className="w-full"
-              />
-              <Input
-                value={isFrenchResident ? city : foreignCity}
-                label="Ville"
-                onChange={isFrenchResident ? updateAddressToVerify("city") : updateData("foreignCity")}
-                error={isFrenchResident ? errors.city : errors.foreignCity}
-                correction={isFrenchResident ? corrections?.city : corrections?.foreignCity}
-                className="w-full"
-              />
-            </div>
-          </>
         )}
         {!isFrenchResident && (
           <>
@@ -632,26 +582,16 @@ export default function StepCoordonnees() {
               error={errors.hostRelationship}
               correction={corrections?.hostRelationship}
             />
-            <Input value={address} label="Son adresse" onChange={updateAddressToVerify("address")} error={errors.address} correction={corrections?.address} />
-            <Input value={zip} label="Code postal" onChange={updateAddressToVerify("zip")} error={errors.zip} correction={corrections?.zip} />
-            <Input value={city} label="Ville" onChange={updateAddressToVerify("city")} error={errors.city} correction={corrections?.city} />
+            <AddressForm
+              data={data}
+              updateData={(newData) => setData({ ...data, ...newData })}
+              getOptions={getAddressOptions}
+              error={errors.address}
+              correction={corrections?.address}
+            />
           </>
         )}
-        {environment === "production" && (
-          <VerifyAddress
-            address={address}
-            disabled={isVerifyAddressDisabled}
-            zip={zip}
-            city={city}
-            onSuccess={onVerifyAddress(true)}
-            onFail={onVerifyAddress()}
-            isVerified={addressVerified === "true"}
-          />
-        )}
 
-        {data && environment !== "production" && <AdressSelect data={data} setData={setData} />}
-
-        <ErrorMessage>{errors.addressVerified}</ErrorMessage>
         <Select
           label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
           options={situationOptions}
