@@ -7,18 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "@/utils/dayjs.utils";
-import {
-  COHESION_STAY_LIMIT_DATE,
-  COHESION_STAY_START,
-  START_DATE_SESSION_PHASE1,
-  translate,
-  translateGrade,
-  YOUNG_STATUS,
-  GRADES,
-  getAge,
-  ROLES,
-  SENDINBLUE_TEMPLATES,
-} from "snu-lib";
+import { COHESION_STAY_START, START_DATE_SESSION_PHASE1, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -76,15 +65,15 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [requests, setRequests] = useState([]);
   const [processing, setProcessing] = useState(false);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
-  const [oldCohort, setOldCohort] = useState(false);
+  const [oldCohort, setOldCohort] = useState(true);
 
   useEffect(() => {
     if (young) {
       setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
-      setOldCohort(dayjs(COHESION_STAY_START[young.cohort]).year() < 2023);
+      setOldCohort(!COHESION_STAY_START[young.cohort] || dayjs(COHESION_STAY_START[young.cohort]).year() < 2023);
     } else {
       setRequests([]);
-      setOldCohort(false);
+      setOldCohort(true);
     }
   }, [young]);
 
@@ -1592,6 +1581,9 @@ function SectionConsentements({ young, onChange, readonly = false }) {
   const [youngAge, setYoungAge] = useState("?");
   const [confirmModal, setConfirmModal] = useState(null);
   const [pdfDownloading, setPdfDownloading] = useState("");
+  const cohorts = useSelector((state) => state.Cohorts);
+
+  const cohort = cohorts.find((c) => c.name === young.cohort);
 
   useEffect(() => {
     if (young) {
@@ -1727,8 +1719,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
           </CheckRead>
           <CheckRead value={young.acceptCGU === "true"}>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
           <CheckRead value={young.consentment === "true"}>
-            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-            <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
+            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion <b>{getCohortPeriod(cohort)}</b> puis la
+            réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
           <CheckRead value={young.consentment === "true"}>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
           <CheckRead value={(young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null) || young.informationAccuracy === "true"}>
@@ -1761,8 +1753,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à participer à la session <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-          réalisation d&apos;une mission d&apos;intérêt général.
+          à participer à la session <b>{getCohortPeriod(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la réalisation
+          d&apos;une mission d&apos;intérêt général.
         </div>
         <div>
           <CheckRead value={young.parent1AllowSNU === "true"}>

@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
+import { getCohortPeriod } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
 import LinkTo from "../../../assets/icons/LinkTo";
@@ -29,7 +30,7 @@ export default function Presentation({ step, parentId }) {
     if (status === "REFUSED") return "est refusé";
   };
 
-  const sejourDate = COHESION_STAY_LIMIT_DATE[young.cohort];
+  const sejourDate = getCohortPeriod(getCohort(young.cohort));
   const title = parentId === 2 ? `${young.firstName} s'est inscrit(e) au SNU !` : `${young.firstName} souhaite s'inscrire au SNU !`;
 
   function onSubmit() {

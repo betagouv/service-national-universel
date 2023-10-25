@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import { useHistory } from "react-router-dom";
 
-import { translateGrade, GRADES, getAge, COHESION_STAY_LIMIT_DATE, ES_NO_LIMIT, YOUNG_STATUS } from "snu-lib";
+import { translateGrade, GRADES, getAge, YOUNG_STATUS, getCohortPeriodTemp } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -121,6 +121,8 @@ export default function Create() {
   });
 
   const cohort = cohorts.find(({ name }) => name === values?.cohort);
+
+  console.log({ cohort });
 
   const validate = () => {
     const errors = {};
@@ -484,7 +486,8 @@ export default function Create() {
         </div>
       )}
 
-      {values.firstName !== "" &&
+      {cohort &&
+        values.firstName !== "" &&
         values.lastName !== "" &&
         values.parent1FirstName !== "" &&
         values.parent1LastName !== "" &&
@@ -496,7 +499,7 @@ export default function Create() {
           <div className="relative mb-4 rounded bg-white pt-4 shadow">
             <div className="ml-8 mb-6 text-lg font-normal">Consentements</div>
             <div className={"flex px-8 pb-14"}>
-              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} />
+              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} cohort={cohort} />
             </div>
           </div>
         )}
@@ -1123,7 +1126,7 @@ const PARENT_STATUS_NAME = {
   mother: "La mère",
   representant: "Le représentant légal",
 };
-function SectionConsentements({ young, setFieldValue, errors }) {
+function SectionConsentements({ young, setFieldValue, errors, cohort }) {
   const [youngAge, setYoungAge] = React.useState("?");
   const [volontaireConsentement, setVolontaireConsentement] = React.useState({
     acceptCGU1: false,
@@ -1226,7 +1229,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
           </CheckRead>
           <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment1")} errors={errors} value={volontaireConsentement.consentment1}>
             Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-            <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
+            <b>{getCohortPeriodTemp({ ...young, cohort })}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
           <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment2")} errors={errors} value={volontaireConsentement.consentment2}>
             S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.
@@ -1263,7 +1266,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à participer à la session <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
+          à participer à la session <b>{getCohortPeriodTemp({ ...young, cohort })}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
           réalisation d&apos;une mission d&apos;intérêt général.
         </div>
         <div>

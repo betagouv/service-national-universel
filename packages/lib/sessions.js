@@ -31,14 +31,21 @@ const getCohortPeriod = (cohort, withBold = false) => {
   return `du ${formattedStart} au ${formattedEnd}`;
 };
 
+// includes old cohorts and 2023 july with specific dates for DROMS
 const getCohortPeriodTemp = (young) => {
   const { cohort, region } = young;
-  if ([...regionsListDROMS, "Polynésie française"].includes(region)) {
+  if (region && [...regionsListDROMS, "Polynésie française"].includes(region)) {
     return "du 4 au 16 Juillet 2023";
   }
   if (!cohort.dateStart || !cohort.dateEnd) {
     const cohortName = cohort.name || cohort;
     switch (cohortName) {
+      case "2019":
+        return "du 16 au 28 juin 2019";
+      case "2020":
+        return "du 21 juin au 2 juillet 2021"; // @todo: date to be confirmed
+      case "2021":
+        return "du 21 juin au 2 juillet 2021";
       case "Février 2022":
         return "du 13 au 25 Février 2022";
       case "Juin 2022":

@@ -491,23 +491,6 @@ const WITHRAWN_REASONS = [
   },
 ];
 
-//A decaler dans ./date au fur et a mesure
-const COHESION_STAY_LIMIT_DATE = {
-  2019: "du 16 au 28 juin 2019",
-  2020: "du 21 juin au 2 juillet 2021",
-  2021: "du 21 juin au 2 juillet 2021",
-  "Février 2022": "du 13 au 25 Février 2022",
-  "Juin 2022": "du 12 au 24 Juin 2022",
-  "Juillet 2022": "du 3 au 15 Juillet 2022",
-  "Février 2023 - C": "du 19 Février au 3 Mars 2023",
-  "Avril 2023 - B": "du 16 au 28 Avril 2023",
-  "Avril 2023 - A": "du 9 au 21 Avril 2023",
-  "Juin 2023": "du 11 au 23 Juin 2023",
-  "Juillet 2023": "du 5 au 17 Juillet 2023",
-  "Octobre 2023 - NC": "du 9 au 20 Octobre 2023",
-  "à venir": "à venir",
-};
-
 const COHESION_STAY_START = {
   2019: new Date("06/16/2019"),
   2020: new Date("06/21/2020"),
@@ -953,7 +936,6 @@ export {
   MISSION_PERIOD_DURING_SCHOOL,
   STRUCTURE_STATUS,
   DEFAULT_STRUCTURE_NAME,
-  COHESION_STAY_LIMIT_DATE,
   INTEREST_MISSION_LIMIT_DATE,
   ES_NO_LIMIT,
   SENDINBLUE_TEMPLATES,
@@ -1010,7 +992,6 @@ export default {
   MISSION_PERIOD_DURING_SCHOOL,
   STRUCTURE_STATUS,
   DEFAULT_STRUCTURE_NAME,
-  COHESION_STAY_LIMIT_DATE,
   INTEREST_MISSION_LIMIT_DATE,
   ES_NO_LIMIT,
   SENDINBLUE_TEMPLATES,

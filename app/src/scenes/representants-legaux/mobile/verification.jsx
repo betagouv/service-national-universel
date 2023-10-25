@@ -2,7 +2,8 @@ import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
-import { COHESION_STAY_LIMIT_DATE, getDepartmentByZip, translate, translateGrade } from "snu-lib";
+import { getDepartmentByZip, translate, translateGrade, getCohortPeriod } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 
@@ -280,7 +281,7 @@ function sectionsData(young) {
     },
     {
       title: "Séjour de cohésion",
-      subtitle: COHESION_STAY_LIMIT_DATE[young.cohort],
+      subtitle: getCohortPeriod(getCohort(young.cohort)),
     },
     {
       title: "Son profil",
