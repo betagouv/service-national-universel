@@ -118,5 +118,16 @@ export const itemsAdministrateur = [
   },
 ];
 
+export const itemsDev = [
+  {
+    title: "Design System",
+    link: "/design-system",
+  },
+  {
+    title: "Assets",
+    link: "/develop-assets",
+  },
+];
+
 export const volontaireHeadCenterRegex = /((\/)(centre\/)[0-9a-fA-F]{24}(\/)[0-9a-fA-F]{24}(\/)[^(equipe)])|((\/volontaire))/;
 export const centerHeadCenterRegex = /((\/)(centre\/)[0-9a-fA-F]{24}$)|((\/)(centre\/)[0-9a-fA-F]{24}(\/)[0-9a-fA-F]{24}(\/equipe))/;
