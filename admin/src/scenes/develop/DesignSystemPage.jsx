@@ -16,7 +16,7 @@ export default function DesignSystemPage() {
       />
       <Subheader title="Code, preview, test, build and ship." />
       <Container title="Hello...">
-        <div>...World!</div>
+        <div className="text-ds-red">...World!</div>
       </Container>
     </Page>
   );

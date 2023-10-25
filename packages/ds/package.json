@@ -17,12 +17,14 @@
   "license": "ISC",
   "exports": {
     ".": "./dist/index.js",
+    "./tailwind.config": "./dist/tailwind.config.js",
     "./admin": "./dist/admin/index.js",
     "./app": "./dist/app/index.js",
     "./dsfr": "./dist/dsfr/index.js"
   },
   "peerDependencies": {
-    "react": "16.14.0"
+    "react": "16.14.0",
+    "react-icons": "^4.6.0"
   },
   "devDependencies": {
     "@tsconfig/vite-react": "^2.0.1",
