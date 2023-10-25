@@ -199,7 +199,7 @@ describe("Young", () => {
         situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
         livesInFrance: "true",
         addressVerified: "true",
-        addressType: "housenumber",
+        coordinatesAccuracyLevel: "housenumber",
         country: "France",
         city: "Paris",
         zip: "75008",
