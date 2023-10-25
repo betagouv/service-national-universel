@@ -167,7 +167,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       }),
       livesInFrance: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
       addressVerified: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      coordinatesAccuracyLevel: needRequired(Joi.string().trim().valid("housenumber", "street", "locality", "municipality"), isRequired),
+      coordinatesAccuracyLevel: Joi.string().trim().valid("housenumber", "street", "locality", "municipality").allow(null, ""),
       country: needRequired(Joi.string().trim(), isRequired),
       city: needRequired(Joi.string().trim(), isRequired),
       zip: needRequired(Joi.string().trim(), isRequired),
