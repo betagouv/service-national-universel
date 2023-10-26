@@ -1,5 +1,5 @@
 import React from "react";
-import { Page, Header, Subheader, Container, InputText, InputTextLabel } from "@snu/ds/admin";
+import { Page, Header, Subheader, Container, InputText } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 
@@ -44,7 +44,7 @@ export default function DesignSystemPage() {
       </Container>
       <Container title="Champs avec label (InputTextLabel)">
         <div className="grid grid-cols-2 gap-4 w-full">
-          <InputTextLabel
+          <InputText
             placeholder="Input text normal"
             disabled={false}
             active={false}
@@ -54,7 +54,7 @@ export default function DesignSystemPage() {
             readOnly={false}
             label="InputTextLabel"
           />
-          <InputTextLabel
+          <InputText
             placeholder="Input text disabled"
             disabled={true}
             active={true}
@@ -64,7 +64,7 @@ export default function DesignSystemPage() {
             readOnly={false}
             label="InputTextLabel"
           />
-          <InputTextLabel
+          <InputText
             placeholder="Input text actif"
             disabled={false}
             active={true}
@@ -74,7 +74,7 @@ export default function DesignSystemPage() {
             readOnly={false}
             label="InputTextLabel"
           />
-          <InputTextLabel
+          <InputText
             placeholder="Input text readOnly"
             disabled={false}
             active={false}
@@ -84,7 +84,7 @@ export default function DesignSystemPage() {
             readOnly={true}
             label="InputTextLabel"
           />
-          <InputTextLabel
+          <InputText
             placeholder="Input text error"
             disabled={false}
             active={false}
