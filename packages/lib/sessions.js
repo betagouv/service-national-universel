@@ -43,10 +43,8 @@ const getCohortPeriodTemp = (young) => {
       case "2019":
         return "du 16 au 28 juin 2019";
       case "2020":
-        return "du 21 juin au 2 juillet 2021"; // @todo: date to be confirmed
-      case "2021":
         return "du 21 juin au 2 juillet 2021";
-      case "2022":
+      case "2021":
         return "du 21 juin au 2 juillet 2021";
       case "Février 2022":
         return "du 13 au 25 Février 2022";
