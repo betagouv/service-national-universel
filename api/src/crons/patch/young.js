@@ -136,10 +136,10 @@ exports.handler = async () => {
     await findAll(YoungPatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
       title: "✅ Young Logs",
-      text: `<@U044RT0N3JR> ${result.youngPatchScanned} young patches were scanned:\n ${printResult(result.event)}`,
+      text: `${result.youngPatchScanned} young patches were scanned:\n ${printResult(result.event)}`,
     });
   } catch (e) {
-    slack.error({ title: "❌ Young Logs", text: `<@U044RT0N3JR> ${JSON.toString(e)}` });
+    slack.error({ title: "❌ Young Logs", text: `${JSON.toString(e)}` });
     capture(e);
   }
 };
