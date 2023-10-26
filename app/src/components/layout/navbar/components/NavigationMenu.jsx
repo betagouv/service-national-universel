@@ -15,6 +15,7 @@ import Socials from "./Socials";
 import { GoTools } from "react-icons/go";
 import MenuLinkExternal from "./MenuLinkExternal";
 import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
+import { CiPalette } from "react-icons/ci";
 
 export default function NavigationMenu({ onClose = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
@@ -39,6 +40,7 @@ export default function NavigationMenu({ onClose = () => {} }) {
           onClose={onClose}
         />
         {environment === "development" && <MenuLink to="develop-assets" icon={<GoTools />} text="Dev tools" onClose={onClose} />}
+        {environment === "development" && <MenuLink to="design-system" icon={<CiPalette />} text="Design system" onClose={onClose} />}
       </ul>
       <Diagoriente />
       <Socials />
