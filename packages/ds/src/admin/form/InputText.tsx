@@ -5,7 +5,8 @@ import { classNames } from "../utils";
 type OwnProps = {
   name: string;
   value: string;
-  onChange(e: React.ChangeEvent<HTMLInputElement>): void;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
   disabled?: boolean;
   active?: boolean;
   readOnly?: boolean;
@@ -16,6 +17,7 @@ export default function InputText({
   name,
   value,
   onChange,
+  placeholder,
   disabled,
   active,
   readOnly,
@@ -33,7 +35,7 @@ export default function InputText({
             ? "border-blue-500"
             : "border-gray-300",
           error && !readOnly && !disabled && "border-red-500",
-          "flex items-center justify-between h-[54px] w-full rounded-md border-[1px]  px-[13px] py-[9px] focus-within:outline-2 focus-within:outline-offset-2 "
+          "flex items-center justify-between h-[54px] w-full rounded-md border-[1px]  px-[13px] py-[9px] focus-within:outline-2 focus-within:outline-offset-2"
         )}
       >
         <input
@@ -41,7 +43,7 @@ export default function InputText({
           name={name}
           id={name}
           className="flex flex-1 h-full py-2 font-normal leading-5 text-gray-900 text-sm placeholder:text-gray-500 disabled:text-gray-500 disabled:bg-gray-50 read-only:cursor-none"
-          placeholder="Placeholder"
+          placeholder={placeholder}
           disabled={disabled}
           value={value}
           readOnly={readOnly}
