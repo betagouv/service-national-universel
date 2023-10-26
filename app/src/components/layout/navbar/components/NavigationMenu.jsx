@@ -1,5 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { environment, supportURL } from "../../../../config";
 import { permissionPhase1, permissionPhase2, permissionPhase3 } from "../../../../utils";
 import plausibleEvent from "@/services/plausible";
@@ -50,8 +51,8 @@ export default function NavigationMenu({ onClose = () => {} }) {
           text="Besoin d'aide ?"
           onClose={onClose}
         />
-        {environment === "development" && <MenuLink to="develop-assets" icon={<GoTools />} text="Dev tools" onClose={onClose} />}
-        {environment === "development" && <MenuLink to="design-system" icon={<CiPalette />} text="Design system" onClose={onClose} />}
+        {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <MenuLink to="develop-assets" icon={<GoTools />} text="Dev tools" onClose={onClose} />}
+        {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <MenuLink to="design-system" icon={<CiPalette />} text="Design system" onClose={onClose} />}
       </ul>
       <Diagoriente />
       <Socials />
