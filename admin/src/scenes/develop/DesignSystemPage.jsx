@@ -1,16 +1,18 @@
 import React from "react";
-import { Page, Header, Subheader, Container, InputText } from "@snu/ds/admin";
+import { Page, Header, Subheader, Container, InputText, InputTextLabel } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 
+const generateInitialValues = (length) => {
+  let obj = {};
+  for (let i = 1; i <= length; i++) {
+    obj[`input${i}`] = "";
+  }
+  return obj;
+};
+
 export default function DesignSystemPage() {
-  const [values, setValues] = React.useState({
-    input1: "",
-    input2: "",
-    input3: "",
-    input4: "",
-    input5: "",
-  });
+  const [values, setValues] = React.useState(generateInitialValues(10));
   const error = "Ceci est une erreur";
 
   const handleChange = (event) => {
@@ -38,6 +40,61 @@ export default function DesignSystemPage() {
           <InputText placeholder="Input text actif" disabled={false} active={true} name="input3" value={values.input3} onChange={handleChange} readOnly={false} />
           <InputText placeholder="Input text readOnly" disabled={false} active={false} name="input4" value={values.input4} onChange={handleChange} readOnly={true} />
           <InputText placeholder="Input text error" disabled={false} active={false} name="input5" value={values.input5} onChange={handleChange} readOnly={false} error={error} />
+        </div>
+      </Container>
+      <Container title="Champs avec label (InputTextLabel)">
+        <div className="grid grid-cols-2 gap-4 w-full">
+          <InputTextLabel
+            placeholder="Input text normal"
+            disabled={false}
+            active={false}
+            name="input6"
+            value={values.input6}
+            onChange={handleChange}
+            readOnly={false}
+            label="InputTextLabel"
+          />
+          <InputTextLabel
+            placeholder="Input text disabled"
+            disabled={true}
+            active={true}
+            name="input7"
+            value={values.input7}
+            onChange={handleChange}
+            readOnly={false}
+            label="InputTextLabel"
+          />
+          <InputTextLabel
+            placeholder="Input text actif"
+            disabled={false}
+            active={true}
+            name="input8"
+            value={values.input8}
+            onChange={handleChange}
+            readOnly={false}
+            label="InputTextLabel"
+          />
+          <InputTextLabel
+            placeholder="Input text readOnly"
+            disabled={false}
+            active={false}
+            name="input9"
+            value={values.input9}
+            onChange={handleChange}
+            readOnly={true}
+            label="InputTextLabel"
+          />
+          <InputTextLabel
+            placeholder="Input text error"
+            disabled={false}
+            active={false}
+            name="input10"
+            value={values.input10}
+            onChange={handleChange}
+            readOnly={false}
+            error={error}
+            label="InputTextLabel"
+          />
         </div>
       </Container>
     </Page>
