@@ -6,6 +6,7 @@ const config = require("../../config");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
+const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const ApplicationModel = require("../../models/application");
@@ -50,8 +51,10 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     const isYoung = req.user.constructor.modelName === "young";
+    const cohort = await CohortModel.findOne({ name: young.cohort });
 
-    if (isYoung && !canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    //@todo: TO TEST
+    if (isYoung && !canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     //Pas plus de 3 demandes d'équivalence + creation possible seulement si le statut des ancienne equiv est "REFUSED"
     const equivalences = await MissionEquivalenceModel.find({ youngId: value.id });
@@ -164,7 +167,10 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const cohort = await CohortModel.findOne({ name: young.cohort });
+
+    // @todo: A TESTER
+    if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

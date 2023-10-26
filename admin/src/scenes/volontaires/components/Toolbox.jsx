@@ -1,17 +1,21 @@
 import React from "react";
-import Hammer from "../../../assets/icons/Hammer";
+import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
+import ReactTooltip from "react-tooltip";
 import { HiOutlineSearch, HiOutlineAdjustments } from "react-icons/hi";
+import { canApplyToPhase2 } from "snu-lib";
+import Hammer from "../../../assets/icons/Hammer";
 import Screwdriver from "../../../assets/icons/Screwdriver";
 import AdjustableWrench from "../../../assets/icons/AdjustableWrench";
-import { useHistory } from "react-router-dom";
 import { supportURL } from "../../../config";
 
-import { COHESION_STAY_END } from "../../../utils";
-import ReactTooltip from "react-tooltip";
-
 export default function Toolbox({ young }) {
+  const cohortList = useSelector((state) => state.Cohorts);
   const history = useHistory();
-  const canApplyToPhase2 = ["DONE", "EXEMPTED"].includes(young.statusPhase1) && new Date() >= COHESION_STAY_END[young.cohort];
+
+  const cohort = cohortList.find((c) => c.name === young.cohort);
+  // @todo: TO TEST
+  const canYoungApplyToPhase2 = canApplyToPhase2(young, cohort);
 
   return (
     <div className="flex flex-col">
@@ -36,13 +40,13 @@ export default function Toolbox({ young }) {
             data-tip=""
             data-for="tooltip-custom"
             className={`group flex items-center justify-center gap-1 rounded-[10px] border-[1px] border-blue-600 bg-blue-600  py-2 ${
-              canApplyToPhase2 ? "hover:border-[#4881FF] hover:bg-[#4881FF] " : "!cursor-not-allowed"
+              canYoungApplyToPhase2 ? "hover:border-[#4881FF] hover:bg-[#4881FF] " : "!cursor-not-allowed"
             }`}
-            onClick={() => canApplyToPhase2 && history.push(`/volontaire/${young._id}/phase2/propose-mission`)}>
+            onClick={() => canYoungApplyToPhase2 && history.push(`/volontaire/${young._id}/phase2/propose-mission`)}>
             <HiOutlineSearch className="h-5 w-5 text-blue-300" />
-            <div className={`text-sm text-blue-100 ${canApplyToPhase2 && "group-hover:text-white"}`}>Trouver une mission</div>
+            <div className={`text-sm text-blue-100 ${canYoungApplyToPhase2 && "group-hover:text-white"}`}>Trouver une mission</div>
           </button>
-          {!canApplyToPhase2 ? (
+          {!canYoungApplyToPhase2 ? (
             <ReactTooltip id="tooltip-custom" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
               <div className="text-[black]">Le jeune n&apos;est pas élibigle à la phase 2</div>
             </ReactTooltip>
@@ -88,13 +92,13 @@ export default function Toolbox({ young }) {
             data-tip=""
             data-for="tooltip-custom"
             className={`group flex items-center justify-center gap-1 rounded-[10px] border-[1px] border-blue-600 bg-blue-600  py-2 ${
-              canApplyToPhase2 ? "hover:border-[#4881FF] hover:bg-[#4881FF] " : "!cursor-not-allowed"
+              canYoungApplyToPhase2 ? "hover:border-[#4881FF] hover:bg-[#4881FF] " : "!cursor-not-allowed"
             }`}
-            onClick={() => canApplyToPhase2 && history.push(`/volontaire/${young._id}/phase2/mission-personnalisé`)}>
+            onClick={() => canYoungApplyToPhase2 && history.push(`/volontaire/${young._id}/phase2/mission-personnalisé`)}>
             <HiOutlineAdjustments className="h-5 w-5 text-blue-300" />
-            <div className={`text-sm text-blue-100 ${canApplyToPhase2 && "group-hover:text-white"}`}>Créer une mission personnalisée</div>
+            <div className={`text-sm text-blue-100 ${canYoungApplyToPhase2 && "group-hover:text-white"}`}>Créer une mission personnalisée</div>
           </button>
-          {!canApplyToPhase2 ? (
+          {!canYoungApplyToPhase2 ? (
             <ReactTooltip id="tooltip-custom" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
               <div className="text-[black]">Le jeune n&apos;est pas élibigle à la phase 2</div>
             </ReactTooltip>

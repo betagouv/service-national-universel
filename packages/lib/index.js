@@ -1,4 +1,4 @@
-import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
+import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, END_DATE_PHASE1 } from "./constants";
 import translation from "./translation";
 import { ROLES } from "./roles";
 
@@ -57,6 +57,13 @@ function shouldForceRedirectToInscription(young, isInscriptionModificationOpen =
     ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
       (isInscriptionModificationOpen && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE"))
   );
+}
+
+//@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
+function canApplyToPhase2(young, cohort) {
+  const now = new Date();
+  const dateEnd = cohort ? new Date(cohort.dateEnd) : END_DATE_PHASE1[young.cohort];
+  return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;
 }
 
 const getFilterLabel = (selected, placeholder = "Choisissez un filtre", prelabel = "") => {
@@ -219,6 +226,7 @@ export {
   shouldForceRedirectToReinscription,
   shouldForceRedirectToInscription,
   hasAccessToReinscription,
+  canApplyToPhase2,
   isInRuralArea,
   getFilterLabel,
   getSelectedFilterLabel,

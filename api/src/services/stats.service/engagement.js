@@ -1,5 +1,6 @@
-const { ES_NO_LIMIT, ROLES, YOUNG_STATUS_PHASE2, CONTRACT_STATUS, COHESION_STAY_END, APPLICATION_STATUS, MISSION_STATUS, formatDateForPostGre } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, YOUNG_STATUS_PHASE2, CONTRACT_STATUS, END_DATE_PHASE1, APPLICATION_STATUS, MISSION_STATUS, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
+const CohortModel = require("../../models/cohort");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
 
 async function getAccessToken(endpoint, apiKey) {
@@ -628,22 +629,27 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
 
   const response2 = await esClient.search({ index: "contract", body: body2 });
 
-  let value = response2.body.aggregations.group_by_youngId.buckets;
+  const buckets = response2.body.aggregations.group_by_youngId.buckets;
+  const value = [];
 
-  value = value.filter((bucket) => {
+  //@todo : TO TEST @C2Chandelier
+  for await (const bucket of buckets) {
     const minYoungContractValidationDate = new Date(bucket.minYoungContractValidationDate.value);
     const correspondingYoung = youngsCohort.find((young) => young._id === bucket.key);
 
     //check si la date de validation de contract est moins d'un an après la date de validation de phase 1 du jeune
     if (correspondingYoung) {
       const oneYearInMilliseconds = 365 * 24 * 60 * 60 * 1000;
-      const cohortEnd = COHESION_STAY_END[correspondingYoung.cohort];
+      const cohort = await CohortModel.findOne({ name: correspondingYoung.cohort });
+      const cohortEnd = cohort?.dateEnd || END_DATE_PHASE1[correspondingYoung.cohort];
 
       if (minYoungContractValidationDate - cohortEnd < oneYearInMilliseconds) {
-        return minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate);
+        if (minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate)) {
+          value.push(bucket);
+        }
       }
     }
-  });
+  }
 
   return [
     {
