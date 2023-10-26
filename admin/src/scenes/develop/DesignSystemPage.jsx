@@ -1,5 +1,5 @@
 import React from "react";
-import { Page, Header, Subheader, Container, InputText } from "@snu/ds/admin";
+import { Page, Header, Subheader, Container, InputText, InputTextLabel } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 
