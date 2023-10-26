@@ -243,6 +243,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           </div>
         )}
         <SectionIdentite
+          cohort={cohort}
           young={young}
           globalMode={globalMode}
           requests={requests}
@@ -551,9 +552,8 @@ function FooterNoRequest({ processing, onProcess, young }) {
   );
 }
 
-function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
+function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState({});
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
   const [birthDate, setBirthDate] = useState({ day: "", month: "", year: "" });
@@ -680,6 +680,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             <>
               <SectionIdentiteCni
                 young={data}
+                cohort={cohort}
                 globalMode={sectionMode}
                 requests={requests}
                 onStartRequest={onStartRequest}
@@ -710,6 +711,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 onChange={onLocalChange}
               />
               <SectionIdentiteCni
+                cohort={cohort}
                 className="mt-[32px]"
                 young={data}
                 globalMode={sectionMode}
@@ -930,7 +932,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   );
 }
 
-function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
+function SectionIdentiteCni({ young, cohort, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
   const user = useSelector((state) => state.Auth.user);
   const categoryOptions = ["cniNew", "cniOld", "passport"].map((s) => ({ value: s, label: translate(s) }));
   let cniDay = "";
@@ -995,7 +997,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
           young={young}
         />
       )}
-      <HonorCertificate young={young} />
+      <HonorCertificate young={young} cohort={cohort} />
     </div>
   );
 }
@@ -2158,12 +2160,10 @@ function getCorrectionRequest(requests, field) {
   });
 }
 
-function HonorCertificate({ young }) {
-  const cohortList = useSelector((state) => state.Cohorts);
+function HonorCertificate({ young, cohort }) {
   let cniExpired = false;
   if (young && young.cohort && young.latestCNIFileExpirationDate) {
-    const cohort = cohortList.find((c) => c.name === young.cohort);
-    const cohortDate = cohort ? new Date(cohort.dateStart) : START_DATE_PHASE1[session.cohort];
+    const cohortDate = cohort ? new Date(cohort.dateStart) : START_DATE_PHASE1[young.cohort];
     if (cohortDate) {
       cniExpired = dayjs(young.latestCNIFileExpirationDate).toUtc().valueOf() < dayjs(cohortDate).toUtc().valueOf();
     }
