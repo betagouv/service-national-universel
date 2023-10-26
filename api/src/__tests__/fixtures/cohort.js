@@ -16,6 +16,7 @@ function getNewCohortFixture(object = {}) {
     manualAffectionOpenForReferentDepartment: faker.random.boolean(),
     dateStart: faker.date.past(),
     dateEnd: faker.date.past(),
+    inscriptionStartDate: faker.date.past(),
     inscriptionEndDate: faker.date.past(),
     instructionEndDate: faker.date.past(),
     pdrChoiceLimitDate: faker.date.past(),
