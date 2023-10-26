@@ -536,15 +536,6 @@ const END_DATE_PHASE1 = {
   "Juillet 2022": new Date("07/15/2022"),
 };
 
-const PHASE1_YOUNG_ACCESS_LIMIT = {
-  "Février 2023 - C": new Date(2023, 0, 12), // before 9 janvier 2023 morning
-  "Avril 2023 - A": new Date(2023, 1, 14), // before 14 fevrier 2023 morning
-  "Avril 2023 - B": new Date(2023, 1, 28), // before 28 fevrier 2023 morning
-  "Juin 2023": new Date(2023, 3, 19), // before 19 avril 2023 morning
-  "Juillet 2023": new Date(2023, 4, 11), // before 11 mai 2023 morning
-  "Octobre 2023 - NC": new Date(2023, 8, 21), // before 21 september 2023 morning  @todo: A modifier quand on connaitra la date
-};
-
 const CONSENTMENT_TEXTS = {
   young: [
     "A lu et accepte les Conditions générales d'utilisation de la plateforme du Service national universel ;",
@@ -957,7 +948,6 @@ export {
   UNSS_TYPE,
   ENGAGEMENT_LYCEEN_TYPES,
   GRADES,
-  PHASE1_YOUNG_ACCESS_LIMIT,
   TEMPLATE_DESCRIPTIONS,
   MIME_TYPES,
   YOUNG_SCHOOLED_SITUATIONS,
@@ -1011,7 +1001,6 @@ export default {
   UNSS_TYPE,
   ENGAGEMENT_LYCEEN_TYPES,
   GRADES,
-  PHASE1_YOUNG_ACCESS_LIMIT,
   TEMPLATE_DESCRIPTIONS,
   MIME_TYPES,
   YOUNG_SCHOOLED_SITUATIONS,
