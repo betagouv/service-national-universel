@@ -1,6 +1,6 @@
+import { classNames } from "@/utils";
 import React from "react";
 import { HiOutlineExclamation } from "react-icons/hi";
-import { classNames } from "../utils";
 
 type OwnProps = {
   name: string;
@@ -34,7 +34,7 @@ export default function InputText({
           !readOnly && !disabled && active
             ? "border-blue-500"
             : "border-gray-300",
-          error && !readOnly && !disabled && "border-red-500",
+          error && !readOnly && !disabled ? "border-red-500" : "",
           "flex items-center justify-between h-[54px] w-full rounded-md border-[1px]  px-[13px] py-[9px] focus-within:outline-2 focus-within:outline-offset-2"
         )}
       >
