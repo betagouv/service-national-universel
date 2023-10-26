@@ -5,6 +5,7 @@ const { getCohortNames } = require("snu-lib");
 const esClient = require("../es");
 const MODELNAME = "sessionphase1";
 const { ENVIRONMENT } = require("../config");
+const { starify } = require("../utils/anonymise");
 
 const File = new mongoose.Schema({
   _id: String,
@@ -177,10 +178,10 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.zipCenter = "00000";
-  this.codeCenter = "00000";
-  this.centerName = "********";
-  this.cityCenter = "*********";
+  this.zipCenter = starify(this.zipCenter);
+  this.codeCenter = starify(this.codeCenter);
+  this.centerName = starify(this.centerName);
+  this.cityCenter = starify(this.cityCenter);
   if (!["VALIDATED", "WAITING_VALIDATION"].includes(this.status)) this.status = "WAITING_VALIDATION";
   return this;
 };

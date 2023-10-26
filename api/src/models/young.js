@@ -7,7 +7,7 @@ const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
 const MODELNAME = "young";
-const { generateAddress, generateRandomName, generateRandomEmail, generateBirhtdate, getYoungLocation, generateNewPhoneNumber } = require("../utils/anonymise");
+const { generateAddress, generateRandomName, generateRandomEmail, generateBirhtdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
 
 const File = new mongoose.Schema({
   name: String,
@@ -1990,21 +1990,21 @@ Schema.methods.anonymise = function () {
   this.parent1Address = generateAddress();
   this.parent2Address = generateAddress();
   this.birthdateAt = generateBirhtdate();
-  this.engagedDescription = this.engagedDescription?.replace(/\S/g, "*");
-  this.motivations = this.motivations?.replace(/\S/g, "*");
-  this.parentConsentmentFilesCompliantInfo = this.parentConsentmentFilesCompliantInfo?.replace(/\S/g, "*");
-  this.withdrawnReason = this.withdrawnReason?.replace(/\S/g, "*");
-  this.withdrawnMessage = this.withdrawnMessage?.replace(/\S/g, "*");
+  this.engagedDescription = starify(this.engagedDescription);
+  this.motivations = starify(this.motivations);
+  this.parentConsentmentFilesCompliantInfo = starify(this.parentConsentmentFilesCompliantInfo);
+  this.withdrawnReason = starify(this.withdrawnReason);
+  this.withdrawnMessage = starify(this.withdrawnMessage);
   this.correctionRequests = this.correctionRequests?.map((e) => {
-    e.message = e.message?.replace(/\S/g, "*");
-    e.reason = e.reason?.replace(/\S/g, "*");
+    e.message = starify(e.message);
+    e.reason = starify(e.reason);
     return e;
   });
   this.notes = this.notes?.map((e) => {
-    e.note = e.note?.replace(/\S/g, "*");
+    e.note = starify(e.note);
     if (e.referent) {
-      e.referent.firstName = e.referent.firstName?.replace(/\S/g, "*");
-      e.referent.lastName = e.referent.lastName?.replace(/\S/g, "*");
+      e.referent.firstName = starify(e.referent.firstName);
+      e.referent.lastName = starify(e.referent.lastName);
     }
     return e;
   });

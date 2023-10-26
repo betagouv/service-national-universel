@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { generateAddress, generateRandomName } = require("../utils/anonymise");
+const { generateAddress, generateRandomName, starify } = require("../utils/anonymise");
 
 const esClient = require("../es");
 
@@ -317,10 +317,10 @@ const Schema = new mongoose.Schema({
 
 Schema.methods.anonymise = function () {
   this.name = generateRandomName().toUpperCase();
-  this.siret = "100 000 000 00000";
+  this.siret = starify(this.siret);
   this.address = generateAddress();
   this.website = "https://www.google.com";
-  this.description = "******* **** *****";
+  this.description = starify(this.description);
   this.twitter = "www.twitter.com";
   this.facebook = "www.facebook.com";
   this.instagram = "www.instagram.com";

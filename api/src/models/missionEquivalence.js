@@ -4,7 +4,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "missionequivalence";
 const { UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
-const { generateRandomName, generateRandomEmail, generateAddress } = require("../utils/anonymise");
+const { generateRandomName, generateRandomEmail, generateAddress, starify } = require("../utils/anonymise");
 
 const Schema = new mongoose.Schema({
   youngId: {
@@ -113,7 +113,7 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.message = "**** ********* **************";
+  this.message = starify(this.message);
   this.address = generateAddress();
   this.contactEmail = generateRandomEmail();
   this.contactFullName = generateRandomName() + generateRandomName();

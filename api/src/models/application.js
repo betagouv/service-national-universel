@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 const patchHistory = require("mongoose-patch-history").default;
+const { starify } = require("../utils/anonymise");
 
 const MODELNAME = "application";
 
@@ -205,10 +206,10 @@ const Schema = new mongoose.Schema({
 
 Schema.methods.anonymise = function () {
   this.youngEmail = "*****@*******.***";
-  this.youngFirstName = "*********";
-  this.youngLastName = "********";
-  this.tutorName = "****** *********";
-  this.missionName = "*************** ******";
+  this.youngFirstName = starify(this.youngFirstName);
+  this.youngLastName = starify(this.youngLastName);
+  this.tutorName = starify(this.tutorName);
+  this.missionName = starify(this.missionName);
   this.contractStatus = this.contractStatus || "DRAFT";
   return this;
 };
