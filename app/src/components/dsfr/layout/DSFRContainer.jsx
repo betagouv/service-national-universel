@@ -14,7 +14,7 @@ export default function DSFRContainer({ title, subtitle, children, supportLink }
               </a>
             ) : null}
           </div>
-          {subtitle && <p className="mt-2 text-sm text-gray-800">{subtitle}</p>}
+          {subtitle && <p className="mt-2 text-sm text-gray-500 leading-relaxed">{subtitle}</p>}
           <hr className="my-4 h-px border-0 bg-gray-200" />
         </>
       )}
