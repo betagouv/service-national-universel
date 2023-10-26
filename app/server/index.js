@@ -30,14 +30,14 @@ if (process.env.PROD) {
   );
 }
 
-if (process.env.STAGING && !process.env.CLE) {
-  app.use(
-    forceDomain({
-      hostname: "moncompte.beta-snu.dev",
-      protocol: "https",
-    }),
-  );
-}
+// if (process.env.STAGING && !process.env.CLE) {
+//   app.use(
+//     forceDomain({
+//       hostname: "moncompte.beta-snu.dev",
+//       protocol: "https",
+//     }),
+//   );
+// }
 
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
 app.use(express.static(path.join(__dirname, "../build")));
