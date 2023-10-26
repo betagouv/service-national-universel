@@ -629,15 +629,15 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
 
   const response2 = await esClient.search({ index: "contract", body: body2 });
 
-  const buckets = response2.body.aggregations.group_by_youngId.buckets;
-  const value = [];
+  let value = response2.body.aggregations.group_by_youngId.buckets;
+
   const allCohort = await CohortModel.find({}, "name dateEnd");
   const allCohortEndDate = allCohort.reduce((result, cohort) => {
     result[cohort.name] = new Date(cohort.dateEnd);
     return result;
   }, {});
 
-  for (const bucket of buckets) {
+  value = value.filter((bucket) => {
     const minYoungContractValidationDate = new Date(bucket.minYoungContractValidationDate.value);
     const correspondingYoung = youngsCohort.find((young) => young._id === bucket.key);
 
@@ -647,12 +647,10 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
       const cohortEnd = allCohortEndDate[correspondingYoung.cohort] || END_DATE_PHASE1[correspondingYoung.cohort];
 
       if (minYoungContractValidationDate - cohortEnd < oneYearInMilliseconds) {
-        if (minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate)) {
-          value.push(bucket);
-        }
+        return minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate);
       }
     }
-  }
+  });
 
   return [
     {
