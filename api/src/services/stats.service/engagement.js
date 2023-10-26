@@ -631,17 +631,20 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
 
   const buckets = response2.body.aggregations.group_by_youngId.buckets;
   const value = [];
+  const allCohort = await CohortModel.find({}, "name dateEnd");
+  const allCohortEndDate = allCohort.reduce((result, cohort) => {
+    result[cohort.name] = new Date(cohort.dateEnd);
+    return result;
+  }, {});
 
-  //@todo : TO TEST @C2Chandelier
-  for await (const bucket of buckets) {
+  for (const bucket of buckets) {
     const minYoungContractValidationDate = new Date(bucket.minYoungContractValidationDate.value);
     const correspondingYoung = youngsCohort.find((young) => young._id === bucket.key);
 
     //check si la date de validation de contract est moins d'un an après la date de validation de phase 1 du jeune
     if (correspondingYoung) {
       const oneYearInMilliseconds = 365 * 24 * 60 * 60 * 1000;
-      const cohort = await CohortModel.findOne({ name: correspondingYoung.cohort });
-      const cohortEnd = cohort?.dateEnd || END_DATE_PHASE1[correspondingYoung.cohort];
+      const cohortEnd = allCohortEndDate[correspondingYoung.cohort] || END_DATE_PHASE1[correspondingYoung.cohort];
 
       if (minYoungContractValidationDate - cohortEnd < oneYearInMilliseconds) {
         if (minYoungContractValidationDate >= new Date(startDate) && minYoungContractValidationDate <= new Date(endDate)) {
