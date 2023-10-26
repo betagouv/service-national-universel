@@ -5,7 +5,7 @@ import { classNames } from "../utils";
 type OwnProps = {
   name: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   active?: boolean;
