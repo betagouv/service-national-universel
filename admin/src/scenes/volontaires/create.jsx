@@ -122,8 +122,6 @@ export default function Create() {
 
   const cohort = cohorts.find(({ name }) => name === values?.cohort);
 
-  console.log({ cohort });
-
   const validate = () => {
     const errors = {};
     const errorEmpty = "Ne peut être vide";

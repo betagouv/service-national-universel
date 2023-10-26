@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "@/utils/dayjs.utils";
-import { START_DATE_SESSION_PHASE1, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
+import { START_DATE_PHASE1, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -553,6 +553,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
 
 function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
+  const [data, setData] = useState({});
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
   const [birthDate, setBirthDate] = useState({ day: "", month: "", year: "" });
@@ -2158,9 +2159,11 @@ function getCorrectionRequest(requests, field) {
 }
 
 function HonorCertificate({ young }) {
+  const cohortList = useSelector((state) => state.Cohorts);
   let cniExpired = false;
   if (young && young.cohort && young.latestCNIFileExpirationDate) {
-    const cohortDate = START_DATE_SESSION_PHASE1[young.cohort];
+    const cohort = cohortList.find((c) => c.name === young.cohort);
+    const cohortDate = cohort ? new Date(cohort.dateStart) : START_DATE_PHASE1[session.cohort];
     if (cohortDate) {
       cniExpired = dayjs(young.latestCNIFileExpirationDate).toUtc().valueOf() < dayjs(cohortDate).toUtc().valueOf();
     }

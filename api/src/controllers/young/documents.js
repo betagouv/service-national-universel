@@ -5,11 +5,12 @@ const fetch = require("node-fetch");
 const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const YoungObject = require("../../models/young");
+const CohortObject = require("../../models/cohort");
 const ContractObject = require("../../models/contract");
 const ApplicationObject = require("../../models/application");
 const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFile, getFile } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
-const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, START_DATE_SESSION_PHASE1, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
+const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const config = require("../../config");
 const NodeClam = require("clamscan");
 const fs = require("fs");
@@ -325,8 +326,9 @@ router.post(
 
         young.files[key].push(newFile);
         if (key === "cniFiles") {
+          const cohort = await CohortObject.findOne({ name: young.cohort });
           young.latestCNIFileExpirationDate = body.expirationDate;
-          young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort];
+          young.CNIFileNotValidOnStart = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
           young.latestCNIFileCategory = body.category;
         }
       }
