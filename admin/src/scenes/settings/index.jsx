@@ -238,7 +238,7 @@ export default function Settings() {
           </div>
           {/* TODO implementer parametres sur la plateforme */}
           {/* Inscriptions (phase 0) */}
-          {/* <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex flex-col w-full gap-8">
               <p className="text-gray-900 leading-5 text-lg font-medium">Inscriptions (phase 0)</p>
               <div className="flex">
@@ -254,8 +254,26 @@ export default function Settings() {
                         </ul>
                       </ReactTooltip>
                     </div>
-                    <DatePickerInput mode="single" label="Ouverture" disabled={isLoading} readOnly={readOnly} />
-                    <DatePickerInput mode="range" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
+                    <DatePickerInput
+                      mode="single"
+                      isTime
+                      label="Ouverture"
+                      placeholder="Date et heure"
+                      value={data.inscriptionStartDate}
+                      onChange={(e) => setData({ ...data, inscriptionStartDate: e })}
+                      readOnly={readOnly}
+                      disabled={isLoading}
+                    />
+                    <DatePickerInput
+                      mode="single"
+                      isTime
+                      label="Fermeture"
+                      placeholder="Date et heure"
+                      value={data.inscriptionEndDate}
+                      onChange={(e) => setData({ ...data, inscriptionEndDate: e })}
+                      readOnly={readOnly}
+                      disabled={isLoading}
+                    />
                   </div>
                 </div>
                 <div className="flex w-[10%] justify-center items-center">
@@ -283,7 +301,16 @@ export default function Settings() {
                       </ReactTooltip>
                     </div>
                     <div className="flex gap-4 w-full">
-                      <DatePickerInput mode="single" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
+                      <DatePickerInput
+                        mode="single"
+                        isTime
+                        label="Fermeture"
+                        placeholder="Date"
+                        value={data.inscriptionModificationEndDate}
+                        onChange={(e) => setData({ ...data, inscriptionModificationEndDate: e })}
+                        readOnly={readOnly}
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
@@ -298,13 +325,22 @@ export default function Settings() {
                       </ReactTooltip>
                     </div>
                     <div className="flex gap-4 w-full">
-                      <DatePickerInput mode="single" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
+                      <DatePickerInput
+                        mode="single"
+                        isTime
+                        label="Fermeture"
+                        placeholder="Date"
+                        value={data.instructionEndDate}
+                        onChange={(e) => setData({ ...data, instructionEndDate: e })}
+                        readOnly={readOnly}
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
 
           {/* TODO implementer parametres sur la plateforme */}
           {/* Préparation des affectations et des transports (phase 1) */}
