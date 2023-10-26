@@ -3,7 +3,7 @@ const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { nam
 
 const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
 
-const getCohortNames = (with2023 = true, withToCome = false, withOld = false) => {
+const getCohortNames = (with2023 = true, withToCome = true, withOld = true) => {
   let cohortNames = [];
   if (with2023) cohortNames = [...cohortNames, ...sessions2023CohortNames];
   if (withToCome) cohortNames = [...cohortNames, "à venir"];

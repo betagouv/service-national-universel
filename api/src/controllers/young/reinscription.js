@@ -41,7 +41,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       zip: Joi.string().trim().allow(null, ""),
       cohort: Joi.string()
         .trim()
-        .valid(...getCohortNames())
+        .valid(...getCohortNames(true, false, false))
         .required(),
     }).validate({ ...req.body }, { stripUnknown: true });
 

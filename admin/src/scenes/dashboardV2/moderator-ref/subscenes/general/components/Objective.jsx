@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import queryString from "query-string";
 import { toastr } from "react-redux-toastr";
-import { COHORTS, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
+import { getCohortNames, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 import api from "@/services/api";
 import { getNewLink } from "@/utils";
@@ -60,7 +60,7 @@ export default function Index({ user }) {
       id: "cohort",
       name: "Cohorte",
       fullValue: "Toutes",
-      options: COHORTS?.map((cohort) => ({ key: cohort, label: cohort })),
+      options: getCohortNames()?.map((cohort) => ({ key: cohort, label: cohort })),
       sort: (e) => orderCohort(e),
     },
   ].filter((e) => e);

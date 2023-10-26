@@ -395,7 +395,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const { error, value } = Joi.object({
       cohort: Joi.string()
         .trim()
-        .valid(...getCohortNames())
+        .valid(...getCohortNames(true, false, false))
         .required(),
     }).validate(req.body, { stripUnknown: true });
 

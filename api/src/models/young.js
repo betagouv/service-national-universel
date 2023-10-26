@@ -210,14 +210,14 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    enum: [...getCohortNames(true, true, true)],
+    enum: getCohortNames(),
     documentation: {
       description: "Cohorte",
     },
   },
   originalCohort: {
     type: String,
-    enum: [...getCohortNames(true, true, true)],
+    enum: getCohortNames(),
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },
