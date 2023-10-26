@@ -26,7 +26,7 @@ export default function Select({
   title,
   optionsGroup,
   type = "primary",
-  disabled,
+  disabled = false,
   icon,
   buttonClassNames = "",
 }: OwnProps) {
@@ -86,7 +86,11 @@ export default function Select({
                 </p>
               ) : null}
               {group.items.map((item) => (
-                <div key={item.key} onClick={() => onClickItem(item)}>
+                <div
+                  className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 text-sm hover:bg-gray-50"
+                  key={item.key}
+                  onClick={() => onClickItem(item)}
+                >
                   {item.render}
                 </div>
               ))}
