@@ -183,6 +183,13 @@ Schema.methods.anonymise = function () {
   this.centerName = starify(this.centerName);
   this.cityCenter = starify(this.cityCenter);
   if (!["VALIDATED", "WAITING_VALIDATION"].includes(this.status)) this.status = "WAITING_VALIDATION";
+  this.team = this.team.map((member) => {
+    member.firstName = starify(member.firstName);
+    member.lastName = starify(member.lastName);
+    member.email = starify(member.email);
+    member.phone = starify(member.phone);
+    return member;
+  });
   return this;
 };
 
