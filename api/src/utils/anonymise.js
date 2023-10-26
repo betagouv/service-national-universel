@@ -284,6 +284,13 @@ function generateNewPhoneNumber() {
   return phoneNumber;
 }
 
+const starify = (value) => {
+  if (!value) return undefined;
+  const str = value.toString();
+  const stars = str?.replace(/\S/g, "*");
+  return stars;
+};
+
 module.exports = {
   generateRandomEmail,
   generateRandomName,
@@ -291,4 +298,5 @@ module.exports = {
   generateBirhtdate,
   getYoungLocation,
   generateNewPhoneNumber,
+  starify,
 };
