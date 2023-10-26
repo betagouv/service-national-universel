@@ -21,37 +21,33 @@ export default function Header({
 }: OwnProps) {
   return (
     <div className="flex items-end justify-between mb-6">
-      <div>
+      <div className="flex flex-col items-start justify-start">
         {/* Breadcrumb */}
-        {breadcrumb && (
+        {breadcrumb?.length && (
           <div className="flex items-center justify-start mb-2">
-            {breadcrumb?.length &&
-              breadcrumb.map((item, index) => (
-                <>
-                  <div
-                    key={item.title + String(index)}
-                    className="flex text-xs leading-[20px]"
-                  >
-                    {item.href ? (
-                      <a
-                        href={item.href}
-                        className="text-ds-red leading-[20px]"
-                      >
-                        {item.title}
-                      </a>
-                    ) : (
-                      <div className="text-ds-red  leading-[20px]">
-                        {item.title}
-                      </div>
-                    )}
-                  </div>
-                  {index < breadcrumb.length - 1 ? (
-                    <div className="mx-2 text-gray-500">
-                      <HiChevronRight size={20} />
+            {breadcrumb.map((item, index) => (
+              <div
+                key={"breadcrumb-" + String(index)}
+                className="flex items-start justify-center"
+              >
+                <div className="flex text-xs leading-[20px]">
+                  {item.href ? (
+                    <a href={item.href} className="text-ds-red leading-[20px]">
+                      {item.title}
+                    </a>
+                  ) : (
+                    <div className="text-ds-red  leading-[20px]">
+                      {item.title}
                     </div>
-                  ) : null}
-                </>
-              ))}
+                  )}
+                </div>
+                {index < breadcrumb.length - 1 ? (
+                  <div className="mx-2 text-gray-500">
+                    <HiChevronRight size={20} />
+                  </div>
+                ) : null}
+              </div>
+            ))}
           </div>
         )}
 
