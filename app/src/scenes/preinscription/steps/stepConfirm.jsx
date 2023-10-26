@@ -156,7 +156,7 @@ export default function StepConfirm() {
           </Link>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 mb-2">
           <div className="flex items-center justify-between text-sm">
             <p className="text-gray-500">Prénom du volontaire&nbsp;:</p>
             <p className="text-right">{data.firstName}</p>
@@ -177,7 +177,6 @@ export default function StepConfirm() {
           </div>
         </div>
 
-        <hr className="my-6" />
         {isEmailValidationEnabled && <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>}
 
         <SignupButtonContainer
