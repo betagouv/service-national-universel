@@ -274,8 +274,9 @@ const Home = (props) => {
 const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
-  [ROLES.INSTITUTION_CHEF]: { authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves"], default: "/mon-etablissement" },
-  [ROLES.INSTITUTION_SOUS_CHEF]: { authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves"], default: "/mon-etablissement" },
+  // FIXME [CLE]: remove dev routes when
+  [ROLES.INSTITUTION_CHEF]: { authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets"], default: "/mon-etablissement" },
+  [ROLES.INSTITUTION_SOUS_CHEF]: { authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets"], default: "/mon-etablissement" },
 };
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
