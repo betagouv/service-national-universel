@@ -10,6 +10,8 @@ const ROLES = {
   VISITOR: "visitor",
   DSNJ: "dsnj",
   TRANSPORTER: "transporter",
+  INSTITUTION_CHEF: "institution_chef",
+  INSTITUTION_SOUS_CHEF: "institution_sous_chef",
 };
 
 const SUB_ROLES = {
