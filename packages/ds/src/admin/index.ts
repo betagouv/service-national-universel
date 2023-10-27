@@ -5,6 +5,7 @@ import Page from "./layout/Page";
 import Subheader from "./layout/Subheader";
 
 // UI
+import Badge from "./ui/badge/Badge";
 import Button from "./ui/Button";
 
 // Form
@@ -18,6 +19,7 @@ export {
   Subheader,
 
   // UI
+  Badge,
   Button,
 
   //Form
