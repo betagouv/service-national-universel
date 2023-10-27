@@ -69,12 +69,14 @@ export default function StepRepresentants() {
     if (data.parent1Email && !validator.isEmail(trimmedParent1Email)) {
       errors.parent1Email = "L'adresse email n'est pas valide";
     } else errors.parent1Email = undefined;
-    if (data.parent2Phone && !isPhoneNumberWellFormated(trimmedParent2Phone, data.parent2PhoneZone)) {
-      errors.parent2Phone = PHONE_ZONES[data.parent2PhoneZone]?.errorMessage;
-    } else errors.parent2Phone = undefined;
-    if (data.parent2Email && !validator.isEmail(trimmedParent2Email)) {
-      errors.parent2Email = "L'adresse email n'est pas valide";
-    } else errors.parent2Email = undefined;
+    if (isParent2Visible) {
+      if (data.parent2Phone && !isPhoneNumberWellFormated(trimmedParent2Phone, data.parent2PhoneZone)) {
+        errors.parent2Phone = PHONE_ZONES[data.parent2PhoneZone]?.errorMessage;
+      } else errors.parent2Phone = undefined;
+      if (data.parent2Email && !validator.isEmail(trimmedParent2Email)) {
+        errors.parent2Email = "L'adresse email n'est pas valide";
+      } else errors.parent2Email = undefined;
+    }
     return errors;
   };
 
