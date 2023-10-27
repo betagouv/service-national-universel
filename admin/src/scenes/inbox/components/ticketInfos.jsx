@@ -56,7 +56,6 @@ export default function TicketInfos({ ticket }) {
     plausibleEvent("Volontaires/CTA - Prendre sa place");
     const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
     if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
-    window.open(appURL, "_blank");
   };
 
   const renderInfos = () => {
@@ -70,7 +69,11 @@ export default function TicketInfos({ ticket }) {
             <Link to={`/volontaire/${user._id}/edit`} target="_blank" rel="noopener noreferrer">
               <PanelActionButton icon="pencil" title="Modifier" />
             </Link>
-            <button onClick={() => onPrendreLaPlace(user._id)}>
+            <button
+              onClick={() => {
+                window.open(appURL, "_blank");
+                onPrendreLaPlace(user._id);
+              }}>
               <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
             </button>
           </div>

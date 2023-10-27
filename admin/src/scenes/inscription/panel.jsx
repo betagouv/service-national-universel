@@ -58,7 +58,6 @@ export default function InscriptionPanel({ onChange, value }) {
     plausibleEvent("Volontaires/CTA - Prendre sa place");
     const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
     if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
-    window.open(appURL, "_blank");
   };
 
   return (
@@ -88,7 +87,11 @@ export default function InscriptionPanel({ onChange, value }) {
               <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
-              <button onClick={() => onPrendreLaPlace(value._id)}>
+              <button
+                onClick={() => {
+                  window.open(appURL, "_blank");
+                  onPrendreLaPlace(value._id);
+                }}>
                 <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
               </button>
               <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />
