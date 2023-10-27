@@ -1,7 +1,7 @@
 import { classNames } from "@/utils";
 import React from "react";
 
-import { ErrorIcon, ErrorMessage, getFormBaseClass } from "./common";
+import { ErrorIcon, ErrorMessage, getFormBaseClass } from "./InputBase";
 
 type OwnProps = {
   name: string;
