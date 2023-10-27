@@ -11,7 +11,6 @@ const ProgressBar = () => {
   }
   const currentStep = getStepFromUrlParam(step, REINSCRIPTION_STEPS_LIST);
   const device = useDevice();
-  console.log(step, currentStep)
   return ["ELIGIBILITE", "SEJOUR"].includes(currentStep) ? (
     <div className="mx-auto flex w-full flex-col justify-center px-[1rem] py-[1rem] md:w-[56rem] md:px-[6rem] md:pt-[2rem] md:pb-[0rem]">
       <div className="text-sm">Étape {currentStep === "ELIGIBILITE" ? "1" : "2"} sur 2</div>

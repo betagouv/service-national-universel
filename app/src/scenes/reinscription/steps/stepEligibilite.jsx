@@ -29,8 +29,8 @@ export default function StepEligibilite() {
   const [loading, setLoading] = React.useState(false);
   const isBirthdayModificationDisabled = true;
   const dispatch = useDispatch();
-
   const history = useHistory();
+  const isEmptyObject = (obj) => Object.keys(obj).length === 0 && obj.constructor === Object;
 
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
@@ -63,17 +63,22 @@ export default function StepEligibilite() {
         }
       } else {
         // School
-        if (!data?.school) {
+        if (isEmptyObject(data?.school)) {
           // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
           errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
+      }
+    } else {
+      // School
+      if (isEmptyObject(data?.school)) {
+        // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
+        errors.school = "Vous devez renseigner complètement votre établissement scolaire";
       }
     }
 
     setError(errors);
     setToggleVerify(!toggleVerify);
 
-    // ! Gestion erreur a reprendre
     if (Object.keys(errors).length) {
       console.warn("Pb avec ce champ : " + Object.keys(errors)[0] + " pour la raison : " + Object.values(errors)[0]);
       toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
