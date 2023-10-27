@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { HiChevronDown } from "react-icons/hi";
 import Button from "./Button";
 import Badge from "../badge/Badge";
+import { classNames } from "@/utils";
 
 type OptionGroupItem = {
   key: string;
@@ -9,6 +10,7 @@ type OptionGroupItem = {
   loadingLabel?: string;
   action?: () => Promise<void>;
 };
+
 type TStatus =
   | "none"
   | "draft"
@@ -99,11 +101,7 @@ export default function Select({
         )}
 
         {/* display options */}
-        <div
-          className={`${
-            open ? "block" : "hidden"
-          } absolute top-[55px] min-w-[250px] rounded-lg bg-white transition left-0 border-3 z-50 overflow-hidden shadow`}
-        >
+        <div className={getDivClass({ open })}>
           {optionsGroup.map((group, i) => (
             <div
               key={group.key || i}
@@ -130,3 +128,13 @@ export default function Select({
     </div>
   );
 }
+
+const getDivClass = ({ open }: { open?: boolean }) => {
+  const baseClass =
+    "absolute top-[55px] min-w-[250px] rounded-lg bg-white transition left-0 border-3 z-50 overflow-hidden shadow";
+  if (open) {
+    return classNames(baseClass, "block");
+  } else {
+    return classNames(baseClass, "hidden");
+  }
+};

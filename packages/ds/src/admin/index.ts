@@ -6,7 +6,6 @@ import Subheader from "./layout/Subheader";
 
 // UI
 import Badge from "./ui/badge/Badge";
-import ButtonTest from "./ui/ButtonTest";
 import Button from "./ui/button/Button";
 import Select from "./ui/button/Select";
 
@@ -22,7 +21,6 @@ export {
 
   // UI
   Badge,
-  ButtonTest,
   Button,
   Select,
 
