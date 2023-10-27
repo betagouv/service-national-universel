@@ -1,8 +1,7 @@
 import { classNames } from "@/utils";
 import React from "react";
-
-import { ErrorIcon, ErrorMessage, getFormBaseClass } from "./InputBase";
 import { HiOutlineChevronDown } from "react-icons/hi";
+import { ErrorIcon, ErrorMessage, getFormBaseClass } from "./InputBase";
 
 type OwnProps = {
   name: string;
