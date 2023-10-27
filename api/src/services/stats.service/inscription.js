@@ -1,4 +1,4 @@
-const { ES_NO_LIMIT, ROLES, COHORTS, YOUNG_STATUS, YOUNG_PHASE, formatDateForPostGre } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, getCohortNames, YOUNG_STATUS, YOUNG_PHASE, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
 
@@ -145,7 +145,8 @@ async function getYoungRegisteredWithParticularSituation(startDate, endDate, use
 
 async function getDepartmentRegistrationGoal(startDate, endDate, user) {
   // ref reg only
-  const cohort = COHORTS[COHORTS.length - 2];
+  const cohorts = getCohortNames();
+  const cohort = cohorts[cohorts.length - 2];
   let body = {
     query: {
       bool: {

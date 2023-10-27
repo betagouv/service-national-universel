@@ -10,6 +10,7 @@ const ContractObject = require("../models/contract");
 const MissionObject = require("../models/mission");
 const StructureObject = require("../models/structure");
 const YoungObject = require("../models/young");
+const CohortObject = require("../models/cohort");
 const ReferentObject = require("../models/referent");
 const { decrypt, encrypt } = require("../cryptoUtils");
 const NodeClam = require("clamscan");
@@ -164,7 +165,9 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const cohort = await CohortObject.findOne({ name: young.cohort });
+
+    if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
-const { COHORTS } = require("snu-lib");
+const { getCohortNames } = require("snu-lib");
 const MODELNAME = "pointderassemblement";
 
 const Schema = new mongoose.Schema({
@@ -18,7 +18,7 @@ const Schema = new mongoose.Schema({
   cohorts: {
     type: [String],
     required: true,
-    enum: COHORTS,
+    enum: getCohortNames(),
     documentation: {
       description: "Cohorte du point de rassemblement",
     },
@@ -45,7 +45,7 @@ const Schema = new mongoose.Schema({
       {
         cohort: {
           type: String,
-          enum: COHORTS,
+          enum: getCohortNames(),
           documentation: {
             description: "Cohorte du complément d'adresse",
           },

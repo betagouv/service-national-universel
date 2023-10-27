@@ -14,51 +14,6 @@ function isEndOfInscriptionManagement2021() {
   return new Date() > new Date(2021, 4, 7); // greater than 7 mai 2021 morning
 }
 
-function inscriptionModificationOpenForYoungs(cohort) {
-  if (!cohort?.inscriptionModificationEndDate) return false;
-  return new Date() < new Date(cohort.inscriptionModificationEndDate);
-}
-
-function inscriptionCreationOpenForYoungs(cohort) {
-  if (!cohort?.inscriptionEndDate) return false;
-  return new Date() < new Date(cohort.inscriptionEndDate);
-}
-
-//@todo: check in cohort list
-function reInscriptionOpenForYoungs(env) {
-  if (env !== undefined && env !== "production") return true;
-
-  return new Date() >= new Date(2023, 10, 6, 8);
-}
-
-function shouldForceRedirectToReinscription(young) {
-  return (
-    young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REINSCRIPTION].includes(young.status)
-  );
-}
-
-function hasAccessToReinscription(young) {
-  if (shouldForceRedirectToReinscription(young)) return true;
-
-  if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
-    return true;
-  }
-
-  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") {
-    return true;
-  }
-
-  return false;
-}
-
-function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
-  return (
-    young.cohort !== "à venir" &&
-    ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
-      (isInscriptionModificationOpen && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE"))
-  );
-}
-
 const getFilterLabel = (selected, placeholder = "Choisissez un filtre", prelabel = "") => {
   if (Object.keys(selected).length === 0) return placeholder;
   const translator = (item) => {
@@ -213,12 +168,6 @@ const formatMessageForReadingInnerHTML = (content) => {
 
 export {
   isEndOfInscriptionManagement2021,
-  inscriptionModificationOpenForYoungs,
-  inscriptionCreationOpenForYoungs,
-  reInscriptionOpenForYoungs,
-  shouldForceRedirectToReinscription,
-  shouldForceRedirectToInscription,
-  hasAccessToReinscription,
   isInRuralArea,
   getFilterLabel,
   getSelectedFilterLabel,

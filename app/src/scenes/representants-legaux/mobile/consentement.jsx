@@ -8,7 +8,7 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/dsfr/forms/toggle";
-import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
+import { getAge, translate, getCohortPeriod } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -44,7 +44,7 @@ function ConsentementForm({ young, token, step, parentId }) {
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
   const youngAge = getAge(young.birthDate);
-  const sessionDate = COHESION_STAY_LIMIT_DATE[young.cohort];
+  const sessionDate = getCohortPeriod(young.cohort);
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";

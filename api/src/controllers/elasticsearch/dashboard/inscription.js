@@ -5,7 +5,7 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
-const { ES_NO_LIMIT, COHORTS, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
+const { ES_NO_LIMIT, getCohortNames, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
 const SessionPhase1Model = require("../../../models/sessionPhase1");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -286,7 +286,7 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const cohortList = queryFilters?.cohort?.length ? queryFilters.cohort : COHORTS;
+    const cohortList = queryFilters?.cohort?.length ? queryFilters.cohort : getCohortNames();
 
     const aggs = cohortList.reduce((acc, cohort) => {
       acc["in&" + cohort] = {

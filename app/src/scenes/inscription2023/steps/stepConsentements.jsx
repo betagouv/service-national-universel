@@ -1,7 +1,8 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE } from "snu-lib";
+import { getCohortPeriod } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 import Error from "../../../components/error";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { supportURL } from "../../../config";
@@ -71,7 +72,7 @@ export default function StepConsentements() {
             <CheckBox checked={data.consentment1} onChange={(e) => setData({ ...data, consentment1: e })} />
             <div className="flex-1 text-sm text-[#3A3A3A]">
               Suis volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-              <strong>{COHESION_STAY_LIMIT_DATE[young.cohort]}</strong> et la réalisation d’une mission d’intérêt général.
+              <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> et la réalisation d’une mission d’intérêt général.
             </div>
           </div>
           <div className="flex items-center gap-4">

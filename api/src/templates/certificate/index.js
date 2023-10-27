@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
 const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
-const { COHESION_STAY_END, MINISTRES, END_DATE_PHASE1, PHASE1_YOUNG_ACCESS_LIMIT, transportDatesToString } = require("snu-lib");
+const { MINISTRES, getCohortEndDate, transportDatesToString } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
@@ -72,27 +72,28 @@ const getMeetingPoint = async (young) => {
 };
 
 const phase1 = async (young) => {
-  const d = COHESION_STAY_END[young.cohort];
+  const session = await getSession(young);
+  const cohort = await getCohort(young);
+  const cohortEndDate = getCohortEndDate(young, cohort);
+
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
-  const ministresData = getMinistres(d);
+  const ministresData = getMinistres(cohortEndDate);
   const template = ministresData.template;
   const cohesionCenter = await getCohesionCenter(young);
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
-  const session = await getSession(young);
-  const cohort = await getCohort(young);
   const meetingPoint = await getMeetingPoint(young);
   const departureDate = await getDepartureDateSession(meetingPoint, session, young, cohort);
   const returnDate = await getReturnDateSession(meetingPoint, session, young, cohort);
 
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))
-    .replace(/{{COHORT}}/g, sanitizeAll({ ...END_DATE_PHASE1, ...PHASE1_YOUNG_ACCESS_LIMIT }[young.cohort].getYear() + 1900))
+    .replace(/{{COHORT}}/g, sanitizeAll(cohortEndDate.getYear() + 1900))
     .replace(/{{COHESION_DATE}}/g, sanitizeAll(transportDatesToString(departureDate, returnDate)))
     .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(cohesionCenter.name || ""))
     .replace(/{{COHESION_CENTER_LOCATION}}/g, sanitizeAll(cohesionCenterLocation))
     .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
     .replace(/{{GENERAL_BG}}/g, sanitizeAll(getSignedUrl(template)))
-    .replace(/{{DATE}}/g, sanitizeAll(d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
+    .replace(/{{DATE}}/g, sanitizeAll(cohortEndDate.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" })));
 };
 
 const phase2 = (young) => {

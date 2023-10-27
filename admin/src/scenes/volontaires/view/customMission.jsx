@@ -12,23 +12,16 @@ import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { adminURL } from "../../../config";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import {
-  COHESION_STAY_END,
-  ENABLE_PM,
-  MISSION_DOMAINS,
-  MISSION_PERIOD_DURING_HOLIDAYS,
-  MISSION_PERIOD_DURING_SCHOOL,
-  PERIOD,
-  ROLES,
-  SENDINBLUE_TEMPLATES,
-  translate,
-} from "../../../utils";
+import { ENABLE_PM, MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, ROLES, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 import Field from "@/components/ui/forms/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
+import { canApplyToPhase2 } from "snu-lib";
+import { useSelector } from "react-redux";
 
 export default function CustomMission({ young, onChange }) {
+  const cohortList = useSelector((state) => state.Cohorts);
   const history = useHistory();
   const [values, setValues] = useState({
     status: "VALIDATED",
@@ -62,6 +55,8 @@ export default function CustomMission({ young, onChange }) {
   const referentSelectRef = useRef();
 
   const [loading, setLoading] = useState(false);
+
+  const cohort = cohortList.find((c) => c.name === young.cohort);
 
   async function initReferents() {
     const { data } = await api.post("/elasticsearch/referent/export", { filters: { structureId: [values.structureId] } });
@@ -214,11 +209,7 @@ export default function CustomMission({ young, onChange }) {
     }
   }, [creationTutor]);
 
-  function canApplyToPhase2(young) {
-    const now = new Date();
-    return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= COHESION_STAY_END[young.cohort];
-  }
-  if (!canApplyToPhase2(young))
+  if (!canApplyToPhase2(young, cohort))
     return (
       <>
         {" "}

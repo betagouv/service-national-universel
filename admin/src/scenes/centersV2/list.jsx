@@ -3,7 +3,7 @@ import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import {
   COHESION_STAY_START,
-  COHORTS,
+  getCohortNames,
   ES_NO_LIMIT,
   ROLES,
   canCreateOrUpdateCohesionCenter,
@@ -43,7 +43,7 @@ export default function List() {
   const [firstSession, setFirstSession] = useState(null);
   const getFirstCohortAvailable = () => {
     let firstSession = null;
-    for (const session of COHORTS) {
+    for (const session of getCohortNames()) {
       if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
         firstSession = session;
         break;
