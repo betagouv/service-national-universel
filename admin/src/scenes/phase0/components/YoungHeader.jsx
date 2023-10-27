@@ -222,7 +222,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     plausibleEvent("Volontaires/CTA - Prendre sa place");
     const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
     if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
-    window.open(appURL, "_blank");
   };
 
   return (
@@ -344,7 +343,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
                   Supprimer
                 </Button>
-                <button onClick={() => onPrendreLaPlace(young._id)}>
+                <button
+                  onClick={() => {
+                    window.open(appURL, "_blank");
+                    onPrendreLaPlace(young._id);
+                  }}>
                   <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                 </button>
               </div>
