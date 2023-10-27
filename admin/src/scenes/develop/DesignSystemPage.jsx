@@ -1,26 +1,30 @@
-import React from "react";
-import { Page, Header, Subheader, Container, InputText, Badge } from "@snu/ds/admin";
-import { HiOutlineCommandLine } from "react-icons/hi2";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
-import { HiUsers, HiPencil, HiChevronDown } from "react-icons/hi";
+import { Badge, Container, Header, InputText, Page, Subheader } from "@snu/ds/admin";
+import React from "react";
+import { HiChevronDown, HiPencil, HiUsers } from "react-icons/hi";
+import { HiOutlineCommandLine } from "react-icons/hi2";
 import { TbExternalLink } from "react-icons/tb";
 
-const generateInitialValues = (length) => {
-  let obj = {};
-  for (let i = 1; i <= length; i++) {
-    obj[`input${i}`] = "";
-  }
-  return obj;
-};
+import { InputPhone } from "@snu/ds/admin";
+import { PHONE_ZONES } from "snu-lib";
 
 export default function DesignSystemPage() {
-  const [values, setValues] = React.useState(generateInitialValues(10));
+  const [values, setValues] = React.useState({
+    input1: "",
+    input1Phone: "",
+    input1PhoneZone: "",
+  });
   const error = "Ceci est une erreur";
 
-  const handleChange = (event) => {
+  const handleChange = (event, nameExtention) => {
     event.persist();
     setValues((prev) => ({ ...prev, [event.target.name]: event.target.value }));
   };
+
+  const handleChangeValue = (value, name) => {
+    setValues((prev) => ({ ...prev, [name]: value }));
+  };
+
   return (
     <Page>
       <Header
@@ -33,66 +37,121 @@ export default function DesignSystemPage() {
       />
       <Subheader title="Code, preview, test, build and ship." />
       <Container title="Champs simples (InputText)">
-        <div className="grid grid-cols-2 gap-4 w-full">
-          <InputText placeholder="Input text normal" disabled={false} active={false} name="input1" value={values.input1} onChange={handleChange} readOnly={false} />
-          <InputText placeholder="Input text disabled" disabled={true} active={true} name="input2" value={values.input2} onChange={handleChange} readOnly={false} />
-          <InputText placeholder="Input text actif" disabled={false} active={true} name="input3" value={values.input3} onChange={handleChange} readOnly={false} />
-          <InputText placeholder="Input text readOnly" disabled={false} active={false} name="input4" value={values.input4} onChange={handleChange} readOnly={true} />
-          <InputText placeholder="Input text error" disabled={false} active={false} name="input5" value={values.input5} onChange={handleChange} readOnly={false} error={error} />
+        <div className="grid grid-cols-3 gap-4 w-full">
+          <InputText placeholder="Input text normal" name="input1" value={values.input1} onChange={handleChange} />
+          <InputText placeholder="Input text disabled" disabled={true} name="input1" value={values.input1} onChange={handleChange} />
+          <InputText placeholder="Input text actif" active={true} name="input1" value={values.input1} onChange={handleChange} />
+          <InputText placeholder="Input text readOnly" name="input1" value={values.input1} onChange={handleChange} readOnly={true} />
+          <InputText placeholder="Input text error" name="input1" value={values.input1} onChange={handleChange} error={error} />
         </div>
       </Container>
-      <Container title="Champs avec label (InputTextLabel)">
-        <div className="grid grid-cols-2 gap-4 w-full">
-          <InputText
-            placeholder="Input text normal"
-            disabled={false}
-            active={false}
-            name="input6"
-            value={values.input6}
-            onChange={handleChange}
-            readOnly={false}
-            label="InputTextLabel"
+      <Container title="Champs avec label (InputText)">
+        <div className="grid grid-cols-3 gap-4 w-full">
+          <InputText placeholder="Input text normal" name="input1" value={values.input1} onChange={handleChange} label="InputTextLabel" />
+          <InputText placeholder="Input text disabled" disabled={true} name="input1" value={values.input1} onChange={handleChange} label="InputTextLabel" />
+          <InputText placeholder="Input text actif" active={true} name="input1" value={values.input1} onChange={handleChange} label="InputTextLabel" />
+          <InputText placeholder="Input text readOnly" name="input1" value={values.input1} onChange={handleChange} readOnly={true} label="InputTextLabel" />
+          <InputText placeholder="Input text error" name="input1" value={values.input1} onChange={handleChange} error={error} label="InputTextLabel" />
+        </div>
+      </Container>
+      <Container title="InputPhone">
+        <div className="grid grid-cols-3 gap-4 w-full">
+          <InputPhone
+            name="input11"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
           />
-          <InputText
-            placeholder="Input text disabled"
+          <InputPhone
+            name="input1"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
             disabled={true}
-            active={true}
-            name="input7"
-            value={values.input7}
-            onChange={handleChange}
-            readOnly={false}
-            label="InputTextLabel"
           />
-          <InputText
-            placeholder="Input text actif"
-            disabled={false}
+          <InputPhone
+            name="input1"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
             active={true}
-            name="input8"
-            value={values.input8}
-            onChange={handleChange}
-            readOnly={false}
-            label="InputTextLabel"
           />
-          <InputText
-            placeholder="Input text readOnly"
-            disabled={false}
-            active={false}
-            name="input9"
-            value={values.input9}
-            onChange={handleChange}
+          <InputPhone
+            name="input1"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
             readOnly={true}
-            label="InputTextLabel"
           />
-          <InputText
-            placeholder="Input text error"
-            disabled={false}
-            active={false}
-            name="input10"
-            value={values.input10}
-            onChange={handleChange}
-            readOnly={false}
+          <InputPhone
+            name="input1"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
             error={error}
-            label="InputTextLabel"
+          />
+        </div>
+      </Container>
+      <Container title="InputPhone avec label">
+        <div className="grid grid-cols-3 gap-4 w-full">
+          <InputPhone
+            label="InputPhoneLabel normal"
+            name="input11"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
+          />
+          <InputPhone
+            label="InputPhoneLabel disabled"
+            name="input1"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
+            disabled={true}
+          />
+          <InputPhone
+            label="InputPhoneLabel actif"
+            name="input1"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
+            active={true}
+          />
+          <InputPhone
+            label="InputPhoneLabel readOnly"
+            name="input1"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
+            readOnly={true}
+          />
+          <InputPhone
+            label="InputPhoneLabel error"
+            name="input1"
+            onChange={(v) => handleChangeValue(v, "input1Phone")}
+            onChangeZone={(v) => handleChangeValue(v, "input1PhoneZone")}
+            value={values.input1Phone}
+            zoneValue={values.input1PhoneZone}
+            placeholder={PHONE_ZONES[values.input1PhoneZone]?.example}
+            error={error}
           />
         </div>
       </Container>
