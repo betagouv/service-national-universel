@@ -32,7 +32,7 @@ jobs:
       - name: Build lib
         continue-on-error: false
         run: |
-          npm ci -w packages/ds
+          npm ci
           npm run build -w packages/ds
           rm packages/ds/.gitignore
 
