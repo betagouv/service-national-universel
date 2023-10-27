@@ -11,7 +11,7 @@ import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
-import Verify from "./Verify";
+import Verify from "./VerifyDocument";
 
 export default function StepUploadMobile({
   recto,

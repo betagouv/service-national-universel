@@ -12,7 +12,7 @@ import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import FileImport from "@/components/dsfr/forms/FileImport";
-import Verify from "./Verify";
+import Verify from "./VerifyDocument";
 
 export default function StepUploadDesktop({
   recto,
@@ -51,6 +51,7 @@ export default function StepUploadDesktop({
   }
 
   function resetState() {
+    setStep(0);
     setRecto();
     setVerso();
     setHasChanged(false);
@@ -58,15 +59,9 @@ export default function StepUploadDesktop({
   }
 
   const handleOnClickNext = async () => {
-    if ([recto, verso].some((e) => !imageFileTypes.includes(e?.type))) {
-      if (corrections?.length) {
-        onCorrect(resetState);
-      } else {
-        onSubmit(resetState);
-      }
-    } else {
-      setStep(1);
-    }
+    const areAllFilesImages = [recto, verso].every((e) => !e || imageFileTypes.includes(e?.type));
+    if (areAllFilesImages) return setStep(1);
+    else return corrections?.length ? onCorrect(resetState) : onSubmit(resetState);
   };
 
   if (step === 1)
@@ -77,9 +72,7 @@ export default function StepUploadDesktop({
           onClickNext={() => (corrections?.length ? onCorrect(resetState) : onSubmit(resetState))}
           labelNext={loading ? "Scan antivirus en cours" : "Oui, les documents sont conformes"}
           disabled={Object.values(checked).some((e) => e === false)}
-          onClickPrevious={() => {
-            setStep(0), resetState();
-          }}
+          onClickPrevious={resetState}
           labelPrevious="Non, recommencer"
         />
       </>
