@@ -370,15 +370,12 @@ const Action = ({ hit }) => {
                 </Link>
                 {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
                   <Listbox.Option
-                    className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}>
-                    <button
-                      className={"block truncate font-normal text-xs"}
-                      onClick={() => {
-                        window.open(appURL, "_blank");
-                        onPrendreLaPlace(hit._id);
-                      }}>
-                      Prendre sa place
-                    </button>
+                    className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}
+                    onClick={() => {
+                      window.open(appURL, "_blank");
+                      onPrendreLaPlace(hit._id);
+                    }}>
+                    Prendre sa place
                   </Listbox.Option>
                 ) : null}
               </Listbox.Options>
