@@ -115,7 +115,6 @@ export default function ProposeMission({ young, onSend }) {
             Proposer une mission à {young.firstName} {young.lastName}
           </h1>
         </div>
-        {/* @todo: A TESTER */}
         {canApplyToPhase2(young, cohort) ? (
           <>
             <div className="h-[38px] w-1/3 mx-auto overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">

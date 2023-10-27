@@ -14,7 +14,6 @@ export default function Toolbox({ young }) {
   const history = useHistory();
 
   const cohort = cohortList.find((c) => c.name === young.cohort);
-  // @todo: TO TEST
   const canYoungApplyToPhase2 = canApplyToPhase2(young, cohort);
 
   return (

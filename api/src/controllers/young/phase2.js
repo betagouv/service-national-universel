@@ -53,7 +53,6 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     const isYoung = req.user.constructor.modelName === "young";
     const cohort = await CohortModel.findOne({ name: young.cohort });
 
-    //@todo: TO TEST
     if (isYoung && !canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     //Pas plus de 3 demandes d'équivalence + creation possible seulement si le statut des ancienne equiv est "REFUSED"
@@ -169,7 +168,6 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
 
     const cohort = await CohortModel.findOne({ name: young.cohort });
 
-    // @todo: A TESTER
     if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);

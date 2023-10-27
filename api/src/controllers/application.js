@@ -167,7 +167,6 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     const cohort = await CohortObject.findOne({ name: young.cohort });
 
-    // @todo: A TESTER
     if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A young can only create their own applications.

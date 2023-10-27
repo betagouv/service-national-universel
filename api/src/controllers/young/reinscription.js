@@ -66,7 +66,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // Update young
     young.set({
       ...value,
-      // @todo check reseted values
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,

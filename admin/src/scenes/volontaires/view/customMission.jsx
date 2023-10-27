@@ -209,7 +209,6 @@ export default function CustomMission({ young, onChange }) {
     }
   }, [creationTutor]);
 
-  //@todo: TO TEST
   if (!canApplyToPhase2(young, cohort))
     return (
       <>
