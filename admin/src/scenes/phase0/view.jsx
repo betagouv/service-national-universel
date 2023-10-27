@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "@/utils/dayjs.utils";
-import { START_DATE_PHASE1, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
+import { getCohortStartDate, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -2163,7 +2163,7 @@ function getCorrectionRequest(requests, field) {
 function HonorCertificate({ young, cohort }) {
   let cniExpired = false;
   if (young && young.cohort && young.latestCNIFileExpirationDate) {
-    const cohortDate = cohort ? new Date(cohort.dateStart) : START_DATE_PHASE1[young.cohort];
+    const cohortDate = getCohortStartDate(young, cohort);
     if (cohortDate) {
       cniExpired = dayjs(young.latestCNIFileExpirationDate).toUtc().valueOf() < dayjs(cohortDate).toUtc().valueOf();
     }

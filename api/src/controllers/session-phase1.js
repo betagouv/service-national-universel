@@ -18,7 +18,7 @@ const Zip = require("adm-zip");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
-  START_DATE_PHASE1,
+  getCohortStartDate,
   SESSION_FILE_KEYS,
   canCreateOrUpdateSessionPhase1,
   canViewCohesionCenter,
@@ -778,7 +778,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
 
     // --- send template
     const cohort = await CohortModel.findOne({ name: session.cohort });
-    let date = cohort ? new Date(cohort.dateStart) : START_DATE_PHASE1[session.cohort];
+    let date = getCohortStartDate(session, cohort);
 
     await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.FILE_SESSION_REMINDER, {
       emailTo: [{ email: headCenter.email }],

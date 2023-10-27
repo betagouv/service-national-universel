@@ -219,8 +219,6 @@ const STRUCTURE_STATUS = {
 
 const DEFAULT_STRUCTURE_NAME = "Ma nouvelle Structure";
 
-const COHORTS_BEFORE_JULY_2023 = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
-
 const INTEREST_MISSION_LIMIT_DATE = {
   2019: "23 mars 2021",
   2020: "31 décembre 2021",
@@ -473,51 +471,6 @@ const WITHRAWN_REASONS = [
     label: "Autre",
   },
 ];
-
-const COHESION_STAY_START = {
-  2019: new Date("06/16/2019"),
-  2020: new Date("06/21/2020"),
-  2021: new Date("06/21/2021"),
-  "Février 2022": new Date("02/13/2022"),
-  "Juin 2022": new Date("06/12/2022"),
-  "Juillet 2022": new Date("07/03/2022"),
-  "Février 2023 - C": new Date("02/19/2023"),
-  "Avril 2023 - A": new Date("04/09/2023"),
-  "Avril 2023 - B": new Date("04/16/2023"),
-  "Juin 2023": new Date("06/11/2023"),
-  "Juillet 2023": new Date("07/05/2023"),
-  "Octobre 2023 - NC": new Date("10/09/2023"),
-};
-
-const START_DATE_SESSION_PHASE1 = {
-  "Février 2022": new Date("03/13/2022"),
-  "Juin 2022": new Date("06/12/2022"),
-  "Juillet 2022": new Date("07/03/2022"),
-  "Février 2023 - C": new Date("02/19/2023"),
-  "Avril 2023 - A": new Date("04/09/2023"),
-  "Avril 2023 - B": new Date("04/16/2023"),
-  "Juin 2023": new Date("06/11/2023"),
-  "Juillet 2023": new Date("07/04/2023"),
-  "Octobre 2023 - NC": new Date("10/09/2023"),
-};
-
-const START_DATE_PHASE1 = {
-  2019: new Date("06/16/2019"),
-  2020: new Date("06/21/2021"),
-  2021: new Date("06/21/2021"),
-  "Février 2022": new Date("02/13/2022"),
-  "Juin 2022": new Date("06/12/2022"),
-  "Juillet 2022": new Date("07/03/2022"),
-};
-
-const END_DATE_PHASE1 = {
-  2019: new Date("06/28/2019"),
-  2020: new Date("07/02/2021"),
-  2021: new Date("07/02/2021"),
-  "Février 2022": new Date("02/25/2022"),
-  "Juin 2022": new Date("06/24/2022"),
-  "Juillet 2022": new Date("07/15/2022"),
-};
 
 const CONSENTMENT_TEXTS = {
   young: [
@@ -916,12 +869,7 @@ export {
   SENDINBLUE_SMS,
   WITHRAWN_REASONS,
   CONSENTMENT_TEXTS,
-  COHORTS_BEFORE_JULY_2023,
-  START_DATE_SESSION_PHASE1,
-  COHESION_STAY_START,
   FILE_STATUS_PHASE1,
-  START_DATE_PHASE1,
-  END_DATE_PHASE1,
   MINISTRES,
   FILE_KEYS,
   MILITARY_FILE_KEYS,
@@ -970,11 +918,7 @@ export default {
   SENDINBLUE_SMS,
   WITHRAWN_REASONS,
   CONSENTMENT_TEXTS,
-  START_DATE_SESSION_PHASE1,
-  COHESION_STAY_START,
   FILE_STATUS_PHASE1,
-  START_DATE_PHASE1,
-  END_DATE_PHASE1,
   MINISTRES,
   FILE_KEYS,
   MILITARY_FILE_KEYS,

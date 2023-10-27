@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
 const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
-const { MINISTRES, END_DATE_PHASE1, transportDatesToString } = require("snu-lib");
+const { MINISTRES, getCohortEndDate, transportDatesToString } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
@@ -74,7 +74,7 @@ const getMeetingPoint = async (young) => {
 const phase1 = async (young) => {
   const session = await getSession(young);
   const cohort = await getCohort(young);
-  const cohortEndDate = cohort ? new Date(cohort.dateEnd) : END_DATE_PHASE1[young.cohort];
+  const cohortEndDate = getCohortEndDate(young, cohort);
 
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
   const ministresData = getMinistres(cohortEndDate);
