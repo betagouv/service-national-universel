@@ -30,7 +30,7 @@ export default function Header({
             {breadcrumb.map((item, index) => (
               <div
                 key={"breadcrumb-" + String(index)}
-                className="flex items-start justify-center"
+                className="flex items-center justify-center"
               >
                 <div className="flex text-xs leading-[20px] text-ds-gray-400">
                   {item.href ? (
