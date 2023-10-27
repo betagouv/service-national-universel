@@ -335,6 +335,7 @@ Schema.methods.anonymise = function () {
   this.actions = starify(this.actions);
   this.justifications = starify(this.justifications);
   this.contraintes = starify(this.contraintes);
+  this.frequence = starify(this.frequence);
   this.jvaRawData = undefined;
   return this;
 };
