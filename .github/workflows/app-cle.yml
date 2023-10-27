@@ -3,7 +3,6 @@ env:
   APP_NAME: snu-cle-app
   ENVIRONMENT_NAME: snu-app-cle
 
-
 name: Deploy CLE app
 
 on:
@@ -29,6 +28,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Build lib
+        continue-on-error: false
+        run: |
+          npm ci -w packages/ds
+          npm run build -w packages/ds
+          rm packages/ds/.gitignore
 
       - name: Create SSH key
         run: |
