@@ -219,7 +219,8 @@ const SideBar = (props) => {
   const supervisorItems = [Dashboard, Candidature, Network, StructureSupervisor, Missions, Utilisateurs];
   const visitorItems = [Dashboard];
   const dsnjItems = [ExportDsnj];
-  const institutionItems = [Institution, Classe, Student];
+  // FIXME [CLE]: remove dev mode
+  const institutionItems = [Institution, Classe, Student, Dev];
 
   const getItems = () => {
     switch (user?.role) {
