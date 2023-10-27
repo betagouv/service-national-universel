@@ -10,6 +10,7 @@ import Button from "./ui/Button";
 
 // Form
 import InputText from "./form/InputText";
+import InputPhone from "./form/InputPhone";
 
 export {
   // Layout
@@ -24,4 +25,5 @@ export {
 
   //Form
   InputText,
+  InputPhone,
 };
