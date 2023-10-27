@@ -2,8 +2,9 @@ import React from "react";
 
 type OwnProps = {
   children: React.ReactNode;
+  className?: string;
 };
 
-export default function Page({ children }: OwnProps) {
-  return <div className="p-8">{children}</div>;
+export default function Page({ children, className }: OwnProps) {
+  return <div className={"p-8 " + className}>{children}</div>;
 }
