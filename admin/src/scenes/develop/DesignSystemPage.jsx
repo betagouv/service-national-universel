@@ -1,7 +1,9 @@
 import React from "react";
-import { Page, Header, Subheader, Container, InputText } from "@snu/ds/admin";
+import { Page, Header, Subheader, Container, InputText, Badge } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
+import { HiUsers, HiPencil, HiChevronDown } from "react-icons/hi";
+import { TbExternalLink } from "react-icons/tb";
 
 const generateInitialValues = (length) => {
   let obj = {};
@@ -92,6 +94,40 @@ export default function DesignSystemPage() {
             error={error}
             label="InputTextLabel"
           />
+        </div>
+      </Container>
+      <Container title="Badges">
+        <div className="grid grid-cols-4 gap-2 px-1">
+          <Badge title={"Phase 1"} />
+          <Badge title={"Référent départemental"} />
+          <Badge title={"Préparation militaire"} status={"secondary"} />
+          <Badge title={"Drome"} mode={"editable"} rightIcon={<TbExternalLink size={20} />} className={"hover:bg-gray-200"} />
+          <Badge title={"Avril 2023 - A"} leftIcon={<HiUsers color="#6366F1" size={20} />} />
+          <Badge
+            title={"Avril 2023 - A"}
+            status={"primary"}
+            mode={"editable"}
+            leftIcon={<HiUsers size={20} />}
+            rightIcon={<HiPencil size={20} />}
+            onClick={() => console.log("test")}
+          />
+          <Badge title={<HiPencil size={20} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
+          <Badge
+            title={"Candidature approuvée"}
+            status={"validated"}
+            mode={"editable"}
+            rightIcon={<HiChevronDown size={20} />}
+            className={"hover:bg-green-200"}
+            onClick={() => console.log("test")}
+          />
+          <Badge title={"Désistée"} status={"cancel"} />
+          <Badge title={"Refusée"} status={"refused"} />
+          <Badge title={"En attente de validation"} status={"waitingValidation"} />
+          <Badge title={"En attente de correction"} status={"waitingCorrection"} />
+          <Badge title={"En cours"} status={"inProgress"} />
+          <Badge title={"Validée sur liste principale"} status={"validated"} />
+          <Badge title={"Validée sur liste complémentaire"} status={"validatedBis"} className="!w-[100px]" />
+          <Badge title={"Brouillon"} status={"draft"} />
         </div>
       </Container>
       <div className="grid grid-rows-2 grid-flow-col gap-4">
