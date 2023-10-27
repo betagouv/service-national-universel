@@ -2,25 +2,27 @@ import React from "react";
 import { HiChevronRight } from "react-icons/hi";
 
 type OwnProps = {
+  title: string;
+  className?: string;
   breadcrumb?: Array<{
     title: string | React.ReactNode;
     href: string;
   }>;
-  title: string;
   titleComponent?: React.ReactNode;
   children?: React.ReactNode;
   actions?: React.ReactNode[];
 };
 
 export default function Header({
-  breadcrumb,
   title,
+  className,
+  breadcrumb,
   titleComponent,
   children,
   actions,
 }: OwnProps) {
   return (
-    <div className="flex items-end justify-between mb-6">
+    <div className={"flex items-end justify-between mb-6 " + className}>
       <div className="flex flex-col items-start justify-start">
         {/* Breadcrumb */}
         {breadcrumb?.length && (
@@ -30,19 +32,20 @@ export default function Header({
                 key={"breadcrumb-" + String(index)}
                 className="flex items-start justify-center"
               >
-                <div className="flex text-xs leading-[20px]">
+                <div className="flex text-xs leading-[20px] text-ds-gray-400">
                   {item.href ? (
-                    <a href={item.href} className="text-ds-red leading-[20px]">
+                    <a
+                      href={item.href}
+                      className="leading-[20px] hover:text-ds-gray-400 hover:underline"
+                    >
                       {item.title}
                     </a>
                   ) : (
-                    <div className="text-ds-red  leading-[20px]">
-                      {item.title}
-                    </div>
+                    <div className="leading-[20px]">{item.title}</div>
                   )}
                 </div>
                 {index < breadcrumb.length - 1 ? (
-                  <div className="mx-2 text-gray-500">
+                  <div className="mx-2 text-ds-gray-400">
                     <HiChevronRight size={20} />
                   </div>
                 ) : null}
@@ -53,12 +56,14 @@ export default function Header({
 
         {/* Title */}
         <div className="flex items-start justify-center">
-          <h1 className="text-3xl font-bold leading-9 text-ds-red">{title}</h1>
+          <h1 className="text-[30px] font-bold leading-9 text-ds-gray-900">
+            {title}
+          </h1>
           {titleComponent}
         </div>
 
         {/* Children */}
-        {children && <div>{children}</div>}
+        {children}
       </div>
 
       {/* Actions */}
