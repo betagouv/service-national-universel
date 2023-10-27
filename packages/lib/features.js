@@ -33,7 +33,7 @@ const features = {
   },
   [FEATURES_NAME.DEVELOPERS_MODE]: {
     [ENVS.production]: [],
-    [ENVS.staging]: [ROLES.ADMIN],
+    // Allow developers mode in staging and development
   },
 };
 

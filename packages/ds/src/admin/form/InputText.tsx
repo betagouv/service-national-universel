@@ -54,7 +54,10 @@ export default function InputText({
           {label && (
             <label
               htmlFor={name}
-              className="m-0 text-gray-500 text-xs font-normal leading-4"
+              className={classNames(
+                error ? "text-red-500" : "text-gray-500",
+                "m-0  text-xs font-normal leading-4"
+              )}
             >
               {label}
             </label>

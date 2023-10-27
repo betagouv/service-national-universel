@@ -40,6 +40,9 @@ import Validate from "./scenes/validate";
 import Volontaires from "./scenes/volontaires";
 import VolontairesHeadCenter from "./scenes/volontaires-head-center";
 import VolontairesResponsible from "./scenes/volontaires-responsible";
+import Institution from "./scenes/institution";
+import Classe from "./scenes/classe";
+import Student from "./scenes/student";
 
 //DashboardV2
 import DashboardHeadCenterV2 from "./scenes/dashboardV2/head-center";
@@ -267,6 +270,10 @@ const Home = (props) => {
               <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
               <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
               <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
+              {/* Institution */}
+              <RestrictedRoute path="/mon-etablissement" component={Institution} />
+              <RestrictedRoute path="/mes-classes" component={Classe} />
+              <RestrictedRoute path="/mes-eleves" component={Student} />
               {/* Only for developper eyes... */}
               {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? (
                 <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />
@@ -303,6 +310,9 @@ const Home = (props) => {
 const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
+  // FIXME [CLE]: remove dev routes when
+  [ROLES.INSTITUTION_CHEF]: { authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets"], default: "/mon-etablissement" },
+  [ROLES.INSTITUTION_SOUS_CHEF]: { authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets"], default: "/mon-etablissement" },
 };
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {

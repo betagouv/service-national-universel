@@ -23,6 +23,9 @@ import GlobeIcon from "./icons/Globe";
 import InviteHeader from "../header/invite";
 import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
+import InstitutionIcon from "./icons/Institution";
+import ClasseIcon from "./icons/Classe";
+import StudentIcon from "./icons/Student";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, itemsDev, volontaireHeadCenterRegex } from "./utils";
 import useDevice from "../../hooks/useDevice";
@@ -169,6 +172,22 @@ const SideBar = (props) => {
       setCurrentOpen={setDropDownOpen}
     />
   );
+  const Institution = () => (
+    <SimpleNavItem
+      sideBarOpen={open}
+      Icon={InstitutionIcon}
+      title="Mon établissement"
+      link="/mon-etablissement"
+      active={path === "mon-etablissement"}
+      setCurrentOpen={setDropDownOpen}
+    />
+  );
+  const Classe = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={ClasseIcon} title="Mes classes" link="/mes-classes" active={path === "mes-classes"} setCurrentOpen={setDropDownOpen} />
+  );
+  const Student = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={StudentIcon} title="Mes élèves" link="/mes-eleves" active={path === "mes-eleves"} setCurrentOpen={setDropDownOpen} />
+  );
 
   //MultiNavLinks
   const SejoursGod = () => (
@@ -200,6 +219,8 @@ const SideBar = (props) => {
   const supervisorItems = [Dashboard, Candidature, Network, StructureSupervisor, Missions, Utilisateurs];
   const visitorItems = [Dashboard];
   const dsnjItems = [ExportDsnj];
+  // FIXME [CLE]: remove dev mode
+  const institutionItems = [Institution, Classe, Student, Dev];
 
   const getItems = () => {
     switch (user?.role) {
@@ -220,6 +241,9 @@ const SideBar = (props) => {
         return visitorItems;
       case ROLES.DSNJ:
         return dsnjItems;
+      case ROLES.INSTITUTION_CHEF:
+      case ROLES.INSTITUTION_SOUS_CHEF:
+        return institutionItems;
       default:
         return [];
     }

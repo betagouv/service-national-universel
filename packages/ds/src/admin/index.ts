@@ -11,6 +11,7 @@ import Select from "./ui/button/Select";
 
 // Form
 import InputText from "./form/InputText";
+import InputPhone from "./form/InputPhone";
 
 export {
   // Layout
@@ -26,4 +27,5 @@ export {
 
   //Form
   InputText,
+  InputPhone,
 };
