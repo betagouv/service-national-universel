@@ -135,9 +135,15 @@ export default function StepRepresentants() {
       }
 
       try {
-        const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/next`, value);
+        const { ok, code, data: responseData, msg } = await api.put(`/young/inscription2023/representants/next`, value);
         if (!ok) {
-          setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+          if (msg && msg.includes("parent1Email")) {
+            setErrors({ ...errors, parent1Email: "L'adresse email n'est pas valide" });
+          } else if (msg && msg.includes("parent2Email")) {
+            setErrors({ ...errors, parent2Email: "L'adresse email n'est pas valide" });
+          } else {
+            setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+          }
           setLoading(false);
           return;
         }

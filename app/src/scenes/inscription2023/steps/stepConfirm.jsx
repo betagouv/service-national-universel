@@ -57,7 +57,6 @@ export default function StepConfirm() {
   return (
     <>
       <DSFRContainer title="Vous y êtes presque...">
-        <h1 className="text-xl font-bold mt-2">Vous y êtes presque...</h1>
         {error?.text && <Error {...error} onClose={() => setError({})} />}
 
         <div className="mt-2 text-sm text-[#666666]">
