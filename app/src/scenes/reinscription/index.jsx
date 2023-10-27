@@ -43,7 +43,7 @@ const Step = () => {
           postCode: young.schoolZip,
           id: young.schoolId
         }
-      } : {}),
+      } : {} ),
       zip: young.zip,
     });
   }, []);

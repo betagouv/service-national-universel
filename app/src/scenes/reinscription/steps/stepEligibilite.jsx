@@ -30,7 +30,10 @@ export default function StepEligibilite() {
   const isBirthdayModificationDisabled = true;
   const dispatch = useDispatch();
   const history = useHistory();
-  const isEmptyObject = (obj) => Object.keys(obj).length === 0 && obj.constructor === Object;
+  const isEmptyObject = (obj) => {
+    if (!obj) return true; // Retourne true si l'objet est null ou undefined
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
+  };
 
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
@@ -67,12 +70,6 @@ export default function StepEligibilite() {
           // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
           errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
-      }
-    } else {
-      // School
-      if (isEmptyObject(data?.school)) {
-        // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
-        errors.school = "Vous devez renseigner complètement votre établissement scolaire";
       }
     }
 
