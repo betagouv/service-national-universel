@@ -77,6 +77,7 @@ export default function InputText({
     </div>
   );
 }
+
 const getInputClass = ({ label }: { label?: string }) => {
   const baseClass =
     "font-normal leading-5 text-gray-900 text-sm placeholder:text-gray-500 disabled:text-gray-500 disabled:bg-gray-50 disabled:cursor-default read-only:cursor-default";
