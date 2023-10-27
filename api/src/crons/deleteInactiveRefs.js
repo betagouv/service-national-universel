@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "../.env-prod" });
 require("../mongo");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");

@@ -19,7 +19,7 @@ const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
-const { ADMIN_URL, APP_URL } = require("../config");
+const { ENVIRONMENT, ADMIN_URL, APP_URL } = require("../config");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -31,7 +31,6 @@ const {
   translateAddFilesPhase2,
 } = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
-const { config } = require("dotenv");
 const {
   uploadFile,
   ERRORS,
@@ -735,7 +734,7 @@ router.post(
           captureMessage("Wrong filetype", { extra: { tempFilePath, mimetype } });
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+        if (ENVIRONMENT === "staging" || ENVIRONMENT === "production") {
           try {
             const clamscan = await new NodeClam().init({
               removeInfected: true,

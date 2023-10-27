@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 require("../services/databases/postgresql.service");
 const { capture } = require("../sentry");
 const codeClimate = require("../models/code-climate.model");
