@@ -332,6 +332,10 @@ Schema.methods.anonymise = function () {
   this.actions = "action Test";
   this.structureName = starify(this.structureName);
   this.tutorName = starify(this.tutorName);
+  this.actions = starify(this.actions);
+  this.justifications = starify(this.justifications);
+  this.contraintes = starify(this.contraintes);
+  this.jvaRawData = undefined;
   return this;
 };
 
