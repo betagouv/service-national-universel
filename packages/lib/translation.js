@@ -127,7 +127,7 @@ const translate = (value) => {
     case "head_center":
       return "Chef de centre";
     case "institution_chef":
-      return "Resposable d'établissement";
+      return "Responsable d'établissement";
     case "institution_sous_chef":
       return "Adjoint d'établissement";
     case "visitor":
