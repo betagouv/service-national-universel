@@ -4,9 +4,22 @@ const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { nam
 
 const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
 
-const getCohortNames = (with2023 = true, withToCome = true, withOld = true) => {
+const sessions2024CohortNames = [
+  "Février 2024 - C",
+  "Février 2024 - A",
+  "Février 2024 - B",
+  "Mars 2024 - La Réunion",
+  "Avril 2024 - C",
+  "Avril 2024 - A",
+  "Avril 2024 - B",
+  "Juin #1 2024",
+  "Juin #2 2024",
+  "Juillet 2024",
+];
+
+const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
   let cohortNames = [];
-  if (with2023) cohortNames = [...cohortNames, ...sessions2023CohortNames];
+  if (withNew) cohortNames = [...cohortNames, ...sessions2023CohortNames, ...sessions2024CohortNames];
   if (withToCome) cohortNames = [...cohortNames, "à venir"];
   if (withOld) cohortNames = [...oldSessions.map((e) => e.name), ...cohortNames];
   return cohortNames;
@@ -26,6 +39,16 @@ const COHESION_STAY_START = {
   "Juin 2023": new Date("06/11/2023"),
   "Juillet 2023": new Date("07/05/2023"),
   "Octobre 2023 - NC": new Date("10/09/2023"),
+  "Février 2024 - C": new Date("02/12/2024"),
+  "Février 2024 - A": new Date("02/19/2024"),
+  "Février 2024 - B": new Date("02/26/2024"),
+  "Mars 2024 - La Réunion": new Date("03/04/2024"),
+  "Avril 2024 - C": new Date("04/08/2024"),
+  "Avril 2024 - A": new Date("04/15/2024"),
+  "Avril 2024 - B": new Date("04/22/2024"),
+  "Juin #1 2024": new Date("06/03/2024"),
+  "Juin #2 2024": new Date("06/17/2024"),
+  "Juillet 2024": new Date("07/03/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -39,6 +62,16 @@ const START_DATE_SESSION_PHASE1 = {
   "Juin 2023": new Date("06/11/2023"),
   "Juillet 2023": new Date("07/04/2023"),
   "Octobre 2023 - NC": new Date("10/09/2023"),
+  "Février 2024 - C": new Date("02/12/2024"),
+  "Février 2024 - A": new Date("02/19/2024"),
+  "Février 2024 - B": new Date("02/26/2024"),
+  "Mars 2024 - La Réunion": new Date("03/04/2024"),
+  "Avril 2024 - C": new Date("04/08/2024"),
+  "Avril 2024 - A": new Date("04/15/2024"),
+  "Avril 2024 - B": new Date("04/22/2024"),
+  "Juin #1 2024": new Date("06/03/2024"),
+  "Juin #2 2024": new Date("06/17/2024"),
+  "Juillet 2024": new Date("07/03/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -55,6 +88,16 @@ const COHESION_STAY_END = {
   "Juin 2023": new Date("06/23/2023"),
   "Juillet 2023": new Date("07/17/2023"),
   "Octobre 2023 - NC": new Date("10/20/2023"),
+  "Février 2024 - C": new Date("02/24/2024"),
+  "Février 2024 - A": new Date("03/02/2024"),
+  "Février 2024 - B": new Date("03/09/2024"),
+  "Mars 2024 - La Réunion": new Date("03/16/2024"),
+  "Avril 2024 - C": new Date("04/20/2024"),
+  "Avril 2024 - A": new Date("04/27/2024"),
+  "Avril 2024 - B": new Date("05/04/2024"),
+  "Juin #1 2024": new Date("06/14/2024"),
+  "Juin #2 2024": new Date("06/28/2024"),
+  "Juillet 2024": new Date("07/15/2024"),
 };
 
 // @todo: to be removed after adding old cohorts in bd
