@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import { useHistory } from "react-router-dom";
 
-import { translateGrade, GRADES, getAge, YOUNG_STATUS, getCohortPeriodTemp } from "snu-lib";
+import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriodTemp } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -1125,7 +1125,6 @@ const PARENT_STATUS_NAME = {
   representant: "Le représentant légal",
 };
 function SectionConsentements({ young, setFieldValue, errors, cohort }) {
-  const [youngAge, setYoungAge] = React.useState("?");
   const [volontaireConsentement, setVolontaireConsentement] = React.useState({
     acceptCGU1: false,
     acceptCGU2: false,
@@ -1142,14 +1141,6 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
   });
 
   React.useEffect(() => {
-    if (young) {
-      setYoungAge(getAge(young.temporaryDate));
-    } else {
-      setYoungAge("?");
-    }
-  }, [young]);
-
-  React.useEffect(() => {
     if (volontaireConsentement.acceptCGU1 && volontaireConsentement.acceptCGU2) {
       setFieldValue("acceptCGU", "true");
     } else {
@@ -1163,18 +1154,10 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
   }, [volontaireConsentement]);
 
   React.useEffect(() => {
-    if (youngAge !== "?" && youngAge < 15) {
-      if (parent1Consentement.allow1 && parent1Consentement.allow2 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
-        setFieldValue("parent1AllowSNU", "true");
-      } else {
-        setFieldValue("parent1AllowSNU", "false");
-      }
+    if (parent1Consentement.allow1 && parent1Consentement.allow2 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
+      setFieldValue("parent1AllowSNU", "true");
     } else {
-      if (parent1Consentement.allow1 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
-        setFieldValue("parent1AllowSNU", "true");
-      } else {
-        setFieldValue("parent1AllowSNU", "false");
-      }
+      setFieldValue("parent1AllowSNU", "false");
     }
   }, [parent1Consentement]);
 
@@ -1274,16 +1257,12 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
               {young.firstName} {young.lastName}
             </b>
           </CheckRead>
-          {youngAge < 15 && (
-            <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow2")} errors={errors} value={parent1Consentement.allow2}>
-              Accepte la collecte et le traitement des données personnelles de{" "}
-              <b>
-                {young.firstName} {young.lastName}
-              </b>
-            </CheckRead>
-          )}
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow3")} errors={errors} value={parent1Consentement.allow3}>
-            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+            S&apos;engage à communiquer la fiche sanitaire de
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+            au responsable du séjour de cohésion.
           </CheckRead>
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow4")} errors={errors} value={parent1Consentement.allow4}>
             S&apos;engage à ce que{" "}
@@ -1294,7 +1273,13 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
             jaune.
           </CheckRead>
           <CheckRead name="rulesParent1" onClick={() => handleConsentementChange("rulesParent1")} errors={errors} value={young.rulesParent1 === "true"}>
-            Reconnait avoir pris connaissance du Règlement Intérieur du SNU.
+            Reconnait avoir pris connaissance du Règlement Intérieur du séjour de cohésion.
+          </CheckRead>
+          <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow2")} errors={errors} value={parent1Consentement.allow2}>
+            Accepte la collecte et le traitement des données personnelles de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
           </CheckRead>
         </div>
         <div className="itemx-center mt-[16px] flex justify-between">

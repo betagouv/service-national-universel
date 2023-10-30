@@ -1590,17 +1590,8 @@ const PARENT_STATUS_NAME = {
 };
 
 function SectionConsentements({ young, onChange, readonly = false, cohort }) {
-  const [youngAge, setYoungAge] = useState("?");
   const [confirmModal, setConfirmModal] = useState(null);
   const [pdfDownloading, setPdfDownloading] = useState("");
-
-  useEffect(() => {
-    if (young) {
-      setYoungAge(getAge(young.birthdateAt));
-    } else {
-      setYoungAge("?");
-    }
-  }, [young]);
 
   const authorizationOptions = [
     { value: "true", label: "J'autorise" },
@@ -1772,16 +1763,12 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
               {young.firstName} {young.lastName}
             </b>
           </CheckRead>
-          {youngAge < 15 && (
-            <CheckRead value={young.parent1AllowSNU === "true"}>
-              Accepte la collecte et le traitement des données personnelles de{" "}
-              <b>
-                {young.firstName} {young.lastName}
-              </b>
-            </CheckRead>
-          )}
           <CheckRead value={young.parent1AllowSNU === "true"}>
-            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+            S&apos;engage à communiquer la fiche sanitaire de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>{" "}
+            au responsable du séjour de cohésion.
           </CheckRead>
           <CheckRead value={young.parent1AllowSNU === "true"}>
             S&apos;engage à ce que{" "}
@@ -1791,7 +1778,13 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
             soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
             jaune.
           </CheckRead>
-          <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du Règlement Intérieur du SNU.</CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du règlement Intérieur du séjour de cohésion.</CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>
+            Accepte la collecte et le traitement des données personnelles de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+          </CheckRead>
         </div>
         <div className="itemx-center mt-[16px] flex justify-between">
           <div className="grow text-[14px] leading-[20px] text-[#374151]">
