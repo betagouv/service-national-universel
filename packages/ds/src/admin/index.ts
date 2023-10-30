@@ -7,7 +7,7 @@ import Subheader from "./layout/Subheader";
 // UI
 import Badge from "./ui/badge/Badge";
 import Button from "./ui/button/Button";
-import Select from "./ui/button/Select";
+import DropdownButton from "./ui/button/DropdownButton";
 
 // Form
 import InputText from "./form/InputText";
@@ -23,7 +23,7 @@ export {
   // UI
   Badge,
   Button,
-  Select,
+  DropdownButton,
 
   //Form
   InputText,

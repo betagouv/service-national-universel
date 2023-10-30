@@ -8,6 +8,7 @@ type OptionGroupItem = {
   key: string;
   render: React.ReactNode;
   loadingLabel?: string;
+  optionClassNames?: string;
   action?: () => Promise<void>;
 };
 
@@ -39,7 +40,7 @@ type OwnProps = {
   buttonClassNames?: string;
 };
 
-export default function Select({
+export default function DropdownButton({
   title,
   optionsGroup,
   mode = "default",
@@ -105,7 +106,9 @@ export default function Select({
           {optionsGroup.map((group, i) => (
             <div
               key={group.key || i}
-              className="border-b-[1px] border-gray-100 py-1 text-xs"
+              className={`${
+                i !== optionsGroup.length - 1 ? "border-b border-gray-100 " : ""
+              }py-1 text-xs`}
             >
               {group.title ? (
                 <p className="px-3 py-2 text-xs font-medium text-gray-500">
@@ -114,7 +117,7 @@ export default function Select({
               ) : null}
               {group.items.map((item) => (
                 <div
-                  className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 text-sm hover:bg-gray-50"
+                  className={`flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 text-sm hover:bg-gray-50 ${item.optionClassNames}`}
                   key={item.key}
                   onClick={() => onClickItem(item)}
                 >
@@ -131,7 +134,7 @@ export default function Select({
 
 const getDivClass = ({ open }: { open?: boolean }) => {
   const baseClass =
-    "absolute top-[55px] min-w-[250px] rounded-lg bg-white transition left-0 border-3 z-50 overflow-hidden shadow";
+    "absolute top-[55px] min-w-[250px] rounded-lg bg-white transition left-0 border-3 z-50 overflow-hidden shadow-md border border-gray-100";
   if (open) {
     return classNames(baseClass, "block");
   } else {

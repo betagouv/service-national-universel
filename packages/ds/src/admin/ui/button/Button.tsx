@@ -50,32 +50,32 @@ const getStyles = ({ type }: { type: Ttype }) => {
     case "secondary":
       return {
         native: "h-[38px] py-[9px] text-sm",
-        base: "text-gray-700 border border-gray-300 bg-white hover:bg-gray-50",
-        disabled: "text-gray-700/60 border border-gray-300/60 bg-white/60",
+        base: "text-gray-700 border !border-gray-300 bg-white hover:bg-gray-50",
+        disabled: "text-gray-700/60 border !border-gray-300/60 bg-white/60",
       };
     case "tertiary":
       return {
         native: "h-8 py-2 text-xs",
-        base: "text-blue-600 border border-blue-300 bg-blue-100 hover:bg-blue-200",
-        disabled: "text-blue-600/60 border border-blue-300/60 bg-blue-100/60",
+        base: "text-blue-600 border !border-blue-300 bg-blue-50 hover:bg-blue-200",
+        disabled: "text-blue-600/60 border !border-blue-300/60 bg-blue-50/60",
       };
     case "wired":
       return {
         native: "h-[38px] py-[9px] text-sm pr-3",
-        base: "text-blue-600 border border-blue-300 hover:bg-blue-50",
-        disabled: "text-blue-600/60 border border-blue-300/60",
+        base: "text-blue-600 border !border-blue-300 hover:bg-blue-50",
+        disabled: "text-blue-600/60 !border border-blue-300/60",
       };
     case "change":
       return {
         native: "h-8 py-2 pl-2.5 text-xs",
-        base: "text-blue-600 border border-blue-300 bg-blue-100 hover:bg-blue-200",
-        disabled: "text-blue-600/60 border border-blue-300/60 bg-blue-100/60",
+        base: "text-blue-600 bg-blue-100 hover:bg-blue-200",
+        disabled: "text-blue-600/60 bg-blue-100/60",
       };
     case "cancel":
       return {
         native: "h-8 py-2 text-xs",
-        base: "text-gray-600 border border-gray-300 bg-gray100 hover:bg-gray-200",
-        disabled: "text-gray-600/60 border border-gray-300/60 bg-gray-100/60",
+        base: "text-gray-600 bg-gray-100 hover:bg-gray-200",
+        disabled: "text-gray-600/60 bg-gray-100/60",
       };
     default:
       return {

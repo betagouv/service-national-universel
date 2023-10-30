@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Page, Header, Subheader, Container, InputText, Badge, Button, Select } from "@snu/ds/admin";
+import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
@@ -30,7 +30,16 @@ export default function DesignSystemPage() {
       key: "1",
       title: "Option 1",
       items: [
-        { key: "1", render: <p className="text-red-500">Select Options 1</p> },
+        {
+          key: "1",
+          render: (
+            <>
+              <HiOutlineCommandLine size={20} color="red" />
+              <p className="text-red-500">Supprimer</p>
+            </>
+          ),
+          optionClassNames: "hover:bg-red-200",
+        },
         {
           key: "2",
           render: (
@@ -259,7 +268,7 @@ export default function DesignSystemPage() {
             optionsGroup={selectTest2}
           />
           <Badge title={<HiPencil size={20} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
-          <Select title={StatusTitle} status={StatusSelect} buttonClassNames={SelectClassName} mode={"badge"} optionsGroup={selectTestStatus} />
+          <DropdownButton title={StatusTitle} status={StatusSelect} buttonClassNames={SelectClassName} mode={"badge"} optionsGroup={selectTestStatus} />
           <Badge title={"Désistée"} status={"cancel"} />
           <Badge title={"Refusée"} status={"refused"} />
           <Badge title={"En attente de validation"} status={"waitingValidation"} />
@@ -277,20 +286,20 @@ export default function DesignSystemPage() {
           <Button title={"Primary base change"} className={"bg-red-500 !w-[100px] hover:bg-red-700"} />
           <Button title={"Primary base disabled"} disabled={true} />
           <Button title={"Primary base + Icon"} leftIcon={<HiOutlineCommandLine size={20} />} />
-          <Select title={"Primary base select"} optionsGroup={selectTest} />
-          <Select title={"Primary base select disabled"} optionsGroup={selectTest} disabled={true} />
+          <DropdownButton title={"Primary base select"} optionsGroup={selectTest} />
+          <DropdownButton title={"Primary base select disabled"} optionsGroup={selectTest} disabled={true} />
           <Button title={"Secondary base"} type={"secondary"} />
           <Button title={"Secondary disabled"} type={"secondary"} disabled={true} />
           <Button title={"Secondary base + Icon"} type={"secondary"} leftIcon={<HiOutlineCommandLine size={20} />} />
-          <Select title={"Secondary base select"} optionsGroup={selectTest2} type={"secondary"} />
-          <Select title={"Secondary base select disabled"} optionsGroup={selectTest2} type={"secondary"} disabled={true} />
+          <DropdownButton title={"Secondary base select"} optionsGroup={selectTest2} type={"secondary"} />
+          <DropdownButton title={"Secondary base select disabled"} optionsGroup={selectTest2} type={"secondary"} disabled={true} />
           <Button title={"Tertiary base"} type={"tertiary"} />
           <Button title={"Tertiary base disabled"} type={"tertiary"} disabled={true} />
           <Button title={"Wired base"} type={"wired"} />
           <Button title={"Wired base disabled"} type={"wired"} disabled={true} />
           <Button title={"Wired base + Icon"} type={"wired"} leftIcon={<HiOutlineCommandLine size={20} />} />
           <Button title={"Modifier"} type={"change"} leftIcon={<HiOutlinePencil size={16} />} />
-          <Button title={"Modifier disabled"} type={"change"} disabled={true} />
+          <Button title={"Modifier disabled"} type={"change"} disabled={true} leftIcon={<HiOutlinePencil size={16} />} />
           <Button title={"Annuler"} type={"cancel"} />
           <Button title={"Annuler disabled"} type={"cancel"} disabled={true} />
         </div>
