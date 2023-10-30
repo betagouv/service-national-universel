@@ -815,7 +815,6 @@ function canSeeDashboardEngagementStatus(actor) {
 
 function canUpdateMyself({ actor, modifiedTarget }) {
   const isMe = actor._id.toString() === modifiedTarget._id.toString();
-
   return isMe;
 }
 
