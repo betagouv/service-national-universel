@@ -224,9 +224,9 @@ export default function StepCoordonnees() {
   const getErrors = () => {
     let errors = {};
 
-    if (hasSpecialSituation === null) {
-      errors.hasSpecialSituation = "Ce champ est obligatoire";
-    }
+    // if (hasSpecialSituation === null) {
+    //   errors.hasSpecialSituation = "Ce champ est obligatoire";
+    // }
     if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
       errors.birthCityZip = errorMessages.zip;
     }
@@ -334,6 +334,10 @@ export default function StepCoordonnees() {
     if (specificAmenagment === "true") {
       fieldToUpdate.push("specificAmenagmentType");
       requiredFields.push("specificAmenagmentType");
+    }
+
+    if (hasSpecialSituation === null) {
+      errors.hasSpecialSituation = "Ce champ est obligatoire";
     }
 
     for (const key of requiredFields) {
@@ -625,10 +629,10 @@ export default function StepCoordonnees() {
             <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
           </div>
         </div>
-        <div className="ml-3 flex flex-raw">
-          <div className="px-6 border-r">
+        <div className="flex flex-raw mb-4">
+          <div className="pr-4 border-r">
             <input
-              className="mr-1"
+              className="mr-2"
               type="radio"
               id="oui"
               name="specialSituation"
@@ -640,9 +644,9 @@ export default function StepCoordonnees() {
               Oui
             </label>
           </div>
-          <div className="px-6 mb-2">
+          <div className="px-6">
             <input
-              className="mr-1"
+              className="mr-2"
               type="radio"
               id="non"
               name="specialSituation"
