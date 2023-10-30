@@ -2015,6 +2015,21 @@ Schema.methods.anonymise = function () {
     lon: newLocation?.longitude || 0,
   };
 
+  this.cniFiles = [];
+  this.highSkilledActivityProofFiles = [];
+  this.dataProcessingConsentmentFiles = [];
+  this.parentConsentmentFiles = [];
+  this.imageRightFiles = [];
+  this.autoTestPCRFiles = [];
+  this.rulesFiles = [];
+  this.militaryPreparationFilesIdentity = [];
+  this.militaryPreparationFilesCensus = [];
+  this.militaryPreparationFilesAuthorization = [];
+  this.militaryPreparationFilesCertificate = [];
+  this.militaryPreparationCorrectionMessage = starify(this.militaryPreparationCorrectionMessage);
+
+  this.files = undefined;
+
   return this;
 };
 
