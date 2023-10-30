@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Page, Header, Subheader, Container, InputText, Badge, Button, Select } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
-import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
 import { BsCheck } from "react-icons/bs";
@@ -121,7 +120,7 @@ export default function DesignSystemPage() {
           { href: "/", title: <HiOutlineCommandLine size={20} /> },
           { href: "/design-system", title: "Design System" },
         ]}
-        actions={[<ButtonPrimary key="header-action-1">Click me</ButtonPrimary>]}
+        actions={[<Button key="header-action-1" title={"Click me"} />]}
       />
       <Subheader title="Code, preview, test, build and ship." />
       <Container title="Champs simples (InputText)">
