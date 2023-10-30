@@ -117,7 +117,7 @@ export default function DropdownButton({
               ) : null}
               {group.items.map((item) => (
                 <div
-                  className={`flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 text-sm hover:bg-gray-50 ${item.optionClassNames}`}
+                  className={`flex cursor-pointer rounded-sm m-0.5 items-center gap-2 p-2 px-3 text-gray-900 text-sm hover:bg-gray-100 ${item.optionClassNames}`}
                   key={item.key}
                   onClick={() => onClickItem(item)}
                 >
