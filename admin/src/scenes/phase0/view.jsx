@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "@/utils/dayjs.utils";
-import { getCohortStartDate, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
+import { getCohortStartDate, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod, getCohortYear } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -1714,17 +1714,13 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
           </span>
         </div>
         <div>
-          <CheckRead value={young.acceptCGU === "true"}>
-            A lu et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
-          </CheckRead>
-          <CheckRead value={young.acceptCGU === "true"}>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
           <CheckRead value={young.consentment === "true"}>
-            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion <b>{getCohortPeriod(cohort)}</b> puis la
-            réalisation d&apos;une mission d&apos;intérêt général.
+            Se porte volontaire pour participer à la session <b>{getCohortYear(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis
+            la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
-          <CheckRead value={young.consentment === "true"}>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
-          <CheckRead value={(young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null) || young.informationAccuracy === "true"}>
-            Certifie l&apos;exactitude des renseignements fournis
+          <CheckRead value={young.acceptCGU === "true"}>
+            S&apos;inscrit pour le séjour de cohésion <strong>{getCohortPeriod(cohort)}</strong> sous réserve de places disponibles et s&apos;engage à en respecter le règlement
+            intérieur.
           </CheckRead>
         </div>
       </div>
