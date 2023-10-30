@@ -1,31 +1,25 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { capture } = require("../../../sentry");
-const esClient = require("../../../es");
-const { ERRORS } = require("../../../utils");
-const { joiElasticSearch } = require("../utils");
-const { ES_NO_LIMIT, getCohortNames, ROLES, region2department, YOUNG_STATUS } = require("snu-lib");
-const SessionPhase1Model = require("../../../models/sessionPhase1");
+const { capture } = require("@/sentry");
+const esClient = require("@/es");
+const { ERRORS } = require("@/utils");
+const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
+const { ES_NO_LIMIT, getCohortNames, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
+const SessionPhase1Model = require("@/models/sessionPhase1");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user } = req;
 
-    // TODO: refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const { dashboardUserRoleContextFilters } = buildDashboardUserRoleContext(req.user);
 
     const body = {
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [
-            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "region.keyword": [user.region] } } : null,
-            user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": user.department } } : null,
-          ].filter(Boolean),
+          filter: [...dashboardUserRoleContextFilters].filter(Boolean),
         },
       },
       size: ES_NO_LIMIT,
@@ -45,11 +39,8 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
   try {
     const { user } = req;
 
-    //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -96,11 +87,7 @@ router.post("/youngsReport", passport.authenticate(["referent"], { session: fals
     const { user } = req;
     const { filters, department } = req.body;
 
-    //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
-    if (!allowedRoles.includes(user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (user.role === ROLES.REFERENT_REGION && !region2department[user.region].includes(department))
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -134,11 +121,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
   try {
     const { user } = req;
 
-    //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER, ROLES.VISITOR];
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canSeeDashboardInscriptionDetail(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -298,11 +281,7 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
   try {
     const { user } = req;
 
-    //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
-    if (!allowedRoles.includes(user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -397,11 +376,7 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
   try {
     const { user } = req;
 
-    //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["statusPhase1", "statusPhase2", "statusPhase3", "status", "cohort", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
@@ -506,11 +481,7 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
   try {
     const { user } = req;
 
-    //@todo refacto this part with middleware
-    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.VISITOR];
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const filterFields = ["cohort", "academy", "department", "region"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
