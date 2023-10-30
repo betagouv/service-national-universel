@@ -267,7 +267,7 @@ export default function DesignSystemPage() {
           <Badge title={"En attente de correction"} status={"waitingCorrection"} />
           <Badge title={"En cours"} status={"inProgress"} />
           <Badge title={"Validée sur liste principale"} status={"validated"} />
-          <Badge title={"Validée sur liste complémentaire"} status={"validatedBis"} className="w-[100px]" />
+          <Badge title={"Validée sur liste complémentaire"} status={"validatedBis"} className="!w-[100px]" />
           <Badge title={"Validée sur liste complémentaire"} status={"validatedBis"} />
           <Badge title={"Brouillon"} status={"draft"} />
         </div>
