@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { translate, getCohortPeriod } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import EditPen from "../../../assets/icons/EditPen";
@@ -66,13 +66,17 @@ export default function StepConfirm() {
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
             <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div>
           </div>
-          <EditPen onClick={() => setModal({ isOpen: true })} />
+          <button onClick={() => setModal({ isOpen: true })}>
+            <EditPen />
+          </button>
         </div>
         <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mon profil</h1>
-            <EditPen onClick={() => history.push("/inscription2023/coordonnee")} />
+            <Link to="/inscription2023/coordonnee">
+              <EditPen onClick={() => history.push("/inscription2023/coordonnee")} />
+            </Link>
           </div>
           <Details title="Pays de naissance" value={young.birthCountry} />
           <Details title="Département de naissance" value={young.birthCityZip} />
@@ -112,7 +116,9 @@ export default function StepConfirm() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mes représentants légaux</h1>
-            <EditPen onClick={() => history.push("/inscription2023/representants")} />
+            <Link to="/inscription2023/representants">
+              <EditPen />
+            </Link>
           </div>
           <Details title="Votre lien" value={translate(young.parent1Status)} />
           <Details title="Son prénom" value={young.parent1FirstName} />
