@@ -1,9 +1,9 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { capture } = require("@/sentry");
-const esClient = require("@/es");
-const { ERRORS } = require("@/utils");
+const { capture } = require("../../../sentry");
+const esClient = require("../../../es");
+const { ERRORS } = require("../../../utils");
 const { ES_NO_LIMIT, ROLES, APPLICATION_STATUS, canSeeDashboardEngagementInfo, canSeeDashboardEngagementStatus } = require("snu-lib");
 const { joiElasticSearch, buildMissionContext, buildApplicationContext, buildDashboardUserRoleContext } = require("../utils");
 // TODO: Guard all requests according to roles
