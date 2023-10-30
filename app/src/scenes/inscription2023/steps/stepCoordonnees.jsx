@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
+import { HiInformationCircle } from "react-icons/hi";
 
 import validator from "validator";
 
@@ -224,9 +225,6 @@ export default function StepCoordonnees() {
   const getErrors = () => {
     let errors = {};
 
-    // if (hasSpecialSituation === null) {
-    //   errors.hasSpecialSituation = "Ce champ est obligatoire";
-    // }
     if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
       errors.birthCityZip = errorMessages.zip;
     }
@@ -620,6 +618,17 @@ export default function StepCoordonnees() {
             <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
           </div>
         </div> */}
+        <hr className="my-2 h-px border-0 bg-gray-200" />
+        <div className="flex flex-row items-center">
+          <h2 className="mb-4 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
+          <a
+            className="mt-2.5 ml-2"
+            href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`}
+            target="_blank"
+            rel="noreferrer">
+            <HiInformationCircle className="h-5 w-5 text-[#000091]" />
+          </a>
+        </div>
         <div className="mb-4 flex items-center">
           <div>
             <h2 className="mt-0 text-[16px] font-bold">
@@ -629,7 +638,7 @@ export default function StepCoordonnees() {
             <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
           </div>
         </div>
-        <div className="flex flex-raw mb-4">
+        <div className="flex flex-row mb-4">
           <div className="pr-4 border-r">
             <input
               className="mr-2"
