@@ -1,7 +1,8 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE, translate } from "snu-lib";
+import { translate, getCohortPeriod } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 import EditPen from "../../../assets/icons/EditPen";
 import ModalSejour from "../components/ModalSejour";
 import { setYoung } from "../../../redux/auth/actions";
@@ -67,7 +68,7 @@ export default function StepConfirm() {
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
-            <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(COHESION_STAY_LIMIT_DATE[young?.cohort])}</div>
+            <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div>
           </div>
           <EditPen onClick={() => setModal({ isOpen: true })} />
         </div>

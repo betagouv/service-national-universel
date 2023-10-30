@@ -7,18 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "@/utils/dayjs.utils";
-import {
-  COHESION_STAY_LIMIT_DATE,
-  COHESION_STAY_START,
-  START_DATE_SESSION_PHASE1,
-  translate,
-  translateGrade,
-  YOUNG_STATUS,
-  GRADES,
-  getAge,
-  ROLES,
-  SENDINBLUE_TEMPLATES,
-} from "snu-lib";
+import { getCohortStartDate, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -72,19 +61,24 @@ const PENDING_ACCORD = "en attente";
 
 export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
   const [requests, setRequests] = useState([]);
   const [processing, setProcessing] = useState(false);
+  const [cohort, setCohort] = useState(undefined);
+  const [oldCohort, setOldCohort] = useState(true);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
-  const [oldCohort, setOldCohort] = useState(false);
 
   useEffect(() => {
     if (young) {
       setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
-      setOldCohort(dayjs(COHESION_STAY_START[young.cohort]).year() < 2023);
+      const currentCohort = cohorts.find((c) => c.name === young.cohort);
+      setCohort(currentCohort);
+      setOldCohort(!currentCohort);
     } else {
       setRequests([]);
-      setOldCohort(false);
+      setCohort(undefined);
+      setOldCohort(true);
     }
   }, [young]);
 
@@ -249,6 +243,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           </div>
         )}
         <SectionIdentite
+          cohort={cohort}
           young={young}
           globalMode={globalMode}
           requests={requests}
@@ -269,7 +264,11 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           oldCohort={oldCohort}
           readonly={user.role === ROLES.HEAD_CENTER}
         />
-        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} readonly={user.role === ROLES.HEAD_CENTER} />}
+        {oldCohort ? (
+          <SectionOldConsentements young={young} />
+        ) : (
+          <SectionConsentements young={young} onChange={onChange} readonly={user.role === ROLES.HEAD_CENTER} cohort={cohort} />
+        )}
       </div>
       {globalMode === "correction" && (
         <>
@@ -553,7 +552,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
   );
 }
 
-function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
+function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
@@ -681,6 +680,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
             <>
               <SectionIdentiteCni
                 young={data}
+                cohort={cohort}
                 globalMode={sectionMode}
                 requests={requests}
                 onStartRequest={onStartRequest}
@@ -711,6 +711,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 onChange={onLocalChange}
               />
               <SectionIdentiteCni
+                cohort={cohort}
                 className="mt-[32px]"
                 young={data}
                 globalMode={sectionMode}
@@ -931,7 +932,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   );
 }
 
-function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
+function SectionIdentiteCni({ young, cohort, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
   const user = useSelector((state) => state.Auth.user);
   const categoryOptions = ["cniNew", "cniOld", "passport"].map((s) => ({ value: s, label: translate(s) }));
   let cniDay = "";
@@ -996,7 +997,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
           young={young}
         />
       )}
-      <HonorCertificate young={young} />
+      <HonorCertificate young={young} cohort={cohort} />
     </div>
   );
 }
@@ -1588,7 +1589,7 @@ const PARENT_STATUS_NAME = {
   representant: "Le représentant légal",
 };
 
-function SectionConsentements({ young, onChange, readonly = false }) {
+function SectionConsentements({ young, onChange, readonly = false, cohort }) {
   const [youngAge, setYoungAge] = useState("?");
   const [confirmModal, setConfirmModal] = useState(null);
   const [pdfDownloading, setPdfDownloading] = useState("");
@@ -1727,8 +1728,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
           </CheckRead>
           <CheckRead value={young.acceptCGU === "true"}>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
           <CheckRead value={young.consentment === "true"}>
-            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-            <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
+            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion <b>{getCohortPeriod(cohort)}</b> puis la
+            réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
           <CheckRead value={young.consentment === "true"}>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
           <CheckRead value={(young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null) || young.informationAccuracy === "true"}>
@@ -1761,8 +1762,8 @@ function SectionConsentements({ young, onChange, readonly = false }) {
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à participer à la session <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-          réalisation d&apos;une mission d&apos;intérêt général.
+          à participer à la session <b>{getCohortPeriod(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la réalisation
+          d&apos;une mission d&apos;intérêt général.
         </div>
         <div>
           <CheckRead value={young.parent1AllowSNU === "true"}>
@@ -2159,10 +2160,10 @@ function getCorrectionRequest(requests, field) {
   });
 }
 
-function HonorCertificate({ young }) {
+function HonorCertificate({ young, cohort }) {
   let cniExpired = false;
   if (young && young.cohort && young.latestCNIFileExpirationDate) {
-    const cohortDate = START_DATE_SESSION_PHASE1[young.cohort];
+    const cohortDate = getCohortStartDate(young, cohort);
     if (cohortDate) {
       cniExpired = dayjs(young.latestCNIFileExpirationDate).toUtc().valueOf() < dayjs(cohortDate).toUtc().valueOf();
     }

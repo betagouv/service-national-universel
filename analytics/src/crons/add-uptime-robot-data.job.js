@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 require("../services/databases/postgresql.service");
 const { capture } = require("../sentry");
 const uptimeRobot = require("../models/uptime-robot.model");

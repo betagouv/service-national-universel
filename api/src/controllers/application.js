@@ -10,6 +10,7 @@ const ContractObject = require("../models/contract");
 const MissionObject = require("../models/mission");
 const StructureObject = require("../models/structure");
 const YoungObject = require("../models/young");
+const CohortObject = require("../models/cohort");
 const ReferentObject = require("../models/referent");
 const { decrypt, encrypt } = require("../cryptoUtils");
 const NodeClam = require("clamscan");
@@ -18,7 +19,7 @@ const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
-const { ADMIN_URL, APP_URL } = require("../config");
+const { ENVIRONMENT, ADMIN_URL, APP_URL } = require("../config");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -30,7 +31,6 @@ const {
   translateAddFilesPhase2,
 } = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
-const { config } = require("dotenv");
 const {
   uploadFile,
   ERRORS,
@@ -164,7 +164,9 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canApplyToPhase2(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const cohort = await CohortObject.findOne({ name: young.cohort });
+
+    if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
@@ -732,7 +734,7 @@ router.post(
           captureMessage("Wrong filetype", { extra: { tempFilePath, mimetype } });
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+        if (ENVIRONMENT === "staging" || ENVIRONMENT === "production") {
           try {
             const clamscan = await new NodeClam().init({
               removeInfected: true,

@@ -1,6 +1,6 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import { formatStringDate } from "snu-lib";
+import { getCohortPeriod } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
@@ -39,7 +39,7 @@ function SessionButton(session) {
         history.push("/reinscription/confirm");
       }}>
       <div>
-        Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
+        Séjour <strong>{getCohortPeriod(session)}</strong>
       </div>
       <ArrowRightBlueSquare />
     </div>

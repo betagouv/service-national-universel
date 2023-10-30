@@ -7,7 +7,7 @@ import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
-  COHORTS,
+  getCohortNames,
   ROLES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
@@ -97,7 +97,7 @@ export default function Index() {
         id: "cohort",
         name: "Cohorte",
         fullValue: "Toutes",
-        options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+        options: getCohortNames().map((cohort) => ({ key: cohort, label: cohort })),
         sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
@@ -123,7 +123,6 @@ export default function Index() {
     const cohortsFilters = getCohortNameList(cohorts);
     setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
   }, []);
-
 
   return (
     <DashboardContainer

@@ -1,4 +1,3 @@
-require("dotenv").config();
 const cron = require("node-cron");
 
 const { ENVIRONMENT } = require("../config");

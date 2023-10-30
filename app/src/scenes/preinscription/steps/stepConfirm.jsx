@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE, PHONE_ZONES, formatDateFR, translate, translateGrade, isFeatureEnabled, FEATURES_NAME } from "snu-lib";
+import { PHONE_ZONES, formatDateFR, translate, translateGrade, isFeatureEnabled, FEATURES_NAME, getCohortPeriod } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
@@ -20,6 +20,7 @@ export default function StepConfirm() {
   const [error, setError] = useState({});
   const [isLoading, setLoading] = useState(false);
   const [data, removePersistedData] = React.useContext(PreInscriptionContext);
+  const selectedCohort = data?.sessions.find((s) => s?.name === data?.cohort);
   const dispatch = useDispatch();
 
   const history = useHistory();
@@ -145,7 +146,7 @@ export default function StepConfirm() {
             <EditPen />
           </Link>
         </div>
-        <div className="font-normal text-[#161616] pb-4">{COHESION_STAY_LIMIT_DATE[data?.cohort]}</div>
+        <div className="font-normal text-[#161616] pb-4">{getCohortPeriod(selectedCohort)}</div>
 
         <hr />
 

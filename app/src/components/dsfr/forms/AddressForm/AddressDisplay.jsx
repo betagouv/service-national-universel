@@ -13,7 +13,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
         <label className="flex flex-col gap-2 w-full">
           Adresse
           <div className="flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
-            <input disabled type="text" value={data.address} className="w-full text-gray-400" />
+            <input disabled type="text" value={data.address} className="w-full text-gray-400 bg-transparent" />
             <HiCheckCircle />
           </div>
         </label>
@@ -35,8 +35,8 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
       <div className="flex flex-col md:flex-row gap-2 md:gap-8">
         <label className="flex flex-col gap-2 w-full">
           Ville
-          <div className="flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
-            <input type="text" value={data.city} disabled className="w-full text-gray-400" />
+          <div className="appearance-none flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
+            <input type="text" value={data.city} disabled className="w-full text-gray-400 bg-transparent" />
             <HiCheckCircle />
           </div>
         </label>
@@ -44,7 +44,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
         <label className="flex flex-col gap-2 w-full">
           Code postal
           <div className="flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
-            <input type="text" value={data.zip} disabled className="w-full text-gray-400" />
+            <input type="text" value={data.zip} disabled className="w-full text-gray-400 bg-transparent" />
             <HiCheckCircle />
           </div>
         </label>
