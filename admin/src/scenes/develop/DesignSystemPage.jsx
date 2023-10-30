@@ -1,10 +1,9 @@
-import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
-import { Badge, Container, Header, InputText, Page, Subheader } from "@snu/ds/admin";
-import React from "react";
-import { HiChevronDown, HiPencil, HiUsers } from "react-icons/hi";
+import React, { useEffect, useState } from "react";
+import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
+import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
-
+import { BsCheck } from "react-icons/bs";
 import { InputPhone } from "@snu/ds/admin";
 import { PHONE_ZONES } from "snu-lib";
 
@@ -14,12 +13,109 @@ export default function DesignSystemPage() {
     input1Phone: "",
     input1PhoneZone: "",
   });
+
   const error = "Ceci est une erreur";
 
   const handleChange = (event, nameExtention) => {
     event.persist();
     setValues((prev) => ({ ...prev, [event.target.name]: event.target.value }));
   };
+
+  const [StatusTitle, setStatusTitle] = useState("Candidature approuvée");
+  const [StatusSelect, setStatusSelect] = useState("validated");
+  const [SelectClassName, setSelectClassName] = useState("hover:bg-green-200");
+
+  const selectTest = [
+    {
+      key: "1",
+      title: "Option 1",
+      items: [
+        {
+          key: "1",
+          render: (
+            <>
+              <HiOutlineCommandLine size={20} color="red" />
+              <p className="text-red-500">Supprimer</p>
+            </>
+          ),
+          optionClassNames: "hover:bg-red-200",
+        },
+        {
+          key: "2",
+          render: (
+            <>
+              <HiOutlineCommandLine size={20} />
+              <p>Select Options 2</p>
+            </>
+          ),
+        },
+      ],
+    },
+    {
+      key: "2",
+      title: "Option 2",
+      items: [
+        { key: "3", render: <p>Select Options 3</p> },
+        { key: "4", render: <p>Select Options 4</p> },
+      ],
+    },
+  ];
+  const selectTest2 = [
+    {
+      key: "1",
+      title: "Option 1",
+      items: [
+        { key: "1", render: <p className="text-red-500">Select Options 1</p> },
+        {
+          key: "2",
+          render: (
+            <>
+              <HiOutlineCommandLine size={20} />
+              <p>Select Options 2</p>
+            </>
+          ),
+        },
+      ],
+    },
+  ];
+  const selectTestStatus = [
+    {
+      key: "1",
+      title: "Status",
+      items: [
+        {
+          key: "1",
+          action: () => {
+            setStatusTitle("Candidature approuvée");
+            setStatusSelect("validated");
+            setSelectClassName("hover:bg-green-200");
+          },
+          render: (
+            <div className="flex items-center gap-4 p-2 px-3">
+              <div className="w-3 h-3 bg-green-500 rounded-[50%] mt-0.5" />
+              <div className={`${StatusSelect === "validated" && "font-bold"} text-sm`}>Candidature Approuvée</div>
+              {StatusSelect === "validated" && <BsCheck size={20} color="black" className="mt-0.5" />}
+            </div>
+          ),
+        },
+        {
+          key: "2",
+          action: () => {
+            setStatusTitle("Candidature non Retenue");
+            setStatusSelect("refused");
+            setSelectClassName("hover:bg-red-200");
+          },
+          render: (
+            <div className="flex items-center gap-4 p-2 px-3">
+              <div className="w-3 h-3 bg-red-500 rounded-[50%] mt-0.5" />
+              <div className={`${StatusSelect === "refused" && "font-bold"} text-sm`}>Candidature non Retenue</div>
+              {StatusSelect === "refused" && <BsCheck size={20} color="black" className="mt-0.5" />}
+            </div>
+          ),
+        },
+      ],
+    },
+  ];
 
   const handleChangeValue = (value, name) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -33,7 +129,7 @@ export default function DesignSystemPage() {
           { href: "/", title: <HiOutlineCommandLine size={20} /> },
           { href: "/design-system", title: "Design System" },
         ]}
-        actions={[<ButtonPrimary key="header-action-1">Click me</ButtonPrimary>]}
+        actions={[<Button key="header-action-1" title={"Click me"} />]}
       />
       <Subheader title="Code, preview, test, build and ship." />
       <Container title="Champs simples (InputText)">
@@ -169,16 +265,10 @@ export default function DesignSystemPage() {
             leftIcon={<HiUsers size={20} />}
             rightIcon={<HiPencil size={20} />}
             onClick={() => console.log("test")}
+            optionsGroup={selectTest2}
           />
           <Badge title={<HiPencil size={20} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
-          <Badge
-            title={"Candidature approuvée"}
-            status={"validated"}
-            mode={"editable"}
-            rightIcon={<HiChevronDown size={20} />}
-            className={"hover:bg-green-200"}
-            onClick={() => console.log("test")}
-          />
+          <DropdownButton title={StatusTitle} status={StatusSelect} buttonClassNames={SelectClassName} mode={"badge"} optionsGroup={selectTestStatus} />
           <Badge title={"Désistée"} status={"cancel"} />
           <Badge title={"Refusée"} status={"refused"} />
           <Badge title={"En attente de validation"} status={"waitingValidation"} />
@@ -186,7 +276,32 @@ export default function DesignSystemPage() {
           <Badge title={"En cours"} status={"inProgress"} />
           <Badge title={"Validée sur liste principale"} status={"validated"} />
           <Badge title={"Validée sur liste complémentaire"} status={"validatedBis"} className="!w-[100px]" />
+          <Badge title={"Validée sur liste complémentaire"} status={"validatedBis"} />
           <Badge title={"Brouillon"} status={"draft"} />
+        </div>
+      </Container>
+      <Container title="Boutons">
+        <div className="grid grid-cols-3 gap-3">
+          <Button title={"Primary base"} />
+          <Button title={"Primary base change"} className={"bg-red-500 !w-[100px] hover:bg-red-700"} />
+          <Button title={"Primary base disabled"} disabled={true} />
+          <Button title={"Primary base + Icon"} leftIcon={<HiOutlineCommandLine size={20} />} />
+          <DropdownButton title={"Primary base select"} optionsGroup={selectTest} />
+          <DropdownButton title={"Primary base select disabled"} optionsGroup={selectTest} disabled={true} />
+          <Button title={"Secondary base"} type={"secondary"} />
+          <Button title={"Secondary disabled"} type={"secondary"} disabled={true} />
+          <Button title={"Secondary base + Icon"} type={"secondary"} leftIcon={<HiOutlineCommandLine size={20} />} />
+          <DropdownButton title={"Secondary base select"} optionsGroup={selectTest2} type={"secondary"} />
+          <DropdownButton title={"Secondary base select disabled"} optionsGroup={selectTest2} type={"secondary"} disabled={true} />
+          <Button title={"Tertiary base"} type={"tertiary"} />
+          <Button title={"Tertiary base disabled"} type={"tertiary"} disabled={true} />
+          <Button title={"Wired base"} type={"wired"} />
+          <Button title={"Wired base disabled"} type={"wired"} disabled={true} />
+          <Button title={"Wired base + Icon"} type={"wired"} leftIcon={<HiOutlineCommandLine size={20} />} />
+          <Button title={"Modifier"} type={"change"} leftIcon={<HiOutlinePencil size={16} />} />
+          <Button title={"Modifier disabled"} type={"change"} disabled={true} leftIcon={<HiOutlinePencil size={16} />} />
+          <Button title={"Annuler"} type={"cancel"} />
+          <Button title={"Annuler disabled"} type={"cancel"} disabled={true} />
         </div>
       </Container>
       <div className="grid grid-rows-2 grid-flow-col gap-4">
