@@ -128,7 +128,8 @@ export default function StepCoordonnees() {
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
-  const [hasSpecialSituation, setSpecialSituation] = useState(false);
+  // const [hasSpecialSituation, setSpecialSituation] = useState(false);
+  const [hasSpecialSituation, setSpecialSituation] = useState(null);
 
   const {
     birthCountry,
@@ -223,6 +224,9 @@ export default function StepCoordonnees() {
   const getErrors = () => {
     let errors = {};
 
+    if (hasSpecialSituation === null) {
+      errors.hasSpecialSituation = "Ce champ est obligatoire";
+    }
     if (wasBornInFranceBool && birthCityZip && !validator.isPostalCode(birthCityZip, "FR")) {
       errors.birthCityZip = errorMessages.zip;
     }
@@ -600,7 +604,7 @@ export default function StepCoordonnees() {
           error={errors.situation}
           correction={corrections?.situation}
         />
-        <div className="mb-4 flex items-center">
+        {/* <div className="mb-4 flex items-center">
           <div>
             <h2 className="mt-0 text-[16px] font-bold">
               Souhaitez-vous nous faire part d’une situation particulière ?
@@ -611,7 +615,47 @@ export default function StepCoordonnees() {
           <div className="ml-3">
             <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
           </div>
+        </div> */}
+        <div className="mb-4 flex items-center">
+          <div>
+            <h2 className="mt-0 text-[16px] font-bold">
+              Souhaitez-vous nous faire part d’une situation particulière ?
+              <span className="text-[14px]">(allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
+            </h2>
+            <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
+          </div>
         </div>
+        <div className="ml-3 flex flex-raw">
+          <div className="px-6 border-r">
+            <input
+              className="mr-1"
+              type="radio"
+              id="oui"
+              name="specialSituation"
+              value="true"
+              checked={hasSpecialSituation === true}
+              onChange={(e) => updateSpecialSituation(e.target.value === "true")}
+            />
+            <label className="mb-0" htmlFor="oui">
+              Oui
+            </label>
+          </div>
+          <div className="px-6 mb-2">
+            <input
+              className="mr-1"
+              type="radio"
+              id="non"
+              name="specialSituation"
+              value="false"
+              checked={hasSpecialSituation === false}
+              onChange={(e) => updateSpecialSituation(e.target.value === "true")}
+            />
+            <label className="mb-0" htmlFor="non">
+              Non
+            </label>
+          </div>
+        </div>
+        <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
         {hasSpecialSituation && (
           <>
             <CheckBox
