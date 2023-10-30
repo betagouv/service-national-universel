@@ -1237,7 +1237,7 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
         </div>
         <div>
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow1")} errors={errors} value={parent1Consentement.allow1}>
-            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de{" "}
             <b>
               {young.firstName} {young.lastName}
             </b>

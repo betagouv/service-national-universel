@@ -319,7 +319,7 @@ function ConsentementForm({ young, token, step, parentId }) {
                   <div>
                     Je, <b>{data.firstName + " " + data.lastName}</b>
                     <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
-                      Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
+                      Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de <b>{youngFullname}</b>.
                     </Check>
                     <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
                       M&apos;engage à communiquer la fiche sanitaire de <b>{youngFullname}</b> au responsable du séjour de cohésion (

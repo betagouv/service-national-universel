@@ -1754,10 +1754,11 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
         </div>
         <div>
           <CheckRead value={young.parent1AllowSNU === "true"}>
-            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de{" "}
             <b>
               {young.firstName} {young.lastName}
             </b>
+            .
           </CheckRead>
           <CheckRead value={young.parent1AllowSNU === "true"}>
             S&apos;engage à communiquer la fiche sanitaire de{" "}
