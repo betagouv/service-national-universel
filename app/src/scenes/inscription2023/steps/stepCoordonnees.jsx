@@ -606,18 +606,6 @@ export default function StepCoordonnees() {
           error={errors.situation}
           correction={corrections?.situation}
         />
-        {/* <div className="mb-4 flex items-center">
-          <div>
-            <h2 className="mt-0 text-[16px] font-bold">
-              Souhaitez-vous nous faire part d’une situation particulière ?
-              <span className="text-[14px] ">(allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
-            </h2>
-            <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
-          </div>
-          <div className="ml-3">
-            <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
-          </div>
-        </div> */}
         <hr className="my-2 h-px border-0 bg-gray-200" />
         <div className="flex flex-row items-center">
           <h2 className="mb-4 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
@@ -638,7 +626,7 @@ export default function StepCoordonnees() {
             <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
           </div>
         </div>
-        <div className="flex flex-row mb-4">
+        <div className="flex flex-col md:flex-row mb-4">
           <div className="pr-4 border-r">
             <input
               className="mr-2"
@@ -653,7 +641,7 @@ export default function StepCoordonnees() {
               Oui
             </label>
           </div>
-          <div className="px-6">
+          <div className="md:px-6">
             <input
               className="mr-2"
               type="radio"
