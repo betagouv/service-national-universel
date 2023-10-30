@@ -4,9 +4,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        "ds-gray": {
-          400: "#9CA3AF",
-          900: "#111827",
+        ds: {
+          gray: {
+            400: "#9CA3AF",
+            900: "#111827",
+          },
+          "deep-blue": {
+            900: "#0C1035",
+            500: "#30345B",
+            50: "#EEEFF5",
+          },
         },
       },
       boxShadow: {
