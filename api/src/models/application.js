@@ -211,6 +211,12 @@ Schema.methods.anonymise = function () {
   this.tutorName = starify(this.tutorName);
   this.missionName = starify(this.missionName);
   this.contractStatus = this.contractStatus || "DRAFT";
+
+  this.contractAvenantFiles = [];
+  this.justificatifsFiles = [];
+  this.feedBackExperienceFiles = [];
+  this.othersFiles = [];
+
   return this;
 };
 
