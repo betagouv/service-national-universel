@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { getCohortPeriod } from "snu-lib";
+import { getCohortPeriod, getCohortYear } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import Error from "../../../components/error";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -71,22 +71,23 @@ export default function StepConsentements() {
           <div className="flex items-center gap-4">
             <CheckBox checked={data.consentment1} onChange={(e) => setData({ ...data, consentment1: e })} />
             <div className="flex-1 text-sm text-[#3A3A3A]">
-              Suis volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-              <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> et la réalisation d’une mission d’intérêt général.
+              Me porte volontaire pour participer à la session <strong>{getCohortYear(getCohort(young.cohort))}</strong> du Service National Universel qui comprend la participation
+              à un séjour de cohésion puis la réalisation d&apos;une mission d&apos;intérêt général dans l&apos;année qui suit le séjour de cohésion.
             </div>
           </div>
           <div className="flex items-center gap-4">
             <CheckBox checked={data.consentment2} onChange={(e) => setData({ ...data, consentment2: e })} />
             <div className="flex-1 text-sm text-[#3A3A3A]">
-              M&apos;engage à respecter le{" "}
+              M&apos;inscris pour le séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles et m&apos;engage à en
+              respecter le{" "}
               <a
                 href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/snu-reglement-interieur-2022-2023.pdf"
                 target="_blank"
                 rel="noreferrer"
                 className="underline hover:underline">
                 règlement intérieur
-              </a>{" "}
-              du SNU, en vue de ma participation au séjour de cohésion.
+              </a>
+              .
             </div>
           </div>
         </div>

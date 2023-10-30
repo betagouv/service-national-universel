@@ -131,6 +131,8 @@ const getCohortEndDate = (young, cohort) => {
   return cohort ? new Date(cohort.dateEnd) : END_DATE_PHASE1[young.cohort];
 };
 
+const getCohortYear = cohort => cohort?.dateStart?.slice(0,4);
+
 const getCohortPeriod = (cohort, withBold = false) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
   const startDate = new Date(cohort.dateStart);
@@ -233,6 +235,7 @@ function canApplyToPhase2(young, cohort) {
 
 export {
   oldSessions,
+  getCohortYear,
   getCohortPeriod,
   getCohortPeriodTemp,
   sessions2023CohortNames,
