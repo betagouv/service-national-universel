@@ -1,9 +1,7 @@
-import Img4 from "../../assets/JVA_round.png";
-import Img3 from "../../assets/logo-snu.png";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import {
   formatDateFR,
   formatLongDateUTC,
@@ -15,6 +13,8 @@ import {
   translatePhase2,
   translateSource,
 } from "snu-lib";
+import Img4 from "../../assets/JVA_round.png";
+import Img3 from "../../assets/logo-snu.png";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import SelectAction from "../../components/SelectAction";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -581,7 +581,7 @@ const Hit = ({ hit, callback }) => {
   return (
     <>
       <div className="flex items-center py-3 px-4 hover:bg-gray-50">
-        <div className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
+        <Link className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
           {hit.isJvaMission === "true" ? (
             <img src={Img4} className="mx-auto h-8 w-8 group-hover:scale-105" />
           ) : (
@@ -600,7 +600,7 @@ const Hit = ({ hit, callback }) => {
               <div className="table-cel truncate text-sm leading-4 text-gray-500 font-bold">{hit.structureName}</div>
             </div>
           </div>
-        </div>
+        </Link>
         <div className="w-[5%]">
           {hit?.visibility === "HIDDEN" && (
             <div className="group relative cursor-pointer">
