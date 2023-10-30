@@ -3,7 +3,7 @@ import FullDoughnut from "../graphs/FullDoughnut";
 import OccupationBarVertical from "./OccupationBarVertical";
 import { getNewLink } from "../../../../utils";
 import queryString from "query-string";
-import { ROLES, COHORTS_BEFORE_JULY_2023 } from "snu-lib/constants";
+import { ROLES, COHORTS_BEFORE_JULY_2023 } from "snu-lib";
 
 export default function Presences({ presence, JDM, depart, departTotal, departMotif, filter, role, sessionId, centerId, cohortHeadCenter = null }) {
   const departPercentage = departTotal ? depart?.true / departTotal : 0;

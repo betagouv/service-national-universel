@@ -41,7 +41,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       zip: Joi.string().trim().allow(null, ""),
       cohort: Joi.string()
         .trim()
-        .valid(...getCohortNames())
+        .valid(...getCohortNames(true, false, false))
         .required(),
     }).validate({ ...req.body }, { stripUnknown: true });
 
@@ -66,7 +66,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // Update young
     young.set({
       ...value,
-      // @todo check reseted values
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,

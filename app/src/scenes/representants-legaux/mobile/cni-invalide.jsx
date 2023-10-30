@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import React, { useContext, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { COHESION_STAY_START, translate } from "snu-lib";
+import { translate } from "snu-lib";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import Loader from "../../../components/Loader";
@@ -25,9 +25,10 @@ export default function CniInvalide() {
     return <Redirect to={`/representants-legaux/cni-invalide-done?token=${token}`} />;
   }
 
-  const youngFullname = young.firstName + " " + young.lastName;
-  const parentFullname = young.parent1FirstName + " " + young.parent1LastName;
-  const dateSejour = COHESION_STAY_START[young.cohort] ? dayjs(COHESION_STAY_START[young.cohort]).locale("fr").format("D MMMM YYYY") : young.cohort;
+  const { firstName, lastName, parent1FirstName, parent1LastName, cohort } = young;
+  const youngFullname = firstName + " " + lastName;
+  const parentFullname = parent1FirstName + " " + parent1LastName;
+  const dateSejour = cohort.dateStart ? dayjs(cohort.dateStart).locale("fr").format("D MMMM YYYY") : cohort.name;
 
   async function onSubmit() {
     setSaving(true);

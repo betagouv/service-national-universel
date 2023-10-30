@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { COHESION_STAY_START, COHORTS, ROLES, START_DATE_SESSION_PHASE1, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
+import { COHESION_STAY_START, getCohortNames, ROLES, START_DATE_SESSION_PHASE1, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
 import Calendar from "../../assets/icons/Calendar";
 import ExternalLink from "../../assets/icons/ExternalLink";
@@ -27,7 +27,7 @@ export default function List() {
 
   const getFirstCohortAvailable = () => {
     let firstSession = null;
-    for (const session of COHORTS) {
+    for (const session of getCohortNames()) {
       if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
         firstSession = session;
         break;

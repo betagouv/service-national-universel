@@ -1,4 +1,3 @@
-import { COHESION_STAY_END } from "./date";
 import { region2department } from "./region-and-departments";
 
 const ROLES = {
@@ -662,11 +661,6 @@ function canShareSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
-function canApplyToPhase2(young) {
-  const now = new Date();
-  return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= COHESION_STAY_END[young.cohort];
-}
-
 function canCreateAlerteMessage(actor) {
   return [ROLES.ADMIN].includes(actor.role);
 }
@@ -898,7 +892,6 @@ export {
   canSeeYoungInfo,
   canEditPresenceYoung,
   canShareSessionPhase1,
-  canApplyToPhase2,
   canCreateAlerteMessage,
   canReadAlerteMessage,
   canViewTableDeRepartition,

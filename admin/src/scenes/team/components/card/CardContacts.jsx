@@ -48,7 +48,6 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
       // we take only the last 2 oldCohorts
       let oldCohorts = oldSessions.map((session) => session.name);
       oldCohorts = oldCohorts.slice(oldCohorts.length - 2, oldCohorts.length);
-      // @todo: needs to be tested
       const newCohorts = sessions2023.map((session) => session.name);
 
       const concatCohorts = [...oldCohorts, ...newCohorts];

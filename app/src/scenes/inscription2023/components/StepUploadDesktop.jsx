@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { ID } from "../utils";
 import { getCohort } from "@/utils/cohorts";
 import dayjs from "dayjs";
@@ -11,11 +12,32 @@ import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import FileImport from "@/components/dsfr/forms/FileImport";
+import Verify from "./VerifyDocument";
 
-export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, date, setDate, error, setError, loading, setLoading, corrections, category, onSubmit, onCorrect }) {
+export default function StepUploadDesktop({
+  recto,
+  setRecto,
+  verso,
+  setVerso,
+  date,
+  setDate,
+  error,
+  setError,
+  loading,
+  setLoading,
+  corrections,
+  category,
+  checked,
+  setChecked,
+  onSubmit,
+  onCorrect,
+}) {
   const young = useSelector((state) => state.Auth.young);
   const [hasChanged, setHasChanged] = useState(false);
   const isEnabled = validate();
+  const [step, setStep] = useState(0);
+  const history = useHistory();
+  const imageFileTypes = ["image/jpeg", "image/png", "image/jpg"];
 
   function validate() {
     if (!dayjs(date).isValid()) {
@@ -29,11 +51,32 @@ export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, da
   }
 
   function resetState() {
+    setStep(0);
     setRecto();
     setVerso();
     setHasChanged(false);
     setLoading(false);
   }
+
+  const handleOnClickNext = async () => {
+    const areAllFilesImages = [recto, verso].every((e) => !e || imageFileTypes.includes(e?.type));
+    if (areAllFilesImages) return setStep(1);
+    else return corrections?.length ? onCorrect(resetState) : onSubmit(resetState);
+  };
+
+  if (step === 1)
+    return (
+      <>
+        <Verify recto={recto} verso={verso} checked={checked} setChecked={setChecked} />
+        <SignupButtonContainer
+          onClickNext={() => (corrections?.length ? onCorrect(resetState) : onSubmit(resetState))}
+          labelNext={loading ? "Scan antivirus en cours" : "Oui, les documents sont conformes"}
+          disabled={Object.values(checked).some((e) => e === false)}
+          onClickPrevious={resetState}
+          labelPrevious="Non, recommencer"
+        />
+      </>
+    );
 
   return (
     <>
@@ -102,11 +145,7 @@ export default function StepUploadDesktop({ recto, setRecto, verso, setVerso, da
       {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      {corrections?.length ? (
-        <SignupButtonContainer onClickNext={() => onCorrect(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Corriger"} disabled={!isEnabled} />
-      ) : (
-        <SignupButtonContainer onClickNext={() => onSubmit(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Continuer"} disabled={!isEnabled} />
-      )}
+      <SignupButtonContainer onClickNext={handleOnClickNext} disabled={!isEnabled} onClickPrevious={() => history.push("/inscription2023/documents")} />
     </>
   );
 }

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
-const { COHORTS } = require("snu-lib");
+const { getCohortNames } = require("snu-lib");
 const MODELNAME = "lignebus";
 
 const BusTeam = new mongoose.Schema({
@@ -68,7 +68,7 @@ const Schema = new mongoose.Schema({
   cohort: {
     type: String,
     required: true,
-    enum: COHORTS,
+    enum: getCohortNames(),
     documentation: {
       description: "Cohorte de la ligne de bus",
     },

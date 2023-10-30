@@ -64,14 +64,15 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
 
 router.get("/isInscriptionOpen/:sessionName?", async (req, res) => {
   const cohortName = req.params.sessionName;
+  const now = new Date();
   try {
     if (cohortName) {
       const cohort = await CohortModel.findOne({ name: cohortName });
       if (!cohort) return res.status(400).send({ ok: true, data: false });
-      return res.send({ ok: true, data: new Date() < new Date(cohort.inscriptionEndDate) });
+      return res.send({ ok: true, data: now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate) });
     }
     const cohorts = await CohortModel.find({});
-    return res.send({ ok: true, data: cohorts.some((c) => new Date() < new Date(c.inscriptionEndDate)) });
+    return res.send({ ok: true, data: cohorts.some((cohort) => now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate)) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

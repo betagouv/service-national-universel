@@ -96,6 +96,8 @@ const departmentToAcademy = {
   "Alpes-Maritimes": "Nice",
   Var: "Nice",
   Guadeloupe: "Guadeloupe",
+  "Saint-Martin": "Guadeloupe",
+  "Saint-Barthélemy": "Guadeloupe",
   Martinique: "Martinique",
   Mayotte: "Mayotte",
   Guyane: "Guyane",

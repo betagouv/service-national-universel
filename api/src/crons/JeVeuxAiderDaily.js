@@ -1,5 +1,3 @@
-require("dotenv").config({ path: "./../../.env-staging" });
-
 const fetch = require("node-fetch");
 require("../mongo");
 const path = require("path");

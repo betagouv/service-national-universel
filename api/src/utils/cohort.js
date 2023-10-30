@@ -7,14 +7,17 @@ async function getFilteredSessions(young) {
   const sessions2023 = await CohortModel.find({});
 
   const region = getRegionForEligibility(young);
+  const now = Date.now();
   const sessions = sessions2023.filter(
     (session) =>
       session.eligibility?.zones.includes(region2zone[region]) &&
       session.eligibility?.schoolLevels.includes(young.grade) &&
       session.eligibility?.bornAfter <= young.birthdateAt &&
       session.eligibility?.bornBefore >= young.birthdateAt &&
-      ((session.inscriptionEndDate && session.inscriptionEndDate > Date.now()) ||
-        ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.instructionEndDate && session.instructionEndDate > Date.now())),
+      !!session.inscriptionStartDate &&
+      session.inscriptionStartDate <= now &&
+      ((session.inscriptionEndDate && session.inscriptionEndDate > now) ||
+        ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.instructionEndDate && session.instructionEndDate > now)),
   );
 
   for (let session of sessions) {

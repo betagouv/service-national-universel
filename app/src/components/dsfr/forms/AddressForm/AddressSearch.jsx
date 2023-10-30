@@ -46,7 +46,7 @@ export default function AddressSearch({ getOptions, updateData, error }) {
     controllerRef.current = controller;
 
     const [options, error] = await getOptions(e.target.value, controller.signal);
-    if (error) return toastr.error("Erreur", "Une erreur est survenue lors de la recherche de votre adresse.", { timeOut: 10_000 });
+    if (error) return toastr.error("Erreur", "Une erreur est survenue lors de la recherche d'adresse.", { timeOut: 10_000 });
     return setOptions(options);
   };
 
@@ -56,7 +56,7 @@ export default function AddressSearch({ getOptions, updateData, error }) {
   };
 
   return (
-    <>
+    <div ref={dropdownRef}>
       <label className="flex flex-col gap-1">
         Rechercher une adresse
         <span className="text-[#666666] text-xs mb-1">Si votre adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
@@ -70,7 +70,7 @@ export default function AddressSearch({ getOptions, updateData, error }) {
 
       <div className="relative">
         {query?.length > 2 && (
-          <div ref={dropdownRef} className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
+          <div className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
             {options.length ? (
               <AddressDropdown optionGroups={options} handleSelect={handleSelect} />
             ) : (
@@ -83,6 +83,6 @@ export default function AddressSearch({ getOptions, updateData, error }) {
       </div>
 
       <ErrorMessage>{error}</ErrorMessage>
-    </>
+    </div>
   );
 }

@@ -9,7 +9,7 @@ const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const CohortModel = require("../../models/cohort");
 const {
-  COHORTS,
+  getCohortNames,
   SENDINBLUE_TEMPLATES,
   canViewMeetingPoints,
   canUpdateMeetingPoint,
@@ -514,7 +514,7 @@ router.get("/:id/bus/:cohort", passport.authenticate("referent", { session: fals
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     const { error: errorCohort, value: checkedCohort } = Joi.string()
       .required()
-      .valid(...COHORTS)
+      .valid(...getCohortNames())
       .validate(req.params.cohort);
 
     if (errorId || errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
