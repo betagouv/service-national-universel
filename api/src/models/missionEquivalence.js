@@ -118,7 +118,7 @@ Schema.methods.anonymise = function () {
   this.contactEmail = generateRandomEmail();
   this.contactFullName = generateRandomName() + generateRandomName();
   this.structureName = generateRandomName();
-  this.files = this.files?.map((f) => starify(f));
+  this.files = [];
   return this;
 };
 
