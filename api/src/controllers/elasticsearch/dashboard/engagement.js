@@ -288,7 +288,7 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
       query: {
         bool: {
           must: [{ match_all: {} }, ...filters.filter(Boolean)],
-          filter: [...dashboardUserRoleContextFilters].filter(Boolean),
+          filter: [...dashboardUserRoleContextFilters, ...missionContextFilters].filter(Boolean),
         },
       },
       aggs: {

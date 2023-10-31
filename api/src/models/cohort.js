@@ -14,7 +14,7 @@ const DSNJExportDates = new mongoose.Schema({
 const Eligibility = new mongoose.Schema({
   zones: {
     type: [String],
-    enum: ["A", "B", "C", "DOM", "PF", "Etranger", "NC", "Corse", "Mayotte", "Reunion", "Guadeloupe", "Guyane", "Martinique"],
+    enum: ["A", "B", "C", "DOM", "PF", "Etranger", "NC", "Corse", "Mayotte", "La Réunion", "Guadeloupe", "Guyane", "Martinique"],
     required: true,
   },
   schoolLevels: {
