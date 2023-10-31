@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton } from "@snu/ds/admin";
+import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, SelectButton } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
@@ -15,12 +15,39 @@ export default function DesignSystemPage() {
     input1Phone: "",
     input1PhoneZone: "",
   });
+  const [valueSelect, setValuesSelect] = React.useState({
+    select1: "",
+    select2: [],
+  });
+  const SelectOptions = [
+    { value: "1", label: "Item 1" },
+    { value: "2", label: "Item 2" },
+    { value: "3", label: "Item 3" },
+    { value: "4", label: "Item 4" },
+    { value: "5", label: "Item 5" },
+  ];
 
   const error = "Ceci est une erreur";
 
   const handleChange = (event, nameExtention) => {
     event.persist();
     setValues((prev) => ({ ...prev, [event.target.name]: event.target.value }));
+  };
+  const handleMonoSelectChange = (selectedOption) => {
+    if (selectedOption) {
+      setValuesSelect({
+        ...valueSelect,
+        select1: selectedOption.value,
+      });
+    } else {
+      setValuesSelect({
+        ...valueSelect,
+        select1: "",
+      });
+    }
+  };
+  const handleMultiSelectChange = (selectedOption) => {
+    setValuesSelect({ ...valueSelect, select2: selectedOption.map((opt) => opt.value) });
   };
 
   const [StatusTitle, setStatusTitle] = useState("Candidature approuvée");
@@ -304,6 +331,94 @@ export default function DesignSystemPage() {
           <Button title={"Modifier disabled"} type={"change"} disabled={true} leftIcon={<HiOutlinePencil size={16} />} />
           <Button title={"Annuler"} type={"cancel"} />
           <Button title={"Annuler disabled"} type={"cancel"} disabled={true} />
+        </div>
+      </Container>
+      <Container title="Select">
+        <div className="grid grid-cols-3 gap-4 w-full">
+          <SelectButton
+            placeholder="Mono Select"
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.select1)}
+            onChange={handleMonoSelectChange}
+          />
+          <SelectButton
+            placeholder="Mono Select with Label"
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.select1)}
+            label="selectTest"
+            isClearable={true}
+            onChange={handleMonoSelectChange}
+          />
+          <SelectButton
+            placeholder="Mono Select disabled"
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.select1)}
+            onChange={handleMonoSelectChange}
+            disabled={true}
+          />
+          <SelectButton
+            placeholder="Mono Select with Label"
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.select1)}
+            label="selectTest"
+            onChange={handleMonoSelectChange}
+            error={error}
+          />
+          <SelectButton
+            placeholder="Mono Select with Label"
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.select1)}
+            onChange={handleMonoSelectChange}
+            error={error}
+          />
+          <SelectButton
+            placeholder="Multi Select"
+            options={SelectOptions}
+            isMulti={true}
+            isClearable={true}
+            value={valueSelect.select2?.map((val) => ({
+              value: val,
+              label: SelectOptions.filter((item) => item.value === val)[0].label,
+            }))}
+            onChange={handleMultiSelectChange}
+          />
+          <SelectButton
+            placeholder="Multi Select with label"
+            options={SelectOptions}
+            isMulti={true}
+            isClearable={true}
+            label="selectTest"
+            value={valueSelect.select2?.map((val) => ({
+              value: val,
+              label: SelectOptions.filter((item) => item.value === val)[0].label,
+            }))}
+            onChange={handleMultiSelectChange}
+          />
+          <SelectButton
+            placeholder="Multi Select with label"
+            options={SelectOptions}
+            isMulti={true}
+            isClearable={true}
+            disabled={true}
+            value={valueSelect.select2?.map((val) => ({
+              value: val,
+              label: SelectOptions.filter((item) => item.value === val)[0].label,
+            }))}
+            onChange={handleMultiSelectChange}
+          />
+          <SelectButton
+            placeholder="Multi Select with label"
+            options={SelectOptions}
+            isMulti={true}
+            isClearable={true}
+            label="selectTest"
+            value={valueSelect.select2?.map((val) => ({
+              value: val,
+              label: SelectOptions.filter((item) => item.value === val)[0].label,
+            }))}
+            error={error}
+            onChange={handleMultiSelectChange}
+          />
         </div>
       </Container>
       <ModalExamples />
