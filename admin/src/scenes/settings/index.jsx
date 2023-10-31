@@ -67,7 +67,7 @@ export default function Settings() {
     const cohortList = getCohortSelectOptions(cohorts, true);
     setCohortList(cohortList);
     if (!cohort) {
-      setCohort(cohortList[0].value);
+      setCohort("Février 2024 - C");
     }
   }, []);
 
