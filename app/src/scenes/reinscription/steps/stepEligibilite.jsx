@@ -29,8 +29,11 @@ export default function StepEligibilite() {
   const [loading, setLoading] = React.useState(false);
   const isBirthdayModificationDisabled = true;
   const dispatch = useDispatch();
-
   const history = useHistory();
+  const isEmptyObject = (obj) => {
+    if (!obj) return true; // Retourne true si l'objet est null ou undefined
+    return Object.keys(obj).length === 0 && obj.constructor === Object;
+  };
 
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
@@ -63,7 +66,7 @@ export default function StepEligibilite() {
         }
       } else {
         // School
-        if (!data?.school) {
+        if (isEmptyObject(data?.school)) {
           // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
           errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
@@ -73,7 +76,6 @@ export default function StepEligibilite() {
     setError(errors);
     setToggleVerify(!toggleVerify);
 
-    // ! Gestion erreur a reprendre
     if (Object.keys(errors).length) {
       console.warn("Pb avec ce champ : " + Object.keys(errors)[0] + " pour la raison : " + Object.values(errors)[0]);
       toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
@@ -125,7 +127,7 @@ export default function StepEligibilite() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
+      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"}>
         <div className="space-y-5">
           <div className="flex flex-col gap-4">
             <div className="flex w-full flex-col">

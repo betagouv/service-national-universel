@@ -225,7 +225,7 @@ router.post("/ticket/form", async (req, res) => {
 
     if (req.body.role === "young" || req.body.role === "parent") {
       author = req.body.role;
-      const existingYoung = await YoungObject.findOne({ email: req.body.email });
+      const existingYoung = await YoungObject.findOne({ email: req.body.email.toLowerCase() });
       if (existingYoung) {
         req.body.role = "young exterior";
       } else {
@@ -234,7 +234,7 @@ router.post("/ticket/form", async (req, res) => {
     }
 
     const obj = {
-      email: req.body.email,
+      email: req.body.email.toLowerCase(),
       subject: req.body.subject,
       message: req.body.message,
       firstName: req.body.firstName,
