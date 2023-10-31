@@ -16,6 +16,7 @@ import { capture, captureMessage } from "../../../sentry";
 import api from "../../../services/api";
 import { cohortsInit } from "../../../utils/cohorts";
 import plausibleEvent from "@/services/plausible";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -124,7 +125,7 @@ export default function Signin() {
         <div className="mt-4 text-[#E5E5E5]">
           <div className="mt-4 mb-3 text-center text-[17px] font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
           {/* <p className="text-center text-base text-[#161616] mb-4">Les inscriptions sont actuellement fermées.</p> */}
-          {isInscriptionOpen ? (
+          {isFeatureEnabled(FEATURES_NAME.YOUNG_INSCRIPTION, undefined, environment) && isInscriptionOpen ? (
             <Link onClick={() => plausibleEvent("Connexion/Lien vers preinscription")} to="/preinscription">
               <p className="w-full my-4 text-center p-2 text-blue-france-sun-113 border-[1px] border-blue-france-sun-113 hover:bg-blue-france-sun-113">Commencer mon inscription</p>
             </Link>

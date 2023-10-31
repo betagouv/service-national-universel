@@ -30,6 +30,9 @@ const features = {
     [ENVS.staging]: [],
     [ENVS.development]: [],
   },
+  [FEATURES_NAME.YOUNG_INSCRIPTION]: {
+    [ENVS.production]: [],
+  },
 };
 
 function isFeatureEnabled(featureName, userRole, environment) {
