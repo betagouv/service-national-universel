@@ -1,4 +1,4 @@
-import { classNames } from "@/utils";
+import { classNames } from "../../utils";
 import React from "react";
 import { HiOutlineChevronDown } from "react-icons/hi";
 import { ErrorIcon, ErrorMessage, getFormBaseClass } from "./InputBase";
