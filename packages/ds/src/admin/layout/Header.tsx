@@ -67,7 +67,9 @@ export default function Header({
       </div>
 
       {/* Actions */}
-      {actions && <div className="ml-6">{actions}</div>}
+      {actions && (
+        <div className="flex items-center justify-end ml-6">{actions}</div>
+      )}
     </div>
   );
 }

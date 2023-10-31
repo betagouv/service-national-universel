@@ -3,14 +3,14 @@ import { Switch } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
-import View from "./view";
+import List from "./list";
 
 export default function Index() {
   useDocumentTitle("Mes élèves");
 
   return (
     <Switch>
-      <SentryRoute path="/mes-eleves" component={View} />
+      <SentryRoute path="/mes-eleves" component={List} />
     </Switch>
   );
 }
