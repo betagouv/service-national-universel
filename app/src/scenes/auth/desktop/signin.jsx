@@ -72,8 +72,6 @@ export default function Signin() {
     setLoading(false);
   };
 
-  console.log(isFeatureEnabled(FEATURES_NAME.YOUNG_INSCRIPTION, undefined, environment));
-
   React.useEffect(() => {
     if (email && password) setDisabled(false);
     else setDisabled(true);
