@@ -4,12 +4,14 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
 import List from "./list";
+import Create from "./create";
 
 export default function Index() {
   useDocumentTitle("Mes classes");
 
   return (
     <Switch>
+      <SentryRoute path="/mes-classes/create" component={Create} />
       <SentryRoute path="/mes-classes" component={List} />
     </Switch>
   );
