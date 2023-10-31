@@ -308,7 +308,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     let { error, value } = validateParents(req.body, type !== "save");
 
     if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, msg: error.message });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     value.parent1Phone = formatPhoneNumberFromPhoneZone(value.parent1Phone, value.parent1PhoneZone);
