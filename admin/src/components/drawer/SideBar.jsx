@@ -178,22 +178,15 @@ const SideBar = (props) => {
       Icon={InstitutionIcon}
       title="Mon établissement"
       link="/mon-etablissement"
-      active={path === "mon-etablissement"}
+      active={path.includes("mon-etablissement")}
       setCurrentOpen={setDropDownOpen}
     />
   );
   const Classe = () => (
-    <SimpleNavItem
-      sideBarOpen={open}
-      Icon={ClasseIcon}
-      title="Mes classes"
-      link="/mes-classes"
-      active={["mes-classes", "creer-une-classe"].includes(path)}
-      setCurrentOpen={setDropDownOpen}
-    />
+    <SimpleNavItem sideBarOpen={open} Icon={ClasseIcon} title="Mes classes" link="/mes-classes" active={path.includes("mes-classes")} setCurrentOpen={setDropDownOpen} />
   );
   const Student = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={StudentIcon} title="Mes élèves" link="/mes-eleves" active={path === "mes-eleves"} setCurrentOpen={setDropDownOpen} />
+    <SimpleNavItem sideBarOpen={open} Icon={StudentIcon} title="Mes élèves" link="/mes-eleves" active={path.includes("mes-eleves")} setCurrentOpen={setDropDownOpen} />
   );
 
   //MultiNavLinks

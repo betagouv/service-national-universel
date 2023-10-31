@@ -273,7 +273,6 @@ const Home = (props) => {
               {/* Institution */}
               <RestrictedRoute path="/mon-etablissement" component={Institution} />
               <RestrictedRoute path="/mes-classes" component={Classe} />
-              <RestrictedRoute path="/creer-une-classe" component={Classe} />
               <RestrictedRoute path="/mes-eleves" component={Student} />
               {/* Only for developper eyes... */}
               {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? (
@@ -313,11 +312,11 @@ const limitedAccess = {
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.INSTITUTION_CHEF]: {
-    authorised: ["/mon-etablissement", "/mes-classes", "/creer-une-classe", "/mes-eleves", "/design-system", "/develop-assets"],
+    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets"],
     default: "/mon-etablissement",
   },
   [ROLES.INSTITUTION_SOUS_CHEF]: {
-    authorised: ["/mon-etablissement", "/mes-classes", "/creer-une-classe", "/mes-eleves", "/design-system", "/develop-assets"],
+    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets"],
     default: "/mon-etablissement",
   },
 };
