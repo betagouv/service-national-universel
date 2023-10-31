@@ -62,13 +62,13 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
   })(req, res);
 });
 
-router.get("/isInscriptionOpen/timeZoneOffset/:timeZoneOffset/:sessionName?", async (req, res) => {
+router.get("/isInscriptionOpen", async (req, res) => {
   const { error, value } = Joi.object({
     sessionName: Joi.string(),
     timeZoneOffset: Joi.number().required(),
   })
     .unknown()
-    .validate(req.params);
+    .validate(req.query, { stripUnknown: true });
 
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
   const { sessionName: cohortName, timeZoneOffset } = value;
