@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
-import { HiInformationCircle } from "react-icons/hi";
+import InformationCircle from "../../../assets/icons/InformationCircle";
 
 import validator from "validator";
 
@@ -25,7 +25,6 @@ import {
 
 import api from "../../../services/api";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
-import Toggle from "../../../components/dsfr/forms/toggle";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { debounce, translate } from "../../../utils";
@@ -129,7 +128,6 @@ export default function StepCoordonnees() {
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
-  // const [hasSpecialSituation, setSpecialSituation] = useState(false);
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
 
   const {
@@ -607,14 +605,10 @@ export default function StepCoordonnees() {
           correction={corrections?.situation}
         />
         <hr className="my-2 h-px border-0 bg-gray-200" />
-        <div className="flex flex-row items-center">
-          <h2 className="mb-4 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
-          <a
-            className="mt-2.5 ml-2"
-            href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`}
-            target="_blank"
-            rel="noreferrer">
-            <HiInformationCircle className="h-5 w-5 text-[#000091]" />
+        <div className="flex mt-4 items-center gap-3 mb-4">
+          <h2 className="m-0 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
+          <a className="mt-1" href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`} target="_blank" rel="noreferrer">
+            <InformationCircle className="text-blue-800" />
           </a>
         </div>
         <div className="mb-4 flex items-center">
