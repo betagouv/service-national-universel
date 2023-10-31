@@ -382,7 +382,7 @@ export default function Create() {
               zip: values.zip,
             };
           }
-          const res = await api.post("/cohort-session/eligibility/2023", body);
+          const res = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, body);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");

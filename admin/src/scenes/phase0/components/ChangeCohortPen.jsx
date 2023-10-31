@@ -29,7 +29,7 @@ export function ChangeCohortPen({ young, onChange }) {
           setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
           return;
         }
-        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}?timeZoneOffset=${new Date().getTimezoneOffset()}`);
         if (Array.isArray(data)) {
           const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
           cohorts.push(cohortToCome);

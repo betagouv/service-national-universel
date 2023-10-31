@@ -21,6 +21,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
   passport.authenticate("referent", async function (err, user) {
     try {
       let young = {};
+      let timeZoneOffset = null;
       const { value } = validateId(req.params.id);
       if (value) young = await YoungModel.findById(value);
       else {
@@ -33,6 +34,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
           grade: Joi.string(),
           status: Joi.string(),
           zip: Joi.string(),
+          timeZoneOffset: Joi.number(),
         })
           .unknown()
           .validate(req.body);
@@ -44,6 +46,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
       }
       const { error: errorQuery, value: query } = Joi.object({
         getAllSessions: Joi.boolean().default(false),
+        timeZoneOffset: Joi.number(),
       }).validate(req.query, {
         stripUnknown: true,
       });
@@ -52,7 +55,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
 
       const bypassFilter =
         (user?.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && query.getAllSessions);
-      const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young);
+      const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young, query.timeZoneOffset || null);
       if (sessions.length === 0) return res.send({ ok: true, data: { msg: "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU." } });
       return res.send({ ok: true, data: sessions });
     } catch (error) {
