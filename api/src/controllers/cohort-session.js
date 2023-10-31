@@ -73,11 +73,10 @@ router.get("/isInscriptionOpen/timeZoneOffset/:timeZoneOffset/:sessionName?", as
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
   const { sessionName: cohortName, timeZoneOffset } = value;
 
-  const serverTimezoneOffsetInMilliseconds = new Date().getTimezoneOffset() * 60 * 1000; // Server's offset from UTC
   const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC
 
   // Adjust server's time for user's timezone
-  const adjustedTimeForUser = new Date().getTime() - serverTimezoneOffsetInMilliseconds + userTimezoneOffsetInMilliseconds;
+  const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;
   const now = new Date(adjustedTimeForUser);
 
   try {
