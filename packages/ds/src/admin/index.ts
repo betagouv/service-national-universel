@@ -1,6 +1,7 @@
 // Form
 import InputText from "./form/InputText";
 import InputPhone from "./form/InputPhone";
+import Label from "./form/Label";
 
 // Layout
 import Container from "./layout/Container";
@@ -19,6 +20,7 @@ export {
   // Form
   InputText,
   InputPhone,
+  Label,
 
   // Layout
   Container,
