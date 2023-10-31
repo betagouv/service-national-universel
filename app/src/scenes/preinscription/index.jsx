@@ -34,7 +34,8 @@ const Step = () => {
   const [isInscriptionOpenLoading, setInscriptionOpenLoading] = useState(true);
   const fetchInscriptionOpen = async () => {
     try {
-      const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen`);
+      const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen/timeZoneOffset/${new Date().getTimezoneOffset()}`);
+      console.log(ok);
       if (!ok) {
         capture(code);
         return toastr.error("Oups, une erreur est survenue", code);

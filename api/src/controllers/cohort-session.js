@@ -62,9 +62,25 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
   })(req, res);
 });
 
-router.get("/isInscriptionOpen/:sessionName?", async (req, res) => {
-  const cohortName = req.params.sessionName;
-  const now = new Date();
+router.get("/isInscriptionOpen/timeZoneOffset/:timeZoneOffset/:sessionName?", async (req, res) => {
+  const { error, value } = Joi.object({
+    sessionName: Joi.string(),
+    timeZoneOffset: Joi.number().required(),
+  })
+    .unknown()
+    .validate(req.params);
+
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  const { sessionName: cohortName, timeZoneOffset } = value;
+
+  const serverTimezoneOffsetInMilliseconds = new Date().getTimezoneOffset() * 60 * 1000; // Server's offset from UTC
+  const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC
+
+  // Adjust server's time for user's timezone
+  const adjustedTimeForUser = new Date().getTime() - serverTimezoneOffsetInMilliseconds + userTimezoneOffsetInMilliseconds;
+  console.log({ adjustedTimeForUser });
+  const now = new Date(adjustedTimeForUser);
+
   try {
     if (cohortName) {
       const cohort = await CohortModel.findOne({ name: cohortName });
@@ -72,7 +88,20 @@ router.get("/isInscriptionOpen/:sessionName?", async (req, res) => {
       return res.send({ ok: true, data: now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate) });
     }
     const cohorts = await CohortModel.find({});
-    return res.send({ ok: true, data: cohorts.some((cohort) => now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate)) });
+    return res.send({
+      ok: true,
+      data: cohorts.some((cohort) => {
+        console.log({
+          name: cohort.name,
+          inscriptionStartDate: new Date(cohort.inscriptionStartDate),
+          inscriptionEndDate: new Date(cohort.inscriptionEndDate),
+          now,
+          nowServer: new Date(),
+          result: now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate),
+        });
+        return now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate);
+      }),
+    });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
