@@ -7,6 +7,7 @@ type OwnProps = {
   name: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  className?: string;
   label?: string;
   placeholder?: string;
   disabled?: boolean;
@@ -19,6 +20,7 @@ export default function InputText({
   name,
   value,
   onChange,
+  className,
   label,
   placeholder,
   disabled,
@@ -40,7 +42,7 @@ export default function InputText({
   });
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={"flex flex-col gap-2 " + className}>
       <div
         className={classNames(
           baseClass,
