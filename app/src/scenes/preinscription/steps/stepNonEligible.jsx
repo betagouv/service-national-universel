@@ -54,19 +54,20 @@ export default function NonEligible() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
-        <h1 className="text-[22px] font-bold">Nous n'avons pas trouvé de séjour qui correspond à votre situation.</h1>
-        <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
-          Les inscriptions sont actuellement uniquement ouvertes aux volontaires <strong>âgés de 15 à 17 ans</strong> et <strong>scolarisés en seconde</strong>{" "}
-          <strong>en Nouvelle-Calédonie ou à Wallis-et-Futuna</strong>.
-        </p>
-        <p className="text-gray-500 mt-4">
-          Soyez informé(e) de l&apos;ouverture des inscriptions pour les prochaines sessions du SNU via le lien suivant :{" "}
-          <a href="https://www.snu.gouv.fr/" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:decoration-2 hover:underline hover:text-gray-800">
-            snu.gouv.fr
-          </a>
-          .
-        </p>
+      <DSFRContainer
+        title="Nous n'avons pas trouvé de séjour qui correspond à votre situation."
+        supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
+        {data?.message === "age" && (
+          <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
+            Pour participer au SNU, vous devez avoir <strong>entre 15 et 17 ans</strong>.
+          </p>
+        )}
+
+        {data?.message === "nationality" && (
+          <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
+            Pour participer au SNU, vous devez être de <strong>nationalité française</strong>.
+          </p>
+        )}
 
         <div className="my-4 text-base font-bold">Découvrez d’autres formes d’engagement</div>
         <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
@@ -93,28 +94,28 @@ function CardEngagement({ program }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="h-min-[700px] min-w-[16rem] md:w-full ">
+    <article className="h-min-[700px] min-w-[16rem] md:w-full">
       <div className="h-[155px] w-full ">
         <a href={program.link} target="_blank" rel="noreferrer">
           <img src={program.picture} className="h-full w-full object-cover" />
         </a>
       </div>
-      <div className={`min-h-min border border-[#E5E5E5] px-4 pr-1 pb-2 ${!isOpen && "h-[250px]"}`}>
-        <div className="my-4 min-h-[40px] font-semibold">{program.title}</div>
-        <div className={`mb-4 text-[13px] leading-6 ${!isOpen && "h-[70px] overflow-hidden text-ellipsis"}`}>
+      <div className={`min-h-min border border-[#E5E5E5] p-4 ${!isOpen && "h-[250px]"} flex flex-col`}>
+        <h3 className="text-lg min-h-[40px] font-semibold">{program.title}</h3>
+        <div className={`mt-3 text-[13px] leading-6 ${!isOpen && "h-[70px] overflow-hidden text-ellipsis"}`}>{program.description}</div>
+        <div className="flex items-center justify-between mt-auto">
+          <button
+            className="flex justify-between items-center mt-auto pr-2 text-xs"
+            onClick={() => {
+              setIsOpen(!isOpen);
+            }}>
+            {isOpen ? "Lire moins" : "Lire plus"}
+          </button>
           <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
-            {program.description}
+            <img src={arrowRightBlue} className="w-3" />
           </a>
         </div>
-        <div
-          className="flex justify-between pr-2 text-[13px]"
-          onClick={() => {
-            setIsOpen(!isOpen);
-          }}>
-          <div>{isOpen ? "Lire moins" : "Lire plus"}</div>
-          <img src={arrowRightBlue} className="w-3" />
-        </div>
       </div>
-    </div>
+    </article>
   );
 }

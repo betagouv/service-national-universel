@@ -86,13 +86,29 @@ export default function StepEligibilite() {
       return;
     }
 
+    if (data.frenchNationality === "false") {
+      setData({ ...data, message: "nationality", step: PREINSCRIPTION_STEPS.INELIGIBLE });
+      return history.push("/preinscription/noneligible");
+    }
+
+    // Check if young is more than 17 years old
+    const age = dayjs().diff(dayjs(data.birthDate), "year");
+    if (age > 17) {
+      setData({ ...data, message: "age", step: PREINSCRIPTION_STEPS.INELIGIBLE });
+      return history.push("/preinscription/noneligible");
+    }
+
     setLoading(true);
     plausibleEvent("Phase0/CTA preinscription - eligibilite");
     if (data.frenchNationality === "false") {
       setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
       return history.push("/preinscription/noneligible");
     }
-    const res = await api.post("/cohort-session/eligibility/2023", {
+    const {
+      ok,
+      code,
+      data: sessions,
+    } = await api.post("/cohort-session/eligibility/2023", {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
       schoolRegion: data.school?.region,
@@ -100,22 +116,19 @@ export default function StepEligibilite() {
       grade: data.scolarity,
       zip: data.zip,
     });
-    if (!res.ok) {
-      capture(res.code);
+
+    if (!ok) {
+      capture(code);
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
 
-    if (res.data.msg) {
-      setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
-    }
-    const sessions = res.data;
     if (sessions.length === 0) {
-      setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: PREINSCRIPTION_STEPS.INELIGIBLE });
+      setData({ ...data, step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
-    setData({ ...data, sessions, step: PREINSCRIPTION_STEPS.SEJOUR });
+
+    setData({ ...data, sessions: data, step: PREINSCRIPTION_STEPS.SEJOUR });
     return history.push("/preinscription/sejour");
   };
 
