@@ -14,8 +14,8 @@ import ProgressBar from "../components/ProgressBar";
 export default function StepSejour() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
   const [route, context, bdcURI] = isLoggedIn
-    ? ["reinscription", ReinscriptionContext, "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
-    : ["preinscription", PreInscriptionContext, "je-me-preinscris-et-cree-mon-compte-volontaire"];
+    ? ["/reinscription/", ReinscriptionContext, "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    : ["/preinscription/", PreInscriptionContext, "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const history = useHistory();
   const [data] = React.useContext(context);
 
@@ -40,7 +40,7 @@ export default function StepSejour() {
           </div>
         </>
       )} */}
-        <SignupButtonContainer onClickPrevious={() => history.push(`/${route}/`)} />
+        <SignupButtonContainer onClickPrevious={() => history.push(route)} />
       </DSFRContainer>
     </>
   );
