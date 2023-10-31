@@ -78,7 +78,6 @@ router.get("/isInscriptionOpen/timeZoneOffset/:timeZoneOffset/:sessionName?", as
 
   // Adjust server's time for user's timezone
   const adjustedTimeForUser = new Date().getTime() - serverTimezoneOffsetInMilliseconds + userTimezoneOffsetInMilliseconds;
-  console.log({ adjustedTimeForUser });
   const now = new Date(adjustedTimeForUser);
 
   try {
@@ -90,17 +89,7 @@ router.get("/isInscriptionOpen/timeZoneOffset/:timeZoneOffset/:sessionName?", as
     const cohorts = await CohortModel.find({});
     return res.send({
       ok: true,
-      data: cohorts.some((cohort) => {
-        console.log({
-          name: cohort.name,
-          inscriptionStartDate: new Date(cohort.inscriptionStartDate),
-          inscriptionEndDate: new Date(cohort.inscriptionEndDate),
-          now,
-          nowServer: new Date(),
-          result: now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate),
-        });
-        return now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate);
-      }),
+      data: cohorts.some((cohort) => now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate)),
     });
   } catch (error) {
     capture(error);
