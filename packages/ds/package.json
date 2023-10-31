@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "exports": {
-    ".": "./dist/index.js",
+    ".": "./dist/common/index.js",
     "./tailwind.config": "./dist/tailwind.config.js",
     "./admin": "./dist/admin/index.js",
     "./app": "./dist/app/index.js",
