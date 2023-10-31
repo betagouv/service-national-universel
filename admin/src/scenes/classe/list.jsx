@@ -13,7 +13,9 @@ export default function list() {
         breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes" }]}
         actions={[
           <Button key="empty" title={`(Voir template ${classes ? "vide" : "liste"})`} type="secondary" onClick={() => setClasses(classes ? undefined : [])} />,
-          <Button key="list" leftIcon={<ClasseIcon />} title="Créer une classe" className="ml-4" />,
+          <a key="list" href="/mes-classes/create">
+            <Button leftIcon={<ClasseIcon />} title="Créer une classe" className="ml-4" />
+          </a>,
         ]}
       />
       {!classes && (
