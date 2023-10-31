@@ -7,7 +7,7 @@ const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
 const MODELNAME = "young";
-const { generateAddress, generateRandomName, generateRandomEmail, generateBirhtdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
+const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
 
 const File = new mongoose.Schema({
   name: String,
@@ -1974,6 +1974,7 @@ Schema.methods.comparePassword = async function (p) {
 
 Schema.methods.anonymise = function () {
   this.email = generateRandomEmail();
+  this.newEmail = generateRandomEmail();
   this.parent1Email = generateRandomEmail();
   this.parent2Email = generateRandomEmail();
   this.firstName = generateRandomName();
@@ -1989,7 +1990,7 @@ Schema.methods.anonymise = function () {
   this.address = generateAddress();
   this.parent1Address = generateAddress();
   this.parent2Address = generateAddress();
-  this.birthdateAt = generateBirhtdate();
+  this.birthdateAt = generateBirthdate();
   this.engagedDescription = starify(this.engagedDescription);
   this.motivations = starify(this.motivations);
   this.parentConsentmentFilesCompliantInfo = starify(this.parentConsentmentFilesCompliantInfo);

@@ -208,6 +208,7 @@ Schema.methods.anonymise = function () {
   this.youngEmail = "*****@*******.***";
   this.youngFirstName = starify(this.youngFirstName);
   this.youngLastName = starify(this.youngLastName);
+  this.youngBirthdateAt = starify(this.youngBirthdateAt);
   this.tutorName = starify(this.tutorName);
   this.missionName = starify(this.missionName);
   this.contractStatus = this.contractStatus || "DRAFT";

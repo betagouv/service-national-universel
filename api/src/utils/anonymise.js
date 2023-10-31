@@ -139,7 +139,7 @@ function getRandomDayOfMonth() {
   return Math.floor(Math.random() * 28) + 1;
 }
 
-function generateBirhtdate() {
+function generateBirthdate() {
   const currentDate = new Date();
   const minAge = 15;
   const maxAge = 17;
@@ -295,7 +295,7 @@ module.exports = {
   generateRandomEmail,
   generateRandomName,
   generateAddress,
-  generateBirhtdate,
+  generateBirthdate,
   getYoungLocation,
   generateNewPhoneNumber,
   starify,

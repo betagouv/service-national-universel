@@ -4,7 +4,7 @@ const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
 const { COHORTS } = require("snu-lib");
 const MODELNAME = "lignebus";
-const { generateRandomName, generateBirhtdate, generateRandomEmail, generateNewPhoneNumber } = require("../../utils/anonymise");
+const { generateRandomName, generateBirthdate, generateRandomEmail, generateNewPhoneNumber } = require("../../utils/anonymise");
 
 const BusTeam = new mongoose.Schema({
   role: {
@@ -226,8 +226,8 @@ Schema.methods.anonymise = function () {
   this.team = this.team.map((t) => {
     t.lastName = generateRandomName();
     t.firstName = generateRandomName();
-    t.birthdate = generateBirhtdate();
-    t.email = generateRandomEmail();
+    t.birthdate = generateBirthdate();
+    t.mail = generateRandomEmail();
     t.phone = generateNewPhoneNumber();
     return t;
   });
