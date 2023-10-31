@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { HiChevronDown } from "react-icons/hi";
 import Button from "./Button";
-import Badge from "../badge/Badge";
+import Badge from "./Badge";
 import { classNames } from "@/utils";
 
 type OptionGroupItem = {
