@@ -36,7 +36,7 @@ export default function DatePicker({ value, onChange, disabled = false }) {
     <div className="mt-2 flex w-full items-start justify-start gap-3 md:gap-8 flex-row">
       <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
         <label htmlFor="day" className={`text-sm mb-2 ml-1 ${textColor}`}>
-          Exemple: 14
+          Exemple : 14
         </label>
         <input
           id="day"
@@ -51,7 +51,7 @@ export default function DatePicker({ value, onChange, disabled = false }) {
       </div>
       <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
         <label htmlFor="month" className={`text-sm mb-2 ml-1 ${textColor}`}>
-          Exemple: 12
+          Exemple : 12
         </label>
         <input
           id="month"
@@ -66,7 +66,7 @@ export default function DatePicker({ value, onChange, disabled = false }) {
       </div>
       <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
         <label htmlFor="year" className={`text-sm mb-2 ml-1 ${textColor}`}>
-          Exemple: 2000
+          Exemple : 2000
         </label>
         <input
           id="year"

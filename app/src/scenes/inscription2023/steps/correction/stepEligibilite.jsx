@@ -101,7 +101,7 @@ export default function StepEligibilite() {
     // Birthdate
     // ? Check age ?
     if (!data?.birthDate) {
-      errors.birthDate = "Vous devez choisir une date de naissance";
+      errors.birthDate = "Vous devez saisir une date de naissance";
     }
 
     if (data.scolarity) {
