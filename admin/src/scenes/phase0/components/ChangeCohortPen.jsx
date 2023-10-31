@@ -4,12 +4,12 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
 import { ROLES, translate, getCohortPeriod, YOUNG_STATUS, calculateAge } from "snu-lib";
-import IconChangementCohorte from "../../../assets/IconChangementCohorte";
-import Pencil from "../../../assets/icons/Pencil";
-import Badge from "../../../components/Badge";
-import Chevron from "../../../components/Chevron";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import api from "../../../services/api";
+import IconChangementCohorte from "@/assets/IconChangementCohorte";
+import Pencil from "@/assets/icons/Pencil";
+import Badge from "@/components/Badge";
+import Chevron from "@/components/Chevron";
+import ModalConfirm from "@/components/modals/ModalConfirm";
+import api from "@/services/api";
 import { BorderButton, PlainButton } from "./Buttons";
 
 export function ChangeCohortPen({ young, onChange }) {
