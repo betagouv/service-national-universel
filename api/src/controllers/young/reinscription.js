@@ -12,9 +12,29 @@ const { getFilteredSessions } = require("../../utils/cohort");
 
 /**
  * ROUTES:
- *  PUT  /reinscription                => updates young who start a reinscription process
+ *  PUT  /reinscription/start          => updates young who starts the reinscription process
+ *  PUT  /reinscription                => updates young who continues the reinscription process after selecting a new cohort
  *  PUT  /reinscription/not-eligible   => updates to young status to not eligible
  */
+
+router.put("/start", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!hasAccessToReinscription(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set({
+      isInReinscription: true,
+      reinscriptionStep2023: STEPS2023.ELIGIBILITE,
+    });
+
+    const updatedYoung = await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(updatedYoung) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 
 router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -110,6 +130,7 @@ router.put("/not-eligible", passport.authenticate("young", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.status = YOUNG_STATUS.NOT_ELIGIBLE;
+    young.reinscriptionStep2023 = "NONELIGIBLE";
 
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

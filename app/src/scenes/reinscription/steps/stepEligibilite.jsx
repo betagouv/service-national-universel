@@ -114,8 +114,15 @@ export default function StepEligibilite() {
         return history.push("/reinscription/noneligible");
       }
 
+      const { ok, code } = await api.put("/young/reinscription", { step: REINSCRIPTION_STEPS.SEJOUR });
       const sessions = res.data;
       setData({ ...data, sessions, step: REINSCRIPTION_STEPS.SEJOUR });
+      if (!ok) {
+        capture(code);
+        setError({ text: "Impossible de vérifier votre éligibilité" });
+        setLoading(false);
+        return;
+      }
       return history.push("/reinscription/sejour");
     } catch (error) {
       capture(error);

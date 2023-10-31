@@ -8,7 +8,9 @@ import { supportURL } from "../../../config";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
 import ProgressBar from "../components/ProgressBar";
-import { REINSCRIPTION_STEPS } from "../../../utils/navigation";
+import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
+import API from "@/services/api";
+import { toastr } from "react-redux-toastr";
 
 export default function StepSejour() {
   const history = useHistory();
@@ -29,15 +31,17 @@ export default function StepSejour() {
 function SessionButton(session) {
   const [data, setData] = React.useContext(ReinscriptionContext);
   const history = useHistory();
+
+  async function handleClick() {
+    const { ok, code } = await API.put("/young/inscription2023/step", { step: INSCRIPTION_STEPS.CONFIRM });
+    if (!ok) return toastr.error("Impossible de mettre à jour votre inscription", code);
+    plausibleEvent(session.event.replace("inscription", "reinscription"));
+    setData({ ...data, cohort: session.name, step: REINSCRIPTION_STEPS.CONFIRM, status: "REINSCRIPTION" });
+    history.push("/reinscription/confirm");
+  }
+
   return (
-    <div
-      key={session.id}
-      className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
-      onClick={() => {
-        plausibleEvent(session.event.replace("inscription", "reinscription"));
-        setData({ ...data, cohort: session.name, step: REINSCRIPTION_STEPS.CONFIRM, status: "REINSCRIPTION" });
-        history.push("/reinscription/confirm");
-      }}>
+    <div key={session.id} className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50" onClick={handleClick}>
       <div>
         Séjour <strong>{getCohortPeriod(session)}</strong>
       </div>

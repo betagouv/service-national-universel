@@ -434,6 +434,9 @@ class Auth {
       }
 
       user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, emailVerified: "true" });
+      if (user.inscriptionStep2023 === STEPS2023.EMAIL_WAITING_VALIDATION) {
+        user.set({ inscriptionStep2023: STEPS2023.EMAIL_VALIDATED });
+      }
       await user.save();
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {

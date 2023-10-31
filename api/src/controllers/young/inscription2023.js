@@ -593,6 +593,34 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
   }
 });
 
+// Keep track of a user's progress through preinscription and reinscription
+router.put("/step", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      step: Joi.string()
+        .trim()
+        .valid(...STEPS2023)
+        .required(),
+    }).validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (young.isInReinscription) {
+      young.set({ reInscriptionStep2023: value.step });
+    } else {
+      young.set({ inscriptionStep2023: value.step });
+    }
+
+    const updatedYoung = await young.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: serializeYoung(updatedYoung) });
+  } catch (e) {
+    capture(e);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 const validateCorrectionRequest = (young, keyList) => {
   const result = {};
   result.correctionRequests = young.correctionRequests?.map((cr) => {

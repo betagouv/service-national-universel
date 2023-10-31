@@ -60,6 +60,7 @@ export default function StepConfirm() {
       zip: data.zip,
       cohort: data.cohort,
       grade: data.scolarity,
+      inscriptionStep2023: isEmailValidationEnabled ? "EMAIL_WAITING_VALIDATION" : "COORDONNEES",
     };
 
     try {

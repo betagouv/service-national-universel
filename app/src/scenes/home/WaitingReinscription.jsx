@@ -5,6 +5,8 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import API from "@/services/api";
+import { toastr } from "react-redux-toastr";
 
 export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
@@ -15,12 +17,16 @@ export default function WaitingReinscription() {
   let textSecond;
   if ((young.status === YOUNG_STATUS.WAITING_LIST || (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === "WAITING_AFFECTATION")) && young.cohort === "à venir")
     textPrecision = "Vérifiez dès maintenant votre éligibilité !";
-  else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
+  else if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") {
     textPrecision = "Votre Phase 1 n'a pas été validée.";
     textSecond = "Pour la valider, inscrivez-vous pour participer à un prochain séjour !";
   } else return;
 
   const onClickEligibilte = async () => {
+    const { ok, code } = await API.put("/young/reinscription/start");
+    if (!ok) {
+      return toastr.error("Impossible de commencer le processus de réinscription", code);
+    }
     plausibleEvent("Phase0/CTA reinscription - home page");
     return history.push("/reinscription");
   };
