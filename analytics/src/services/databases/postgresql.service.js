@@ -6,7 +6,7 @@ const { redisClient } = require("../../services/databases/redis.service");
 const REDIS_KEYS = require("../../services/databases/redis.constants");
 
 const db = new Sequelize(POSTGRESQL, {
-  logging: ENVIRONMENT === "development",
+  logging: ENVIRONMENT === "development" ? console.log : false,
 });
 
 db.authenticate()
