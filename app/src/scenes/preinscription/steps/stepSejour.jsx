@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { getCohortPeriod } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
@@ -6,13 +7,15 @@ import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { supportURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
-import plausibleEvent from "../../../services/plausible";
-import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
+import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
+import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
 
 export default function StepSejour() {
+  const isLoggedIn = false; //!!useSelector((state) => state?.Auth?.young);
+  const [route, context] = isLoggedIn ? ["reinscription", ReinscriptionContext] : ["preinscription", PreInscriptionContext];
   const history = useHistory();
-  const [data] = React.useContext(PreInscriptionContext);
+  const [data] = React.useContext(context);
 
   return (
     <>
@@ -35,23 +38,27 @@ export default function StepSejour() {
           </div>
         </>
       )} */}
-        <SignupButtonContainer onClickPrevious={() => history.push("/preinscription/")} />
+        <SignupButtonContainer onClickPrevious={() => history.push(`/${route}/`)} />
       </DSFRContainer>
     </>
   );
 }
 
 function SessionButton(session) {
-  const [data, setData] = React.useContext(PreInscriptionContext);
+  const isLoggedIn = false; //!!useSelector((state) => state?.Auth?.young);
+  const [route, context, step] = isLoggedIn
+    ? ["/reinscription/confirm", ReinscriptionContext, REINSCRIPTION_STEPS.CONFIRM]
+    : ["/preinscription/profil", PreInscriptionContext, PREINSCRIPTION_STEPS.PROFIL];
   const history = useHistory();
+  const [data, setData] = React.useContext(context);
+
   return (
     <div
       key={session.id}
       className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
       onClick={() => {
-        setData({ ...data, cohort: session.name, step: PREINSCRIPTION_STEPS.PROFIL });
-        plausibleEvent(session.event);
-        history.push("/preinscription/profil");
+        setData({ ...data, cohort: session.name, step });
+        history.push(route);
       }}>
       <div>
         Séjour <strong>{getCohortPeriod(session)}</strong>
