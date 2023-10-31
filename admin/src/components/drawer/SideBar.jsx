@@ -183,7 +183,14 @@ const SideBar = (props) => {
     />
   );
   const Classe = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={ClasseIcon} title="Mes classes" link="/mes-classes" active={path === "mes-classes"} setCurrentOpen={setDropDownOpen} />
+    <SimpleNavItem
+      sideBarOpen={open}
+      Icon={ClasseIcon}
+      title="Mes classes"
+      link="/mes-classes"
+      active={["mes-classes", "creer-une-classe"].includes(path)}
+      setCurrentOpen={setDropDownOpen}
+    />
   );
   const Student = () => (
     <SimpleNavItem sideBarOpen={open} Icon={StudentIcon} title="Mes élèves" link="/mes-eleves" active={path === "mes-eleves"} setCurrentOpen={setDropDownOpen} />

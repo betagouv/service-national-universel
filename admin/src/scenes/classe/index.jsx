@@ -3,14 +3,16 @@ import { Switch } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
-import List from "./list";
+import View from "./view";
+import Create from "./create";
 
 export default function Index() {
   useDocumentTitle("Mes classes");
 
   return (
     <Switch>
-      <SentryRoute path="/mes-classes" component={List} />
+      <SentryRoute path="/mes-classes" component={View} />
+      <SentryRoute path="/creer-une-classe" component={Create} />
     </Switch>
   );
 }
