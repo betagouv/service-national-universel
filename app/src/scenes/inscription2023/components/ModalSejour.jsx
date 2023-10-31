@@ -61,14 +61,16 @@ export default function ModalSejour({ isOpen, onCancel }) {
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
-      <div className="flex w-full flex-col px-3 py-4">
-        {!loading ? (
-          <div className="flex items-center justify-end gap-2 pb-2 text-sm text-[#000091]" onClick={onCancel}>
-            <GrClose />
-            Fermer
-          </div>
-        ) : null}
-        <div className="mt-2 text-lg font-bold text-[#161616]">Choisissez la date de votre séjour</div>
+      <div className="p-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-[#161616] m-0">Choisissez la date de votre séjour</h2>
+          {!loading ? (
+            <button className="flex items-center justify-end gap-2 pb-2 text-sm text-[#000091]" onClick={onCancel}>
+              <GrClose />
+              Fermer
+            </button>
+          ) : null}
+        </div>
         <hr className="my-4 h-px border-0 bg-gray-200" />
         {error?.text && <Error {...error} onClose={() => setError({})} />}
 
@@ -78,7 +80,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
           <>
             {cohorts.length !== 0 ? (
               <>
-                <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
+                <div className="mb-2 font-semibold">Séjours de cohésion disponibles</div>
                 <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
                 <div className="my-4">{cohorts?.map((e) => SessionButton(e))}</div>
               </>
