@@ -25,7 +25,7 @@ export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
   const cohorts = useSelector((state) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
-  const [cohort, setCohort] = useState(urlParams.get("cohort"));
+  const [cohort, setCohort] = useState(urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : null);
   const [cohortList, setCohortList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const readOnly = !isSuperAdmin(user);
@@ -66,7 +66,9 @@ export default function Settings() {
   useEffect(() => {
     const cohortList = getCohortSelectOptions(cohorts, true);
     setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[0].value);
+    if (!cohort) {
+      setCohort(cohortList[0].value);
+    }
   }, []);
 
   useEffect(() => {
@@ -85,7 +87,7 @@ export default function Settings() {
       setIsLoading(true);
       delete data.name;
       delete data.snuId;
-      const { ok, code } = await api.put(`/cohort/${cohort}`, data);
+      const { ok, code } = await api.put(`/cohort/${encodeURIComponent(cohort)}`, data);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", code);
         await getCohort();
@@ -129,7 +131,7 @@ export default function Settings() {
               selected={cohortList.find((e) => e.value === cohort)}
               setSelected={(e) => {
                 setCohort(e.value);
-                history.replace({ search: `?cohort=${e.value}` });
+                history.replace({ search: `?cohort=${encodeURIComponent(e.value)}` });
               }}
             />
           </div>
