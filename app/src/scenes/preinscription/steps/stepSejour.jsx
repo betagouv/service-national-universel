@@ -12,15 +12,17 @@ import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/naviga
 import ProgressBar from "../components/ProgressBar";
 
 export default function StepSejour() {
-  const isLoggedIn = false; //!!useSelector((state) => state?.Auth?.young);
-  const [route, context] = isLoggedIn ? ["reinscription", ReinscriptionContext] : ["preinscription", PreInscriptionContext];
+  const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
+  const [route, context, bdcURI] = isLoggedIn
+    ? ["reinscription", ReinscriptionContext, "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    : ["preinscription", PreInscriptionContext, "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const history = useHistory();
   const [data] = React.useContext(context);
 
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Choisissez la date du séjour" supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
+      <DSFRContainer title="Choisissez la date du séjour" supportLink={supportURL + `/base-de-connaissance/${bdcURI}`}>
         <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
         <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
         <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
@@ -45,7 +47,7 @@ export default function StepSejour() {
 }
 
 function SessionButton(session) {
-  const isLoggedIn = false; //!!useSelector((state) => state?.Auth?.young);
+  const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
   const [route, context, step] = isLoggedIn
     ? ["/reinscription/confirm", ReinscriptionContext, REINSCRIPTION_STEPS.CONFIRM]
     : ["/preinscription/profil", PreInscriptionContext, PREINSCRIPTION_STEPS.PROFIL];

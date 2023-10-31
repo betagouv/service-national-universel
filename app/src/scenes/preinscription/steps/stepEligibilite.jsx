@@ -57,7 +57,7 @@ export default function StepEligibilite() {
     }
     // Birthdate
     if (!data?.birthDate || !dayjs(data.birthDate).isValid()) {
-      errors.birthDate = "Vous devez choisir une date de naissance valide";
+      errors.birthDate = "Vous devez saisir une date de naissance valide";
     }
 
     if (data.scolarity) {

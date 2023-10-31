@@ -39,7 +39,7 @@ export default function Settings() {
 
   const getCohort = async () => {
     try {
-      const { ok, data: reponseCohort } = await api.get("/cohort/" + cohort);
+      const { ok, data: reponseCohort } = await api.get("/cohort/" + encodeURIComponent(cohort));
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du séjour");
       }
@@ -319,8 +319,8 @@ export default function Settings() {
                       <MdInfoOutline data-tip data-for="instruction" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="instruction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-                          <li>Ouverture et fermeture de la proposition du séjour sur le formulaire d’inscription.</li>
-                          <li>Blocage de l’accès au dossier des dossiers d’inscription “en cours”.</li>
+                          <li> Fermeture de la proposition de séjour pour le changement de séjour.</li>
+                          <li>Le lendemain, les dossiers restants “en attente de validation” et “en attente de correction” seront basculés sur un autre séjour via script.</li>
                         </ul>
                       </ReactTooltip>
                     </div>
