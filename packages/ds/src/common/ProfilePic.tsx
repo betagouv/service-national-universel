@@ -1,10 +1,15 @@
 import React from "react";
 import { HiUser } from "react-icons/hi";
 
+type ProfilePicIconProps = {
+  size: number;
+  className: string;
+};
+
 type OwnProps = {
   image?: string;
   initials?: string;
-  icon?: (size: number, className: string) => React.ReactNode;
+  icon?: ((props: ProfilePicIconProps) => React.ReactNode) | string;
   size?: number;
   className?: string;
 };
@@ -42,7 +47,12 @@ export default function ProfilePic({
           {initials.substring(0, 2)}
         </div>
       )}
-      {!image && !initials && icon && icon(size / 2, "text-ds-deep-blue-900")}
+      {!image && !initials && icon && typeof icon === "string" && icon}
+      {!image &&
+        !initials &&
+        icon &&
+        typeof icon !== "string" &&
+        icon({ size: size / 2, className: "text-ds-deep-blue-900" })}
       {!image && !initials && !icon && (
         <HiUser size={size / 2} className="text-ds-deep-blue-900" />
       )}

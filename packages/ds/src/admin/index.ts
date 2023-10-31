@@ -9,10 +9,11 @@ import Page from "./layout/Page";
 import Subheader from "./layout/Subheader";
 
 // UI
-import Badge from "./ui/badge/Badge";
-import Button from "./ui/button/Button";
-import DropdownButton from "./ui/button/DropdownButton";
-import Modal from "./ui/modal/Modal";
+import Badge from "./ui/Badge";
+import Button from "./ui/Button";
+import DropdownButton from "./ui/DropdownButton";
+import Modal from "./ui/Modal";
+import ModalConfirmation from "./ui/ModalConfirmation";
 
 export {
   // Form
@@ -30,4 +31,5 @@ export {
   Button,
   DropdownButton,
   Modal,
+  ModalConfirmation,
 };

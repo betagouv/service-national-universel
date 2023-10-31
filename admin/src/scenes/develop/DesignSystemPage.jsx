@@ -7,6 +7,7 @@ import { BsCheck } from "react-icons/bs";
 import { InputPhone } from "@snu/ds/admin";
 import { PHONE_ZONES } from "snu-lib";
 import ModalExamples from "./components/Modal";
+import ProfilePicExamples from "./components/ProfilePic";
 
 export default function DesignSystemPage() {
   const [values, setValues] = React.useState({
@@ -306,6 +307,7 @@ export default function DesignSystemPage() {
         </div>
       </Container>
       <ModalExamples />
+      <ProfilePicExamples />
       <div className="grid grid-rows-2 grid-flow-col gap-4">
         <Container className="row-span-2" title="Contacts administrateurs CLE" />
         <Container className="mb-0" title="Contacts référents de classe (6)" />

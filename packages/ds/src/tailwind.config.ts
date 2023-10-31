@@ -6,8 +6,9 @@ export default {
       colors: {
         ds: {
           gray: {
-            400: "#9CA3AF",
             900: "#111827",
+            500: "#6B7280",
+            400: "#9CA3AF",
           },
           "deep-blue": {
             900: "#0C1035",

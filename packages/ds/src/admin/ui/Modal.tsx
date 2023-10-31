@@ -3,26 +3,26 @@ import { Dialog, Transition } from "@headlessui/react";
 
 type OwnProps = {
   isOpen: boolean;
-  children: React.ReactNode;
   onClose: () => void;
   className?: string;
   classNameContent?: string;
   header?: React.ReactNode;
+  content?: React.ReactNode;
   footer?: React.ReactNode;
 };
 
 export default function Modal({
   isOpen,
-  children,
   onClose,
   className,
   classNameContent,
   header,
+  content,
   footer,
 }: OwnProps) {
   return (
     <Transition.Root show={isOpen}>
-      <Dialog as="div" className="relative z-20" onClose={() => onClose?.()}>
+      <Dialog as="div" className="relative z-20" onClose={onClose}>
         <Transition.Child
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -48,7 +48,7 @@ export default function Modal({
               >
                 <div className={"p-8 rounded-md bg-white " + classNameContent}>
                   {header && <div className="mb-6">{header}</div>}
-                  {children}
+                  {content}
                   {footer && <div className="mt-6">{footer}</div>}
                 </div>
               </Dialog.Panel>
