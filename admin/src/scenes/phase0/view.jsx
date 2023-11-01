@@ -68,6 +68,28 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [cohort, setCohort] = useState(undefined);
   const [oldCohort, setOldCohort] = useState(true);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
+  const [footerClass, setFooterClass] = useState("");
+
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      const open = event.detail.open;
+      if (open === true) {
+        setFooterClass("left-[220px]");
+      } else {
+        setFooterClass("left-[88px]");
+      }
+      console.log("sideBar", event);
+    };
+    window.addEventListener("sideBar", handleStorageChange);
+    return () => {
+      window.removeEventListener("sideBar", handleStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (localStorage?.getItem("sideBarOpen") === "false") setFooterClass("left-[88px]");
+    else setFooterClass("left-[220px]");
+  }, []);
 
   useEffect(() => {
     if (young) {
@@ -273,17 +295,24 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       {globalMode === "correction" && (
         <>
           {footerMode === "PENDING" && (
-            <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
+            <FooterPending
+              young={young}
+              requests={requests}
+              onDeletePending={deletePendingRequests}
+              sending={processing}
+              onSendPending={sendPendingRequests}
+              footerClass={footerClass}
+            />
           )}
-          {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
-          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
+          {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} footerClass={footerClass} />}
+          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} footerClass={footerClass} />}
         </>
       )}
     </>
   );
 }
 
-function FooterPending({ young, requests, sending, onDeletePending, onSendPending }) {
+function FooterPending({ young, requests, sending, onDeletePending, onSendPending, footerClass }) {
   const [sentRequestsCount, setSentRequestsCount] = useState(0);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
@@ -295,7 +324,7 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
   }, [requests]);
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[18px] font-medium leading-snug text-[#242526]">Le dossier est-il conforme&nbsp;?</span>
@@ -329,7 +358,7 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
   );
 }
 
-function FooterSent({ young, requests, reminding, onRemindRequests }) {
+function FooterSent({ young, requests, reminding, onRemindRequests, footerClass }) {
   const [sentRequestsCount, setSentRequestsCount] = useState(0);
 
   useEffect(() => {
@@ -353,7 +382,7 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   const remindedAt = remindedDate ? dayjs(remindedDate).format("DD/MM/YYYY à HH:mm") : null;
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[18px] font-medium leading-snug text-[#242526]">Demande de correction envoyée</span>
@@ -374,7 +403,7 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   );
 }
 
-function FooterNoRequest({ processing, onProcess, young }) {
+function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   const [confirmModal, setConfirmModal] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
@@ -477,7 +506,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
   }
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[18px] font-medium leading-snug text-[#242526]">Le dossier est-il conforme&nbsp;?</span>
