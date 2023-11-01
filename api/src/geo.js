@@ -5,7 +5,6 @@ const { QPV_USERNAME, QPV_PASSWORD } = require("./config");
 const AreaModel = require("./models/areas");
 
 const url = "https://wsa.sig.ville.gouv.fr/service/georeferenceur.json";
-
 // ZUS : Zone Urbain Sensible /
 // ZFU : Zones Franches Urbaines
 // HZUS : ???
@@ -43,13 +42,13 @@ async function getQPV(postcode, commune, adresse) {
           }
           return res.json();
         })
-        .then((json) => {
-          if (!json?.reponses) {
-            // capture(`Cant find ${postcode}, ${commune}, ${addresseFormated}`);
-            return resolve(false);
+        .then(({ code_reponse }) => {
+          if (!code_reponse) {
+            return resolve(null);
           }
-          if (json.reponses.length && json.reponses[0].code_reponse === "OUI") return resolve(true);
-          return resolve(false);
+          if (code_reponse === "OUI") return resolve(true);
+          if (code_reponse === "NON") return resolve(false);
+          return resolve(null);
         })
         .catch((err) => {
           reject(err);

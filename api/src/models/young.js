@@ -882,7 +882,6 @@ const Schema = new mongoose.Schema({
   qpv: {
     type: String,
     enum: ["true", "false", ""],
-    default: "",
     documentation: {
       description: "Le volontaire est dans un Quarier Prioritaire pendant le snu",
     },
