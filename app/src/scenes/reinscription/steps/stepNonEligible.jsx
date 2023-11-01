@@ -5,7 +5,6 @@ import serviceCivique from "../../../assets/programmes-engagement/service-civiqu
 import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
-import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
@@ -13,6 +12,7 @@ import { supportURL } from "@/config";
 import { setYoung } from "@/redux/auth/actions";
 import API from "@/services/api";
 import { toastr } from "react-redux-toastr";
+import CardEngagement from "@/scenes/preinscription/components/CardEngagement";
 
 export default function NonEligible() {
   const history = useHistory();
@@ -91,35 +91,5 @@ export default function NonEligible() {
         <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" disabled={loading} />
       </DSFRContainer>
     </>
-  );
-}
-
-function CardEngagement({ program }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="h-min-[700px] min-w-[16rem] md:w-full ">
-      <div className="h-[155px] w-full ">
-        <a href={program.link} target="_blank" rel="noreferrer">
-          <img src={program.picture} className="h-full w-full object-cover" />
-        </a>
-      </div>
-      <div className={`min-h-min border border-[#E5E5E5] px-4 pr-1 pb-2 ${!isOpen && "h-[250px]"}`}>
-        <div className="my-4 min-h-[40px] font-semibold">{program.title}</div>
-        <div className={`mb-4 text-[13px] leading-6 ${!isOpen && "h-[70px] overflow-hidden text-ellipsis"}`}>
-          <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
-            {program.description}
-          </a>
-        </div>
-        <div
-          className="flex justify-between pr-2 text-[13px]"
-          onClick={() => {
-            setIsOpen(!isOpen);
-          }}>
-          <div>{isOpen ? "Lire moins" : "Lire plus"}</div>
-          <img src={arrowRightBlue} className="w-3" />
-        </div>
-      </div>
-    </div>
   );
 }

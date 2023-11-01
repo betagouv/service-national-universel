@@ -1,15 +1,15 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { useHistory } from "react-router-dom";
 import serviceCivique from "../../../assets/programmes-engagement/service-civique.jpg";
 import jeVeuxAider from "../../../assets/programmes-engagement/je-veux-aider.jpg";
 import reserveGendarmerie from "../../../assets/programmes-engagement/reserve-gendarmerie.jpg";
 import reserveArmee from "../../../assets/programmes-engagement/reserve-armees.jpg";
-import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
+import CardEngagement from "../components/CardEngagement";
 
 export default function NonEligible() {
   const history = useHistory();
@@ -87,35 +87,5 @@ export default function NonEligible() {
         <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
       </DSFRContainer>
     </>
-  );
-}
-
-function CardEngagement({ program }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <article className="h-min-[700px] min-w-[16rem] md:w-full">
-      <div className="h-[155px] w-full ">
-        <a href={program.link} target="_blank" rel="noreferrer">
-          <img src={program.picture} className="h-full w-full object-cover" />
-        </a>
-      </div>
-      <div className={`min-h-min border border-[#E5E5E5] p-4 ${!isOpen && "h-[250px]"} flex flex-col`}>
-        <h3 className="text-lg min-h-[40px] font-semibold">{program.title}</h3>
-        <div className={`mt-3 text-[13px] leading-6 ${!isOpen && "h-[70px] overflow-hidden text-ellipsis"}`}>{program.description}</div>
-        <div className="flex items-center justify-between mt-auto">
-          <button
-            className="flex justify-between items-center mt-auto pr-2 text-xs"
-            onClick={() => {
-              setIsOpen(!isOpen);
-            }}>
-            {isOpen ? "Lire moins" : "Lire plus"}
-          </button>
-          <a href={program.link} target="_blank" rel="noreferrer" className="visited:text-[#161616]">
-            <img src={arrowRightBlue} className="w-3" />
-          </a>
-        </div>
-      </div>
-    </article>
   );
 }
