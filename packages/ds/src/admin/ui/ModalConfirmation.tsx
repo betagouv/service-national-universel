@@ -4,6 +4,8 @@ import Modal from "./Modal";
 
 type TAction = {
   title: string;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   isCancel?: boolean;
   isDestructive?: boolean;
   onClick?: () => void;
@@ -13,15 +15,17 @@ type OwnProps = {
   isOpen: boolean;
   onClose: () => void;
   actions: Array<TAction> | React.ReactNode;
+  className?: string;
   icon?: React.ReactNode;
   title?: string;
-  text?: string;
+  text?: React.ReactNode;
 };
 
 export default function ModalConfirmation({
   isOpen,
   onClose,
   actions,
+  className,
   icon,
   title,
   text,
@@ -30,13 +34,14 @@ export default function ModalConfirmation({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      className={className}
       header={icon && <div className="flex justify-center">{icon}</div>}
       content={
         <div className="text-center">
           {title && (
             <h3 className="text-xl font-bold text-ds-gray-900">{title}</h3>
           )}
-          {text && <p className="mt-2 text-ds-gray-500">{text}</p>}
+          {text && <div className="mt-2 text-ds-gray-500">{text}</div>}
         </div>
       }
       footer={
@@ -46,7 +51,9 @@ export default function ModalConfirmation({
                 <Button
                   key={action.title + index}
                   type={action.isCancel ? "secondary" : "primary"}
+                  leftIcon={action.leftIcon}
                   title={action.title}
+                  rightIcon={action.rightIcon}
                   className={`flex-1 justify-center ${
                     !!action.isDestructive && "bg-red-500 hover:bg-red-700"
                   }`}
