@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
 
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, hasAccessToReinscription, reInscriptionOpenForYoungs } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription, reInscriptionOpenForYoungs } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Banner from "./components/banner";
 import Default from "./default";
@@ -73,7 +73,7 @@ export default function Home() {
       return <Phase1NotDone />;
     }
 
-    if (["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"].includes(young.cohort)) {
+    if (getCohortNames(true).includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
