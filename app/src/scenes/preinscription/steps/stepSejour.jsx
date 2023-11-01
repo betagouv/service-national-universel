@@ -31,20 +31,6 @@ export default function StepSejour() {
           <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
         )}
         <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
-        {/* {data.sessions?.length < 3 && (
-        <>
-          <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
-          <div className="text-sm text-gray-500">
-            La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-            <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline underline-offset-4">
-              En savoir plus.
-            </a>
-          </div>
-          <div className="my-4 text-[#000091] underline underline-offset-4">
-            <Link to="/public-engagements">Consulter d’autres dispositifs d’engagement</Link>
-          </div>
-        </>
-      )} */}
         <SignupButtonContainer onClickPrevious={() => history.push(route)} />
       </DSFRContainer>
     </>
@@ -58,8 +44,6 @@ function SessionButton(session) {
     : ["/preinscription/profil", PreInscriptionContext, PREINSCRIPTION_STEPS.PROFIL];
   const history = useHistory();
   const [data, setData] = React.useContext(context);
-  console.log("CONTEXT");
-  console.log(data);
 
   return (
     <div

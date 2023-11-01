@@ -6,6 +6,7 @@ import { Modal } from "reactstrap";
 import { formatStringDate } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
+import Alert from "../../../components/dsfr/ui/Alert";
 import Loader from "../../../components/Loader";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
@@ -20,6 +21,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
   const [cohorts, setCohorts] = React.useState([]);
   const [error, setError] = React.useState({});
   const dispatch = useDispatch();
+  const { grade } = young;
 
   React.useEffect(() => {
     (async () => {
@@ -82,6 +84,9 @@ export default function ModalSejour({ isOpen, onCancel }) {
               <>
                 <div className="mb-2 font-semibold">Séjours de cohésion disponibles</div>
                 <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
+                {grade == "1ereGT" && (
+                  <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
+                )}
                 <div className="my-4">{cohorts?.map((e) => SessionButton(e))}</div>
               </>
             ) : (
