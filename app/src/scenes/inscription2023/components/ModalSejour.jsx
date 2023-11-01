@@ -3,7 +3,7 @@ import { GrClose } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
-import { formatStringDate } from "snu-lib";
+import { formatStringDate, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Alert from "../../../components/dsfr/ui/Alert";
@@ -84,7 +84,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
               <>
                 <div className="mb-2 font-semibold">Séjours de cohésion disponibles</div>
                 <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-                {grade == "1ereGT" && (
+                {grade == GRADES["1ereGT"] && (
                   <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
                 )}
                 <div className="my-4">{cohorts?.map((e) => SessionButton(e))}</div>

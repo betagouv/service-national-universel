@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { getCohortPeriod } from "snu-lib";
+import { getCohortPeriod, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
@@ -27,7 +27,7 @@ export default function StepSejour() {
       <DSFRContainer title="Choisissez la date du séjour" supportLink={supportURL + `/base-de-connaissance/${bdcURI}`}>
         <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
         <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-        {scolarity == "1ereGT" && (
+        {scolarity == GRADES["1ereGT"] && (
           <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
         )}
         <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
