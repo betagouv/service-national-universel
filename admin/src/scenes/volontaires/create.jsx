@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import validator from "validator";
 
-import { translate } from "../../utils";
-import api from "../../services/api";
+import { translate } from "@/utils";
+import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { capture } from "../../sentry";
+import { capture } from "@/sentry";
 import { useHistory } from "react-router-dom";
 
 import { translateGrade, GRADES, getAge, YOUNG_STATUS, getCohortPeriodTemp } from "snu-lib";
@@ -20,10 +20,10 @@ import { CniField } from "../phase0/components/CniField";
 import SchoolEditor from "../phase0/components/SchoolEditor";
 import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
-import Check from "../../assets/icons/Check";
+import Check from "@/assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
-import ConfirmationModal from "../../components/ui/modals/ConfirmationModal";
+import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 
 export default function Create() {
   const history = useHistory();
@@ -382,7 +382,7 @@ export default function Create() {
               zip: values.zip,
             };
           }
-          const res = await api.post("/cohort-session/eligibility/2023", body);
+          const res = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, body);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");

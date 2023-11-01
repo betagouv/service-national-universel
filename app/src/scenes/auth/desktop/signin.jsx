@@ -1,22 +1,22 @@
+import queryString from "query-string";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { Link, useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib/date";
+import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/dsfr/forms/input";
-import { setYoung } from "../../../redux/auth/actions";
-import api from "../../../services/api";
 import Error from "../../../components/error";
-import queryString from "query-string";
-import { useHistory } from "react-router-dom";
-import { cohortsInit } from "../../../utils/cohorts";
-import { Link } from "react-router-dom";
 import { environment } from "../../../config";
-import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
-import { captureMessage } from "../../../sentry";
-import plausibleEvent from "../../../services/plausible";
+import { setYoung } from "../../../redux/auth/actions";
+import { capture, captureMessage } from "../../../sentry";
+import api from "../../../services/api";
+import { cohortsInit } from "../../../utils/cohorts";
+import plausibleEvent from "@/services/plausible";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -25,6 +25,7 @@ export default function Signin() {
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
+  const [isInscriptionOpen, setInscriptionOpen] = React.useState(false);
   const history = useHistory();
 
   const dispatch = useDispatch();
@@ -76,6 +77,22 @@ export default function Signin() {
     else setDisabled(true);
   }, [email, password]);
 
+  React.useEffect(() => {
+    const fetchInscriptionOpen = async () => {
+      try {
+        const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen?timeZoneOffset=${new Date().getTimezoneOffset()}`);
+        if (!ok) {
+          capture(code);
+          return toastr.error("Oups, une erreur est survenue", code);
+        }
+        setInscriptionOpen(data);
+      } catch (e) {
+        setInscriptionOpen(false);
+      }
+    };
+    fetchInscriptionOpen();
+  }, []);
+
   return (
     <div className="flex bg-[#F9F6F2] py-6">
       <div className="mx-auto w-full bg-white px-[1rem] py-[2rem] shadow-sm md:w-[56rem] md:px-[6rem] md:pt-[3rem]">
@@ -111,27 +128,23 @@ export default function Signin() {
         <div className="mt-3 text-[#E5E5E5] space-y-3">
           <div className="mt-3 mb-2 text-center text-xl font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
           {/* <p className="text-center text-base text-[#161616] my-3">Les inscriptions sont actuellement fermées.</p> */}
-          {/* <Link
-            onClick={() => plausibleEvent("Connexion/Lien vers preinscription")}
-            to="/preinscription"
-            className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
-            Pré-inscription
-          </Link> */}
-
-          {environment !== "production" && (
+          {isFeatureEnabled(FEATURES_NAME.YOUNG_INSCRIPTION, undefined, environment) && isInscriptionOpen ? (
             <Link
+              onClick={() => plausibleEvent("Connexion/Lien vers preinscription")}
               to="/preinscription"
               className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
-              Pré-inscription (accès staging)
+              Commencer mon inscription
             </Link>
+          ) : (
+            <>
+              <p className="text-center text-base text-[#161616] m-3">Soyez informé(e) lors de l'ouverture des prochaines inscriptions.</p>
+              <a
+                className="plausible-event-name=Clic+LP+Inscription w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] hover:bg-[#000091] hover:text-white"
+                href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
+                Recevoir une alerte par email
+              </a>
+            </>
           )}
-
-          <p className="text-center text-base text-[#161616] m-3">Soyez informé(e) lors de l’ouverture des prochaines inscriptions.</p>
-          <a
-            className="plausible-event-name=Clic+LP+Inscription w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] hover:bg-[#000091] hover:text-white"
-            href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
-            Recevoir une alerte par email
-          </a>
         </div>
       </div>
     </div>

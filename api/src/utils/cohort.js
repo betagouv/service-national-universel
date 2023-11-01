@@ -3,11 +3,19 @@ const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
 
-async function getFilteredSessions(young) {
+async function getFilteredSessions(young, timeZoneOffset = null) {
   const sessions2023 = await CohortModel.find({});
-
   const region = getRegionForEligibility(young);
-  const now = Date.now();
+
+  let now = Date.now();
+
+  if (timeZoneOffset) {
+    const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC
+    // Adjust server's time for user's timezone
+    const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;
+    now = new Date(adjustedTimeForUser);
+  }
+
   const sessions = sessions2023.filter(
     (session) =>
       session.eligibility?.zones.includes(region2zone[region]) &&

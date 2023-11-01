@@ -86,7 +86,7 @@ export default function StepEligibilite() {
     plausibleEvent("Phase0/CTA reinscription - eligibilite");
 
     try {
-      const res = await api.post("/cohort-session/eligibility/2023", {
+      const res = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, {
         schoolDepartment: data.school?.departmentName,
         department: data.school?.department,
         schoolRegion: data.school?.region,
