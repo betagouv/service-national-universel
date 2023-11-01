@@ -8,7 +8,7 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/dsfr/forms/toggle";
-import { getAge, translate, getCohortPeriod } from "snu-lib";
+import { translate, getCohortYear } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -43,7 +43,7 @@ function ConsentementForm({ young, token, step, parentId }) {
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
-  const sessionDate = getCohortPeriod(young.cohort);
+  const cohortYear = getCohortYear(young.cohort);
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
@@ -310,8 +310,7 @@ function ConsentementForm({ young, token, step, parentId }) {
           {parentId === 1 && (
             <div className="border-t-solid  border-t-[1px] border-t-[#E5E5E5] py-[16px]">
               <AuthorizeBlock className="mb-[32px]" title="Participation au SNU" value={data.allowSNU} onChange={(e) => setData({ ...data, allowSNU: e })} error={errors.allowSNU}>
-                <b>{youngFullname}</b> à participer à la session <b>{sessionDate}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-                réalisation d&apos;une mission d&apos;intérêt général.
+                <b>{youngFullname}</b> à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohortYear)}</b> du SNU.
               </AuthorizeBlock>
 
               {data.allowSNU && (
