@@ -17,6 +17,8 @@ import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEP
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import Loader from "@/components/Loader";
 import { toastr } from "react-redux-toastr";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
+import { environment } from "@/config";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -70,7 +72,8 @@ const Step = () => {
 
 const PreInscriptionPublic = () => {
   const young = useSelector((state) => state.Auth.young);
-  if (young && young.emailVerified === "false") return <Redirect to="/preinscription/email-validation" />;
+  const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
+  if (young && young.emailVerified === "false" && isEmailValidationEnabled) return <Redirect to="/preinscription/email-validation" />;
   if (young) return <Redirect to="/inscription2023" />;
 
   return (
