@@ -1232,8 +1232,7 @@ function SectionConsentements({ young, setFieldValue, errors, cohort }) {
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à participer à la session <b>{getCohortPeriodTemp({ ...young, cohort })}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-          réalisation d&apos;une mission d&apos;intérêt général.
+          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohort)}</b> du SNU.
         </div>
         <div>
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow1")} errors={errors} value={parent1Consentement.allow1}>
