@@ -42,7 +42,7 @@ async function getQPV(postcode, commune, adresse) {
           }
           return res.json();
         })
-        .then(({ code_reponse }) => {
+        .then(({ code_reponse } = {}) => {
           if (!code_reponse) {
             return resolve(null);
           }
