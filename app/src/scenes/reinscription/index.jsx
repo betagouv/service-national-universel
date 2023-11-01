@@ -6,7 +6,7 @@ import { SentryRoute } from "../../sentry";
 import { useSelector } from "react-redux";
 import StepEligibilite from "./steps/stepEligibilite";
 import StepNonEligible from "./steps/stepNonEligible";
-import StepSejour from "./steps/stepSejour";
+import StepSejour from "../preinscription/steps/stepSejour";
 import StepConfirm from "./steps/stepConfirm";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
