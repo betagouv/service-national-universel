@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "@/utils/dayjs.utils";
-import { getCohortStartDate, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
+import { getCohortStartDate, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod, getCohortYear } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -1619,17 +1619,8 @@ const PARENT_STATUS_NAME = {
 };
 
 function SectionConsentements({ young, onChange, readonly = false, cohort }) {
-  const [youngAge, setYoungAge] = useState("?");
   const [confirmModal, setConfirmModal] = useState(null);
   const [pdfDownloading, setPdfDownloading] = useState("");
-
-  useEffect(() => {
-    if (young) {
-      setYoungAge(getAge(young.birthdateAt));
-    } else {
-      setYoungAge("?");
-    }
-  }, [young]);
 
   const authorizationOptions = [
     { value: "true", label: "J'autorise" },
@@ -1752,17 +1743,13 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
           </span>
         </div>
         <div>
-          <CheckRead value={young.acceptCGU === "true"}>
-            A lu et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
-          </CheckRead>
-          <CheckRead value={young.acceptCGU === "true"}>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
           <CheckRead value={young.consentment === "true"}>
-            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion <b>{getCohortPeriod(cohort)}</b> puis la
-            réalisation d&apos;une mission d&apos;intérêt général.
+            Se porte volontaire pour participer à la session <b>{getCohortYear(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis
+            la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
-          <CheckRead value={young.consentment === "true"}>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
-          <CheckRead value={(young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null) || young.informationAccuracy === "true"}>
-            Certifie l&apos;exactitude des renseignements fournis
+          <CheckRead value={young.acceptCGU === "true"}>
+            S&apos;inscrit pour le séjour de cohésion <strong>{getCohortPeriod(cohort)}</strong> sous réserve de places disponibles et s&apos;engage à en respecter le règlement
+            intérieur.
           </CheckRead>
         </div>
       </div>
@@ -1796,21 +1783,18 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
         </div>
         <div>
           <CheckRead value={young.parent1AllowSNU === "true"}>
-            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de{" "}
             <b>
               {young.firstName} {young.lastName}
             </b>
+            .
           </CheckRead>
-          {youngAge < 15 && (
-            <CheckRead value={young.parent1AllowSNU === "true"}>
-              Accepte la collecte et le traitement des données personnelles de{" "}
-              <b>
-                {young.firstName} {young.lastName}
-              </b>
-            </CheckRead>
-          )}
           <CheckRead value={young.parent1AllowSNU === "true"}>
-            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+            S&apos;engage à communiquer la fiche sanitaire de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>{" "}
+            au responsable du séjour de cohésion.
           </CheckRead>
           <CheckRead value={young.parent1AllowSNU === "true"}>
             S&apos;engage à ce que{" "}
@@ -1820,7 +1804,13 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
             soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
             jaune.
           </CheckRead>
-          <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du Règlement Intérieur du SNU.</CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du règlement Intérieur du séjour de cohésion.</CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>
+            Accepte la collecte et le traitement des données personnelles de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+          </CheckRead>
         </div>
         <div className="itemx-center mt-[16px] flex justify-between">
           <div className="grow text-[14px] leading-[20px] text-[#374151]">
