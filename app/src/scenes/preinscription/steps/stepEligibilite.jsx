@@ -92,7 +92,7 @@ export default function StepEligibilite() {
       setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
       return history.push("/preinscription/noneligible");
     }
-    const res = await api.post("/cohort-session/eligibility/2023", {
+    const res = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
       schoolRegion: data.school?.region,

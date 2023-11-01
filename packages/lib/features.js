@@ -27,8 +27,11 @@ const features = {
     [ENVS.staging]: [],
   },
   [FEATURES_NAME.EMAIL_VALIDATION]: {
-    [ENVS.staging]: [],
-    [ENVS.development]: [],
+    // [ENVS.staging]: [],
+    // [ENVS.development]: [],
+  },
+  [FEATURES_NAME.YOUNG_INSCRIPTION]: {
+    [ENVS.production]: [],
   },
 };
 

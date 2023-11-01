@@ -26,7 +26,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
   React.useEffect(() => {
     (async () => {
       try {
-        const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+        const res = await api.post(`/cohort-session/eligibility/2023/${young._id}?timeZoneOffset=${new Date().getTimezoneOffset()}`);
         if (res.data.msg) return setError({ text: res.data.msg });
         const cohorts = res.data;
         if (cohorts.length === 0) {

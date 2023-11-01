@@ -7,7 +7,7 @@ import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
 import Field from "./components/Field";
 import dayjs from "@/utils/dayjs.utils";
-import { getCohortStartDate, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod } from "snu-lib";
+import { getCohortStartDate, translate, translateGrade, YOUNG_STATUS, GRADES, getAge, ROLES, SENDINBLUE_TEMPLATES, getCohortPeriod, getCohortYear } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -68,6 +68,28 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const [cohort, setCohort] = useState(undefined);
   const [oldCohort, setOldCohort] = useState(true);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
+  const [footerClass, setFooterClass] = useState("");
+
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      const open = event.detail.open;
+      if (open === true) {
+        setFooterClass("left-[220px]");
+      } else {
+        setFooterClass("left-[88px]");
+      }
+      console.log("sideBar", event);
+    };
+    window.addEventListener("sideBar", handleStorageChange);
+    return () => {
+      window.removeEventListener("sideBar", handleStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (localStorage?.getItem("sideBarOpen") === "false") setFooterClass("left-[88px]");
+    else setFooterClass("left-[220px]");
+  }, []);
 
   useEffect(() => {
     if (young) {
@@ -273,17 +295,24 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       {globalMode === "correction" && (
         <>
           {footerMode === "PENDING" && (
-            <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
+            <FooterPending
+              young={young}
+              requests={requests}
+              onDeletePending={deletePendingRequests}
+              sending={processing}
+              onSendPending={sendPendingRequests}
+              footerClass={footerClass}
+            />
           )}
-          {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
-          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
+          {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} footerClass={footerClass} />}
+          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} footerClass={footerClass} />}
         </>
       )}
     </>
   );
 }
 
-function FooterPending({ young, requests, sending, onDeletePending, onSendPending }) {
+function FooterPending({ young, requests, sending, onDeletePending, onSendPending, footerClass }) {
   const [sentRequestsCount, setSentRequestsCount] = useState(0);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
@@ -295,7 +324,7 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
   }, [requests]);
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[18px] font-medium leading-snug text-[#242526]">Le dossier est-il conforme&nbsp;?</span>
@@ -329,7 +358,7 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
   );
 }
 
-function FooterSent({ young, requests, reminding, onRemindRequests }) {
+function FooterSent({ young, requests, reminding, onRemindRequests, footerClass }) {
   const [sentRequestsCount, setSentRequestsCount] = useState(0);
 
   useEffect(() => {
@@ -353,7 +382,7 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   const remindedAt = remindedDate ? dayjs(remindedDate).format("DD/MM/YYYY à HH:mm") : null;
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[18px] font-medium leading-snug text-[#242526]">Demande de correction envoyée</span>
@@ -374,7 +403,7 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   );
 }
 
-function FooterNoRequest({ processing, onProcess, young }) {
+function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   const [confirmModal, setConfirmModal] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
@@ -477,7 +506,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
   }
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[18px] font-medium leading-snug text-[#242526]">Le dossier est-il conforme&nbsp;?</span>
@@ -1590,17 +1619,8 @@ const PARENT_STATUS_NAME = {
 };
 
 function SectionConsentements({ young, onChange, readonly = false, cohort }) {
-  const [youngAge, setYoungAge] = useState("?");
   const [confirmModal, setConfirmModal] = useState(null);
   const [pdfDownloading, setPdfDownloading] = useState("");
-
-  useEffect(() => {
-    if (young) {
-      setYoungAge(getAge(young.birthdateAt));
-    } else {
-      setYoungAge("?");
-    }
-  }, [young]);
 
   const authorizationOptions = [
     { value: "true", label: "J'autorise" },
@@ -1723,17 +1743,13 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
           </span>
         </div>
         <div>
-          <CheckRead value={young.acceptCGU === "true"}>
-            A lu et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
-          </CheckRead>
-          <CheckRead value={young.acceptCGU === "true"}>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
           <CheckRead value={young.consentment === "true"}>
-            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion <b>{getCohortPeriod(cohort)}</b> puis la
-            réalisation d&apos;une mission d&apos;intérêt général.
+            Se porte volontaire pour participer à la session <b>{getCohortYear(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis
+            la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
-          <CheckRead value={young.consentment === "true"}>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
-          <CheckRead value={(young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null) || young.informationAccuracy === "true"}>
-            Certifie l&apos;exactitude des renseignements fournis
+          <CheckRead value={young.acceptCGU === "true"}>
+            S&apos;inscrit pour le séjour de cohésion <strong>{getCohortPeriod(cohort)}</strong> sous réserve de places disponibles et s&apos;engage à en respecter le règlement
+            intérieur.
           </CheckRead>
         </div>
       </div>
@@ -1767,21 +1783,18 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
         </div>
         <div>
           <CheckRead value={young.parent1AllowSNU === "true"}>
-            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de{" "}
             <b>
               {young.firstName} {young.lastName}
             </b>
+            .
           </CheckRead>
-          {youngAge < 15 && (
-            <CheckRead value={young.parent1AllowSNU === "true"}>
-              Accepte la collecte et le traitement des données personnelles de{" "}
-              <b>
-                {young.firstName} {young.lastName}
-              </b>
-            </CheckRead>
-          )}
           <CheckRead value={young.parent1AllowSNU === "true"}>
-            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+            S&apos;engage à communiquer la fiche sanitaire de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>{" "}
+            au responsable du séjour de cohésion.
           </CheckRead>
           <CheckRead value={young.parent1AllowSNU === "true"}>
             S&apos;engage à ce que{" "}
@@ -1791,7 +1804,13 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
             soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
             jaune.
           </CheckRead>
-          <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du Règlement Intérieur du SNU.</CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du règlement Intérieur du séjour de cohésion.</CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>
+            Accepte la collecte et le traitement des données personnelles de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+          </CheckRead>
         </div>
         <div className="itemx-center mt-[16px] flex justify-between">
           <div className="grow text-[14px] leading-[20px] text-[#374151]">
