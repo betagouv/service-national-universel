@@ -79,12 +79,20 @@ const DASHBOARD_TODOS_FUNCTIONS = {
     YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START: "young_to_follow_without_contract_after_start",
     // Volontaires (À actualiser) X volontaires ayant achevé leur mission à mettre à jour
     YOUNG_TO_UPDATE_AFTER_END: "young_to_update_after_end",
-    // Volontaires (À actualiser) X volontaires ayant commencé leur mission à mettre à jour 
+    // Volontaires (À actualiser) X volontaires ayant commencé leur mission à mettre à jour
     YOUNG_TO_UPDATE_AFTER_START: "young_to_update_after_start",
     // Équivalence (À vérifier) X demandes d’équivalence MIG sont en attente de vérification.
     EQUIVALENCE_WAITING_VERIFICATION: "equivalence_waiting_verification",
     //Contrat (À renseigner) 1 représentant de l’État est à renseigner.
     STRUCTURE_MANAGER: "structure_manager",
+
+    //For resp and supervisor
+    // Contrat (À suivre) X contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature
+    STRUCTURE_CONTRACT_TO_EDIT: "structure_contract_to_edit",
+    //Missions (À corriger) X missions sont en attente de correction.
+    STRUCTURE_MISSION_TO_CORRECT: "structure_mission_to_correct",
+    //Candidatures (À traiter) X candidatures sont en attente de validation.
+    STRUCTURE_APPLICATION_TO_VALIDATE: "structure_application_to_validate",
   },
 };
 

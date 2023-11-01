@@ -195,6 +195,27 @@ const getNoteData = (key, user) => {
       link: null,
       btnLabel: "À suivre",
     },
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_CONTRACT_TO_EDIT]: {
+      // Contrat (À suivre) X contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature
+      title: "Contrat",
+      content: "contrats d'engagement sont à éditer par la structure d'accueil et à envoyer en signature.",
+      link: "/volontaire/list/all?status=VALIDATED~IN_PROGRESS~DONE&contractStatus=DRAFT",
+      btnLabel: "À suivre",
+    },
+    //Missions (À corriger) X missions sont en attente de correction.
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MISSION_TO_CORRECT]: {
+      title: "Mission",
+      content: "missions sont en attente de correction.",
+      link: "/mission?status=WAITING_CORRECTION",
+      btnLabel: "À corriger",
+    },
+    //Candidatures (À traiter) X candidatures sont en attente de validation.
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_APPLICATION_TO_VALIDATE]: {
+      title: "Candidatures",
+      content: "candidatures sont en attente de validation.",
+      link: "/volontaire/list/pending?status=WAITING_VALIDATION",
+      btnLabel: "À traiter",
+    },
   };
 
   return NOTES[key];
