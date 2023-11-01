@@ -73,7 +73,7 @@ export default function Home() {
       return <Phase1NotDone />;
     }
 
-    if (getCohortNames(true).includes(young.cohort)) {
+    if (getCohortNames(true, false, false).includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
