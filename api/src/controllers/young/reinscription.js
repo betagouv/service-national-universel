@@ -24,7 +24,7 @@ router.put("/start", passport.authenticate("young", { session: false, failWithEr
     if (!hasAccessToReinscription(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
-      isInReinscription: true,
+      status: YOUNG_STATUS.REINSCRIPTION,
       reinscriptionStep2023: STEPS2023.ELIGIBILITE,
     });
 
@@ -70,7 +70,6 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     }
 
     // complete values
-    value.status = YOUNG_STATUS.REINSCRIPTION;
     value.originalCohort = young.cohort;
     value.cohortChangeReason = "Réinscription à un nouveau séjour";
     value.zip = value.schooled === "true" ? young.zip : value.zip; //zip is only present in this request if the young is not schooled

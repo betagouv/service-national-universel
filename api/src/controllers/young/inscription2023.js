@@ -606,7 +606,7 @@ router.put("/step", passport.authenticate("young", { session: false, failWithErr
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (young.isInReinscription) {
+    if (young.status === YOUNG_STATUS.REINSCRIPTION) {
       young.set({ reInscriptionStep2023: value.step });
     } else {
       young.set({ inscriptionStep2023: value.step });

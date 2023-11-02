@@ -363,15 +363,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // Used for analytics
-  isInReinscription: {
-    type: Boolean,
-    default: false,
-    documentation: {
-      description: "Le volontaire a commencé le parcours de réinscription",
-    },
-  },
-
   reinscriptionStep2023: {
     type: String,
     enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "CONSENTEMENTS", "DOCUMENTS", "WAITING_CONSENT", "DONE"],

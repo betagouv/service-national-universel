@@ -49,7 +49,7 @@ function SessionButton(session) {
   const [data, setData] = React.useContext(context);
 
   async function handleOnClick() {
-    // If young in in resinscription, we track his steps for analytics
+    // If young in in reinscription, we track his steps for analytics
     if (isLoggedIn) {
       const { ok, code } = await API.put("/young/inscription2023/step", { step: INSCRIPTION_STEPS.CONFIRM });
       if (!ok) return toastr.error("Impossible de mettre à jour votre inscription", code);
@@ -60,11 +60,11 @@ function SessionButton(session) {
   }
 
   return (
-    <div key={session.id} className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50" onClick={handleOnClick}>
-      <div>
+    <button key={session.id} className="my-3 flex items-center justify-between border p-4 hover:bg-gray-50 w-full" onClick={handleOnClick}>
+      <p>
         Séjour <strong>{getCohortPeriod(session)}</strong>
-      </div>
+      </p>
       <ArrowRightBlueSquare />
-    </div>
+    </button>
   );
 }
