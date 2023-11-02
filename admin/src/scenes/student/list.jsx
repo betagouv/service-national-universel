@@ -312,31 +312,35 @@ export default function list() {
               size={size}
               setSize={setSize}
               render={
-                <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-gray-100">
-                  <div className="flex items-center py-3 px-4 text-xs leading-5 font-[500] uppercase text-gray-500 bg-gray-50 ">
-                    <div className="w-[35%]">Élèves</div>
-                    <div className="w-[20%]">Cohortes</div>
-                    <div className="w-[20%]">Classes</div>
-                    <div className="w-[20%]">Statuts</div>
-                    <div className="w-[5%]">Actions</div>
-                  </div>
-                  {data.map((hit) => (
-                    <Hit
-                      key={hit._id}
-                      hit={hit}
-                      callback={(e) => {
-                        if (e._id === mission?._id) setMission(e);
-                      }}
-                    />
-                  ))}
-                  <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 bg-gray-50">
-                    <div className="w-[35%]">Élèves</div>
-                    <div className="w-[20%]">Cohortes</div>
-                    <div className="w-[20%]">Classes</div>
-                    <div className="w-[20%]">Statuts</div>
-                    <div className="w-[5%]">Actions</div>
-                  </div>
-                </div>
+                <table className="mt-6 mb-2 flex w-full flex-col divide-y table-auto divide-gray-100 border-gray-100">
+                  <thead>
+                    <tr className="flex items-center py-3 px-4 text-xs font-[500] leading-5 uppercase text-gray-500 bg-gray-50 cursor-default">
+                      <span className="w-[35%]">Élèves</span>
+                      <span className="w-[20%]">Cohortes</span>
+                      <span className="w-[20%]">Classes</span>
+                      <span className="w-[20%]">Statuts</span>
+                      <span className="w-[5%]">Actions</span>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.map((hit) => (
+                      <Hit
+                        key={hit._id}
+                        hit={hit}
+                        callback={(e) => {
+                          if (e._id === mission?._id) setMission(e);
+                        }}
+                      />
+                    ))}
+                  </tbody>
+                  <tr className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 bg-gray-50">
+                    <span className="w-[35%]">Élèves</span>
+                    <span className="w-[20%]">Cohortes</span>
+                    <span className="w-[20%]">Classes</span>
+                    <span className="w-[20%]">Statuts</span>
+                    <span className="w-[5%]">Actions</span>
+                  </tr>
+                </table>
               }
             />
           </div>
@@ -350,34 +354,32 @@ const Hit = ({ hit }) => {
   const history = useHistory();
 
   return (
-    <>
-      <div className="flex items-center py-3 px-4 hover:bg-gray-50">
-        <div className="w-[35%] table-cell truncate cursor-pointer" onClick={() => history.push(`/student/${hit._id}`)}>
-          <span className="font-bold text-gray-900 text-base leading-5">{hit.status !== "DELETED" ? `${hit.firstName} ${hit.lastName}` : "Compte supprimé"}</span>
-          <p className="text-xs text-gray-500 leading-5">
-            {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {hit.status !== "DELETED" ? `• ${hit.city || ""} (${hit.department || ""})` : null}
-          </p>
-        </div>
-        <div className="flex w-[20%] flex-col gap-2">
-          <Badge title={"CLE 23-24"} leftIcon={<HiUsers color="#EC4899" size={20} />} />
-        </div>
-        <div className="flex w-[20%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
-          <div className="flex w-full flex-col justify-center">
-            <div className="m-0 table w-full table-fixed border-collapse">
-              <div className="table-cell truncate font-bold text-gray-900">{hit.name}</div>
-            </div>
-            <div className="m-0 mt-1 table w-full table-fixed border-collapse">
-              <div className="table-cel truncate text-xs leading-5 text-gray-500 ">id: {hit._id}</div>
-            </div>
+    <tr className="flex items-center py-3 px-4 hover:bg-gray-50">
+      <td className="w-[35%] table-cell truncate cursor-pointer" onClick={() => history.push(`/student/${hit._id}`)}>
+        <span className="font-bold text-gray-900 text-base leading-5">{hit.status !== "DELETED" ? `${hit.firstName} ${hit.lastName}` : "Compte supprimé"}</span>
+        <p className="text-xs text-gray-500 leading-5">
+          {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {hit.status !== "DELETED" ? `• ${hit.city || ""} (${hit.department || ""})` : null}
+        </p>
+      </td>
+      <td className="flex w-[20%] flex-col gap-2">
+        <Badge title={"CLE 23-24"} leftIcon={<HiUsers color="#EC4899" size={20} />} />
+      </td>
+      <td className="flex w-[20%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
+        <div className="flex w-full flex-col justify-center">
+          <div className="m-0 table w-full table-fixed border-collapse">
+            <div className="table-cell truncate font-bold text-gray-900">{hit.name}</div>
+          </div>
+          <div className="m-0 mt-1 table w-full table-fixed border-collapse">
+            <div className="table-cel truncate text-xs leading-5 text-gray-500 ">id: {hit._id}</div>
           </div>
         </div>
-        <div className="w-[20%]">
-          <Badge title={translate(MISSION_STATUS[hit.status])} status={hit.status} />
-        </div>
-        <div className="flex w-[5%] flex-col gap-2">
-          <Badge title={<IoFlashOutline size={20} />} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-10 !h-10 !border-none"} />
-        </div>
-      </div>
-    </>
+      </td>
+      <td className="w-[20%]">
+        <Badge title={translate(MISSION_STATUS[hit.status])} status={hit.status} />
+      </td>
+      <td className="flex w-[5%] flex-col gap-2">
+        <Badge title={<IoFlashOutline size={20} />} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-10 !h-10 !border-none"} />
+      </td>
+    </tr>
   );
 };
