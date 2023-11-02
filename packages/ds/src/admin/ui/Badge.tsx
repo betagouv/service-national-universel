@@ -2,14 +2,14 @@ import React from "react";
 
 type TStatus =
   | "none"
-  | "draft"
-  | "cancel"
-  | "refused"
-  | "inProgress"
-  | "waitingValidation"
-  | "waitingCorrection"
-  | "validated"
-  | "validatedBis"
+  | "DRAFT"
+  | "CANCEL"
+  | "REFUSED"
+  | "IN_PROGRESS"
+  | "WAITING_VALIDATION"
+  | "WAITING_CORRECTION"
+  | "VALIDATED"
+  | "WAITING_LIST"
   | "secondary"
   | "primary";
 
@@ -54,7 +54,7 @@ export default function Badge({
 
   return (
     <div
-      className={`flex items-center justify-center w-fit h-8 rounded-3xl px-3 py-1.5 gap-2 border-[1px] text-xs leading-5 font-[500 ${styles} ${className}`}
+      className={`flex items-center justify-center w-fit h-8 rounded-3xl px-3 py-1.5 gap-2 border-[1px] text-xs leading-5 font-[500] ${styles} ${className}`}
     >
       {leftIcon}
       {typeof title === "string" ? (
@@ -69,21 +69,21 @@ export default function Badge({
 
 const getStyles = ({ status }: { status: TStatus }) => {
   switch (status) {
-    case "cancel":
+    case "CANCEL":
       return "text-rose-500 bg-gray-50 border-gray-200";
-    case "refused":
+    case "REFUSED":
       return "text-red-600 bg-red-50 border-red-200";
-    case "inProgress":
+    case "IN_PROGRESS":
       return "text-indigo-600 bg-indigo-50 border-indigo-300";
-    case "waitingValidation":
+    case "WAITING_VALIDATION":
       return "text-yellow-600 bg-yellow-50 border-yellow-300";
-    case "waitingCorrection":
+    case "WAITING_CORRECTION":
       return "text-orange-600 bg-orange-50 border-orange-300";
-    case "validated":
+    case "VALIDATED":
       return "text-green-600 bg-green-50 border-green-300";
-    case "validatedBis":
+    case "WAITING_LIST":
       return "text-cyan-600 bg-cyan-50 border-cyan-300";
-    case "draft":
+    case "DRAFT":
       return "text-white bg-indigo-500 italic border-indigo-500";
     case "primary":
       return "text-blue-600 bg-blue-50 border-blue-300 hover:bg-blue-100";
