@@ -546,15 +546,28 @@ export default function StepCoordonnees() {
           />
         )}
         {!isFrenchResident && (
-          <SearchableSelect
-            label="Pays de résidence"
-            value={foreignCountry}
-            options={foreignCountryOptions}
-            onChange={updateData("foreignCountry")}
-            placeholder="Sélectionnez un pays"
-            error={errors.foreignCountry}
-            correction={corrections?.foreignCountry}
-          />
+          <>
+            <SearchableSelect
+              label="Pays de résidence"
+              value={foreignCountry}
+              options={foreignCountryOptions}
+              onChange={updateData("foreignCountry")}
+              placeholder="Sélectionnez un pays"
+              error={errors.foreignCountry}
+              correction={corrections?.foreignCountry}
+            />
+            <Input
+              value={foreignAddress}
+              label="Adresse de résidence"
+              onChange={updateData("foreignAddress")}
+              error={errors.foreignAddress}
+              correction={corrections?.foreignAddress}
+            />
+            <div className="flex flex-col md:flex-row md:gap-8">
+              <Input value={foreignZip} label="Code postal" onChange={updateData("foreignZip")} error={errors.foreignZip} correction={corrections?.foreignZip} className="w-full" />
+              <Input value={foreignCity} label="Ville" onChange={updateData("foreignCity")} error={errors.foreignCity} correction={corrections?.foreignCity} className="w-full" />
+            </div>
+          </>
         )}
         {!isFrenchResident && (
           <>
@@ -607,9 +620,12 @@ export default function StepCoordonnees() {
         <hr className="my-2 h-px border-0 bg-gray-200" />
         <div className="flex mt-4 items-center gap-3 mb-4">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
-          <a className="mt-1" href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`} target="_blank" rel="noreferrer">
+          <a
+            className="mt-1"
+            href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`}
+            target="_blank"
+            rel="noreferrer">
             <RiInformationFill className="text-xl text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
-
           </a>
         </div>
         <div className="mb-4 flex items-center">
