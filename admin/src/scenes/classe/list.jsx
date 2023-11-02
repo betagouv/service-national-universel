@@ -283,8 +283,8 @@ export default function list() {
               size={size}
               setSize={setSize}
               render={
-                <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
-                  <div className="flex items-center py-3 px-4 text-xs leading-5 font-[500] uppercase text-gray-500 ">
+                <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-gray-100">
+                  <div className="flex items-center py-3 px-4 text-xs leading-5 font-[500] uppercase text-gray-500 bg-gray-50 ">
                     <div className="w-[40%]">Classes</div>
                     <div className="w-[20%]">Cohortes</div>
                     <div className="w-[20%]">Élèves</div>
@@ -299,7 +299,7 @@ export default function list() {
                       }}
                     />
                   ))}
-                  <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 ">
+                  <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 bg-gray-50">
                     <div className="w-[40%]">Classes</div>
                     <div className="w-[20%]">Cohortes</div>
                     <div className="w-[20%]">Élèves</div>

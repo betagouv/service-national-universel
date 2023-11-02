@@ -59,8 +59,9 @@ export default function PaginationServerDriven({ currentPageNumber, setCurrentPa
         </div>
       ) : null}
       <div className="text-xs text-gray-800 font-bold">
-        {currentPageNumber * size + 1} <span className="font-normal">-</span> {currentPageNumber * size + itemsCountOnCurrentPage} <span className="font-normal"> sur </span>{" "}
-        {itemsCountTotal || 0}
+        <span className="font-normal">Affichage</span> {currentPageNumber * size + 1}
+        <span className="font-normal"> à </span>
+        {currentPageNumber * size + itemsCountOnCurrentPage} <span className="font-normal"> sur </span> {itemsCountTotal || 0}
       </div>
       <div className="flex gap-1 items-center justify-center">
         <div className="flex justify-center items-center min-h-[32px] min-w-[65px] font-bold text-xs border border-gray-200 rounded-md border-solid">
