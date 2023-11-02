@@ -6,6 +6,8 @@ const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { faker } = require("@faker-js/faker");
 const crypto = require("crypto");
+const { createCohortHelper } = require("./helpers/cohort");
+const getNewCohortFixture = require("./fixtures/cohort");
 
 const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
@@ -142,9 +144,10 @@ describe("Young", () => {
     it("should return 409 when user already exists", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
-      await createYoungHelper({ ...fixture, email });
+      const young = await createYoungHelper({ ...fixture, email });
+      const cohort = await createCohortHelper({ ...getNewCohortFixture(), name: young.cohort });
       res = await request(getAppHelper()).post("/young/signup").send({
-        email: fixture.email,
+        email: email,
         phone: fixture.phone,
         phoneZone: fixture.phoneZone,
         firstName: "foo",
@@ -155,7 +158,7 @@ describe("Young", () => {
         grade: fixture.grade,
         frenchNationality: fixture.frenchNationality,
         schooled: fixture.schooled,
-        cohort: fixture.cohort,
+        cohort: cohort.name,
       });
       expect(res.status).toBe(409);
     });
