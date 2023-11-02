@@ -54,7 +54,7 @@ import {
   isFeatureEnabled,
   FEATURES_NAME,
 } from "snu-lib";
-import { history, initSentry, SentryRoute } from "./sentry";
+import { capture, history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
 
@@ -203,6 +203,13 @@ const Espace = () => {
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
 
+  async function startReinscription() {
+    const { ok, code } = await api.put("/young/reinscription/start");
+    if (!ok) {
+      capture(code);
+    }
+  }
+
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
     const { ok, code } = await api.put(`/young/accept-cgu`);
@@ -227,7 +234,10 @@ const Espace = () => {
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
+  if (shouldForceRedirectToReinscription(young)) {
+    startReinscription();
+    return <Redirect to="/reinscription" />;
+  }
 
   if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
 

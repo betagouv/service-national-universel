@@ -946,6 +946,14 @@ const STEPS2023 = {
   DONE: "DONE",
 };
 
+const REINSCRIPTION_STEPS = {
+  ELIGIBILITY: "ELIGIBILITY",
+  SEJOUR: "SEJOUR",
+  CONFIRM: "CONFIRM",
+  WAITING_CONSENT: "WAITING_CONSENT",
+  DONE: "DONE",
+};
+
 module.exports = {
   timeout,
   uploadFile,
@@ -980,6 +988,7 @@ module.exports = {
   YOUNG_SITUATIONS,
   STEPS,
   STEPS2023,
+  REINSCRIPTION_STEPS,
   FILE_STATUS_PHASE1,
   translateFileStatusPhase1,
   getCcOfYoung,

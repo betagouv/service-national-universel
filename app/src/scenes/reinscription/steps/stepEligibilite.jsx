@@ -133,7 +133,7 @@ export default function StepEligibilite() {
         return history.push("/reinscription/noneligible");
       }
 
-      const { ok: okStep, code: codeStep } = await api.put("/young/step", { step: REINSCRIPTION_STEPS.SEJOUR });
+      const { ok: okStep, code: codeStep } = await api.put("/young/inscription2023/step", { step: REINSCRIPTION_STEPS.SEJOUR });
       setData({ ...data, sessions, step: REINSCRIPTION_STEPS.SEJOUR });
       if (!okStep) {
         capture(codeStep);

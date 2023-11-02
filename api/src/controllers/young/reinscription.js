@@ -6,7 +6,7 @@ const Joi = require("joi");
 const YoungObject = require("../../models/young");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
-const { ERRORS, STEPS2023 } = require("../../utils");
+const { ERRORS, REINSCRIPTION_STEPS } = require("../../utils");
 const { canUpdateYoungStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1, getCohortNames, hasAccessToReinscription } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 
@@ -25,7 +25,7 @@ router.put("/start", passport.authenticate("young", { session: false, failWithEr
 
     young.set({
       status: YOUNG_STATUS.REINSCRIPTION,
-      reinscriptionStep2023: STEPS2023.ELIGIBILITE,
+      reinscriptionStep2023: REINSCRIPTION_STEPS.ELIGIBILITY,
     });
 
     const updatedYoung = await young.save({ fromUser: req.user });
@@ -43,7 +43,9 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // Check if the young has access to reinscription
-    if (!hasAccessToReinscription(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!hasAccessToReinscription(young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     // Validate request body
     const { error, value } = Joi.object({
@@ -88,7 +90,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,
-      reInscriptionStep2023: STEPS2023.COORDONNEES,
+      reinscriptionStep2023: REINSCRIPTION_STEPS.DONE,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
 
       rulesParent1: undefined,
