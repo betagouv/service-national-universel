@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
-import InformationCircle from "../../../assets/icons/InformationCircle";
+import { RiInformationFill } from "react-icons/ri";
 
 import validator from "validator";
 
