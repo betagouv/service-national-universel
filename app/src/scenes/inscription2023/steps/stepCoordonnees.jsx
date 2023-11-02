@@ -607,18 +607,23 @@ export default function StepCoordonnees() {
         <hr className="my-2 h-px border-0 bg-gray-200" />
         <div className="flex mt-4 items-center gap-3 mb-4">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
-          <a className="mt-1" href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`} target="_blank" rel="noreferrer">
+          <a
+            className="mt-1"
+            href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`}
+            target="_blank"
+            rel="noreferrer">
             <RiInformationFill className="text-xl text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
-
           </a>
         </div>
         <div className="mb-4 flex items-center">
           <div>
-            <h2 className="mt-0 text-[16px] font-bold">
+            <h2 className="mt-0 leading-6 text-[16px]">
               Souhaitez-vous nous faire part d’une situation particulière ?
-              <span className="text-[14px]">(allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
+              <span className="text-[16px]"> (allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
             </h2>
-            <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
+            <div className=" mt-2 text-[12px] leading-5 text-[#666666]">
+              Le SNU est ouvert à tous. Pour vous accueillir dans les meilleures conditions, un responsable pourra prendre contact avec vous.
+            </div>
           </div>
         </div>
         <div className="flex flex-col md:flex-row mb-4">
