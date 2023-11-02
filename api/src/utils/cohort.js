@@ -16,7 +16,7 @@ async function getFilteredSessions(young, timeZoneOffset = null) {
     now = new Date(adjustedTimeForUser);
   }
 
-  const currentCohortYear = young.cohort ? new Date(sessions2023.find((c) => c.name === young.cohort).dateStart).getFullYear() : undefined;
+  const currentCohortYear = young.cohort ? new Date(sessions2023.find((c) => c.name === young.cohort)?.dateStart)?.getFullYear() : undefined;
 
   const sessions = sessions2023.filter(
     (session) =>
