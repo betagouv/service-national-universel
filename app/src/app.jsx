@@ -29,7 +29,6 @@ import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
 import ModalCGU from "./components/modals/ModalCGU";
-import ModalResumePhase1ForWithdrawn from "./components/modals/ModalResumePhase1ForWithdrawn";
 import Navbar from "./components/layout/navbar";
 import NonEligible from "./scenes/noneligible";
 import Phase1 from "./scenes/phase1";
@@ -198,7 +197,6 @@ const MandatoryLogIn = () => {
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
-  const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
@@ -218,16 +216,10 @@ const Espace = () => {
       setIsModalCGUOpen(true);
     }
 
-    if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
-      getAvailableSessions(young).then((sessions) => {
-        if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
-      });
-    }
   }, [young]);
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  console.log(shouldForceRedirectToReinscription(young));
   if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
   if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
@@ -259,7 +251,6 @@ const Espace = () => {
       <Footer />
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
-      <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
     </>
   );
 };

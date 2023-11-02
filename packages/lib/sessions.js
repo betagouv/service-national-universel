@@ -197,33 +197,21 @@ function shouldForceRedirectToReinscription(young) {
   );
 }
 
-// function hasAccessToReinscription(young) {
-//   if (shouldForceRedirectToReinscription(young)) return true;
-
-//   if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
-//     return true;
-//   }
-
-//   if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") {
-//     return true;
-//   }
-
-//   return false;
-// }
 function hasAccessToReinscription(young) {
-  // Vérifier si le statut permet la réinscription directement
+  if (shouldForceRedirectToReinscription(young)) return true;
+
   const allowedStatuses = [
     YOUNG_STATUS.IN_PROGRESS,
     YOUNG_STATUS.WAITING_VALIDATION,
     YOUNG_STATUS.WAITING_CORRECTION,
-    YOUNG_STATUS.REINSCRIPTION,
     YOUNG_STATUS.WAITING_LIST,
+    YOUNG_STATUS.ABANDONED,
+    YOUNG_STATUS.WITHDRAWN,
+    YOUNG_STATUS.REINSCRIPTION,
     YOUNG_STATUS.VALIDATED,
   ];
 
-  // Retourner true si le jeune a un statut permettant la réinscription
-  // et si le motif de départ n'est pas "Exclusion" en cas de statut VALIDATED
-  return allowedStatuses.includes(young.status) && !( young.departSejourMotif === "Exclusion");
+  return allowedStatuses.includes(young.status) && !(young.departSejourMotif === "Exclusion");
 }
 
 function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
