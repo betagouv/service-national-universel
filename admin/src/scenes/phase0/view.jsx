@@ -78,7 +78,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       } else {
         setFooterClass("left-[88px]");
       }
-      console.log("sideBar", event);
     };
     window.addEventListener("sideBar", handleStorageChange);
     return () => {
@@ -105,14 +104,14 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   }, [young]);
 
   useEffect(() => {
-    if (requests.find((r) => r.status === "PENDING")) {
+    if (requests.some((r) => r.status === "PENDING")) {
       setFooterMode("PENDING");
-    } else if (requests.find((r) => ["SENT", "REMINDED"].includes(r.status))) {
+    } else if (requests.some((r) => ["SENT", "REMINDED"].includes(r.status))) {
       setFooterMode("WAITING");
     } else {
       setFooterMode("NO_REQUEST");
     }
-  }, [requests]);
+  }, [requests, requests.length]);
 
   function onStartRequest(fieldName) {
     setCurrentCorrectionRequestField(fieldName);
@@ -313,15 +312,8 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
 }
 
 function FooterPending({ young, requests, sending, onDeletePending, onSendPending, footerClass }) {
-  const [sentRequestsCount, setSentRequestsCount] = useState(0);
-  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-
-  useEffect(() => {
-    const sent = requests.filter((r) => r.status === "SENT" || r.status === "REMINDED").length;
-    const pending = requests.filter((r) => r.status === "PENDING").length;
-    setSentRequestsCount(sent);
-    setPendingRequestsCount(pending);
-  }, [requests]);
+  const sentRequestsCount = requests.filter((r) => r.status === "SENT" || r.status === "REMINDED")?.length || 0;
+  const pendingRequestsCount = requests.filter((r) => r.status === "PENDING")?.length || 0;
 
   return (
     <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
