@@ -23,7 +23,6 @@ export const REINSCRIPTION_STEPS = {
   CONFIRM: "CONFIRM",
 };
 
-
 export const CORRECTION_STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
   SEJOUR: "SEJOUR",
@@ -158,7 +157,7 @@ const WAITING_CORRECTION_LINK = [
     step: "coordonnee",
   },
   {
-    field: ["cniFile", "latestCNIFileExpirationDate"],
+    field: ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"],
     redirect: "/inscription2023/correction/documents",
     step: "documents",
   },
@@ -176,7 +175,7 @@ export const getCorrectionByStep = (young, step) => {
 };
 
 export const getCorrectionsForStepUpload = (young) => {
-  return young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
+  return young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field));
 };
 
 export const redirectToCorrection = (field) => {
