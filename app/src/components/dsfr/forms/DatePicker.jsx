@@ -11,6 +11,8 @@ export default function DatePicker({ value, onChange, disabled = false }) {
   const limitMonth = (month) => limitRange(month, 1, 12);
   const limitYear = (year) => limitRange(year, 20, maxYear);
 
+  const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
+
   useEffect(() => {
     if (day && month && year) {
       const dayString = day.toString();
@@ -51,6 +53,7 @@ export default function DatePicker({ value, onChange, disabled = false }) {
           min="1"
           max="31"
           value={day}
+          onKeyDown={blockInvalidChar}
           onChange={handleDayChange}
           placeholder="Jour"
           maxLength="2"
@@ -68,6 +71,7 @@ export default function DatePicker({ value, onChange, disabled = false }) {
           min="1"
           max="12"
           value={month}
+          onKeyDown={blockInvalidChar}
           onChange={handleMonthChange}
           placeholder="Mois"
           maxLength="2"
@@ -85,6 +89,7 @@ export default function DatePicker({ value, onChange, disabled = false }) {
           min={minYear}
           max={maxYear}
           value={year}
+          onKeyDown={blockInvalidChar}
           onChange={handleYearChange}
           placeholder="Année"
           maxLength="4"
