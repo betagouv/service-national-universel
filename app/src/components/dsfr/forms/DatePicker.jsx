@@ -5,11 +5,7 @@ export default function DatePicker({ value, onChange, disabled = false }) {
   const [month, setMonth] = useState(() => (value ? value.getMonth() + 1 : ""));
   const [year, setYear] = useState(() => (value ? value.getFullYear() : ""));
   const maxYear = new Date().getFullYear();
-  const minYear = maxYear - 25;
-  const limitRange = (value, min, max) => value && Math.min(max, Math.max(min, value));
-  const limitDay = (day) => limitRange(day, 1, 31);
-  const limitMonth = (month) => limitRange(month, 1, 12);
-  const limitYear = (year) => limitRange(year, 20, maxYear);
+  const minYear = 0;
 
   const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
 
@@ -33,9 +29,9 @@ export default function DatePicker({ value, onChange, disabled = false }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  const handleDayChange = (e) => setDay(limitDay(e.target.value));
-  const handleMonthChange = (e) => setMonth(limitMonth(e.target.value));
-  const handleYearChange = (e) => setYear(limitYear(e.target.value));
+  const handleDayChange = (e) => setDay(e.target.value);
+  const handleMonthChange = (e) => setMonth(e.target.value);
+  const handleYearChange = (e) => setYear(e.target.value);
 
   const textColor = disabled ? "text-[#929292]" : "text-[#666666]";
   const borderColor = disabled ? "border-[#929292]" : "border-black";
