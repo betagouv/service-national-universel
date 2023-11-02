@@ -245,7 +245,7 @@ function ConsentementForm({ young, token, step, parentId }) {
       <Navbar step={step} />
       <DSFRContainer title="Apporter votre consentement">
         <div className="flex flex-col">
-          <h1 className="mb-1  text-[22px] font-bold text-[#21213F]">Apporter votre consentement</h1>
+          {/* <h1 className="mb-1  text-[22px] font-bold text-[#21213F]">Apporter votre consentement</h1> */}
           <div className="mb-[24px] text-[14px] leading-[20px] text-[#666666]">
             <p>
               En tant que représentant(e) légal(e), utilisez ce bouton pour vous identifier avec FranceConnect et <b>vérifier votre identité et vos données personnelles</b> (nom,
@@ -357,9 +357,9 @@ function ConsentementForm({ young, token, step, parentId }) {
             <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-8">
               <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
                 <div className="mb-3">
-                  Le Ministère de l’Education Nationale et de la Jeunesse, ses partenaires et les journalistes dûment accrédités par les services communication du ministère et/ou
-                  des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur
-                  leurs publications respectives.{" "}
+                  Le Ministère de l’Education Nationale et de la Jeunesse (MENJ), ses services déconcentrés, ses partenaires et les journalistes dûment accrédités par les services
+                  de communication du ministère à enregistrer, reproduire et représenter l’image ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
+                  séparément, sur leurs publications respectives.{" "}
                   {!imageRightsExplanationShown && (
                     <a className="whitespace-nowrap underline" href="#" onClick={toggleImageRightsExplanationShown}>
                       Lire plus
@@ -369,13 +369,22 @@ function ConsentementForm({ young, token, step, parentId }) {
                 {imageRightsExplanationShown && (
                   <>
                     <div className="mb-3">
-                      Cette autorisation est valable pour une utilisation : d’une durée de 5 ans à compter de la signature de la présente ; sur tous les supports d’information et
-                      de communication imprimés ou numériques à but non lucratif ; édités par les services de l’État ainsi que sur tous réseaux de communication, y compris
-                      télévisuels ou Internet ; de l’image du volontaire représenté en tant que telle et/ou intégrée dans une œuvre papier, numérique ou audiovisuelle. Conformément
-                      aux dispositions légales en vigueur relatives au droit à l’image, le MENJS s’engage à ce que la publication et la diffusion de l’image ainsi que des
-                      commentaires l’accompagnant ne portent pas atteinte à sa vie privée, à sa dignité et à sa réputation. En vertu du Règlement général sur la protection des
-                      données (RGPD), entré en application le 25 mai 2018, le sujet ou son/ses représentant(s) légal/légaux dispose(ent) d’un libre accès aux photos concernant la
-                      personne mineure et a le droit de demander à tout moment le retrait de celles-ci*.
+                      <p>
+                        Cette autorisation est valable pour une utilisation sur l’ensemble du parcours du service national universel, tant durant le séjour de cohésion que dans le
+                        cadre de la mobilisation du volontaire au titre de la réserve du SNU :{" "}
+                      </p>
+                      <div className="ml-4 mt-2 mb-2">
+                        <li>pour une durée de 5 ans à compter de la signature de la présente ;</li>
+                        <li> sur tous les supports d’information et de communication imprimés ou numériques à but non lucratif ; </li>
+                        <li>édités par les services de l’État ainsi que sur tous réseaux de communication, y compris télévisuels ou Internet ;</li>
+                        <li>de l’image du volontaire représenté en tant que telle ou intégrée dans une œuvre papier, numérique ou audiovisuelle.</li>
+                      </div>
+                      <p>
+                        Conformément aux dispositions légales en vigueur relatives au droit à l’image, le MENJ s’engage à ce que la publication et la diffusion de l’image du
+                        volontaire ainsi que des commentaires l’accompagnant ne portent pas atteinte à sa vie privée, à sa dignité et à sa réputation. En vertu du Règlement général
+                        sur la protection des données (RGPD), entré en application le 25 mai 2018, le volontaire et ses représentants légaux disposent d’un libre accès aux photos
+                        concernant la personne mineure et ont le droit de demander à tout moment le retrait de celles-ci. La présente autorisation est consentie à titre gratuit.
+                      </p>
                     </div>
                     <div className="mb-3">La présente autorisation est consentie à titre gratuit.</div>
                     <a className="underline" href="#" onClick={toggleImageRightsExplanationShown}>
