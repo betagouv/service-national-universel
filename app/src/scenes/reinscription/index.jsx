@@ -1,19 +1,21 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Redirect, Switch, useParams } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
+import Loader from "@/components/Loader";
+import api from "@/services/api";
 import ReinscriptionContextProvider, { ReinscriptionContext } from "../../context/ReinscriptionContextProvider";
-import { SentryRoute } from "../../sentry";
+import { SentryRoute, capture } from "../../sentry";
 
 import { useSelector } from "react-redux";
 import StepEligibilite from "./steps/stepEligibilite";
 import StepNonEligible from "./steps/stepNonEligible";
-import StepSejour from "./steps/stepSejour";
+import StepSejour from "../preinscription/steps/stepSejour";
 import StepConfirm from "./steps/stepConfirm";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import { hasAccessToReinscription, reInscriptionOpenForYoungs } from "snu-lib";
+import { hasAccessToReinscription } from "snu-lib";
 import FutureCohort from "../inscription2023/FutureCohort";
-import { environment } from "@/config";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -30,18 +32,22 @@ const Step = () => {
       ...data,
       birthDate: young.birthdateAt,
       scolarity: young.grade,
-      school: {
-        fullName: young.schoolName,
-        type: young.schoolType,
-        adresse: young.schoolAddress,
-        codeCity: young.schoolZip,
-        city: young.schoolCity,
-        departmentName: young.schoolDepartment,
-        region: young.schoolRegion,
-        country: young.schoolCountry,
-        id: young.schoolId,
-        postCode: young.schoolZip,
-      },
+      ...(young.schoolId
+        ? {
+            school: {
+              fullName: young.schoolName,
+              type: young.schoolType,
+              adresse: young.schoolAddress,
+              codeCity: young.schoolZip,
+              city: young.schoolCity,
+              departmentName: young.schoolDepartment,
+              region: young.schoolRegion,
+              country: young.schoolCountry,
+              postCode: young.schoolZip,
+              id: young.schoolId,
+            },
+          }
+        : {}),
       zip: young.zip,
     });
   }, []);
@@ -61,11 +67,33 @@ const Step = () => {
 };
 
 export default function ReInscription() {
+  const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
+  const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
   const young = useSelector((state) => state.Auth.young);
+
+  const fetchInscriptionOpen = async () => {
+    try {
+      const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen?timeZoneOffset=${new Date().getTimezoneOffset()}`);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
+      setReinscriptionOpen(data);
+      setReinscriptionOpenLoading(false);
+    } catch (e) {
+      setReinscriptionOpenLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInscriptionOpen();
+  }, []);
 
   if (!hasAccessToReinscription(young)) return <Redirect to="/" />;
 
-  if (!reInscriptionOpenForYoungs(environment)) return <FutureCohort />;
+  if (isReinscriptionOpenLoading) return <Loader />;
+
+  if (!isReinscriptionOpen) return <FutureCohort />;
 
   return (
     <ReinscriptionContextProvider>

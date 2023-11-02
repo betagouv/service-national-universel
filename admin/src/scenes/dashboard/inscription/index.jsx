@@ -46,8 +46,8 @@ export default function Index({ onChangeFilter = () => {} }) {
           "Avril 2024 - C",
           "Avril 2024 - A",
           "Avril 2024 - B",
-          "Juin #1 2024",
-          "Juin #2 2024",
+          "Juin 2024 - 1",
+          "Juin 2024 - 2",
           "Juillet 2024",
         ],
       }),
@@ -117,8 +117,8 @@ export default function Index({ onChangeFilter = () => {} }) {
                   { key: "Avril 2024 - C", label: "Avril 2024 - C" },
                   { key: "Avril 2024 - A", label: "Avril 2024 - A" },
                   { key: "Avril 2024 - B", label: "Avril 2024 - B" },
-                  { key: "Juin #1 2024", label: "Juin #1 2024" },
-                  { key: "Juin #2 2024", label: "Juin #2 2024" },
+                  { key: "Juin 2024 - 1", label: "Juin 2024 - 1" },
+                  { key: "Juin 2024 - 2", label: "Juin 2024 - 2" },
                   { key: "Juillet 2024", label: "Juillet 2024" },
                 ]}
                 onChange={(cohort) => updateFilter({ cohort })}

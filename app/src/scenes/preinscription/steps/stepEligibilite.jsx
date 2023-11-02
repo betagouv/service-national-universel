@@ -53,7 +53,7 @@ export default function StepEligibilite() {
     }
     // Birthdate
     if (!data?.birthDate || !dayjs(data.birthDate).isValid()) {
-      errors.birthDate = "Vous devez choisir une date de naissance valide";
+      errors.birthDate = "Vous devez saisir une date de naissance valide";
     }
 
     if (data.scolarity) {
@@ -105,7 +105,7 @@ export default function StepEligibilite() {
       code,
       data: sessions,
       message,
-    } = await api.post("/cohort-session/eligibility/2023", {
+    } = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
       schoolRegion: data.school?.region,

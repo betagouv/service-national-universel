@@ -56,7 +56,7 @@ export const ERROR_MESSAGES = {
     unchecked: "Vous devez confirmer ce point.",
   },
   personalData: {
-    unchecked: "Vous devez accepter ce point.",
+    unchecked: "Vous devez confirmer ce point.",
   },
   healthForm: {
     unchecked: "Vous devez confirmer votre engagement.",

@@ -5,7 +5,10 @@ import useDevice from "../../../hooks/useDevice";
 import { getStepFromUrlParam, PREINSCRIPTION_STEPS_LIST } from "../../../utils/navigation";
 
 const ProgressBar = () => {
-  const { step } = useParams();
+  let { step } = useParams();
+  if (!step){
+    step = "eligibilite"
+  }
   const currentStep = getStepFromUrlParam(step, PREINSCRIPTION_STEPS_LIST);
   const device = useDevice();
 

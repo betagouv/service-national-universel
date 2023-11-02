@@ -60,7 +60,7 @@ export default function NonEligible() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
+      <DSFRContainer supportLink={supportURL + "/base-de-connaissance/jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"}>
         <h1 className="text-[22px] font-bold">Nous n'avons pas trouvé de séjour qui correspond à votre situation.</h1>
         <p className="mb-2 mt-4 border-l-8 border-l-[#0a0a0d] pl-4">
           Les inscriptions sont actuellement uniquement ouvertes aux volontaires <strong>âgés de 15 à 17 ans</strong> et <strong>scolarisés en seconde</strong>{" "}

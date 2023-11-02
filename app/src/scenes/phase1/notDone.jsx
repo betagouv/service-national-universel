@@ -6,7 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 import { youngCanChangeSession } from "snu-lib";
 import plausibleEvent from "../../services/plausible";
 import API from "../../services/api";
-import { permissionPhase2, permissionReinscription } from "../../utils";
+import { permissionPhase2 } from "../../utils";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import { isCohortDone } from "../../utils/cohorts";
@@ -40,10 +40,6 @@ export default function NotDone() {
     }
   }
 
-  async function goToReinscription() {
-    return history.push("/reinscription");
-  }
-
   return (
     <HeroContainer>
       <Hero>
@@ -70,14 +66,6 @@ export default function NotDone() {
                   history.push("/phase2");
                 }}>
                 Réaliser ma mission d&apos;intérêt général
-              </button>
-            )}
-            {/* @todo voir si on peut arriver dans ce cas */}
-            {permissionReinscription(young) && (
-              <button
-                className="bg-blue-[#FFFFFF] mt-5 w-full rounded-[10px] border-[1px]  border-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-blue-600 transition duration-150 ease-in-out hover:bg-blue-600 hover:text-white"
-                onClick={goToReinscription}>
-                Se réinscrire à un autre séjour
               </button>
             )}
           </div>
