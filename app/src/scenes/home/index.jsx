@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
 
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, hasAccessToReinscription, reInscriptionOpenForYoungs } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Banner from "./components/banner";
 import Default from "./default";
@@ -13,17 +13,40 @@ import Affected from "./Affected";
 import WaitingCorrectionV2 from "./waitingCorrectionV2";
 import WaitingList from "./waitingList";
 import WaitingReinscription from "./WaitingReinscription";
-import WaitingReinscriptionOld from "./WaitingReinscriptionOld";
+import WaitingReinscriptionInscriptionClosed from "./WaitingReinscriptionOld";
 import WaitingValidation from "./waitingValidation";
 import Withdrawn from "./withdrawn";
 import Phase1NotDone from "./Phase1NotDone";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import FutureCohort from "./FutureCohort";
-import { environment } from "@/config";
+import { capture } from "@/sentry";
+import { toastr } from "react-redux-toastr";
+import API from "@/services/api";
+import Loader from "@/components/Loader";
 
 export default function Home() {
   useDocumentTitle("Accueil");
   const young = useSelector((state) => state.Auth.young);
+  const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
+  const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
+
+  const fetchInscriptionOpen = async () => {
+    try {
+      const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen?timeZoneOffset=${new Date().getTimezoneOffset()}`);
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
+      setReinscriptionOpen(data);
+      setReinscriptionOpenLoading(false);
+    } catch (e) {
+      setReinscriptionOpenLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInscriptionOpen();
+  }, []);
 
   if (!young) return <Redirect to="/auth" />;
 
@@ -58,8 +81,9 @@ export default function Home() {
         </>
       );
     if (hasAccessToReinscription(young)) {
-      // @todo: WaitingReinscriptionOld should be deleted and WaitingReinscription updated to handle both cases
-      return reInscriptionOpenForYoungs(environment) ? <WaitingReinscription /> : <WaitingReinscriptionOld />;
+      if (isReinscriptionOpenLoading) return <Loader />;
+      // @todo: WaitingReinscriptionInscriptionClosed should be deleted and WaitingReinscription updated to handle both cases
+      return isReinscriptionOpen ? <WaitingReinscription /> : <WaitingReinscriptionInscriptionClosed />;
     }
     if (
       young.status === YOUNG_STATUS.VALIDATED &&
@@ -73,7 +97,7 @@ export default function Home() {
       return <Phase1NotDone />;
     }
 
-    if (["Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"].includes(young.cohort)) {
+    if (getCohortNames(true, false, false).includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;

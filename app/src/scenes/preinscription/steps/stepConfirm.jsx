@@ -65,20 +65,17 @@ export default function StepConfirm() {
 
     try {
       setLoading(true);
-      const { code, ok } = await api.post("/young/signup", values);
+      const { code, ok, token, user } = await api.post("/young/signup", values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
       } else {
-        plausibleEvent("Phase0/CTA preinscription - inscription");
-        const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
-        if (young) {
+        if (user) {
           if (token) api.setToken(token);
-          dispatch(setYoung(young));
+          dispatch(setYoung(user));
           removePersistedData();
+          history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
         }
-
-        history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
       }
     } catch (e) {
       setLoading(false);

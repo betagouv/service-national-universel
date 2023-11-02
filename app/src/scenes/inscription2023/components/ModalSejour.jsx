@@ -3,9 +3,10 @@ import { GrClose } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
-import { formatStringDate } from "snu-lib";
+import { formatStringDate, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
+import Alert from "../../../components/dsfr/ui/Alert";
 import Loader from "../../../components/Loader";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
@@ -20,11 +21,12 @@ export default function ModalSejour({ isOpen, onCancel }) {
   const [cohorts, setCohorts] = React.useState([]);
   const [error, setError] = React.useState({});
   const dispatch = useDispatch();
+  const { grade } = young;
 
   React.useEffect(() => {
     (async () => {
       try {
-        const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+        const res = await api.post(`/cohort-session/eligibility/2023/${young._id}?timeZoneOffset=${new Date().getTimezoneOffset()}`);
         if (res.data.msg) return setError({ text: res.data.msg });
         const cohorts = res.data;
         if (cohorts.length === 0) {
@@ -82,6 +84,9 @@ export default function ModalSejour({ isOpen, onCancel }) {
               <>
                 <div className="mb-2 font-semibold">Séjours de cohésion disponibles</div>
                 <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
+                {grade == GRADES["1ereGT"] && (
+                  <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
+                )}
                 <div className="my-4">{cohorts?.map((e) => SessionButton(e))}</div>
               </>
             ) : (

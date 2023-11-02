@@ -889,8 +889,8 @@ const Schema = new mongoose.Schema({
   },
   qpv: {
     type: String,
+    // TODO: REMOVE "" value from enum after cleaning DB from string empty values.
     enum: ["true", "false", ""],
-    default: "",
     documentation: {
       description: "Le volontaire est dans un Quarier Prioritaire pendant le snu",
     },
