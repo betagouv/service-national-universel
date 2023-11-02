@@ -410,7 +410,7 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     // Check inscription goals
     const sessions = await getFilteredSessions(young);
     const session = sessions.find(({ name }) => name === value.cohort);
-    if (!session || session.goalReached) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED }); //|| session.isFull
+    if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED }); //|| session.isFull || session.goalReached
 
     let template = SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE;
     const emailsTo = [];

@@ -16,8 +16,12 @@ async function getFilteredSessions(young, timeZoneOffset = null) {
     now = new Date(adjustedTimeForUser);
   }
 
+  const currentCohortYear = young.cohort ? new Date(sessions2023.find((c) => c.name === young.cohort).dateStart).getFullYear() : undefined;
+
   const sessions = sessions2023.filter(
     (session) =>
+      // if the young has already a cohort, he can only apply for the cohorts of the same year
+      (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
       session.eligibility?.zones.includes(region2zone[region]) &&
       session.eligibility?.schoolLevels.includes(young.grade) &&
       session.eligibility?.bornAfter <= young.birthdateAt &&

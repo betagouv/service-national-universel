@@ -3,7 +3,7 @@ import { GrClose } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
-import { formatStringDate, GRADES } from "snu-lib";
+import { getCohortPeriod, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Alert from "../../../components/dsfr/ui/Alert";
@@ -119,7 +119,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
           onSubmit(session.name);
         }}>
         <div>
-          Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
+          Séjour <strong>{getCohortPeriod(session)}</strong>
         </div>
         <ArrowRightBlueSquare />
       </div>
