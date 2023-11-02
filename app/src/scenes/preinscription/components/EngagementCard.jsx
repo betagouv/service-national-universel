@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { RiArrowRightLine } from "react-icons/ri";
 
-export default function CardEngagement({ program }) {
+export default function EngagementCard({ program }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

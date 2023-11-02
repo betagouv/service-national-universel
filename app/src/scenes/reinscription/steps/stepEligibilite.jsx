@@ -82,11 +82,6 @@ export default function StepEligibilite() {
       return;
     }
 
-    if (data.frenchNationality === "false" || !data.frenchNationality) {
-      setData({ ...data, message: "nationality", step: REINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
-    }
-
     // Check if young is more than 17 years old
     const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
