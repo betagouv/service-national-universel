@@ -1,28 +1,27 @@
-import React, { useState, useEffect } from "react";
+import { React, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
 
+import Loader from "@/components/Loader";
+import { capture } from "@/sentry";
+import API from "@/services/api";
+import { toastr } from "react-redux-toastr";
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
-import Banner from "./components/banner";
-import Default from "./default";
-import HomePhase2 from "./HomePhase2";
-import RefusedV2 from "./refusedV2";
-import ValidatedV2 from "./validatedV2";
 import Affected from "./Affected";
-import WaitingCorrectionV2 from "./waitingCorrectionV2";
-import WaitingList from "./waitingList";
+import FutureCohort from "./FutureCohort";
+import HomePhase2 from "./HomePhase2";
+import Phase1NotDone from "./Phase1NotDone";
 import WaitingReinscription from "./WaitingReinscription";
 import WaitingReinscriptionInscriptionClosed from "./WaitingReinscriptionOld";
+import Default from "./default";
+import RefusedV2 from "./refusedV2";
+import ValidatedV2 from "./validatedV2";
+import WaitingCorrectionV2 from "./waitingCorrectionV2";
+import WaitingList from "./waitingList";
 import WaitingValidation from "./waitingValidation";
 import Withdrawn from "./withdrawn";
-import Phase1NotDone from "./Phase1NotDone";
-import useDocumentTitle from "../../hooks/useDocumentTitle";
-import FutureCohort from "./FutureCohort";
-import { capture } from "@/sentry";
-import { toastr } from "react-redux-toastr";
-import API from "@/services/api";
-import Loader from "@/components/Loader";
 
 export default function Home() {
   useDocumentTitle("Accueil");
@@ -51,35 +50,11 @@ export default function Home() {
   if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
-    if (young.status === YOUNG_STATUS.ABANDONED)
-      return (
-        <>
-          {young.cohort === "2021" ? <Banner /> : null}
-          <Withdrawn />
-        </>
-      );
-    if (young.status === YOUNG_STATUS.WITHDRAWN)
-      return (
-        <>
-          {young.cohort === "2021" ? <Banner /> : null}
-          <Withdrawn />
-        </>
-      );
+    if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
+    if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
 
-    if (young.status === YOUNG_STATUS.WAITING_LIST && !["2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"].includes(young.cohort))
-      return (
-        <>
-          {young.cohort === "2021" ? <Banner /> : null}
-          <WaitingList />
-        </>
-      );
-    if (young.status === YOUNG_STATUS.REFUSED)
-      return (
-        <>
-          {young.cohort === "2021" ? <Banner /> : null}
-          <RefusedV2 />
-        </>
-      );
+    if (young.status === YOUNG_STATUS.WAITING_LIST && !["2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"].includes(young.cohort)) return <WaitingList />;
+    if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
     if (hasAccessToReinscription(young)) {
       if (isReinscriptionOpenLoading) return <Loader />;
       // @todo: WaitingReinscriptionInscriptionClosed should be deleted and WaitingReinscription updated to handle both cases
