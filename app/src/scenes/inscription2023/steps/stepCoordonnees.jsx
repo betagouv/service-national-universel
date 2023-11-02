@@ -608,7 +608,8 @@ export default function StepCoordonnees() {
         <div className="flex mt-4 items-center gap-3 mb-4">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
           <a className="mt-1" href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`} target="_blank" rel="noreferrer">
-            <InformationCircle className="text-blue-800" />
+            <RiInformationFill className="text-xl text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
+
           </a>
         </div>
         <div className="mb-4 flex items-center">
