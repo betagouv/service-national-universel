@@ -101,7 +101,7 @@ export default function StepEligibilite() {
     // Birthdate
     // ? Check age ?
     if (!data?.birthDate) {
-      errors.birthDate = "Vous devez choisir une date de naissance";
+      errors.birthDate = "Vous devez saisir une date de naissance";
     }
 
     if (data.scolarity) {
@@ -151,7 +151,7 @@ export default function StepEligibilite() {
 
     try {
       const updatedYoung = { ...young, ...updates };
-      const res = await api.post("/cohort-session/eligibility/2023", updatedYoung);
+      const res = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, updatedYoung);
       if (!res.ok) throw new Error(translate(res.code));
 
       const cohorts = res.data.length > 0 ? res.data : null;

@@ -12,8 +12,8 @@ const sessions2024CohortNames = [
   "Avril 2024 - C",
   "Avril 2024 - A",
   "Avril 2024 - B",
-  "Juin #1 2024",
-  "Juin #2 2024",
+  "Juin 2024 - 1",
+  "Juin 2024 - 2",
   "Juillet 2024",
 ];
 
@@ -46,8 +46,8 @@ const COHESION_STAY_START = {
   "Avril 2024 - C": new Date("04/08/2024"),
   "Avril 2024 - A": new Date("04/15/2024"),
   "Avril 2024 - B": new Date("04/22/2024"),
-  "Juin #1 2024": new Date("06/03/2024"),
-  "Juin #2 2024": new Date("06/17/2024"),
+  "Juin 2024 - 1": new Date("06/03/2024"),
+  "Juin 2024 - 2": new Date("06/17/2024"),
   "Juillet 2024": new Date("07/03/2024"),
 };
 
@@ -69,8 +69,8 @@ const START_DATE_SESSION_PHASE1 = {
   "Avril 2024 - C": new Date("04/08/2024"),
   "Avril 2024 - A": new Date("04/15/2024"),
   "Avril 2024 - B": new Date("04/22/2024"),
-  "Juin #1 2024": new Date("06/03/2024"),
-  "Juin #2 2024": new Date("06/17/2024"),
+  "Juin 2024 - 1": new Date("06/03/2024"),
+  "Juin 2024 - 2": new Date("06/17/2024"),
   "Juillet 2024": new Date("07/03/2024"),
 };
 
@@ -95,8 +95,8 @@ const COHESION_STAY_END = {
   "Avril 2024 - C": new Date("04/20/2024"),
   "Avril 2024 - A": new Date("04/27/2024"),
   "Avril 2024 - B": new Date("05/04/2024"),
-  "Juin #1 2024": new Date("06/14/2024"),
-  "Juin #2 2024": new Date("06/28/2024"),
+  "Juin 2024 - 1": new Date("06/14/2024"),
+  "Juin 2024 - 2": new Date("06/28/2024"),
   "Juillet 2024": new Date("07/15/2024"),
 };
 
@@ -130,6 +130,8 @@ const getCohortStartDate = (young, cohort) => {
 const getCohortEndDate = (young, cohort) => {
   return cohort ? new Date(cohort.dateEnd) : END_DATE_PHASE1[young.cohort];
 };
+
+const getCohortYear = cohort => cohort?.dateStart?.slice(0,4);
 
 const getCohortPeriod = (cohort, withBold = false) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
@@ -189,13 +191,6 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-//@todo: check in cohort list
-function reInscriptionOpenForYoungs(env) {
-  if (env !== undefined && env !== "production") return true;
-
-  return new Date() >= new Date(2023, 10, 6, 8);
-}
-
 function shouldForceRedirectToReinscription(young) {
   return (
     young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REINSCRIPTION].includes(young.status)
@@ -233,13 +228,13 @@ function canApplyToPhase2(young, cohort) {
 
 export {
   oldSessions,
+  getCohortYear,
   getCohortPeriod,
   getCohortPeriodTemp,
   sessions2023CohortNames,
   getCohortNames,
   inscriptionModificationOpenForYoungs,
   inscriptionCreationOpenForYoungs,
-  reInscriptionOpenForYoungs,
   shouldForceRedirectToReinscription,
   shouldForceRedirectToInscription,
   hasAccessToReinscription,

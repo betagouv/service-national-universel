@@ -17,20 +17,25 @@ const FEATURES_NAME = {
 // If the environment is not defined then the feature is enabled
 const features = {
   [FEATURES_NAME.SIDEBAR]: {
-    [ENVS.production]: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION],
+    [ENVS.production]: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE, ROLES.SUPERVISOR],
   },
   [FEATURES_NAME.DASHBOARD]: {
-    [ENVS.production]: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION],
+    [ENVS.production]: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE, ROLES.SUPERVISOR],
   },
   [FEATURES_NAME.FLEXIBLE_REDIRECT]: {
     [ENVS.production]: [],
     [ENVS.staging]: [],
   },
   [FEATURES_NAME.EMAIL_VALIDATION]: {
-    [ENVS.staging]: [],
-    [ENVS.development]: [],
+    // [ENVS.staging]: [],
+    // [ENVS.development]: [],
+  },
+  [FEATURES_NAME.YOUNG_INSCRIPTION]: {
+    [ENVS.production]: [],
   },
 };
+
+//Force redeploy
 
 function isFeatureEnabled(featureName, userRole, environment) {
   const feature = features[featureName];

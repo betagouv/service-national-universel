@@ -55,10 +55,10 @@ export const PREINSCRIPTION_STEPS_LIST = [
 ];
 
 export const REINSCRIPTION_STEPS_LIST = [
-  { name: PREINSCRIPTION_STEPS.ELIGIBILITE, url: "eligibilite" },
-  { name: PREINSCRIPTION_STEPS.INELIGIBLE, url: "noneligible" },
-  { name: PREINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
-  { name: PREINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
+  { name: REINSCRIPTION_STEPS.ELIGIBILITE, url: "eligibilite" },
+  { name: REINSCRIPTION_STEPS.INELIGIBLE, url: "noneligible" },
+  { name: REINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
+  { name: REINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
 ];
 
 export const CORRECTION_STEPS_LIST = [

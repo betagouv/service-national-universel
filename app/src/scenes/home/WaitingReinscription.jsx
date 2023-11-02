@@ -10,13 +10,12 @@ export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
-  //@todo: check if reInscriptionOpenForYoungs is true, otherwise display old messages
   let textPrecision;
   let textSecond;
   if ((young.status === YOUNG_STATUS.WAITING_LIST || (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === "WAITING_AFFECTATION")) && young.cohort === "à venir")
     textPrecision = "Vérifiez dès maintenant votre éligibilité !";
   else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
-    textPrecision = "Votre Phase 1 n'a pas été validé.";
+    textPrecision = "Votre Phase 1 n'a pas été validée.";
     textSecond = "Pour la valider, inscrivez-vous pour participer à un prochain séjour !";
   } else return;
 

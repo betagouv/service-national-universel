@@ -8,7 +8,7 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/dsfr/forms/toggle";
-import { getAge, translate, getCohortPeriod } from "snu-lib";
+import { translate, getCohortYear } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -43,8 +43,7 @@ function ConsentementForm({ young, token, step, parentId }) {
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
-  const youngAge = getAge(young.birthDate);
-  const sessionDate = getCohortPeriod(young.cohort);
+  const cohortYear = getCohortYear(young.cohort);
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
@@ -154,12 +153,10 @@ function ConsentementForm({ young, token, step, parentId }) {
 
       if (data.allowSNU) {
         validate("rightOlder", "unchecked", data.rightOlder !== true);
-        if (youngAge < 15) {
-          validate("personalData", "unchecked", data.personalData !== true);
-        }
         validate("healthForm", "unchecked", data.healthForm !== true);
         validate("vaccination", "unchecked", data.vaccination !== true);
         validate("internalRules", "unchecked", data.internalRules !== true);
+        validate("personalData", "unchecked", data.personalData !== true);
 
         // validate("allowCovidAutotest", "not_choosen", data.allowCovidAutotest !== false && data.allowCovidAutotest !== true);
         validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
@@ -313,8 +310,7 @@ function ConsentementForm({ young, token, step, parentId }) {
           {parentId === 1 && (
             <div className="border-t-solid  border-t-[1px] border-t-[#E5E5E5] py-[16px]">
               <AuthorizeBlock className="mb-[32px]" title="Participation au SNU" value={data.allowSNU} onChange={(e) => setData({ ...data, allowSNU: e })} error={errors.allowSNU}>
-                <b>{youngFullname}</b> à participer à la session <b>{sessionDate}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-                réalisation d&apos;une mission d&apos;intérêt général.
+                <b>{youngFullname}</b> à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohortYear)}</b> du SNU.
               </AuthorizeBlock>
 
               {data.allowSNU && (
@@ -322,16 +318,10 @@ function ConsentementForm({ young, token, step, parentId }) {
                   <div>
                     Je, <b>{data.firstName + " " + data.lastName}</b>
                     <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
-                      Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
+                      Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de <b>{youngFullname}</b>.
                     </Check>
-                    {youngAge < 15 && (
-                      <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
-                        J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
-                      </Check>
-                    )}
                     <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
-                      M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
-                      cohésion (
+                      M&apos;engage à communiquer la fiche sanitaire de <b>{youngFullname}</b> au responsable du séjour de cohésion (
                       <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Télécharger la fiche sanitaire ici
                       </a>
@@ -344,9 +334,12 @@ function ConsentementForm({ young, token, step, parentId }) {
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
                       Reconnais avoir pris connaissance du{" "}
                       <a href={CDN_BASE_URL + "/file/snu-reglement-interieur-2022-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
-                        Règlement Intérieur du SNU
+                        Règlement Intérieur du séjour de cohésion
                       </a>
                       .
+                    </Check>
+                    <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
+                      Accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
                     </Check>
                   </div>
                 </div>
