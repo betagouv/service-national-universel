@@ -5,6 +5,11 @@ export const categories = [
 
 export const articleSummaries = [
   {
+    title: "Phase 0: Quelles sont les dates des séjours 2024 ?",
+    description: "Vous souhaitez connaitre les dates des séjours proposés en 2024",
+    slug: "je-souhaite-minscrire-au-snu",
+  },
+  {
     title: "🌲 Phase 1 : Changer les dates de mon séjour",
     description: "Vous n'êtes plus disponible pendant votre séjour ? Découvrez comment transférer votre inscription sur un autre séjour du SNU.",
     slug: "je-souhaite-changer-les-dates-de-mon-sejour",
@@ -53,6 +58,13 @@ export const articleSummaries = [
 
 // TODO: Move to DB
 export const questions = [
+  {
+    value: "PHASE_0_ELIGIBILITY",
+    category: "QUESTION",
+    label: "Phase 0 -  Eligibilité aux séjours 2024",
+    articles: ["je-souhaite-minscrire-au-snu"],
+    roles: ["public"],
+  },
   {
     value: "PHASE_1",
     category: "QUESTION",
