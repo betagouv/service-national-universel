@@ -29,7 +29,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     const { error, value } = Joi.object({
       schooled: Joi.string().trim().required(),
       grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE").required(),
-      schoolName: Joi.string().trim().required(),
+      schoolName: Joi.string().trim(),
       schoolType: Joi.string().trim().allow(null, ""),
       schoolAddress: Joi.string().trim().allow(null, ""),
       schoolZip: Joi.string().trim().allow(null, ""),
@@ -61,7 +61,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     // Check if the young can choose the given cohort
     const sessions = await getFilteredSessions({ birthdateAt: young.birthdateAt, ...value });
     const session = sessions.find(({ name }) => name === value.cohort);
-    if (!session || session.goalReached) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // Update young
     young.set({
