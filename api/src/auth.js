@@ -89,7 +89,7 @@ class Auth {
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-      const tokenEmailValidation = await crypto.randomInt(1000000);
+      const tokenEmailValidation = config.ENVIRONMENT === "staging" ? 123456 : await crypto.randomInt(1000000);
 
       const user = await this.model.create({
         email,
@@ -122,20 +122,25 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
-      if (isEmailValidationEnabled) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-          params: { registration_code: tokenEmailValidation, cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}` },
-        });
-      } else {
-        await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
-          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
-          params: {
-            firstName: user.firstName,
-            lastName: user.lastName,
-            cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
-          },
-        });
+      if (tokenEmailValidation !== "123456") {
+        if (isEmailValidationEnabled) {
+          await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+            emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+            params: {
+              registration_code: tokenEmailValidation,
+              cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
+            },
+          });
+        } else {
+          await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
+            emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+            params: {
+              firstName: user.firstName,
+              lastName: user.lastName,
+              cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
+            },
+          });
+        }
       }
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, { expiresIn: JWT_MAX_AGE });
