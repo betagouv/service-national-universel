@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ProfilePic } from "@snu/ds";
-import { Page, Header, Container, Button, ModalConfirmation, Label, InputText } from "@snu/ds/admin";
+import { Page, Header, Container, Button, InputText, ModalConfirmation, Label } from "@snu/ds/admin";
 import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { VscCopy } from "react-icons/vsc";
 import InstitutionIcon from "@/components/drawer/icons/Institution";
@@ -14,6 +14,7 @@ export default function view() {
   ]);
   const [modalChef, setModalChef] = useState(false);
   const [modalSousChef, setModalSousChef] = useState(false);
+  const [modalCoordinator, setModalCoordinator] = useState(false);
 
   return (
     <Page>
@@ -21,6 +22,7 @@ export default function view() {
         title={form.name}
         breadcrumb={[{ title: <InstitutionIcon className="scale-[65%]" /> }, { title: "Fiche de mon établissement" }]}
         actions={[
+          <Button key="modal-coordinator" className="ml-2" type="secondary" title="Ajouter un coordinateur" onClick={() => setModalCoordinator(true)} />,
           <Button key="modal-sous-chef" className="ml-2" type="secondary" title="Modal 1ère connexion Référent de classe" onClick={() => setModalSousChef(true)} />,
           <Button key="modal-chef" className="ml-2" type="secondary" title="Modal 1ère connexion Chef d'ét." onClick={() => setModalChef(true)} />,
         ]}
@@ -77,7 +79,7 @@ export default function view() {
         </div>
       </Container>
 
-      {/* INSTITUTION_CHEF */}
+      {/* First login INSTITUTION_CHEF */}
       <ModalConfirmation
         isOpen={modalChef}
         onClose={() => setModalChef(false)}
@@ -89,7 +91,7 @@ export default function view() {
           { title: "Ajouter un coordinateur", leftIcon: <HiPlus />, onClick: () => console.info("Ajouter un coordinateur") },
         ]}
       />
-      {/* INSTITUTION_SOUS_CHEF */}
+      {/* First login INSTITUTION_SOUS_CHEF */}
       <ModalConfirmation
         isOpen={modalSousChef}
         onClose={() => setModalSousChef(false)}
@@ -99,6 +101,25 @@ export default function view() {
         actions={[
           { title: "Fermer", isCancel: true },
           { title: "Compléter les informations", leftIcon: <ClasseIcon />, onClick: () => console.info("Compléter les informations") },
+        ]}
+      />
+      {/* Invite COORDINATOR */}
+      <ModalConfirmation
+        isOpen={modalCoordinator}
+        onClose={() => setModalCoordinator(false)}
+        className="md:max-w-[700px]"
+        icon={<ProfilePic />}
+        title="Ajouter un coordinateur d’établissement"
+        text={
+          <div className="mt-6 w-[636px] text-left text-ds-gray-900">
+            <InputText className="mb-3" label="Nom" placeholder="Préciser" />
+            <InputText className="mb-3" label="Prénom" placeholder="Préciser" />
+            <InputText className="mb-3" type="email" label="Adresse email" placeholder="Préciser" />
+          </div>
+        }
+        actions={[
+          { title: "Modifier", isCancel: true },
+          { title: "Valider", onClick: () => console.info("Ajouter un coordinateur") },
         ]}
       />
     </Page>

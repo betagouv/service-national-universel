@@ -13,8 +13,11 @@ export default function list() {
         breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes" }]}
         actions={[
           <Button key="empty" title={`(Voir template ${classes ? "vide" : "liste"})`} type="secondary" onClick={() => setClasses(classes ? undefined : [])} />,
-          <a key="list" href="/mes-classes/create">
-            <Button leftIcon={<ClasseIcon />} title="Créer une classe" className="ml-4" />
+          <a key="view" href="/mes-classes/1" className="ml-2">
+            <Button title="Vue classe" type="secondary" />
+          </a>,
+          <a key="list" href="/mes-classes/create" className="ml-2">
+            <Button leftIcon={<ClasseIcon />} title="Créer une classe" />
           </a>,
         ]}
       />
