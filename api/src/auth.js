@@ -89,7 +89,7 @@ class Auth {
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-      const tokenEmailValidation = config.ENVIRONMENT === "staging" ? 123456 : await crypto.randomInt(1000000);
+      const tokenEmailValidation = config.ENVIRONMENT === "staging" ? config.TOKENLOADTEST : await crypto.randomInt(1000000);
 
       const user = await this.model.create({
         email,
@@ -122,7 +122,7 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
-      if (tokenEmailValidation !== "123456") {
+      if (tokenEmailValidation !== config.TOKENLOADTEST) {
         if (isEmailValidationEnabled) {
           await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
             emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
