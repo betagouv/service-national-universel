@@ -10,6 +10,7 @@ import { capture } from "../../sentry";
 import ProgressBar from "./components/ProgressBar";
 import { supportURL } from "@/config";
 import API from "@/services/api";
+import { toastr } from "react-redux-toastr";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young);
@@ -17,8 +18,11 @@ export default function Done() {
   async function handleClick() {
     try {
       plausibleEvent("Phase0/CTA preinscription - demarrer");
-      const { ok, data, code } = await API.put("/young/inscription2023/step", { step: "COORDONNEES" });
-      console.log("🚀 ~ file: Done.jsx:21 ~ handleClick ~ data:", data)
+      const { ok, code } = await API.put("/young/inscription2023/step", { step: "COORDONNEES" });
+      if (!ok) {
+        capture(code);
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
       history.push("/inscription2023");
     } catch (e) {
       capture(e);
@@ -29,7 +33,7 @@ export default function Done() {
     <>
       <ProgressBar />
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
-        <h1 className="text-3xl font-semibold leading-snug">Bienvenue trucmuche {young?.firstName} 🎉</h1>
+        <h1 className="text-3xl font-semibold leading-snug">Bienvenue {young?.firstName} 🎉</h1>
         <h1 className="text-3xl font-semibold leading-snug">Votre compte volontaire a été créé.</h1>
         <p className="py-2 mt-2 text-gray-600">
           Vous pouvez dès à présent <strong>finaliser votre inscription</strong> ou la reprendre à tout moment depuis le mail envoyé à {young?.email}, ou depuis l’écran de

@@ -30,7 +30,8 @@ export default function StepEmailValidation() {
   const [isDidNotReceiveCodeModalOpen, setDidNotReceiveCodeModalOpen] = useState(false);
   const [isModifyEmailModalOpen, setModifyEmailOpen] = useState(false);
 
-  if (young && young.emailVerified === "true") return <Redirect to="/inscription2023" />;
+  if (young && young.emailVerified === "true" && young.inscriptionStep2023 === "COORDONNEES") return <Redirect to="/inscription2023" />;
+  if (young && young.emailVerified === "true" && young.inscriptionStep2023 === "EMAIL_VALIDATED") return <Redirect to="/preinscription/done" />;
 
   async function handleClick() {
     try {

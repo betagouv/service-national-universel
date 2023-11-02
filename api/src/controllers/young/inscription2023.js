@@ -596,7 +596,10 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
 router.put("/step", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      step: Joi.string().trim().valid(Object.values(STEPS2023)).required(),
+      step: Joi.string()
+        .trim()
+        .valid(...Object.values(STEPS2023))
+        .required(),
     }).validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
