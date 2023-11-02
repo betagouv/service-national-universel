@@ -449,14 +449,14 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       if (young.files.cniFiles.length > 0) {
         young.set("inscriptionStep2023", STEPS2023.CONFIRM);
       } else return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      const { error, value } = Joi.object({ date: Joi.date().required() }).validate(req.body, { stripUnknown: true });
+      const { error, value } = Joi.object({ date: Joi.date().required(), latestCNIFileCategory: Joi.string().trim() }).validate(req.body, { stripUnknown: true });
       if (error) {
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
       const cohort = await CohortObject.findOne({ name: young.cohort });
       const CNIFileNotValidOnStart = value.date < new Date(cohort.dateStart);
-      young.set({ latestCNIFileExpirationDate: value.date, CNIFileNotValidOnStart });
+      young.set({ latestCNIFileExpirationDate: value.date, latestCNIFileCategory: value.latestCNIFileCategory, CNIFileNotValidOnStart });
     }
 
     if (type === "correction") {
