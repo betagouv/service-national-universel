@@ -197,21 +197,23 @@ function shouldForceRedirectToReinscription(young) {
   );
 }
 
+
 function hasAccessToReinscription(young) {
   if (shouldForceRedirectToReinscription(young)) return true;
 
-  const allowedStatuses = [
-    YOUNG_STATUS.IN_PROGRESS,
-    YOUNG_STATUS.WAITING_VALIDATION,
-    YOUNG_STATUS.WAITING_CORRECTION,
-    YOUNG_STATUS.WAITING_LIST,
-    YOUNG_STATUS.ABANDONED,
-    YOUNG_STATUS.WITHDRAWN,
-    YOUNG_STATUS.REINSCRIPTION,
-    YOUNG_STATUS.VALIDATED,
-  ];
+  if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && !(young.departSejourMotif === "Exclusion")) {
+    return true;
+  }
 
-  return allowedStatuses.includes(young.status) && !(young.departSejourMotif === "Exclusion");
+  if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
+    return true;
+  }
+
+  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") {
+    return true;
+  }
+
+  return false;
 }
 
 function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
