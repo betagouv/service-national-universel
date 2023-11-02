@@ -21,7 +21,6 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
   passport.authenticate("referent", async function (err, user) {
     try {
       let young = {};
-      let timeZoneOffset = null;
       const { value } = validateId(req.params.id);
       if (value) young = await YoungModel.findById(value);
       else {
@@ -34,7 +33,6 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
           grade: Joi.string(),
           status: Joi.string(),
           zip: Joi.string(),
-          timeZoneOffset: Joi.number(),
         })
           .unknown()
           .validate(req.body);
