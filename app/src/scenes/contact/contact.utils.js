@@ -39,6 +39,16 @@ export const articleSummaries = [
     description: "Vous souhaitez comprendre le déroulement de la phase 3 du SNU ?",
     slug: "comment-fonctionne-la-phase-3",
   },
+  {
+    title: "Je n’arrive pas à compléter le formulaire d’inscription ",
+    description: "Vous souhaitez avoir de l’aide pour compléter votre inscription",
+    slug: "je-minscris-et-remplis-mon-profil",
+  },
+  {
+    title: "J’ai un frère ou une soeur qui possède déjà un compte",
+    description: "Votre frère ou votre soeur possède déjà un compte, vous souhaitez connaître la procédure pour créer un autre compte.",
+    slug: "je-souhaite-inscrire-des-freressoeurs",
+  },
 ];
 
 // TODO: Move to DB
@@ -107,9 +117,17 @@ export const questions = [
   },
   {
     category: "TECHNICAL",
-    value: "DOWNLOAD",
-    label: "Je n'arrive pas à télécharger un document depuis la plateforme",
-    roles: ["public", "young"],
+    value: "COMPLETION",
+    label: "Pour compléter mon formulaire d'inscription",
+    articles: ["je-minscris-et-remplis-mon-profil"],
+    roles: ["public"],
+  },
+  {
+    category: "TECHNICAL",
+    value: "SIBLINGS",
+    label: "J’ai un frère ou une soeur qui possède déjà un compte ",
+    articles: ["je-souhaite-inscrire-des-freressoeurs"],
+    roles: ["public"],
   },
   {
     category: "TECHNICAL",
@@ -121,6 +139,12 @@ export const questions = [
     category: "TECHNICAL",
     value: "CONTRACT",
     label: "Je n'ai pas reçu le lien de validation du contrat d'engagement",
+    roles: ["public", "young"],
+  },
+  {
+    category: "TECHNICAL",
+    value: "DOWNLOAD",
+    label: "Je n'arrive pas à télécharger un document depuis la plateforme",
     roles: ["public", "young"],
   },
   {
