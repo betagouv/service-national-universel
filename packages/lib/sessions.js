@@ -191,13 +191,6 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-//@todo: check in cohort list
-function reInscriptionOpenForYoungs(env) {
-  if (env !== undefined && env !== "production") return true;
-
-  return new Date() >= new Date(2023, 10, 6, 8);
-}
-
 function shouldForceRedirectToReinscription(young) {
   return (
     young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REINSCRIPTION].includes(young.status)
@@ -242,7 +235,6 @@ export {
   getCohortNames,
   inscriptionModificationOpenForYoungs,
   inscriptionCreationOpenForYoungs,
-  reInscriptionOpenForYoungs,
   shouldForceRedirectToReinscription,
   shouldForceRedirectToInscription,
   hasAccessToReinscription,

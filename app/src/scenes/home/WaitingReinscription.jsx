@@ -10,7 +10,6 @@ export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
-  //@todo: check if reInscriptionOpenForYoungs is true, otherwise display old messages
   let textPrecision;
   let textSecond;
   if ((young.status === YOUNG_STATUS.WAITING_LIST || (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === "WAITING_AFFECTATION")) && young.cohort === "à venir")

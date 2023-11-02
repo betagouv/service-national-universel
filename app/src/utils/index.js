@@ -75,12 +75,6 @@ export function permissionPhase3(y) {
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
 }
 
-// eslint-disable-next-line no-unused-vars
-export function permissionReinscription(_y) {
-  // return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && !["Exclusion"].includes(y.departSejourMotif);
-  return false;
-}
-
 // from the end of the cohort's last day
 export function isYoungCanApplyToPhase2Missions(young) {
   const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
