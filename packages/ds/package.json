@@ -9,8 +9,8 @@
     "dev": "npx tsc -w --jsx preserve -t ES2021 --outDir dist --noEmit false",
     "build": "npx tsc --jsx preserve -t ES2021 --outDir dist --noEmit false",
     "lint": "eslint src \"{**/*,*}.{js,ts,jsx,tsx}\"",
-    "lint:fix": "eslint src --ext .js,.ts --fix",
-    "lint:report": "eslint src --ext .js,.ts --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
+    "lint:fix": "eslint src --ext .js,.ts,jsx,tsx --fix",
+    "lint:report": "eslint src --ext .js,.ts,jsx,tsx --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\""
   },
   "author": "",
@@ -24,9 +24,9 @@
   },
   "peerDependencies": {
     "@headlessui/react": "^1.7.4",
-    "react": "16.14.0",
-    "react-dom": "16.14.0",
-    "react-icons": "^4.6.0"
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-icons": "4.11.0"
   },
   "devDependencies": {
     "@tsconfig/vite-react": "^2.0.1",
