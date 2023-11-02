@@ -59,9 +59,10 @@ export default function StepUploadDesktop({
   }
 
   const handleOnClickNext = async () => {
+    if (corrections?.length) return onCorrect(resetState);
     const areAllFilesImages = [recto, verso].every((e) => !e || imageFileTypes.includes(e?.type));
     if (areAllFilesImages) return setStep(1);
-    else return corrections?.length ? onCorrect(resetState) : onSubmit(resetState);
+    else return onSubmit(resetState);
   };
 
   if (step === 1)

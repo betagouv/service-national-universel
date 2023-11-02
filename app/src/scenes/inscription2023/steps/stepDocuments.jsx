@@ -61,6 +61,10 @@ export default function StepDocuments() {
     if (!disabledUpload) history.push(`televersement/${doc.category}`);
   }
 
+  function goBack() {
+    return history.push("/inscription2023/representants");
+  }
+
   const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION && corrections?.length === 0) return <Redirect to="/" />;
@@ -107,7 +111,7 @@ export default function StepDocuments() {
             </div>
           </div>
         ))}
-        <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/representants")} disabled={disabled} />
+        <SignupButtonContainer onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />
       </DSFRContainer>
       <Help supportLink={supportLink} />
     </>
