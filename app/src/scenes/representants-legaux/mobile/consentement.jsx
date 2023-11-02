@@ -310,7 +310,7 @@ function ConsentementForm({ young, token, step, parentId }) {
           {parentId === 1 && (
             <div className="border-t-solid  border-t-[1px] border-t-[#E5E5E5] py-[16px]">
               <AuthorizeBlock className="mb-[32px]" title="Participation au SNU" value={data.allowSNU} onChange={(e) => setData({ ...data, allowSNU: e })} error={errors.allowSNU}>
-                <b>{youngFullname}</b> à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohortYear)}</b> du SNU.
+                <b>{youngFullname}</b> à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{cohortYear}</b> du SNU.
               </AuthorizeBlock>
 
               {data.allowSNU && (
