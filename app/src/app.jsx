@@ -227,6 +227,7 @@ const Espace = () => {
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
+  console.log(shouldForceRedirectToReinscription(young));
   if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
   if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;

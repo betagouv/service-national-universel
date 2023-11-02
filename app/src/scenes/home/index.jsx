@@ -53,8 +53,9 @@ export default function Home() {
     if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
     if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
 
-    if (young.status === YOUNG_STATUS.WAITING_LIST && !["2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"].includes(young.cohort)) return <WaitingList />;
+    // if (young.status === YOUNG_STATUS.WAITING_LIST && !["2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"].includes(young.cohort)) return <WaitingList />;
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
+    console.log(hasAccessToReinscription(young), young.status);
     if (hasAccessToReinscription(young)) {
       if (isReinscriptionOpenLoading) return <Loader />;
       // @todo: WaitingReinscriptionInscriptionClosed should be deleted and WaitingReinscription updated to handle both cases
