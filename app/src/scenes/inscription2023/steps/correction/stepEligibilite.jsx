@@ -12,6 +12,7 @@ import SchoolInFrance from "../../components/ShoolInFrance";
 import SchoolOutOfFrance from "../../components/ShoolOutOfFrance";
 import Input from "../../components/Input";
 import Select from "../../../../components/dsfr/forms/Select";
+import ErrorMessage from "../../../../components/dsfr/forms/ErrorMessage";
 
 import { useDispatch, useSelector } from "react-redux";
 import { YOUNG_STATUS } from "snu-lib";
@@ -228,7 +229,9 @@ export default function StepEligibilite() {
         />
         <label className="flex-start mt-2 flex w-full flex-col text-base">
           Date de naissance
-          <DatePicker value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} error={error.birthDate} correction={corrections.birthdateAt} />
+          <DatePicker value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+          <ErrorMessage>{error.birthDate}</ErrorMessage>
+          <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
         </label>
         {data.scolarity && (
           <>
