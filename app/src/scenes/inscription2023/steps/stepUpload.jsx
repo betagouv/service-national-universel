@@ -75,7 +75,7 @@ export default function StepUpload() {
       const { ok: uploadOk } = await uploadFiles();
       if (!uploadOk) return;
 
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: expirationDate });
+      const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: expirationDate, latestCNIFileCategory: category });
 
       if (!ok) {
         capture(code);

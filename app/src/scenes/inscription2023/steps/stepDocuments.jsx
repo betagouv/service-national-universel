@@ -22,7 +22,9 @@ export default function StepDocuments() {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
-  const corrections = young?.correctionRequests?.filter((e) => ["cniFile", "latestCNIFileExpirationDate"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
+  const corrections = young?.correctionRequests?.filter(
+    (e) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status),
+  );
   const disabledUpload = young?.files.cniFiles.length > 2;
 
   const IDs = [
@@ -57,6 +59,10 @@ export default function StepDocuments() {
 
   function handleClick(doc) {
     if (!disabledUpload) history.push(`televersement/${doc.category}`);
+  }
+
+  function goBack() {
+    return history.push("/inscription2023/representants");
   }
 
   const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
@@ -105,7 +111,7 @@ export default function StepDocuments() {
             </div>
           </div>
         ))}
-        <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/representants")} disabled={disabled} />
+        <SignupButtonContainer onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />
       </DSFRContainer>
       <Help supportLink={supportLink} />
     </>

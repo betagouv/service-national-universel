@@ -951,6 +951,8 @@ const translateField = (field) => {
       return "Pièce d'identité";
     case "latestCNIFileExpirationDate":
       return "Date d'expiration de la pièce d'identité";
+    case "latestCNIFileCategory":
+      return "Type de pièce d'identité";
 
     default:
       return field;
