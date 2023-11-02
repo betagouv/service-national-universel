@@ -324,10 +324,10 @@ const Hit = ({ hit }) => {
         <div className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
           <div className="flex w-full flex-col justify-center">
             <div className="m-0 table w-full table-fixed border-collapse">
-              <div className="table-cell truncate font-bold text-gray-900">{hit.name}</div>
+              <div className="table-cell truncate font-bold text-gray-900 text-base leading-5">{hit.name}</div>
             </div>
             <div className="m-0 mt-1 table w-full table-fixed border-collapse">
-              <div className="table-cel truncate text-xs font-[500] leading-5 text-gray-500 ">id: {hit._id}</div>
+              <div className="table-cel truncate text-xs leading-5 text-gray-500 ">id: {hit._id}</div>
             </div>
           </div>
         </div>
