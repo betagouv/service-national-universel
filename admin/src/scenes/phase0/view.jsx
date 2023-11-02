@@ -78,7 +78,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       } else {
         setFooterClass("left-[88px]");
       }
-      console.log("sideBar", event);
     };
     window.addEventListener("sideBar", handleStorageChange);
     return () => {
@@ -105,14 +104,14 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   }, [young]);
 
   useEffect(() => {
-    if (requests.find((r) => r.status === "PENDING")) {
+    if (requests.some((r) => r.status === "PENDING")) {
       setFooterMode("PENDING");
-    } else if (requests.find((r) => ["SENT", "REMINDED"].includes(r.status))) {
+    } else if (requests.some((r) => ["SENT", "REMINDED"].includes(r.status))) {
       setFooterMode("WAITING");
     } else {
       setFooterMode("NO_REQUEST");
     }
-  }, [requests]);
+  }, [requests, requests.length]);
 
   function onStartRequest(fieldName) {
     setCurrentCorrectionRequestField(fieldName);
