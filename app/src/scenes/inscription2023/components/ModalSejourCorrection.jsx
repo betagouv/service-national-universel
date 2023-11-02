@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "reactstrap";
-import { formatStringDate } from "snu-lib";
+import { formatStringDate, getCohortPeriod } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
 import Loader from "../../../components/Loader";
@@ -63,7 +63,7 @@ export default function ModalSejourCorrection({ data, isOpen, onValidation }) {
           onSubmit(session.name);
         }}>
         <div>
-          Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
+          Séjour <strong>{getCohortPeriod(session)}</strong>
         </div>
         <ArrowRightBlueSquare />
       </div>
