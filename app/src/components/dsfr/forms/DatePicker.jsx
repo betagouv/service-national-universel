@@ -4,6 +4,12 @@ export default function DatePicker({ value, onChange, disabled = false }) {
   const [day, setDay] = useState(() => (value ? value.getDate() : ""));
   const [month, setMonth] = useState(() => (value ? value.getMonth() + 1 : ""));
   const [year, setYear] = useState(() => (value ? value.getFullYear() : ""));
+  const maxYear = new Date().getFullYear();
+  const minYear = maxYear - 25;
+  const limitRange = (value, min, max) => value && Math.min(max, Math.max(min, value));
+  const limitDay = (day) => limitRange(day, 1, 31);
+  const limitMonth = (month) => limitRange(month, 1, 12);
+  const limitYear = (year) => limitRange(year, 20, maxYear);
 
   useEffect(() => {
     if (day && month && year) {
@@ -25,9 +31,9 @@ export default function DatePicker({ value, onChange, disabled = false }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  const handleDayChange = (e) => setDay(e.target.value);
-  const handleMonthChange = (e) => setMonth(e.target.value);
-  const handleYearChange = (e) => setYear(e.target.value);
+  const handleDayChange = (e) => setDay(limitDay(e.target.value));
+  const handleMonthChange = (e) => setMonth(limitMonth(e.target.value));
+  const handleYearChange = (e) => setYear(limitYear(e.target.value));
 
   const textColor = disabled ? "text-[#929292]" : "text-[#666666]";
   const borderColor = disabled ? "border-[#929292]" : "border-black";
@@ -42,6 +48,8 @@ export default function DatePicker({ value, onChange, disabled = false }) {
           id="day"
           className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
           type="number"
+          min="1"
+          max="31"
           value={day}
           onChange={handleDayChange}
           placeholder="Jour"
@@ -57,6 +65,8 @@ export default function DatePicker({ value, onChange, disabled = false }) {
           id="month"
           className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
           type="number"
+          min="1"
+          max="12"
           value={month}
           onChange={handleMonthChange}
           placeholder="Mois"
@@ -72,6 +82,8 @@ export default function DatePicker({ value, onChange, disabled = false }) {
           id="year"
           className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
           type="number"
+          min={minYear}
+          max={maxYear}
           value={year}
           onChange={handleYearChange}
           placeholder="Année"
