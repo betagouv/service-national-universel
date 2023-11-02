@@ -19,8 +19,8 @@ import Default from "./default";
 import RefusedV2 from "./refusedV2";
 import ValidatedV2 from "./validatedV2";
 import WaitingCorrectionV2 from "./waitingCorrectionV2";
-import WaitingList from "./waitingList";
 import WaitingValidation from "./waitingValidation";
+import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 
 export default function Home() {
@@ -50,11 +50,14 @@ export default function Home() {
   if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
-    if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
-    if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
-
-    if (young.status === YOUNG_STATUS.WAITING_LIST && !["2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"].includes(young.cohort)) return <WaitingList />;
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
+
+    if (isReinscriptionOpen === false) {
+      if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
+      if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
+      if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
+    }
+
     if (hasAccessToReinscription(young)) {
       if (isReinscriptionOpenLoading) return <Loader />;
       // @todo: WaitingReinscriptionInscriptionClosed should be deleted and WaitingReinscription updated to handle both cases
@@ -68,7 +71,7 @@ export default function Home() {
       return <HomePhase2 />;
     }
 
-    if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
+    if ([YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
       return <Phase1NotDone />;
     }
 
@@ -88,7 +91,7 @@ export default function Home() {
     if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
       return <FutureCohort />;
     }
-
+    
     return <Default />;
   };
 

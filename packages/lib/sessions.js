@@ -131,7 +131,7 @@ const getCohortEndDate = (young, cohort) => {
   return cohort ? new Date(cohort.dateEnd) : END_DATE_PHASE1[young.cohort];
 };
 
-const getCohortYear = cohort => cohort?.dateStart?.slice(0,4);
+const getCohortYear = (cohort) => cohort?.dateStart?.slice(0, 4);
 
 const getCohortPeriod = (cohort, withBold = false) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
@@ -197,8 +197,13 @@ function shouldForceRedirectToReinscription(young) {
   );
 }
 
+
 function hasAccessToReinscription(young) {
   if (shouldForceRedirectToReinscription(young)) return true;
+
+  if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && !(young.departSejourMotif === "Exclusion")) {
+    return true;
+  }
 
   if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
     return true;
