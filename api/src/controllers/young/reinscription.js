@@ -88,7 +88,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,
-      inscriptionStep2023: STEPS2023.COORDONNEES,
+      reInscriptionStep2023: STEPS2023.COORDONNEES,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
 
       rulesParent1: undefined,

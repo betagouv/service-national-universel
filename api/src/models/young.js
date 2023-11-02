@@ -380,7 +380,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // keep track of the current inscription step
+  // deprecated
   inscriptionStep: {
     type: String,
     default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES

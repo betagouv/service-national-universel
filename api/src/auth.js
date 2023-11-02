@@ -48,6 +48,7 @@ class Auth {
       }).validate(req.body);
 
       if (error) {
+        console.log("🚀 ~ file: auth.js:51 ~ Auth ~ signUp ~ error:", error)
         if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
         if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -91,6 +92,8 @@ class Auth {
 
       const tokenEmailValidation = await crypto.randomInt(1000000);
 
+      const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
+
       const user = await this.model.create({
         email,
         phone,
@@ -113,14 +116,12 @@ class Auth {
         zip,
         cohort,
         grade,
-        inscriptionStep2023: STEPS2023.COORDONNEES,
+        inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
         emailVerified: "false",
         tokenEmailValidation,
         attemptsEmailValidation: 0,
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
       });
-
-      const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
       if (isEmailValidationEnabled) {
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
