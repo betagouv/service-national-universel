@@ -9,8 +9,11 @@ import Alert from "../../../components/dsfr/ui/Alert";
 import { supportURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
-import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
+import { INSCRIPTION_STEPS, PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
+import API from "@/services/api";
+import { toastr } from "react-redux-toastr";
+import plausibleEvent from "@/services/plausible";
 
 export default function StepSejour() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -45,14 +48,19 @@ function SessionButton(session) {
   const history = useHistory();
   const [data, setData] = React.useContext(context);
 
+  async function handleOnClick() {
+    // If young in in resinscription, we track his steps for analytics
+    if (isLoggedIn) {
+      const { ok, code } = await API.put("/young/inscription2023/step", { step: INSCRIPTION_STEPS.CONFIRM });
+      if (!ok) return toastr.error("Impossible de mettre à jour votre inscription", code);
+    }
+    await plausibleEvent(session.event);
+    setData({ ...data, cohort: session.name, step });
+    history.push(route);
+  }
+
   return (
-    <div
-      key={session.id}
-      className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
-      onClick={() => {
-        setData({ ...data, cohort: session.name, step });
-        history.push(route);
-      }}>
+    <div key={session.id} className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50" onClick={handleOnClick}>
       <div>
         Séjour <strong>{getCohortPeriod(session)}</strong>
       </div>
