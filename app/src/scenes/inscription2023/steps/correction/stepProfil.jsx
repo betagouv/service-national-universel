@@ -110,6 +110,7 @@ export default function StepProfil() {
             placeholder={PHONE_ZONES[data.phoneZone]?.example}
             error={error.phone || error.phoneZone}
             className="mt-3"
+            correction={corrections.phone}
           />
           <hr className="my-4" />
           <h2 className="text-base font-bold my-4">Mes identifiants de connexion</h2>

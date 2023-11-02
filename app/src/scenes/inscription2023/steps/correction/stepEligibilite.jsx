@@ -260,7 +260,7 @@ export default function StepEligibilite() {
                 </>
               )
             ) : !data.isAbroad ? (
-              <Input value={data.lastName} onChange={(e) => setData({ ...data, zip: e })} label="Code Postal" error={error.zip} correction={corrections.zip} />
+              <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} label="Code Postal" error={error.zip} correction={corrections.zip} />
             ) : null}
           </>
         )}

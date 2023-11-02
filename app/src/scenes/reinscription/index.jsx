@@ -8,7 +8,6 @@ import { SentryRoute, capture } from "../../sentry";
 
 import { useSelector } from "react-redux";
 import StepEligibilite from "./steps/stepEligibilite";
-import StepNonEligible from "./steps/stepNonEligible";
 import StepSejour from "../preinscription/steps/stepSejour";
 import StepConfirm from "./steps/stepConfirm";
 
@@ -19,7 +18,6 @@ import FutureCohort from "../inscription2023/FutureCohort";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
-  if (step === STEPS.INELIGIBLE) return <StepNonEligible />;
   if (step === STEPS.SEJOUR) return <StepSejour />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
 }

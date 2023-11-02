@@ -82,11 +82,29 @@ export default function StepEligibilite() {
       return;
     }
 
+    // Check if young is more than 17 years old
+    const age = dayjs().diff(dayjs(data.birthDate), "year");
+    if (age > 17) {
+      const { ok, code } = await api.put("/young/reinscription/not-eligible");
+      if (!ok) {
+        capture(code);
+        setError({ text: "Impossible de vérifier votre éligibilité" });
+        return;
+      }
+      // setData({ ...data, message: "age", step: REINSCRIPTION_STEPS.INELIGIBLE });
+      return history.push("/noneligible");
+    }
+
     setLoading(true);
     plausibleEvent("Phase0/CTA reinscription - eligibilite");
 
     try {
-      const res = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, {
+      const {
+        ok,
+        data: sessions,
+        code,
+        message,
+      } = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, {
         schoolDepartment: data.school?.departmentName,
         department: data.school?.department,
         schoolRegion: data.school?.region,
@@ -94,14 +112,15 @@ export default function StepEligibilite() {
         grade: data.scolarity,
         zip: data.zip,
       });
-      if (!res.ok) {
-        capture(res.code);
+
+      if (!ok) {
+        capture(code);
         setError({ text: "Impossible de vérifier votre éligibilité" });
         setLoading(false);
         return;
       }
 
-      if (res.data.msg || res.data.length === 0) {
+      if (sessions.length === 0) {
         const { ok, data, code } = await api.put("/young/reinscription/not-eligible");
         if (!ok) {
           capture(code);
@@ -110,19 +129,19 @@ export default function StepEligibilite() {
           return;
         }
         dispatch(setYoung(data));
-        setData({ ...data, step: REINSCRIPTION_STEPS.INELIGIBLE });
+        setData({ ...data, message, step: REINSCRIPTION_STEPS.INELIGIBLE });
         return history.push("/reinscription/noneligible");
       }
 
-      const { ok, code } = await api.put("/young/reinscription", { step: REINSCRIPTION_STEPS.SEJOUR });
-      const sessions = res.data;
+      const { ok: okStep, code: codeStep } = await api.put("/young/step", { step: REINSCRIPTION_STEPS.SEJOUR });
       setData({ ...data, sessions, step: REINSCRIPTION_STEPS.SEJOUR });
-      if (!ok) {
-        capture(code);
+      if (!okStep) {
+        capture(codeStep);
         setError({ text: "Impossible de vérifier votre éligibilité" });
         setLoading(false);
         return;
       }
+
       return history.push("/reinscription/sejour");
     } catch (error) {
       capture(error);
