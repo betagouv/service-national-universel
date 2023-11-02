@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
+import ErrorMessage from "./ErrorMessage";
 
-export default function DatePicker({ value, onChange, disabled = false }) {
+export default function DatePicker({ value, onChange, disabled = false, error, correction }) {
   const [day, setDay] = useState(() => (value ? value.getDate() : ""));
   const [month, setMonth] = useState(() => (value ? value.getMonth() + 1 : ""));
   const [year, setYear] = useState(() => (value ? value.getFullYear() : ""));
@@ -37,61 +38,65 @@ export default function DatePicker({ value, onChange, disabled = false }) {
   const borderColor = disabled ? "border-[#929292]" : "border-black";
 
   return (
-    <div className="mt-2 flex w-full items-start justify-start gap-3 md:gap-8 flex-row">
-      <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
-        <label htmlFor="day" className={`text-sm mb-2 ml-1 ${textColor}`}>
-          Exemple : 14
-        </label>
-        <input
-          id="day"
-          className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
-          type="number"
-          min="1"
-          max="31"
-          value={day}
-          onKeyDown={blockInvalidChar}
-          onChange={handleDayChange}
-          placeholder="Jour"
-          maxLength="2"
-          disabled={disabled}
-        />
+    <>
+      <div className="mt-2 flex w-full items-start justify-start gap-3 md:gap-8 flex-row">
+        <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
+          <label htmlFor="day" className={`text-sm mb-2 ml-1 ${textColor}`}>
+            Exemple : 14
+          </label>
+          <input
+            id="day"
+            className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
+            type="number"
+            min="1"
+            max="31"
+            value={day}
+            onKeyDown={blockInvalidChar}
+            onChange={handleDayChange}
+            placeholder="Jour"
+            maxLength="2"
+            disabled={disabled}
+          />
+        </div>
+        <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
+          <label htmlFor="month" className={`text-sm mb-2 ml-1 ${textColor}`}>
+            Exemple : 12
+          </label>
+          <input
+            id="month"
+            className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
+            type="number"
+            min="1"
+            max="12"
+            value={month}
+            onKeyDown={blockInvalidChar}
+            onChange={handleMonthChange}
+            placeholder="Mois"
+            maxLength="2"
+            disabled={disabled}
+          />
+        </div>
+        <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
+          <label htmlFor="year" className={`text-sm mb-2 ml-1 ${textColor}`}>
+            Exemple : 2000
+          </label>
+          <input
+            id="year"
+            className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
+            type="number"
+            min={minYear}
+            max={maxYear}
+            value={year}
+            onKeyDown={blockInvalidChar}
+            onChange={handleYearChange}
+            placeholder="Année"
+            maxLength="4"
+            disabled={disabled}
+          />
+        </div>
       </div>
-      <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
-        <label htmlFor="month" className={`text-sm mb-2 ml-1 ${textColor}`}>
-          Exemple : 12
-        </label>
-        <input
-          id="month"
-          className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
-          type="number"
-          min="1"
-          max="12"
-          value={month}
-          onKeyDown={blockInvalidChar}
-          onChange={handleMonthChange}
-          placeholder="Mois"
-          maxLength="2"
-          disabled={disabled}
-        />
-      </div>
-      <div className={`flex flex-col items-start mb-2 flex-grow ${textColor}`}>
-        <label htmlFor="year" className={`text-sm mb-2 ml-1 ${textColor}`}>
-          Exemple : 2000
-        </label>
-        <input
-          id="year"
-          className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
-          type="number"
-          min={minYear}
-          max={maxYear}
-          value={year}
-          onKeyDown={blockInvalidChar}
-          onChange={handleYearChange}
-          placeholder="Année"
-          maxLength="4"
-          disabled={disabled}
-        />
-      </div>
-    </div>
+      <ErrorMessage>{error}</ErrorMessage>
+      <ErrorMessage>{correction}</ErrorMessage>
+    </>
   );
 }

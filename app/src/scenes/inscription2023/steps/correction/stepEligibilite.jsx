@@ -19,8 +19,7 @@ import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import { translate } from "../../../../utils";
-import DatePickerList from "../../components/DatePickerList";
-
+import DatePicker from "../../../../components/dsfr/forms/DatePicker";
 import Footer from "@/components/dsfr/layout/Footer";
 import StickyButton from "../../../../components/dsfr/ui/buttons/stickyButton";
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
@@ -227,13 +226,10 @@ export default function StepEligibilite() {
           error={error.scolarity}
           correction={corrections.grade}
         />
-        <DatePickerList
-          label="Date de naissance"
-          value={data.birthDate}
-          onChange={(date) => setData({ ...data, birthDate: new Date(date) })}
-          error={error.birthDate}
-          correction={corrections.birthdateAt}
-        />
+        <label className="flex-start mt-2 flex w-full flex-col text-base">
+          Date de naissance
+          <DatePicker value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} error={error.birthDate} correction={corrections.birthdateAt} />
+        </label>
         {data.scolarity && (
           <>
             <div className="flex items-center justify-between">
