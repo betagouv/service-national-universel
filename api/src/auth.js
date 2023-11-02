@@ -122,7 +122,7 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
-      if (tokenEmailValidation !== "123456") {
+      if (tokenEmailValidation !== "123456" && config.ENVIRONMENT === "staging") {
         if (isEmailValidationEnabled) {
           await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
             emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
