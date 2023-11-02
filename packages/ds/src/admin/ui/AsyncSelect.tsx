@@ -1,15 +1,19 @@
 import React from "react";
-import Select, { components, GroupBase, StylesConfig } from "react-select";
+import { components, GroupBase, StylesConfig } from "react-select";
+import AsyncSelect from "react-select/async";
 import { HiOutlineExclamation } from "react-icons/hi";
 import { BsCheckLg } from "react-icons/bs";
 
 type CustomStyles = StylesConfig<string, boolean, GroupBase<string>>;
 
 type OwnProps = {
-  options: GroupBase<string>[];
+  loadOptions: (
+    inputValue: string,
+    callback: (options: GroupBase<string>[]) => void
+  ) => void | Promise<GroupBase<string>[]>;
   value: string | null;
-  defaultValue?: string | null;
   placeholder?: string;
+  noOptionsMessage?: string;
   label?: string;
   disabled?: boolean;
   error?: string;
@@ -23,9 +27,9 @@ type OwnProps = {
 };
 
 export default function SelectButton({
-  options,
+  loadOptions,
   value,
-  defaultValue,
+  noOptionsMessage,
   label,
   placeholder,
   disabled = false,
@@ -163,10 +167,12 @@ export default function SelectButton({
         >
           {label}
         </label>
-        <Select
+        <AsyncSelect
           placeholder={placeholder}
-          options={options}
-          defaultValue={defaultValue}
+          loadOptions={loadOptions}
+          defaultOptions
+          cacheOptions
+          noOptionsMessage={() => noOptionsMessage}
           maxMenuHeight={maxMenuHeight}
           isMulti={isMulti}
           isDisabled={disabled}
@@ -175,8 +181,6 @@ export default function SelectButton({
           isClearable={isClearable}
           isSearchable={isSearchable}
           value={value}
-          className={isMulti ? "basic-multi-select" : "basic-single"}
-          classNamePrefix="select"
           onChange={onChange}
           components={
             isMulti ? { Option: MultiOption } : { Option: MonoOption }
