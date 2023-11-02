@@ -38,10 +38,6 @@ const features = {
     [ENVS.production]: [],
     // Allow developers mode in staging and development
   },
-  [FEATURES_NAME.DEVELOPERS_MODE]: {
-    [ENVS.production]: [],
-    [ENVS.staging]: [ROLES.ADMIN],
-  },
 };
 
 //Force redeploy

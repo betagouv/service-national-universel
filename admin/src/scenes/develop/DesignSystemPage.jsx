@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, SelectButton, AsyncSelect } from "@snu/ds/admin";
+import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, Select } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
@@ -363,14 +363,14 @@ export default function DesignSystemPage() {
       </Container>
       <Container title="Select">
         <div className="grid grid-cols-3 gap-4 w-full">
-          <SelectButton
+          <Select
             placeholder="Mono Select"
             defaultValue={SelectOptions[0]}
             options={SelectOptions}
             value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
             onChange={handleMonoSelectChange}
           />
-          <SelectButton
+          <Select
             placeholder="Mono Select with Label"
             options={SelectOptions}
             value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
@@ -378,14 +378,14 @@ export default function DesignSystemPage() {
             isClearable={true}
             onChange={handleMonoSelectChange}
           />
-          <SelectButton
+          <Select
             placeholder="Mono Select disabled"
             options={SelectOptions}
             value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
             onChange={handleMonoSelectChange}
             disabled={true}
           />
-          <SelectButton
+          <Select
             placeholder="Mono Select with Label"
             options={SelectOptions}
             value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
@@ -393,14 +393,14 @@ export default function DesignSystemPage() {
             onChange={handleMonoSelectChange}
             error={error}
           />
-          <SelectButton
+          <Select
             placeholder="Mono Select"
             options={SelectOptions}
             value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
             onChange={handleMonoSelectChange}
             error={error}
           />
-          <SelectButton
+          <Select
             placeholder="Multi Select"
             options={SelectOptions}
             isMulti={true}
@@ -411,7 +411,7 @@ export default function DesignSystemPage() {
             })}
             onChange={handleMultiSelectChange}
           />
-          <SelectButton
+          <Select
             placeholder="Multi Select with label"
             options={SelectOptions}
             isMulti={true}
@@ -423,7 +423,7 @@ export default function DesignSystemPage() {
             })}
             onChange={handleMultiSelectChange}
           />
-          <SelectButton
+          <Select
             placeholder="Multi Select with label"
             options={SelectOptions}
             isMulti={true}
@@ -435,7 +435,7 @@ export default function DesignSystemPage() {
             })}
             onChange={handleMultiSelectChange}
           />
-          <SelectButton
+          <Select
             placeholder="Multi Select with label"
             options={SelectOptions}
             isMulti={true}
@@ -448,7 +448,8 @@ export default function DesignSystemPage() {
             error={error}
             onChange={handleMultiSelectChange}
           />
-          <AsyncSelect
+          <Select
+            isAsync
             placeholder="Mono Async Select"
             loadOptions={fetchStructures}
             isClearable={true}
@@ -456,7 +457,8 @@ export default function DesignSystemPage() {
             value={valueSelect.monoAsyncSelect ? { label: valueSelect.monoAsyncSelect.name } : null}
             onChange={handleMonoAsyncSelectChange}
           />
-          <AsyncSelect
+          <Select
+            isAsync
             placeholder="Multi Async Select"
             loadOptions={fetchStructures}
             isClearable={true}

@@ -1,12 +1,13 @@
 import React from "react";
 import Select, { components, GroupBase, StylesConfig } from "react-select";
+import AsyncSelect from "react-select/async";
 import { HiOutlineExclamation } from "react-icons/hi";
 import { BsCheckLg } from "react-icons/bs";
 
 type CustomStyles = StylesConfig<string, boolean, GroupBase<string>>;
 
 type OwnProps = {
-  options: GroupBase<string>[];
+  options?: GroupBase<string>[];
   value: string | null;
   defaultValue?: string | null;
   placeholder?: string;
@@ -20,7 +21,14 @@ type OwnProps = {
   isClearable?: boolean;
   isSearchable?: boolean;
   onChange: () => void;
-};
+  // async
+  isAsync?: boolean;
+  noOptionsMessage?: string;
+  loadOptions: (
+    inputValue: string,
+    callback: (options: GroupBase<string>[]) => void
+  ) => void | Promise<GroupBase<string>[]>;
+}
 
 export default function SelectButton({
   options,
@@ -37,6 +45,10 @@ export default function SelectButton({
   isClearable = false,
   isSearchable = true,
   onChange,
+  // async
+  isAsync = false,
+  noOptionsMessage,
+  loadOptions,
 }: OwnProps) {
   const paddingStyle = label ? "16px 0 0 0" : "0";
 
@@ -163,26 +175,49 @@ export default function SelectButton({
         >
           {label}
         </label>
-        <Select
-          placeholder={placeholder}
-          options={options}
-          defaultValue={defaultValue}
-          maxMenuHeight={maxMenuHeight}
-          isMulti={isMulti}
-          isDisabled={disabled}
-          closeMenuOnSelect={closeMenuOnSelect}
-          hideSelectedOptions={hideSelectedOptions}
-          isClearable={isClearable}
-          isSearchable={isSearchable}
-          value={value}
-          className={isMulti ? "basic-multi-select" : "basic-single"}
-          classNamePrefix="select"
-          onChange={onChange}
-          components={
-            isMulti ? { Option: MultiOption } : { Option: MonoOption }
-          }
-          styles={customStyles}
-        />
+        { isAsync ? (
+          <AsyncSelect
+            placeholder={placeholder}
+            loadOptions={loadOptions}
+            defaultOptions
+            cacheOptions
+            noOptionsMessage={() => noOptionsMessage}
+            maxMenuHeight={maxMenuHeight}
+            isMulti={isMulti}
+            isDisabled={disabled}
+            closeMenuOnSelect={closeMenuOnSelect}
+            hideSelectedOptions={hideSelectedOptions}
+            isClearable={isClearable}
+            isSearchable={isSearchable}
+            value={value}
+            onChange={onChange}
+            components={
+              isMulti ? { Option: MultiOption } : { Option: MonoOption }
+            }
+            styles={customStyles}
+          />
+        ) : (
+          <Select
+            placeholder={placeholder}
+            options={options}
+            defaultValue={defaultValue}
+            maxMenuHeight={maxMenuHeight}
+            isMulti={isMulti}
+            isDisabled={disabled}
+            closeMenuOnSelect={closeMenuOnSelect}
+            hideSelectedOptions={hideSelectedOptions}
+            isClearable={isClearable}
+            isSearchable={isSearchable}
+            value={value}
+            className={isMulti ? "basic-multi-select" : "basic-single"}
+            classNamePrefix="select"
+            onChange={onChange}
+            components={
+              isMulti ? { Option: MultiOption } : { Option: MonoOption }
+            }
+            styles={customStyles}
+          />
+        ) }
         {error && (
           <HiOutlineExclamation className="absolute top-4 right-3 z-1 text-red-500 w-5 h-5" />
         )}

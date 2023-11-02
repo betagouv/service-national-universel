@@ -15,8 +15,7 @@ import Button from "./ui/Button";
 import DropdownButton from "./ui/DropdownButton";
 import Modal from "./ui/Modal";
 import ModalConfirmation from "./ui/ModalConfirmation";
-import SelectButton from "./ui/Select";
-import AsyncSelect from "./ui/AsyncSelect";
+import Select from "./ui/Select";
 
 export {
   // Form
@@ -36,6 +35,5 @@ export {
   DropdownButton,
   Modal,
   ModalConfirmation,
-  SelectButton,
-  AsyncSelect,
+  Select,
 };
