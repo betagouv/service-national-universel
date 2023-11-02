@@ -85,14 +85,14 @@ export default function StepEligibilite() {
     // Check if young is more than 17 years old
     const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
-      const { ok, data, code } = await api.put("/young/reinscription/not-eligible");
+      const { ok, code } = await api.put("/young/reinscription/not-eligible");
       if (!ok) {
         capture(code);
         setError({ text: "Impossible de vérifier votre éligibilité" });
         return;
       }
-      setData({ ...data, message: "age", step: REINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
+      // setData({ ...data, message: "age", step: REINSCRIPTION_STEPS.INELIGIBLE });
+      return history.push("/noneligible");
     }
 
     setLoading(true);
