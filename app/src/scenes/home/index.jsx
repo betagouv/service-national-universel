@@ -20,8 +20,8 @@ import RefusedV2 from "./refusedV2";
 import ValidatedV2 from "./validatedV2";
 import WaitingCorrectionV2 from "./waitingCorrectionV2";
 import WaitingValidation from "./waitingValidation";
-// import WaitingList from "./waitingList";
-// import Withdrawn from "./withdrawn";
+import WaitingList from "./waitingList";
+import Withdrawn from "./withdrawn";
 
 export default function Home() {
   useDocumentTitle("Accueil");
@@ -50,11 +50,13 @@ export default function Home() {
   if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
-    // if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
-    // if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
-
-    // if (young.status === YOUNG_STATUS.WAITING_LIST && !["2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"].includes(young.cohort)) return <WaitingList />;
+    if (isReinscriptionOpen === false){
+      if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
+      if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
+      // if (young.status === YOUNG_STATUS.WAITING_LIST && !["2022", "Février 2022", "Juin 2022", "Juillet 2022", "à venir"].includes(young.cohort)) return <WaitingList />;
+    }
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
+
     if (hasAccessToReinscription(young)) {
       if (isReinscriptionOpenLoading) return <Loader />;
       // @todo: WaitingReinscriptionInscriptionClosed should be deleted and WaitingReinscription updated to handle both cases
