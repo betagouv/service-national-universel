@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
+import { RiInformationFill } from "react-icons/ri";
 
 import validator from "validator";
 
@@ -24,7 +25,6 @@ import {
 
 import api from "../../../services/api";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
-import Toggle from "../../../components/dsfr/forms/toggle";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { debounce, translate } from "../../../utils";
@@ -128,7 +128,7 @@ export default function StepCoordonnees() {
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
-  const [hasSpecialSituation, setSpecialSituation] = useState(false);
+  const [hasSpecialSituation, setSpecialSituation] = useState(null);
 
   const {
     birthCountry,
@@ -330,6 +330,10 @@ export default function StepCoordonnees() {
     if (specificAmenagment === "true") {
       fieldToUpdate.push("specificAmenagmentType");
       requiredFields.push("specificAmenagmentType");
+    }
+
+    if (hasSpecialSituation === null) {
+      errors.hasSpecialSituation = "Ce champ est obligatoire";
     }
 
     for (const key of requiredFields) {
@@ -600,18 +604,54 @@ export default function StepCoordonnees() {
           error={errors.situation}
           correction={corrections?.situation}
         />
+        <hr className="my-2 h-px border-0 bg-gray-200" />
+        <div className="flex mt-4 items-center gap-3 mb-4">
+          <h2 className="m-0 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
+          <a className="mt-1" href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`} target="_blank" rel="noreferrer">
+            <RiInformationFill className="text-xl text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
+
+          </a>
+        </div>
         <div className="mb-4 flex items-center">
           <div>
             <h2 className="mt-0 text-[16px] font-bold">
               Souhaitez-vous nous faire part d’une situation particulière ?
-              <span className="text-[14px] ">(allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
+              <span className="text-[14px]">(allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
             </h2>
             <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
           </div>
-          <div className="ml-3">
-            <Toggle toggled={hasSpecialSituation} onClick={() => updateSpecialSituation(!hasSpecialSituation)} />
+        </div>
+        <div className="flex flex-col md:flex-row mb-4">
+          <div className="pr-4 border-r">
+            <input
+              className="mr-2"
+              type="radio"
+              id="oui"
+              name="specialSituation"
+              value="true"
+              checked={hasSpecialSituation === true}
+              onChange={(e) => updateSpecialSituation(e.target.value === "true")}
+            />
+            <label className="mb-0" htmlFor="oui">
+              Oui
+            </label>
+          </div>
+          <div className="md:px-6">
+            <input
+              className="mr-2"
+              type="radio"
+              id="non"
+              name="specialSituation"
+              value="false"
+              checked={hasSpecialSituation === false}
+              onChange={(e) => updateSpecialSituation(e.target.value === "true")}
+            />
+            <label className="mb-0" htmlFor="non">
+              Non
+            </label>
           </div>
         </div>
+        <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
         {hasSpecialSituation && (
           <>
             <CheckBox
