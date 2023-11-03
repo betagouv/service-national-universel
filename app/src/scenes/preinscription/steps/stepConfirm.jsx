@@ -154,7 +154,7 @@ export default function StepConfirm() {
           </Link>
         </div>
 
-        <div className="space-y-2 mb-2">
+        <div className="space-y-2 mb-8">
           <div className="flex items-center justify-between text-sm">
             <p className="text-gray-500">Prénom du volontaire&nbsp;:</p>
             <p className="text-right">{data.firstName}</p>

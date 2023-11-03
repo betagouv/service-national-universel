@@ -29,23 +29,6 @@ const Step = () => {
     updateValue({
       ...data,
       birthDate: young.birthdateAt,
-      scolarity: young.grade,
-      ...(young.schoolId
-        ? {
-            school: {
-              fullName: young.schoolName,
-              type: young.schoolType,
-              adresse: young.schoolAddress,
-              codeCity: young.schoolZip,
-              city: young.schoolCity,
-              departmentName: young.schoolDepartment,
-              region: young.schoolRegion,
-              country: young.schoolCountry,
-              postCode: young.schoolZip,
-              id: young.schoolId,
-            },
-          }
-        : {}),
       zip: young.zip,
     });
   }, []);
