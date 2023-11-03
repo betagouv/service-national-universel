@@ -1,5 +1,5 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ROLES, region2department } = require("snu-lib");
-const { buildArbitratyNdJson, buildMissionContext } = require("../../controllers/elasticsearch/utils");
+const { buildArbitratyNdJson, buildMissionContext, buildApplicationContext } = require("../../controllers/elasticsearch/utils");
 const esClient = require("../../es");
 const { queryFromFilter, withAggs } = require("./todo.helper");
 const service = {};
@@ -422,6 +422,83 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AF
   });
 
   return { [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AFTER_START]: youngs.body.hits.total.value };
+};
+
+service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC_FOR_RESP] = async (user) => {
+  const { missionContextFilters, missionContextError } = await buildMissionContext(user);
+  if (missionContextError) {
+    throw new Error(missionContextError.status, missionContextError.body);
+  }
+
+  const { applicationContextFilters, applicationContextError } = await buildApplicationContext(user);
+  if (missionContextError) {
+    throw new Error(applicationContextError.status, applicationContextError.body);
+  }
+
+  // Contrat (À suivre) X contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature
+  const contract = await esClient.search({
+    index: "application",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            ...applicationContextFilters,
+            {
+              term: {
+                "contractStatus.keyword": "DRAFT",
+              },
+            },
+            { terms: { "status.keyword": ["VALIDATED", "IN_PROGRESS", "DONE"] } },
+          ],
+        },
+      },
+      size: 0,
+      track_total_hits: 1000,
+    },
+  });
+  //Missions (À corriger) X missions sont en attente de correction.
+  const missions = await esClient.search({
+    index: "mission",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [...missionContextFilters, { term: { "status.keyword": "WAITING_CORRECTION" } }],
+        },
+      },
+      size: 0,
+      track_total_hits: 1000,
+    },
+  });
+
+  //Candidatures (À traiter) X candidatures sont en attente de validation.
+  const applications = await esClient.search({
+    index: "application",
+    body: {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [
+            ...applicationContextFilters,
+            {
+              term: {
+                "status.keyword": "WAITING_VALIDATION",
+              },
+            },
+          ],
+        },
+      },
+      size: 0,
+      track_total_hits: 1000,
+    },
+  });
+
+  return {
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_CONTRACT_TO_EDIT]: contract.body.hits.total.value,
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MISSION_TO_CORRECT]: missions.body.hits.total.value,
+    [DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_APPLICATION_TO_VALIDATE]: applications.body.hits.total.value,
+  };
 };
 
 module.exports = service;
