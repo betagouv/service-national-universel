@@ -23,11 +23,11 @@ export default function EngagementPrograms() {
       link: "https://www.jeveuxaider.gouv.fr/",
     },
     {
-      title: "Réserve la Gendarmerie nationale",
+      title: "Réserve de la Gendarmerie nationale",
       description:
         "La réserve opérationnelle de la gendarmerie renforce l'action des unités d’active et les structures de commandement. Les réservistes contribuent directement, à la production de sécurité et à la bonne exécution des lois.",
       picture: reserveGendarmerie,
-      link: "https://www.gendarmerie.interieur.gouv.fr/notre-institution/generalites/nos-effectifs/reserve-gendarmerie/devenir-reserviste",
+      link: "https://www.gendarmerie.interieur.gouv.fr/recrutement/recrutements-et-conditions-d-acces/reserviste-dans-la-reserve-operationnelle",
     },
     {
       title: "Réserve des Armées",

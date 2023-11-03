@@ -9,7 +9,6 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
 import { YOUNG_STATUS } from "snu-lib";
-import { supportURL } from "@/config";
 import API from "@/services/api";
 import dayjs from "dayjs";
 
@@ -34,15 +33,12 @@ export default function NonEligible() {
 
   return (
     <DSFRLayout>
-      <DSFRContainer
-        supportLink={supportURL + "/base-de-connaissance/jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"}
-        title="Vous n’êtes malheureusement pas éligible au SNU.">
+      <DSFRContainer title="Vous n’êtes malheureusement pas éligible au SNU.">
         {age > 17 && (
           <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
             Pour participer au SNU, vous devez avoir <strong>entre 15 et 17 ans</strong>.
           </p>
         )}
-
         <EngagementPrograms />
         <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" disabled={loading} />
       </DSFRContainer>
