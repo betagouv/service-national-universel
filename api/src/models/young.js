@@ -383,7 +383,7 @@ const Schema = new mongoose.Schema({
   // also used for 2024
   inscriptionStep2023: {
     type: String,
-    enum: ["EMAIL_WAITNG_VALIDATION", "COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
+    enum: ["EMAIL_WAITING_VALIDATION", "COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
     documentation: {
       description: "Étape du tunnel d'inscription 2023/2024",
     },
@@ -392,7 +392,6 @@ const Schema = new mongoose.Schema({
   // @deprecated
   inscriptionStep: {
     type: String,
-    default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
     documentation: {
       description: "Étape du tunnel d'inscription",

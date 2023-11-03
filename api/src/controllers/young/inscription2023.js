@@ -226,7 +226,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     }
 
     if (type === "next") {
-      if (value.hasStartedReinscription) {
+      if (young.hasStartedReinscription) {
         value.reinscriptionStep2023 = STEPS2023.CONSENTEMENTS;
       } else {
         value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
@@ -368,7 +368,12 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const value = { informationAccuracy: "true", inscriptionStep2023: STEPS2023.WAITING_CONSENT };
+    let value = { informationAccuracy: "true" };
+    if (young.hasStartedReinscription) {
+      value.reinscriptionStep2023 = STEPS2023.WAITING_CONSENT;
+    } else {
+      value.inscriptionStep2023 = STEPS2023.WAITING_CONSENT;
+    }
 
     if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && !young?.inscriptionDoneDate) {
       const cohort = await CohortObject.findOne({ name: young.cohort });
@@ -551,7 +556,11 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ inscriptionStep2023: STEPS2023.DONE });
+    if (young.hasStartedReinscription) {
+      young.set({ reinscriptionStep2023: STEPS2023.DONE });
+    } else {
+      young.set({ inscriptionStep2023: STEPS2023.DONE });
+    }
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
