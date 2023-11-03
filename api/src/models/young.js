@@ -6,6 +6,7 @@ const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames } = require("snu-lib")
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
+const { REINSCRIPTION_STEPS } = require("../utils");
 const MODELNAME = "young";
 
 const File = new mongoose.Schema({
@@ -365,7 +366,7 @@ const Schema = new mongoose.Schema({
 
   reinscriptionStep2023: {
     type: String,
-    enum: ["ELIGIBILITY", "NONELIGIBLE", "SEJOUR", "CONFIRM", "CONSENTEMENTS", "DOCUMENTS", "WAITING_CONSENT", "DONE"],
+    enum: REINSCRIPTION_STEPS,
     documentation: {
       description: "Étape du tunnel de réinscription 2023",
     },
@@ -380,7 +381,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // deprecated
+  // @deprecated
   inscriptionStep: {
     type: String,
     default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES

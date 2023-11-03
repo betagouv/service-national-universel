@@ -43,9 +43,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // Check if the young has access to reinscription
-    if (!hasAccessToReinscription(young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!hasAccessToReinscription(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Validate request body
     const { error, value } = Joi.object({
@@ -90,7 +88,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       acceptCGU: undefined,
       consentment: undefined,
       inscriptionDoneDate: undefined,
-      reinscriptionStep2023: REINSCRIPTION_STEPS.DONE,
+      reinscriptionStep2023: REINSCRIPTION_STEPS.COORDONNEES,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
 
       rulesParent1: undefined,
@@ -131,7 +129,7 @@ router.put("/not-eligible", passport.authenticate("young", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.status = YOUNG_STATUS.NOT_ELIGIBLE;
-    young.reinscriptionStep2023 = "NONELIGIBLE";
+    young.reinscriptionStep2023 = REINSCRIPTION_STEPS.NOT_ELIGIBLE;
 
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

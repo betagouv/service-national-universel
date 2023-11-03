@@ -597,15 +597,13 @@ router.put("/step", passport.authenticate("young", { session: false, failWithErr
   try {
     const { error, value } = Joi.object({
       step: Joi.string()
-      .trim()
-      .valid(...Object.values(STEPS2023), ...Object.values(REINSCRIPTION_STEPS))
-      .required(),
+        .trim()
+        .valid(...Object.values(STEPS2023), ...Object.values(REINSCRIPTION_STEPS))
+        .required(),
     }).validate(req.body, { stripUnknown: true });
     if (error) {
-      console.log("🚀 ~ file: inscription2023.js:605 ~ router.put ~ error:", error)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    console.log("🚀 ~ file: inscription2023.js:599 ~ router.put ~ value.step:", value.step)
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
