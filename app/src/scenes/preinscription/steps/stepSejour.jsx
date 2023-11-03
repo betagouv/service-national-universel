@@ -25,7 +25,7 @@ export default function StepSejour() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Choisissez la date du séjour" supportLink={supportURL + `/base-de-connaissance/${bdcURI}`}>
+      <DSFRContainer title="Choisissez la date du séjour" supportLink={supportURL + `/base-de-connaissance/${bdcURI}`} supportEvent="Phase0/aide preinscription - sejour">
         <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
         <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
         {scolarity == GRADES["1ereGT"] && (
@@ -54,7 +54,7 @@ function SessionButton(session) {
   }
 
   return (
-    <button key={session.id} className="w-full my-3 flex items-center justify-between border p-4 hover:bg-gray-50" onClick={handleClick}>
+    <button key={session.id} onClick={handleClick} className="w-full my-3 flex items-center justify-between border p-4 hover:bg-gray-50">
       <p>
         Séjour <strong>{getCohortPeriod(session)}</strong>
       </p>
