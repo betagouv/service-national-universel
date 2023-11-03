@@ -34,12 +34,12 @@ function renderStep(step) {
   return <StepCoordonnees />;
 }
 
-const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscriptionStep2023 } }) => {
+const Step = ({ young: { status, reinscriptionStep2023, inscriptionStep2023 } }) => {
   const { step } = useParams();
 
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
 
-  const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
+  const eligibleStep = status === "REINSCRIPTION" ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
 
   if (!requestedStep && eligibleStep) {
     return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
@@ -100,7 +100,7 @@ export default function Index() {
 
   //Il a fini son inscription
   const isInscriptionDone =
-    young?.status === "WAITING_VALIDATION" && (young?.reinscriptionStep2023 === "DONE" || (!young?.hasStartedReinscription && young?.inscriptionStep2023 === "DONE"));
+    young?.status === "WAITING_VALIDATION" && (young?.reinscriptionStep2023 === "DONE" || (!young?.reinscriptionStep2023 && young?.inscriptionStep2023 === "DONE"));
   if (isInscriptionDone) {
     return <Redirect to={{ pathname: "/" }} />;
   }

@@ -374,7 +374,7 @@ const Schema = new mongoose.Schema({
   // also used for 2024
   reinscriptionStep2023: {
     type: String,
-    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "WAITING_CONSENT", "CONFIRM", "DONE"],
+    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "COORDONNEES", "CONSENTEMENTS", "DOCUMENTS", "REPRESENTANTS", "WAITING_CONSENT", "CONFIRM", "DONE"],
     documentation: {
       description: "Étape du tunnel de réinscription 2023",
     },
