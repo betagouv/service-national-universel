@@ -630,11 +630,13 @@ export default function StepCoordonnees() {
         </div>
         <div className="mb-4 flex items-center">
           <div>
-            <h2 className="mt-0 text-[16px] font-bold">
+            <h2 className="mt-0 leading-6 text-[16px]">
               Souhaitez-vous nous faire part d’une situation particulière ?
-              <span className="text-[14px]">(allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
+              <span className="text-[16px]"> (allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
             </h2>
-            <div className=" mt-1 text-[14px] leading-tight text-[#666666]">En fonction des situations signalées, un responsable prendra contact avec vous.</div>
+            <div className=" mt-2 text-[12px] leading-5 text-[#666666]">
+              Le SNU est ouvert à tous. Pour vous accueillir dans les meilleures conditions, un responsable pourra prendre contact avec vous.
+            </div>
           </div>
         </div>
         <div className="flex flex-col md:flex-row mb-4">

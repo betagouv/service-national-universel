@@ -7,7 +7,7 @@ import plausibleEvent from "../../services/plausible";
 import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { capture } from "../../sentry";
-import ProgressBar from "./components/ProgressBar";
+// import ProgressBar from "./components/ProgressBar";
 import { supportURL } from "@/config";
 
 export default function Done() {
@@ -24,7 +24,7 @@ export default function Done() {
 
   return (
     <>
-      <ProgressBar />
+      {/* <ProgressBar /> */}
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <h1 className="text-3xl font-semibold leading-snug">Bienvenue {young?.firstName} 🎉</h1>
         <h1 className="text-3xl font-semibold leading-snug">Votre compte volontaire a été créé.</h1>
