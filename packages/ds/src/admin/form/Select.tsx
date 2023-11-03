@@ -7,9 +7,10 @@ import { BsCheckLg } from "react-icons/bs";
 type CustomStyles = StylesConfig<string, boolean, GroupBase<string>>;
 
 type OwnProps = {
-  options?: GroupBase<string>[];
   value: string | null;
+  options?: GroupBase<string>[];
   defaultValue?: string | null;
+  className?: string;
   placeholder?: string;
   label?: string;
   disabled?: boolean;
@@ -24,7 +25,7 @@ type OwnProps = {
   // async props
   isAsync?: boolean;
   noOptionsMessage?: string;
-  loadOptions: (
+  loadOptions?: (
     inputValue: string,
     callback: (options: GroupBase<string>[]) => void
   ) => void | Promise<GroupBase<string>[]>;
@@ -34,6 +35,7 @@ export default function SelectButton({
   options,
   value,
   defaultValue,
+  className,
   label,
   placeholder,
   disabled = false,
@@ -166,7 +168,7 @@ export default function SelectButton({
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className={"flex flex-col gap-3 " + className}>
       <div className="relative">
         <label
           className={`absolute top-1 left-3 z-10 text-xs font-normal ${
