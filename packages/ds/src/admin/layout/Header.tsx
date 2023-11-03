@@ -55,7 +55,7 @@ export default function Header({
         )}
 
         {/* Title */}
-        <div className="flex items-start justify-center">
+        <div className="flex items-center justify-start">
           <h1 className="text-[30px] font-bold leading-9 text-ds-gray-900">
             {title}
           </h1>
