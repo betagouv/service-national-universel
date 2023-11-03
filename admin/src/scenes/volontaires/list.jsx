@@ -233,15 +233,17 @@ const BadgePhase = ({ text, value, redirect, style }) => {
   };
 
   return (
-    <Badge
-      onClick={() => history.push(redirect)}
-      minify
-      text={text}
-      tooltipText={translator()}
-      minTooltipText={`${text}: ${translate(value)}`}
-      color={YOUNG_STATUS_COLORS[value]}
-      className={style}
-    />
+    <Link to={redirect}>
+      <Badge
+        onClick={() => history.push(redirect)}
+        minify
+        text={text}
+        tooltipText={translator()}
+        minTooltipText={`${text}: ${translate(value)}`}
+        color={YOUNG_STATUS_COLORS[value]}
+        className={style}
+      />
+    </Link>
   );
 };
 
