@@ -99,7 +99,9 @@ export default function Index() {
   }
 
   //Il a fini son inscription
-  if ((young.reinscriptionStep2023 === "DONE" || young.inscriptionStep2023 === "DONE") && young.status === "WAITING_VALIDATION") {
+  const isInscriptionDone =
+    young.status === "WAITING_VALIDATION" && (young.reinscriptionStep2023 === "DONE" || (!young?.hasStartedReinscription && young.inscriptionStep2023 === "DONE"));
+  if (isInscriptionDone) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
