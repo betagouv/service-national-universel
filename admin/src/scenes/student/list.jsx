@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Page, Header, Container, Button, Badge } from "@snu/ds/admin";
+import { Page, Header, Container, Button, Badge, DropdownButton } from "@snu/ds/admin";
 import { HiPlus } from "react-icons/hi";
 import ClasseIcon from "@/components/drawer/icons/Classe";
 import StudentIcon from "@/components/drawer/icons/Student";
@@ -18,7 +18,6 @@ export default function list() {
   const [classes, setClasses] = useState(true);
 
   //ICI ON PREND LEXEMPLE DES MISSIONS POUR LA DEMO, A SUPPRIMER ENSUITE
-  const [mission, setMission] = useState(null);
   const [structure, setStructure] = useState();
   const user = useSelector((state) => state.Auth.user);
   const [data, setData] = useState([
@@ -324,13 +323,7 @@ export default function list() {
                   </thead>
                   <tbody>
                     {data.map((hit) => (
-                      <Hit
-                        key={hit._id}
-                        hit={hit}
-                        callback={(e) => {
-                          if (e._id === mission?._id) setMission(e);
-                        }}
-                      />
+                      <Hit key={hit._id} hit={hit} />
                     ))}
                   </tbody>
                   <tr className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 bg-gray-50">
@@ -378,7 +371,22 @@ const Hit = ({ hit }) => {
         <Badge title={translate(MISSION_STATUS[hit.status])} status={hit.status} />
       </td>
       <td className="flex w-[5%] flex-col gap-2">
-        <Badge title={<IoFlashOutline size={20} />} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-10 !h-10 !border-none"} />
+        <DropdownButton
+          title={<IoFlashOutline size={20} />}
+          mode={"badge"}
+          rightIcon={false}
+          buttonClassNames={"rounded-[50%] !p-0 !w-10 !h-10 border-none hover:bg-white hover:text-blue-600"}
+          optionsGroup={[
+            {
+              key: "actions",
+              title: "",
+              items: [
+                { key: "action1", render: <p>Action 1</p> },
+                { key: "action2", render: <p>Action 2</p> },
+              ],
+            },
+          ]}
+        />
       </td>
     </tr>
   );
