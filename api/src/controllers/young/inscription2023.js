@@ -83,14 +83,14 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-            foreignCountry: "",
-            foreignAddress: "",
-            foreignCity: "",
-            foreignZip: "",
-            hostFirstName: "",
-            hostLastName: "",
-            hostRelationship: "",
-          }
+          foreignCountry: "",
+          foreignAddress: "",
+          foreignCity: "",
+          foreignZip: "",
+          hostFirstName: "",
+          hostLastName: "",
+          hostRelationship: "",
+        }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
@@ -225,7 +225,13 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
     }
 
-    if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+    if (type === "next") {
+      if (value.hasStartedReinscription) {
+        value.reinscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+      } else {
+        value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+      }
+    }
 
     if (type === "correction") {
       const keyList = Object.keys(coordonneeSchema);
@@ -289,8 +295,14 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     young.set({
       acceptCGU: "true",
       consentment: "true",
-      inscriptionStep2023: STEPS2023.REPRESENTANTS,
     });
+
+    if (young.hasStartedReinscription) {
+      young.set({ reinscriptionStep2023: STEPS2023.REPRESENTANTS });
+    } else {
+      young.set({ inscriptionStep2023: STEPS2023.REPRESENTANTS });
+    }
+
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -327,7 +339,11 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     }
 
     if (type === "next") {
-      value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+      if (young.hasStartedReinscription) {
+        value.reinscriptionStep2023 = STEPS2023.DOCUMENTS;
+      } else {
+        value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+      }
 
       if (!young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
       if (!young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
@@ -457,6 +473,11 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       const cohort = await CohortObject.findOne({ name: young.cohort });
       const CNIFileNotValidOnStart = value.date < new Date(cohort.dateStart);
       young.set({ latestCNIFileExpirationDate: value.date, latestCNIFileCategory: value.latestCNIFileCategory, CNIFileNotValidOnStart });
+      if (young.hasStartedReinscription) {
+        young.set({ reinscriptionStep2023: STEPS2023.CONFIRM });
+      } else {
+        young.set({ inscriptionStep2023: STEPS2023.CONFIRM });
+      }
     }
 
     if (type === "correction") {
