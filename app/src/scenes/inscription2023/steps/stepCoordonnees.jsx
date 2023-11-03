@@ -333,7 +333,7 @@ export default function StepCoordonnees() {
     }
 
     if (hasSpecialSituation === null) {
-      errors.hasSpecialSituation = "Ce champ est obligatoire";
+      errors.hasSelectedSpecialSituation = "Ce champ est obligatoire";
     }
 
     for (const key of requiredFields) {
@@ -669,7 +669,7 @@ export default function StepCoordonnees() {
             </label>
           </div>
         </div>
-        <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
+        <ErrorMessage>{errors.hasSelectedSpecialSituation}</ErrorMessage>
         {hasSpecialSituation && (
           <>
             <CheckBox
