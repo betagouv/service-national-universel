@@ -14,14 +14,14 @@ type OptionGroupItem = {
 
 type TStatus =
   | "none"
-  | "draft"
-  | "cancel"
-  | "refused"
-  | "inProgress"
-  | "waitingValidation"
-  | "waitingCorrection"
-  | "validated"
-  | "validatedBis"
+  | "DRAFT"
+  | "CANCEL"
+  | "REFUSED"
+  | "IN_PROGRESS"
+  | "WAITING_VALIDATION"
+  | "WAITING_CORRECTION"
+  | "VALIDATED"
+  | "WAITING_LIST"
   | "secondary"
   | "primary";
 

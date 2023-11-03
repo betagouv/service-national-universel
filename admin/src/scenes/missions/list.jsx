@@ -334,7 +334,7 @@ export default function List() {
     });
     return result;
   }
-
+  console.log(data);
   //Filters
   const filterArray = [
     { title: "Région", name: "region", parentGroup: "Général", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
