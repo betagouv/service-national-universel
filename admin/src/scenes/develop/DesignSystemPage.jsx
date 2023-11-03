@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton } from "@snu/ds/admin";
+import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, Select } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
@@ -8,6 +8,7 @@ import { InputPhone } from "@snu/ds/admin";
 import { PHONE_ZONES } from "snu-lib";
 import ModalExamples from "./components/Modal";
 import ProfilePicExamples from "./components/ProfilePic";
+import api from "@/services/api";
 
 export default function DesignSystemPage() {
   const [values, setValues] = React.useState({
@@ -15,6 +16,26 @@ export default function DesignSystemPage() {
     input1Phone: "",
     input1PhoneZone: "",
   });
+  const [valueSelect, setValuesSelect] = useState({
+    monoSelect: "",
+    multiSelect: [],
+    monoAsyncSelect: "",
+    multiAsyncSelect: [],
+  });
+  const SelectOptions = [
+    { value: "1", label: "Item 1" },
+    { value: "2", label: "Item 2" },
+    { value: "3", label: "Item 3" },
+    { value: "4", label: "Item 4" },
+    { value: "5", label: "Item 5" },
+  ];
+
+  const fetchStructures = async (inputValue) => {
+    const { responses } = await api.post("/elasticsearch/structure/search", { filters: { searchbar: [inputValue] } });
+    return responses[0].hits.hits.map((hit) => {
+      return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
+    });
+  };
 
   const error = "Ceci est une erreur";
 
@@ -22,6 +43,40 @@ export default function DesignSystemPage() {
     event.persist();
     setValues((prev) => ({ ...prev, [event.target.name]: event.target.value }));
   };
+  const handleMonoSelectChange = (selectedOption) => {
+    if (selectedOption) {
+      setValuesSelect({
+        ...valueSelect,
+        monoSelect: selectedOption.value,
+      });
+    } else {
+      setValuesSelect({
+        ...valueSelect,
+        monoSelect: "",
+      });
+    }
+  };
+  const handleMonoAsyncSelectChange = (selectedOption) => {
+    if (selectedOption) {
+      setValuesSelect({
+        ...valueSelect,
+        monoAsyncSelect: selectedOption.value,
+      });
+    } else {
+      setValuesSelect({
+        ...valueSelect,
+        monoAsyncSelect: "",
+      });
+    }
+  };
+  const handleMultiSelectChange = (selectedOption) => {
+    setValuesSelect({ ...valueSelect, multiSelect: selectedOption.map((opt) => opt.value) });
+  };
+  const handleMultiAsyncSelectChange = (selectedOption) => {
+    setValuesSelect({ ...valueSelect, multiAsyncSelect: selectedOption.map((opt) => opt.value) });
+  };
+
+  console.log(valueSelect);
 
   const [StatusTitle, setStatusTitle] = useState("Candidature approuvée");
   const [StatusSelect, setStatusSelect] = useState("validated");
@@ -304,6 +359,116 @@ export default function DesignSystemPage() {
           <Button title={"Modifier disabled"} type={"change"} disabled={true} leftIcon={<HiOutlinePencil size={16} />} />
           <Button title={"Annuler"} type={"cancel"} />
           <Button title={"Annuler disabled"} type={"cancel"} disabled={true} />
+        </div>
+      </Container>
+      <Container title="Select">
+        <div className="grid grid-cols-3 gap-4 w-full">
+          <Select
+            placeholder="Mono Select"
+            defaultValue={SelectOptions[0]}
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
+            onChange={handleMonoSelectChange}
+          />
+          <Select
+            placeholder="Mono Select with Label"
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
+            label="selectTest"
+            isClearable={true}
+            onChange={handleMonoSelectChange}
+          />
+          <Select
+            placeholder="Mono Select disabled"
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
+            onChange={handleMonoSelectChange}
+            disabled={true}
+          />
+          <Select
+            placeholder="Mono Select with Label"
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
+            label="selectTest2"
+            onChange={handleMonoSelectChange}
+            error={error}
+          />
+          <Select
+            placeholder="Mono Select"
+            options={SelectOptions}
+            value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
+            onChange={handleMonoSelectChange}
+            error={error}
+          />
+          <Select
+            placeholder="Multi Select"
+            options={SelectOptions}
+            isMulti={true}
+            isClearable={true}
+            value={valueSelect.multiSelect?.map((value) => {
+              const label = SelectOptions.find((item) => item.value === value)?.label;
+              return label ? { value: value, label } : null;
+            })}
+            onChange={handleMultiSelectChange}
+          />
+          <Select
+            placeholder="Multi Select with label"
+            options={SelectOptions}
+            isMulti={true}
+            isClearable={true}
+            label="selectTest"
+            value={valueSelect.multiSelect?.map((value) => {
+              const label = SelectOptions.find((item) => item.value === value)?.label;
+              return label ? { value: value, label } : null;
+            })}
+            onChange={handleMultiSelectChange}
+          />
+          <Select
+            placeholder="Multi Select with label"
+            options={SelectOptions}
+            isMulti={true}
+            isClearable={true}
+            disabled={true}
+            value={valueSelect.multiSelect?.map((value) => {
+              const label = SelectOptions.find((item) => item.value === value)?.label;
+              return label ? { value: value, label } : null;
+            })}
+            onChange={handleMultiSelectChange}
+          />
+          <Select
+            placeholder="Multi Select with label"
+            options={SelectOptions}
+            isMulti={true}
+            isClearable={true}
+            label="selectTest"
+            value={valueSelect.multiSelect?.map((value) => {
+              const label = SelectOptions.find((item) => item.value === value)?.label;
+              return label ? { value: value, label } : null;
+            })}
+            error={error}
+            onChange={handleMultiSelectChange}
+          />
+          <Select
+            isAsync
+            placeholder="Mono Async Select"
+            loadOptions={fetchStructures}
+            isClearable={true}
+            noOptionsMessage={"Aucune structure ne correspond à cette recherche"}
+            value={valueSelect.monoAsyncSelect ? { label: valueSelect.monoAsyncSelect.name } : null}
+            onChange={handleMonoAsyncSelectChange}
+          />
+          <Select
+            isAsync
+            placeholder="Multi Async Select"
+            loadOptions={fetchStructures}
+            isClearable={true}
+            isMulti={true}
+            noOptionsMessage={"Aucune structure ne correspond à cette recherche"}
+            value={valueSelect.multiAsyncSelect?.map((item) => {
+              return item ? { value: item, label: item.name } : null;
+            })}
+            onChange={handleMultiAsyncSelectChange}
+          />
         </div>
       </Container>
       <ModalExamples />
