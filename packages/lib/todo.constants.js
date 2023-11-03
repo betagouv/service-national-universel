@@ -85,7 +85,6 @@ const DASHBOARD_TODOS_FUNCTIONS = {
     EQUIVALENCE_WAITING_VERIFICATION: "equivalence_waiting_verification",
     //Contrat (À renseigner) 1 représentant de l’État est à renseigner.
     STRUCTURE_MANAGER: "structure_manager",
-
     //For resp and supervisor
     // Contrat (À suivre) X contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature
     STRUCTURE_CONTRACT_TO_EDIT: "structure_contract_to_edit",
