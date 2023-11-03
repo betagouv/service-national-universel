@@ -66,7 +66,11 @@ export default function StepConfirm() {
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
             <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div>
           </div>
-          <button onClick={() => setModal({ isOpen: true })}>
+          <button
+            onClick={() => {
+              plausibleEvent("Phase0/CTA inscription - modifier sejour");
+              setModal({ isOpen: true });
+            }}>
             <EditPen />
           </button>
         </div>
@@ -75,7 +79,7 @@ export default function StepConfirm() {
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mon profil</h1>
             <Link to="/inscription2023/coordonnee">
-              <EditPen onClick={() => history.push("/inscription2023/coordonnee")} />
+              <EditPen onClick={() => plausibleEvent("Phase0/CTA inscription - modifier profil")} />
             </Link>
           </div>
           <Details title="Pays de naissance" value={young.birthCountry} />
@@ -117,7 +121,7 @@ export default function StepConfirm() {
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mes représentants légaux</h1>
             <Link to="/inscription2023/representants">
-              <EditPen />
+              <EditPen onClick={() => plausibleEvent("Phase0/CTA inscription - modifier rl")} />
             </Link>
           </div>
           <Details title="Votre lien" value={translate(young.parent1Status)} />

@@ -14,6 +14,7 @@ import ConsentDone from "../../../assets/icons/ConsentDone";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
+import plausibleEvent from "@/services/plausible";
 
 export default function StepWaitingConsent() {
   const young = useSelector((state) => state.Auth.young);
@@ -34,6 +35,7 @@ export default function StepWaitingConsent() {
         setDisabled(false);
         return;
       }
+      plausibleEvent("Phase0/CTA inscription - relancer rep leg");
       toastr.success("Succès", "Votre relance a bien été prise en compte.");
     } catch (e) {
       capture(e);

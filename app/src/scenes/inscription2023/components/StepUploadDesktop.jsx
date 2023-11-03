@@ -13,6 +13,7 @@ import MyDocs from "../components/MyDocs";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import FileImport from "@/components/dsfr/forms/FileImport";
 import Verify from "./VerifyDocument";
+import plausibleEvent from "@/services/plausible";
 
 export default function StepUploadDesktop({
   recto,
@@ -137,7 +138,12 @@ export default function StepUploadDesktop({
 
       <div className="my-4 text-sm text-gray-800">
         Vous avez besoin d’aide pour téléverser les documents ?{" "}
-        <a href="https://support.snu.gouv.fr/base-de-connaissance/je-televerse-un-document/" className="underline">
+        <a
+          href="https://support.snu.gouv.fr/base-de-connaissance/je-televerse-un-document/"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={plausibleEvent("Phase0/CTA inscription - aide televerser")}
+          className="underline">
           Cliquez ici
         </a>
         .

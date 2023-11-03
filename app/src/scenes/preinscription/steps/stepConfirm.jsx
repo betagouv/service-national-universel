@@ -70,6 +70,7 @@ export default function StepConfirm() {
         setLoading(false);
       } else {
         if (user) {
+          plausibleEvent("Phase0/CTA preinscription - inscription");
           if (token) api.setToken(token);
           dispatch(setYoung(user));
           removePersistedData();

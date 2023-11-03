@@ -14,7 +14,7 @@ export default function Done() {
   const history = useHistory();
   async function handleClick() {
     try {
-      plausibleEvent("Phase0/CTA preinscription - demarrer");
+      plausibleEvent("Phase0/CTA preinscription - finaliser");
       history.push("/inscription2023");
     } catch (e) {
       capture(e);
