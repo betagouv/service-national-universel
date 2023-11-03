@@ -6,7 +6,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Section, Container } from "@snu/ds/dsfr";
 
-export default function register() {
+export default function confirmation() {
   const history = useHistory();
 
   const handleSubmit = () => {
@@ -15,7 +15,9 @@ export default function register() {
 
   return (
     <Section>
-      <Stepper currentStep={5} stepCount={5} title="Création d’un compte : confirmation" />
+      <div className="m-auto max-w-[587px]">
+        <Stepper currentStep={5} stepCount={5} title="Création d’un compte : confirmation" />
+      </div>
       <Container className="flex flex-col gap-8">
         <div className="flex items-start justify-between">
           <h1 className="text-xl font-bold">Validez vos informations</h1>

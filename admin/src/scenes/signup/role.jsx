@@ -5,10 +5,10 @@ import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Section, Container } from "@snu/ds/dsfr";
 
-export default function register() {
+export default function role() {
   const history = useHistory();
   const [role, setRole] = React.useState("chef_etablissement");
-  const [etablissement, setEtablissement] = React.useState("chef_etablissement");
+  const [etablissement, setEtablissement] = React.useState("Lycée ABC");
 
   const ROLES_CLE = {
     chef_etablissement: "Chef d'établissement",
@@ -17,21 +17,14 @@ export default function register() {
     referent_snu: "Référent SNU",
   };
 
-  const getEtablissement = async () => {
-    const response = await api.get(`/etablissement/${etablissement_id}`);
-    setEtablissement(response.data);
-  };
-
-  useEffect(() => {
-    getEtablissement();
-  }, []);
-
   // TODO : get dynamiquement le role et l'etablissement
   // ...?role=chef_etablissement&etablissement_id=abc123
 
   return (
     <Section>
-      <Stepper currentStep={1} stepCount={5} title="Création d’un compte : rôle et fonction" nextTitle="Adresse email" />
+      <div className="m-auto max-w-[587px]">
+        <Stepper currentStep={1} stepCount={5} title="Création d’un compte : rôle et fonction" nextTitle="Adresse email" />
+      </div>
       <Container className="flex flex-col gap-8">
         <div className="flex items-start justify-between">
           <h1 className="text-xl font-bold">Confirmez votre rôle et votre fonction</h1>
@@ -39,7 +32,7 @@ export default function register() {
         </div>
         <hr className="p-1" />
         <p>
-          Vous allez créez un compte Administrateur CLE en tant que <b>{ROLES_CLE[role]}</b> du <b>{etablissement?.name}</b>.
+          Vous allez créez un compte Administrateur CLE en tant que <b>{ROLES_CLE[role]}</b> du <b>{etablissement}</b>.
           <br />
           Confirmez-vous qu’il s’agit bien de votre rôle et de votre fonction ?
         </p>

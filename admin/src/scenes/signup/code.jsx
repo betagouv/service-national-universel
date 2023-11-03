@@ -8,13 +8,15 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 
 import { Section, Container } from "@snu/ds/dsfr";
 
-export default function register() {
+export default function code() {
   const history = useHistory();
   const [email, setEmail] = React.useState("blabla@email.com");
 
   return (
     <Section>
-      <Stepper currentStep={3} stepCount={5} title="Création d’un compte : code d'activation" nextTitle="Informations" />
+      <div className="m-auto max-w-[587px]">
+        <Stepper currentStep={3} stepCount={5} title="Création d’un compte : code d'activation" nextTitle="Informations" />
+      </div>
       <Container className="flex flex-col gap-8">
         <div className="flex items-start justify-between">
           <h1 className="text-xl font-bold">Renseignez votre code d'activation</h1>
