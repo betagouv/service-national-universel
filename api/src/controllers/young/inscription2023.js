@@ -398,6 +398,13 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
         },
       });
 
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CONSENT, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: {
+          cta: config.APP_URL,
+        },
+      });
+
       value.inscriptionDoneDate = new Date();
     }
 
