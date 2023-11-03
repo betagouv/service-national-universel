@@ -21,14 +21,14 @@ type OwnProps = {
   isClearable?: boolean;
   isSearchable?: boolean;
   onChange: () => void;
-  // async
+  // async props
   isAsync?: boolean;
   noOptionsMessage?: string;
   loadOptions: (
     inputValue: string,
     callback: (options: GroupBase<string>[]) => void
   ) => void | Promise<GroupBase<string>[]>;
-}
+};
 
 export default function SelectButton({
   options,
@@ -45,7 +45,7 @@ export default function SelectButton({
   isClearable = false,
   isSearchable = true,
   onChange,
-  // async
+  // async props
   isAsync = false,
   noOptionsMessage,
   loadOptions,
@@ -175,7 +175,7 @@ export default function SelectButton({
         >
           {label}
         </label>
-        { isAsync ? (
+        {isAsync ? (
           <AsyncSelect
             placeholder={placeholder}
             loadOptions={loadOptions}
@@ -217,7 +217,7 @@ export default function SelectButton({
             }
             styles={customStyles}
           />
-        ) }
+        )}
         {error && (
           <HiOutlineExclamation className="absolute top-4 right-3 z-1 text-red-500 w-5 h-5" />
         )}

@@ -2,6 +2,7 @@
 import InputText from "./form/InputText";
 import InputPhone from "./form/InputPhone";
 import Label from "./form/Label";
+import Select from "./form/Select";
 
 // Layout
 import Container from "./layout/Container";
@@ -15,7 +16,6 @@ import Button from "./ui/Button";
 import DropdownButton from "./ui/DropdownButton";
 import Modal from "./ui/Modal";
 import ModalConfirmation from "./ui/ModalConfirmation";
-import Select from "./ui/Select";
 
 export {
   // Form
