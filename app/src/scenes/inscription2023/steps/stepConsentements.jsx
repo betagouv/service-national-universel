@@ -81,7 +81,7 @@ export default function StepConsentements() {
               M&apos;inscris pour le séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles et m&apos;engage à en
               respecter le{" "}
               <a
-                href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/snu-reglement-interieur-2022-2023.pdf"
+                href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/snu-reglement-interieur.pdf"
                 target="_blank"
                 rel="noreferrer"
                 className="underline hover:underline">
