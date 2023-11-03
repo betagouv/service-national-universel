@@ -294,13 +294,7 @@ export default function list() {
                   </thead>
                   <tbody>
                     {data.map((hit) => (
-                      <Hit
-                        key={hit._id}
-                        hit={hit}
-                        callback={(e) => {
-                          if (e._id === mission?._id) setMission(e);
-                        }}
-                      />
+                      <Hit key={hit._id} hit={hit} />
                     ))}
                   </tbody>
                   <tr className="flex items-center py-3 px-4 text-xs leading-5 font-[500] uppercase text-gray-500 bg-gray-50 ">
