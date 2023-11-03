@@ -73,11 +73,14 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
 
       rulesParent1: undefined,
+      parent1AllowSNU: undefined,
       parentAllowSNU: undefined,
       parent1DataVerified: undefined,
       parent1AllowImageRights: undefined,
       parent2AllowImageRights: undefined,
       parent2AllowImageRightsReset: undefined,
+      parent1OwnAddress: undefined,
+      parent1ValidationDate: undefined,
 
       cohesionCenterId: undefined,
       sessionPhase1Id: undefined,

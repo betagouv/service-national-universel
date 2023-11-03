@@ -59,7 +59,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     if (young) {
       let options = [];
       if (user.role === ROLES.ADMIN) {
-        options = Object.keys(YOUNG_STATUS).filter((status) => status !== young.status && status !== YOUNG_STATUS.DELETED);
+        options = Object.keys(YOUNG_STATUS).filter((status) => status !== young.status && ![YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.DELETED].includes(status));
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
