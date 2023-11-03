@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ProfilePic } from "@snu/ds";
-import { Page, Header, Container, Button, Badge, Label, InputText, ModalConfirmation } from "@snu/ds/admin";
+import { Page, Header, Container, Button, Badge, Label, InputText, ModalConfirmation, Select } from "@snu/ds/admin";
 import { HiOutlinePencil } from "react-icons/hi";
 import { BsSend, BsTrash3 } from "react-icons/bs";
 import { VscCopy } from "react-icons/vsc";
@@ -31,13 +31,16 @@ export default function view() {
             <Label title="Nom de la classe engagée" tooltip="This is a test and need to be replaced." />
             <InputText className="mb-3" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             <Label title="Coloration" tooltip="This is a test and need to be replaced." />
+            <Select value={{ value: "Environnement", label: "Environnement" }} options={[{ value: "Environnement", label: "Environnement" }]} />
           </div>
           <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
           <div className="flex-1">
             <Label title="Nombre d'élèves" tooltip="This is a test and need to be replaced." />
             <InputText className="mb-3" type="number" value={27} />
             <Label title="Situation scolaire" tooltip="This is a test and need to be replaced." />
-            <InputText className="mb-3" type="number" value={27} />
+            <Select className="mb-3" label="Type d'établissement" />
+            <Select className="mb-3" label="Filière" />
+            <Select className="mb-3" label="Niveau" />
             <div className="flex items-center justify-end mt-6">
               <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700">
                 <BsTrash3 className="mr-2" />

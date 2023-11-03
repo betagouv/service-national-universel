@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label } from "@snu/ds/admin";
 import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
@@ -30,9 +31,9 @@ export default function view() {
       <Container
         title="Contacts"
         actions={[
-          <a key="list-users" href="/utilisateurs">
+          <Link key="list-users" to="/utilisateurs">
             <Button type="tertiary" title="Voir mon équipe" />
-          </a>,
+          </Link>,
         ]}>
         <div className="flex items-stretch justify-between">
           {contacts.map((contact, index) => (
