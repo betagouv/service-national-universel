@@ -132,14 +132,14 @@ export const questions = [
     value: "COMPLETION",
     label: "Pour compléter mon formulaire d'inscription",
     articles: ["je-minscris-et-remplis-mon-profil"],
-    roles: ["public, young"],
+    roles: ["public", "young"],
   },
   {
     category: "TECHNICAL",
     value: "SIBLINGS",
     label: "J’ai un frère ou une soeur qui possède déjà un compte ",
     articles: ["je-souhaite-inscrire-des-freressoeurs"],
-    roles: ["public, young"],
+    roles: ["public", "young"],
   },
   {
     category: "TECHNICAL",
