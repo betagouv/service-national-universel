@@ -61,6 +61,9 @@ export default function Home() {
     if (hasAccessToReinscription(young)) {
       if (isReinscriptionOpenLoading) return <Loader />;
       // @todo: WaitingReinscriptionInscriptionClosed should be deleted and WaitingReinscription updated to handle both cases
+      if (young.status === YOUNG_STATUS.WITHDRAWN && ["DONE", "EXEMPTED"].includes(young.statusPhase1)) {
+        return <Withdrawn />;
+      }
       return isReinscriptionOpen ? <WaitingReinscription /> : <WaitingReinscriptionInscriptionClosed />;
     }
     if (
@@ -91,7 +94,7 @@ export default function Home() {
     if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
       return <FutureCohort />;
     }
-    
+
     return <Default />;
   };
 
