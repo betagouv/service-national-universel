@@ -79,7 +79,7 @@ export default function DesignSystemPage() {
   console.log(valueSelect);
 
   const [StatusTitle, setStatusTitle] = useState("Candidature approuvée");
-  const [StatusSelect, setStatusSelect] = useState("validated");
+  const [StatusSelect, setStatusSelect] = useState("VALIDATED");
   const [SelectClassName, setSelectClassName] = useState("hover:bg-green-200");
 
   const selectTest = [
@@ -144,14 +144,14 @@ export default function DesignSystemPage() {
           key: "1",
           action: () => {
             setStatusTitle("Candidature approuvée");
-            setStatusSelect("validated");
+            setStatusSelect("VALIDATED");
             setSelectClassName("hover:bg-green-200");
           },
           render: (
             <div className="flex items-center gap-4 p-2 px-3">
               <div className="w-3 h-3 bg-green-500 rounded-[50%] mt-0.5" />
-              <div className={`${StatusSelect === "validated" && "font-bold"} text-sm`}>Candidature Approuvée</div>
-              {StatusSelect === "validated" && <BsCheck size={20} color="black" className="mt-0.5" />}
+              <div className={`${StatusSelect === "VALIDATED" && "font-bold"} text-sm`}>Candidature Approuvée</div>
+              {StatusSelect === "VALIDATED" && <BsCheck size={20} color="black" className="mt-0.5" />}
             </div>
           ),
         },
@@ -159,14 +159,14 @@ export default function DesignSystemPage() {
           key: "2",
           action: () => {
             setStatusTitle("Candidature non Retenue");
-            setStatusSelect("refused");
+            setStatusSelect("REFUSED");
             setSelectClassName("hover:bg-red-200");
           },
           render: (
             <div className="flex items-center gap-4 p-2 px-3">
               <div className="w-3 h-3 bg-red-500 rounded-[50%] mt-0.5" />
-              <div className={`${StatusSelect === "refused" && "font-bold"} text-sm`}>Candidature non Retenue</div>
-              {StatusSelect === "refused" && <BsCheck size={20} color="black" className="mt-0.5" />}
+              <div className={`${StatusSelect === "REFUSED" && "font-bold"} text-sm`}>Candidature non Retenue</div>
+              {StatusSelect === "REFUSED" && <BsCheck size={20} color="black" className="mt-0.5" />}
             </div>
           ),
         },
@@ -326,15 +326,15 @@ export default function DesignSystemPage() {
           />
           <Badge title={<HiPencil size={20} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
           <DropdownButton title={StatusTitle} status={StatusSelect} buttonClassNames={SelectClassName} mode={"badge"} optionsGroup={selectTestStatus} />
-          <Badge title={"Désistée"} status={"cancel"} />
-          <Badge title={"Refusée"} status={"refused"} />
-          <Badge title={"En attente de validation"} status={"waitingValidation"} />
-          <Badge title={"En attente de correction"} status={"waitingCorrection"} />
-          <Badge title={"En cours"} status={"inProgress"} />
-          <Badge title={"Validée sur liste principale"} status={"validated"} />
-          <Badge title={"Validée sur liste complémentaire"} status={"validatedBis"} className="!w-[100px]" />
-          <Badge title={"Validée sur liste complémentaire"} status={"validatedBis"} />
-          <Badge title={"Brouillon"} status={"draft"} />
+          <Badge title={"Désistée"} status={"CANCEL"} />
+          <Badge title={"Refusée"} status={"REFUSED"} />
+          <Badge title={"En attente de validation"} status={"WAITING_VALIDATION"} />
+          <Badge title={"En attente de correction"} status={"WAITING-CORRECTION"} />
+          <Badge title={"En cours"} status={"IN_PROGRESS"} />
+          <Badge title={"Validée sur liste principale"} status={"VALIDATED"} />
+          <Badge title={"Validée sur liste complémentaire"} status={"WAITING_LIST"} className="!w-[100px]" />
+          <Badge title={"Validée sur liste complémentaire"} status={"WAITING_LIST"} />
+          <Badge title={"Brouillon"} status={"DRAFT"} />
         </div>
       </Container>
       <Container title="Boutons">
