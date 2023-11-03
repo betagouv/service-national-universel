@@ -28,7 +28,6 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
               className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 border-b-2 border-gray-800"
             />
           </label>
-          <ErrorMessage>{error}</ErrorMessage>
         </>
       )}
 
@@ -49,7 +48,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
           </div>
         </label>
       </div>
-
+      <ErrorMessage>{error}</ErrorMessage>
       <ErrorMessage>{correction}</ErrorMessage>
       <button onClick={resetData} className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover ml-auto py-1 w-fit flex gap-2 items-center">
         <RiSearchLine />

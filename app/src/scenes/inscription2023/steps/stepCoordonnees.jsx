@@ -65,6 +65,7 @@ const commonRequiredFields = [
   "situation",
   "livesInFrance",
   "address",
+  "addressVerified",
   "zip",
   "city",
   "region",
@@ -218,7 +219,7 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [birthCityZip, zip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
+  }, [birthCityZip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
   const getErrors = () => {
     let errors = {};
@@ -340,6 +341,18 @@ export default function StepCoordonnees() {
       if (data[key] === undefined || data[key] === "") {
         errors[key] = "Ce champ est obligatoire";
       }
+    }
+
+    if (!data.addressVerified || data.addressVerified === "false") {
+      data.address = "";
+      data.zip = "";
+      data.city = "";
+      data.region = "";
+      data.department = "";
+      data.location = {};
+      data.cityCode = "";
+      data.coordinatesAccuracyLevel = "";
+      errors.address = "Veuillez saisir une nouvelle adresse.";
     }
 
     errors = { ...errors, ...getErrors() };
@@ -536,7 +549,7 @@ export default function StepCoordonnees() {
           error={errors?.livesInFrance}
           correction={corrections?.livesInFrance}
         />
-        {isFrenchResident && (
+        {isFrenchResident ? (
           <AddressForm
             data={data}
             updateData={(newData) => setData({ ...data, ...newData })}
@@ -544,8 +557,7 @@ export default function StepCoordonnees() {
             error={errors.address}
             correction={corrections?.address}
           />
-        )}
-        {!isFrenchResident && (
+        ) : (
           <>
             <SearchableSelect
               label="Pays de résidence"
@@ -567,10 +579,6 @@ export default function StepCoordonnees() {
               <Input value={foreignZip} label="Code postal" onChange={updateData("foreignZip")} error={errors.foreignZip} correction={corrections?.foreignZip} className="w-full" />
               <Input value={foreignCity} label="Ville" onChange={updateData("foreignCity")} error={errors.foreignCity} correction={corrections?.foreignCity} className="w-full" />
             </div>
-          </>
-        )}
-        {!isFrenchResident && (
-          <>
             <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
             <div className="my-3 flex">
               <div className="flex w-[40px] min-w-[40px] items-center justify-center bg-[#0063CB]">
