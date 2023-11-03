@@ -83,14 +83,14 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-          foreignCountry: "",
-          foreignAddress: "",
-          foreignCity: "",
-          foreignZip: "",
-          hostFirstName: "",
-          hostLastName: "",
-          hostRelationship: "",
-        }
+            foreignCountry: "",
+            foreignAddress: "",
+            foreignCity: "",
+            foreignZip: "",
+            hostFirstName: "",
+            hostLastName: "",
+            hostRelationship: "",
+          }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
@@ -467,9 +467,9 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (type === "next") {
-      if (young.files.cniFiles.length > 0) {
-        young.set("inscriptionStep2023", STEPS2023.CONFIRM);
-      } else return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (young.files.cniFiles.length === 0) {
+        return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
       const { error, value } = Joi.object({ date: Joi.date().required(), latestCNIFileCategory: Joi.string().trim() }).validate(req.body, { stripUnknown: true });
       if (error) {
         capture(error);
