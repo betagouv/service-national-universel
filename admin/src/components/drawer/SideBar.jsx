@@ -188,6 +188,9 @@ const SideBar = (props) => {
   const Student = () => (
     <SimpleNavItem sideBarOpen={open} Icon={StudentIcon} title="Mes élèves" link="/mes-eleves" active={path.includes("mes-eleves")} setCurrentOpen={setDropDownOpen} />
   );
+  const Contact = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={AdminIcon} title="Mes contacts" link="/mes-contacts" active={path.includes("mes-contacts")} setCurrentOpen={setDropDownOpen} />
+  );
 
   //MultiNavLinks
   const SejoursGod = () => (
@@ -220,7 +223,7 @@ const SideBar = (props) => {
   const visitorItems = [Dashboard];
   const dsnjItems = [ExportDsnj];
   // FIXME [CLE]: remove dev mode
-  const institutionItems = [Institution, Classe, Student, Dev];
+  const institutionItems = [Institution, Classe, Student, Contact, Dev];
 
   const getItems = () => {
     switch (user?.role) {
