@@ -326,8 +326,12 @@ const translate = (value) => {
       return "Votre demande n'a pas pu être prise en compte";
     case "COPIED_TO_CLIPBOARD":
       return "Copié dans le presse-papiers";
+    case "EMAIL_WAITING_VALIDATION":
+      return "Email en attente de validation";
     case "COORDONNEES":
       return "Coordonnées";
+    case "CONSENTEMENTS":
+      return "Consentements";
     case "REPRESENTANTS":
       return "Représentants";
     case "DOCUMENTS":

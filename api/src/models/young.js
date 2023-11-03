@@ -363,10 +363,18 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  // @deprecated
+  hasStartedReinscription: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Le jeune a commencé sa réinscription",
+    },
+  },
+
+  // also used for 2024
   reinscriptionStep2023: {
     type: String,
-    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "CONSENTEMENTS", "DOCUMENTS", "WAITING_CONSENT", "DONE"],
+    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "COORDONNEES", "CONSENTEMENTS", "DOCUMENTS", "REPRESENTANTS", "WAITING_CONSENT", "CONFIRM", "DONE"],
     documentation: {
       description: "Étape du tunnel de réinscription 2023",
     },
@@ -375,16 +383,15 @@ const Schema = new mongoose.Schema({
   // also used for 2024
   inscriptionStep2023: {
     type: String,
-    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
+    enum: ["EMAIL_WAITING_VALIDATION", "COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
     documentation: {
       description: "Étape du tunnel d'inscription 2023/2024",
     },
   },
 
-  // keep track of the current inscription step
+  // @deprecated
   inscriptionStep: {
     type: String,
-    default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
     documentation: {
       description: "Étape du tunnel d'inscription",

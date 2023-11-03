@@ -225,7 +225,13 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
     }
 
-    if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+    if (type === "next") {
+      if (young.status === "REINSCRIPTION") {
+        value.reinscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+      } else {
+        value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+      }
+    }
 
     if (type === "correction") {
       const keyList = Object.keys(coordonneeSchema);
@@ -289,8 +295,14 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     young.set({
       acceptCGU: "true",
       consentment: "true",
-      inscriptionStep2023: STEPS2023.REPRESENTANTS,
     });
+
+    if (young.status === "REINSCRIPTION") {
+      young.set({ reinscriptionStep2023: STEPS2023.REPRESENTANTS });
+    } else {
+      young.set({ inscriptionStep2023: STEPS2023.REPRESENTANTS });
+    }
+
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -327,7 +339,11 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     }
 
     if (type === "next") {
-      value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+      if (young.status === "REINSCRIPTION") {
+        value.reinscriptionStep2023 = STEPS2023.DOCUMENTS;
+      } else {
+        value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+      }
 
       if (!young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
       if (!young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
@@ -352,7 +368,12 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const value = { informationAccuracy: "true", inscriptionStep2023: STEPS2023.WAITING_CONSENT };
+    let value = { informationAccuracy: "true" };
+    if (young.status === "REINSCRIPTION") {
+      value.reinscriptionStep2023 = STEPS2023.WAITING_CONSENT;
+    } else {
+      value.inscriptionStep2023 = STEPS2023.WAITING_CONSENT;
+    }
 
     if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && !young?.inscriptionDoneDate) {
       const cohort = await CohortObject.findOne({ name: young.cohort });
@@ -446,9 +467,9 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (type === "next") {
-      if (young.files.cniFiles.length > 0) {
-        young.set("inscriptionStep2023", STEPS2023.CONFIRM);
-      } else return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (young.files.cniFiles.length === 0) {
+        return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
       const { error, value } = Joi.object({ date: Joi.date().required(), latestCNIFileCategory: Joi.string().trim() }).validate(req.body, { stripUnknown: true });
       if (error) {
         capture(error);
@@ -457,6 +478,11 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       const cohort = await CohortObject.findOne({ name: young.cohort });
       const CNIFileNotValidOnStart = value.date < new Date(cohort.dateStart);
       young.set({ latestCNIFileExpirationDate: value.date, latestCNIFileCategory: value.latestCNIFileCategory, CNIFileNotValidOnStart });
+      if (young.status === "REINSCRIPTION") {
+        young.set({ reinscriptionStep2023: STEPS2023.CONFIRM });
+      } else {
+        young.set({ inscriptionStep2023: STEPS2023.CONFIRM });
+      }
     }
 
     if (type === "correction") {
@@ -530,7 +556,11 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ inscriptionStep2023: STEPS2023.DONE });
+    if (young.reinscriptionStep2023 === "WAITING_CONSENT") {
+      young.set({ reinscriptionStep2023: STEPS2023.DONE });
+    } else {
+      young.set({ inscriptionStep2023: STEPS2023.DONE });
+    }
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

@@ -44,10 +44,14 @@ export default function StepDocuments() {
     },
   ];
 
-  const disabled = !young?.files?.cniFiles?.length || !young?.latestCNIFileExpirationDate;
+  const disabled = !young?.files?.cniFiles?.length || !young?.latestCNIFileExpirationDate || !young?.latestCNIFileCategory;
 
   async function onSubmit() {
-    const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: young.latestCNIFileExpirationDate });
+    const {
+      ok,
+      code,
+      data: responseData,
+    } = await api.put("/young/inscription2023/documents/next", { date: young.latestCNIFileExpirationDate, latestCNIFileCategory: young?.latestCNIFileCategory });
     if (!ok) {
       capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });

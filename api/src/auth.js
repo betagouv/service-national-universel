@@ -91,6 +91,8 @@ class Auth {
 
       const tokenEmailValidation = config.ENVIRONMENT === "staging" ? config.TOKENLOADTEST : await crypto.randomInt(1000000);
 
+      const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
+
       const user = await this.model.create({
         email,
         phone,
@@ -113,14 +115,12 @@ class Auth {
         zip,
         cohort,
         grade,
-        inscriptionStep2023: STEPS2023.COORDONNEES,
+        inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
         emailVerified: "false",
         tokenEmailValidation,
         attemptsEmailValidation: 0,
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
       });
-
-      const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
       if (tokenEmailValidation !== config.TOKENLOADTEST) {
         if (isEmailValidationEnabled) {
@@ -439,6 +439,9 @@ class Auth {
       }
 
       user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, emailVerified: "true" });
+      if (user.inscriptionStep2023 === STEPS2023.EMAIL_WAITING_VALIDATION) {
+        user.set({ inscriptionStep2023: STEPS2023.COORDONNEES });
+      }
       await user.save();
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {

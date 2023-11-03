@@ -195,12 +195,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       value.parent1ValidationDate = new Date();
       if (young.parentAllowSNU !== value.parentAllowSNU) {
         if (value.parentAllowSNU === "true") {
-          if (young.status === YOUNG_STATUS.REINSCRIPTION) {
-            value.status = YOUNG_STATUS.VALIDATED;
-            value.statusPhase1 = YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
-          } else {
-            value.status = YOUNG_STATUS.WAITING_VALIDATION;
-          }
+          value.status = YOUNG_STATUS.WAITING_VALIDATION;
         } else value.status = YOUNG_STATUS.NOT_AUTORISED;
 
         if (!canUpdateYoungStatus({ body: value, current: young })) {
