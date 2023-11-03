@@ -25,21 +25,30 @@ export default function view() {
           <Button key="modal-chef" className="ml-2" type="secondary" title="Modal 1ère connexion Chef d'ét." onClick={() => setModalChef(true)} />,
         ]}
       />
-      <Container title="Contacts" actions={[
+      <Container
+        title="Contacts"
+        actions={[
           <a key="list-users" href="/utilisateurs">
             <Button type="tertiary" title="Voir mon équipe" />
           </a>,
         ]}>
         <div className="flex items-stretch justify-between">
-          {contacts.map((contact, index) => <div key={contact.email} className="flex-1 shrink-0 flex items-stretch justify-between">
-            <div>
-              <div className="text-base font-bold text-ds-gray-900">{contact.name}</div>
-              <div className="mb-4 text-ds-gray-500">{contact.role}</div>
-              <div className="flex items-center justify-start mb-2"><HiOutlinePhone size={20} className="mr-2" />{contact.phone}</div>
-              <div className="flex items-center justify-start"><HiOutlineMail size={20} className="mr-2" /> {contact.email} <VscCopy size={20} className="ml-2 text-gray-400 cursor-pointer" /></div>
+          {contacts.map((contact, index) => (
+            <div key={contact.email} className="flex-1 shrink-0 flex items-stretch justify-between">
+              <div>
+                <div className="text-base font-bold text-ds-gray-900">{contact.name}</div>
+                <div className="mb-4 text-ds-gray-500">{contact.role}</div>
+                <div className="flex items-center justify-start mb-2">
+                  <HiOutlinePhone size={20} className="mr-2" />
+                  {contact.phone}
+                </div>
+                <div className="flex items-center justify-start">
+                  <HiOutlineMail size={20} className="mr-2" /> {contact.email} <VscCopy size={20} className="ml-2 text-gray-400 cursor-pointer" />
+                </div>
+              </div>
+              {index < contacts.length - 1 && <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>}
             </div>
-            {index < contacts.length - 1 && <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>}
-          </div>)}
+          ))}
         </div>
       </Container>
       <Container title="Informations générales" actions={[<Button key="update" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" />]}>
