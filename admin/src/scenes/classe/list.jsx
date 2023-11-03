@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Page, Header, Container, Button } from "@snu/ds/admin";
 import { HiPlus } from "react-icons/hi";
 import ClasseIcon from "@/components/drawer/icons/Classe";
@@ -13,9 +14,12 @@ export default function list() {
         breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes" }]}
         actions={[
           <Button key="empty" title={`(Voir template ${classes ? "vide" : "liste"})`} type="secondary" onClick={() => setClasses(classes ? undefined : [])} />,
-          <a key="list" href="/mes-classes/create">
-            <Button leftIcon={<ClasseIcon />} title="Créer une classe" className="ml-4" />
-          </a>,
+          <Link key="view" to="/mes-classes/1" className="ml-2">
+            <Button title="Vue classe" type="secondary" />
+          </Link>,
+          <Link key="list" to="/mes-classes/create" className="ml-2">
+            <Button leftIcon={<ClasseIcon />} title="Créer une classe" />
+          </Link>,
         ]}
       />
       {!classes && (
