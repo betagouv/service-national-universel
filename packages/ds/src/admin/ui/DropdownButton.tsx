@@ -33,6 +33,7 @@ type OwnProps = {
     items: Array<OptionGroupItem>;
   }>;
   mode?: "default" | "badge";
+  rightIcon?: boolean;
   status?: TStatus;
   type?: "primary" | "secondary" | "tertiary";
   disabled?: boolean;
@@ -44,6 +45,7 @@ export default function DropdownButton({
   title,
   optionsGroup,
   mode = "default",
+  rightIcon = true,
   status = "none",
   type = "primary",
   disabled = false,
@@ -85,7 +87,9 @@ export default function DropdownButton({
             status={status}
             mode={"editable"}
             leftIcon={icon}
-            rightIcon={<HiChevronDown size={20} className="mt-0.5" />}
+            rightIcon={
+              rightIcon && <HiChevronDown size={20} className="mt-0.5" />
+            }
             className={buttonClassNames}
             onClick={() => setOpen((e) => !e)}
           />
@@ -95,7 +99,9 @@ export default function DropdownButton({
             type={type}
             className={buttonClassNames}
             leftIcon={icon}
-            rightIcon={<HiChevronDown size={20} className="mt-0.5" />}
+            rightIcon={
+              rightIcon && <HiChevronDown size={20} className="mt-0.5" />
+            }
             disabled={disabled || loading}
             onClick={() => setOpen((e) => !e)}
           />
