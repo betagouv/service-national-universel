@@ -7,16 +7,24 @@ import { SentryRoute } from "../../sentry";
 import "@codegouvfr/react-dsfr/dsfr/utility/icons/icons.min.css";
 import "@codegouvfr/react-dsfr/dsfr/dsfr.min.css";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
-startReactDsfr({ defaultColorScheme: "system", Link });
+startReactDsfr({ defaultColorScheme: "light", Link });
 
-import Register from "./register";
+import Role from "./role";
+import Email from "./email";
+import Code from "./code";
+import Informations from "./informations";
+import Confirmation from "./confirmation";
 
 export default function Index() {
   useDocumentTitle("Creer mon compte");
 
   return (
     <Switch>
-      <SentryRoute path="/creer-mon-compte" component={Register} />
+      <SentryRoute path="/creer-mon-compte/role" component={Role} />
+      <SentryRoute path="/creer-mon-compte/email" component={Email} />
+      <SentryRoute path="/creer-mon-compte/code" component={Code} />
+      <SentryRoute path="/creer-mon-compte/informations" component={Informations} />
+      <SentryRoute path="/creer-mon-compte/confirmation" component={Confirmation} />
     </Switch>
   );
 }
