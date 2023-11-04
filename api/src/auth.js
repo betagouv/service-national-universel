@@ -264,6 +264,9 @@ class Auth {
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
       if (!user.emailVerified || user.emailVerified === "false") {
         user.set({ emailVerified: "true" });
+        if (user.inscriptionStep2023 === STEPS2023.EMAIL_WAITING_VALIDATION) {
+          user.set({ inscriptionStep2023: STEPS2023.COORDONNEES });
+        }
       }
       await user.save();
 
