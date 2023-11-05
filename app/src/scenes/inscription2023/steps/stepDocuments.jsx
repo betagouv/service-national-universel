@@ -7,7 +7,7 @@ import { translate, translateCorrectionReason, translateField, YOUNG_STATUS } fr
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 
-import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
+import { RiArrowRightLine } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
@@ -16,6 +16,7 @@ import MyDocs from "../components/MyDocs";
 import Navbar from "../components/Navbar";
 import Info from "../../../components/info";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import plausibleEvent from "@/services/plausible";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -32,15 +33,18 @@ export default function StepDocuments() {
       category: "cniNew",
       title: "Carte Nationale d'Identité",
       subtitle: "Nouveau format (après août 2021)",
+      event: "Phase0/CTA inscription - nouvelle CI",
     },
     {
       category: "cniOld",
       title: "Carte Nationale d'Identité",
       subtitle: "Ancien format",
+      event: "Phase0/CTA inscription - ancienne CI",
     },
     {
       category: "passport",
       title: "Passeport",
+      event: "Phase0/CTA inscription - passeport",
     },
   ];
 
@@ -62,7 +66,8 @@ export default function StepDocuments() {
   }
 
   function handleClick(doc) {
-    if (!disabledUpload) history.push(`televersement/${doc.category}`);
+    plausibleEvent(doc.event);
+    history.push(`televersement/${doc.category}`);
   }
 
   function goBack() {
@@ -77,7 +82,7 @@ export default function StepDocuments() {
   return (
     <>
       <Navbar />
-      <DSFRContainer title="Ma pièce d’identité" supportLink={supportLink}>
+      <DSFRContainer title="Ma pièce d’identité" supportLink={supportLink} supportEvent="Phase0/aide inscription - CI">
         <div className="my-4">
           {corrections?.map((e) => (
             <ErrorMessage key={e._id}>
@@ -101,20 +106,23 @@ export default function StepDocuments() {
         )}
 
         <div className="mt-2 text-sm text-gray-800">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
-        {IDs.map((doc) => (
-          <div
-            key={doc.category}
-            className={`my-4 cursor-pointer bg-[#FFFFFF] hover:bg-[#FAFAFA] ${disabledUpload && "cursor-default bg-[#FAFAFA]"}`}
-            onClick={() => handleClick(doc)}>
-            <div className="my-3 flex items-center justify-between border p-4">
-              <div>
-                <div>{doc.title}</div>
-                {doc.subtitle && <div className="text-sm text-gray-500">{doc.subtitle}</div>}
+        <div className="flex flex-col my-3 gap-3">
+          {IDs.map((doc) => (
+            <button
+              key={doc.category}
+              disabled={disabledUpload}
+              onClick={() => handleClick(doc)}
+              className="hover:bg-[#FAFAFA] disabled:cursor-not-allowed disabled:bg-[#FAFAFA] w-full flex items-center justify-between border p-4 group">
+              <div className="text-left">
+                <p>{doc.title}</p>
+                {doc.subtitle && <p className="text-sm text-gray-500">{doc.subtitle}</p>}
               </div>
-              <ArrowRightBlueSquare fill={disabledUpload ? "gray" : "#000091"} />
-            </div>
-          </div>
-        ))}
+              <div className="w-10 h-10 bg-blue-france-sun-113 group-hover:bg-blue-france-sun-113-hover group-disabled:bg-gray-400">
+                <RiArrowRightLine className="text-white w-6 h-6 mx-auto my-2" />
+              </div>
+            </button>
+          ))}
+        </div>
         <SignupButtonContainer onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />
       </DSFRContainer>
       <Help supportLink={supportLink} />

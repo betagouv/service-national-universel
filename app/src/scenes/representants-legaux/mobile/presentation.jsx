@@ -11,6 +11,7 @@ import { BorderButton } from "../components/Buttons";
 import Navbar from "../components/Navbar";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import plausibleEvent from "@/services/plausible";
 
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
@@ -33,6 +34,7 @@ export default function Presentation({ step, parentId }) {
   const title = parentId === 2 ? `${young.firstName} s'est inscrit(e) au SNU !` : `${young.firstName} souhaite s'inscrire au SNU !`;
 
   function onSubmit() {
+    plausibleEvent("Phase0/CTA representant legal - continuer etape 1");
     const route = parentId === 2 ? "verification-parent2" : "verification";
     history.push(`/representants-legaux/${route}?token=${token}`);
   }

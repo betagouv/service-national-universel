@@ -132,7 +132,10 @@ export default function StepEligibilite() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
+      <DSFRContainer
+        title="Vérifiez votre éligibilité au SNU"
+        supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
+        supportEvent="Phase0/aide preinscription - eligibilite">
         <div className="space-y-5">
           <div className="flex-start flex flex-col">
             <div className="flex items-center">

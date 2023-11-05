@@ -61,7 +61,10 @@ export default function StepConfirm() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={supportURL + "/base-de-connaissance/jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"}>
+      <DSFRContainer
+        title="Ces informations sont-elles correctes ?"
+        supportLink={supportURL + "/base-de-connaissance/jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"}
+        supportEvent="Phase0/aide preinscription - recap">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="my-6 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-[#161616]">Mon éligibilité</h1>

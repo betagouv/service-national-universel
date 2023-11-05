@@ -137,7 +137,7 @@ export default function StepRepresentants() {
       try {
         const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/next`, value);
         if (!ok) {
-            setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
+          setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
           setLoading(false);
           return;
         }
@@ -256,14 +256,20 @@ export default function StepRepresentants() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <DSFRContainer title="Mes représentants légaux" supportLink={supportLink}>
+      <DSFRContainer title="Mes représentants légaux" supportLink={supportLink} supportEvent="Phase0/aide inscription - rep leg">
         <div className="mt-2 text-sm text-[#666666]">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
         <hr className="my-4 h-px border-0 bg-gray-200" />
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
         <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="flex items-center gap-4">
-          <CheckBox checked={isParent2Visible} onChange={(e) => setIsParent2Visible(e)} />
+          <CheckBox
+            checked={isParent2Visible}
+            onChange={(e) => {
+              plausibleEvent("Phase0/CTA inscription - ajouter rep leg");
+              setIsParent2Visible(e);
+            }}
+          />
           <div className="flex-1 text-sm text-[#3A3A3A]">Je renseigne un(e) second(e) représentant(e) légal(e)</div>
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}

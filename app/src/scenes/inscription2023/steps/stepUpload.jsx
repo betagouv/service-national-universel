@@ -125,7 +125,7 @@ export default function StepUpload() {
   return (
     <>
       <Navbar />
-      <DSFRContainer title={ID[category].title} supportLink={supportLink}>
+      <DSFRContainer title={ID[category].title} supportLink={supportLink} supportEvent="Phase0/aide inscription - CI">
         {device === "mobile" ? (
           <StepUploadMobile
             recto={recto}
