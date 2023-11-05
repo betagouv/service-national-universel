@@ -89,7 +89,9 @@ class Auth {
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-      const tokenEmailValidation = config.ENVIRONMENT === "staging" ? config.TOKENLOADTEST : await crypto.randomInt(1000000);
+      const tokenEmailValidation = await crypto.randomInt(1000000);
+
+      const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
       const user = await this.model.create({
         email,
@@ -113,34 +115,30 @@ class Auth {
         zip,
         cohort,
         grade,
-        inscriptionStep2023: STEPS2023.COORDONNEES,
+        inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
         emailVerified: "false",
         tokenEmailValidation,
         attemptsEmailValidation: 0,
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
       });
 
-      const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
-
-      if (tokenEmailValidation !== config.TOKENLOADTEST) {
-        if (isEmailValidationEnabled) {
-          await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-            emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-            params: {
-              registration_code: tokenEmailValidation,
-              cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
-            },
-          });
-        } else {
-          await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
-            emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
-            params: {
-              firstName: user.firstName,
-              lastName: user.lastName,
-              cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
-            },
-          });
-        }
+      if (isEmailValidationEnabled) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+          params: {
+            registration_code: tokenEmailValidation,
+            cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
+          },
+        });
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
+          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+          params: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
+          },
+        });
       }
 
       const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, { expiresIn: JWT_MAX_AGE });
@@ -266,6 +264,9 @@ class Auth {
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
       if (!user.emailVerified || user.emailVerified === "false") {
         user.set({ emailVerified: "true" });
+        if (user.inscriptionStep2023 === STEPS2023.EMAIL_WAITING_VALIDATION) {
+          user.set({ inscriptionStep2023: STEPS2023.COORDONNEES });
+        }
       }
       await user.save();
 
@@ -439,6 +440,9 @@ class Auth {
       }
 
       user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, emailVerified: "true" });
+      if (user.inscriptionStep2023 === STEPS2023.EMAIL_WAITING_VALIDATION) {
+        user.set({ inscriptionStep2023: STEPS2023.COORDONNEES });
+      }
       await user.save();
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {

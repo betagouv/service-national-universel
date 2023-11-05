@@ -103,6 +103,8 @@ const translateFieldYoung = (f) => {
     case "inscriptionStep":
     case "inscriptionStep2023":
       return "Étape d'inscription";
+    case "reinscriptionStep2023":
+      return "Étape de réinscription";
     case "cohesion2020Step":
       return "Étape d'inscription (2020)";
     case "historic":

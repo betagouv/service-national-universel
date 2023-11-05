@@ -109,16 +109,14 @@ export default function StepEmailValidation() {
       <div className="mt-8 flex flex-col gap-1">
         <label>Code d'activation reçu par e-mail</label>
         <Input value={emailValidationToken} onChange={setEmailValidationToken} />
-        <div className="h-2">
-          {error && (
-            <span className="text-sm text-red-500">
-              {error}{" "}
-              <InlineButton className="ml-1 text-sm text-red-500 hover:text-red-700" onClick={handleRequestNewToken}>
-                Recevoir un nouveau code
-              </InlineButton>
-            </span>
-          )}
-        </div>
+        {error && (
+          <span className="text-sm text-red-500">
+            {error}{" "}
+            <InlineButton className="ml-1 text-sm text-red-500 hover:text-red-700" onClick={handleRequestNewToken}>
+              Recevoir un nouveau code
+            </InlineButton>
+          </span>
+        )}
       </div>
       <InlineButton
         className="mt-3"

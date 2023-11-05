@@ -60,7 +60,11 @@ export default function StepUploadDesktop({
   }
 
   const handleOnClickNext = async () => {
+    //si correction on passe directement à la vérification
     if (corrections?.length) return onCorrect(resetState);
+    //si pas de nouveaux fichiers on passe directement à la vérification
+    if (!recto && !verso && young?.files?.cniFiles?.length) return onSubmit(resetState);
+    //sinon
     const areAllFilesImages = [recto, verso].every((e) => !e || imageFileTypes.includes(e?.type));
     if (areAllFilesImages) return setStep(1);
     else return onSubmit(resetState);
@@ -188,6 +192,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
         <label className="flex-start mt-2 flex w-full flex-col text-base">
           Date d&apos;expiration
           <DatePicker
+            displayError
             value={date}
             onChange={(date) => {
               setDate(date);

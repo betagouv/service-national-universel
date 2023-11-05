@@ -180,7 +180,7 @@ export default function StepEligibilite() {
                   </span>
                 </p>
 
-                <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, school: {} })} toggled={!data.isAbroad} />
+                <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, school: {}, zip: undefined })} toggled={!data.isAbroad} />
                 {error.isAbroad ? <span className="text-sm text-red-500">{error.isAbroad}</span> : null}
               </div>
 

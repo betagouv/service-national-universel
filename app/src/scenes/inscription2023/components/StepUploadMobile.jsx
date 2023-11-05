@@ -193,6 +193,7 @@ function ExpirationDate({ corrections, category, young, date, setDate, setHasCha
         <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
       </div>
       <DatePicker
+        displayError
         value={date}
         onChange={(date) => {
           setDate(date);

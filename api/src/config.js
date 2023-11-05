@@ -50,7 +50,6 @@ const JVA_TOKEN = process.env.JVA_TOKEN || "";
 const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
 const REDIS_URL = process.env.REDIS_URL || "";
-const TOKENLOADTEST = process.env.TOKENLOADTEST || "";
 
 module.exports = {
   LOCAL,
@@ -92,7 +91,6 @@ module.exports = {
   API_ANALYTICS_ENDPOINT,
   API_ANALYTICS_API_KEY,
   REDIS_URL,
-  TOKENLOADTEST,
 };
 
 function getEnvironment() {

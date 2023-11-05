@@ -92,7 +92,7 @@ export default function StepConfirm() {
           <Details title="Ville" value={young.city} />
           {young.foreignAddress && (
             <>
-              <div className="text-center text-sm text-[#666666]">L&apos;adresse affichée ci-dessus est celle de votre hébergeur. Votre adresse à l&apos;étranger :</div>
+              <div className="text-center text-base text-[#666666]">L&apos;adresse affichée ci-dessus est celle de votre hébergeur. Votre adresse à l&apos;étranger :</div>
               <Details title="Adresse à l'étranger" value={young.foreignAddress} />
               <Details title="Code postal à l'étranger" value={young.foreignZip} />
               <Details title="Ville à l'étranger" value={young.foreignCity} />

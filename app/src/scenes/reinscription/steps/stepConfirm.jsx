@@ -73,36 +73,36 @@ export default function StepConfirm() {
           </Link>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
+        <div className="space-y-2 text-base">
+          <div className="flex items-center justify-between">
             <p className="text-gray-500">Niveau de scolarité&nbsp;:</p>
             <p className="text-right">{translateGrade(data.scolarity)}</p>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between">
             <p className="text-gray-500">Date de naissance&nbsp;:</p>
             <p className="text-right">{formatDateFR(data.birthDate)}</p>
           </div>
           {data.school ? (
             <>
               {data.school?.country && (
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between">
                   <p className="text-gray-500">Pays de l&apos;établissement&nbsp;:</p>
                   <p className="text-right capitalize">{data.school?.country?.toLowerCase()}</p>
                 </div>
               )}
               {data.school?.city && (
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between">
                   <p className="text-gray-500">Commune de l&apos;établissement&nbsp;:</p>
                   <p className="text-right">{data.school.city}</p>
                 </div>
               )}
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between">
                 <p className="text-gray-500">Nom de l&apos;établissement&nbsp;:</p>
                 <p className="truncate text-right">{data.school.fullName}</p>
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between">
               <p className="text-gray-500">Code postal&nbsp;:</p>
               <p className="text-right">{data.zip}</p>
             </div>
