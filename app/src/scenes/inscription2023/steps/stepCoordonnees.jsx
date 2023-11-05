@@ -482,7 +482,7 @@ export default function StepCoordonnees() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <DSFRContainer title="Mon profil volontaire" supportLink={supportLink}>
+      <DSFRContainer title="Mon profil volontaire" supportLink={supportLink} supportEvent="Phase0/aide inscription - coordonnees">
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect

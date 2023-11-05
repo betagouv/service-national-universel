@@ -100,6 +100,7 @@ function ConsentementForm({ young, token, step, parentId }) {
     if (errors) {
       setErrors(errors);
     } else if (await saveData()) {
+      plausibleEvent("Phase0/CTA representant legal - valider");
       done();
     }
     setSaving(false);

@@ -78,7 +78,7 @@ export default function StepDocuments() {
   return (
     <>
       <Navbar />
-      <DSFRContainer title="Ma pièce d’identité" supportLink={supportLink}>
+      <DSFRContainer title="Ma pièce d’identité" supportLink={supportLink} supportEvent="Phase0/aide inscription - CI">
         <div className="my-4">
           {corrections?.map((e) => (
             <ErrorMessage key={e._id}>

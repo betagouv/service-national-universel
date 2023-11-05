@@ -256,7 +256,7 @@ export default function StepRepresentants() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <DSFRContainer title="Mes représentants légaux" supportLink={supportLink}>
+      <DSFRContainer title="Mes représentants légaux" supportLink={supportLink} supportEvent="Phase0/aide inscription - rep leg">
         <div className="mt-2 text-sm text-[#666666]">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
         <hr className="my-4 h-px border-0 bg-gray-200" />
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}

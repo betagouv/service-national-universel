@@ -13,6 +13,7 @@ import Check from "../components/Check";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import { supportURL } from "../../../config";
+import plausibleEvent from "@/services/plausible";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
@@ -36,6 +37,7 @@ export default function Verification({ step, parentId }) {
       setError(null);
       if (certified) {
         if (await saveParentCertified()) {
+          plausibleEvent("Phase0/CTA representant legal - continuer etape 2");
           history.push(`/representants-legaux/consentement?token=${token}`);
         }
       } else {

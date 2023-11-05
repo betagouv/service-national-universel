@@ -58,7 +58,10 @@ export default function StepConsentements() {
   return (
     <>
       <Navbar />
-      <DSFRContainer title="Apporter mon consentement" supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`}>
+      <DSFRContainer
+        title="Apporter mon consentement"
+        supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`}
+        supportEvent="Phase0/aide inscription - consentement">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
         <div className="mt-4 flex flex-col gap-4 pb-2">
           <div className="text-base text-[#161616]">
