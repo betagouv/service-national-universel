@@ -369,7 +369,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let value = { informationAccuracy: "true" };
-    if (young.status === "REINSCRIPTION") {
+    if (young.hasStartedReinscription) {
       value.reinscriptionStep2023 = STEPS2023.WAITING_CONSENT;
     } else {
       value.inscriptionStep2023 = STEPS2023.WAITING_CONSENT;
