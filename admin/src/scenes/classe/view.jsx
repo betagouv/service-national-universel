@@ -5,6 +5,7 @@ import { HiOutlinePencil } from "react-icons/hi";
 import { BsSend, BsTrash3 } from "react-icons/bs";
 import { VscCopy } from "react-icons/vsc";
 import ClasseIcon from "@/components/drawer/icons/Classe";
+import { Link } from "react-router-dom";
 
 export default function view() {
   const [form, setForm] = useState({ name: "CAP vert" });
@@ -15,7 +16,7 @@ export default function view() {
       <Header
         title={form.name}
         titleComponent={<Badge className="mx-4" title="En cours d'inscription" status="inProgress" />}
-        breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", href: "/mes-classes" }, { title: "Fiche de la classe" }]}
+        breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
         actions={[<Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />]}
       />
       <Container title="Informations générales" actions={[<Button key="update" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" />]}>
@@ -53,9 +54,9 @@ export default function view() {
       <Container
         title="Suivi de la classe"
         actions={[
-          <a key="list-students" href="/mes-eleves">
+          <Link key="list-students" to="/mes-eleves">
             <Button type="tertiary" title="Voir les élèves" />
-          </a>,
+          </Link>,
         ]}>
         <div className="flex items-stretch justify-between">
           <table className="flex-1 shrink-0">

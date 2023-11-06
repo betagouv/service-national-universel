@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import { HiChevronRight } from "react-icons/hi";
 
 type OwnProps = {
@@ -6,7 +7,7 @@ type OwnProps = {
   className?: string;
   breadcrumb?: Array<{
     title: string | React.ReactNode;
-    href: string;
+    to: string;
   }>;
   titleComponent?: React.ReactNode;
   children?: React.ReactNode;
@@ -33,13 +34,13 @@ export default function Header({
                 className="flex items-center justify-center"
               >
                 <div className="flex text-xs leading-[20px] text-ds-gray-400">
-                  {item.href ? (
-                    <a
-                      href={item.href}
+                  {item.to ? (
+                    <NavLink
+                      to={item.to}
                       className="leading-[20px] hover:text-ds-gray-400 hover:underline"
                     >
                       {item.title}
-                    </a>
+                    </NavLink>
                   ) : (
                     <div className="leading-[20px]">{item.title}</div>
                   )}
