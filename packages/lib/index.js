@@ -138,6 +138,11 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
   if (statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return true;
   return false;
 };
+
+const isYoungInReinscription = (young) => {
+  return young.hasStartedReinscription || false;
+}
+
 const formatPhoneNumberFR = (tel) => {
   if (!tel) return "";
   const regex = /^((?:(?:\+|00)33|0)\s*[1-9])((?:[\s.-]*\d{2}){4})$/;
@@ -175,6 +180,7 @@ export {
   canUpdateYoungStatus,
   canUserUpdateYoungStatus,
   youngCanChangeSession,
+  isYoungInReinscription,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
   htmlCleaner,

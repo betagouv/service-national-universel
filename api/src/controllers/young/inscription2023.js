@@ -10,7 +10,16 @@ const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName, validateParents, representantSchema } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
-const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES, isInRuralArea, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone, getCohortNames } = require("snu-lib");
+const {
+  canUpdateYoungStatus,
+  YOUNG_STATUS,
+  SENDINBLUE_TEMPLATES,
+  isInRuralArea,
+  PHONE_ZONES_NAMES_ARR,
+  formatPhoneNumberFromPhoneZone,
+  getCohortNames,
+  isYoungInReinscription,
+} = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
 const { getQPV, getDensity } = require("../../geo");
@@ -226,7 +235,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     }
 
     if (type === "next") {
-      if (young.status === "REINSCRIPTION") {
+      if (isYoungInReinscription(young)) {
         value.reinscriptionStep2023 = STEPS2023.CONSENTEMENTS;
       } else {
         value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
@@ -297,7 +306,7 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
       consentment: "true",
     });
 
-    if (young.status === "REINSCRIPTION") {
+    if (isYoungInReinscription(young)) {
       young.set({ reinscriptionStep2023: STEPS2023.REPRESENTANTS });
     } else {
       young.set({ inscriptionStep2023: STEPS2023.REPRESENTANTS });
@@ -339,7 +348,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     }
 
     if (type === "next") {
-      if (young.status === "REINSCRIPTION") {
+      if (isYoungInReinscription(young)) {
         value.reinscriptionStep2023 = STEPS2023.DOCUMENTS;
       } else {
         value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
@@ -369,7 +378,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let value = { informationAccuracy: "true" };
-    if (young.hasStartedReinscription) {
+    if (isYoungInReinscription(young)) {
       value.reinscriptionStep2023 = STEPS2023.WAITING_CONSENT;
     } else {
       value.inscriptionStep2023 = STEPS2023.WAITING_CONSENT;
@@ -485,7 +494,7 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       const cohort = await CohortObject.findOne({ name: young.cohort });
       const CNIFileNotValidOnStart = value.date < new Date(cohort.dateStart);
       young.set({ latestCNIFileExpirationDate: value.date, latestCNIFileCategory: value.latestCNIFileCategory, CNIFileNotValidOnStart });
-      if (young.status === "REINSCRIPTION") {
+      if (isYoungInReinscription(young)) {
         young.set({ reinscriptionStep2023: STEPS2023.CONFIRM });
       } else {
         young.set({ inscriptionStep2023: STEPS2023.CONFIRM });
@@ -563,7 +572,7 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (young.reinscriptionStep2023 === "WAITING_CONSENT") {
+    if (isYoungInReinscription(young)) {
       young.set({ reinscriptionStep2023: STEPS2023.DONE });
     } else {
       young.set({ inscriptionStep2023: STEPS2023.DONE });
@@ -582,7 +591,12 @@ router.put("/goToInscriptionAgain", passport.authenticate("young", { session: fa
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ inscriptionStep2023: STEPS2023.CONFIRM });
+    if (isYoungInReinscription(young)) {
+      young.set({ reinscriptionStep2023: STEPS2023.CONFIRM });
+    } else {
+      young.set({ inscriptionStep2023: STEPS2023.CONFIRM });
+    }
+
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
