@@ -39,6 +39,7 @@ import Institution from "./scenes/institution";
 import Classe from "./scenes/classe";
 import Student from "./scenes/student";
 import Contact from "./scenes/contactCLE";
+import Signup from "./scenes/signup";
 
 //DashboardV2
 import DashboardHeadCenterV2 from "./scenes/dashboardV2/head-center";
@@ -84,6 +85,7 @@ export default function App() {
             <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
             <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
             <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+            <SentryRoute path="/creer-mon-compte" component={Signup} />
             {/* Authentification accessoire */}
             <SentryRoute path="/auth" component={Auth} />
             {/* Authentification nécessaire */}
