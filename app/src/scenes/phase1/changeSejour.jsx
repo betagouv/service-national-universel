@@ -63,6 +63,10 @@ export default function ChangeSejour() {
   const onConfirmer = async () => {
     try {
       if (newSejour && motif && messageTextArea) {
+        if(!young?.department){
+          toastr.error("Il n'y a pas de département pour ce jeune")
+          throw new Error("Department is undefined")
+        }
         const res = await api.get(`/inscription-goal/${newSejour}/department/${young.department}/reached`);
         if (!res.ok) throw new Error(res);
         const isGoalReached = res.data;
