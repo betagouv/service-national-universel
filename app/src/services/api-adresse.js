@@ -123,7 +123,8 @@ function getDepartmentAndRegionFromContext(context) {
 async function getAddressOptions(query, signal) {
   // Call BAN API
   const res = await apiAdress(query, { limit: 10 }, { signal });
-  if (res?.error) return [null, res.error];
+  if (!res) return [[], null];
+  if (res.error) return [null, res.error];
   if (!res.features?.length) return [[], null];
 
   // Format and group options
