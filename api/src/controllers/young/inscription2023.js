@@ -572,7 +572,7 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (isYoungInReinscription(young)) {
+    if (young.reinscriptionStep2023 === "WAITING_CONSENT") {
       young.set({ reinscriptionStep2023: STEPS2023.DONE });
     } else {
       young.set({ inscriptionStep2023: STEPS2023.DONE });

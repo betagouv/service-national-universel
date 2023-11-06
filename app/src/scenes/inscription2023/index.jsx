@@ -34,12 +34,15 @@ function renderStep(step) {
   return <StepCoordonnees />;
 }
 
-const Step = ({ young: { status, reinscriptionStep2023, inscriptionStep2023 } }) => {
+const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscriptionStep2023 } }) => {
   const { step } = useParams();
+  console.log("🚀 ~ file: index.jsx:39 ~ Step ~ step:", step);
 
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
+  console.log("🚀 ~ file: index.jsx:42 ~ Step ~ requestedStep:", requestedStep);
 
-  const eligibleStep = status === "REINSCRIPTION" ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
+  const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
+  console.log("🚀 ~ file: index.jsx:45 ~ Step ~ eligibleStep:", eligibleStep);
 
   if (!requestedStep && eligibleStep) {
     return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
