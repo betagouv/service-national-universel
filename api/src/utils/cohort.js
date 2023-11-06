@@ -44,7 +44,7 @@ async function getAllSessions(young) {
   const sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
   const availableSessions = await getFilteredSessions(young);
   for (let session of sessionsWithPlaces) {
-    session.isEligible = availableSessions.includes(session);
+    session.isEligible = availableSessions.find((e) => e.name === session.name) ? true : false;
   }
   return sessionsWithPlaces;
 }
