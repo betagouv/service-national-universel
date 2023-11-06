@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { Page, Header, Container, Button, Badge, DropdownButton } from "@snu/ds/admin";
-import { HiPlus } from "react-icons/hi";
+import { HiPlus, HiUsers } from "react-icons/hi";
 import ClasseIcon from "@/components/drawer/icons/Classe";
 import StudentIcon from "@/components/drawer/icons/Student";
-import { useHistory } from "react-router-dom";
-import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
+import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { useSelector } from "react-redux";
-import api from "../../services/api";
-import { ROLES, translate, translateVisibilty } from "../../utils";
-import DateFilter from "../../components/filters-system-v2/components/customComponent/DateFilter";
+import api from "@/services/api";
+import { ROLES, translate, translateVisibilty } from "@/utils";
+import DateFilter from "@/components/filters-system-v2/components/customComponent/DateFilter";
 import { formatDateFR, getDepartmentNumber, translateApplication, translateMission, translateSource, MISSION_STATUS, getAge } from "snu-lib";
-import { HiUsers } from "react-icons/hi";
 import { IoFlashOutline } from "react-icons/io5";
 
 export default function list() {
@@ -248,7 +246,7 @@ export default function list() {
         breadcrumb={[{ title: <StudentIcon className="scale-[65%]" /> }, { title: "Mes élèves" }]}
         actions={[
           <Button key="empty" title={`(Voir template ${classes ? "vide" : "liste"})`} type="secondary" onClick={() => setClasses(classes ? undefined : [])} />,
-          <Link key="list" href="/mes-classes/create">
+          <Link key="list" to="/mes-classes/create">
             <Button leftIcon={<ClasseIcon />} title="Créer une classe" className="ml-4" />
           </Link>,
         ]}
@@ -258,7 +256,9 @@ export default function list() {
           <div className="py-6 bg-gray-50">
             <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore créé de classe engagée</div>
             <div className="flex items-start justify-center h-[136px]">
-              <Button type="wired" leftIcon={<HiPlus />} title="Créer une première classe engagée" />
+              <Link to="/mes-classes/create">
+                <Button type="wired" leftIcon={<HiPlus />} title="Créer une première classe engagée" />
+              </Link>
             </div>
           </div>
         </Container>
@@ -375,7 +375,8 @@ const Hit = ({ hit }) => {
           title={<IoFlashOutline size={20} />}
           mode={"badge"}
           rightIcon={false}
-          buttonClassNames={"rounded-[50%] !p-0 !w-10 !h-10 border-none hover:bg-white hover:text-blue-600"}
+          buttonClassName={"rounded-[50%] !p-0 !w-10 !h-10 border-none hover:bg-white hover:text-blue-600"}
+          position="right"
           optionsGroup={[
             {
               key: "actions",
