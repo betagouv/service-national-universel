@@ -1,9 +1,9 @@
 import React from "react";
-import { HiOutlineChevronDown } from "react-icons/hi";
+import { Input } from "@codegouvfr/react-dsfr/Input";
+import { Select } from "@codegouvfr/react-dsfr/Select";
 
 import { classNames } from "../../utils";
-import { PHONE_ZONES } from "../../common";
-import { ErrorIcon, ErrorMessage, getFormBaseClass } from "./InputBase";
+import { PHONE_ZONES } from '../../common';
 
 type OwnProps = {
   name: string;
@@ -32,19 +32,6 @@ export default function InputPhone({
   readOnly,
   error,
 }: OwnProps) {
-  const {
-    baseClass,
-    focusActive,
-    bgColorClass,
-    borderColorClass,
-    isErrorActive,
-  } = getFormBaseClass({
-    disabled,
-    active,
-    readOnly,
-    error,
-  });
-
   const selectRef = React.useRef<HTMLSelectElement>(null);
 
   const handleChangePhoneZone = (
@@ -59,35 +46,30 @@ export default function InputPhone({
 
   return (
     <div className="flex flex-col gap-2">
-      <div
-        className={classNames(
-          baseClass,
-          focusActive,
-          bgColorClass,
-          borderColorClass,
-          "px-[13px] py-[9px] h-[54px]"
-        )}
-      >
+      <div>
         <div className="flex flex-1 flex-col justify-center">
           {label && (
             <label
               htmlFor={name}
               className={classNames(
-                error ? "text-red-500" : "text-gray-500",
-                "m-0  text-xs font-normal leading-4"
+                error ? "text-red-500" : "text-[var(--text-label-grey)]",
+                "mb-0 text-base font-normal leading-6"
               )}
             >
               {label}
             </label>
           )}
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <select
+          <div className="flex ">
+            <div className="flex ">
+              <Select
+                label=""
                 disabled={disabled || readOnly}
-                className="appearance-none w-20 text-sm !text-gray-500 font-normal bg-transparent leading-5 :disabled:text-gray-500 disabled:opacity-100"
-                ref={selectRef}
-                onChange={handleChangePhoneZone}
-                value={zoneValue}
+                nativeSelectProps={{
+                  className: "!my-0",
+                  ref: selectRef,
+                  onChange: handleChangePhoneZone,
+                  value: zoneValue,
+                }}
               >
                 {!zoneValue && (
                   <option value="" className="flex gap-1">
@@ -99,28 +81,28 @@ export default function InputPhone({
                     {phoneZone.code} {phoneZone.shortcut}
                   </option>
                 ))}
-              </select>
-              <div className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 pointer-events-none">
-                <HiOutlineChevronDown className="text-gray-500 w-5 h-5 leading-5" />
-              </div>
+              </Select>
             </div>
-            <div className="h-5 w-[1px] bg-gray-200" />
-            <input
-              type="text"
-              name={name}
-              id={name}
-              className={getInputClass({ label })}
-              placeholder={placeholder ? placeholder : "Choisissez une zone"}
+            {/* <div className="h-6 my-auto w-[1px] bg-gray-200" /> */}
+            <Input
+              label=""
               disabled={disabled}
-              value={value}
-              readOnly={readOnly}
-              onChange={handleChangeValue}
+              nativeInputProps={{
+                inputMode: "tel",
+                pattern: "[0-9]*",
+                type: "number",
+                className: getInputClass({ label }),
+                name,
+                id: name,
+                placeholder: placeholder ? placeholder : "612345678",
+                onChange: handleChangeValue,
+                value: value,
+                readOnly: readOnly,
+              }}
             />
           </div>
         </div>
-        {isErrorActive && <ErrorIcon />}
       </div>
-      {isErrorActive && <ErrorMessage error={error} />}
     </div>
   );
 }
