@@ -14,6 +14,7 @@
     "build:dev": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode development",
     "preview": "vite preview",
     "postinstall": "copy-dsfr-to-public",
+    "prestart": "copy-dsfr-to-public && only-include-used-icons",
     "predev": "only-include-used-icons",
     "prebuild": "only-include-used-icons",
     "lint": "eslint src --ext .js,.jsx",

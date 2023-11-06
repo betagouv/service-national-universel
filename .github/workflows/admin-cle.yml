@@ -36,11 +36,6 @@ jobs:
           npm run build -w packages/ds
           rm packages/ds/.gitignore
 
-      - name: Copy DSFR
-        continue-on-error: false
-        run: |
-          npm run postinstall -w admin
-
       - name: Create SSH key
         run: |
           mkdir -p ~/.ssh/
