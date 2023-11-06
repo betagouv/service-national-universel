@@ -384,7 +384,8 @@ export default function Create() {
           } else {
             setEgibilityError("");
           }
-          setCohorts(res.data);
+
+          setCohorts(res.data.filter((c) => !["Juin 2024 - 1", "Mars 2024 - La Réunion"].includes(c.name)));
         } catch (e) {
           capture(e);
 
