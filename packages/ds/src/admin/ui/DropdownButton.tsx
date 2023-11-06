@@ -25,6 +25,11 @@ type TStatus =
   | "secondary"
   | "primary";
 
+enum EPosition {
+  Left = "left",
+  Right = "right",
+}
+
 type OwnProps = {
   title: string;
   optionsGroup: Array<{
@@ -38,7 +43,8 @@ type OwnProps = {
   type?: "primary" | "secondary" | "tertiary";
   disabled?: boolean;
   icon?: React.ReactNode;
-  buttonClassNames?: string;
+  buttonClassName?: string;
+  position?: EPosition;
 };
 
 export default function DropdownButton({
@@ -50,7 +56,8 @@ export default function DropdownButton({
   type = "primary",
   disabled = false,
   icon,
-  buttonClassNames = "",
+  buttonClassName = "",
+  position = EPosition.Left,
 }: OwnProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -90,14 +97,14 @@ export default function DropdownButton({
             rightIcon={
               rightIcon && <HiChevronDown size={20} className="mt-0.5" />
             }
-            className={buttonClassNames}
+            className={buttonClassName}
             onClick={() => setOpen((e) => !e)}
           />
         ) : (
           <Button
             title={loading ? loadingLabel : title}
             type={type}
-            className={buttonClassNames}
+            className={buttonClassName}
             leftIcon={icon}
             rightIcon={
               rightIcon && <HiChevronDown size={20} className="mt-0.5" />
@@ -108,7 +115,7 @@ export default function DropdownButton({
         )}
 
         {/* display options */}
-        <div className={getDivClass({ open })}>
+        <div className={getDivClass({ open, position })}>
           {optionsGroup.map((group, i) => (
             <div
               key={group.key || i}
@@ -138,9 +145,9 @@ export default function DropdownButton({
   );
 }
 
-const getDivClass = ({ open }: { open?: boolean }) => {
+const getDivClass = ({ open, position }: { open?: boolean, position: EPosition }) => {
   const baseClass =
-    "absolute top-[55px] min-w-[250px] rounded-lg bg-white transition left-0 border-3 z-50 overflow-hidden shadow-md border border-gray-100";
+    `absolute top-[55px] min-w-[250px] rounded-lg bg-white transition ${position === EPosition.Left ? "left-0" : "right-0"} border-3 z-50 overflow-hidden shadow-md border border-gray-100`;
   if (open) {
     return classNames(baseClass, "block");
   } else {
