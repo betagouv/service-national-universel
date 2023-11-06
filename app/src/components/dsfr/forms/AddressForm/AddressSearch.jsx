@@ -46,8 +46,9 @@ export default function AddressSearch({ getOptions, updateData, error }) {
     controllerRef.current = controller;
 
     const [options, error] = await getOptions(e.target.value, controller.signal);
-    if (error) return toastr.error("Erreur", `Une erreur est survenue lors de la recherche d'adresse : ${error || error.message}`, { timeOut: 10_000 });
-    return setOptions(options);
+    if (error) return toastr.error("Erreur", `Une erreur est survenue lors de la recherche d'adresse.`, { timeOut: 10_000 });
+    if (options) return setOptions(options);
+    return;
   };
 
   const handleSelect = (option) => {
