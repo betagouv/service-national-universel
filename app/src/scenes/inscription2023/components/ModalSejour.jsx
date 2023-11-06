@@ -44,7 +44,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
   const onSubmit = async (cohort) => {
     setLoading(true);
     try {
-      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort&timeZoneOffset=${new Date().getTimezoneOffset()}`, { cohort });
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort?timeZoneOffset=${new Date().getTimezoneOffset()}`, { cohort });
       if (!ok) {
         setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
         setLoading(false);

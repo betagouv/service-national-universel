@@ -97,7 +97,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
   async function handleChangeCohort() {
     try {
       if (!message) return toastr.error("Veuillez indiquer un message");
-      await api.put(`/referent/young/${young._id}/change-cohort&timeZoneOffset=${new Date().getTimezoneOffset()}`, { cohort: newCohort.name, message, cohortChangeReason: motif });
+      await api.put(`/referent/young/${young._id}/change-cohort?timeZoneOffset=${new Date().getTimezoneOffset()}`, { cohort: newCohort.name, message, cohortChangeReason: motif });
       if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
       if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
       await onChange();
