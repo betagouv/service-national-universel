@@ -120,7 +120,8 @@ export default function Index() {
   }, [JSON.stringify(selectedFilters)]);
 
   useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts);
+    //regex to get all cohort 2024
+    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
     setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
   }, []);
 
