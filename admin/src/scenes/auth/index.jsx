@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Switch, Redirect, useLocation } from "react-router-dom";
-import plausibleEvent from "@/services/plausible";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
@@ -36,9 +35,7 @@ export default function AuthIndex() {
           return setLoading(false);
         }
         if (res.token) api.setToken(res.token);
-        if (res.user) {
-          dispatch(setUser(res.user));
-        }
+        if (res.user) dispatch(setUser(res.user));
       } catch (e) {
         console.log(e);
       }
