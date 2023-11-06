@@ -44,7 +44,7 @@ async function getAllSessions(young) {
   const sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
   const availableSessions = await getFilteredSessions(young);
   for (let session of sessionsWithPlaces) {
-    session.isEligible = availableSessions.includes(session);
+    session.isEligible = availableSessions.some((e) => e.name === session.name);
   }
   return sessionsWithPlaces;
 }
@@ -87,6 +87,7 @@ async function getPlaces(sessions, region) {
       session.goal = goals.find(({ _id }) => _id === session.name)?.total;
       session.goalReached = session.goal <= 0 ? true : session.numberOfCandidates + session.numberOfValidated >= session.goal * session.buffer;
       session.isFull = session.goal <= 0 ? true : session.numberOfValidated >= session.goal;
+      session.isEligible = sessions.some((e) => e.name === session.name);
     }
   }
 
