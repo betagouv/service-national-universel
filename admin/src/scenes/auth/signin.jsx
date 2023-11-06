@@ -4,6 +4,7 @@ import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
+import plausibleEvent from "@/services/plausible";
 import { maintenance } from "../../config";
 import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
@@ -59,10 +60,12 @@ export default function Signin() {
                   try {
                     const { user, token, code } = await api.post(`/referent/signin`, { email, password });
                     if (code === "2FA_REQUIRED") {
+                      plausibleEvent("2FA demandée");
                       return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
                     }
                     if (token) api.setToken(token);
                     if (user) {
+                      plausibleEvent("Connexion réussie");
                       dispatch(setUser(user));
                       if (isFeatureEnabled(FEATURES_NAME.FLEXIBLE_REDIRECT, undefined, environment) ? redirect : isValidRedirectUrl(redirect))
                         return (window.location.href = redirect);

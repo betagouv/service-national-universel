@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import plausibleEvent from "@/services/plausible";
 import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/dsfr/forms/input";
 import { setYoung } from "../../../redux/auth/actions";
@@ -41,13 +42,15 @@ export default function Signin() {
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {
+        plausibleEvent("2FA/ Connexion réussie");
         dispatch(setYoung(response.user));
-        if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
-        if (redirect) {
+        const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
+        if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
           toastr.error("Url de redirection invalide : " + redirect);
           return history.push("/");
         }
+        return (window.location.href = redirect);
       }
     } catch (e) {
       setLoading(false);
