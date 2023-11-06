@@ -197,7 +197,6 @@ function shouldForceRedirectToReinscription(young) {
   );
 }
 
-
 function hasAccessToReinscription(young) {
   if (shouldForceRedirectToReinscription(young)) return true;
 
@@ -220,7 +219,9 @@ function shouldForceRedirectToInscription(young, isInscriptionModificationOpen =
   return (
     young.cohort !== "à venir" &&
     ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
-      (isInscriptionModificationOpen && young.status === YOUNG_STATUS.WAITING_VALIDATION && ((young.hasStartedReinscription && young.reinscriptionStep !== "DONE") || young.inscriptionStep2023 !== "DONE")))
+      (isInscriptionModificationOpen &&
+        young.status === YOUNG_STATUS.WAITING_VALIDATION &&
+        ((young.hasStartedReinscription && young.reinscriptionStep2023 !== "DONE") || (!young.hasStartedReinscription && young.inscriptionStep2023 !== "DONE"))))
   );
 }
 

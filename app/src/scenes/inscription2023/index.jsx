@@ -21,6 +21,7 @@ import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
 import { environment } from "../../config";
 import { getCohort } from "@/utils/cohorts";
+import { RiContactsBookLine } from "react-icons/ri";
 
 function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
@@ -102,12 +103,12 @@ export default function Index() {
   }
 
   //Il a fini son inscription
-  if (young.inscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION" && !young.reinscriptionStep2023) {
+  if (young.inscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION" && !young.hasStartedReinscription) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
   //il a fini sa re-inscription
-  if (young.reinscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION") {
+  if (young.reinscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION" && young.hasStartedReinscription) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
