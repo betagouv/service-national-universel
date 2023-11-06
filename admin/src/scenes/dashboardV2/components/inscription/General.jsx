@@ -33,7 +33,8 @@ export default function General({ selectedFilters, setSelectedFilters }) {
     : academyList.map((a) => ({ key: a, label: a }));
 
   useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts);
+    //regex to get all cohort 2024
+    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
     setSelectedFilters({ cohort: cohortsFilters });
   }, []);
 
