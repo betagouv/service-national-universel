@@ -43,7 +43,7 @@ import VolontairesResponsible from "./scenes/volontaires-responsible";
 import Institution from "./scenes/institution";
 import Classe from "./scenes/classe";
 import Student from "./scenes/student";
-import Contact from "./scenes/contactCLE";
+import Contact from "./scenes/contact";
 import Signup from "./scenes/signup";
 
 //DashboardV2
