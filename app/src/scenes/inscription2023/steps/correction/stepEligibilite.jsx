@@ -190,7 +190,7 @@ export default function StepEligibilite() {
       const res = await api.put("/young/inscription2023/eligibilite", updates);
       if (!res.ok) throw new Error(translate(code));
 
-      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort`, { cohort });
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort&timeZoneOffset=${new Date().getTimezoneOffset()}`, { cohort });
       if (!ok) throw new Error(translate(code));
       dispatch(setYoung(responseData));
       toastr.success("La correction a été prise en compte");
