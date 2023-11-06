@@ -38,7 +38,7 @@ export default function AddressSearch({ getOptions, updateData, error }) {
 
   const handleChangeQuery = async (e) => {
     setQuery(e.target.value);
-    if (e.target.value.length < 3) return;
+    if (e.target.value.trim().length < 3) return;
 
     // Abort previous request and refresh abort controller
     if (controllerRef.current) controllerRef.current.abort();
@@ -69,7 +69,7 @@ export default function AddressSearch({ getOptions, updateData, error }) {
       </label>
 
       <div className="relative">
-        {query?.length > 2 && (
+        {query?.trim().length > 2 && (
           <div className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
             {options.length ? (
               <AddressDropdown optionGroups={options} handleSelect={handleSelect} />
