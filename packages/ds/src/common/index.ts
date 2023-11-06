@@ -1,3 +1,7 @@
-import ProfilePic from "./ProfilePic";
+// Constants
+import PHONE_ZONES from "./constants/PhoneZones";
 
-export { ProfilePic };
+// UI
+import ProfilePic from "./ui/ProfilePic";
+
+export { PHONE_ZONES, ProfilePic };

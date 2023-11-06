@@ -1,7 +1,7 @@
 import React from "react";
 import { BiCopy } from "react-icons/bi";
 import { BsCheck2, BsChevronDown } from "react-icons/bs";
-import { GoPrimitiveDot } from "react-icons/go";
+import { BsCircleFill } from "react-icons/bs";
 import { HiCheckCircle } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 import Bell from "../../../assets/icons/Bell";
@@ -133,7 +133,7 @@ export default function CardEquivalence({ young, equivalence }) {
                           className="flex min-w-[200px] cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
                           onClick={() => setOpen((e) => !e)}>
                           <div className="flex items-center gap-2">
-                            <GoPrimitiveDot className={theme[equivalence.status]} />
+                            <BsCircleFill className={theme[equivalence.status]} />
                             <span className="text-sm font-normal leading-5">{translate(equivalence?.status)}</span>
                           </div>
                           <ChevronDown className="ml-2 cursor-pointer text-gray-400" />
