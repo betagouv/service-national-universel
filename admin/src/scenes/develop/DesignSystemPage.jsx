@@ -183,8 +183,8 @@ export default function DesignSystemPage() {
       <Header
         title="Design System"
         breadcrumb={[
-          { href: "/", title: <HiOutlineCommandLine size={20} /> },
-          { href: "/design-system", title: "Design System" },
+          { to: "/", title: <HiOutlineCommandLine size={20} /> },
+          { to: "/design-system", title: "Design System" },
         ]}
         actions={[<Button key="header-action-1" title={"Click me"} />]}
       />
@@ -325,7 +325,7 @@ export default function DesignSystemPage() {
             optionsGroup={selectTest2}
           />
           <Badge title={<HiPencil size={20} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
-          <DropdownButton title={StatusTitle} status={StatusSelect} buttonClassNames={SelectClassName} mode={"badge"} optionsGroup={selectTestStatus} />
+          <DropdownButton title={StatusTitle} status={StatusSelect} buttonClassName={SelectClassName} mode={"badge"} optionsGroup={selectTestStatus} />
           <Badge title={"Désistée"} status={"CANCEL"} />
           <Badge title={"Refusée"} status={"REFUSED"} />
           <Badge title={"En attente de validation"} status={"WAITING_VALIDATION"} />

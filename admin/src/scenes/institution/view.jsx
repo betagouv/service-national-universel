@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { ProfilePic } from "@snu/ds";
-import { Page, Header, Container, Button, InputText, ModalConfirmation, Label } from "@snu/ds/admin";
+import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
 import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone } from "react-icons/hi";
 import { VscCopy } from "react-icons/vsc";
 import InstitutionIcon from "@/components/drawer/icons/Institution";
@@ -17,6 +17,8 @@ export default function view() {
   const [modalSousChef, setModalSousChef] = useState(false);
   const [modalCoordinator, setModalCoordinator] = useState(false);
 
+  const history = useHistory();
+
   return (
     <Page>
       <Header
@@ -31,8 +33,8 @@ export default function view() {
       <Container
         title="Contacts"
         actions={[
-          <Link key="list-users" to="/utilisateurs">
-            <Button type="tertiary" title="Voir mon équipe" />
+          <Link key="list-users" to="/mes-contacts">
+            <Button type="tertiary" title="Voir mes contacts" />
           </Link>,
         ]}>
         <div className="flex items-stretch justify-between">
@@ -73,9 +75,9 @@ export default function view() {
           <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
           <div className="flex-1 shrink-0">
             <Label title="Type d’établissement" tooltip="This is a test and need to be replaced." />
-            <InputText className="mb-4" value="Lycée professionnel" />
+            <Select className="mb-4" />
             <Label title="Filière" tooltip="This is a test and need to be replaced." />
-            <InputText className="mb-4" value="Autres" />
+            <Select className="mb-4" />
           </div>
         </div>
       </Container>
@@ -88,8 +90,8 @@ export default function view() {
         title="Bonjour Estelle PÉPIN !"
         text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un référent d’établissement."
         actions={[
-          { title: "Créer une classe engagée", leftIcon: <ClasseIcon />, onClick: () => (window.location.href = "/mes-classes/create") },
-          { title: "Ajouter un coordinateur", leftIcon: <HiPlus />, onClick: () => console.info("Ajouter un coordinateur") },
+          { title: "Créer une classe engagée", leftIcon: <ClasseIcon />, onClick: () => history.push("/mes-classes/create") },
+          { title: "Ajouter un coordinateur", leftIcon: <HiPlus />, onClick: () => setModalCoordinator(true) },
         ]}
       />
       {/* First login INSTITUTION_SOUS_CHEF */}
@@ -101,7 +103,7 @@ export default function view() {
         text="Bienvenue sur votre compte SNU en tant que Référent de classe. Vous pouvez compléter la fiche de votre classe en renseignant toutes les informations."
         actions={[
           { title: "Fermer", isCancel: true },
-          { title: "Compléter les informations", leftIcon: <ClasseIcon />, onClick: () => console.info("Compléter les informations") },
+          { title: "Compléter les informations", leftIcon: <ClasseIcon />, onClick: () => history.push("/mes-classes/1") },
         ]}
       />
       {/* Invite COORDINATOR */}
