@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { Page, Header, Container, Button, Badge } from "@snu/ds/admin";
-import { HiPlus } from "react-icons/hi";
+import { HiPlus, HiUsers } from "react-icons/hi";
 import ClasseIcon from "@/components/drawer/icons/Classe";
-import { useHistory } from "react-router-dom";
-import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
+import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { useSelector } from "react-redux";
-import api from "../../services/api";
-import { ROLES, translate, translateVisibilty } from "../../utils";
-import DateFilter from "../../components/filters-system-v2/components/customComponent/DateFilter";
+import api from "@/services/api";
+import { ROLES, translate, translateVisibilty } from "@/utils";
+import DateFilter from "@/components/filters-system-v2/components/customComponent/DateFilter";
 import { formatDateFR, getDepartmentNumber, translateApplication, translateMission, translateSource, MISSION_STATUS } from "snu-lib";
-import { HiUsers } from "react-icons/hi";
 
 export default function list() {
   const [classes, setClasses] = useState(true);
@@ -230,7 +228,9 @@ export default function list() {
           <div className="py-6 bg-gray-50">
             <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore créé de classe engagée</div>
             <div className="flex items-start justify-center h-[136px]">
-              <Button type="wired" leftIcon={<HiPlus />} title="Créer une première classe engagée" />
+              <Link to="/mes-classes/create">
+                <Button type="wired" leftIcon={<HiPlus />} title="Créer une première classe engagée" />
+              </Link>
             </div>
           </div>
         </Container>
@@ -318,7 +318,7 @@ const Hit = ({ hit }) => {
 
   return (
     <tr className="flex items-center py-3 px-4 hover:bg-gray-50">
-      <td className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
+      <td className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mes-classes/${hit._id}`)}>
         <div className="flex w-full flex-col justify-center">
           <div className="m-0 table w-full table-fixed border-collapse">
             <div className="table-cell truncate font-bold text-gray-900 text-base leading-5">{hit.name}</div>
