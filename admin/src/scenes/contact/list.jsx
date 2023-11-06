@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Page, Header, Container, Badge, DropdownButton } from "@snu/ds/admin";
 import { formatLongDateFR, getDepartmentNumber, ROLES, translate } from "snu-lib";
-import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import AdminIcon from "@/components/drawer/icons/Admin";
 import { BsDownload } from "react-icons/bs";
-import api from "../../services/api";
+import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
-import { IoFlashOutline } from "react-icons/io5";
+import { IoFlashOutline, IoWarning } from "react-icons/io5";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -311,7 +311,8 @@ const Hit = ({ hit }) => {
           title={<IoFlashOutline size={20} />}
           mode={"badge"}
           rightIcon={false}
-          buttonClassNames={"rounded-[50%] !p-0 !w-10 !h-10 border-none hover:bg-white hover:text-blue-600"}
+          buttonClassName={"rounded-[50%] !p-0 !w-10 !h-10 border-none hover:bg-white hover:text-blue-600"}
+          position="right"
           optionsGroup={[
             {
               key: "actions",

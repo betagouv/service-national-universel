@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { ProfilePic } from "@snu/ds";
-import { Page, Header, Container, Button, Label, InputText, ModalConfirmation } from "@snu/ds/admin";
+import { Page, Header, Container, Button, Label, InputText, ModalConfirmation, Select } from "@snu/ds/admin";
 import ClasseIcon from "@/components/drawer/icons/Classe";
+import { useHistory } from "react-router-dom";
 
 export default function create() {
   const [form, setForm] = useState({});
   const [modalConfirmation, setModalConfirmation] = useState(false);
+
+  const history = useHistory();
 
   const actions = [
     <a key="cancel" href="/mes-classes" className="mr-2">
@@ -18,7 +21,7 @@ export default function create() {
     <Page>
       <Header
         title="Création d’une classe engagée"
-        breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", href: "/mes-classes" }, { title: "Créer une classe" }]}
+        breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Créer une classe" }]}
         actions={actions}
       />
       <Container title="Informations générales">
@@ -48,6 +51,7 @@ export default function create() {
           <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
           <div className="flex-1">
             <Label title="... ou référent de classe existant" />
+            <Select className="mb-3" />
           </div>
         </div>
       </Container>
@@ -83,7 +87,7 @@ export default function create() {
         }
         actions={[
           { title: "Modifier", isCancel: true },
-          { title: "Valider", onClick: () => console.info("Créer cette classe") },
+          { title: "Valider", onClick: () => history.push("/mes-classes/1") },
         ]}
       />
     </Page>
