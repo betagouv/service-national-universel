@@ -23,16 +23,17 @@ export function ChangeCohortPen({ young, onChange }) {
   useEffect(() => {
     if (young) {
       (async function getSessions() {
-        const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18;
-        const cohortToCome = { name: "à venir", isEligible: isEligibleForCohortToCome };
-        if (user.role !== ROLES.ADMIN) {
-          setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
-          return;
-        }
+        //When inscription is open for youngs, we don't want to display the cohort to come
+        // const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18;
+        // const cohortToCome = { name: "à venir", isEligible: isEligibleForCohortToCome };
+        // if (user.role !== ROLES.ADMIN) {
+        //   setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
+        //   return;
+        // }
         const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}?timeZoneOffset=${new Date().getTimezoneOffset()}`);
         if (Array.isArray(data)) {
           const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
-          cohorts.push(cohortToCome);
+          // cohorts.push(cohortToCome);
           if (!unmounted) setOptions(cohorts);
         } else if (!unmounted) setOptions([]);
       })();

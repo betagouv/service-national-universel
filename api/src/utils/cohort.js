@@ -87,6 +87,7 @@ async function getPlaces(sessions, region) {
       session.goal = goals.find(({ _id }) => _id === session.name)?.total;
       session.goalReached = session.goal <= 0 ? true : session.numberOfCandidates + session.numberOfValidated >= session.goal * session.buffer;
       session.isFull = session.goal <= 0 ? true : session.numberOfValidated >= session.goal;
+      session.isEligible = sessions.find((e) => e.name === session.name) ? true : false;
     }
   }
 
