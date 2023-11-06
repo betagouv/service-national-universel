@@ -11,6 +11,7 @@ export default function confirmation() {
 
   const handleSubmit = () => {
     console.log("DONE");
+    history.push("/auth");
   };
 
   return (
@@ -30,28 +31,28 @@ export default function confirmation() {
             <i className={fr.cx("fr-icon-edit-fill", "text-[var(--background-action-high-blue-france)] cursor-pointer")} onClick={() => history.goBack()}></i>
           </div>
           <div className="flex items-start justify-between">
-            <div className="text-[var(--light-text-mention-grey)]">Établissement scolaire :</div>
-            <div className="text-right text-[var(--light-text-label-grey)]">Lycée Professionnel Marie Laurencin</div>
+            <div className="text-[#666]">Établissement scolaire :</div>
+            <div className="text-right text-[#161616]">Lycée Professionnel Marie Laurencin</div>
           </div>
           <div className="flex items-start justify-between">
-            <div className="text-[var(--light-text-mention-grey)]">Rôle :</div>
-            <div className="text-right text-[var(--light-text-label-grey)]">Administrateur CLE</div>
+            <div className="text-[#666]">Rôle :</div>
+            <div className="text-right text-[#161616]">Administrateur CLE</div>
           </div>
           <div className="flex items-start justify-between">
-            <div className="text-[var(--light-text-mention-grey)]">Fonction :</div>
-            <div className="text-right text-[var(--light-text-label-grey)]">Coordinateur d’établissement</div>
+            <div className="text-[#666]">Fonction :</div>
+            <div className="text-right text-[#161616]">Coordinateur d’établissement</div>
           </div>
           <div className="flex items-start justify-between">
-            <div className="text-[var(--light-text-mention-grey)]">Prénom :</div>
-            <div className="text-right text-[var(--light-text-label-grey)]">Maxime</div>
+            <div className="text-[#666]">Prénom :</div>
+            <div className="text-right text-[#161616]">Maxime</div>
           </div>
           <div className="flex items-start justify-between">
-            <div className="text-[var(--light-text-mention-grey)]">Nom :</div>
-            <div className="text-right text-[var(--light-text-label-grey)]">PISTACHE</div>
+            <div className="text-[#666]">Nom :</div>
+            <div className="text-right text-[#161616]">PISTACHE</div>
           </div>
           <div className="flex items-start justify-between">
-            <div className="text-[var(--light-text-mention-grey)]">Numéro de téléphone :</div>
-            <div className="text-right text-[var(--light-text-label-grey)]">(+33) 06 07 08 09 01</div>
+            <div className="text-[#666]">Numéro de téléphone :</div>
+            <div className="text-right text-[#161616]">(+33) 06 07 08 09 01</div>
           </div>
         </div>
         <div>
@@ -60,8 +61,8 @@ export default function confirmation() {
             <i className={fr.cx("fr-icon-edit-fill", "text-[var(--background-action-high-blue-france)] cursor-pointer")} onClick={() => history.goBack()}></i>
           </div>
           <div className="flex items-start justify-between">
-            <div className="text-[var(--light-text-mention-grey)]">Adresse email :</div>
-            <div className="text-right text-[var(--light-text-label-grey)]">maxime.pistache@ac-paris.fr</div>
+            <div className="text-[#666]">Adresse email :</div>
+            <div className="text-right text-[#161616]">maxime.pistache@ac-paris.fr</div>
           </div>
         </div>
         <hr className="p-1" />

@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 const useDocumentCss = (stylesheets) => {
-  const [sheets, setSheets] = React.useState(stylesheets);
-  const [links, setLinks] = React.useState([]);
+  const [sheets, setSheets] = useState(stylesheets);
+  const [links, setLinks] = useState([]);
 
   useEffect(() => {
     for (const sheet of sheets) {
@@ -16,7 +16,7 @@ const useDocumentCss = (stylesheets) => {
 
     return () => {
       for (const link of links) {
-        document.head.removeChild(link);
+        link?.remove?.();
       }
     };
   }, [sheets]);

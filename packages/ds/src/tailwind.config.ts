@@ -19,7 +19,7 @@ export default {
       },
       boxShadow: {
         container: "0px 0px 8px 0px rgba(0, 0, 0, 0.08)",
-        "fr-container": "0px 5px 10px -16px rgba(0, 0, 0, 0.05)",
+        "fr-container": "0px 5px 10px 0 rgba(0, 0, 0, 0.05)",
       },
     },
   },

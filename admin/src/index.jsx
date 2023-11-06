@@ -16,10 +16,9 @@ import App from "./app.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />,
+      <App />
       <ReduxToastr timeOut={1500} transitionIn="fadeIn" transitionOut="fadeOut" />
     </Provider>
-    ,
   </React.StrictMode>,
 );
 
