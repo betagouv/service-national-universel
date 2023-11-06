@@ -65,7 +65,7 @@ export default function ChangeSejour() {
       if (newSejour && motif && messageTextArea) {
         if(!young?.department){
           toastr.error("Il n'y a pas de département pour ce jeune")
-          throw new Error()
+          throw new Error("Department is undefined")
         }
         const res = await api.get(`/inscription-goal/${newSejour}/department/${young.department}/reached`);
         if (!res.ok) throw new Error(res);
