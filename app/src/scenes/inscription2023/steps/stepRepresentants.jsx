@@ -257,8 +257,6 @@ export default function StepRepresentants() {
     <>
       <Navbar onSave={onSave} />
       <DSFRContainer title="Mes représentants légaux" supportLink={supportLink} supportEvent="Phase0/aide inscription - rep leg">
-        <div className="mt-2 text-sm text-[#666666]">Votre représentant(e) légal(e) recevra un lien pour consentir à votre participation au SNU.</div>
-        <hr className="my-4 h-px border-0 bg-gray-200" />
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
         <hr className="my-4 h-px border-0 bg-gray-200" />
@@ -270,7 +268,7 @@ export default function StepRepresentants() {
               setIsParent2Visible(e);
             }}
           />
-          <div className="flex-1 text-sm text-[#3A3A3A]">Je renseigne un(e) second(e) représentant(e) légal(e)</div>
+          <div className="flex-1 text-sm text-[#3A3A3A]">Je renseigne un(e) second(e) représentant(e) légal(e) - <span className="text-[#666666]">Facultatif</span></div>
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
         {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
@@ -287,7 +285,16 @@ export default function StepRepresentants() {
 const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
   return (
     <div className="my-4 flex flex-col">
-      <div className="pb-2 font-bold text-[#161616]">Représentant légal {i} </div>
+      <div className="pb-2 font-bold text-[18px] text-[#161616]">Représentant légal {i} </div>
+      <div className="border-l-8 border-l-[#6A6AF4] text-[#3A3A3A] text-[16px] my-4 pl-8 leading-6">
+        <p className="">Votre représentant(e) légal(e) {i} recevra un lien par e-mail pour :</p>
+        <li>
+          consentir à <strong className="text-black">votre participation</strong> au SNU
+        </li>
+        <li>
+          consentir à <strong className="text-black">votre droit à l’image</strong>.
+        </li>
+      </div>
       <RadioButton
         label="Votre lien"
         options={parentsStatus}
