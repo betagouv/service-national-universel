@@ -88,6 +88,11 @@ const Schema = new mongoose.Schema({
   deletedAt: { type: Date },
 });
 
+Schema.methods.anonymise = async function () {
+  this.departureAddress = generateAddress();
+  return this;
+};
+
 Schema.virtual("user").set(function (user) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;
