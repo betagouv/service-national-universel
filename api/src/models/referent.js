@@ -54,14 +54,6 @@ const Schema = new mongoose.Schema({
       description: "tentative de connexion. Max 15",
     },
   },
-  // ! To delete if trust_token works
-  userIps: {
-    type: [String],
-    default: [],
-    documentation: {
-      description: "Liste des IP utilisées par l'utilisateur",
-    },
-  },
   token2FA: {
     type: String,
     default: "",
@@ -231,12 +223,6 @@ const Schema = new mongoose.Schema({
       description: "Numéro de téléphone fix",
     },
   },
-  mobile: {
-    type: String,
-    documentation: {
-      description: "Numéro de portable",
-    },
-  },
 
   deletedAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
@@ -257,11 +243,10 @@ Schema.methods.comparePassword = async function (p) {
 };
 
 Schema.methods.anonymise = function () {
-  this.phone = generateNewPhoneNumber();
-  this.mobile = generateNewPhoneNumber();
-  this.email = generateRandomEmail();
-  this.firstName = generateRandomName();
-  this.lastName = generateRandomName();
+  this.phone && (this.phone = generateNewPhoneNumber());
+  this.email && (this.email = generateRandomEmail());
+  this.firstName && (this.firstName = generateRandomName());
+  this.lastName && (this.lastName = generateRandomName());
   return this;
 };
 
@@ -311,7 +296,6 @@ Schema.plugin(patchHistory, {
     "/loginAttempts",
     "/attempts2FA",
     "/updatedAt",
-    "/userIps",
     "/token2FA",
     "/token2FAExpires",
   ],
@@ -333,7 +317,6 @@ Schema.plugin(
       "attempts2FA",
       "updatedAt",
       "lastActivityAt",
-      "userIps",
       "token2FA",
       "token2FAExpires",
     ],

@@ -176,8 +176,8 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.code2022 = "02022";
-  this.code = "00000";
+  this.code2022 && (this.code2022 = "02022");
+  this.code && (this.code = "00000");
   return this;
 };
 

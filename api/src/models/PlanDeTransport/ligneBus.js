@@ -223,14 +223,15 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.team = this.team.map((t) => {
-    t.lastName = generateRandomName();
-    t.firstName = generateRandomName();
-    t.birthdate = generateBirthdate();
-    t.mail = generateRandomEmail();
-    t.phone = generateNewPhoneNumber();
-    return t;
-  });
+  this.team &&
+    (this.team = this.team.map((t) => {
+      t.lastName && (t.lastName = generateRandomName());
+      t.firstName && (t.firstName = generateRandomName());
+      t.birthdate && (t.birthdate = generateBirthdate());
+      t.mail && (t.mail = generateRandomEmail());
+      t.phone && (t.phone = generateNewPhoneNumber());
+      return t;
+    }));
   return this;
 };
 

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 const patchHistory = require("mongoose-patch-history").default;
-const { generateAddress } = require("../utils/anonymise");
+const { generateAddress, starify } = require("../utils/anonymise");
 
 const MODELNAME = "meetingpoint";
 
@@ -89,7 +89,8 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = async function () {
-  this.departureAddress = generateAddress();
+  this.departureAddress && (this.departureAddress = generateAddress());
+  this.centerCode && (this.centerCode = starify(this.centerCode));
   return this;
 };
 

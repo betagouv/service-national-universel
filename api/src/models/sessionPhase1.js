@@ -178,18 +178,19 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.zipCenter = starify(this.zipCenter);
-  this.codeCenter = starify(this.codeCenter);
-  this.centerName = starify(this.centerName);
-  this.cityCenter = starify(this.cityCenter);
+  this.zipCenter && (this.zipCenter = starify(this.zipCenter));
+  this.codeCenter && (this.codeCenter = starify(this.codeCenter));
+  this.centerName && (this.centerName = starify(this.centerName));
+  this.cityCenter && (this.cityCenter = starify(this.cityCenter));
   if (!["VALIDATED", "WAITING_VALIDATION"].includes(this.status)) this.status = "WAITING_VALIDATION";
-  this.team = this.team.map((member) => {
-    member.firstName = starify(member.firstName);
-    member.lastName = starify(member.lastName);
-    member.email = starify(member.email);
-    member.phone = starify(member.phone);
-    return member;
-  });
+  this.team &&
+    (this.team = this.team.map((member) => {
+      member.firstName && (member.firstName = starify(member.firstName));
+      member.lastName && (member.lastName = starify(member.lastName));
+      member.email && (member.email = starify(member.email));
+      member.phone && (member.phone = starify(member.phone));
+      return member;
+    }));
   return this;
 };
 
@@ -203,6 +204,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
   this.updatedAt = Date.now();
+
   next();
 });
 

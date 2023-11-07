@@ -53,7 +53,6 @@ function serializeYoung(young, user) {
       delete ret.sqlId;
       delete ret.password;
       delete ret.passwordChangedAt;
-      delete ret.userIps;
       delete ret.token2FA;
       delete ret.token2FAExpires;
       delete ret.attempts2FA;
@@ -83,7 +82,6 @@ function serializeReferent(referent) {
       delete ret.sqlId;
       delete ret.password;
       delete ret.passwordChangedAt;
-      delete ret.userIps;
       delete ret.token2FA;
       delete ret.token2FAExpires;
       delete ret.attempts2FA;

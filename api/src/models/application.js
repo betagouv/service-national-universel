@@ -205,18 +205,18 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.youngEmail = "*****@*******.***";
-  this.youngFirstName = starify(this.youngFirstName);
-  this.youngLastName = starify(this.youngLastName);
-  this.youngBirthdateAt = starify(this.youngBirthdateAt);
-  this.tutorName = starify(this.tutorName);
-  this.missionName = starify(this.missionName);
-  this.contractStatus = this.contractStatus || "DRAFT";
+  this.youngEmail && (this.youngEmail = "*****@*******.***");
+  this.youngFirstName && (this.youngFirstName = starify(this.youngFirstName));
+  this.youngLastName && (this.youngLastName = starify(this.youngLastName));
+  this.youngBirthdateAt && (this.youngBirthdateAt = starify(this.youngBirthdateAt));
+  this.tutorName && (this.tutorName = starify(this.tutorName));
+  this.missionName && (this.missionName = starify(this.missionName));
+  this.contractStatus && (this.contractStatus = this.contractStatus || "DRAFT");
 
-  this.contractAvenantFiles = [];
-  this.justificatifsFiles = [];
-  this.feedBackExperienceFiles = [];
-  this.othersFiles = [];
+  this.contractAvenantFiles && (this.contractAvenantFiles = []);
+  this.justificatifsFiles && (this.justificatifsFiles = []);
+  this.feedBackExperienceFiles && (this.feedBackExperienceFiles = []);
+  this.othersFiles && (this.othersFiles = []);
 
   return this;
 };

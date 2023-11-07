@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { generateAddress, generateRandomName, starify } = require("../utils/anonymise");
+const { generateAddress, generateRandomName, starify, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
 
 const esClient = require("../es");
 
@@ -316,14 +316,19 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.name = generateRandomName().toUpperCase();
-  this.siret = starify(this.siret);
-  this.address = generateAddress();
-  this.website = "https://www.google.com";
-  this.description = starify(this.description);
-  this.twitter = "www.twitter.com";
-  this.facebook = "www.facebook.com";
-  this.instagram = "www.instagram.com";
+  this.name && (this.name = generateRandomName().toUpperCase());
+  this.siret && (this.siret = starify(this.siret));
+  this.address && (this.address = generateAddress());
+  this.website && (this.website = "https://www.google.com");
+  this.description && (this.description = starify(this.description));
+  this.twitter && (this.twitter = "www.twitter.com");
+  this.facebook && (this.facebook = "www.facebook.com");
+  this.instagram && (this.instagram = "www.instagram.com");
+  //anonymize structure manager
+  this.structureManager.firstName && (this.structureManager.firstName = generateRandomName());
+  this.structureManager.lastName && (this.structureManager.lastName = generateRandomName());
+  this.structureManager.mobile && (this.structureManager.mobile = generateNewPhoneNumber());
+  this.structureManager.email && (this.structureManager.email = generateRandomEmail());
   return this;
 };
 

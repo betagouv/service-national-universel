@@ -113,12 +113,12 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.message = starify(this.message);
-  this.address = generateAddress();
-  this.contactEmail = generateRandomEmail();
-  this.contactFullName = generateRandomName() + generateRandomName();
-  this.structureName = generateRandomName();
-  this.files = [];
+  this.message && (this.message = starify(this.message));
+  this.address && (this.address = generateAddress());
+  this.contactEmail && (this.contactEmail = generateRandomEmail());
+  this.contactFullName && (this.contactFullName = generateRandomName() + generateRandomName());
+  this.structureName && (this.structureName = generateRandomName());
+  this.files && (this.files = []);
   return this;
 };
 

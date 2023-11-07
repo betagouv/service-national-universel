@@ -30,8 +30,8 @@ const Schema = new mongoose.Schema({
 });
 
 Schema.methods.anonymise = function () {
-  this.mail = generateRandomEmail();
-  this.birthdateAt = generateBirthdate();
+  this.mail && (this.mail = generateRandomEmail());
+  this.birthdateAt && (this.birthdateAt = generateBirthdate());
   return this;
 };
 
