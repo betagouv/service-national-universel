@@ -23,9 +23,9 @@ export default function StepDocuments() {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
-  const corrections = young?.correctionRequests?.filter(
-    (e) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status),
-  );
+  const corrections = young?.correctionRequests
+    ?.filter((correctionRequest) => correctionRequest?.cohort === young?.cohort)
+    ?.filter((e) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
   const disabledUpload = young?.files.cniFiles.length > 2;
 
   const IDs = [
@@ -76,9 +76,12 @@ export default function StepDocuments() {
 
   const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
-  if (young?.status === YOUNG_STATUS.WAITING_CORRECTION && corrections?.length === 0) return <Redirect to="/" />;
-  if (corrections?.some((e) => ["MISSING_FRONT", "MISSING_BACK"].includes(e.reason))) return <Redirect to="televersement" />;
-  if (corrections?.some((e) => e.field === "latestCNIFileExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
+  if (young?.status === YOUNG_STATUS.WAITING_CORRECTION) {
+    if (corrections?.length === 0) return <Redirect to="/" />;
+    if (corrections?.some((e) => ["MISSING_FRONT", "MISSING_BACK"].includes(e.reason))) return <Redirect to="televersement" />;
+    if (corrections?.some((e) => e.field === "latestCNIFileExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
+  }
+
   return (
     <>
       <Navbar />
