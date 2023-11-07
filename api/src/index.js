@@ -1,5 +1,5 @@
 (async () => {
-  await require("../../env-manager")("api-staging");
+  await require("./env-manager")();
 
   // ! Ignore specific error
   const originalConsoleError = console.error;
@@ -21,7 +21,7 @@
   const passport = require("passport");
   require("./mongo");
 
-  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
+  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT,API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
 
   if (process.env.NODE_ENV !== "test") {
     console.log("APP_URL", APP_URL);
