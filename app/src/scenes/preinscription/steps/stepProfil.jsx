@@ -86,7 +86,10 @@ export default function StepProfil() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"} title="Créez votre compte">
+      <DSFRContainer
+        title="Créez votre compte"
+        supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
+        supportEvent="Phase0/aide preinscription - infos persos">
         <div className="space-y-5">
           <label className="w-full">
             Prénom du volontaire

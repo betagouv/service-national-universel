@@ -3,11 +3,7 @@
  * Il vérifie si on est la veille de la fermeture des instructions d'une cohorte.
  * Si c'est le cas, il envoit à tous les référents départementaux pour qui il reste des jeunes en attente de validation une relance mail.
  */
-const path = require("path");
-const apiDir = path.resolve(__dirname, "..", "..");
-const srcDir = path.join(apiDir, "src");
-require("dotenv").config({ path: path.join(apiDir, ".env-staging") });
-require(path.join(srcDir, "mongo"));
+require("../mongo");
 const { capture } = require("../sentry");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");

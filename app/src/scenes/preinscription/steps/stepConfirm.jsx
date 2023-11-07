@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE, PHONE_ZONES, formatDateFR, translate, translateGrade } from "snu-lib";
+import { PHONE_ZONES, formatDateFR, translate, translateGrade, isFeatureEnabled, FEATURES_NAME, getCohortPeriod } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
@@ -13,12 +13,14 @@ import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
-import { supportURL } from "@/config";
+import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
 export default function StepConfirm() {
   const [error, setError] = useState({});
+  const [isLoading, setLoading] = useState(false);
   const [data, removePersistedData] = React.useContext(PreInscriptionContext);
+  const selectedCohort = data?.sessions.find((s) => s?.name === data?.cohort);
   const dispatch = useDispatch();
 
   const history = useHistory();
@@ -32,6 +34,8 @@ export default function StepConfirm() {
       }),
     [error],
   );
+
+  const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
 
   const onSubmit = async () => {
     const values = {
@@ -58,26 +62,25 @@ export default function StepConfirm() {
       grade: data.scolarity,
     };
 
-    if (values.schooled === "true") values.grade = data.scolarity;
-
     try {
-      const { code, ok } = await api.post("/young/signup", values);
+      setLoading(true);
+      const { code, ok, token, user } = await api.post(`/young/signup?timeZoneOffset=${new Date().getTimezoneOffset()}`, values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+        setLoading(false);
       } else {
-        plausibleEvent("Phase0/CTA preinscription - inscription");
+        if (user) {
+          plausibleEvent("Phase0/CTA preinscription - inscription");
+          if (token) api.setToken(token);
+          dispatch(setYoung(user));
+          removePersistedData();
+          history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
+        }
       }
-      const { user: young, token } = await api.post(`/young/signin`, { email: data.email, password: data.password });
-      if (young) {
-        if (token) api.setToken(token);
-        dispatch(setYoung(young));
-        removePersistedData();
-      }
-      // after connection young is automatically redirected to /preinscription/email-validation
-      history.push("/preinscription/email-validation");
     } catch (e) {
+      setLoading(false);
       if (e.code === "USER_ALREADY_REGISTERED")
-        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
+        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
       else {
         capture(e);
         setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
@@ -88,7 +91,10 @@ export default function StepConfirm() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Ces informations sont-elles correctes ?" supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
+      <DSFRContainer
+        title="Ces informations sont-elles correctes ?"
+        supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
+        supportEvent="Phase0/aide preinscription - recap">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="my-6 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-[#161616]">Mon éligibilité</h1>
@@ -97,36 +103,36 @@ export default function StepConfirm() {
           </Link>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
+        <div className="space-y-2 text-base">
+          <div className="flex items-center justify-between">
             <p className="text-gray-500">Niveau de scolarité&nbsp;:</p>
             <p className="text-right">{translateGrade(data.scolarity)}</p>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between">
             <p className="text-gray-500">Date de naissance&nbsp;:</p>
             <p className="text-right">{formatDateFR(data.birthDate)}</p>
           </div>
           {data.school ? (
             <>
               {data.school?.country && (
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between">
                   <p className="text-gray-500">Pays de l&apos;établissement&nbsp;:</p>
                   <p className="text-right capitalize">{data.school?.country?.toLowerCase()}</p>
                 </div>
               )}
               {data.school?.city && (
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between">
                   <p className="text-gray-500">Commune de l&apos;établissement&nbsp;:</p>
                   <p className="text-right">{data.school.city}</p>
                 </div>
               )}
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between">
                 <p className="text-gray-500">Nom de l&apos;établissement&nbsp;:</p>
                 <p className="truncate text-right">{data.school.fullName}</p>
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between">
               <p className="text-gray-500">Code postal&nbsp;:</p>
               <p className="text-right">{data.zip}</p>
             </div>
@@ -141,7 +147,7 @@ export default function StepConfirm() {
             <EditPen />
           </Link>
         </div>
-        <div className="font-normal text-[#161616] pb-4">{COHESION_STAY_LIMIT_DATE[data?.cohort]}</div>
+        <div className="font-normal text-[16px] text-[#161616] pb-4">{getCohortPeriod(selectedCohort)}</div>
 
         <hr />
 
@@ -152,31 +158,34 @@ export default function StepConfirm() {
           </Link>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
+        <div className="space-y-2 mb-8">
+          <div className="flex items-center justify-between">
             <p className="text-gray-500">Prénom du volontaire&nbsp;:</p>
             <p className="text-right">{data.firstName}</p>
           </div>
-          <div className="flex items-center justify-between  text-sm">
+          <div className="flex items-center justify-between">
             <p className="text-gray-500">Nom du volontaire&nbsp;:</p>
             <p className="text-right">{data.lastName}</p>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between">
             <p className="text-gray-500">Téléphone&nbsp;:</p>
             <p className="text-right">
               {PHONE_ZONES[data.phoneZone].code} {data.phone}
             </p>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between">
             <p className="text-gray-500">Email&nbsp;:</p>
             <p className="text-right">{data.email}</p>
           </div>
         </div>
 
-        <hr className="my-6" />
-        <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>
+        {isEmailValidationEnabled && <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>}
 
-        <SignupButtonContainer onClickNext={() => onSubmit()} labelNext="Oui, recevoir un code d'activation par e-mail" disabled={Object.values(error).length} />
+        <SignupButtonContainer
+          onClickNext={() => onSubmit()}
+          labelNext={isEmailValidationEnabled ? "Oui, recevoir un code d'activation par e-mail" : "M'inscrire au SNU"}
+          disabled={isLoading}
+        />
       </DSFRContainer>
     </>
   );

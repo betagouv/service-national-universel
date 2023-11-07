@@ -4,6 +4,7 @@ import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
+import plausibleEvent from "@/services/plausible";
 import { maintenance } from "../../config";
 import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
@@ -11,8 +12,8 @@ import api from "../../services/api";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { formatToActualTime } from "snu-lib/date";
-import { FEATURES_NAME, isFeatureEnabled } from "../../features";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { captureMessage } from "../../sentry";
 
@@ -59,12 +60,15 @@ export default function Signin() {
                   try {
                     const { user, token, code } = await api.post(`/referent/signin`, { email, password });
                     if (code === "2FA_REQUIRED") {
+                      plausibleEvent("2FA demandée");
                       return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
                     }
                     if (token) api.setToken(token);
                     if (user) {
+                      plausibleEvent("Connexion réussie");
                       dispatch(setUser(user));
-                      if (isFeatureEnabled(FEATURES_NAME.FLEXIBLE_REDIRECT) ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
+                      if (isFeatureEnabled(FEATURES_NAME.FLEXIBLE_REDIRECT, undefined, environment) ? redirect : isValidRedirectUrl(redirect))
+                        return (window.location.href = redirect);
                       if (redirect) {
                         captureMessage("Invalid redirect url", { extra: { redirect } });
                         toastr.error("Url de redirection invalide : " + redirect);

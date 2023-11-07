@@ -1,23 +1,14 @@
-import React from "react";
-import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
-import DashboardContainer from "../../../components/DashboardContainer";
+import React, { useState } from "react";
+import General from "@/scenes/dashboardV2/components/inscription/General";
 
 export default function Index() {
+  const [selectedFilters, setSelectedFilters] = useState({
+    cohort: [],
+  });
+
   return (
-    <DashboardContainer
-      active="inscription"
-      availableTab={["inscription"]}
-      navChildren={
-        <div className="flex items-center gap-2">
-          <ButtonPrimary className="text-sm">
-            Exporter le rapport <span className="font-bold">“Inscription”</span>
-          </ButtonPrimary>
-          <ButtonPrimary className="text-sm">
-            Exporter les statistiques <span className="font-bold">“Inscription”</span>
-          </ButtonPrimary>
-        </div>
-      }>
-      <div className="w-full rounded-lg bg-white p-8">Inscription</div>
-    </DashboardContainer>
+    <div className="p-8">
+      <General selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} />
+    </div>
   );
 }

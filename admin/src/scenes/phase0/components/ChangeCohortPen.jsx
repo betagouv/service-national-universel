@@ -4,12 +4,12 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
 import { ROLES, translate, getCohortPeriod, YOUNG_STATUS, calculateAge } from "snu-lib";
-import IconChangementCohorte from "../../../assets/IconChangementCohorte";
-import Pencil from "../../../assets/icons/Pencil";
-import Badge from "../../../components/Badge";
-import Chevron from "../../../components/Chevron";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import api from "../../../services/api";
+import IconChangementCohorte from "@/assets/IconChangementCohorte";
+import Pencil from "@/assets/icons/Pencil";
+import Badge from "@/components/Badge";
+import Chevron from "@/components/Chevron";
+import ModalConfirm from "@/components/modals/ModalConfirm";
+import api from "@/services/api";
 import { BorderButton, PlainButton } from "./Buttons";
 
 export function ChangeCohortPen({ young, onChange }) {
@@ -23,16 +23,21 @@ export function ChangeCohortPen({ young, onChange }) {
   useEffect(() => {
     if (young) {
       (async function getSessions() {
-        const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18;
-        const cohortToCome = { name: "à venir", isEligible: isEligibleForCohortToCome };
-        if (user.role !== ROLES.ADMIN) {
-          setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
-          return;
-        }
-        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+        //When inscription is open for youngs, we don't want to display the cohort to come
+        // const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18;
+        // const cohortToCome = { name: "à venir", isEligible: isEligibleForCohortToCome };
+        // if (user.role !== ROLES.ADMIN) {
+        //   setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
+        //   return;
+        // }
+        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}?timeZoneOffset=${new Date().getTimezoneOffset()}`);
         if (Array.isArray(data)) {
-          const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
-          cohorts.push(cohortToCome);
+          const cohorts = data
+            .map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible }))
+            .filter((c) => c.name !== young.cohort)
+            //todo rajouter un flag hidden pour les cohort non visible
+            .filter((c) => !["Juin 2024 - 1", "Mars 2024 - La Réunion"].includes(c.name));
+          // cohorts.push(cohortToCome);
           if (!unmounted) setOptions(cohorts);
         } else if (!unmounted) setOptions([]);
       })();
@@ -92,7 +97,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
   async function handleChangeCohort() {
     try {
       if (!message) return toastr.error("Veuillez indiquer un message");
-      await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
+      await api.put(`/referent/young/${young._id}/change-cohort?timeZoneOffset=${new Date().getTimezoneOffset()}`, { cohort: newCohort.name, message, cohortChangeReason: motif });
       if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
       if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
       await onChange();

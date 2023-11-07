@@ -241,6 +241,10 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       uselessInformation: Joi.object().allow(null),
       daysToValidate: Joi.number().allow(null, ""),
       daysToValidateForTerminalGrade: Joi.number().allow(null, ""),
+      inscriptionStartDate: Joi.date().required(),
+      inscriptionEndDate: Joi.date().required(),
+      instructionEndDate: Joi.date().required(),
+      inscriptionModificationEndDate: Joi.date(),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {
       capture(bodyError);

@@ -1,24 +1,20 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import { useSelector } from "react-redux";
 import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 import { youngCanChangeSession } from "snu-lib";
 import plausibleEvent from "../../services/plausible";
 import API from "../../services/api";
-import { permissionPhase2, permissionReinscription, translate } from "../../utils";
-import { setYoung } from "../../redux/auth/actions";
+import { permissionPhase2 } from "../../utils";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
-import Loader from "../../components/Loader";
 import { isCohortDone } from "../../utils/cohorts";
 import InfoConvocation from "./components/modals/InfoConvocation";
 
 export default function NotDone() {
-  const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young) || {};
   const history = useHistory();
-  const dispatch = useDispatch();
   const [modalOpen, setModalOpen] = React.useState(false);
   const [center, setCenter] = React.useState(null);
   const [meetingPoint, setMeetingPoint] = React.useState(null);
@@ -41,22 +37,6 @@ export default function NotDone() {
     } catch (e) {
       capture(e);
       toastr.error(e.message);
-    }
-  }
-
-  async function goToReinscription() {
-    try {
-      setLoading(true);
-      const { ok, code, data: responseData } = await API.put("/young/reinscription/goToReinscription");
-      if (!ok) throw new Error(translate(code));
-      dispatch(setYoung(responseData));
-
-      plausibleEvent("Phase1 Non réalisée/CTA reinscription - home page");
-      return history.push("/reinscription/eligibilite");
-    } catch (e) {
-      setLoading(false);
-      capture(e);
-      toastr.error("Une erreur s'est produite :", translate(e.code));
     }
   }
 
@@ -87,19 +67,6 @@ export default function NotDone() {
                 }}>
                 Réaliser ma mission d&apos;intérêt général
               </button>
-            )}
-            {permissionReinscription(young) && (
-              <>
-                {loading ? (
-                  <Loader />
-                ) : (
-                  <button
-                    className="bg-blue-[#FFFFFF] mt-5 w-full rounded-[10px] border-[1px]  border-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-blue-600 transition duration-150 ease-in-out hover:bg-blue-600 hover:text-white"
-                    onClick={goToReinscription}>
-                    Se réinscrire à un autre séjour
-                  </button>
-                )}
-              </>
             )}
           </div>
         </div>

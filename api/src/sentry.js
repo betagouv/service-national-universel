@@ -104,7 +104,7 @@ function capture(err, contexte) {
 function captureMessage(mess, contexte) {
   console.log("captureMessage", mess);
   if (!mess) {
-    sentryCaptureMessage("Error not defined");
+    sentryCaptureMessage("Message not defined");
     return;
   }
 

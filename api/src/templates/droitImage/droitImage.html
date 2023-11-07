@@ -21,12 +21,18 @@
                 gap: 0.2cm;
             }
 
+            .italic-text {
+                font-style: italic;
+                font-size: 8pt;
+                margin-top: 0cm;
+            }
+
             .title {
-                font-size: 14pt;
+                font-size: 11pt;
                 font-weight: bold;
                 color: #385EA9;
                 text-align: center;
-                margin: 14pt 0;
+                margin: 14pt 0 6pt 0;
             }
 
             .content {
@@ -34,16 +40,18 @@
             }
 
             p {
-                font-size: 11pt;
+                font-size: 10pt;
                 line-height: 1.2em;
-                margin-top: 1cm;
+                margin-top: 0.8cm;
             }
 
             .span2Parents {
                 display: {{WITH_2_PARENTS_SPAN}};
+                font-size: 10pt;
             }
             .span1Parent {
                 display: {{WITH_1_PARENT_SPAN}};
+                ont-size: 10pt;
             }
             .block2Parents {
                 display: {{WITH_2_PARENTS_BLOCK}};
@@ -53,9 +61,11 @@
             }
             .allow {
                 display: {{ALLOW}};
+                font-size: 18pt;
             }
             .disallow {
                 display: {{DISALLOW}};
+                font-size: 18pt;
             }
 
             .parent1HasDate {
@@ -81,7 +91,7 @@
             }
 
             ul li {
-                font-size: 11pt;
+                font-size: 10pt;
                 line-height: 1.2em;
             }
 
@@ -93,11 +103,18 @@
 
             .authorization {
                 display: flex;
-                align-items: flex-start;
+                align-items: center;
+            }
+
+            .authorizations {
+                display: flex;
+                justify-content: space-around; 
+                align-items: center; 
+                margin-top: 0.5cm;
             }
 
             .authorization p {
-                margin-left: 0.5cm;
+                margin-left: 0.2cm; /* Réduit de 0.5cm à 0.2cm pour réduire l'espace */
                 margin-top: 0;
             }
         </style>
@@ -108,27 +125,30 @@
             <img src="{{BASE_URL}}/images/logo-snu.png" alt="Logo-SNU" width="50" height="50"/>
         </div>
         <div class="content">
-            <div class="title">DROIT &Agrave; L&rsquo;IMAGE</div>
+            <div class="title">AUTORISATION DE PRISE DE VUES D’UN MINEUR ET D’UTILISATION D'IMAGES </div>
+            <div class="italic-text">Cette autorisation requiert la signature des 2 représentants légaux pour être effective. A défaut d’avoir les 2 signatures, le
+                volontaire ne pourra être pris en photo, ni filmé et son témoignage ne pourra pas être partagé au sein de la communauté SNU.</div>
             <p><b>Je, soussign&eacute;(e), repr&eacute;sentant l&eacute;gal n&deg;1 : </b><i>{{PARENT1}}</i></p>
             <p class="block2Parents"><b>Je, soussign&eacute;(e), repr&eacute;sentant l&eacute;gal n&deg;2 : </b><i>{{PARENT2}}</i></p>
             <p><b>Représentant<span class="span2Parents">s</span> <span class="span1Parent">légal</span><span class="span2Parents">légaux</span> de </b><i>{{YOUNG_NAME}}</i></p>
-
-            <div class="authorization">
-                <div class="allow">&#9745;</div>
-                <div class="disallow">&#9744;</div>
-                <p><span class="span1Parent">autorise</span><span class="span2Parents">autorisons</span> le Ministère de l’Education Nationale et de la Jeunesse (MENJ), ses partenaires et
-                    les journalistes dûment accrédités par les services communication du ministère et/ou des préfectures à
-                    enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en
-                    intégralité, ensemble ou séparément, sur leurs publications respectives.</p>
+            <div class="authorizations">
+                <div class="authorization">
+                    <div class="allow">&#9745;</div>
+                    <div class="disallow">&#9744;</div>
+                    <span class="span1Parent">autorise</span><span class="span2Parents">autorisons</span>
+                </div>
+                <div class="authorization">
+                    <div class="disallow">&#9745;</div>
+                    <div class="allow">&#9744;</div>
+                    <span class="span1Parent">n&apos;autorise pas</span><span class="span2Parents">n&apos;autorisons pas</span>
+                </div>
             </div>
-            <div class="authorization">
-                <div class="disallow">&#9745;</div>
-                <div class="allow">&#9744;</div>
-                <p>n&apos;<span class="span1Parent">autorise</span><span class="span2Parents">autorisons</span> pas le MENJ et les journalistes à enregistrer, reproduire et représenter l’image
-                    et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur les
-                    supports détaillés ci-dessous.</p>
-            </div>
-            <p>Cette autorisation est valable pour une utilisation :</p>
+            <p><b>le Ministère de l’Education Nationale et de la Jeunesse (MENJ), ses services déconcentrés, ses
+                partenaires et les journalistes dûment accrédités par les services de communication du ministère à
+                enregistrer, reproduire et représenter l’image ou la voix du volontaire représenté en partie ou en
+                intégralité, ensemble ou séparément, sur leurs publications respectives.</b></p>
+            <p>Cette autorisation est valable pour une utilisation sur l’ensemble du parcours du service national universel, tant
+                durant le séjour de cohésion que dans le cadre de la mobilisation du volontaire au titre de la réserve du SNU :</p>
             <ul>
                 <li>d’une durée de 5 ans à compter de la signature de la présente ;</li>
                 <li>sur tous les supports d’information et de communication imprimés ou numériques à but non lucratif ;</li>

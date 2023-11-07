@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { translate } from "snu-lib";
+import { formatToActualTime } from "snu-lib/date";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import Modal from "@/components/ui/modals/Modal";
@@ -24,8 +25,17 @@ const PasswordModalContent = ({ onSuccess, onCancel }) => {
 
       return onSuccess(password);
     } catch (e) {
-      capture(e);
+      setPassword("");
       setError(translate(e.code));
+      if (e.code === "TOO_MANY_REQUESTS") {
+        let date = formatToActualTime(e?.data?.nextLoginAttemptIn);
+        setError(
+          `Vous avez atteint le maximum de tentatives de connexion autorisées. Votre accès est bloqué jusqu'à ${
+            date !== "-" ? `à ${date}` : "demain"
+          }. Revenez d'ici quelques minutes.`,
+        );
+      }
+      capture(e);
       setLoading(false);
     }
   };

@@ -7,7 +7,7 @@ const config = require("./config");
 const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, TRUST_TOKEN_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
-const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
@@ -53,6 +53,14 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
+      const { error: errorQuery, value: query } = Joi.object({
+        timeZoneOffset: Joi.number(),
+      }).validate(req.query, {
+        stripUnknown: true,
+      });
+
+      if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
       const {
         email,
         phone,
@@ -84,12 +92,14 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      let sessions = await getFilteredSessions(value);
+      let sessions = await getFilteredSessions(value, query.timeZoneOffset || null);
       if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
       const tokenEmailValidation = await crypto.randomInt(1000000);
+
+      const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
       const user = await this.model.create({
         email,
@@ -113,17 +123,29 @@ class Auth {
         zip,
         cohort,
         grade,
-        inscriptionStep2023: STEPS2023.COORDONNEES,
+        inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
         emailVerified: "false",
         tokenEmailValidation,
         attemptsEmailValidation: 0,
-        tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10,
+        tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
       });
 
-      if (config.ENVIRONMENT !== "production") {
+      if (isEmailValidationEnabled) {
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
           emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-          params: { registration_code: tokenEmailValidation, cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}` },
+          params: {
+            registration_code: tokenEmailValidation,
+            cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
+          },
+        });
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
+          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+          params: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
+          },
         });
       }
 
@@ -138,135 +160,6 @@ class Auth {
     } catch (error) {
       console.log("Error ", error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  }
-
-  async changeEmailDuringSignUp(req, res) {
-    try {
-      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).validate(req.body, { stripUnknown: true });
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const user = await this.model.findOne({
-        email: req.user.email,
-        emailVerified: "false",
-      });
-
-      if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
-
-      const existingUser = await this.model.findOne({
-        email: value.email,
-      });
-
-      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
-
-      const tokenEmailValidation = await crypto.randomInt(1000000);
-      user.set({ email: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
-      await user.save();
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: value.email }],
-        params: {
-          registration_code: tokenEmailValidation,
-          cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
-        },
-      });
-
-      return res.status(200).send({
-        ok: true,
-        user: serializeYoung(user, user),
-      });
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  }
-
-  async requestEmailUpdate(req, res) {
-    try {
-      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const { password, email } = value;
-
-      if (req.user.email === email) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_UNCHANGED });
-
-      // is new email already used?
-      const existingUser = await this.model.findOne({
-        email,
-      });
-      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
-
-      const match = await req.user.comparePassword(password);
-      if (!match) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
-
-      const currentUser = await this.model.findOne({
-        email: req.user.email,
-      });
-
-      if (!currentUser) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
-      const tokenEmailValidation = await crypto.randomInt(1000000);
-      currentUser.set({ newEmail: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
-
-      await currentUser.save();
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION, {
-        emailTo: [{ name: `${currentUser.firstName} ${currentUser.lastName}`, email: value.email }],
-        params: {
-          registration_code: tokenEmailValidation,
-          cta: `${config.APP_URL}/account/general?newEmailValidationToken=${tokenEmailValidation}`,
-        },
-      });
-
-      return res.status(200).send({ ok: true });
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  }
-
-  async validateEmailUpdate(req, res) {
-    try {
-      const { error, value } = Joi.object({ token_email_validation: Joi.string().required() }).unknown().validate(req.body);
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-      const { token_email_validation } = value;
-      const user = await this.model.findOne({
-        email: req.user.email,
-        attemptsEmailValidation: { $lt: 3 },
-        tokenEmailValidationExpires: { $gt: Date.now() },
-      });
-
-      if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
-      if (!user.newEmail) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
-      if (user.tokenEmailValidation !== token_email_validation) {
-        user.set({ attemptsEmailValidation: (user.attemptsEmailValidation || 0) + 1 });
-        await user.save();
-        return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
-      }
-
-      const existingUser = await this.model.findOne({
-        email: user.newEmail,
-      });
-
-      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
-
-      user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null });
-      await user.save();
-
-      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
-
-      return res.status(200).send({
-        ok: true,
-        user: data,
-      });
-    } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
@@ -301,10 +194,8 @@ class Auth {
       }
 
       const shouldUse2FA = () => {
-        if (config.ENVIRONMENT === "development") return false;
-        if (config.ENVIRONMENT === "staging" && !user.email.match(regexp_exception_staging)) return false;
-
-        if (user.emailVerified === "false") return false;
+        // if (config.ENVIRONMENT === "development") return false;
+        // if (config.ENVIRONMENT === "staging" && !user.email.match(regexp_exception_staging)) return false;
 
         const trustToken = req.cookies[`trust_token-${user._id}`];
         if (!trustToken) return true;
@@ -379,6 +270,12 @@ class Auth {
       user.set({ token2FA: null, token2FAExpires: null });
       user.set({ loginAttempts: 0, attempts2FA: 0 });
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
+      if (!user.emailVerified || user.emailVerified === "false") {
+        user.set({ emailVerified: "true" });
+        if (user.inscriptionStep2023 === STEPS2023.EMAIL_WAITING_VALIDATION) {
+          user.set({ inscriptionStep2023: STEPS2023.COORDONNEES });
+        }
+      }
       await user.save();
 
       if (rememberMe) {
@@ -396,6 +293,135 @@ class Auth {
         token,
         user: data,
         data,
+      });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async changeEmailDuringSignUp(req, res) {
+    try {
+      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).validate(req.body, { stripUnknown: true });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const user = await this.model.findOne({
+        email: req.user.email,
+        emailVerified: "false",
+      });
+
+      if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+
+      const existingUser = await this.model.findOne({
+        email: value.email,
+      });
+
+      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
+
+      const tokenEmailValidation = await crypto.randomInt(1000000);
+      user.set({ email: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60 });
+      await user.save();
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: value.email }],
+        params: {
+          registration_code: tokenEmailValidation,
+          cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
+        },
+      });
+
+      return res.status(200).send({
+        ok: true,
+        user: serializeYoung(user, user),
+      });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async requestEmailUpdate(req, res) {
+    try {
+      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const { password, email } = value;
+
+      if (req.user.email === email) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_UNCHANGED });
+
+      // is new email already used?
+      const existingUser = await this.model.findOne({
+        email,
+      });
+      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
+
+      const match = await req.user.comparePassword(password);
+      if (!match) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+
+      const currentUser = await this.model.findOne({
+        email: req.user.email,
+      });
+
+      if (!currentUser) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      const tokenEmailValidation = await crypto.randomInt(1000000);
+      currentUser.set({ newEmail: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60 });
+
+      await currentUser.save();
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION, {
+        emailTo: [{ name: `${currentUser.firstName} ${currentUser.lastName}`, email: value.email }],
+        params: {
+          registration_code: tokenEmailValidation,
+          cta: `${config.APP_URL}/account/general?newEmailValidationToken=${tokenEmailValidation}`,
+        },
+      });
+
+      return res.status(200).send({ ok: true });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async validateEmailUpdate(req, res) {
+    try {
+      const { error, value } = Joi.object({ token_email_validation: Joi.string().required() }).unknown().validate(req.body);
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      const { token_email_validation } = value;
+      const user = await this.model.findOne({
+        email: req.user.email,
+        attemptsEmailValidation: { $lt: 3 },
+        tokenEmailValidationExpires: { $gt: Date.now() },
+      });
+
+      if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      if (!user.newEmail) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      if (user.tokenEmailValidation !== token_email_validation) {
+        user.set({ attemptsEmailValidation: (user.attemptsEmailValidation || 0) + 1 });
+        await user.save();
+        return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      }
+
+      const existingUser = await this.model.findOne({
+        email: user.newEmail,
+      });
+
+      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
+
+      user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null });
+      await user.save();
+
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+
+      return res.status(200).send({
+        ok: true,
+        user: data,
       });
     } catch (error) {
       capture(error);
@@ -422,6 +448,9 @@ class Auth {
       }
 
       user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, emailVerified: "true" });
+      if (user.inscriptionStep2023 === STEPS2023.EMAIL_WAITING_VALIDATION) {
+        user.set({ inscriptionStep2023: STEPS2023.COORDONNEES });
+      }
       await user.save();
 
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
@@ -466,10 +495,10 @@ class Auth {
 
       const tokenEmailValidation = await crypto.randomInt(1000000);
 
-      user.set({ tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 10 });
+      user.set({ tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60 });
       await user.save();
 
-      await sendTemplate(SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION, {
+      await sendTemplate(user.newEmail ? SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION : SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: req.user.email }],
         params: {
           registration_code: tokenEmailValidation,
@@ -534,8 +563,28 @@ class Auth {
     const { password } = value;
 
     try {
+      const now = new Date();
+      const user = await this.model.findById(req.user._id);
+
+      if (user.loginAttempts > 12) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS" });
+      if (user.nextLoginAttemptIn > now) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+
       const match = await req.user.comparePassword(password);
-      if (!match) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      if (!match) {
+        const loginAttempts = (user.loginAttempts || 0) + 1;
+
+        let date = now;
+        if (loginAttempts > 5) {
+          date = new Date(now.getTime() + 60 * 1000);
+        }
+
+        user.set({ loginAttempts, nextLoginAttemptIn: date });
+        await user.save();
+        if (date > now) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: date } });
+        return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      }
+      user.set({ loginAttempts: 0 });
+      await user.save();
 
       return res.status(200).send({ ok: true });
     } catch (error) {

@@ -57,6 +57,9 @@ function serializeYoung(young, user) {
       delete ret.token2FA;
       delete ret.token2FAExpires;
       delete ret.attempts2FA;
+      delete ret.tokenEmailValidation;
+      delete ret.tokenEmailValidationExpires;
+      delete ret.attemptsEmailValidation;
       delete ret.lastLogoutAt;
       delete ret.nextLoginAttemptIn;
       delete ret.forgotPasswordResetToken;

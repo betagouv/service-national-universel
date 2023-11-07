@@ -1,5 +1,3 @@
-require("dotenv").config();
-
 const { db } = require("../services/databases/postgresql.service");
 const { capture, captureMessage } = require("../sentry");
 const slack = require("../slack");

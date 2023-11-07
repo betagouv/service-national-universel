@@ -13,6 +13,7 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
@@ -44,7 +45,13 @@ function fromUser(young, parent = 1) {
 
 router.get("/young", tokenParentValidMiddleware, async (req, res) => {
   try {
-    return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
+    const cohortDetails = { name: req.young.cohort };
+    const cohort = await CohortModel.findOne({ name: req.young.cohort });
+    if (cohort) {
+      cohortDetails.dateStart = cohort.dateStart;
+      cohortDetails.dateEnd = cohort.dateEnd;
+    }
+    return res.status(200).send({ ok: true, data: { ...serializeYoung(req.young), cohort: cohortDetails } });
   } catch (e) {
     capture(e);
     return res.status(500).send(e);
@@ -188,12 +195,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       value.parent1ValidationDate = new Date();
       if (young.parentAllowSNU !== value.parentAllowSNU) {
         if (value.parentAllowSNU === "true") {
-          if (young.status === YOUNG_STATUS.REINSCRIPTION) {
-            value.status = YOUNG_STATUS.VALIDATED;
-            value.statusPhase1 = YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
-          } else {
-            value.status = YOUNG_STATUS.WAITING_VALIDATION;
-          }
+          value.status = YOUNG_STATUS.WAITING_VALIDATION;
         } else value.status = YOUNG_STATUS.NOT_AUTORISED;
 
         if (!canUpdateYoungStatus({ body: value, current: young })) {

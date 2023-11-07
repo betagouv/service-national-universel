@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import validator from "validator";
 
-import { translate } from "../../utils";
-import api from "../../services/api";
+import { translate } from "@/utils";
+import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { capture } from "../../sentry";
+import { capture } from "@/sentry";
 import { useHistory } from "react-router-dom";
 
-import { translateGrade, GRADES, getAge, COHESION_STAY_LIMIT_DATE, ES_NO_LIMIT, YOUNG_STATUS } from "snu-lib";
+import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriodTemp, getCohortPeriod, getCohortYear } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -20,10 +20,10 @@ import { CniField } from "../phase0/components/CniField";
 import SchoolEditor from "../phase0/components/SchoolEditor";
 import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
-import Check from "../../assets/icons/Check";
+import Check from "@/assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
-import ConfirmationModal from "../../components/ui/modals/ConfirmationModal";
+import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 
 export default function Create() {
   const history = useHistory();
@@ -87,7 +87,6 @@ export default function Create() {
     paiBeneficiary: "false",
     allergies: "false",
     consentment: "false",
-    certifyData: "false",
     parentAllowSNU: "",
     parent1Status: "",
     rulesParent1: "false",
@@ -264,9 +263,6 @@ export default function Create() {
     if (values.consentment === "false") {
       errors.consentment = errorEmpty;
     }
-    if (values.certifyData === "false") {
-      errors.certifyData = errorEmpty;
-    }
     if (values.parentAllowSNU === "false" || values.parentAllowSNU === "") {
       errors.parentAllowSNU = errorEmpty;
     }
@@ -343,7 +339,6 @@ export default function Create() {
       setLoading(true);
       values.addressVerified = values.addressVerified.toString();
       // necessaire ?
-      delete values.certifyData;
       const { ok, code, young } = await api.post("/young/invite", { ...values, status });
       if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
       const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
@@ -382,14 +377,15 @@ export default function Create() {
               zip: values.zip,
             };
           }
-          const res = await api.post("/cohort-session/eligibility/2023", body);
+          const res = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, body);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
           } else {
             setEgibilityError("");
           }
-          setCohorts(res.data);
+
+          setCohorts(res.data.filter((c) => !["Juin 2024 - 1", "Mars 2024 - La Réunion"].includes(c.name)));
         } catch (e) {
           capture(e);
 
@@ -484,7 +480,8 @@ export default function Create() {
         </div>
       )}
 
-      {values.firstName !== "" &&
+      {cohort &&
+        values.firstName !== "" &&
         values.lastName !== "" &&
         values.parent1FirstName !== "" &&
         values.parent1LastName !== "" &&
@@ -496,7 +493,7 @@ export default function Create() {
           <div className="relative mb-4 rounded bg-white pt-4 shadow">
             <div className="ml-8 mb-6 text-lg font-normal">Consentements</div>
             <div className={"flex px-8 pb-14"}>
-              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} />
+              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} cohort={cohort} />
             </div>
           </div>
         )}
@@ -1123,13 +1120,10 @@ const PARENT_STATUS_NAME = {
   mother: "La mère",
   representant: "Le représentant légal",
 };
-function SectionConsentements({ young, setFieldValue, errors }) {
-  const [youngAge, setYoungAge] = React.useState("?");
+function SectionConsentements({ young, setFieldValue, errors, cohort }) {
   const [volontaireConsentement, setVolontaireConsentement] = React.useState({
     acceptCGU1: false,
-    acceptCGU2: false,
     consentment1: false,
-    consentment2: false,
     inscriptionDoneDate: false,
   });
   const [parent1Consentement, setParent1Consentement] = React.useState({
@@ -1141,20 +1135,12 @@ function SectionConsentements({ young, setFieldValue, errors }) {
   });
 
   React.useEffect(() => {
-    if (young) {
-      setYoungAge(getAge(young.temporaryDate));
-    } else {
-      setYoungAge("?");
-    }
-  }, [young]);
-
-  React.useEffect(() => {
-    if (volontaireConsentement.acceptCGU1 && volontaireConsentement.acceptCGU2) {
+    if (volontaireConsentement.acceptCGU1) {
       setFieldValue("acceptCGU", "true");
     } else {
       setFieldValue("acceptCGU", "false");
     }
-    if (volontaireConsentement.consentment1 && volontaireConsentement.consentment2) {
+    if (volontaireConsentement.consentment1) {
       setFieldValue("consentment", "true");
     } else {
       setFieldValue("consentment", "false");
@@ -1162,18 +1148,10 @@ function SectionConsentements({ young, setFieldValue, errors }) {
   }, [volontaireConsentement]);
 
   React.useEffect(() => {
-    if (youngAge !== "?" && youngAge < 15) {
-      if (parent1Consentement.allow1 && parent1Consentement.allow2 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
-        setFieldValue("parent1AllowSNU", "true");
-      } else {
-        setFieldValue("parent1AllowSNU", "false");
-      }
+    if (parent1Consentement.allow1 && parent1Consentement.allow2 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
+      setFieldValue("parent1AllowSNU", "true");
     } else {
-      if (parent1Consentement.allow1 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
-        setFieldValue("parent1AllowSNU", "true");
-      } else {
-        setFieldValue("parent1AllowSNU", "false");
-      }
+      setFieldValue("parent1AllowSNU", "false");
     }
   }, [parent1Consentement]);
 
@@ -1218,21 +1196,13 @@ function SectionConsentements({ young, setFieldValue, errors }) {
           </span>
         </div>
         <div>
-          <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU1")} errors={errors} value={volontaireConsentement.acceptCGU1}>
-            A lu et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
-          </CheckRead>
-          <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU2")} errors={errors} value={volontaireConsentement.acceptCGU2}>
-            A pris connaissance des modalités de traitement de mes données personnelles.
-          </CheckRead>
           <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment1")} errors={errors} value={volontaireConsentement.consentment1}>
-            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-            <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
+            Se porte volontaire pour participer à la session <b>{getCohortYear(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis
+            la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
-          <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment2")} errors={errors} value={volontaireConsentement.consentment2}>
-            S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.
-          </CheckRead>
-          <CheckRead name="certifyData" onClick={() => handleConsentementChange("certifyData")} errors={errors} value={young.certifyData === "true"}>
-            Certifie l&apos;exactitude des renseignements fournis
+          <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU1")} errors={errors} value={volontaireConsentement.acceptCGU1}>
+            S&apos;inscrit pour le séjour de cohésion <strong>{getCohortPeriod(cohort)}</strong> sous réserve de places disponibles et s&apos;engage à en respecter le règlement
+            intérieur.
           </CheckRead>
         </div>
       </div>
@@ -1263,26 +1233,22 @@ function SectionConsentements({ young, setFieldValue, errors }) {
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à participer à la session <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-          réalisation d&apos;une mission d&apos;intérêt général.
+          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohort)}</b> du SNU.
         </div>
         <div>
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow1")} errors={errors} value={parent1Consentement.allow1}>
-            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de{" "}
             <b>
               {young.firstName} {young.lastName}
             </b>
+            .
           </CheckRead>
-          {youngAge < 15 && (
-            <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow2")} errors={errors} value={parent1Consentement.allow2}>
-              Accepte la collecte et le traitement des données personnelles de{" "}
-              <b>
-                {young.firstName} {young.lastName}
-              </b>
-            </CheckRead>
-          )}
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow3")} errors={errors} value={parent1Consentement.allow3}>
-            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+            S&apos;engage à communiquer la fiche sanitaire de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>{" "}
+            au responsable du séjour de cohésion.
           </CheckRead>
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow4")} errors={errors} value={parent1Consentement.allow4}>
             S&apos;engage à ce que{" "}
@@ -1293,7 +1259,14 @@ function SectionConsentements({ young, setFieldValue, errors }) {
             jaune.
           </CheckRead>
           <CheckRead name="rulesParent1" onClick={() => handleConsentementChange("rulesParent1")} errors={errors} value={young.rulesParent1 === "true"}>
-            Reconnait avoir pris connaissance du Règlement Intérieur du SNU.
+            Reconnait avoir pris connaissance du Règlement Intérieur du séjour de cohésion.
+          </CheckRead>
+          <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow2")} errors={errors} value={parent1Consentement.allow2}>
+            Accepte la collecte et le traitement des données personnelles de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+            .
           </CheckRead>
         </div>
         <div className="itemx-center mt-[16px] flex justify-between">

@@ -1,4 +1,3 @@
-require("dotenv").config();
 require("pg");
 const { Sequelize } = require("sequelize");
 const { ENVIRONMENT, POSTGRESQL } = require("../../config");

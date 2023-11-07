@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { COHESION_STAY_LIMIT_DATE } from "snu-lib/constants";
+import { getCohortPeriod } from "snu-lib";
 import CalendarBig from "../../../assets/icons/CalendarBig";
 import CheckCircleStroke from "../../../assets/icons/CheckCircleStroke";
 import LinkTo from "../../../assets/icons/LinkTo";
@@ -11,6 +11,7 @@ import { BorderButton } from "../components/Buttons";
 import Navbar from "../components/Navbar";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import plausibleEvent from "@/services/plausible";
 
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
@@ -29,10 +30,11 @@ export default function Presentation({ step, parentId }) {
     if (status === "REFUSED") return "est refusé";
   };
 
-  const sejourDate = COHESION_STAY_LIMIT_DATE[young.cohort];
+  const sejourDate = getCohortPeriod(young.cohort);
   const title = parentId === 2 ? `${young.firstName} s'est inscrit(e) au SNU !` : `${young.firstName} souhaite s'inscrire au SNU !`;
 
   function onSubmit() {
+    plausibleEvent("Phase0/CTA representant legal - continuer etape 1");
     const route = parentId === 2 ? "verification-parent2" : "verification";
     history.push(`/representants-legaux/${route}?token=${token}`);
   }

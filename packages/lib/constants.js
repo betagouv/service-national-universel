@@ -219,25 +219,6 @@ const STRUCTURE_STATUS = {
 
 const DEFAULT_STRUCTURE_NAME = "Ma nouvelle Structure";
 
-const COHORTS = [
-  "2019",
-  "2020",
-  "2021",
-  "2022",
-  "Février 2022",
-  "Juin 2022",
-  "Juillet 2022",
-  "Février 2023 - C",
-  "Avril 2023 - B",
-  "Avril 2023 - A",
-  "Juin 2023",
-  "Juillet 2023",
-  "Octobre 2023 - NC",
-  "à venir",
-];
-
-const COHORTS_BEFORE_JULY_2023 = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
-
 const INTEREST_MISSION_LIMIT_DATE = {
   2019: "23 mars 2021",
   2020: "31 décembre 2021",
@@ -350,6 +331,7 @@ const SENDINBLUE_TEMPLATES = {
     PARENT_DID_NOT_CONSENT: "1304",
     PARENT2_DID_NOT_CONSENT: "1243",
     PHASE1_AFFECTATION: "1272",
+    INSCRIPTION_WAITING_CONSENT: "620",
 
     // MIG
     REFUSE_APPLICATION: "1253",
@@ -490,77 +472,6 @@ const WITHRAWN_REASONS = [
     label: "Autre",
   },
 ];
-
-//A decaler dans ./date au fur et a mesure
-const COHESION_STAY_LIMIT_DATE = {
-  2019: "du 16 au 28 juin 2019",
-  2020: "du 21 juin au 2 juillet 2021",
-  2021: "du 21 juin au 2 juillet 2021",
-  "Février 2022": "du 13 au 25 Février 2022",
-  "Juin 2022": "du 12 au 24 Juin 2022",
-  "Juillet 2022": "du 3 au 15 Juillet 2022",
-  "Février 2023 - C": "du 19 Février au 3 Mars 2023",
-  "Avril 2023 - B": "du 16 au 28 Avril 2023",
-  "Avril 2023 - A": "du 9 au 21 Avril 2023",
-  "Juin 2023": "du 11 au 23 Juin 2023",
-  "Juillet 2023": "du 5 au 17 Juillet 2023",
-  "Octobre 2023 - NC": "du 9 au 20 Octobre 2023",
-  "à venir": "à venir",
-};
-
-const COHESION_STAY_START = {
-  2019: new Date("06/16/2019"),
-  2020: new Date("06/21/2020"),
-  2021: new Date("06/21/2021"),
-  "Février 2022": new Date("02/13/2022"),
-  "Juin 2022": new Date("06/12/2022"),
-  "Juillet 2022": new Date("07/03/2022"),
-  "Février 2023 - C": new Date("02/19/2023"),
-  "Avril 2023 - A": new Date("04/09/2023"),
-  "Avril 2023 - B": new Date("04/16/2023"),
-  "Juin 2023": new Date("06/11/2023"),
-  "Juillet 2023": new Date("07/05/2023"),
-  "Octobre 2023 - NC": new Date("10/09/2023"),
-};
-
-const START_DATE_SESSION_PHASE1 = {
-  "Février 2022": new Date("03/13/2022"),
-  "Juin 2022": new Date("06/12/2022"),
-  "Juillet 2022": new Date("07/03/2022"),
-  "Février 2023 - C": new Date("02/19/2023"),
-  "Avril 2023 - A": new Date("04/09/2023"),
-  "Avril 2023 - B": new Date("04/16/2023"),
-  "Juin 2023": new Date("06/11/2023"),
-  "Juillet 2023": new Date("07/04/2023"),
-  "Octobre 2023 - NC": new Date("10/09/2023"),
-};
-
-const START_DATE_PHASE1 = {
-  2019: new Date("06/16/2019"),
-  2020: new Date("06/21/2021"),
-  2021: new Date("06/21/2021"),
-  "Février 2022": new Date("02/13/2022"),
-  "Juin 2022": new Date("06/12/2022"),
-  "Juillet 2022": new Date("07/03/2022"),
-};
-
-const END_DATE_PHASE1 = {
-  2019: new Date("06/28/2019"),
-  2020: new Date("07/02/2021"),
-  2021: new Date("07/02/2021"),
-  "Février 2022": new Date("02/25/2022"),
-  "Juin 2022": new Date("06/24/2022"),
-  "Juillet 2022": new Date("07/15/2022"),
-};
-
-const PHASE1_YOUNG_ACCESS_LIMIT = {
-  "Février 2023 - C": new Date(2023, 0, 12), // before 9 janvier 2023 morning
-  "Avril 2023 - A": new Date(2023, 1, 14), // before 14 fevrier 2023 morning
-  "Avril 2023 - B": new Date(2023, 1, 28), // before 28 fevrier 2023 morning
-  "Juin 2023": new Date(2023, 3, 19), // before 19 avril 2023 morning
-  "Juillet 2023": new Date(2023, 4, 11), // before 11 mai 2023 morning
-  "Octobre 2023 - NC": new Date(2023, 8, 21), // before 21 september 2023 morning  @todo: A modifier quand on connaitra la date
-};
 
 const CONSENTMENT_TEXTS = {
   young: [
@@ -953,20 +864,13 @@ export {
   MISSION_PERIOD_DURING_SCHOOL,
   STRUCTURE_STATUS,
   DEFAULT_STRUCTURE_NAME,
-  COHESION_STAY_LIMIT_DATE,
   INTEREST_MISSION_LIMIT_DATE,
   ES_NO_LIMIT,
   SENDINBLUE_TEMPLATES,
   SENDINBLUE_SMS,
   WITHRAWN_REASONS,
   CONSENTMENT_TEXTS,
-  COHORTS,
-  COHORTS_BEFORE_JULY_2023,
-  START_DATE_SESSION_PHASE1,
-  COHESION_STAY_START,
   FILE_STATUS_PHASE1,
-  START_DATE_PHASE1,
-  END_DATE_PHASE1,
   MINISTRES,
   FILE_KEYS,
   MILITARY_FILE_KEYS,
@@ -975,7 +879,6 @@ export {
   UNSS_TYPE,
   ENGAGEMENT_LYCEEN_TYPES,
   GRADES,
-  PHASE1_YOUNG_ACCESS_LIMIT,
   TEMPLATE_DESCRIPTIONS,
   MIME_TYPES,
   YOUNG_SCHOOLED_SITUATIONS,
@@ -1010,19 +913,13 @@ export default {
   MISSION_PERIOD_DURING_SCHOOL,
   STRUCTURE_STATUS,
   DEFAULT_STRUCTURE_NAME,
-  COHESION_STAY_LIMIT_DATE,
   INTEREST_MISSION_LIMIT_DATE,
   ES_NO_LIMIT,
   SENDINBLUE_TEMPLATES,
   SENDINBLUE_SMS,
   WITHRAWN_REASONS,
   CONSENTMENT_TEXTS,
-  COHORTS,
-  START_DATE_SESSION_PHASE1,
-  COHESION_STAY_START,
   FILE_STATUS_PHASE1,
-  START_DATE_PHASE1,
-  END_DATE_PHASE1,
   MINISTRES,
   FILE_KEYS,
   MILITARY_FILE_KEYS,
@@ -1030,7 +927,6 @@ export default {
   UNSS_TYPE,
   ENGAGEMENT_LYCEEN_TYPES,
   GRADES,
-  PHASE1_YOUNG_ACCESS_LIMIT,
   TEMPLATE_DESCRIPTIONS,
   MIME_TYPES,
   YOUNG_SCHOOLED_SITUATIONS,

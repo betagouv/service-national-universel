@@ -3,16 +3,16 @@ import { useSelector } from "react-redux";
 import { Redirect, useParams } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 
-import StepConfirm from "./mobile/stepConfirm";
-import StepConsentements from "./mobile/stepConsentements";
-import StepCoordonnees from "./mobile/stepCoordonnees";
-import StepDocuments from "./mobile/stepDocuments";
-import StepDone from "./mobile/stepDone";
-import StepRepresentants from "./mobile/stepRepresentants";
-import StepUpload from "./mobile/stepUpload";
+import StepConfirm from "./steps/stepConfirm";
+import StepConsentements from "./steps/stepConsentements";
+import StepCoordonnees from "./steps/stepCoordonnees";
+import StepDocuments from "./steps/stepDocuments";
+import StepDone from "./steps/stepDone";
+import StepRepresentants from "./steps/stepRepresentants";
+import StepUpload from "./steps/stepUpload";
 
-import MobileCorrectionEligibilite from "./mobile/correction/stepEligibilite";
-import MobileCorrectionProfil from "./mobile/correction/stepProfil";
+import MobileCorrectionEligibilite from "./steps/correction/stepEligibilite";
+import MobileCorrectionProfil from "./steps/correction/stepProfil";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
@@ -34,12 +34,12 @@ function renderStep(step) {
   return <StepCoordonnees />;
 }
 
-const Step = ({ young: { inscriptionStep2023 } }) => {
+const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscriptionStep2023 } }) => {
   const { step } = useParams();
 
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
 
-  const eligibleStep = inscriptionStep2023 || STEPS.COORDONNEES;
+  const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
 
   if (!requestedStep && eligibleStep) {
     return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
@@ -91,12 +91,20 @@ export default function Index() {
   }
 
   //il n'a pas acces a l'inscription
-  if (young?.status && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) {
+  if (
+    young?.status &&
+    ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REINSCRIPTION].includes(young?.status)
+  ) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
   //Il a fini son inscription
-  if (young.inscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION") {
+  if (young.inscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION" && !young.hasStartedReinscription) {
+    return <Redirect to={{ pathname: "/" }} />;
+  }
+
+  //il a fini sa re-inscription
+  if (young.reinscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION" && young.hasStartedReinscription) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 

@@ -30,7 +30,7 @@ const {
   canViewSchemaDeRepartition,
   YOUNG_STATUS,
   region2department,
-  COHORTS,
+  getCohortNames,
   canCreateSchemaDeRepartition,
   canDeleteSchemaDeRepartition,
   canEditSchemaDeRepartition,
@@ -51,7 +51,7 @@ const { sendTemplate } = require("../../sendinblue");
 
 const schemaRepartitionBodySchema = Joi.object({
   cohort: Joi.string()
-    .valid(...COHORTS)
+    .valid(...getCohortNames())
     .required(),
   intradepartmental: Joi.string().valid("true", "false"),
   fromDepartment: Joi.string().trim().required(),
@@ -918,7 +918,7 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
     // --- vérification
     const bodySchema = Joi.object({
       cohort: Joi.string()
-        .valid(...COHORTS)
+        .valid(...getCohortNames())
         .required(),
       intradepartmental: Joi.string().valid("true", "false"),
       fromDepartment: Joi.string().trim().required(),

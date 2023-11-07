@@ -8,7 +8,7 @@ const DidNotReceiveActivationReasons = ({ modifiyEmail, className }) => {
     <ul className={`mt-4 list-none text-[#0063CB] flex flex-col gap-1 ${className}`}>
       <li>
         <BsInfoSquareFill className="inline mb-1 mr-1" />
-        L'adresse e-mail que vous utilisez est bien celle que vous avez renseigné
+        L'adresse e-mail que vous utilisez est bien celle que vous avez renseignée
         <InlineButton className="ml-1 text-xs text-[#0063CB]" onClick={modifiyEmail}>
           Modifier mon adresse e-mail
         </InlineButton>
@@ -19,7 +19,7 @@ const DidNotReceiveActivationReasons = ({ modifiyEmail, className }) => {
       </li>
       <li>
         <BsInfoSquareFill className="inline mb-1 mr-1" />
-        L'adresse e-mail no_reply-mailauto@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boîte mail
+        L'adresse e-mail no_reply-auth@snu.gouv.fr ne fait pas partie des adresses indésirables de votre boîte mail
       </li>
       <li>
         <BsInfoSquareFill className="inline mb-1 mr-1" />

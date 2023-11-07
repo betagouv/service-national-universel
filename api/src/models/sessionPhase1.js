@@ -24,7 +24,7 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    enum: [...getCohortNames(true, false, true)],
+    enum: getCohortNames(true, false, true),
     documentation: {
       description: "Cohorte",
     },

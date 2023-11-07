@@ -13,25 +13,6 @@ function isEndOfInscriptionManagement2021() {
   return new Date() > new Date(2021, 4, 7); // greater than 7 mai 2021 morning
 }
 
-function inscriptionModificationOpenForYoungs(cohort) {
-  if (!cohort?.inscriptionModificationEndDate) return false;
-  return new Date() < new Date(cohort.inscriptionModificationEndDate);
-}
-
-function inscriptionCreationOpenForYoungs(cohort) {
-  if (!cohort?.inscriptionEndDate) return false;
-  return new Date() < new Date(cohort.inscriptionEndDate);
-}
-
-function reInscriptionModificationOpenForYoungs(cohort, env) {
-  if (env !== undefined && env !== "production") return true;
-
-  switch (cohort) {
-    default:
-      return new Date() < new Date(2023, 4, 11); // before 11 mai 2023 morning
-  }
-}
-
 const getFilterLabel = (selected, placeholder = "Choisissez un filtre", prelabel = "") => {
   if (Object.keys(selected).length === 0) return placeholder;
   const translator = (item) => {
@@ -157,6 +138,11 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
   if (statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return true;
   return false;
 };
+
+const isYoungInReinscription = (young) => {
+  return young.hasStartedReinscription || false;
+}
+
 const formatPhoneNumberFR = (tel) => {
   if (!tel) return "";
   const regex = /^((?:(?:\+|00)33|0)\s*[1-9])((?:[\s.-]*\d{2}){4})$/;
@@ -186,9 +172,6 @@ const formatMessageForReadingInnerHTML = (content) => {
 
 export {
   isEndOfInscriptionManagement2021,
-  inscriptionModificationOpenForYoungs,
-  inscriptionCreationOpenForYoungs,
-  reInscriptionModificationOpenForYoungs,
   isInRuralArea,
   getFilterLabel,
   getSelectedFilterLabel,
@@ -197,6 +180,7 @@ export {
   canUpdateYoungStatus,
   canUserUpdateYoungStatus,
   youngCanChangeSession,
+  isYoungInReinscription,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
   htmlCleaner,
@@ -207,6 +191,7 @@ export * from "./colors";
 export * from "./constants";
 export * from "./date";
 export * from "./excelExports";
+export * from "./features";
 export * from "./file";
 export * from "./phone-number";
 export * from "./plan-de-transport";

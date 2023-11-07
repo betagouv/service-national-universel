@@ -3,6 +3,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib/date";
+import plausibleEvent from "@/services/plausible";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
@@ -46,16 +47,18 @@ export default function Signin() {
       const urlParams = new URLSearchParams(window.location.search);
       const invitationToken = urlParams.get("token");
       const { data: young, token } = await api.post(`/young/signup_invite`, { email, password, invitationToken: invitationToken });
-      if (young) {
-        if (token) api.setToken(token);
+      if (young && token) {
+        plausibleEvent("INVITATION/ Connexion réussie");
+        api.setToken(token);
         dispatch(setYoung(young));
         await cohortsInit();
-        if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
-        if (redirect) {
+        const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
+        if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
           toastr.error("Url de redirection invalide : " + redirect);
           return history.push("/");
         }
+        return (window.location.href = redirect);
       }
     } catch (e) {
       console.log(e);

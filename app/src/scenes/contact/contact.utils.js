@@ -5,6 +5,11 @@ export const categories = [
 
 export const articleSummaries = [
   {
+    title: "Phase 0: Quelles sont les dates des séjours 2024 ?",
+    description: "Vous souhaitez connaitre les dates des séjours proposés en 2024",
+    slug: "je-souhaite-minscrire-au-snu",
+  },
+  {
     title: "🌲 Phase 1 : Changer les dates de mon séjour",
     description: "Vous n'êtes plus disponible pendant votre séjour ? Découvrez comment transférer votre inscription sur un autre séjour du SNU.",
     slug: "je-souhaite-changer-les-dates-de-mon-sejour",
@@ -39,10 +44,27 @@ export const articleSummaries = [
     description: "Vous souhaitez comprendre le déroulement de la phase 3 du SNU ?",
     slug: "comment-fonctionne-la-phase-3",
   },
+  {
+    title: "Je n’arrive pas à compléter le formulaire d’inscription ",
+    description: "Vous souhaitez avoir de l’aide pour compléter votre inscription",
+    slug: "je-minscris-et-remplis-mon-profil",
+  },
+  {
+    title: "J’ai un frère ou une soeur qui possède déjà un compte",
+    description: "Votre frère ou votre soeur possède déjà un compte, vous souhaitez connaître la procédure pour créer un autre compte.",
+    slug: "je-souhaite-inscrire-des-freressoeurs",
+  },
 ];
 
 // TODO: Move to DB
 export const questions = [
+  {
+    value: "PHASE_0_ELIGIBILITY",
+    category: "QUESTION",
+    label: "Phase 0 -  Eligibilité aux séjours 2024",
+    articles: ["je-souhaite-minscrire-au-snu"],
+    roles: ["public", "young"],
+  },
   {
     value: "PHASE_1",
     category: "QUESTION",
@@ -107,8 +129,16 @@ export const questions = [
   },
   {
     category: "TECHNICAL",
-    value: "DOWNLOAD",
-    label: "Je n'arrive pas à télécharger un document depuis la plateforme",
+    value: "COMPLETION",
+    label: "Pour compléter mon formulaire d'inscription",
+    articles: ["je-minscris-et-remplis-mon-profil"],
+    roles: ["public", "young"],
+  },
+  {
+    category: "TECHNICAL",
+    value: "SIBLINGS",
+    label: "J’ai un frère ou une soeur qui possède déjà un compte ",
+    articles: ["je-souhaite-inscrire-des-freressoeurs"],
     roles: ["public", "young"],
   },
   {
@@ -121,6 +151,12 @@ export const questions = [
     category: "TECHNICAL",
     value: "CONTRACT",
     label: "Je n'ai pas reçu le lien de validation du contrat d'engagement",
+    roles: ["public", "young"],
+  },
+  {
+    category: "TECHNICAL",
+    value: "DOWNLOAD",
+    label: "Je n'arrive pas à télécharger un document depuis la plateforme",
     roles: ["public", "young"],
   },
   {

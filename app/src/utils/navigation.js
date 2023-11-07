@@ -17,6 +17,12 @@ export const PREINSCRIPTION_STEPS = {
   CONFIRM: "CONFIRM",
 };
 
+export const REINSCRIPTION_STEPS = {
+  ELIGIBILITE: "ELIGIBILITE",
+  SEJOUR: "SEJOUR",
+  CONFIRM: "CONFIRM",
+};
+
 export const CORRECTION_STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
   SEJOUR: "SEJOUR",
@@ -44,6 +50,12 @@ export const PREINSCRIPTION_STEPS_LIST = [
   { name: PREINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
   { name: PREINSCRIPTION_STEPS.PROFIL, url: "profil" },
   { name: PREINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
+];
+
+export const REINSCRIPTION_STEPS_LIST = [
+  { name: REINSCRIPTION_STEPS.ELIGIBILITE, url: "eligibilite" },
+  { name: REINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
+  { name: REINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
 ];
 
 export const CORRECTION_STEPS_LIST = [
@@ -145,7 +157,7 @@ const WAITING_CORRECTION_LINK = [
     step: "coordonnee",
   },
   {
-    field: ["cniFile", "latestCNIFileExpirationDate"],
+    field: ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"],
     redirect: "/inscription2023/correction/documents",
     step: "documents",
   },
@@ -163,7 +175,7 @@ export const getCorrectionByStep = (young, step) => {
 };
 
 export const getCorrectionsForStepUpload = (young) => {
-  return young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
+  return young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field));
 };
 
 export const redirectToCorrection = (field) => {

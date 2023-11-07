@@ -115,9 +115,14 @@ router.get("/ticketscount", passport.authenticate("referent", { session: false, 
     const user = await ReferentObject.findById(req.user._id);
     let query = {};
     if (user.role === ROLES.REFERENT_DEPARTMENT)
-      query = { department: user.department, subject: "J'ai une question", role: { $in: ["young", "young exterior", "parent", "responsible"] }, canal: "PLATFORM" };
+      query = {
+        department: user.department,
+        subject: "J'ai une question",
+        role: { $in: ["young", "young exterior", "parent", "responsible"] },
+        canal: { $in: ["PLATFORM", "MAIL"] },
+      };
     if (user.role === ROLES.REFERENT_REGION)
-      query = { region: user.region, subject: "J'ai une question", role: { $in: ["young", "young exterior", "parent", "responsible"] }, canal: "PLATFORM" };
+      query = { region: user.region, subject: "J'ai une question", role: { $in: ["young", "young exterior", "parent", "responsible"] }, canal: { $in: ["PLATFORM", "MAIL"] } };
 
     const { ok, data } = await zammood.api(`/v0/ticket/count`, {
       method: "POST",
@@ -225,7 +230,7 @@ router.post("/ticket/form", async (req, res) => {
 
     if (req.body.role === "young" || req.body.role === "parent") {
       author = req.body.role;
-      const existingYoung = await YoungObject.findOne({ email: req.body.email });
+      const existingYoung = await YoungObject.findOne({ email: req.body.email.toLowerCase() });
       if (existingYoung) {
         req.body.role = "young exterior";
       } else {
@@ -234,7 +239,7 @@ router.post("/ticket/form", async (req, res) => {
     }
 
     const obj = {
-      email: req.body.email,
+      email: req.body.email.toLowerCase(),
       subject: req.body.subject,
       message: req.body.message,
       firstName: req.body.firstName,

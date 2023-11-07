@@ -256,16 +256,13 @@ describe("Young", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      const newEmail = faker.internet.email();
       const res = await request(getAppHelper()).put("/young/account/profile").send({
         gender: "male",
-        email: newEmail,
         phone: "0600000000",
         phoneZone: "FRANCE",
       });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.gender).toEqual("male");
-      expect(res.body.data.email).toEqual(newEmail);
       expect(res.body.data.phone).toEqual("0600000000");
       expect(res.body.data.phoneZone).toEqual("FRANCE");
       passport.user = previous;

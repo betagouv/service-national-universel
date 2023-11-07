@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
-import { COHESION_STAY_LIMIT_DATE, getDepartmentByZip, translate, translateGrade } from "snu-lib";
+import { getDepartmentByZip, translate, translateGrade, getCohortPeriod } from "snu-lib";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 
@@ -13,6 +13,7 @@ import Check from "../components/Check";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import { supportURL } from "../../../config";
+import plausibleEvent from "@/services/plausible";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
@@ -36,6 +37,7 @@ export default function Verification({ step, parentId }) {
       setError(null);
       if (certified) {
         if (await saveParentCertified()) {
+          plausibleEvent("Phase0/CTA representant legal - continuer etape 2");
           history.push(`/representants-legaux/consentement?token=${token}`);
         }
       } else {
@@ -280,7 +282,7 @@ function sectionsData(young) {
     },
     {
       title: "Séjour de cohésion",
-      subtitle: COHESION_STAY_LIMIT_DATE[young.cohort],
+      subtitle: getCohortPeriod(young.cohort),
     },
     {
       title: "Son profil",

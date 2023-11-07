@@ -211,14 +211,14 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    enum: [...getCohortNames(true, true, true)],
+    enum: getCohortNames(),
     documentation: {
       description: "Cohorte",
     },
   },
   originalCohort: {
     type: String,
-    enum: [...getCohortNames(true, true, true)],
+    enum: getCohortNames(),
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },
@@ -364,26 +364,35 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  hasStartedReinscription: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Le jeune a commencé sa réinscription",
+    },
+  },
+
+  // also used for 2024
   reinscriptionStep2023: {
     type: String,
-    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "CONSENTEMENTS", "DOCUMENTS", "WAITING_CONSENT", "DONE"],
+    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "COORDONNEES", "CONSENTEMENTS", "DOCUMENTS", "REPRESENTANTS", "WAITING_CONSENT", "CONFIRM", "DONE"],
     documentation: {
       description: "Étape du tunnel de réinscription 2023",
     },
   },
 
+  // also used for 2024
   inscriptionStep2023: {
     type: String,
-    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
+    enum: ["EMAIL_WAITING_VALIDATION", "COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
     documentation: {
-      description: "Étape du tunnel d'inscription 2023",
+      description: "Étape du tunnel d'inscription 2023/2024",
     },
   },
 
-  // keep track of the current inscription step
+  // @deprecated
   inscriptionStep: {
     type: String,
-    default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
     documentation: {
       description: "Étape du tunnel d'inscription",
@@ -805,6 +814,13 @@ const Schema = new mongoose.Schema({
       description: "Adresse pendant le snu du volontaire",
     },
   },
+  coordinatesAccuracyLevel: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+    documentation: {
+      description: "Type d'adresse du volontaire dans la Base adresse nationale",
+    },
+  },
   complementAddress: {
     type: String,
     documentation: {
@@ -873,8 +889,8 @@ const Schema = new mongoose.Schema({
   },
   qpv: {
     type: String,
+    // TODO: REMOVE "" value from enum after cleaning DB from string empty values.
     enum: ["true", "false", ""],
-    default: "",
     documentation: {
       description: "Le volontaire est dans un Quarier Prioritaire pendant le snu",
     },
@@ -1068,6 +1084,10 @@ const Schema = new mongoose.Schema({
       description: "Adresse du parent 1",
     },
   },
+  parent1coordinatesAccuracyLevel: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+  },
   parent1ComplementAddress: {
     type: String,
     documentation: {
@@ -1215,6 +1235,10 @@ const Schema = new mongoose.Schema({
       description: "Adresse du parent 2",
     },
   },
+  parent2coordinatesAccuracyLevel: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+  },
   parent2ComplementAddress: {
     type: String,
     documentation: {
@@ -1317,6 +1341,8 @@ const Schema = new mongoose.Schema({
       description: "Lien de l'hébergeur avec le volontaire",
     },
   },
+
+  // TODO: cleanup host address fields (they are not used anymore).
   hostCity: {
     type: String,
     documentation: {

@@ -326,8 +326,12 @@ const translate = (value) => {
       return "Votre demande n'a pas pu être prise en compte";
     case "COPIED_TO_CLIPBOARD":
       return "Copié dans le presse-papiers";
+    case "EMAIL_WAITING_VALIDATION":
+      return "Email en attente de validation";
     case "COORDONNEES":
       return "Coordonnées";
+    case "CONSENTEMENTS":
+      return "Consentements";
     case "REPRESENTANTS":
       return "Représentants";
     case "DOCUMENTS":
@@ -338,6 +342,8 @@ const translate = (value) => {
       return "De leur établissement";
     case "mobilityNearRelative":
       return "De l'hébergement d'un proche";
+    case "N/A":
+      return "Non renseigné";
     default:
       return value;
   }
@@ -407,36 +413,6 @@ const translateState = (state) => {
       return "en attente";
     default:
       return state;
-  }
-};
-
-const translateCohortTemp = (young) => {
-  const { cohort } = young;
-
-  switch (cohort) {
-    case "Février 2022":
-      return "du 13 au 25 Février 2022";
-    case "Juin 2022":
-      return "du 12 au 24 Juin 2022";
-    case "Juillet 2022":
-      return "du 3 au 15 Juillet 2022";
-    case "Février 2023 - C":
-      return "du 19 Février au 3 Mars 2023";
-    case "Avril 2023 - B":
-      return "du 16 au 28 Avril 2023";
-    case "Avril 2023 - A":
-      return "du 9 au 21 Avril 2023";
-    case "Juin 2023":
-      return "du 11 au 23 Juin 2023";
-    case "Juillet 2023":
-      if ([...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-        return "du 4 au 16 Juillet 2023";
-      }
-      return "du 5 au 17 Juillet 2023";
-    case "Octobre 2023 - NC":
-      return "du 9 au 20 Octobre 2023";
-    default:
-      return cohort;
   }
 };
 
@@ -979,6 +955,8 @@ const translateField = (field) => {
       return "Pièce d'identité";
     case "latestCNIFileExpirationDate":
       return "Date d'expiration de la pièce d'identité";
+    case "latestCNIFileCategory":
+      return "Type de pièce d'identité";
 
     default:
       return field;
@@ -1152,7 +1130,6 @@ function translateBusPatchesField(path) {
 export {
   translate,
   translateState,
-  translateCohortTemp,
   translateSessionStatus,
   translatePhase1,
   translateContractStatus,
@@ -1184,7 +1161,6 @@ export {
 export default {
   translate,
   translateState,
-  translateCohortTemp,
   translateSessionStatus,
   translatePhase1,
   translateContractStatus,

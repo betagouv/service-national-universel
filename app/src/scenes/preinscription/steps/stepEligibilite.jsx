@@ -21,6 +21,7 @@ import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
+import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -47,17 +48,17 @@ export default function StepEligibilite() {
   const onSubmit = async () => {
     let errors = {};
 
-    // Nationality
-    if (!data?.frenchNationality) {
-      errors.frenchNationality = "Vous devez être français";
+    if (data.frenchNationality === "false" || !data.frenchNationality) {
+      errors.frenchNationality = "Pour participer au SNU, vous devez être de nationalité française.";
     }
+
     // Scolarity
     if (!data?.scolarity) {
       errors.scolarity = "Choisissez un niveau de scolarité";
     }
     // Birthdate
     if (!data?.birthDate || !dayjs(data.birthDate).isValid()) {
-      errors.birthDate = "Vous devez choisir une date de naissance valide";
+      errors.birthDate = "Vous devez saisir une date de naissance valide";
     }
 
     if (data.scolarity) {
@@ -86,13 +87,25 @@ export default function StepEligibilite() {
       return;
     }
 
+    // Check if young is more than 17 years old
+    const age = dayjs().diff(dayjs(data.birthDate), "year");
+    if (age > 17) {
+      setData({ ...data, message: "age", step: PREINSCRIPTION_STEPS.INELIGIBLE });
+      return history.push("/preinscription/noneligible");
+    }
+
     setLoading(true);
     plausibleEvent("Phase0/CTA preinscription - eligibilite");
     if (data.frenchNationality === "false") {
       setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
       return history.push("/preinscription/noneligible");
     }
-    const res = await api.post("/cohort-session/eligibility/2023", {
+    const {
+      ok,
+      code,
+      data: sessions,
+      message,
+    } = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
       schoolRegion: data.school?.region,
@@ -100,21 +113,18 @@ export default function StepEligibilite() {
       grade: data.scolarity,
       zip: data.zip,
     });
-    if (!res.ok) {
-      capture(res.code);
+
+    if (!ok) {
+      capture(code);
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
 
-    if (res.data.msg) {
-      setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
-    }
-    const sessions = res.data;
     if (sessions.length === 0) {
-      setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: PREINSCRIPTION_STEPS.INELIGIBLE });
+      setData({ ...data, message, step: PREINSCRIPTION_STEPS.INELIGIBLE });
       return history.push("/preinscription/noneligible");
     }
+
     setData({ ...data, sessions, step: PREINSCRIPTION_STEPS.SEJOUR });
     return history.push("/preinscription/sejour");
   };
@@ -122,17 +132,20 @@ export default function StepEligibilite() {
   return (
     <>
       <ProgressBar />
-      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}>
+      <DSFRContainer
+        title="Vérifiez votre éligibilité au SNU"
+        supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
+        supportEvent="Phase0/aide preinscription - eligibilite">
         <div className="space-y-5">
           <div className="flex-start flex flex-col">
-            <div className="flex items-center">
+            <div className="flex items-center mb-2">
               <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
               <div className="flex items-center">
                 <span className="ml-4 mr-2">Je suis de nationalité française</span>
                 <IconFrance />
               </div>
             </div>
-            {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
+            {error.frenchNationality ? <ErrorMessage>{error.frenchNationality}</ErrorMessage> : null}
           </div>
 
           <div className="flex flex-col gap-4">
@@ -167,7 +180,7 @@ export default function StepEligibilite() {
                   </span>
                 </p>
 
-                <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, school: {} })} toggled={!data.isAbroad} />
+                <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, school: {}, zip: undefined })} toggled={!data.isAbroad} />
                 {error.isAbroad ? <span className="text-sm text-red-500">{error.isAbroad}</span> : null}
               </div>
 

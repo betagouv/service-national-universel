@@ -7,7 +7,7 @@ import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
-  COHORTS,
+  getCohortNames,
   ROLES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
@@ -53,6 +53,7 @@ export default function Index() {
     user.role === ROLES.REFERENT_REGION
       ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
       : academyList.map((a) => ({ key: a, label: a }));
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let filters = [
@@ -97,7 +98,7 @@ export default function Index() {
         id: "cohort",
         name: "Cohorte",
         fullValue: "Toutes",
-        options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+        options: getCohortNames().map((cohort) => ({ key: cohort, label: cohort })),
         sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
@@ -114,16 +115,20 @@ export default function Index() {
   };
 
   useEffect(() => {
+    if (isLoading) return;
     queryCenter();
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
   }, [JSON.stringify(selectedFilters)]);
 
   useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts);
+    //regex to get all cohort 2024
+    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
     setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
+    setIsLoading(false);
   }, []);
 
+  if (isLoading) return null;
 
   return (
     <DashboardContainer

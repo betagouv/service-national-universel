@@ -3,18 +3,33 @@ const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
 
-async function getFilteredSessions(young) {
+async function getFilteredSessions(young, timeZoneOffset = null) {
   const sessions2023 = await CohortModel.find({});
-
   const region = getRegionForEligibility(young);
+
+  let now = Date.now();
+
+  if (timeZoneOffset) {
+    const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC
+    // Adjust server's time for user's timezone
+    const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;
+    now = new Date(adjustedTimeForUser);
+  }
+
+  const currentCohortYear = young.cohort ? new Date(sessions2023.find((c) => c.name === young.cohort)?.dateStart)?.getFullYear() : undefined;
+
   const sessions = sessions2023.filter(
     (session) =>
+      // if the young has already a cohort, he can only apply for the cohorts of the same year
+      (!young.cohort || currentCohortYear === session.dateStart.getFullYear()) &&
       session.eligibility?.zones.includes(region2zone[region]) &&
       session.eligibility?.schoolLevels.includes(young.grade) &&
       session.eligibility?.bornAfter <= young.birthdateAt &&
       session.eligibility?.bornBefore >= young.birthdateAt &&
-      ((session.inscriptionEndDate && session.inscriptionEndDate > Date.now()) ||
-        ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.instructionEndDate && session.instructionEndDate > Date.now())),
+      !!session.inscriptionStartDate &&
+      session.inscriptionStartDate <= now &&
+      ((session.inscriptionEndDate && session.inscriptionEndDate > now) ||
+        ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) && session.instructionEndDate && session.instructionEndDate > now)),
   );
 
   for (let session of sessions) {
@@ -29,7 +44,7 @@ async function getAllSessions(young) {
   const sessionsWithPlaces = await getPlaces([...oldSessions, ...sessions2023], region);
   const availableSessions = await getFilteredSessions(young);
   for (let session of sessionsWithPlaces) {
-    session.isEligible = availableSessions.includes(session);
+    session.isEligible = availableSessions.some((e) => e.name === session.name);
   }
   return sessionsWithPlaces;
 }
@@ -72,6 +87,7 @@ async function getPlaces(sessions, region) {
       session.goal = goals.find(({ _id }) => _id === session.name)?.total;
       session.goalReached = session.goal <= 0 ? true : session.numberOfCandidates + session.numberOfValidated >= session.goal * session.buffer;
       session.isFull = session.goal <= 0 ? true : session.numberOfValidated >= session.goal;
+      session.isEligible = sessions.some((e) => e.name === session.name);
     }
   }
 

@@ -1,4 +1,3 @@
-import { COHESION_STAY_END } from "./date";
 import { region2department } from "./region-and-departments";
 
 const ROLES = {
@@ -621,7 +620,7 @@ function canSearchInElasticSearch(actor, index) {
   if (index === "mission") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "school" || index === "schoolramses") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(actor.role);
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].includes(actor.role);
   } else if (index === "young-having-school-in-department") {
     return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young-having-school-in-region") {
@@ -660,11 +659,6 @@ function canSendTutorTemplate(actor) {
 
 function canShareSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER].includes(actor.role);
-}
-
-function canApplyToPhase2(young) {
-  const now = new Date();
-  return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= COHESION_STAY_END[young.cohort];
 }
 
 function canCreateAlerteMessage(actor) {
@@ -793,6 +787,30 @@ function canCheckIfRefExist(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR].includes(actor.role);
 }
 
+function canSeeDashboardSejourInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
+function canSeeDashboardSejourHeadCenter(actor) {
+  return [ROLES.HEAD_CENTER].includes(actor.role);
+}
+
+function canSeeDashboardInscriptionInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR].includes(actor.role);
+}
+
+function canSeeDashboardInscriptionDetail(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR, ROLES.HEAD_CENTER].includes(actor.role);
+}
+
+function canSeeDashboardEngagementInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
+function canSeeDashboardEngagementStatus(actor) {
+  return [ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(actor.role);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -874,7 +892,6 @@ export {
   canSeeYoungInfo,
   canEditPresenceYoung,
   canShareSessionPhase1,
-  canApplyToPhase2,
   canCreateAlerteMessage,
   canReadAlerteMessage,
   canViewTableDeRepartition,
@@ -912,4 +929,10 @@ export {
   canPutSpecificDateOnSessionPhase1,
   isBusEditionOpen,
   canCheckIfRefExist,
+  canSeeDashboardSejourInfo,
+  canSeeDashboardInscriptionInfo,
+  canSeeDashboardInscriptionDetail,
+  canSeeDashboardEngagementInfo,
+  canSeeDashboardEngagementStatus,
+  canSeeDashboardSejourHeadCenter,
 };

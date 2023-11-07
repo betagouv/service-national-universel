@@ -11,7 +11,12 @@ export default function StatutPhase({ values, filter }) {
   };
   return (
     <div className="flex flex-col gap-6  rounded-lg bg-white px-8 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-      <p className="text-base font-bold leading-5 text-gray-900">Statut des inscriptions</p>
+      <div className="flex items-center justify-between">
+        <p className="text-base font-bold leading-5 text-gray-900">Statut des inscriptions</p>
+        <p className="text-base leading-5 text-gray-900">
+          Inscriptions cumulées : <p className="font-bold inline">{total}</p>
+        </p>
+      </div>
       <div className="flex w-full flex-wrap justify-between">
         <div className="flex min-w-[30%] flex-col gap-2">
           <StatusText

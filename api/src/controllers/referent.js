@@ -425,7 +425,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     let { __v, ...newYoung } = value;
 
     if (newYoung.status === "REINSCRIPTION") {
-      newYoung.reinscriptionStep2023 = STEPS2023REINSCRIPTION.ELIGIBILITE;
       newYoung.cohesionStayPresence = undefined;
       newYoung.presenceJDM = undefined;
       newYoung.departSejourAt = undefined;
@@ -535,11 +534,19 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
+    const { error: errorQuery, value: query } = Joi.object({
+      timeZoneOffset: Joi.number(),
+    }).validate(req.query, {
+      stripUnknown: true,
+    });
+
+    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
     if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
     const { cohort, cohortChangeReason } = validatedBody.value;
 
-    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young);
+    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, query.timeZoneOffset || null);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;

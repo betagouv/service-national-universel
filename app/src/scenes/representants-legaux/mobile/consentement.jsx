@@ -8,10 +8,10 @@ import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
 import Toggle from "../../../components/dsfr/forms/toggle";
-import { COHESION_STAY_LIMIT_DATE, getAge, translate } from "snu-lib";
+import { translate, getCohortYear } from "snu-lib";
 import Check from "../components/Check";
 import { FRANCE, ABROAD, translateError, API_CONSENT, isReturningParent, CDN_BASE_URL } from "../commons";
-import VerifyAddress from "../../inscription2023/components/VerifyAddress";
+import AddressForm from "@/components/dsfr/forms/AddressForm";
 import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
@@ -19,9 +19,10 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
-import { getDataForConsentStep } from "../utils";
+import { getAddress, getDataForConsentStep } from "../utils";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
+import { getAddressOptions } from "@/services/api-adresse";
 
 export default function Consentement({ step, parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -42,8 +43,7 @@ function ConsentementForm({ young, token, step, parentId }) {
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
-  const youngAge = getAge(young.birthDate);
-  const sessionDate = COHESION_STAY_LIMIT_DATE[young.cohort];
+  const cohortYear = getCohortYear(young.cohort);
 
   // --- France Connect
   const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
@@ -51,32 +51,40 @@ function ConsentementForm({ young, token, step, parentId }) {
 
   // --- address
   const formattedAddress =
-    data?.address && data.address + (data.addressComplement ? " " + data.addressComplement : "") + " " + data.zip + " " + data.city + (data.country ? ", " + data.country : "");
+    young?.address &&
+    young.address + (young.addressComplement ? " " + young.addressComplement : "") + " " + young.zip + " " + young.city + (young.country ? ", " + young.country : "");
 
-  const addressTypeOptions = [
+  const livesInFranceOption = [
     { label: "En France (Métropolitaine ou Outre-mer)", value: FRANCE },
     { label: "À l’étranger", value: ABROAD },
   ];
 
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setData({
-      ...data,
-      addressVerified: true,
-      cityCode: suggestion.cityCode,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? suggestion.address : data.address,
-      zip: isConfirmed ? suggestion.zip : data.zip,
-      city: isConfirmed ? suggestion.city : data.city,
-    });
-    setErrors({ addressVerified: undefined });
-  };
-
   function toggleImageRightsExplanationShown(e) {
     e.preventDefault();
     setImageRightsExplanationShown(!imageRightsExplanationShown);
+  }
+
+  function toggleConfirmAddress() {
+    if (data.confirmAddress) {
+      setData({
+        ...data,
+        confirmAddress: false,
+        address: "",
+        addressComplement: "",
+        zip: "",
+        city: "",
+        country: "",
+        addressVerified: "false",
+        coordinatesAccuracyLevel: "",
+        cityCode: "",
+        region: "",
+        department: "",
+        location: "",
+      });
+    } else {
+      const address = getAddress(young, parentId);
+      setData({ ...data, confirmAddress: true, ...address });
+    }
   }
 
   function onPrevious() {
@@ -92,6 +100,7 @@ function ConsentementForm({ young, token, step, parentId }) {
     if (errors) {
       setErrors(errors);
     } else if (await saveData()) {
+      plausibleEvent("Phase0/CTA representant legal - valider");
       done();
     }
     setSaving(false);
@@ -125,20 +134,18 @@ function ConsentementForm({ young, token, step, parentId }) {
     }
 
     // --- address
-    if (!data.addressVerified) {
-      let validAddress = validate("address", "empty", validator.isEmpty(data.address, { ignore_whitespace: true }));
-      if (validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }))) {
-        validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
-      }
-      validAddress = validate("city", "empty", validator.isEmpty(data.city, { ignore_whitespace: true })) && validAddress;
+    let validAddress = validate("address", "empty", validator.isEmpty(data.address, { ignore_whitespace: true }));
+    if (validate("zip", "empty", validator.isEmpty(data.zip, { ignore_whitespace: true }))) {
+      validAddress = validate("zip", "invalid", !validator.isPostalCode(data.zip, "FR")) && validAddress;
+    }
+    validAddress = validate("city", "empty", validator.isEmpty(data.city, { ignore_whitespace: true })) && validAddress;
 
-      if (data.addressType === ABROAD) {
-        validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true })) && validAddress;
-      }
+    if (data.livesInFrance === ABROAD) {
+      validAddress = validate("country", "empty", validator.isEmpty(data.country, { ignore_whitespace: true })) && validAddress;
+    }
 
-      if (!validAddress) {
-        setData({ ...data, confirmAddress: false });
-      }
+    if (!validAddress) {
+      setData({ ...data, confirmAddress: false });
     }
 
     // --- accept
@@ -147,12 +154,10 @@ function ConsentementForm({ young, token, step, parentId }) {
 
       if (data.allowSNU) {
         validate("rightOlder", "unchecked", data.rightOlder !== true);
-        if (youngAge < 15) {
-          validate("personalData", "unchecked", data.personalData !== true);
-        }
         validate("healthForm", "unchecked", data.healthForm !== true);
         validate("vaccination", "unchecked", data.vaccination !== true);
         validate("internalRules", "unchecked", data.internalRules !== true);
+        validate("personalData", "unchecked", data.personalData !== true);
 
         // validate("allowCovidAutotest", "not_choosen", data.allowCovidAutotest !== false && data.allowCovidAutotest !== true);
         validate("allowImageRights", "not_choosen", data.allowImageRights !== false && data.allowImageRights !== true);
@@ -238,7 +243,7 @@ function ConsentementForm({ young, token, step, parentId }) {
       <Navbar step={step} />
       <DSFRContainer title="Apporter votre consentement">
         <div className="flex flex-col">
-          <h1 className="mb-1  text-[22px] font-bold text-[#21213F]">Apporter votre consentement</h1>
+          {/* <h1 className="mb-1  text-[22px] font-bold text-[#21213F]">Apporter votre consentement</h1> */}
           <div className="mb-[24px] text-[14px] leading-[20px] text-[#666666]">
             <p>
               En tant que représentant(e) légal(e), utilisez ce bouton pour vous identifier avec FranceConnect et <b>vérifier votre identité et vos données personnelles</b> (nom,
@@ -276,37 +281,28 @@ function ConsentementForm({ young, token, step, parentId }) {
               <div className="flex-grow-1">
                 <b>Je réside</b> {formattedAddress}
               </div>
-              <Toggle onClick={() => setData({ ...data, confirmAddress: !data.confirmAddress })} toggled={data.confirmAddress} />
+              <Toggle onClick={toggleConfirmAddress} toggled={data.confirmAddress} />
               {errors.confirmAddress ? <span className="text-sm text-red-500">{errors.confirmAddress}</span> : null}
             </div>
             {!data.confirmAddress && (
               <>
-                <ResponsiveRadioButton label="Je réside..." options={addressTypeOptions} onChange={(e) => setData({ ...data, addressType: e })} value={data.addressType} />
-                <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />
-                <Input
-                  className=""
-                  value={data.addressComplement}
-                  label="Complément d'adresse"
-                  onChange={(e) => setData({ ...data, addressComplement: e })}
-                  error={errors.addressComplement}
-                />
-                <Input value={data.zip} label="Code postal" onChange={(e) => setData({ ...data, zip: e })} error={errors.zip} />
-                <Input value={data.city} label="Ville" onChange={(e) => setData({ ...data, city: e })} error={errors.city} />
-                {data.addressType === ABROAD ? (
-                  <Input className="" value={data.country} label="Pays de résidence" onChange={(e) => setData({ ...data, country: e })} error={errors.country} />
+                <ResponsiveRadioButton label="Je réside..." options={livesInFranceOption} onChange={(e) => setData({ ...data, livesInFrance: e })} value={data.livesInFrance} />
+                {data.livesInFrance === FRANCE ? (
+                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} />
                 ) : (
-                  <div className="flex justify-end">
-                    <div className="w-[50%]">
-                      <VerifyAddress
-                        address={data.address}
-                        zip={data.zip}
-                        city={data.city}
-                        onSuccess={onVerifyAddress(true)}
-                        onFail={onVerifyAddress()}
-                        isVerified={data.addressVerified === true}
-                      />
-                    </div>
-                  </div>
+                  <>
+                    <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />
+                    <Input
+                      className=""
+                      value={data.addressComplement}
+                      label="Complément d'adresse"
+                      onChange={(e) => setData({ ...data, addressComplement: e })}
+                      error={errors.addressComplement}
+                    />
+                    <Input value={data.zip} label="Code postal" onChange={(e) => setData({ ...data, zip: e })} error={errors.zip} />
+                    <Input value={data.city} label="Ville" onChange={(e) => setData({ ...data, city: e })} error={errors.city} />
+                    <Input className="" value={data.country} label="Pays de résidence" onChange={(e) => setData({ ...data, country: e })} error={errors.country} />
+                  </>
                 )}
               </>
             )}
@@ -315,8 +311,7 @@ function ConsentementForm({ young, token, step, parentId }) {
           {parentId === 1 && (
             <div className="border-t-solid  border-t-[1px] border-t-[#E5E5E5] py-[16px]">
               <AuthorizeBlock className="mb-[32px]" title="Participation au SNU" value={data.allowSNU} onChange={(e) => setData({ ...data, allowSNU: e })} error={errors.allowSNU}>
-                <b>{youngFullname}</b> à participer à la session <b>{sessionDate}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-                réalisation d&apos;une mission d&apos;intérêt général.
+                <b>{youngFullname}</b> à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{cohortYear}</b> du SNU.
               </AuthorizeBlock>
 
               {data.allowSNU && (
@@ -324,16 +319,10 @@ function ConsentementForm({ young, token, step, parentId }) {
                   <div>
                     Je, <b>{data.firstName + " " + data.lastName}</b>
                     <Check checked={data.rightOlder} onChange={(e) => setData({ ...data, rightOlder: e })} className="mt-[32px]" error={errors.rightOlder}>
-                      Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de <b>{youngFullname}</b>
+                      Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de <b>{youngFullname}</b>.
                     </Check>
-                    {youngAge < 15 && (
-                      <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
-                        J&apos;accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
-                      </Check>
-                    )}
                     <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
-                      M’engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de
-                      cohésion (
+                      M&apos;engage à communiquer la fiche sanitaire de <b>{youngFullname}</b> au responsable du séjour de cohésion (
                       <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Télécharger la fiche sanitaire ici
                       </a>
@@ -345,10 +334,13 @@ function ConsentementForm({ young, token, step, parentId }) {
                     </Check>
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
                       Reconnais avoir pris connaissance du{" "}
-                      <a href={CDN_BASE_URL + "/file/snu-reglement-interieur-2022-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
-                        Règlement Intérieur du SNU
+                      <a href={CDN_BASE_URL + "/file/snu-reglement-interieur.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                        Règlement Intérieur du séjour de cohésion
                       </a>
                       .
+                    </Check>
+                    <Check checked={data.personalData} onChange={(e) => setData({ ...data, personalData: e })} className="mt-[24px]" error={errors.personalData}>
+                      Accepte la collecte et le traitement des données personnelles de <b>{youngFullname}</b>
                     </Check>
                   </div>
                 </div>
@@ -359,9 +351,9 @@ function ConsentementForm({ young, token, step, parentId }) {
             <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-8">
               <AuthorizeBlock title="Droit à l’image" value={data.allowImageRights} onChange={(e) => setData({ ...data, allowImageRights: e })} error={errors.allowImageRights}>
                 <div className="mb-3">
-                  Le Ministère de l’Education Nationale et de la Jeunesse, ses partenaires et les journalistes dûment accrédités par les services communication du ministère et/ou
-                  des préfectures à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur
-                  leurs publications respectives.{" "}
+                  Le Ministère de l’Education Nationale et de la Jeunesse (MENJ), ses services déconcentrés, ses partenaires et les journalistes dûment accrédités par les services
+                  de communication du ministère à enregistrer, reproduire et représenter l’image ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
+                  séparément, sur leurs publications respectives.{" "}
                   {!imageRightsExplanationShown && (
                     <a className="whitespace-nowrap underline" href="#" onClick={toggleImageRightsExplanationShown}>
                       Lire plus
@@ -371,13 +363,22 @@ function ConsentementForm({ young, token, step, parentId }) {
                 {imageRightsExplanationShown && (
                   <>
                     <div className="mb-3">
-                      Cette autorisation est valable pour une utilisation : d’une durée de 5 ans à compter de la signature de la présente ; sur tous les supports d’information et
-                      de communication imprimés ou numériques à but non lucratif ; édités par les services de l’État ainsi que sur tous réseaux de communication, y compris
-                      télévisuels ou Internet ; de l’image du volontaire représenté en tant que telle et/ou intégrée dans une œuvre papier, numérique ou audiovisuelle. Conformément
-                      aux dispositions légales en vigueur relatives au droit à l’image, le MENJS s’engage à ce que la publication et la diffusion de l’image ainsi que des
-                      commentaires l’accompagnant ne portent pas atteinte à sa vie privée, à sa dignité et à sa réputation. En vertu du Règlement général sur la protection des
-                      données (RGPD), entré en application le 25 mai 2018, le sujet ou son/ses représentant(s) légal/légaux dispose(ent) d’un libre accès aux photos concernant la
-                      personne mineure et a le droit de demander à tout moment le retrait de celles-ci*.
+                      <p>
+                        Cette autorisation est valable pour une utilisation sur l’ensemble du parcours du service national universel, tant durant le séjour de cohésion que dans le
+                        cadre de la mobilisation du volontaire au titre de la réserve du SNU :{" "}
+                      </p>
+                      <div className="ml-4 mt-2 mb-2">
+                        <li>pour une durée de 5 ans à compter de la signature de la présente ;</li>
+                        <li> sur tous les supports d’information et de communication imprimés ou numériques à but non lucratif ; </li>
+                        <li>édités par les services de l’État ainsi que sur tous réseaux de communication, y compris télévisuels ou Internet ;</li>
+                        <li>de l’image du volontaire représenté en tant que telle ou intégrée dans une œuvre papier, numérique ou audiovisuelle.</li>
+                      </div>
+                      <p>
+                        Conformément aux dispositions légales en vigueur relatives au droit à l’image, le MENJ s’engage à ce que la publication et la diffusion de l’image du
+                        volontaire ainsi que des commentaires l’accompagnant ne portent pas atteinte à sa vie privée, à sa dignité et à sa réputation. En vertu du Règlement général
+                        sur la protection des données (RGPD), entré en application le 25 mai 2018, le volontaire et ses représentants légaux disposent d’un libre accès aux photos
+                        concernant la personne mineure et ont le droit de demander à tout moment le retrait de celles-ci. La présente autorisation est consentie à titre gratuit.
+                      </p>
                     </div>
                     <div className="mb-3">La présente autorisation est consentie à titre gratuit.</div>
                     <a className="underline" href="#" onClick={toggleImageRightsExplanationShown}>

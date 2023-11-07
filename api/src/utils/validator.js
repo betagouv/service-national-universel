@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, COHORTS, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
+const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames } = require("snu-lib");
 const { isYoung } = require("../utils");
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -249,7 +249,8 @@ function validateNewApplication(application, user) {
 
 const cohesionCenterKeys = () => {
   let dynamicCohort = {};
-  COHORTS.forEach((c) => {
+  const cohorts = getCohortNames();
+  cohorts.forEach((c) => {
     dynamicCohort[c] = Joi.object()
       .keys({
         status: Joi.string().allow(null, ""),
@@ -734,12 +735,13 @@ function validateStructureManager(structureManager) {
 }
 
 function validateHeadOfCenterCohortChange(values) {
+  const cohorts = getCohortNames();
   return Joi.object()
     .keys({
       cohesionCenterId: Joi.string().regex(idRegex, "id").required(),
       headCenterId: Joi.string().regex(idRegex, "id").required(),
-      oldCohort: Joi.string().valid(...COHORTS),
-      newCohort: Joi.string().valid(...COHORTS),
+      oldCohort: Joi.string().valid(...cohorts),
+      newCohort: Joi.string().valid(...cohorts),
     })
     .validate(values, { stripUnknown: true });
 }

@@ -32,7 +32,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
           birthdateAt: Joi.date().required(),
           grade: Joi.string(),
           status: Joi.string(),
-          zip: Joi.string(),
+          zip: Joi.string().allow("", null),
         })
           .unknown()
           .validate(req.body);
@@ -44,6 +44,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
       }
       const { error: errorQuery, value: query } = Joi.object({
         getAllSessions: Joi.boolean().default(false),
+        timeZoneOffset: Joi.number(),
       }).validate(req.query, {
         stripUnknown: true,
       });
@@ -52,8 +53,8 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
 
       const bypassFilter =
         (user?.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && query.getAllSessions);
-      const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young);
-      if (sessions.length === 0) return res.send({ ok: true, data: { msg: "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU." } });
+      const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young, query.timeZoneOffset || null);
+      if (sessions.length === 0) return res.send({ ok: true, data: [], message: "no_session_found" });
       return res.send({ ok: true, data: sessions });
     } catch (error) {
       capture(error);
@@ -62,16 +63,34 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
   })(req, res);
 });
 
-router.get("/isInscriptionOpen/:sessionName?", async (req, res) => {
-  const cohortName = req.params.sessionName;
+router.get("/isInscriptionOpen", async (req, res) => {
+  const { error, value } = Joi.object({
+    sessionName: Joi.string(),
+    timeZoneOffset: Joi.number().required(),
+  })
+    .unknown()
+    .validate(req.query, { stripUnknown: true });
+
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  const { sessionName: cohortName, timeZoneOffset } = value;
+
+  const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC
+
+  // Adjust server's time for user's timezone
+  const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;
+  const now = new Date(adjustedTimeForUser);
+
   try {
     if (cohortName) {
       const cohort = await CohortModel.findOne({ name: cohortName });
       if (!cohort) return res.status(400).send({ ok: true, data: false });
-      return res.send({ ok: true, data: new Date() < new Date(cohort.inscriptionEndDate) });
+      return res.send({ ok: true, data: now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate) });
     }
     const cohorts = await CohortModel.find({});
-    return res.send({ ok: true, data: cohorts.some((c) => new Date() < new Date(c.inscriptionEndDate)) });
+    return res.send({
+      ok: true,
+      data: cohorts.some((cohort) => now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate)),
+    });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

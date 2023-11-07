@@ -6,7 +6,6 @@ import { toastr } from "react-redux-toastr";
 import { youngCanChangeSession } from "snu-lib";
 import { PHONE_ZONES } from "snu-lib/phone-number";
 import { useDispatch, useSelector } from "react-redux";
-import { environment } from "@/config";
 import { setYoung } from "@/redux/auth/actions";
 import { validateEmail, validatePhoneNumber } from "@/utils/form-validation.utils";
 import { updateYoung } from "@/services/young.service";
@@ -35,7 +34,6 @@ const getInitialFormValues = (young) => ({
   },
 });
 
-//@todo : before going to production, adapt backend route as well
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -48,7 +46,7 @@ const AccountGeneralPage = () => {
   const shouldValidateEmail = newEmailValidationToken && young.newEmail;
 
   useEffect(() => {
-    if (environment === "production" || formValues.email === young.email) return;
+    if (formValues.email === young.email) return;
     setFormValues({ ...formValues, email: young.email });
   }, [young.email, formValues]);
 
@@ -85,7 +83,6 @@ const AccountGeneralPage = () => {
         gender: formValues.gender,
         phone: formValues.phone.phoneNumber.trim(),
         phoneZone: formValues.phone.phoneZone,
-        email: formValues.email.trim(),
       };
       const { title, message, data: updatedYoung } = await updateYoung("profile", youngDataToUpdate);
       toastr.success(title, message);
@@ -114,14 +111,12 @@ const AccountGeneralPage = () => {
     <>
       <div className="overflow-hidden bg-white shadow-sm lg:rounded-lg">
         <ChangeAddressModal isOpen={isChangeAddressModalOpen} onClose={() => setChangeAddressModalOpen(false)} young={young} />
-        {environment !== "production" && (
-          <ChangeEmailModal
-            isOpen={isChangeEmailModalOpen}
-            onClose={() => setChangeEmailModalOpen(false)}
-            young={young}
-            validationToken={shouldValidateEmail ? newEmailValidationToken : ""}
-          />
-        )}
+        <ChangeEmailModal
+          isOpen={isChangeEmailModalOpen}
+          onClose={() => setChangeEmailModalOpen(false)}
+          young={young}
+          validationToken={shouldValidateEmail ? newEmailValidationToken : ""}
+        />
         <form onSubmit={handleSubmitGeneralForm}>
           <div className="grid grid-cols-1 lg:grid-cols-3">
             <div className="hidden py-6 pl-6 lg:col-start-1 lg:block">
@@ -153,13 +148,11 @@ const AccountGeneralPage = () => {
                   placeholder="example@example.com"
                   value={formValues.email}
                   onChange={handleChangeValue("email")}
-                  disabled={environment !== "production"}
+                  disabled
                 />
-                {environment !== "production" && (
-                  <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-4">
-                    Modifier mon adresse email
-                  </InlineButton>
-                )}
+                <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-4">
+                  Modifier mon adresse email
+                </InlineButton>
                 <InputPhone
                   label="Téléphone"
                   name="phone"

@@ -60,6 +60,7 @@ module.exports = {
         "beige-gris-galet-975": "#f9f6f2",
         "blue-france-sun-113": "#000091",
         "blue-france-sun-113-hover": "#1212ff",
+        "blue-france-info": "#0063cb",
         "grey-625": "#929292",
         "grey-925": "#e5e5e5",
         "snu-primary": "#42389d",

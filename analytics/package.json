@@ -21,6 +21,7 @@
   "author": "Selego",
   "license": "ISC",
   "dependencies": {
+    "@scaleway/sdk": "^1.38.1",
     "@sentry/integrations": "^7.61.0",
     "@sentry/node": "^7.61.0",
     "body-parser": "^1.20.2",

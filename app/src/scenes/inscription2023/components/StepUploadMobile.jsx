@@ -6,21 +6,33 @@ import { getCohort } from "@/utils/cohorts";
 import { formatDateFR, translateCorrectionReason } from "snu-lib";
 import dayjs from "dayjs";
 
-import CheckBox from "../../../components/dsfr/forms/checkbox";
 import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import Verify from "./VerifyDocument";
 
-export default function StepUploadMobile({ recto, setRecto, verso, setVerso, date, setDate, error, setError, loading, setLoading, corrections, category, onSubmit, onCorrect }) {
+export default function StepUploadMobile({
+  recto,
+  setRecto,
+  verso,
+  setVerso,
+  date,
+  setDate,
+  error,
+  setError,
+  loading,
+  setLoading,
+  corrections,
+  category,
+  checked,
+  setChecked,
+  onSubmit,
+  onCorrect,
+}) {
   const young = useSelector((state) => state.Auth.young);
   const [step, setStep] = useState(getStep());
-  const [checked, setChecked] = useState({
-    "Toutes les informations sont lisibles": false,
-    "Le document n'est pas coupé": false,
-    "La photo est nette": false,
-  });
   const [hasChanged, setHasChanged] = useState(false);
   const isEnabled = validate();
 
@@ -43,15 +55,9 @@ export default function StepUploadMobile({ recto, setRecto, verso, setVerso, dat
   }
 
   function renderStep(step) {
-    if (step === "recto") return <Recto corrections={corrections} category={category} setRecto={setRecto} setStep={setStep} setHasChanged={setHasChanged} />;
-    if (step === "verso") return <Verso corrections={corrections} category={category} setVerso={setVerso} setStep={setStep} setHasChanged={setHasChanged} />;
-    if (step === "verify")
-      return (
-        <>
-          <Gallery recto={recto} verso={verso} />
-          <Verify checked={checked} setChecked={setChecked} />
-        </>
-      );
+    if (step === "recto") return <Recto corrections={corrections} category={category} setRecto={setRecto} setStep={setStep} setHasChanged={setHasChanged} setError={setError} />;
+    if (step === "verso") return <Verso corrections={corrections} category={category} setVerso={setVerso} setStep={setStep} setHasChanged={setHasChanged} setError={setError} />;
+    if (step === "verify") return <Verify recto={recto} verso={verso} checked={checked} setChecked={setChecked} />;
     if (step === "date") return <ExpirationDate corrections={corrections} category={category} young={young} date={date} setDate={setDate} setHasChanged={setHasChanged} />;
   }
 
@@ -95,7 +101,7 @@ export default function StepUploadMobile({ recto, setRecto, verso, setVerso, dat
   );
 }
 
-function Recto({ corrections, category, setRecto, setStep, setHasChanged }) {
+function Recto({ corrections, category, setRecto, setStep, setHasChanged, setError }) {
   async function handleChange(e) {
     const image = await resizeImage(e.target.files[0]);
     if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
@@ -130,7 +136,7 @@ function Recto({ corrections, category, setRecto, setStep, setHasChanged }) {
   );
 }
 
-function Verso({ corrections, category, setVerso, setStep, setHasChanged }) {
+function Verso({ corrections, category, setVerso, setStep, setHasChanged, setError }) {
   async function handleChange(e) {
     const image = await resizeImage(e.target.files[0]);
     if (image.size > 5000000) return setError({ text: "Ce fichier est trop volumineux." });
@@ -163,20 +169,6 @@ function Verso({ corrections, category, setVerso, setStep, setHasChanged }) {
   );
 }
 
-function Verify({ checked, setChecked }) {
-  return (
-    <>
-      <p className="my-4 text-lg font-semibold text-gray-800">Vérifiez les points suivants</p>
-      {Object.entries(checked).map(([key, value]) => (
-        <div className="my-2 flex items-center" key={key}>
-          <CheckBox type="checkbox" checked={value} onChange={() => setChecked({ ...checked, [key]: !checked[key] })} />
-          <span className="ml-2 mr-2">{key}</span>
-        </div>
-      ))}
-    </>
-  );
-}
-
 function ExpirationDate({ corrections, category, young, date, setDate, setHasChanged }) {
   return (
     <>
@@ -201,6 +193,7 @@ function ExpirationDate({ corrections, category, young, date, setDate, setHasCha
         <img className="mx-auto my-4" src={ID[category]?.imgDate} alt={ID.title} />
       </div>
       <DatePicker
+        displayError
         value={date}
         onChange={(date) => {
           setDate(date);
@@ -208,14 +201,5 @@ function ExpirationDate({ corrections, category, young, date, setDate, setHasCha
         }}
       />
     </>
-  );
-}
-
-function Gallery({ recto, verso }) {
-  return (
-    <div className="mb-4 flex h-48 w-full space-x-2 overflow-x-auto">
-      {recto && <img src={URL.createObjectURL(recto)} className="w-3/4 object-contain" />}
-      {verso && <img src={URL.createObjectURL(verso)} className="w-3/4 object-contain" />}
-    </div>
   );
 }

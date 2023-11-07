@@ -3,13 +3,6 @@ env:
   APP_NAME: snu-stag-admin
   ENVIRONMENT_NAME: snu-admin-staging
 
-  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  SLACK_COLOR: "#3278BD"
-  SLACK_ICON_EMOJI: ":package:"
-  SLACK_USERNAME: Github
-  MSG_MINIMAL: true
-  SLACK_FOOTER: ""
-
 name: Deploy staging admin
 
 on:
@@ -17,9 +10,6 @@ on:
     branches:
       - main
       - staging
-    paths:
-      - admin/**
-      - packages/**
   workflow_dispatch:
 
 jobs:

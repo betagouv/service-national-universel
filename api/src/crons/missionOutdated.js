@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
 const path = require("path");
 const { capture } = require("../sentry");
