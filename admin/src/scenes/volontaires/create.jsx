@@ -715,7 +715,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
       )}
       <div className="mt-8">
         <div className="mt-8 mb-2 text-xs font-medium leading-snug text-[#242526]">Situations particulières</div>
-        <FieldSituationsParticulieres name="specificSituations" young={values} mode={"edition"} onChange={(value, key) => setFieldValue(key, value)} />
+        <FieldSituationsParticulieres name="specificSituations" young={values} mode="edition" onChange={(key, value) => setFieldValue(key, value)} />
         {values.specificAmenagment === "true" && (
           <Field
             name="specificAmenagmentType"
