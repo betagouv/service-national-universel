@@ -47,7 +47,7 @@ router.post(
   async ({ body }, res) => {
     try {
       body.date = new Date(body.date);
-      const log = await LogYoungModel.create(body.value);
+      const log = await LogYoungModel.create(body);
 
       return res.status(200).send({ ok: true, data: log });
     } catch (error) {
