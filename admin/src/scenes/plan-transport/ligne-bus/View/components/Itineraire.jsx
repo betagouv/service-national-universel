@@ -1,5 +1,5 @@
 import React from "react";
-import { GoPrimitiveDot } from "react-icons/go";
+import { BsCircleFill } from "react-icons/bs";
 import { IoAirplaneOutline, IoRocketOutline } from "react-icons/io5";
 import { formatDateFR, ROLES, translate } from "snu-lib";
 import BusSvg from "../../../../../assets/icons/Bus";
@@ -161,7 +161,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour, bus,
                   <div className="flex w-14 items-center justify-center rounded-lg bg-gray-100 py-2 text-xs font-medium leading-4">{event.time}</div>
                   <div>
                     <span className="flex h-8 w-8 items-center justify-center">
-                      <GoPrimitiveDot className={classNames(event.iconColor, "z-10 h-5 w-5")} aria-hidden="true" />
+                      <BsCircleFill className={classNames(event.iconColor, "z-10 h-5 w-5")} aria-hidden="true" />
                     </span>
                   </div>
                   <div className="flex min-w-0 flex-1 items-center justify-between space-x-4">
