@@ -10,7 +10,7 @@ export async function cohortsInit() {
   if (isCohortsInitialized()) return;
   try {
     const result = await api.get("/cohort");
-    if (result.status === 401) {
+    if (result?.status === 401) {
       return;
     }
     if (!result.ok) {
