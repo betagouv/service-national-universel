@@ -81,6 +81,8 @@ async function createLog(patch, actualYoung, event, value) {
   const youngInfos = await actualYoung.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let young = rebuildYoung(youngInfos);
 
+  const anonymisedYoung = new YoungModel(young).anonymise();
+
   const age = getAge(young?.birthdateAt || actualYoung?.birthdateAt);
 
   const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/young`, {
@@ -109,7 +111,7 @@ async function createLog(patch, actualYoung, event, value) {
       user_rural: isInRuralArea(young?.populationDensity ? young : actualYoung),
       user_age: age !== "?" ? age : undefined,
       date: patch.date,
-      raw_data: young,
+      raw_data: anonymisedYoung,
     }),
   });
 
