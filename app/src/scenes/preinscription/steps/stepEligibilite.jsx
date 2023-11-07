@@ -21,6 +21,7 @@ import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
+import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
 export default function StepEligibilite() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -46,6 +47,10 @@ export default function StepEligibilite() {
 
   const onSubmit = async () => {
     let errors = {};
+
+    if (data.frenchNationality === "false" || !data.frenchNationality) {
+      errors.frenchNationality = "Pour participer au SNU, vous devez être de nationalité française.";
+    }
 
     // Scolarity
     if (!data?.scolarity) {
@@ -80,11 +85,6 @@ export default function StepEligibilite() {
       console.warn("Pb avec ce champ : " + Object.keys(errors)[0] + " pour la raison : " + Object.values(errors)[0]);
       toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
       return;
-    }
-
-    if (data.frenchNationality === "false" || !data.frenchNationality) {
-      setData({ ...data, message: "nationality", step: PREINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
     }
 
     // Check if young is more than 17 years old
@@ -138,14 +138,14 @@ export default function StepEligibilite() {
         supportEvent="Phase0/aide preinscription - eligibilite">
         <div className="space-y-5">
           <div className="flex-start flex flex-col">
-            <div className="flex items-center">
+            <div className="flex items-center mb-2">
               <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
               <div className="flex items-center">
                 <span className="ml-4 mr-2">Je suis de nationalité française</span>
                 <IconFrance />
               </div>
             </div>
-            {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
+            {error.frenchNationality ? <ErrorMessage>{error.frenchNationality}</ErrorMessage> : null}
           </div>
 
           <div className="flex flex-col gap-4">
