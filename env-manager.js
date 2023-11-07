@@ -1,8 +1,8 @@
 const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const { Secret, createClient } = require("@scaleway/sdk");
 
-async function loadEnv() {
+async function loadEnv(secretName) {
   if (!process.env.DEV) return;
 
   const client = createClient({
@@ -15,7 +15,10 @@ async function loadEnv() {
 
   const api = new Secret.v1alpha1.API(client);
 
-  const secret = await api.accessSecretVersionByName({ secretName: "analytics", revision: "latest_enabled" });
+  const secret = await api.accessSecretVersionByName({
+    secretName,
+    revision: "latest_enabled",
+  });
   const decodedData = Buffer.from(secret.data, "base64").toString("utf8");
   const parsed = require("dotenv").parse(decodedData);
 
