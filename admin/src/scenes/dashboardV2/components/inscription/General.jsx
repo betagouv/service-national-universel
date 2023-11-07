@@ -34,9 +34,10 @@ export default function General({ selectedFilters, setSelectedFilters }) {
     : academyList.map((a) => ({ key: a, label: a }));
 
   useEffect(() => {
-    //regex to get all cohort 2024
+    // regex to get all cohort 2024
     const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
     setSelectedFilters({ cohort: cohortsFilters });
+
     setIsLoading(false);
   }, []);
 
@@ -94,6 +95,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
   }, []);
 
   useEffect(() => {
+    if (isLoading) return;
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
     fetchCurrentInscriptions();

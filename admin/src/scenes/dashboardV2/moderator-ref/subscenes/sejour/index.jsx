@@ -115,6 +115,7 @@ export default function Index() {
   };
 
   useEffect(() => {
+    if (isLoading) return;
     queryCenter();
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
