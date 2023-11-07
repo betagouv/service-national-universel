@@ -4,6 +4,8 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
+const { generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
 
 const MODELNAME = "referent";
@@ -50,14 +52,6 @@ const Schema = new mongoose.Schema({
     default: 0,
     documentation: {
       description: "tentative de connexion. Max 15",
-    },
-  },
-  // ! To delete if trust_token works
-  userIps: {
-    type: [String],
-    default: [],
-    documentation: {
-      description: "Liste des IP utilisées par l'utilisateur",
     },
   },
   token2FA: {
@@ -229,12 +223,6 @@ const Schema = new mongoose.Schema({
       description: "Numéro de téléphone fix",
     },
   },
-  mobile: {
-    type: String,
-    documentation: {
-      description: "Numéro de portable",
-    },
-  },
 
   deletedAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
@@ -252,6 +240,14 @@ Schema.pre("save", async function (next) {
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
   return bcrypt.compare(p, user.password || "");
+};
+
+Schema.methods.anonymise = function () {
+  this.phone && (this.phone = generateNewPhoneNumber());
+  this.email && (this.email = generateRandomEmail());
+  this.firstName && (this.firstName = generateRandomName());
+  this.lastName && (this.lastName = generateRandomName());
+  return this;
 };
 
 //Sync with Sendinblue
@@ -300,7 +296,6 @@ Schema.plugin(patchHistory, {
     "/loginAttempts",
     "/attempts2FA",
     "/updatedAt",
-    "/userIps",
     "/token2FA",
     "/token2FAExpires",
   ],
@@ -322,7 +317,6 @@ Schema.plugin(
       "attempts2FA",
       "updatedAt",
       "lastActivityAt",
-      "userIps",
       "token2FA",
       "token2FAExpires",
     ],

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
+const { generateRandomEmail, generateBirthdate } = require("../utils/anonymise");
 
 const MODELNAME = "waitinglist";
 
@@ -27,6 +28,12 @@ const Schema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
+
+Schema.methods.anonymise = function () {
+  this.mail && (this.mail = generateRandomEmail());
+  this.birthdateAt && (this.birthdateAt = generateBirthdate());
+  return this;
+};
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 

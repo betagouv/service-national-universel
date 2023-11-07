@@ -5,6 +5,7 @@ const { getCohortNames } = require("snu-lib");
 const esClient = require("../es");
 const MODELNAME = "sessionphase1";
 const { ENVIRONMENT } = require("../config");
+const { starify } = require("../utils/anonymise");
 
 const File = new mongoose.Schema({
   _id: String,
@@ -176,6 +177,23 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.methods.anonymise = function () {
+  this.zipCenter && (this.zipCenter = starify(this.zipCenter));
+  this.codeCenter && (this.codeCenter = starify(this.codeCenter));
+  this.centerName && (this.centerName = starify(this.centerName));
+  this.cityCenter && (this.cityCenter = starify(this.cityCenter));
+  if (!["VALIDATED", "WAITING_VALIDATION"].includes(this.status)) this.status = "WAITING_VALIDATION";
+  this.team &&
+    (this.team = this.team.map((member) => {
+      member.firstName && (member.firstName = starify(member.firstName));
+      member.lastName && (member.lastName = starify(member.lastName));
+      member.email && (member.email = starify(member.email));
+      member.phone && (member.phone = starify(member.phone));
+      return member;
+    }));
+  return this;
+};
+
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
@@ -186,6 +204,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
   this.updatedAt = Date.now();
+
   next();
 });
 

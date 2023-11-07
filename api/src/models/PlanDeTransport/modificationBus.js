@@ -4,6 +4,7 @@ const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
 const { getCohortNames } = require("snu-lib");
 const MODELNAME = "modificationbus";
+const { starify } = require("../../utils/anonymise");
 
 const Schema = new mongoose.Schema({
   cohort: {
@@ -181,6 +182,20 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
   deletedAt: { type: Date },
 });
+
+Schema.methods.anonymise = function () {
+  this.requestMessage && (this.requestMessage = starify(this.requestMessage));
+  this.requestUserName && (this.requestUserName = starify(this.requestUserName));
+  this.statusUserName && (this.statusUserName = starify(this.statusUserName));
+  this.opinionUserName && (this.opinionUserName = starify(this.opinionUserName));
+  this.messages &&
+    (this.messages = this.messages.map((message) => {
+      message.message = starify(message.message);
+      message.userName = starify(message.userName);
+      return message;
+    }));
+  return this;
+};
 
 Schema.virtual("user").set(function (user) {
   if (user) {
