@@ -166,7 +166,7 @@ const WAITING_CORRECTION_LINK = [
 export const getCorrectionByStep = (young, step) => {
   const keyList = WAITING_CORRECTION_LINK.find((link) => link.step === step);
   const corrections = young?.correctionRequests.reduce((acc, curr) => {
-    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field)) {
+    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field) && curr.cohort === young.cohort) {
       acc[curr.field] = curr.message;
     }
     return acc;
@@ -175,7 +175,9 @@ export const getCorrectionByStep = (young, step) => {
 };
 
 export const getCorrectionsForStepUpload = (young) => {
-  return young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field));
+  return young.correctionRequests
+    ?.filter((e) => e.cohort === young.cohort)
+    ?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field));
 };
 
 export const redirectToCorrection = (field) => {
