@@ -53,6 +53,7 @@ export default function Index() {
     user.role === ROLES.REFERENT_REGION
       ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
       : academyList.map((a) => ({ key: a, label: a }));
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let filters = [
@@ -123,7 +124,10 @@ export default function Index() {
     //regex to get all cohort 2024
     const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
     setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
+    setIsLoading(false);
   }, []);
+
+  if (isLoading) return null;
 
   return (
     <DashboardContainer
