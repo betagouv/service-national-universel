@@ -21,13 +21,15 @@
   const passport = require("passport");
   require("./mongo");
 
-  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, ENVIRONMENT } = require("./config.js");
+  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT,API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
 
   if (process.env.NODE_ENV !== "test") {
     console.log("APP_URL", APP_URL);
     console.log("ADMIN_URL", ADMIN_URL);
     console.log("SUPPORT_URL", SUPPORT_URL);
     console.log("KNOWLEDGEBASE_URL", KNOWLEDGEBASE_URL);
+    console.log("ANALYTICS_URL", API_ANALYTICS_ENDPOINT);
+    console.log("PDF_URL", API_PDF_ENDPOINT);
     console.log("ENVIRONMENT: ", ENVIRONMENT);
   }
 
