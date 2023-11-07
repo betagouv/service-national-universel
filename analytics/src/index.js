@@ -1,5 +1,5 @@
 (async () => {
-  await require("./env-manager")();
+  await require("./env-manager")("analytics");
 
   const helmet = require("helmet");
   const bodyParser = require("body-parser");

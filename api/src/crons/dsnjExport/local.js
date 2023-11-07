@@ -1,5 +1,5 @@
 (async () => {
-  await require("../../env-manager")();
+  await require("../../../../env-manager")("api-prod");
   require("../../mongo");
 
   // ! To migrate into scripts dir to not be tagged as dead code
