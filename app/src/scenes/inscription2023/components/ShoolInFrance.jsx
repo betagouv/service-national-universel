@@ -14,7 +14,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
 
-  const [manualFilling, setManualFilling] = useState((school?.fullName && !school?.id) || false);
+  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
   const [manualSchool, setManualSchool] = useState(school ?? {});
 
   useEffect(() => {
