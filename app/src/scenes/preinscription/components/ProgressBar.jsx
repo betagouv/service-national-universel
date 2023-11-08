@@ -2,23 +2,22 @@ import React from "react";
 import { useParams } from "react-router-dom";
 
 import useDevice from "../../../hooks/useDevice";
-import { getStepFromUrlParam, PREINSCRIPTION_STEPS_LIST } from "../../../utils/navigation";
+import { getStepFromUrlParam, PREINSCRIPTION_STEPS_LIST, REINSCRIPTION_STEPS_LIST } from "../../../utils/navigation";
 
 const ProgressBar = ({ isReinscription = false }) => {
+  const STEPS_LIST = isReinscription ? REINSCRIPTION_STEPS_LIST : PREINSCRIPTION_STEPS_LIST;
+
   let { step } = useParams();
   if (!step) {
     step = "eligibilite";
   }
-  const currentStep = getStepFromUrlParam(step, PREINSCRIPTION_STEPS_LIST);
+  const currentStep = getStepFromUrlParam(step, STEPS_LIST);
   const device = useDevice();
-  const STEPS = ["ELIGIBILITE", "SEJOUR", "PROFIL"];
+  const STEPS = isReinscription ? ["ELIGIBILITE", "SEJOUR", "PROFIL"] : ["ELIGIBILITE", "SEJOUR"];
   const NEXT_STEP = {
     ELIGIBILITE: "Séjour de cohésion",
     SEJOUR: !isReinscription && "Mon compte volontaire SNU",
   };
-  if (isReinscription) {
-    STEPS.pop();
-  }
 
   return STEPS.includes(currentStep) ? (
     <div className="mx-auto flex w-full flex-col justify-center px-[1rem] py-[1rem] md:w-[56rem] md:px-[6rem] md:pt-[2rem] md:pb-[0rem]">

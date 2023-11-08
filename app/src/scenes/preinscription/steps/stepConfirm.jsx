@@ -14,8 +14,6 @@ import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
-// import ProgressBar from "../../reinscription/components/ProgressBar";
-
 import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
 
