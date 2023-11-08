@@ -188,7 +188,7 @@ export default function StepEligibilite() {
                 data.isAbroad ? (
                   <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 ) : (
-                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school })} errors={error} />
+                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} errors={error} />
                 )
               ) : !data.isAbroad ? (
                 <div className="flex-start my-4 flex flex-col">
