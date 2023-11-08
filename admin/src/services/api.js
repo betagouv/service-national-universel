@@ -3,6 +3,7 @@ import fetchRetry from "fetch-retry";
 import { capture } from "../sentry";
 import { apiURL } from "../config";
 import { createFormDataForFileUpload } from "snu-lib";
+import { ERRORS } from "snu-lib/errors";
 
 let fetch = window.fetch;
 
@@ -46,7 +47,7 @@ class api {
       } catch (e) {
         if (e.name === "AbortError") {
           console.log("Fetch request was manually reloaded, ignoring error.");
-          resolve();
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
           capture(e, { extras: { path: "CHECK TOKEN", token: this.token } });
           reject(e);
@@ -187,7 +188,7 @@ class api {
       } catch (e) {
         if (e.name === "AbortError") {
           console.log("Fetch request was manually reloaded, ignoring error.");
-          resolve();
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
           capture(e, { extra: { path: path } });
           reject(e);
@@ -226,7 +227,7 @@ class api {
       } catch (e) {
         if (e.name === "AbortError") {
           console.log("Fetch request was manually reloaded, ignoring error.");
-          resolve();
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
           capture(e, { extra: { path: path, body: body } });
           reject(e);
@@ -394,7 +395,7 @@ class api {
       } catch (e) {
         if (e.name === "AbortError") {
           console.log("Fetch request was manually reloaded, ignoring error.");
-          resolve();
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
           capture(e, { extra: { path: path, body: body } });
           reject(e);
