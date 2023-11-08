@@ -42,7 +42,7 @@ class api {
       } catch (e) {
         if (e.name === "AbortError") {
           console.log("Fetch request was manually reloaded, ignoring error.");
-          resolve(); // You may want to resolve with a specific value or handle differently
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR }); // You may want to resolve with a specific value or handle differently
         } else {
           capture(e, { extra: { path: "CHECK TOKEN", token: this.token } });
           reject(e);
@@ -116,7 +116,7 @@ class api {
       } catch (e) {
         if (e.name === "AbortError") {
           console.log("Fetch request was manually reloaded, ignoring error.");
-          resolve(); // You may want to resolve with a specific value or handle differently
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR }); // You may want to resolve with a specific value or handle differently
         } else {
           capture(e, { extra: { path: path } });
           reject(e);
@@ -155,7 +155,7 @@ class api {
       } catch (e) {
         if (e.name === "AbortError") {
           console.log("Fetch request was manually reloaded, ignoring error.");
-          resolve(); // You may want to resolve with a specific value or handle differently
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR }); // You may want to resolve with a specific value or handle differently
         } else {
           capture(e, { extra: { path: path, body: body } });
           reject(e);
@@ -253,7 +253,7 @@ class api {
       } catch (e) {
         if (e.name === "AbortError") {
           console.log("Fetch request was manually reloaded, ignoring error.");
-          resolve(); // You may want to resolve with a specific value or handle differently
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR }); // You may want to resolve with a specific value or handle differently
         } else {
           capture(e, { extra: { path: path, body: body } });
           reject(e);
