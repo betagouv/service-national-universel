@@ -49,6 +49,8 @@ async function createLog(patch, actualApplication, event, value) {
   const applicationInfos = await actualApplication.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let application = rebuildApplication(applicationInfos);
 
+  const anonymizedApplication = new ApplicationModel(application).anonymise();
+
   const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/application`, {
     method: "POST",
     redirect: "follow",
@@ -68,7 +70,7 @@ async function createLog(patch, actualApplication, event, value) {
       candidature_structure_id: actualApplication.structureId.toString(),
       candidature_status: application.status || actualApplication.status,
       date: patch.date,
-      raw_data: application,
+      raw_data: anonymizedApplication,
     }),
   });
 

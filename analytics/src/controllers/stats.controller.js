@@ -23,6 +23,8 @@ router.post("/refresh", authMiddleware, async (req, res) => {
     // Clear postgresql cache from redis after refresh
     db.cacheClear();
 
+    console.log("Refreshed materialized views finished");
+
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
