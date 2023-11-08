@@ -848,6 +848,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { se
       "region",
       "zip",
       "city",
+      "createdAt",
     ];
 
     for (const key in young.files) {
