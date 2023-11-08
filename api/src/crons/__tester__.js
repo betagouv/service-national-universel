@@ -1,12 +1,18 @@
 // To test run:
-// node ./src/crons/__tester__.js --cron patch/young
+// node ./src/crons/__tester__.js patch/young
+
+// You need to run in local apps and target the right database (Prod usually)
 
 (async () => {
   await require('../env-manager')()
 
-  switch (process.argv[3]) {
+  switch (process.argv[2]) {
     case "patch/young":
-      require('./patch/young').manualHandler("2023-08-17", "2023-08-18");
+      require('./patch/young').manualHandler("2023-11-06", "2023-11-08");
+      break;
+    case "refresh-materialized-views":
+      require('./patch/refresh-materialized-views').handler();
       break;
   }
+  process.exit(0);
 })();

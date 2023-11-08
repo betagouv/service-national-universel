@@ -48,6 +48,8 @@ async function createLog(patch, actualMissionEquivalence, event, value) {
   let missionEquivalence = rebuildMissionEquivalence(missionEquivalenceInfos);
   const structure = await StructureModel.findOne({ name: actualMissionEquivalence.structureName });
 
+  const anonymisedMissionEquivalence = new MissionEquivalenceModel(missionEquivalence).anonymise();
+
   const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/mission-equivalence`, {
     method: "POST",
     redirect: "follow",
@@ -67,7 +69,7 @@ async function createLog(patch, actualMissionEquivalence, event, value) {
       candidature_structure_id: structure?._id || "",
       candidature_status: missionEquivalence.status || actualMissionEquivalence.status,
       date: patch.date,
-      raw_data: missionEquivalence,
+      raw_data: anonymisedMissionEquivalence,
       type_engagement: actualMissionEquivalence.type || "",
     }),
   });
