@@ -9,14 +9,13 @@ import { FiChevronLeft } from "react-icons/fi";
 import { toastr } from "react-redux-toastr";
 import { getAddressOptions } from "@/services/api-adresse";
 
-export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, corrections = null }) {
+export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
   const [cities, setCities] = useState([]);
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
 
-  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
+  const [manualFilling, setManualFilling] = useState((school?.fullName && !school?.id) || false);
   const [manualSchool, setManualSchool] = useState(school ?? {});
-  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     async function getCities() {
@@ -29,30 +28,6 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
     }
     getCities();
   }, []);
-
-  useEffect(() => {
-    if (!cities.length) return;
-
-    let errors = {};
-
-    if (!school?.fullName) {
-      errors.fullName = "Vous devez renseigner le nom de l'établissement";
-    }
-    if (!city) {
-      errors.city = "Vous devez renseigner le nom de la ville";
-    }
-
-    if (manualFilling && Object.keys(manualSchool).length) {
-      if (!manualSchool?.fullName) {
-        errors.manualFullName = "Vous devez renseigner le nom de l'établissement";
-      }
-      if (!manualSchool?.adresse) {
-        errors.manualAdresse = "Vous devez renseigner une adresse";
-      }
-    }
-
-    setErrors(errors);
-  }, [toggleVerify]);
 
   useEffect(() => {
     async function getSchools() {
@@ -79,10 +54,10 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
         data={manualSchool}
         updateData={(newData) => {
           setManualSchool({ ...manualSchool, ...newData });
-          onSelectSchool(newData);
+          onSelectSchool({ ...newData, fullName: manualSchool.fullName });
         }}
         getOptions={getAddressOptions}
-        error={errors.manualAdresse}
+        error={errors.school}
         correction={corrections?.schoolAddress}
       />
       <GhostButton
@@ -130,7 +105,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
           onSelectSchool(null);
           setManualFilling(true);
         }}
-        error={errors.fullName}
+        error={errors.school}
         correction={corrections?.schoolName}
       />
     </>
