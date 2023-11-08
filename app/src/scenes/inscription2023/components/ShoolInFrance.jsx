@@ -3,20 +3,11 @@ import api from "../../../services/api";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import CreatableSelect from "../../../components/CreatableSelect";
 import Input from "./Input";
-import VerifyAddress from "./VerifyAddress";
+import AddressForm from "@/components/dsfr/forms/AddressForm";
 import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
-import validator from "validator";
-import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import { toastr } from "react-redux-toastr";
-
-const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
-const addressValidationSuccess = "L'adresse a été vérifiée";
-
-const messageStyles = {
-  info: "info",
-  error: "error",
-};
+import { getAddressOptions } from "@/services/api-adresse";
 
 export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, corrections = null }) {
   const [cities, setCities] = useState([]);
@@ -26,8 +17,6 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
   const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
   const [manualSchool, setManualSchool] = useState(school ?? {});
   const [errors, setErrors] = useState({});
-
-  const isVerifyAddressDisabled = !manualSchool.fullName || !manualSchool.adresse || !manualSchool.city || !manualSchool.postCode;
 
   useEffect(() => {
     async function getCities() {
@@ -60,15 +49,6 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
       if (!manualSchool?.adresse) {
         errors.manualAdresse = "Vous devez renseigner une adresse";
       }
-      if (!manualSchool?.city) {
-        errors.manualCity = "Vous devez renseigner le nom de la ville";
-      }
-      if (!(manualSchool?.postCode && validator.isPostalCode(manualSchool?.postCode, "FR"))) {
-        errors.manualPostCode = "Vous devez sélectionner un code postal";
-      }
-      if (!manualSchool?.addressVerified) {
-        errors.addressVerified = "Merci de vérifier l'adresse";
-      }
     }
 
     setErrors(errors);
@@ -83,80 +63,28 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
     getSchools();
   }, [city]);
 
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    const newSchool = {
-      ...manualSchool,
-      addressVerified: isConfirmed ? "true" : undefined,
-      cityCode: suggestion.cityCode,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      // if the suggestion is not confirmed we keep the address typed by the user
-      adresse: isConfirmed ? suggestion.address : manualSchool.adresse,
-      postCode: isConfirmed ? suggestion.zip : manualSchool.postCode,
-      city: isConfirmed ? suggestion.city : manualSchool.city,
-    };
-    setManualSchool(newSchool);
-    setErrors({ addressVerified: undefined });
-    onSelectSchool(newSchool);
-  };
-
   return manualFilling ? (
     <>
       <Input
         value={manualSchool.fullName}
         label="Nom de l'établissement"
         onChange={(value) => {
-          setManualSchool({ ...manualSchool, fullName: value, addressVerified: undefined });
+          setManualSchool({ ...manualSchool, fullName: value });
           onSelectSchool(null);
         }}
         error={errors.manualFullName}
         correction={corrections?.schoolName}
       />
-      <Input
-        value={manualSchool.adresse}
-        label="Adresse de l'établissement"
-        onChange={(value) => {
-          setManualSchool({ ...manualSchool, adresse: value, addressVerified: undefined });
-          onSelectSchool(null);
+      <AddressForm
+        data={manualSchool}
+        updateData={(newData) => {
+          setManualSchool({ ...manualSchool, ...newData });
+          onSelectSchool(newData);
         }}
-        error={errors.manualAdresse}
-        correction={corrections?.schoolAddress}
+        getOptions={getAddressOptions}
+        error={errors.manualSchool?.adresse}
+        corrections={corrections?.adresse}
       />
-      <Input
-        value={manualSchool.postCode}
-        label="Code postal de l'établissement"
-        onChange={(value) => {
-          setManualSchool({ ...manualSchool, postCode: value, addressVerified: undefined });
-          onSelectSchool(null);
-        }}
-        error={errors.manualPostCode}
-        correction={corrections?.schoolZip}
-      />
-      <Input
-        value={manualSchool.city}
-        label="Ville de l'établissement"
-        onChange={(value) => {
-          setManualSchool({ ...manualSchool, city: value, addressVerified: undefined });
-          onSelectSchool(null);
-        }}
-        error={errors.manualCity}
-        correction={corrections?.schoolCity}
-      />
-      <VerifyAddress
-        address={manualSchool.adresse}
-        disabled={isVerifyAddressDisabled}
-        zip={manualSchool.postCode}
-        city={manualSchool.city}
-        onSuccess={onVerifyAddress(true)}
-        onFail={onVerifyAddress(false)}
-        isVerified={manualSchool.addressVerified}
-        message={manualSchool.addressVerified === "true" ? addressValidationSuccess : isVerifyAddressDisabled ? addressValidationInfo : errors.addressVerified}
-        messageStyle={manualSchool.addressVerified === "true" || isVerifyAddressDisabled ? messageStyles.info : messageStyles.error}
-      />
-      <div className="flex justify-end">
-        <ErrorMessage>{errors.addressVerified}</ErrorMessage>
-      </div>
       <GhostButton
         name={
           <div className="flex items-center justify-center gap-1 text-center">
@@ -198,7 +126,7 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
         }}
         placeholder="Sélectionnez un établissement"
         onCreateOption={(value) => {
-          setManualSchool({ city: manualSchool.city, fullName: value, addressVerified: undefined });
+          setManualSchool({ fullName: value, addressVerified: undefined });
           onSelectSchool(null);
           setManualFilling(true);
         }}
