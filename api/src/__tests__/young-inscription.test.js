@@ -459,7 +459,7 @@ describe("Young", () => {
       const cohortObj = {
         cohort: "Juillet 2023",
       };
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
+      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").set("user-timezone", -60).send(cohortObj);
       expect(res.status).toBe(404);
     });
 
@@ -475,7 +475,7 @@ describe("Young", () => {
         cohort: "Juillet 2023",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
+      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").set("user-timezone", -60).send(cohortObj);
       expect(res.status).toBe(409);
     });
 
