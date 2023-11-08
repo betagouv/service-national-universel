@@ -49,7 +49,6 @@ export default function StepEligibilite() {
     scolarity: young?.grade,
     zip: young?.zip,
   });
-  console.log("🚀 ~ file: stepEligibilite.jsx:51 ~ StepEligibilite ~ data:", data);
   const dispatch = useDispatch();
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
