@@ -82,8 +82,8 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
           onSelectSchool(newData);
         }}
         getOptions={getAddressOptions}
-        error={errors.manualSchool?.adresse}
-        corrections={corrections?.adresse}
+        error={errors.manualAdresse}
+        correction={corrections?.schoolAddress}
       />
       <GhostButton
         name={
