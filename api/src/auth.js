@@ -53,13 +53,13 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const { error: errorQuery, value: query } = Joi.object({
-        timeZoneOffset: Joi.number(),
-      }).validate(req.query, {
+      const { error: errorHeaders, value: headers } = Joi.object({
+        "user-timezone": Joi.number().required(),
+      }).validate(req.headers, {
         stripUnknown: true,
       });
 
-      if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (errorHeaders) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const {
         email,
@@ -92,7 +92,7 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      let sessions = await getFilteredSessions(value, query.timeZoneOffset || null);
+      let sessions = await getFilteredSessions(value, headers["user-timezone"] || null);
       if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });

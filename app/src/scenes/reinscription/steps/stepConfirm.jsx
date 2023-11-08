@@ -42,7 +42,7 @@ export default function StepConfirm() {
 
     try {
       setLoading(true);
-      const { code, ok, data } = await api.put(`/young/reinscription?timeZoneOffset=${new Date().getTimezoneOffset()}`, values);
+      const { code, ok, data } = await api.put(`/young/reinscription`, values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);

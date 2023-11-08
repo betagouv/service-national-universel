@@ -30,7 +30,7 @@ export function ChangeCohortPen({ young, onChange }) {
         //   setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
         //   return;
         // }
-        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}?timeZoneOffset=${new Date().getTimezoneOffset()}`);
+        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (Array.isArray(data)) {
           const cohorts = data
             .map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible }))
@@ -97,7 +97,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
   async function handleChangeCohort() {
     try {
       if (!message) return toastr.error("Veuillez indiquer un message");
-      await api.put(`/referent/young/${young._id}/change-cohort?timeZoneOffset=${new Date().getTimezoneOffset()}`, { cohort: newCohort.name, message, cohortChangeReason: motif });
+      await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
       if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
       if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
       await onChange();

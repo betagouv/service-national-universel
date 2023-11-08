@@ -42,7 +42,7 @@ export default function ChangeSejour() {
   useEffect(() => {
     (async function getInfo() {
       try {
-        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}?timeZoneOffset=${new Date().getTimezoneOffset()}`);
+        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         const isArray = Array.isArray(data);
         if (isArray) {
           const availableCohorts = data.map((cohort) => cohort.name).filter((cohort) => (young.status === YOUNG_STATUS.WITHDRAWN ? cohort : cohort !== young.cohort));
@@ -63,9 +63,9 @@ export default function ChangeSejour() {
   const onConfirmer = async () => {
     try {
       if (newSejour && motif && messageTextArea) {
-        if(!young?.department){
-          toastr.error("Il n'y a pas de département pour ce jeune")
-          throw new Error("Department is undefined")
+        if (!young?.department) {
+          toastr.error("Il n'y a pas de département pour ce jeune");
+          throw new Error("Department is undefined");
         }
         const res = await api.get(`/inscription-goal/${newSejour}/department/${young.department}/reached`);
         if (!res.ok) throw new Error(res);

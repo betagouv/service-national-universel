@@ -105,7 +105,7 @@ export default function StepEligibilite() {
       code,
       data: sessions,
       message,
-    } = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, {
+    } = await api.post(`/cohort-session/eligibility/2023`, {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
       schoolRegion: data.school?.region,

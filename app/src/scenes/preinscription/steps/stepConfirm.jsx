@@ -64,7 +64,7 @@ export default function StepConfirm() {
 
     try {
       setLoading(true);
-      const { code, ok, token, user } = await api.post(`/young/signup?timeZoneOffset=${new Date().getTimezoneOffset()}`, values);
+      const { code, ok, token, user } = await api.post(`/young/signup`, values);
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);

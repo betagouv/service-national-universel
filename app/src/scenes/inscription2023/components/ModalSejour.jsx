@@ -26,7 +26,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
   React.useEffect(() => {
     (async () => {
       try {
-        const res = await api.post(`/cohort-session/eligibility/2023/${young._id}?timeZoneOffset=${new Date().getTimezoneOffset()}`);
+        const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (res.data.msg) return setError({ text: res.data.msg });
         const cohorts = res.data;
         if (cohorts.length === 0) {
@@ -44,7 +44,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
   const onSubmit = async (cohort) => {
     setLoading(true);
     try {
-      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort?timeZoneOffset=${new Date().getTimezoneOffset()}`, { cohort });
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort`, { cohort });
       if (!ok) {
         setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
         setLoading(false);

@@ -60,7 +60,7 @@
     cors({
       credentials: true,
       origin,
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage", "User-Timezone"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage", "user-timezone"],
     }),
   );
   app.use(bodyParser.json({ limit: "50mb" }));
