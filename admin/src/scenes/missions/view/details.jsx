@@ -7,7 +7,7 @@ import validator from "validator";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 import InfoCircleMission from "../../../assets/icons/InfoCircleMission";
 
-import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES, ENABLE_PM } from "../../../utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "@/components/ui/forms/Field";
@@ -32,8 +32,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [errors, setErrors] = useState({});
   const [referents, setReferents] = useState([]);
   const [creationTutor, setCreationTutor] = useState(false);
-  const [selectedStructure, setSelectedStructure] = useState(null);
   const { user } = useSelector((state) => state.Auth);
+  const [structure, setStructure] = useState(null);
 
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
@@ -62,15 +62,23 @@ export default function DetailsView({ mission, setMission, getMission }) {
     "region",
     "department",
     "location",
+    "isMilitaryPreparation",
   ];
 
   const history = useHistory();
 
   const referentSelectRef = useRef();
 
-  async function initReferents() {
-    const { responses } = await api.post("/elasticsearch/referent/structure/" + values.structureId);
+  async function initContext({ structureId }) {
+    if (!structureId) return history.push("/mission");
 
+    //init structure
+    const { ok, data, code } = await api.get(`/structure/${structureId}`);
+    if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
+    setValues({ ...values, structureName: data.name, structureId: data._id.toString() });
+    setStructure(data);
+
+    const { responses } = await api.post("/elasticsearch/referent/structure/" + structureId);
     if (responses?.length) {
       const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
       if (!responseReferents.find((ref) => ref.value === values.tutorId)) {
@@ -82,7 +90,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
   }
 
   useEffect(() => {
-    initReferents();
+    initContext({ structureId: values.structureId });
   }, [values.structureId]);
 
   const fetchStructures = async (inputValue) => {
@@ -162,6 +170,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
       // build object from array of keys
       const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {});
       if (valuesToSend.addressVerified) valuesToSend.addressVerified = valuesToSend.addressVerified.toString();
+      if (structure.isMilitaryPreparation !== "true") valuesToSend.isMilitaryPreparation = "false";
       const { ok, code, data: missionReturned } = await api.put(`/mission/${values._id}`, valuesToSend);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
@@ -216,7 +225,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
       newTutor.structureId = values.structureId;
       newTutor.structureName = values.structureName;
-      if (selectedStructure?.isNetwork === "true") {
+      if (structure?.isNetwork === "true") {
         newTutor.role = ROLES.SUPERVISOR;
       } else {
         newTutor.role = ROLES.RESPONSIBLE;
@@ -225,7 +234,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
       if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
       setNewTutor({ firstName: "", lastName: "", email: "", phone: "" });
       setCreationTutor(false);
-      initReferents();
+      initContext({ structureId: values.structureId });
       return toastr.success("Invitation envoyée");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
@@ -233,6 +242,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
       toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
     }
   };
+
+  if (!mission || !structure) return null;
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -367,7 +378,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     defaultOptions
                     onChange={(e) => {
                       setValues({ ...values, structureName: e.label, structureId: e._id });
-                      setSelectedStructure(e.structure);
                     }}
                     placeholder="Rechercher une structure"
                     error={errors.structureName}
@@ -495,7 +505,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         );
                       }}
                       isValidNewOption={() => true}
-                      value={referents?.find((ref) => ref.value === values.tutorId)}
+                      value={referents?.find((ref) => ref.value === values.tutorId) || ""}
                     />
                   )}
 
@@ -638,6 +648,20 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     value={translate(values.contraintes)}
                   />
                 </div>
+                {ENABLE_PM && structure.isMilitaryPreparation === "true" ? (
+                  <div className="flex flex-row items-center justify-between">
+                    <div className="font-medium text-gray-800">Préparation Militaire : {values?.isMilitaryPreparation === "true" ? "oui" : "non"}</div>
+                    <Toggle
+                      id="hebergement"
+                      name="hebergement"
+                      disabled={!editing}
+                      value={values?.isMilitaryPreparation === "true"}
+                      onChange={(e) => {
+                        setValues({ ...values, isMilitaryPreparation: e.toString() });
+                      }}
+                    />
+                  </div>
+                ) : null}
                 <div>
                   <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Hébergement</div>
                   <div className="flex flex-row items-center justify-between">

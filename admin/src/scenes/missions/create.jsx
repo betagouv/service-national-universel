@@ -7,7 +7,7 @@ import validator from "validator";
 
 import Field from "@/components/ui/forms/Field";
 import Toggle from "../../components/Toggle";
-import { MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, ROLES, SENDINBLUE_TEMPLATES, translate } from "../../utils";
+import { ENABLE_PM, MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, ROLES, SENDINBLUE_TEMPLATES, translate } from "../../utils";
 import VerifyAddress from "../phase0/components/VerifyAddress";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -21,10 +21,12 @@ import api from "../../services/api";
 import plausibleEvent from "@/services/plausible";
 
 export default function Create(props) {
-  const structureId = props?.match?.params?.id;
+  const structureIdBase = props?.match?.params?.id;
   const urlParams = new URLSearchParams(window.location.search);
   const duplicate = urlParams.get("duplicate");
-  const [values, setValues] = useState({});
+  const [values, setValues] = useState({
+    structureId: structureIdBase,
+  });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [referents, setReferents] = useState([]);
@@ -32,6 +34,7 @@ export default function Create(props) {
   const [selectedStructure, setSelectedStructure] = useState(null);
   const { user } = useSelector((state) => state.Auth);
   const [modalConfirmation, setModalConfirmation] = useState(false);
+  const [structure, setStructure] = useState(null);
 
   const [newTutor, setNewTutor] = useState({ firstName: "", lastName: "", email: "", phone: "" });
 
@@ -45,15 +48,16 @@ export default function Create(props) {
   const referentSelectRef = useRef();
 
   async function initContext() {
-    if (!structureId) return history.push("/mission");
+    if (!values.structureId) return history.push("/mission");
 
     //init structure
-    const { ok, data, code } = await api.get(`/structure/${structureId}`);
+    const { ok, data, code } = await api.get(`/structure/${values.structureId}`);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
-    setValues({ ...values, structureName: data.name, structureId: data._id.toString() });
+    setValues({ ...values, structureName: data.name, structureId: data._id.toString(), isMilitaryPreparation: data.isMilitaryPreparation ? "true" : "false" });
+    setStructure(data);
 
     //init list tutor
-    const { responses } = await api.post("/elasticsearch/referent/structure/" + structureId);
+    const { responses } = await api.post("/elasticsearch/referent/structure/" + values.structureId);
     if (responses?.length) {
       const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
       setReferents(responseReferents);
@@ -81,8 +85,8 @@ export default function Create(props) {
 
   useEffect(() => {
     initContext();
-    if (duplicate) fetchMission();
-  }, [structureId]);
+    if (duplicate && structureIdBase === values.structureId) fetchMission();
+  }, [values.structureId]);
 
   const fetchStructures = async (inputValue) => {
     const { responses } = await api.post("/elasticsearch/structure/search", { filters: { searchbar: [inputValue] } });
@@ -120,6 +124,7 @@ export default function Create(props) {
       // build object from array of keys
       values.addressVerified = values?.addressVerified?.toString();
       values.placesLeft = values.placesTotal;
+      if (structure.isMilitaryPreparation !== "true") values.isMilitaryPreparation = "false";
       if (Object.keys(errors).length > 0) values.status = "DRAFT";
       else values.status = "WAITING_VALIDATION";
       const { ok, code, data } = await api.post(`/mission`, values);
@@ -183,6 +188,8 @@ export default function Create(props) {
       toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
     }
   };
+
+  if (!structure) return null;
 
   return (
     <>
@@ -362,7 +369,7 @@ export default function Create(props) {
                       );
                     }}
                     isValidNewOption={() => true}
-                    value={referents?.find((ref) => ref.value === values.tutorId)}
+                    value={referents?.find((ref) => ref.value === values.tutorId) || ""}
                   />
                   {creationTutor && (
                     <div>
@@ -483,6 +490,19 @@ export default function Create(props) {
                   />
                 </div>
                 <div>
+                  {ENABLE_PM && structure.isMilitaryPreparation === "true" ? (
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="font-medium text-gray-800">Préparation Militaire : {values?.isMilitaryPreparation === "true" ? "oui" : "non"}</div>
+                      <Toggle
+                        id="hebergement"
+                        name="hebergement"
+                        value={values?.isMilitaryPreparation === "true"}
+                        onChange={(e) => {
+                          setValues({ ...values, isMilitaryPreparation: e.toString() });
+                        }}
+                      />
+                    </div>
+                  ) : null}
                   <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Hébergement</div>
                   <div className="flex flex-row items-center justify-between">
                     <div className="font-medium text-gray-800">Hébergement proposé : {values?.hebergement === "true" ? "oui" : "non"}</div>
