@@ -21,11 +21,11 @@ import api from "../../services/api";
 import plausibleEvent from "@/services/plausible";
 
 export default function Create(props) {
-  const structureIdBase = props?.match?.params?.id;
+  const structureIdFromParams = props?.match?.params?.id;
   const urlParams = new URLSearchParams(window.location.search);
   const duplicate = urlParams.get("duplicate");
   const [values, setValues] = useState({
-    structureId: structureIdBase,
+    structureId: structureIdFromParams,
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -85,7 +85,7 @@ export default function Create(props) {
 
   useEffect(() => {
     initContext();
-    if (duplicate && structureIdBase === values.structureId) fetchMission();
+    if (duplicate && structureIdFromParams === values.structureId) fetchMission();
   }, [values.structureId]);
 
   const fetchStructures = async (inputValue) => {
