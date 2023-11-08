@@ -19,7 +19,7 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
       if (result.status === 401) {
         return;
       }
-      if (!result.ok) {
+      if (!result?.ok) {
         capture("Unable to load global cohorts data :" + JSON.stringify(result));
       } else {
         setSessions2023(result.data);

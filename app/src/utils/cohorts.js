@@ -13,7 +13,7 @@ export async function cohortsInit() {
     if (result?.status === 401) {
       return;
     }
-    if (!result.ok) {
+    if (!result?.ok) {
       capture("Unable to load global cohorts data :" + JSON.stringify(result));
     } else {
       cohorts = result.data;
