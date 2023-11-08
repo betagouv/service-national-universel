@@ -5,7 +5,7 @@ import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
 import validator from "validator";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
-import InfoCircleMission from "../../../assets/icons/InfoCircleMission";
+import InfoCircleMission from "@/assets/icons/InfoCircleMission";
 
 import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES, ENABLE_PM } from "@/utils";
 import MissionView from "./wrapper";
