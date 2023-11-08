@@ -60,7 +60,7 @@ export default function AddressSearch({ getOptions, updateData, error }) {
     <div ref={dropdownRef}>
       <label className="flex flex-col gap-1">
         Rechercher une adresse
-        <span className="text-[#666666] text-xs mb-1">Si votre adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
+        <span className="text-[#666666] text-xs mb-1">Si l'adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
         <div className="relative">
           <input type="text" value={query} onChange={handleChangeQuery} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />
           <span className="material-icons absolute right-5 mt-[12px] text-lg">
@@ -76,7 +76,7 @@ export default function AddressSearch({ getOptions, updateData, error }) {
               <AddressDropdown optionGroups={options} handleSelect={handleSelect} />
             ) : (
               <p className="p-3 text-gray-800 text-center">
-                Votre adresse ne s'affiche pas ? Renseignez une <strong>commune</strong> ou un <strong>code postal</strong>.
+                L'adresse ne s'affiche pas ? Renseignez une <strong>commune</strong> ou un <strong>code postal</strong>.
               </p>
             )}
           </div>
