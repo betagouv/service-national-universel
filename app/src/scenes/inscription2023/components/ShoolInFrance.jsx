@@ -84,7 +84,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         }}
         value={city}
         placeholder="Recherchez une commune"
-        error={errors.city}
+        error={errors?.city}
         correction={corrections?.schoolCity}
         noOptionsMessage="Veuillez rechercher une commune existante."
         isDebounced
@@ -105,7 +105,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           onSelectSchool(null);
           setManualFilling(true);
         }}
-        error={errors.school}
+        error={errors?.school}
         correction={corrections?.schoolName}
       />
     </>
