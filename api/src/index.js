@@ -21,7 +21,7 @@
   const passport = require("passport");
   require("./mongo");
 
-  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT,API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
+  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
 
   if (process.env.NODE_ENV !== "test") {
     console.log("APP_URL", APP_URL);
@@ -60,7 +60,7 @@
     cors({
       credentials: true,
       origin,
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage", "User-Timezone"],
     }),
   );
   app.use(bodyParser.json({ limit: "50mb" }));
