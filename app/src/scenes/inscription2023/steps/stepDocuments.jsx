@@ -78,8 +78,8 @@ export default function StepDocuments() {
 
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION) {
     if (corrections?.length === 0) return <Redirect to="/" />;
-    if (corrections?.some((e) => ["MISSING_FRONT", "MISSING_BACK"].includes(e.reason))) return <Redirect to="televersement" />;
-    if (corrections?.some((e) => e.field === "latestCNIFileExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
+    // if (corrections?.some((e) => ["MISSING_FRONT", "MISSING_BACK"].includes(e.reason))) return <Redirect to="televersement" />;
+    // if (corrections?.some((e) => e.field === "latestCNIFileExpirationDate") && young?.files.cniFiles.length) return <Redirect to="televersement" />;
   }
 
   return (
