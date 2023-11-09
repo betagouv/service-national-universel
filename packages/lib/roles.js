@@ -22,7 +22,7 @@ const SUB_ROLES = {
   coordinator: "coordinator",
   assistant_coordinator: "assistant_coordinator",
   referent_etablissement: "referent_etablissement",
-  coordinateur_cler: "coordinateur_cler",
+  coordinateur_cle: "coordinateur_cle",
   none: "",
 };
 

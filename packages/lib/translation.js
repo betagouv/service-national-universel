@@ -164,7 +164,7 @@ const translate = (value) => {
       return "Délégué régional académique à la jeunesse, à l'engagement et aux sports (DRAJES)";
     case "referent_etablissement":
       return "Chef d'établissement";
-    case "coordinator_cle":
+    case "coordinateur_cle":
       return "Coordinateur d'établissement";
     case "INSCRIPTION":
       return "Inscription";

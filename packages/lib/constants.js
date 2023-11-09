@@ -174,7 +174,7 @@ const REFERENT_REGION_SUBROLE = {
 
 const ADMINISTRATEUR_CLE_SUBROLE = {
   referent_etablissement: SUB_ROLES.referent_etablissement,
-  coordinator_cle: SUB_ROLES.coordinator_cle,
+  coordinateur_cle: SUB_ROLES.coordinateur_cle,
 };
 
 const MISSION_STATUS = {
