@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { Modal } from "reactstrap";
 import ModalTailwind from "../../../components/ui/modals/Modal";
-import { GrClose } from "react-icons/gr";
-import { RiArrowRightLine } from "react-icons/ri";
+import { RiArrowRightLine, RiCloseFill } from "react-icons/ri";
 import Button from "../../../components/dsfr/ui/buttons/Button";
 import SecondaryButton from "../../../components/dsfr/ui/buttons/SecondaryButton";
 
-export default function ModalRecap({ isOpen, topTitle = "alerte", title, message, onChange, onCancel, onConfirm, confirmText = "Confirmer", cancelText = "Annuler", young }) {
+export default function ModalRecap({ isOpen, title, message, onChange, onCancel, onConfirm, confirmText = "Confirmer", cancelText = "Annuler", young }) {
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
@@ -20,13 +18,13 @@ export default function ModalRecap({ isOpen, topTitle = "alerte", title, message
       <section className="px-4">
         <button className="w-full mt-4 flex items-center justify-end gap-2 pb-2 text-sm text-[#000091]" onClick={onCancel}>
           Fermer
-          <GrClose className="h-3 mt-0.5"/>
+          <RiCloseFill className="text-lg" />
         </button>
-        <div className="flex py-2 text-[24px] font-semibold leading-32">
+        <div className="flex py-2 text-[24px] font-semibold leading-32 gap-2">
           <RiArrowRightLine className="text-black w-12 h-12 mx-auto pb-2" />
           {title}
         </div>
-        <div className="text-sm text-[16px] text-gray-500 leading-[24px]">{message}</div>
+        <div className="text-gray-500 leading-[24px] mb-4">{message}</div>
         <hr className="my-2" />
         <div className="mb-3">
           <p className="text-gray-500">Niveau de scolarité</p>
