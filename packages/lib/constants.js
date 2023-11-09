@@ -835,6 +835,45 @@ const STRUCTURE_LEGAL_STATUS = {
   OTHER: "OTHER",
 };
 
+//CLE
+const STATUS_CLASSE = {
+  WITHDRAWN: "WITHDRAWN",
+  DRAFT: "DRAFT",
+  CREATED: "CREATED",
+  INSCRIPTION_IN_PROGRESS: "INSCRIPTION_IN_PROGRESS",
+  INSCRIPTION_TO_CHECK: "INSCRIPTION_TO_CHECK",
+  DONE: "DONE",
+};
+
+//TODO to update with ARBITRAGE
+const STATUS_PHASE1_CLASSE = {
+  WAITING_AFFECTATION: "WAITING_AFFECTATION",
+  AFFECTED: "AFFECTED",
+  NOT_DONE: "NOT_DONE",
+  DONE: "DONE",
+};
+
+//TODO to update with ARBITRAGE
+const CLE_TYPE = {
+  LYC: "LYC",
+};
+
+//TODO to update with ARBITRAGE
+const CLE_SECTOR = {
+  pro: "pro",
+  gen: "gen",
+};
+
+//TODO to update with ARBITRAGE
+const CLE_GRADE = {
+  "2ndePro": GRADES["2ndePro"],
+  "2ndeGT": GRADES["2ndeGT"],
+  "1ereGT": GRADES["1ereGT"],
+  "1erePro": GRADES["1erePro"],
+  TermGT: GRADES["TermGT"],
+  TermPro: GRADES["TermPro"],
+};
+
 export {
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
@@ -883,6 +922,11 @@ export {
   MIME_TYPES,
   YOUNG_SCHOOLED_SITUATIONS,
   STRUCTURE_LEGAL_STATUS,
+  CLE_TYPE,
+  CLE_SECTOR,
+  CLE_GRADE,
+  STATUS_CLASSE,
+  STATUS_PHASE1_CLASSE,
 };
 export default {
   YOUNG_STATUS,
@@ -931,4 +975,9 @@ export default {
   MIME_TYPES,
   YOUNG_SCHOOLED_SITUATIONS,
   STRUCTURE_LEGAL_STATUS,
+  CLE_TYPE,
+  CLE_SECTOR,
+  CLE_GRADE,
+  STATUS_CLASSE,
+  STATUS_PHASE1_CLASSE,
 };

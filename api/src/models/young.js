@@ -663,7 +663,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  path: {
+  source: {
     type: String,
     enum: ["volontaire", "CLE"],
     documentation: {

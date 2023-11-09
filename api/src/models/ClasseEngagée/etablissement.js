@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
+const { CLE_TYPE, CLE_SECTOR } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "etablissement";
 
@@ -80,7 +81,7 @@ const Schema = new mongoose.Schema({
   type: {
     type: [String],
     required: true,
-    enum: ["COLLEGE", "LYCEE", "CFA", "AUTRE"],
+    enum: Object.keys(CLE_TYPE),
     documentation: {
       description: "Type d'établissement",
     },
@@ -90,7 +91,7 @@ const Schema = new mongoose.Schema({
   sector: {
     type: [String],
     required: true,
-    enum: ["PUBLIC", "PRIVE"],
+    enum: Object.keys(CLE_SECTOR),
     documentation: {
       description: "Secteur de l'établissement",
     },
