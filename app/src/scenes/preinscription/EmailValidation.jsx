@@ -98,7 +98,7 @@ export default function StepEmailValidation() {
       <ModifyEmailModal isOpen={isModifyEmailModalOpen} onClose={() => setModifyEmailOpen(false)} onEmailChange={handleRequestEmailChange} />
       <h1 className="text-2xl font-semibold text-[#161616]">Entrer le code d'activation</h1>
       <p className="mt-4 text-[#3A3A3A]">
-        Pour valider la création de votre compte volontaire, vous devez entrer le code d’activation reçu sur la boîte mail <strong>{young?.email}</strong>
+        Pour valider la création de votre compte, vous devez entrer le code d’activation reçu sur la boîte mail <strong>{young?.email}</strong>
         <InlineButton
           onClick={() => {
             setModifyEmailOpen(true);
@@ -125,7 +125,7 @@ export default function StepEmailValidation() {
         }}>
         Je n'ai rien reçu
       </InlineButton>
-      <SignupButtonContainer onClickNext={handleClick} labelNext="Activer mon compte volontaire" />
+      <SignupButtonContainer onClickNext={handleClick} labelNext="Activer mon compte" />
     </DSFRContainer>
   );
 }
