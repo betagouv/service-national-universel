@@ -288,11 +288,11 @@ const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
   return (
     <div className="my-4 flex flex-col">
       <div className="pb-2 font-bold text-[18px] text-[#161616]">Représentant légal {i} </div>
-      <div className="border-l-8 border-l-[#6A6AF4] text-[#3A3A3A] text-[16px] my-4 pl-8 leading-6">
-        <p className="">Votre représentant(e) légal(e) {i} recevra un lien par e-mail pour :</p>
+      <div className="pl-3 border-l-4 border-l-indigo-500 text-[#3A3A3A] text-[16px] my-4 leading-6">
+        <p>Votre représentant(e) légal(e) {i} recevra un lien par e-mail pour :</p>
         {i === 1 && (
           <li>
-            consentir à <strong className="text-black">votre participation</strong> au SNU
+            consentir à <strong className="text-black">votre participation</strong> au SNU ;
           </li>
         )}
         <li>
