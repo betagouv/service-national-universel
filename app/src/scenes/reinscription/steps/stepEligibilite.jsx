@@ -9,6 +9,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { useDispatch } from "react-redux";
 import { REINSCRIPTION_STEPS } from "../../../utils/navigation";
+import ModalConfirm from "../components/ModalRecap";
 
 import Input from "../../../components/dsfr/forms/input";
 import Toggle from "../../../components/dsfr/forms/toggle";
@@ -35,6 +36,8 @@ export default function StepEligibilite() {
     return Object.keys(obj).length === 0 && obj.constructor === Object;
   };
 
+  const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
+
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
     { value: "4eme", label: "4ème" },
@@ -49,7 +52,7 @@ export default function StepEligibilite() {
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
-  const onSubmit = async () => {
+  const onVerify = async () => {
     let errors = {};
 
     // Scolarity
@@ -81,7 +84,15 @@ export default function StepEligibilite() {
       toastr.error("Un problème est survenu : Vérifiez que vous avez rempli tous les champs");
       return;
     }
+    setCancelModal({
+      isOpen: true,
+      onConfirm: onSubmit,
+      // title: "Les informations sont-elles correctes ?",
+      // message: "Ces informations seront utilisées pour déterminer votre éligibilité. Si vous n'êtes pas éligible, vous ne pourrez plus revenir en arrière.",
+    });
+  };
 
+  const onSubmit = async () => {
     // Check if young is more than 17 years old
     const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
@@ -204,7 +215,25 @@ export default function StepEligibilite() {
               ) : null}
             </>
           )}
-          <SignupButtonContainer onClickNext={onSubmit} disabled={loading} />
+          <SignupButtonContainer
+            onClickNext={onVerify}
+            disabled={loading}
+          />
+          {data?.school?.city && (
+            <ModalConfirm
+              isOpen={cancelModal?.isOpen}
+              title={"Les informations sont-elles correctes ?"}
+              message={"Ces informations seront utilisées pour déterminer votre éligibilité. Si vous n'êtes pas éligible, vous ne pourrez plus revenir en arrière."}
+              confirmText="Oui, confirmer"
+              cancelText="Non"
+              young={data}
+              onCancel={() => setCancelModal({ isOpen: false, onConfirm: null })}
+              onConfirm={async () => {
+                await cancelModal?.onConfirm();
+                setCancelModal({ isOpen: false, onConfirm: null });
+              }}
+            />
+          )}
         </div>
       </DSFRContainer>
     </>
