@@ -9,6 +9,7 @@ let fetch = window.fetch;
 class api {
   constructor() {
     this.token = "";
+    this.headers = { "x-user-timezone": new Date().getTimezoneOffset() };
   }
 
   getToken() {
@@ -34,7 +35,7 @@ class api {
           mode: "cors",
           method: "GET",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
           signal,
         });
         const res = await response.json();
@@ -61,7 +62,7 @@ class api {
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
         if (response.status === 401) {
@@ -95,7 +96,7 @@ class api {
           mode: "cors",
           method: "GET",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
           signal,
         });
         if (response.status === 401) {
@@ -140,7 +141,7 @@ class api {
           mode: "cors",
           method: "PUT",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
           body: typeof body === "string" ? body : JSON.stringify(body),
           signal,
         });
@@ -175,7 +176,7 @@ class api {
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { Authorization: `JWT ${this.token}` },
+          headers: { Authorization: `JWT ${this.token}`, ...this.headers },
           body: formData,
         });
         if (response.status === 401) {
@@ -203,7 +204,7 @@ class api {
           mode: "cors",
           credentials: "include",
           method: "DELETE",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
         });
         if (response.status === 401) {
           if (window?.location?.pathname !== "/auth") {
@@ -235,7 +236,7 @@ class api {
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
           body: typeof body === "string" ? body : JSON.stringify(body),
           signal,
         });

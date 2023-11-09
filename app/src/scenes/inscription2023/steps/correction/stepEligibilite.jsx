@@ -137,7 +137,7 @@ export default function StepEligibilite() {
 
     try {
       const updatedYoung = { ...young, ...updates };
-      const res = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, updatedYoung);
+      const res = await api.post(`/cohort-session/eligibility/2023`, updatedYoung);
       if (!res.ok) throw new Error(translate(res.code));
 
       const cohorts = res.data.length > 0 ? res.data : null;
@@ -176,7 +176,7 @@ export default function StepEligibilite() {
       const res = await api.put("/young/inscription2023/eligibilite", updates);
       if (!res.ok) throw new Error(translate(code));
 
-      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort?timeZoneOffset=${new Date().getTimezoneOffset()}`, { cohort });
+      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/changeCohort`, { cohort });
       if (!ok) throw new Error(translate(code));
       dispatch(setYoung(responseData));
       toastr.success("La correction a été prise en compte");
