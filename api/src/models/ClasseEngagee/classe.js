@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
-const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST } = require("snu-lib");
+const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "classe";
 
@@ -22,11 +22,11 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  referentIds: {
+  classeReferentIds: {
     type: [String],
     required: true,
     documentation: {
-      description: "ID du référent de la classe",
+      description: "ID du référent de classe",
     },
   },
 
@@ -68,13 +68,13 @@ const Schema = new mongoose.Schema({
   coloration: {
     type: String,
     required: true,
-    enum: ["VERT", "ORANGE", "ROUGE"],
+    enum: CLE_COLORATION_LIST,
     documentation: {
       description: "Couleur de la classe",
     },
   },
 
-  placesTotal: {
+  totalSeats: {
     type: Number,
     required: true,
     documentation: {
@@ -82,7 +82,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  placesTaken: {
+  seatsTaken: {
     type: Number,
     required: true,
     default: 0,

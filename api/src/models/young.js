@@ -649,7 +649,7 @@ const Schema = new mongoose.Schema({
   },
 
   //Phase 0 classe engagée
-  classeEngageeId: {
+  classeId: {
     type: String,
     documentation: {
       description: "Id de la classe engagée",

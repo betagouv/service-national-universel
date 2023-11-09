@@ -61,6 +61,7 @@ const Schema = new mongoose.Schema({
       description: "Ville de l'établissement",
     },
   },
+  
   address: {
     type: String,
     required: true,
