@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
+import ModalRecap from "../components/ModalRecap";
 
 import IconFrance from "../../../assets/IconFrance";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -35,6 +36,7 @@ export default function StepEligibilite() {
   const [error, setError] = React.useState({});
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [confirmationModal, setConfirmationModal] = React.useState({ isOpen: false, onConfirm: null });
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -53,7 +55,7 @@ export default function StepEligibilite() {
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
-  const onSubmit = async () => {
+  const onVerify = async () => {
     let errors = {};
 
     if (data.frenchNationality === "false" || !data.frenchNationality) {
@@ -95,6 +97,17 @@ export default function StepEligibilite() {
       return;
     }
 
+    if (isLoggedIn) {
+      setConfirmationModal({
+        isOpen: true,
+        onConfirm: onSubmit,
+      });
+    } else {
+      onSubmit();
+    }
+  };
+
+  const onSubmit = async () => {
     // Check if young is more than 17 years old
     const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
@@ -229,7 +242,22 @@ export default function StepEligibilite() {
               ) : null}
             </>
           )}
-          <SignupButtonContainer onClickNext={onSubmit} disabled={loading} />
+          <SignupButtonContainer onClickNext={onVerify} disabled={loading} />
+          {data?.school?.city && (
+            <ModalRecap
+              isOpen={confirmationModal?.isOpen}
+              title={"Les informations sont-elles correctes ?"}
+              message={"Ces informations seront utilisées pour déterminer votre éligibilité. Si vous n'êtes pas éligible, vous ne pourrez plus revenir en arrière."}
+              confirmText="Oui, confirmer"
+              cancelText="Non"
+              young={data}
+              onCancel={() => setConfirmationModal({ isOpen: false, onConfirm: null })}
+              onConfirm={async () => {
+                await confirmationModal?.onConfirm();
+                setConfirmationModal({ isOpen: false, onConfirm: null });
+              }}
+            />
+          )}
         </div>
       </DSFRContainer>
     </>
