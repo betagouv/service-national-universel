@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames } = require("snu-lib");
+const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
@@ -645,6 +645,29 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "La convacation a été telechargée",
+    },
+  },
+
+  //Phase 0 classe engagée
+  classeId: {
+    type: String,
+    documentation: {
+      description: "Id de la classe engagée",
+    },
+  },
+
+  etablissementId: {
+    type: String,
+    documentation: {
+      description: "Id de l'établissement CLE",
+    },
+  },
+
+  source: {
+    type: String,
+    enum: YOUNG_SOURCE_LIST,
+    documentation: {
+      description: "Type de parcours d'un jeune",
     },
   },
 
