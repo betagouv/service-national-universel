@@ -9,7 +9,7 @@ import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
 import Badge from "../../components/Badge";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
-import Invite from "../../components/header/invite";
+import Invite from "../../components/drawer/components/invite";
 import { MultiLine, Table } from "../../components/list";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";

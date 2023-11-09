@@ -42,9 +42,7 @@ import DashboardResponsibleV2 from "./scenes/dashboardV2/responsible";
 import DashboardVisitorV2 from "./scenes/dashboardV2/visitor";
 
 import Loader from "./components/Loader";
-import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import Header from "./components/header";
 
 import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
