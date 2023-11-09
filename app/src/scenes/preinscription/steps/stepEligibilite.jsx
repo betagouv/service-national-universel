@@ -165,12 +165,13 @@ export default function StepEligibilite() {
         <div className="space-y-5">
           {!isLoggedIn && (
             <div className="flex-start flex flex-col">
-              <div className="flex items-center mb-2">
-                <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-                <div className="flex items-center">
-                  <span className="ml-4 mr-2">Je suis de nationalité française</span>
-                  <IconFrance />
-                </div>
+              <div className="flex items-center gap-2 mb-2">
+                <CheckBox
+                  checked={data.frenchNationality === "true"}
+                  onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })}
+                  label="Je suis de nationalité française"
+                />
+                <IconFrance />
               </div>
               {error.frenchNationality ? <ErrorMessage>{error.frenchNationality}</ErrorMessage> : null}
             </div>
