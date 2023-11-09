@@ -648,6 +648,29 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  //Phase 0 classe engagée
+  classeEngageeId: {
+    type: String,
+    documentation: {
+      description: "Id de la classe engagée",
+    },
+  },
+
+  etablissementId: {
+    type: String,
+    documentation: {
+      description: "Id de l'établissement CLE",
+    },
+  },
+
+  path: {
+    type: String,
+    enum: ["volontaire", "CLE"],
+    documentation: {
+      description: "Type de parcours d'un jeune",
+    },
+  },
+
   //Phase 1 Affectation
   sessionPhase1Id: {
     type: String,
