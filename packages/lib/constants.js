@@ -866,8 +866,10 @@ const CLE_SECTOR = {
 
 //TODO to update with ARBITRAGE
 const CLE_COLORATION = {
-  pro: "green",
-  gen: "blue",
+  SPORT: "SPORT",
+  ENVIRONMENT: "ENVIRONMENT",
+  DEFENSE: "DEFENSE",
+  RESILIENCE: "RESILIENCE",
 };
 
 //TODO to update with ARBITRAGE
