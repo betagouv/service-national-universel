@@ -100,7 +100,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam, structure }
         setResponsible(null);
         toastr.success("Le contact a été sauvegardé !");
       } else {
-        responsible.role = structure.isNetwork ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE;
+        responsible.role = structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE;
         responsible.structureId = structure._id;
         responsible.structureName = structure.name;
         const { ok, code, data } = await API.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, responsible);
