@@ -20,7 +20,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
         <label className="flex flex-col gap-2 w-full">
           Adresse
           <div className="flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
-            <input disabled type="text" value={data.address} className="w-full text-gray-400 bg-[#EEEEEE]" />
+            <input disabled type="text" value={data.address || data.adresse} className="w-full text-gray-400 bg-[#EEEEEE]" />
             <HiCheckCircle />
           </div>
         </label>
@@ -30,7 +30,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
             Adresse
             <input
               type="text"
-              value={data.address}
+              value={data.address || data.adresse}
               onChange={(e) => updateData({ address: e.target.value })}
               className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 border-b-2 border-gray-800"
             />

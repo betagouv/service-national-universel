@@ -47,7 +47,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           setManualSchool({ ...manualSchool, fullName: value });
           onSelectSchool(null);
         }}
-        error={errors.manualFullName}
+        error={errors?.manualFullName}
         correction={corrections?.schoolName}
       />
       <AddressForm
@@ -57,7 +57,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           onSelectSchool({ ...newData, fullName: manualSchool.fullName });
         }}
         getOptions={getAddressOptions}
-        error={errors.school}
+        error={errors?.school}
         correction={corrections?.schoolAddress}
       />
       <GhostButton
@@ -101,7 +101,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         }}
         placeholder="Sélectionnez un établissement"
         onCreateOption={(value) => {
-          setManualSchool({ fullName: value, addressVerified: undefined });
+          setManualSchool({ fullName: value });
           onSelectSchool(null);
           setManualFilling(true);
         }}
