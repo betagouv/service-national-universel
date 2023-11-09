@@ -534,19 +534,11 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    const { error: errorHeaders, value: headers } = Joi.object({
-      "user-timezone": Joi.number().required(),
-    }).validate(req.headers, {
-      stripUnknown: true,
-    });
-
-    if (errorHeaders) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
     if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 
     const { cohort, cohortChangeReason } = validatedBody.value;
 
-    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, headers["user-timezone"] || null);
+    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const oldSessionPhase1Id = young.sessionPhase1Id;

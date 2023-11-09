@@ -75,14 +75,6 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { error: errorHeaders, value: headers } = Joi.object({
-      "user-timezone": Joi.number().required(),
-    }).validate(req.headers, {
-      stripUnknown: true,
-    });
-
-    if (errorHeaders) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const currentCohort = await CohortObject.findOne({ name: young.cohort });
@@ -100,7 +92,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
     ) {
       // @todo eligibility is based on address, should be based on school address.
-      const availableSessions = await getFilteredSessions({ grade: young.grade, birthdateAt: young.birthdateAt, ...value }, headers["user-timezone"] || null);
+      const availableSessions = await getFilteredSessions({ grade: young.grade, birthdateAt: young.birthdateAt, ...value }, req.headers["x-user-timezone"] || null);
 
       const cohort = value.cohort ? value.cohort : young.cohort;
       const status = value.status ? value.status : young.status;

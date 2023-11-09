@@ -1,3 +1,5 @@
+const validateCustomHeader = require("./middlewares/validateCustomHeader");
+
 (async () => {
   await require("./env-manager")();
 
@@ -60,9 +62,13 @@
     cors({
       credentials: true,
       origin,
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage", "user-timezone"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage", "x-user-timezone"],
     }),
   );
+
+  //Check custom header
+  app.use(validateCustomHeader);
+
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));

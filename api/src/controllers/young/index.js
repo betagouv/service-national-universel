@@ -464,14 +464,6 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
     const { error: idError, value: id } = validateId(req.params.id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { error: errorHeaders, value: headers } = Joi.object({
-      "user-timezone": Joi.number().required(),
-    }).validate(req.headers, {
-      stripUnknown: true,
-    });
-
-    if (errorHeaders) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
     const young = await YoungObject.findById(id);
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -512,7 +504,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       young.set({ originalCohort: young.cohort });
     }
 
-    const sessions = await getFilteredSessions(young, headers["user-timezone"] || null);
+    const sessions = await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
     const session = sessions.find(({ name }) => name === cohort);
     if (!session && cohort !== "à venir") return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
