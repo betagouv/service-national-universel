@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
-const { STATUS_CLASSE, STATUS_PHASE1_CLASSE, CLE_TYPE, CLE_SECTOR, CLE_GRADE } = require("snu-lib");
+const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "classe";
 
@@ -41,7 +41,7 @@ const Schema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
-    enum: Object.keys(STATUS_CLASSE),
+    enum: STATUS_CLASSE_LIST,
     documentation: {
       description: "Statut de la classe",
     },
@@ -50,7 +50,7 @@ const Schema = new mongoose.Schema({
   statusPhase1: {
     type: String,
     required: true,
-    enum: Object.keys(STATUS_PHASE1_CLASSE),
+    enum: STATUS_PHASE1_CLASSE_LIST,
     documentation: {
       description: "Statut de la classe pour la phase 1",
     },
@@ -95,7 +95,7 @@ const Schema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: Object.keys(CLE_TYPE),
+    enum: CLE_TYPE_LIST,
     documentation: {
       description: "Type de la classe",
     },
@@ -105,7 +105,7 @@ const Schema = new mongoose.Schema({
   sector: {
     type: String,
     required: true,
-    enum: Object.keys(CLE_SECTOR),
+    enum: CLE_SECTOR_LIST,
     documentation: {
       description: "Filière de l'établissement",
     },
@@ -114,7 +114,7 @@ const Schema = new mongoose.Schema({
   grade: {
     type: String,
     required: true,
-    enum: Object.keys(CLE_GRADE),
+    enum: CLE_GRADE_LIST,
     documentation: {
       description: "Niveau de la classe",
     },
