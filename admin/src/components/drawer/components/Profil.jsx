@@ -86,6 +86,9 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                       <div className="!ml-3 flex flex-col">
                         <span className=" text-left text-xs leading-5 font-semibold h-[20px] truncate uppercase text-[#EEEFF5] w-[150px]">{translate(user.role)}</span>
                         {getDepRegion(user) && <span className=" text-left text-xs leading-5 font-normal h-[20px] truncate text-[#EEEFF5]/80 w-[150px]">{getDepRegion(user)}</span>}
+                        {user.role === ROLES.ADMINISTRATEUR_CLE && (
+                          <span className=" text-left text-xs leading-5 font-normal h-[20px] truncate text-[#EEEFF5]/80 w-[150px]">{translate(user.subRole)}</span>
+                        )}
                       </div>
                     )}
                     <div className="flex items-center justify-center !ml-1 w-[20px] h-[20px]">
