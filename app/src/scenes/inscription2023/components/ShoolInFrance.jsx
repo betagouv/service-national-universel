@@ -9,6 +9,7 @@ import { FiChevronLeft } from "react-icons/fi";
 import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import { toastr } from "react-redux-toastr";
+import SchoolSearch from "./SchoolSearch";
 
 const addressValidationInfo = "Pour valider votre adresse vous devez remplir les champs adresse de résidence, code postale et ville.";
 const addressValidationSuccess = "L'adresse a été vérifiée";
@@ -21,6 +22,7 @@ const messageStyles = {
 export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, corrections = null }) {
   const [cities, setCities] = useState([]);
   const [city, setCity] = useState(school?.city);
+  const [department, setDepartment] = useState(school?.department);
   const [schools, setSchools] = useState([]);
 
   const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
@@ -29,17 +31,17 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
 
   const isVerifyAddressDisabled = !manualSchool.fullName || !manualSchool.adresse || !manualSchool.city || !manualSchool.postCode;
 
-  useEffect(() => {
-    async function getCities() {
-      const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCities=true", { filters: { country: ["FRANCE"] } });
-      if (!responses[0].aggregations?.cities.buckets.length) {
-        toastr.error("Erreur", "Impossible de récupérer les établissements");
-        return;
-      }
-      setCities(responses[0].aggregations?.cities.buckets.map((e) => e.key).sort());
-    }
-    getCities();
-  }, []);
+  // useEffect(() => {
+  //   async function getCities() {
+  //     const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCitiesAndDepartments=true", { filters: { country: ["FRANCE"] } });
+  //     if (!responses[0].aggregations?.cities.buckets.length) {
+  //       toastr.error("Erreur", "Impossible de récupérer les établissements");
+  //       return;
+  //     }
+  //     setCities(responses[0].aggregations?.cities.buckets.map((e) => e.key).sort());
+  //   }
+  //   getCities();
+  // }, []);
 
   useEffect(() => {
     if (!cities.length) return;
@@ -74,14 +76,14 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
     setErrors(errors);
   }, [toggleVerify]);
 
-  useEffect(() => {
-    async function getSchools() {
-      if (!city) return;
-      const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { country: ["FRANCE"], city: [city] } });
-      setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
-    }
-    getSchools();
-  }, [city]);
+  // useEffect(() => {
+  //   async function getSchools() {
+  //     if (!city) return;
+  //     const { responses } = await api.post("/elasticsearch/schoolramses/public/search", { filters: { country: ["FRANCE"], departmentName: [department], city: [city] } });
+  //     setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
+  //   }
+  //   getSchools();
+  // }, [city, department]);
 
   const onVerifyAddress = (isConfirmed) => (suggestion) => {
     const newSchool = {
@@ -171,21 +173,28 @@ export default function SchoolInFrance({ school, onSelectSchool, toggleVerify, c
     </>
   ) : (
     <>
-      <SearchableSelect
-        label="Commune de l'établissement"
-        options={cities?.map((c) => ({ value: c, label: c }))}
-        onChange={(value) => {
-          setCity(value);
-          setManualSchool({ city: value, addressVerified: undefined });
-          onSelectSchool(null);
-        }}
-        value={city}
-        placeholder="Recherchez une commune"
-        error={errors.city}
-        correction={corrections?.schoolCity}
-        noOptionsMessage="Veuillez rechercher une commune existante."
-        isDebounced
-      />
+      <SchoolSearch />
+      {/* {cities.length > 0 && (
+        <SearchableSelect
+          label="Commune de l'établissement"
+          options={cities?.map((c) => ({ value: c[0] + " - " + c[1], label: c[0] + " - " + c[1] }))}
+          onChange={(value) => {
+            console.log("🚀 ~ file: ShoolInFrance.jsx:183 ~ SchoolInFrance ~ value:", value);
+            const city = value.split(" - ")[0];
+            const department = value.split(" - ")[1];
+            setCity(city);
+            setDepartment(department);
+            setManualSchool({ city: value[0], department: value[1] });
+            onSelectSchool(null);
+          }}
+          value={city + department}
+          placeholder="Recherchez une commune"
+          error={errors.city}
+          correction={corrections?.schoolCity}
+          noOptionsMessage="Veuillez rechercher une commune existante."
+          isDebounced
+        />
+      )} */}
       <CreatableSelect
         label="Nom de l'établissement"
         value={school && `${school.fullName} - ${school.adresse}`}
