@@ -47,6 +47,8 @@ async function createLog(patch, actualStructure, event, value) {
   const structInfos = await actualStructure.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let structure = rebuildStruct(structInfos);
 
+  const anonymisedStructure = new StructureModel(structure).anonymise();
+
   // console.log(
   //   (Array.isArray(structure?.types) ? structure?.types[0] : structure?.types) || (Array.isArray(actualStructure?.types) ? actualStructure?.types[0] : actualStructure?.types),
   // );
@@ -75,7 +77,7 @@ async function createLog(patch, actualStructure, event, value) {
       structure_preparationMilitaire: structure.isMilitaryPreparation || actualStructure.isMilitaryPreparation,
       structure_reseau: structure.isNetwork,
       date: patch.date,
-      raw_data: structure,
+      raw_data: anonymisedStructure,
     }),
   });
 
