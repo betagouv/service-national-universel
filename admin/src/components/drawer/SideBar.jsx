@@ -244,8 +244,8 @@ const SideBar = (props) => {
         return visitorItems;
       case ROLES.DSNJ:
         return dsnjItems;
-      case ROLES.INSTITUTION_CHEF:
-      case ROLES.INSTITUTION_SOUS_CHEF:
+      case ROLES.ADMINISTRATEUR_CLE:
+      case ROLES.REFERENT_CLASSE:
         return institutionItems;
       default:
         return [];
