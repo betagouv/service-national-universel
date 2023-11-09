@@ -82,7 +82,7 @@ export default function view() {
         </div>
       </Container>
 
-      {/* First login INSTITUTION_CHEF */}
+      {/* First login ADMINISTRATEUR_CLE */}
       <ModalConfirmation
         isOpen={modalChef}
         onClose={() => setModalChef(false)}
@@ -94,7 +94,7 @@ export default function view() {
           { title: "Ajouter un coordinateur", leftIcon: <HiPlus />, onClick: () => setModalCoordinator(true) },
         ]}
       />
-      {/* First login INSTITUTION_SOUS_CHEF */}
+      {/* First login REFERENT_CLASSE */}
       <ModalConfirmation
         isOpen={modalSousChef}
         onClose={() => setModalSousChef(false)}
