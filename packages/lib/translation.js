@@ -126,10 +126,10 @@ const translate = (value) => {
       return "Responsable";
     case "head_center":
       return "Chef de centre";
-    case "institution_chef":
-      return "Responsable d'établissement";
-    case "institution_sous_chef":
-      return "Adjoint d'établissement";
+    case "administrateur_cle":
+      return "Administrateur CLE";
+    case "referent_classe":
+      return "Référent de classe";
     case "visitor":
       return "Visiteur";
     case "supervisor":
@@ -162,6 +162,10 @@ const translate = (value) => {
       return "Secrétaire général d'académie (SGA)";
     case "drajes":
       return "Délégué régional académique à la jeunesse, à l'engagement et aux sports (DRAJES)";
+    case "referent_etablissement":
+      return "Chef d'établissement";
+    case "coordinateur_cle":
+      return "Coordinateur d'établissement";
     case "INSCRIPTION":
       return "Inscription";
     case "COHESION_STAY":
