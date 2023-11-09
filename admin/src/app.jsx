@@ -279,11 +279,11 @@ const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
-  [ROLES.INSTITUTION_CHEF]: {
+  [ROLES.ADMINISTRATEUR_CLE]: {
     authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/mes-contacts"],
     default: "/mon-etablissement",
   },
-  [ROLES.INSTITUTION_SOUS_CHEF]: {
+  [ROLES.REFERENT_CLASSE]: {
     authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets"],
     default: "/mon-etablissement",
   },
