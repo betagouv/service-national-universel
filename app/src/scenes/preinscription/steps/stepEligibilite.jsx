@@ -98,7 +98,7 @@ export default function StepEligibilite() {
       return;
     }
 
-    if (isLoggedIn && environment != "production") {
+    if (isLoggedIn && environment !== "production") {
       setConfirmationModal({
         isOpen: true,
         onConfirm: onSubmit,
