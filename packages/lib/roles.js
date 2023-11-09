@@ -10,8 +10,8 @@ const ROLES = {
   VISITOR: "visitor",
   DSNJ: "dsnj",
   TRANSPORTER: "transporter",
-  INSTITUTION_CHEF: "institution_chef",
-  INSTITUTION_SOUS_CHEF: "institution_sous_chef",
+  ADMINISTRATEUR_CLE: "administrateur_cle",
+  REFERENT_CLASSE : "referent_classe",
 };
 
 const SUB_ROLES = {
@@ -21,6 +21,8 @@ const SUB_ROLES = {
   secretariat: "secretariat",
   coordinator: "coordinator",
   assistant_coordinator: "assistant_coordinator",
+  referent_etablissement: "referent_etablissement",
+  coordinateur_cler: "coordinateur_cler",
   none: "",
 };
 
