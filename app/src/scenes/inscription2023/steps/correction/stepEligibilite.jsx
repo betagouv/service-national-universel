@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { toastr } from "react-redux-toastr";
-import { useHistory, useParams } from "react-router-dom";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import validator from "validator";
 import IconFrance from "../../../../assets/IconFrance";
-import QuestionMarkBlueCircle from "../../../../assets/icons/QuestionMarkBlueCircle";
 import CheckBox from "../../../../components/dsfr/forms/checkbox";
 import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
@@ -15,63 +14,50 @@ import Select from "../../../../components/dsfr/forms/Select";
 import ErrorMessage from "../../../../components/dsfr/forms/ErrorMessage";
 
 import { useDispatch, useSelector } from "react-redux";
-import { YOUNG_STATUS } from "snu-lib";
 import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import { translate } from "../../../../utils";
 import DatePicker from "../../../../components/dsfr/forms/DatePicker";
-import Footer from "@/components/dsfr/layout/Footer";
-import StickyButton from "../../../../components/dsfr/ui/buttons/stickyButton";
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
 import Navbar from "../../components/Navbar";
 import { supportURL } from "@/config";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import Loader from "@/components/Loader";
 
 export default function StepEligibilite() {
-  const [data, setData] = React.useState({});
   const young = useSelector((state) => state.Auth.young);
+  const [data, setData] = React.useState({
+    frenchNationality: young?.frenchNationality,
+    birthDate: new Date(young?.birthdateAt),
+    school: young?.schooled
+      ? {
+          fullName: young?.schoolName,
+          type: young?.schoolType,
+          adresse: young?.schoolAddress,
+          codeCity: young?.schoolZip,
+          city: young?.schoolCity,
+          departmentName: young?.schoolDepartment,
+          region: young?.schoolRegion,
+          country: young?.schoolCountry,
+          id: young?.schoolId,
+          postCode: young?.schoolZip,
+          zip: young?.schoolZip,
+        }
+      : null,
+    scolarity: young?.grade,
+    zip: young?.zip,
+  });
   const dispatch = useDispatch();
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [modal, setModal] = React.useState({ isOpen: false });
 
-  const [corrections, setCorrections] = React.useState({});
-
   const { step } = useParams();
-
+  const corrections = getCorrectionByStep(young, step);
   const history = useHistory();
-
-  useEffect(() => {
-    if (!young) return;
-    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
-      const corrections = getCorrectionByStep(young, step);
-      if (!Object.keys(corrections).length) return history.push("/");
-      else setCorrections(corrections);
-    }
-    setData({
-      frenchNationality: young.frenchNationality,
-      birthDate: new Date(young.birthdateAt),
-      school: young.schooled
-        ? {
-            fullName: young.schoolName,
-            type: young.schoolType,
-            adresse: young.schoolAddress,
-            codeCity: young.schoolZip,
-            city: young.schoolCity,
-            departmentName: young.schoolDepartment,
-            region: young.schoolRegion,
-            country: young.schoolCountry,
-            id: young.schoolId,
-            postCode: young.schoolZip,
-          }
-        : null,
-      scolarity: young.grade,
-      zip: young.zip,
-    });
-  }, [young]);
 
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
@@ -139,7 +125,7 @@ export default function StepEligibilite() {
       schoolName: data.school?.fullName,
       schoolType: data.school?.type,
       schoolAddress: data.school?.address || data.school?.adresse,
-      schoolZip: data.school?.postCode || data.school?.postcode,
+      schoolZip: data.school?.postCode || data.school?.postcode || data.school?.zip,
       schoolCity: data.school?.city,
       schoolDepartment: data.school?.departmentName || data.school?.department,
       schoolRegion: data.school?.region,
@@ -202,6 +188,8 @@ export default function StepEligibilite() {
     }
   };
 
+  if (!young) return <Loader />;
+  if (!corrections) return <Redirect to="/" />;
   return (
     <>
       <Navbar />
@@ -236,27 +224,23 @@ export default function StepEligibilite() {
         {data.scolarity && (
           <>
             <div className="flex items-center justify-between">
-              <p>
+              <div>
                 <div>
                   <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
                 </div>
                 <div className="flex h-5 items-center">
                   <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
                 </div>
-              </p>
+              </div>
 
               <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, zip: data.isAbroad ? null : data.zip })} toggled={!data.isAbroad} />
             </div>
 
             {data.scolarity !== "NOT_SCOLARISE" ? (
               data.isAbroad ? (
-                <>
-                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} corrections={corrections} />
-                </>
+                <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} corrections={corrections} />
               ) : (
-                <>
-                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} corrections={corrections} />
-                </>
+                <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} errors={error} corrections={corrections} />
               )
             ) : !data.isAbroad ? (
               <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} label="Code Postal" error={error.zip} correction={corrections.zip} />

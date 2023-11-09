@@ -7,9 +7,9 @@ import ReinscriptionContextProvider, { ReinscriptionContext } from "../../contex
 import { SentryRoute, capture } from "../../sentry";
 
 import { useSelector } from "react-redux";
-import StepEligibilite from "./steps/stepEligibilite";
+import StepEligibilite from "../preinscription/steps/stepEligibilite";
 import StepSejour from "../preinscription/steps/stepSejour";
-import StepConfirm from "./steps/stepConfirm";
+import StepConfirm from "../preinscription/steps/stepConfirm";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
@@ -30,6 +30,7 @@ const Step = () => {
       ...data,
       birthDate: young.birthdateAt,
       zip: young.zip,
+      frenchNationality: young.frenchNationality,
     });
   }, []);
 

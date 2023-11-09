@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { getCohortPeriod, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
@@ -24,7 +24,7 @@ export default function StepSejour() {
 
   return (
     <>
-      <ProgressBar />
+      <ProgressBar isReinscription={isLoggedIn} />
       <DSFRContainer title="Choisissez la date du séjour" supportLink={supportURL + `/base-de-connaissance/${bdcURI}`} supportEvent="Phase0/aide preinscription - sejour">
         <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
         <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
@@ -32,6 +32,16 @@ export default function StepSejour() {
           <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
         )}
         <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
+        <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
+        <div className="text-sm text-gray-500">
+          La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
+          <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline underline-offset-4">
+            En savoir plus.
+          </a>
+        </div>
+        <div className="my-4 text-[#000091] underline underline-offset-4">
+          <Link to="/public-engagements">Consulter d’autres dispositifs d’engagement</Link>
+        </div>
         <SignupButtonContainer onClickPrevious={() => history.push(route)} />
       </DSFRContainer>
     </>

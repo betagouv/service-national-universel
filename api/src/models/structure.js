@@ -325,10 +325,10 @@ Schema.methods.anonymise = function () {
   this.facebook && (this.facebook = "www.facebook.com");
   this.instagram && (this.instagram = "www.instagram.com");
   //anonymize structure manager
-  this.structureManager.firstName && (this.structureManager.firstName = generateRandomName());
-  this.structureManager.lastName && (this.structureManager.lastName = generateRandomName());
-  this.structureManager.mobile && (this.structureManager.mobile = generateNewPhoneNumber());
-  this.structureManager.email && (this.structureManager.email = generateRandomEmail());
+  this.structureManager?.firstName && (this.structureManager.firstName = generateRandomName());
+  this.structureManager?.lastName && (this.structureManager.lastName = generateRandomName());
+  this.structureManager?.mobile && (this.structureManager.mobile = generateNewPhoneNumber());
+  this.structureManager?.email && (this.structureManager.email = generateRandomEmail());
   return this;
 };
 

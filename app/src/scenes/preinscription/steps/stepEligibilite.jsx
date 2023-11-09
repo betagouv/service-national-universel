@@ -1,13 +1,16 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import { setYoung } from "@/redux/auth/actions";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import { capture } from "../../../sentry";
 import validator from "validator";
 import dayjs from "dayjs";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
+import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
 
 import IconFrance from "../../../assets/IconFrance";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -24,11 +27,16 @@ import { supportURL } from "@/config";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
 export default function StepEligibilite() {
-  const [data, setData] = React.useContext(PreInscriptionContext);
+  const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
+  const [STEPS, context, isBirthdayModificationDisabled, uri, bdcUri] = isLoggedIn
+    ? [REINSCRIPTION_STEPS, ReinscriptionContext, true, "reinscription", "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    : [PREINSCRIPTION_STEPS, PreInscriptionContext, false, "preinscription", "je-me-preinscris-et-cree-mon-compte-volontaire"];
+  const [data, setData] = React.useContext(context);
   const [error, setError] = React.useState({});
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
+  const dispatch = useDispatch();
   const history = useHistory();
 
   const optionsScolarite = [
@@ -70,7 +78,7 @@ export default function StepEligibilite() {
         }
       } else {
         // School
-        if ((!data?.school?.address && !data.school.adresse) || !data?.school?.city || !data?.school?.fullName) {
+        if ((!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip) || !data?.school?.city || !data?.school?.fullName) {
           // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
           errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
@@ -90,15 +98,26 @@ export default function StepEligibilite() {
     // Check if young is more than 17 years old
     const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
-      setData({ ...data, message: "age", step: PREINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
+      if (!isLoggedIn) {
+        setData({ ...data, message: "age", step: PREINSCRIPTION_STEPS.INELIGIBLE });
+        return history.push("/preinscription/noneligible");
+      } else {
+        const { ok, code } = await api.put("/young/reinscription/not-eligible");
+        if (!ok) {
+          capture(code);
+          setError({ text: "Impossible de vérifier votre éligibilité" });
+          return;
+        }
+        // setData({ ...data, message: "age", step: REINSCRIPTION_STEPS.INELIGIBLE });
+        return history.push("/noneligible");
+      }
     }
 
     setLoading(true);
-    plausibleEvent("Phase0/CTA preinscription - eligibilite");
+    plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
     if (data.frenchNationality === "false") {
       setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
-      return history.push("/preinscription/noneligible");
+      return history.push(`/${uri}/noneligible`);
     }
     const {
       ok,
@@ -121,33 +140,41 @@ export default function StepEligibilite() {
     }
 
     if (sessions.length === 0) {
-      setData({ ...data, message, step: PREINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
+      if (isLoggedIn) {
+        const { ok, data, code } = await api.put("/young/reinscription/not-eligible");
+        if (!ok) {
+          capture(code);
+          setError({ text: "Impossible de vérifier votre éligibilité" });
+          setLoading(false);
+          return;
+        }
+        dispatch(setYoung(data));
+      }
+      setData({ ...data, message, step: STEPS.INELIGIBLE });
+      return history.push(`/${uri}/noneligible`);
     }
 
-    setData({ ...data, sessions, step: PREINSCRIPTION_STEPS.SEJOUR });
-    return history.push("/preinscription/sejour");
+    setData({ ...data, sessions, step: STEPS.SEJOUR });
+    return history.push(`/${uri}/sejour`);
   };
 
   return (
     <>
-      <ProgressBar />
-      <DSFRContainer
-        title="Vérifiez votre éligibilité au SNU"
-        supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
-        supportEvent="Phase0/aide preinscription - eligibilite">
+      <ProgressBar isReinscription={isLoggedIn} />
+      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
         <div className="space-y-5">
-          <div className="flex-start flex flex-col">
-            <div className="flex items-center mb-2">
-              <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-              <div className="flex items-center">
-                <span className="ml-4 mr-2">Je suis de nationalité française</span>
-                <IconFrance />
+          {!isLoggedIn && (
+            <div className="flex-start flex flex-col">
+              <div className="flex items-center mb-2">
+                <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
+                <div className="flex items-center">
+                  <span className="ml-4 mr-2">Je suis de nationalité française</span>
+                  <IconFrance />
+                </div>
               </div>
+              {error.frenchNationality ? <ErrorMessage>{error.frenchNationality}</ErrorMessage> : null}
             </div>
-            {error.frenchNationality ? <ErrorMessage>{error.frenchNationality}</ErrorMessage> : null}
-          </div>
-
+          )}
           <div className="flex flex-col gap-4">
             <div className="flex w-full flex-col">
               <SearchableSelect
@@ -161,9 +188,9 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className="flex-start mt-2 flex w-full flex-col text-base">
+            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#666666]"}`}>
               Date de naissance
-              <DatePicker value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} disabled={isBirthdayModificationDisabled} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           </div>
@@ -188,7 +215,7 @@ export default function StepEligibilite() {
                 data.isAbroad ? (
                   <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
                 ) : (
-                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school })} errors={error} />
+                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} errors={error} />
                 )
               ) : !data.isAbroad ? (
                 <div className="flex-start my-4 flex flex-col">
