@@ -30,6 +30,7 @@ const Step = () => {
       ...data,
       birthDate: young.birthdateAt,
       zip: young.zip,
+      frenchNationality: young.frenchNationality,
     });
   }, []);
 
