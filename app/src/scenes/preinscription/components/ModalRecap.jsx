@@ -16,11 +16,11 @@ export default function ModalRecap({ isOpen, topTitle = "alerte", title, message
   };
 
   return (
-    <ModalTailwind isOpen={isOpen} className="w-[352px] space-y-2 bg-white p-2">
+    <ModalTailwind isOpen={isOpen} className="w-[384px] rounded-none space-y-2 bg-white p-2">
       <section className="px-4">
         <button className="w-full mt-4 flex items-center justify-end gap-2 pb-2 text-sm text-[#000091]" onClick={onCancel}>
           Fermer
-          <GrClose className="h-3 mt-0.5 text-blue-600" />
+          <GrClose className="h-3 mt-0.5"/>
         </button>
         <div className="flex py-2 text-[24px] font-semibold leading-32">
           <RiArrowRightLine className="text-black w-12 h-12 mx-auto pb-2" />
