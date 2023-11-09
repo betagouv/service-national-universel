@@ -12,6 +12,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ModalRecap from "../components/ModalRecap";
+import { environment } from "../../../config";
 
 import IconFrance from "../../../assets/IconFrance";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -97,7 +98,7 @@ export default function StepEligibilite() {
       return;
     }
 
-    if (isLoggedIn) {
+    if (isLoggedIn && environment != "production") {
       setConfirmationModal({
         isOpen: true,
         onConfirm: onSubmit,
@@ -243,7 +244,7 @@ export default function StepEligibilite() {
             </>
           )}
           <SignupButtonContainer onClickNext={onVerify} disabled={loading} />
-          {data?.school?.city && (
+          {confirmationModal.isOpen && (
             <ModalRecap
               isOpen={confirmationModal?.isOpen}
               title={"Les informations sont-elles correctes ?"}
