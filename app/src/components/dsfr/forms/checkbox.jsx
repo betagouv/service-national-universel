@@ -1,5 +1,5 @@
 import React from "react";
-import Check from "@/assets/icons/Check";
+import { RiCheckLine } from "react-icons/ri";
 
 export default function CheckBox({ checked, onChange, label = "", description = "", className = "", disabled = false }) {
   return (
@@ -11,16 +11,14 @@ export default function CheckBox({ checked, onChange, label = "", description = 
       }}
       className={`flex items-center ${className}`}>
       <div
-        className={`flex shrink-0 items-center justify-center border-[1px] rounded-lg h-6 w-6 ${
-          disabled ? "bg-[#929292]" : `cursor-pointer hover:scale-105  ${checked ? "bg-[#000091]" : "bg-inherit"}`
+        className={`flex shrink-0 items-center justify-center border-[1px] border-[#000091] rounded-sm h-6 w-6 ${
+          disabled ? "border-[#929292]" : `cursor-pointer  ${checked ? "bg-[#000091]" : "bg-inherit"}`
         }`}>
-        {checked ? <Check className="text-white" /> : null}
+        {checked ? <RiCheckLine className="text-white" /> : null}
       </div>
-      {label && (
-        <label className={`pl-2 ${disabled && "cursor-pointer"}`}>
-          {label} <span className="text-[#666666] text-[14px] leading-tight"> {description}</span>
-        </label>
-      )}
+      <p className={`pl-3 ${!disabled && "cursor-pointer"}`}>
+        {label} <span className="text-[#666666] text-sm leading-tight"> {description}</span>
+      </p>
     </div>
   );
 }

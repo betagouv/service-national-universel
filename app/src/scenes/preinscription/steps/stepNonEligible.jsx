@@ -25,13 +25,6 @@ export default function NonEligible() {
             Pour participer au SNU, vous devez avoir <strong>entre 15 et 17 ans</strong>.
           </p>
         )}
-
-        {data?.message === "nationality" && (
-          <p className="mb-2 mt-4 border-l-8 border-l-[#6A6AF4] pl-4">
-            Pour participer au SNU, vous devez être de <strong>nationalité française</strong>.
-          </p>
-        )}
-
         <EngagementPrograms />
         <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
       </DSFRContainer>

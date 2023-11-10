@@ -38,7 +38,7 @@ const Schema = new mongoose.Schema({
   department: {
     type: String,
     documentation: {
-      description: "Départment du centre",
+      description: "Département du centre",
     },
   },
   region: {
@@ -159,7 +159,7 @@ const Schema = new mongoose.Schema({
   departmentCode: {
     type: String,
     documentation: {
-      description: "Numéro du départment du centre",
+      description: "Numéro du département du centre",
     },
   },
 
@@ -167,13 +167,19 @@ const Schema = new mongoose.Schema({
     type: [String],
     enum: ["VALIDATED", "DRAFT", "WAITING_VALIDATION"],
     documentation: {
-      description: "Status de la globalite des cohortes d'un centre",
+      description: "Status de la globalité des cohortes d'un centre",
     },
   },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
+
+Schema.methods.anonymise = function () {
+  this.code2022 && (this.code2022 = "02022");
+  this.code && (this.code = "00000");
+  return this;
+};
 
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {

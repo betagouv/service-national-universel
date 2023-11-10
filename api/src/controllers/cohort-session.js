@@ -32,7 +32,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
           birthdateAt: Joi.date().required(),
           grade: Joi.string(),
           status: Joi.string(),
-          zip: Joi.string(),
+          zip: Joi.string().allow("", null),
         })
           .unknown()
           .validate(req.body);
@@ -42,18 +42,17 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
         }
         young = body;
       }
-      const { error: errorQuery, value: query } = Joi.object({
+      const { error: errorParams, value: params } = Joi.object({
         getAllSessions: Joi.boolean().default(false),
-        timeZoneOffset: Joi.number(),
-      }).validate(req.query, {
-        stripUnknown: true,
-      });
+      })
+        .unknown()
+        .validate(req.query, { stripUnknown: true });
 
-      if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const bypassFilter =
-        (user?.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && query.getAllSessions);
-      const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young, query.timeZoneOffset || null);
+        (user?.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
+      const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
       if (sessions.length === 0) return res.send({ ok: true, data: [], message: "no_session_found" });
       return res.send({ ok: true, data: sessions });
     } catch (error) {
@@ -66,15 +65,14 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
 router.get("/isInscriptionOpen", async (req, res) => {
   const { error, value } = Joi.object({
     sessionName: Joi.string(),
-    timeZoneOffset: Joi.number().required(),
   })
     .unknown()
     .validate(req.query, { stripUnknown: true });
 
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-  const { sessionName: cohortName, timeZoneOffset } = value;
+  const { sessionName: cohortName } = value;
 
-  const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC
+  const userTimezoneOffsetInMilliseconds = req.headers["x-user-timezone"] * 60 * 1000; // User's offset from UTC
 
   // Adjust server's time for user's timezone
   const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;

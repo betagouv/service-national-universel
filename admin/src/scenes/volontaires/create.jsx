@@ -377,14 +377,15 @@ export default function Create() {
               zip: values.zip,
             };
           }
-          const res = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, body);
+          const res = await api.post(`/cohort-session/eligibility/2023`, body);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
           } else {
             setEgibilityError("");
           }
-          setCohorts(res.data);
+
+          setCohorts(res.data.filter((c) => !["Juin 2024 - 1", "Mars 2024 - La Réunion"].includes(c.name)));
         } catch (e) {
           capture(e);
 
@@ -714,7 +715,7 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
       )}
       <div className="mt-8">
         <div className="mt-8 mb-2 text-xs font-medium leading-snug text-[#242526]">Situations particulières</div>
-        <FieldSituationsParticulieres name="specificSituations" young={values} mode={"edition"} onChange={(value, key) => setFieldValue(key, value)} />
+        <FieldSituationsParticulieres name="specificSituations" young={values} mode="edition" onChange={(key, value) => setFieldValue(key, value)} />
         {values.specificAmenagment === "true" && (
           <Field
             name="specificAmenagmentType"

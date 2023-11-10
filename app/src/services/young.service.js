@@ -10,7 +10,7 @@ export const abandonYoungAccount = ({ withdrawnMessage, withdrawnReason }) => ap
 
 export const updateYoung = async (path, youngDataToUpdate) => {
   try {
-    const { ok, code, data } = await api.put(`/young/account/${path}?timeZoneOffset=${new Date().getTimezoneOffset()}`, youngDataToUpdate);
+    const { ok, code, data } = await api.put(`/young/account/${path}`, youngDataToUpdate);
     if (!ok && code === ERRORS.OPERATION_UNAUTHORIZED) {
       throw {
         title: `${translate(code)} :`,

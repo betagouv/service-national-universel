@@ -66,8 +66,6 @@ describe("Young", () => {
       const fieldToKeep = [
         "_id",
         "__v",
-        "email",
-        "status",
         "birthdateAt",
         "cohort",
         "gender",
@@ -83,17 +81,20 @@ describe("Young", () => {
         "statusPhase2",
         "phase2ApplicationStatus",
         "statusPhase3",
+        "inscriptionStep2023",
+        "inscriptionDoneDate",
+        "reinscriptionStep2023",
         "department",
         "region",
         "zip",
         "city",
-        "files",
+        "createdAt",
       ];
 
       //Check that the fields deleted are deleted
       for (const key in updatedYoung) {
         if (!fieldToKeep.find((val) => val === key)) {
-          if (key !== "updatedAt") expect(updatedYoung[key]).toEqual(undefined);
+          if (!["updatedAt", "status", "email", "_id", "phase2ApplicationStatus", "birthdateAt"].includes(key)) expect(updatedYoung[key]).toEqual(undefined);
         }
       }
 
@@ -109,7 +110,7 @@ describe("Young", () => {
             expect(updatedYoung[key]).toEqual(young[key].toString());
           } else if (key === "phase2ApplicationStatus") {
             expect(updatedYoung[key]).toEqual(Array.from(young[key]));
-          } else if (key === "birthdateAt") {
+          } else if (["birthdateAt", "createdAt"].includes(key)) {
             expect(Date(updatedYoung[key])).toEqual(Date(young[key]));
           } else {
             expect(updatedYoung[key]).toEqual(young[key]);

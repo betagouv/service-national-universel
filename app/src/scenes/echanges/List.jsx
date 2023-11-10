@@ -61,12 +61,14 @@ const Echanges = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const { ok, data } = await API.get(`/zammood/tickets`);
-        if (!ok) {
+        const response = await API.get(`/zammood/tickets`);
+        if (response && response.ok) {
+          const { data } = response;
+          setUserTickets(data);
+        } else {
           toastr.error("Erreur pendant la récupération des Tickets");
-          return setUserTickets([]);
+          setUserTickets([]);
         }
-        setUserTickets(data);
       } catch (error) {
         capture(error);
         toastr.error("Le fichier n'a pas pu être téléchargé");

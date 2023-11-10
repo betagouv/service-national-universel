@@ -55,6 +55,8 @@ async function createLog(patch, actualMission, event, value) {
   const missionInfos = await actualMission.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let mission = rebuildMission(missionInfos);
 
+  const anonymisedMission = new MissionModel(mission).anonymise();
+
   const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/mission`, {
     method: "POST",
     redirect: "follow",
@@ -81,7 +83,7 @@ async function createLog(patch, actualMission, event, value) {
       mission_preparationMilitaire: mission.isMilitaryPreparation || actualMission.isMilitaryPreparation,
       mission_JVA: mission.isJvaMission || actualMission.isJvaMission,
       date: patch.date,
-      raw_data: mission,
+      raw_data: anonymisedMission,
     }),
   });
 

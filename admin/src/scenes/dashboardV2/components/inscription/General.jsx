@@ -24,6 +24,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
 
   const [inscriptionDetailObject, setInscriptionDetailObject] = useState({});
   const [totalInscriptions, setTotalInscriptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
@@ -33,9 +34,11 @@ export default function General({ selectedFilters, setSelectedFilters }) {
     : academyList.map((a) => ({ key: a, label: a }));
 
   useEffect(() => {
-    //regex to get all cohort 2024
+    // regex to get all cohort 2024
     const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
     setSelectedFilters({ cohort: cohortsFilters });
+
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -92,6 +95,7 @@ export default function General({ selectedFilters, setSelectedFilters }) {
   }, []);
 
   useEffect(() => {
+    if (isLoading) return;
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
     fetchCurrentInscriptions();
@@ -108,6 +112,9 @@ export default function General({ selectedFilters, setSelectedFilters }) {
         .reduce((acc, current) => acc + (current.max && !isNaN(Number(current.max)) ? Number(current.max) : 0), 0),
     [inscriptionGoals, selectedFilters.cohort, selectedFilters.department, selectedFilters.region, selectedFilters.academy],
   );
+
+  if (isLoading) return null;
+
   return (
     <div className="flex flex-col gap-8 ">
       <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />

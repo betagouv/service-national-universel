@@ -47,15 +47,17 @@ export default function Signin() {
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
       if (young) {
+        plausibleEvent("Connexion réussie");
         if (token) api.setToken(token);
         dispatch(setYoung(young));
         await cohortsInit();
-        if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
-        if (redirect) {
+        const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
+        if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
           toastr.error("Url de redirection invalide : " + redirect);
           return history.push("/");
         }
+        return (window.location.href = redirect);
       }
     } catch (e) {
       setPassword("");
@@ -79,7 +81,7 @@ export default function Signin() {
   React.useEffect(() => {
     const fetchInscriptionOpen = async () => {
       try {
-        const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen?timeZoneOffset=${new Date().getTimezoneOffset()}`);
+        const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen`);
         if (!ok) {
           capture(code);
           return toastr.error("Oups, une erreur est survenue", code);

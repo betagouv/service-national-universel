@@ -10,10 +10,10 @@ export async function cohortsInit() {
   if (isCohortsInitialized()) return;
   try {
     const result = await api.get("/cohort");
-    if (result.status === 401) {
+    if (result?.status === 401) {
       return;
     }
-    if (!result.ok) {
+    if (!result?.ok) {
       capture("Unable to load global cohorts data :" + JSON.stringify(result));
     } else {
       cohorts = result.data;

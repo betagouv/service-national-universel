@@ -3,6 +3,7 @@ import { Link, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
+import plausibleEvent from "@/services/plausible";
 import { maintenance } from "../../config";
 import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
@@ -33,13 +34,15 @@ export default function Signin() {
       setLoading(false);
       if (response.token) api.setToken(response.token);
       if (response.user) {
+        plausibleEvent("2FA / Connexion réussie");
         dispatch(setUser(response.user));
-        if (environment === "development" ? redirect : isValidRedirectUrl(redirect)) return (window.location.href = redirect);
-        if (redirect) {
+        const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
+        if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
           toastr.error("Url de redirection invalide : " + redirect);
           return history.push("/");
         }
+        return (window.location.href = redirect);
       }
     } catch (e) {
       setLoading(false);
