@@ -3,6 +3,7 @@ import { RiLoader2Line, RiSearchLine } from "react-icons/ri";
 import { toastr } from "react-redux-toastr";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { debounce } from "@/utils";
+import { capture } from "@/sentry";
 
 export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOptions, value, onChange, errorMessage }) {
   const [query, setQuery] = useState("");
@@ -47,7 +48,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
           return;
         }
       } catch (e) {
-        console.error("🚀 ~ file: AsyncCombobox.jsx:54 ~ handleChangeQuery ~ e:", e);
+        capture(e);
       } finally {
         setLoading(false);
       }
@@ -77,7 +78,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
             type="text"
             value={query || value?.label || ""}
             onChange={(e) => handleChangeQuery(e)}
-            onClick={() => {
+            onFocus={() => {
               setQuery("");
               onChange(null);
             }}
@@ -88,9 +89,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
           </span>
         </div>
       </label>
-
       {query?.trim().length > 2 && <Dropdown options={options} handleSelect={handleSelect} loading={loading} hint={hint} />}
-
       <ErrorMessage>{errorMessage}</ErrorMessage>
     </div>
   );
