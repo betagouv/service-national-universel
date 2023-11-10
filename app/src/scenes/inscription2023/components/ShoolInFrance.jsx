@@ -29,7 +29,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   }
 
   async function getSchools(city) {
-    if (!city?.value.lenght === 2) return;
+    if (!city?.value.length === 2) return;
     const { responses } = await api.post("/elasticsearch/schoolramses/public/search", {
       filters: { country: ["FRANCE"], city: [city.value[0]], departmentName: [city.value[1]] },
     });
