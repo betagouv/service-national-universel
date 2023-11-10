@@ -90,8 +90,8 @@ export default function view() {
         title="Bonjour Estelle PÉPIN !"
         text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un référent d’établissement."
         actions={[
-          { title: "Créer une classe engagée", leftIcon: <ClasseIcon />, onClick: () => history.push("/mes-classes/create") },
-          { title: "Ajouter un coordinateur", leftIcon: <HiPlus />, onClick: () => setModalCoordinator(true) },
+          { title: "Créer une classe engagée", leftIcon: <ClasseIcon width={20} height={20} />, onClick: () => history.push("/mes-classes/create") },
+          { title: "Ajouter un coordinateur", leftIcon: <HiPlus className="text-lg" />, onClick: () => setModalCoordinator(true) },
         ]}
       />
       {/* First login REFERENT_CLASSE */}
@@ -103,7 +103,7 @@ export default function view() {
         text="Bienvenue sur votre compte SNU en tant que Référent de classe. Vous pouvez compléter la fiche de votre classe en renseignant toutes les informations."
         actions={[
           { title: "Fermer", isCancel: true },
-          { title: "Compléter les informations", leftIcon: <ClasseIcon />, onClick: () => history.push("/mes-classes/1") },
+          { title: "Compléter les informations", leftIcon: <ClasseIcon width={20} height={20} />, onClick: () => history.push("/mes-classes/1") },
         ]}
       />
       {/* Invite COORDINATOR */}
