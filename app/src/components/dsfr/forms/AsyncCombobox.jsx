@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { debounce } from "@/utils";
 
-export default function AsyncCombobox({ label, hint, getOptions, value, onChange, error }) {
+export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOptions, value, onChange, errorMessage }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -91,7 +91,7 @@ export default function AsyncCombobox({ label, hint, getOptions, value, onChange
 
       {query?.trim().length > 2 && <Dropdown options={options} handleSelect={handleSelect} loading={loading} hint={hint} />}
 
-      <ErrorMessage>{error}</ErrorMessage>
+      <ErrorMessage>{errorMessage}</ErrorMessage>
     </div>
   );
 }
@@ -107,12 +107,12 @@ function Dropdown({ loading, options, handleSelect, hint }) {
           </div>
         ) : options.length ? (
           options.map((option) => (
-            <button key={option.label} onClick={() => handleSelect(option)} className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
+            <button key={option.label} onClick={() => handleSelect(option)} className="px-3 py-2.5 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
               <p className="text-left">{option.label}</p>
             </button>
           ))
         ) : (
-          <p className="p-3 text-gray-800 text-center">{hint || "Aucun résultat."}</p>
+          <p className="p-3 text-gray-800 text-center">{hint}</p>
         )}
       </div>
     </div>

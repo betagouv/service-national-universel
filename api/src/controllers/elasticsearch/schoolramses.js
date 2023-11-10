@@ -132,14 +132,6 @@ router.post("/public/search", async (req, res) => {
           },
         },
       };
-    } else if (req.query.searchSchool) {
-      query = {
-        query: {
-          match: {
-            "schoolName.folded": req.query.searchSchool,
-          },
-        },
-      };
     } else {
       query = {
         query: {
