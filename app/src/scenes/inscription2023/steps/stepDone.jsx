@@ -89,7 +89,7 @@ export default function StepWaitingConsent() {
             Bonne nouvelle, votre représentant légal a <strong>déjà donné son consentement.</strong>
           </p>
           <p className="mt-2 text-base text-[#161616]">Vous pouvez désormais accéder à votre compte volontaire.</p>
-          <SignupButtonContainer labelNext="Accéder à mon compte volontaire" onClickNext={handleDone} />
+          <SignupButtonContainer labelNext="Accéder à mon compte" onClickNext={handleDone} />
         </DSFRContainer>
       ) : (
         <>
