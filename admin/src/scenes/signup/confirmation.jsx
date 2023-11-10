@@ -70,7 +70,7 @@ export default function confirmation() {
           options={[
             {
               label: (
-                <p className="p-0 m-0 !pl-8">
+                <p className="p-0 m-0 mt-2 !pl-8 text-xs">
                   J'ai lu et j'accepte les <a href="#">Conditions Générales d'Utilisation (CGU)</a> de la plateforme du Service National Universel.
                 </p>
               ),
@@ -81,7 +81,7 @@ export default function confirmation() {
             },
             {
               label: (
-                <p className="p-0 m-0 !pl-8">
+                <p className="p-0 m-0 mt-3 !pl-8 text-xs">
                   J’ai pris connaissance des <a href="#">modalités de traitement de mes données personnelles</a>.
                 </p>
               ),

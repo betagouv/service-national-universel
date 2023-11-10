@@ -67,17 +67,13 @@ export default function informations() {
         <div className="flex w-full">
           <InputPhone label="Numéro de téléphone" />
         </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-6">
-            <div className="w-full">
-              <PasswordInput label="Mot de passe" nativeInputProps={{}} />
-            </div>
-            <div className="w-full">
-              <PasswordInput label="Confirmer votre mot de passe" nativeInputProps={{}} />
-            </div>
-          </div>
-          <p className="text-neutral-600 text-sm">Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</p>
+        <div className="w-full">
+          <PasswordInput label="Mot de passe" nativeInputProps={{}} />
         </div>
+        <div className="w-full">
+          <PasswordInput label="Confirmer votre mot de passe" nativeInputProps={{}} />
+        </div>
+        <p className="text-neutral-600 text-sm">Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</p>
         <hr className="p-1" />
         <div className="flex justify-end">
           <Button onClick={() => history.push(`/creer-mon-compte/confirmation`)}>Continuer</Button>

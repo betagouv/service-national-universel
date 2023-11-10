@@ -1,9 +1,11 @@
+/** @format */
+
 import React from "react";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 
 import { classNames } from "../../utils";
-import { PHONE_ZONES } from '../../common';
+import { PHONE_ZONES } from "../../common";
 
 type OwnProps = {
   name: string;
@@ -45,45 +47,44 @@ export default function InputPhone({
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <div>
-        <div className="flex flex-1 flex-col justify-center">
-          {label && (
-            <label
-              htmlFor={name}
-              className={classNames(
-                error ? "text-red-500" : "text-[var(--text-label-grey)]",
-                "mb-0 text-base font-normal leading-6"
-              )}
+    <div className="flex flex-col gap-2 w-full">
+      <div className="flex flex-1 flex-col justify-center w-full">
+        {label && (
+          <label
+            htmlFor={name}
+            className={classNames(
+              error ? "text-red-500" : "text-[var(--text-label-grey)]",
+              "mb-0 text-base font-normal leading-6"
+            )}
+          >
+            {label}
+          </label>
+        )}
+        <div className="flex w-full">
+          <div className="w-48">
+            <Select
+              label=""
+              disabled={disabled || readOnly}
+              nativeSelectProps={{
+                className: "!my-0",
+                ref: selectRef,
+                onChange: handleChangePhoneZone,
+                value: zoneValue,
+              }}
             >
-              {label}
-            </label>
-          )}
-          <div className="flex ">
-            <div className="flex ">
-              <Select
-                label=""
-                disabled={disabled || readOnly}
-                nativeSelectProps={{
-                  className: "!my-0",
-                  ref: selectRef,
-                  onChange: handleChangePhoneZone,
-                  value: zoneValue,
-                }}
-              >
-                {!zoneValue && (
-                  <option value="" className="flex gap-1">
-                    + ?? ...
-                  </option>
-                )}
-                {Object.entries(PHONE_ZONES).map(([key, phoneZone]) => (
-                  <option key={key} value={key}>
-                    {phoneZone.code} {phoneZone.shortcut}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            {/* <div className="h-6 my-auto w-[1px] bg-gray-200" /> */}
+              {!zoneValue && (
+                <option value="" className="flex gap-1">
+                  + ?? ...
+                </option>
+              )}
+              {Object.entries(PHONE_ZONES).map(([key, phoneZone]) => (
+                <option key={key} value={key}>
+                  {phoneZone.shortcut} {phoneZone.code}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="w-full">
             <Input
               label=""
               disabled={disabled}
