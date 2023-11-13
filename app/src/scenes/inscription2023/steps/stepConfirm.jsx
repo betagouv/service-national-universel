@@ -33,11 +33,6 @@ export default function StepConfirm() {
     young?.highSkilledActivity === "true" ||
     young?.highSkilledActivityInSameDepartment === "true";
 
-  function formatDate(isoString) {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(isoString).toLocaleDateString(undefined, options);
-  }
-
   const onSubmit = async () => {
     setLoading(true);
     try {
@@ -87,11 +82,10 @@ export default function StepConfirm() {
               <EditPen onClick={() => plausibleEvent("Phase0/CTA inscription - modifier profil")} />
             </Link>
           </div>
+          <Details title="Sexe" value={translate(young.gender)} />
           <Details title="Pays de naissance" value={young.birthCountry} />
           <Details title="Ville de naissance" value={young.birthCity} />
           <Details title="Code postal de naissance" value={young.birthCityZip} />
-          <Details title="Date de naissance" value={formatDate(young.birthdateAt)} />
-          <Details title="Sexe" value={translate(young.gender)} />
           <Details title="Adresse de résidence" value={young.address} />
           <Details title="Ville de résidence" value={young.city} />
           <Details title="Code postal de résidence" value={young.zip} />
