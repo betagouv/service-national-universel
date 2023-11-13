@@ -1,5 +1,10 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setYoung } from "@/redux/auth/actions";
+import API from "@/services/api";
+import dayjs from "dayjs";
+import { capture } from "@/sentry";
 import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
@@ -7,7 +12,7 @@ import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import Input from "../../../components/dsfr/forms/input";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
-import { appURL, supportURL } from "../../../config";
+import { appURL, environment, supportURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
 import { getPasswordErrorMessage } from "../../../utils";
@@ -15,6 +20,8 @@ import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
+import { translate } from "snu-lib/translation";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import IconFrance from "@/assets/IconFrance";
 import { RiInformationLine } from "react-icons/ri";
@@ -22,11 +29,15 @@ import DatePicker from "@/components/dsfr/forms/DatePicker";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
+  console.log("🚀 ~ file: stepProfil.jsx:32 ~ StepProfil ~ data:", data)
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState({});
+  const [loading, setLoading] = React.useState(false);
+
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
+  const dispatch = useDispatch();
   const parcours = new URLSearchParams(window.location.search).get("parcours") || "hts";
   const classeId = new URLSearchParams(window.location.search).get("classeId");
 
@@ -93,11 +104,66 @@ export default function StepProfil() {
     if (!Object.keys(errors).length) return;
 
     if (parcours === "cle") {
-      // go to parcours 2fa
+      await signUp();
     } else {
       setData({ ...data, email: trimmedEmail, step: PREINSCRIPTION_STEPS.CONFIRM });
       plausibleEvent("Phase0/CTA preinscription - infos persos");
       history.push("/preinscription/confirm");
+    }
+  };
+
+  const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
+
+  const signUp = async () => {
+    const values = {
+      email: data.email,
+      phone: data.phone,
+      phoneZone: data.phoneZone,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      frenchNationality: data.frenchNationality,
+      password: data.password,
+      birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
+      classeId,
+      // etablissementId,
+      schooled: "true",
+      source: "CLE",
+      // schoolName: data.school?.fullName,
+      // schoolType: data.school?.type,
+      // schoolAddress: data.school?.address || data.school?.adresse,
+      // schoolZip: data.school?.postCode || data.school?.postcode,
+      // schoolCity: data.school?.city,
+      // schoolDepartment: data.school?.departmentName || data.school?.department,
+      // schoolRegion: data.school?.region,
+      // schoolCountry: data.school?.country,
+      // schoolId: data.school?.id,
+      // zip: data.zip,
+      // cohort: data.cohort,
+      // grade: data.scolarity,
+    };
+
+    try {
+      setLoading(true);
+      const { code, ok, token, user } = await API.post(`/young/signup`, values);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+        setLoading(false);
+      } else {
+        if (user) {
+          plausibleEvent("Phase0/CTA preinscription - inscription");
+          if (token) API.setToken(token);
+          dispatch(setYoung(user));
+          history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
+        }
+      }
+    } catch (e) {
+      setLoading(false);
+      if (e.code === "USER_ALREADY_REGISTERED")
+        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
+      else {
+        capture(e);
+        setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
+      }
     }
   };
 
@@ -276,6 +342,7 @@ export default function StepProfil() {
           labelNext={parcours === "cle" ? "Recevoir un code d’activation par e-mail." : "Continuer"}
           labelPrevious="Retour au choix du séjour"
           collapsePrevious={true}
+          disabled={loading}
         />
       </DSFRContainer>
     </>
