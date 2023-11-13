@@ -119,23 +119,43 @@ router.post("/public/search", async (req, res) => {
   try {
     const { body } = req;
 
-    const filterFields = ["country.keyword", "city.keyword"];
+    const filterFields = ["country.keyword", "departmentName.keyword", "city.keyword"];
     const { queryFilters } = joiElasticSearch({ filterFields, body });
 
-    const query = {
-      query: {
-        bool: {
-          must: { match_all: {} },
-          filter: [],
+    let query = {};
+
+    if (req.query.searchCity) {
+      query = {
+        query: {
+          match: {
+            "city.folded": req.query.searchCity,
+          },
         },
-      },
-      size: ES_NO_LIMIT,
-    };
+      };
+    } else {
+      query = {
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: [],
+          },
+        },
+        size: ES_NO_LIMIT,
+      };
+    }
 
     if (queryFilters?.country) {
       query.query.bool.filter.push({
         terms: {
           "country.keyword": queryFilters.country,
+        },
+      });
+    }
+
+    if (queryFilters?.departmentName) {
+      query.query.bool.filter.push({
+        terms: {
+          "departmentName.keyword": queryFilters.departmentName,
         },
       });
     }
@@ -159,6 +179,23 @@ router.post("/public/search", async (req, res) => {
       query.size = 0;
       query.aggs = {
         cities: { terms: { field: "city.keyword", size: ES_NO_LIMIT } },
+      };
+    }
+
+    if (req.query.aggsByCitiesAndDepartments) {
+      query.size = 0;
+      query.aggs = {
+        cities: {
+          multi_terms: {
+            terms: [{ field: "city.keyword" }, { field: "departmentName.keyword" }],
+            order: { avg_score: "desc" },
+          },
+          aggs: {
+            avg_score: {
+              avg: { script: "_score" },
+            },
+          },
+        },
       };
     }
 
