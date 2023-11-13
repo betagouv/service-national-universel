@@ -37,7 +37,7 @@ export default function StepProfil() {
   const validate = () => {
     let errors = {};
 
-    if (parcours !== "cle" && !data?.frenchNationality) {
+    if (parcours === "cle" && !data?.frenchNationality) {
       errors.frenchNationality = "Ce champ est obligatoire";
     }
 
