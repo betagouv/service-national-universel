@@ -17,13 +17,13 @@ import {
   ROLES,
   SENDINBLUE_TEMPLATES,
   VISITOR_SUBROLES,
-} from "../../utils";
+} from "../../../utils";
 
-import { Footer } from "../../components/modals/Modal";
-import ModalButton from "../../components/buttons/ModalButton";
-import api from "../../services/api";
-import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import CustomMultiSelect from "../CustomMultiSelect";
+import { Footer } from "../../modals/Modal";
+import ModalButton from "../../buttons/ModalButton";
+import api from "../../../services/api";
+import ErrorMessage, { requiredMessage } from "../../errorMessage";
+import CustomMultiSelect from "../../CustomMultiSelect";
 
 export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
   const { user } = useSelector((state) => state.Auth);

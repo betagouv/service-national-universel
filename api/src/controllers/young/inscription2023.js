@@ -439,21 +439,13 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const { error: errorQuery, value: query } = Joi.object({
-      timeZoneOffset: Joi.number(),
-    }).validate(req.query, {
-      stripUnknown: true,
-    });
-
-    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Check inscription goals
-    const sessions = await getFilteredSessions(young, query.timeZoneOffset || null);
+    const sessions = await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
     const session = sessions.find(({ name }) => name === value.cohort);
     if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED }); //|| session.isFull || session.goalReached
 

@@ -21,7 +21,6 @@
     "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
   },
   "dependencies": {
-    "@appbaseio/reactivesearch": "3.42.1",
     "@codegouvfr/react-dsfr": "^0.78.5",
     "@headlessui/react": "^1.7.4",
     "@sentry/integrations": "^7.58.1",
@@ -64,7 +63,6 @@
     "reactstrap": "8.10.1",
     "redux": "4.2.1",
     "regenerator-runtime": "0.13.9",
-    "sanitize-html": "^2.7.3",
     "slugify": "^1.6.5",
     "snu-lib": "*",
     "styled-components": "5.3.11",

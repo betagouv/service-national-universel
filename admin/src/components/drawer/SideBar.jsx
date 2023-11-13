@@ -20,7 +20,7 @@ import SchemaIcon from "./icons/Schema";
 import MapIcon from "./icons/Map";
 import FlagIcon from "./icons/Flag";
 import GlobeIcon from "./icons/Globe";
-import InviteHeader from "../header/invite";
+import InviteHeader from "./components/invite";
 import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
 import InstitutionIcon from "./icons/Institution";

@@ -146,7 +146,7 @@ describe("Young", () => {
       const email = fixture.email.toLowerCase();
       const young = await createYoungHelper({ ...fixture, email });
       const cohort = await createCohortHelper({ ...getNewCohortFixture(), name: young.cohort });
-      res = await request(getAppHelper()).post("/young/signup").send({
+      res = await request(getAppHelper()).post("/young/signup").set("x-user-timezone", -60).send({
         email: email,
         phone: fixture.phone,
         phoneZone: fixture.phoneZone,

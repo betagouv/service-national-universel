@@ -1,7 +1,6 @@
 import React from "react";
 import Select, { components } from "react-select";
 import styled from "styled-components";
-import { colors } from "../../../utils";
 
 const MultiSelect = ({ disabled, label, value = [], onChange, options, placeholder = "Choisir" }) => {
   return (

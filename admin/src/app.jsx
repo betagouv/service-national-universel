@@ -1,8 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
-import queryString from "query-string";
 import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
@@ -12,10 +12,6 @@ import Association from "./scenes/association";
 import Auth from "./scenes/auth";
 import Center from "./scenes/centersV2";
 import Content from "./scenes/content";
-import Dashboard from "./scenes/dashboard";
-import DashboardHeadCenter from "./scenes/dashboard-head-center";
-import DashboardResponsible from "./scenes/dashboard-responsible";
-import DashboardVisitor from "./scenes/dashboard-visitor";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
 import DesignSystemPage from "./scenes/develop/DesignSystemPage";
 import DSNJExport from "./scenes/dsnj-export";
@@ -53,9 +49,7 @@ import DashboardResponsibleV2 from "./scenes/dashboardV2/responsible";
 import DashboardVisitorV2 from "./scenes/dashboardV2/visitor";
 
 import Loader from "./components/Loader";
-import Drawer from "./components/drawer";
 import Footer from "./components/footer";
-import Header from "./components/header";
 
 import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
@@ -69,7 +63,6 @@ import "./index.css";
 import Team from "./scenes/team";
 
 import SideBar from "./components/drawer/SideBar";
-import useDocumentTitle from "./hooks/useDocumentTitle";
 import { getCohorts } from "./services/cohort.service";
 
 initSentry();
@@ -112,20 +105,8 @@ const Home = (props) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(true);
 
-  const [drawerVisible, setDrawerVisible] = useState(true);
-
   // pour les chefs de centre, il faut afficher une seul session à la fois si il y en a plusieurs (peu importe le centre de cohésion)
   const [sessionPhase1List, setSessionPhase1List] = useState(null);
-
-  const renderDashboard = () => {
-    useDocumentTitle("Tableau de bord");
-
-    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
-    if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenter />;
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <Dashboard />;
-    if (user?.role === ROLES.VISITOR) return <DashboardVisitor />;
-    return null;
-  };
 
   const renderDashboardV2 = () => {
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <DashboardV2 />;
@@ -226,24 +207,11 @@ const Home = (props) => {
 
   return (
     <div>
-      {!isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role, environment) ? (
-        <Header onClickBurger={() => setDrawerVisible((e) => !e)} drawerVisible={drawerVisible} sessionsList={sessionPhase1List} />
-      ) : null}
       <div className="flex">
-        {!isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role, environment) ? (
-          <Drawer open={drawerVisible} onOpen={setDrawerVisible} />
-        ) : (
-          <SideBar sessionsList={sessionPhase1List} />
-        )}
+        <SideBar sessionsList={sessionPhase1List} />
+
         <div className="flex flex-col w-full">
-          <div
-            className={
-              !isFeatureEnabled(FEATURES_NAME.SIDEBAR, user?.role, environment)
-                ? drawerVisible
-                  ? `flex-1 ml-[220px] min-h-screen`
-                  : `flex-1 lg:ml-[220px] min-h-screen`
-                : `flex-1  min-h-screen`
-            }>
+          <div className={`flex-1  min-h-screen`}>
             <Switch>
               <RestrictedRoute path="/structure" component={Structure} />
               <RestrictedRoute path="/settings" component={Settings} />
@@ -284,11 +252,8 @@ const Home = (props) => {
               ) : null}
               {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
               {/* DASHBOARD */}
-              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/dashboard/:currentTab/:currentSubtab" component={renderDashboard} />}
-              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/dashboard/:currentTab" component={renderDashboard} />}
-              {!isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/" component={renderDashboard} />}
-              {isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/dashboard" component={renderDashboardV2} />}
-              {isFeatureEnabled(FEATURES_NAME.DASHBOARD, user?.role, environment) && <RestrictedRoute path="/" component={renderDashboardV2} />}
+              <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
+              <RestrictedRoute path="/" component={renderDashboardV2} />
             </Switch>
           </div>
           <Footer />

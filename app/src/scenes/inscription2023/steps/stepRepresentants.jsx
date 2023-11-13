@@ -268,7 +268,7 @@ export default function StepRepresentants() {
               setIsParent2Visible(e);
             }}
           />
-          <div className="flex-1 text-sm text-[#3A3A3A]">
+          <div className="flex-1 text-[16px] text-[#3A3A3A]">
             Je renseigne un(e) second(e) représentant(e) légal(e) - <span className="text-[#666666]">Facultatif</span>
           </div>
         </div>

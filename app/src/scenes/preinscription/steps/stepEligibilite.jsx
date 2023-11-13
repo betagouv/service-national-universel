@@ -11,6 +11,8 @@ import dayjs from "dayjs";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
+import ModalRecap from "../components/ModalRecap";
+import { environment } from "../../../config";
 
 import IconFrance from "../../../assets/IconFrance";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -35,6 +37,7 @@ export default function StepEligibilite() {
   const [error, setError] = React.useState({});
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [confirmationModal, setConfirmationModal] = React.useState({ isOpen: false, onConfirm: null });
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -53,7 +56,7 @@ export default function StepEligibilite() {
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
-  const onSubmit = async () => {
+  const onVerify = async () => {
     let errors = {};
 
     if (data.frenchNationality === "false" || !data.frenchNationality) {
@@ -95,6 +98,17 @@ export default function StepEligibilite() {
       return;
     }
 
+    if (isLoggedIn && environment !== "production") {
+      setConfirmationModal({
+        isOpen: true,
+        onConfirm: onSubmit,
+      });
+    } else {
+      onSubmit();
+    }
+  };
+
+  const onSubmit = async () => {
     // Check if young is more than 17 years old
     const age = dayjs().diff(dayjs(data.birthDate), "year");
     if (age > 17) {
@@ -124,7 +138,7 @@ export default function StepEligibilite() {
       code,
       data: sessions,
       message,
-    } = await api.post(`/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}`, {
+    } = await api.post(`/cohort-session/eligibility/2023`, {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
       schoolRegion: data.school?.region,
@@ -165,12 +179,13 @@ export default function StepEligibilite() {
         <div className="space-y-5">
           {!isLoggedIn && (
             <div className="flex-start flex flex-col">
-              <div className="flex items-center mb-2">
-                <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-                <div className="flex items-center">
-                  <span className="ml-4 mr-2">Je suis de nationalité française</span>
-                  <IconFrance />
-                </div>
+              <div className="flex items-center gap-2 mb-2">
+                <CheckBox
+                  checked={data.frenchNationality === "true"}
+                  onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })}
+                  label="Je suis de nationalité française"
+                />
+                <IconFrance />
               </div>
               {error.frenchNationality ? <ErrorMessage>{error.frenchNationality}</ErrorMessage> : null}
             </div>
@@ -229,7 +244,22 @@ export default function StepEligibilite() {
               ) : null}
             </>
           )}
-          <SignupButtonContainer onClickNext={onSubmit} disabled={loading} />
+          <SignupButtonContainer onClickNext={onVerify} disabled={loading} />
+          {confirmationModal.isOpen && (
+            <ModalRecap
+              isOpen={confirmationModal?.isOpen}
+              title={"Les informations sont-elles correctes ?"}
+              message={"Ces informations seront utilisées pour déterminer votre éligibilité. Si vous n'êtes pas éligible, vous ne pourrez plus revenir en arrière."}
+              confirmText="Oui, confirmer"
+              cancelText="Non"
+              young={data}
+              onCancel={() => setConfirmationModal({ isOpen: false, onConfirm: null })}
+              onConfirm={async () => {
+                await confirmationModal?.onConfirm();
+                setConfirmationModal({ isOpen: false, onConfirm: null });
+              }}
+            />
+          )}
         </div>
       </DSFRContainer>
     </>

@@ -11,7 +11,7 @@ import PlusSVG from "../../assets/plus.svg";
 import CrossSVG from "../../assets/cross.svg";
 import { region2department, departmentList, department2region } from "../../utils";
 
-import YearPicker from "../dashboard/components/YearPicker";
+import YearPicker from "../../components/legacy-dashboard/YearPicker";
 export default function Goal() {
   useDocumentTitle("Objectifs");
 

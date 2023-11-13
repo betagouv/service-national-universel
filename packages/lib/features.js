@@ -17,12 +17,6 @@ const FEATURES_NAME = {
 
 // If the environment is not defined then the feature is enabled
 const features = {
-  [FEATURES_NAME.SIDEBAR]: {
-    [ENVS.production]: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE, ROLES.SUPERVISOR],
-  },
-  [FEATURES_NAME.DASHBOARD]: {
-    [ENVS.production]: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE, ROLES.SUPERVISOR],
-  },
   [FEATURES_NAME.FORCE_REDIRECT]: {
     [ENVS.production]: [],
     [ENVS.staging]: [],

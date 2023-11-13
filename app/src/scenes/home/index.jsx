@@ -31,7 +31,7 @@ export default function Home() {
 
   const fetchInscriptionOpen = async () => {
     try {
-      const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen?timeZoneOffset=${new Date().getTimezoneOffset()}`);
+      const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen`);
       if (!ok) {
         capture(code);
         return toastr.error("Oups, une erreur est survenue", code);
