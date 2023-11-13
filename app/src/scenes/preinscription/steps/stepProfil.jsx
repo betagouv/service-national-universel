@@ -15,6 +15,10 @@ import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
+import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import IconFrance from "@/assets/IconFrance";
+import { RiInformationLine } from "react-icons/ri";
+import DatePicker from "@/components/dsfr/forms/DatePicker";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -23,6 +27,8 @@ export default function StepProfil() {
   const [error, setError] = React.useState({});
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
+  const parcours = new URLSearchParams(window.location.search).get("parcours") || "hts";
+  const classeId = new URLSearchParams(window.location.search).get("classeId");
 
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
   const trimmedEmail = data?.email?.trim();
@@ -30,6 +36,14 @@ export default function StepProfil() {
 
   const validate = () => {
     let errors = {};
+
+    if (parcours !== "cle" && !data?.frenchNationality) {
+      errors.frenchNationality = "Ce champ est obligatoire";
+    }
+
+    if (parcours === "cle" && !data?.birthDate) {
+      errors.birthDate = "Ce champ est obligatoire";
+    }
 
     if (data?.phone && !isPhoneNumberWellFormated(trimmedPhone, data?.phoneZone)) {
       errors.phone = PHONE_ZONES[data?.phoneZone]?.errorMessage;
@@ -76,7 +90,11 @@ export default function StepProfil() {
       errors.rulesYoung = "Vous devez accepter les modalités de traitement de mes données personnelles";
     }
     setError(errors);
-    if (!Object.keys(errors).length) {
+    if (!Object.keys(errors).length) return;
+
+    if (parcours === "cle") {
+      // go to parcours 2fa
+    } else {
       setData({ ...data, email: trimmedEmail, step: PREINSCRIPTION_STEPS.CONFIRM });
       plausibleEvent("Phase0/CTA preinscription - infos persos");
       history.push("/preinscription/confirm");
@@ -85,23 +103,77 @@ export default function StepProfil() {
 
   return (
     <>
-      <ProgressBar />
+      {parcours === "hts" && <ProgressBar />}
       <DSFRContainer
         title="Créez votre compte"
         supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
         supportEvent="Phase0/aide preinscription - infos persos">
+        {parcours === "cle" && (
+          <>
+            <div className="flex items-center gap-2 mb-2">
+              <label htmlFor="nationalite" className="m-0">
+                Je suis de nationalié française
+              </label>
+              <IconFrance />
+              <button onClick={() => window.alert("Vous devez être de nationalité française pour vous inscrire au SNU")}>
+                <RiInformationLine className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
+              </button>
+            </div>
+
+            <div className="flex flex-col md:flex-row mb-4">
+              <div className="pr-4 border-r">
+                <input
+                  className="mr-2"
+                  type="radio"
+                  id="oui"
+                  name="nationalite"
+                  value="true"
+                  checked={data.frenchNationality === "true"}
+                  onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
+                />
+                <label className="mb-0" htmlFor="oui">
+                  Oui
+                </label>
+              </div>
+              <div className="md:px-6">
+                <input
+                  className="mr-2"
+                  type="radio"
+                  id="non"
+                  name="nationalite"
+                  value="false"
+                  checked={data.frenchNationality === "false" || data.frenchNationality === undefined}
+                  onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
+                />
+                <label className="mb-0" htmlFor="non">
+                  Non
+                </label>
+              </div>
+            </div>
+            <ErrorMessage>{error?.frenchNationality}</ErrorMessage>
+          </>
+        )}
+
         <div className="space-y-5">
           <label className="w-full">
-            Prénom du volontaire
+            Prénom {parcours === "cle" ? "de l'élève" : "du volontaire"}
             <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} />
             {error.firstName && <span className="text-sm text-red-500">{error.firstName}</span>}
           </label>
 
           <label className="w-full">
-            Nom du volontaire
+            Nom de famille {parcours === "cle" ? "de l'élève" : "du volontaire"}
             <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
             {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
           </label>
+
+          {parcours === "cle" && (
+            <label className="w-full">
+              Date de naissance
+              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} />
+              {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
+            </label>
+          )}
 
           <PhoneField
             label="Téléphone"
@@ -116,7 +188,9 @@ export default function StepProfil() {
 
           <hr className="my-4" />
           <h2 className="text-base font-bold my-4">Mes identifiants de connexion</h2>
-          <p className="pl-3 border-l-4 border-l-indigo-500">Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte volontaire.</p>
+          <p className="pl-3 border-l-4 border-l-indigo-500">
+            Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte {parcours === "cle" ? "élève" : "volontaire"}.
+          </p>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <label className="w-full">
@@ -199,6 +273,7 @@ export default function StepProfil() {
         <SignupButtonContainer
           onClickNext={() => onSubmit()}
           onClickPrevious={() => history.push("/preinscription/sejour")}
+          labelNext={parcours === "cle" ? "Recevoir un code d’activation par e-mail." : "Continuer"}
           labelPrevious="Retour au choix du séjour"
           collapsePrevious={true}
         />
