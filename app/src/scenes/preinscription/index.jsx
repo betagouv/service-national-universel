@@ -31,6 +31,7 @@ function renderStepResponsive(step) {
 const Step = () => {
   const [data] = useContext(PreInscriptionContext);
   const { step } = useParams();
+  const parcours = new URLSearchParams(window.location.search).get("parcours") || "hts";
 
   const [isInscriptionOpen, setInscriptionOpen] = useState(false);
   const [isInscriptionOpenLoading, setInscriptionOpenLoading] = useState(true);
@@ -59,7 +60,7 @@ const Step = () => {
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === data.step);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
 
-  if (currentStepIndex > eligibleStepIndex) {
+  if (parcours === "hts" && currentStepIndex > eligibleStepIndex) {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
