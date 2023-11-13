@@ -41,7 +41,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
           toastr.error("Erreur", `Une erreur est survenue lors de la recherche : ${error}`, { timeOut: 10_000 });
           return;
         }
-        if (options) {
+        if (options?.length) {
           setOptions(options);
           return;
         }
