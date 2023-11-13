@@ -17,11 +17,11 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   async function getCities(query) {
     return new Promise(async (resolve, reject) => {
       try {
-        const { responses } = await api.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
-        if (!responses[0].aggregations?.cities.buckets.length) {
+        const res = await api.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
+        if (res.status === 500) {
           reject("Impossible de récupérer les établissements");
         }
-        resolve({ options: responses[0].aggregations.cities.buckets.map((e) => ({ label: e.key[0] + " - " + e.key[1], value: e.key })) });
+        resolve({ options: res.responses[0].aggregations.cities.buckets.map((e) => ({ label: e.key[0] + " - " + e.key[1], value: e.key })) });
       } catch (e) {
         reject(e);
       }

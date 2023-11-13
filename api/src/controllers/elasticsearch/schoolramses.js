@@ -128,7 +128,10 @@ router.post("/public/search", async (req, res) => {
       query = {
         query: {
           match: {
-            "city.folded": req.query.searchCity,
+            city: {
+              query: req.query.searchCity,
+              fuzziness: "AUTO",
+            },
           },
         },
       };
