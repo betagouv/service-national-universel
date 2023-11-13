@@ -3,6 +3,7 @@ import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
+import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
 import CGU from "./scenes/CGU";
