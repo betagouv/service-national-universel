@@ -82,14 +82,14 @@ export default function StepConfirm() {
               <EditPen onClick={() => plausibleEvent("Phase0/CTA inscription - modifier profil")} />
             </Link>
           </div>
-          <Details title="Pays de naissance" value={young.birthCountry} />
-          <Details title="Département de naissance" value={young.birthCityZip} />
-          <Details title="Ville de naissance" value={young.birthCity} />
           <Details title="Sexe" value={translate(young.gender)} />
-          <Details title="Téléphone" value={concatPhoneNumberWithZone(young.phone, young.phoneZone)} />
+          <Details title="Pays de naissance" value={young.birthCountry} />
+          <Details title="Ville de naissance" value={young.birthCity} />
+          <Details title="Code postal de naissance" value={young.birthCityZip} />
           <Details title="Adresse de résidence" value={young.address} />
-          <Details title="Code postal" value={young.zip} />
-          <Details title="Ville" value={young.city} />
+          <Details title="Ville de résidence" value={young.city} />
+          <Details title="Code postal de résidence" value={young.zip} />
+          <Details title="Téléphone" value={concatPhoneNumberWithZone(young.phone, young.phoneZone)} />
           {young.foreignAddress && (
             <>
               <div className="text-center text-base text-[#666666]">L&apos;adresse affichée ci-dessus est celle de votre hébergeur. Votre adresse à l&apos;étranger :</div>
