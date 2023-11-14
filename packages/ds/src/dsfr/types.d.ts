@@ -1,4 +1,4 @@
-export interface IField {
+export type Field = {
   label: string;
   value: number | string;
-}
+};
