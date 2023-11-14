@@ -100,7 +100,6 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam, structure }
         setResponsible(null);
         toastr.success("Le contact a été sauvegardé !");
       } else {
-        responsible.role = structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE;
         responsible.structureId = structure._id;
         responsible.structureName = structure.name;
         const { ok, code, data } = await API.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, responsible);
@@ -241,7 +240,7 @@ const AddContact = ({ setResponsible, isSupervisor = false }) => {
   return (
     <div
       className="border-grey-200 flex h-28 flex-row items-center justify-center rounded-lg border-[1px] border-dashed border-blue-600 bg-[#ffffff] px-2 hover:cursor-pointer hover:bg-[#eff6ff]"
-      onClick={() => setResponsible({})}>
+      onClick={() => setResponsible({ role: ROLES.RESPONSIBLE  })}>
       <HiPlus className="text-indigo-300" />
       <div className="pl-2 text-sm text-blue-600">Ajouter un {isSupervisor ? "membre" : "responsable"}</div>{" "}
     </div>
@@ -275,7 +274,7 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
           <Select
             label="Sélectionnez un rôle"
             options={rolesOptions}
-            selected={rolesOptions.find((e) => e.value === responsible.role || { label: "Responsable", value: ROLES.RESPONSIBLE })}
+            selected={rolesOptions.find((e) => e.value === responsible.role)}
             setSelected={(e) => setResponsible({ ...responsible, role: e.value })}
           />
         )}
