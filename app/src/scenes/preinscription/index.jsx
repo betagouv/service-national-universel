@@ -18,6 +18,7 @@ import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import Loader from "@/components/Loader";
 import { toastr } from "react-redux-toastr";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
+import { YOUNG_SOURCE } from "snu-lib/constants";
 import { environment } from "@/config";
 
 function renderStepResponsive(step) {
@@ -31,6 +32,7 @@ function renderStepResponsive(step) {
 const Step = () => {
   const [data] = useContext(PreInscriptionContext);
   const { step } = useParams();
+  const parcours = new URLSearchParams(window.location.search).get("parcours") || YOUNG_SOURCE.VOLONTAIRE;
 
   const [isInscriptionOpen, setInscriptionOpen] = useState(false);
   const [isInscriptionOpenLoading, setInscriptionOpenLoading] = useState(true);
@@ -59,7 +61,7 @@ const Step = () => {
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === data.step);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
 
-  if (currentStepIndex > eligibleStepIndex) {
+  if (parcours === YOUNG_SOURCE.VOLONTAIRE && currentStepIndex > eligibleStepIndex) {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
