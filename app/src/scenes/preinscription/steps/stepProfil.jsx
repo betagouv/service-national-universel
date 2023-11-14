@@ -91,20 +91,18 @@ export default function StepProfil() {
     }
 
     errors = { ...errors, ...validate() };
-    
+
     if (data.acceptCGU !== "true") {
       errors.acceptCGU = "Vous devez accepter les Conditions Générales d'Utilisation (CGU)";
     }
-    
+
     if (data.rulesYoung !== "true") {
       errors.rulesYoung = "Vous devez accepter les modalités de traitement de mes données personnelles";
     }
     setError(errors);
-    console.log("🚀 ~ file: stepProfil.jsx:94 ~ onSubmit ~ errors:", errors)
     if (Object.keys(errors).length) return;
-    
+
     if (parcours === "cle") {
-      console.log("🚀 ~ file: stepProfil.jsx:96 ~ onSubmit ~ data", data)
       await signUp();
     } else {
       setData({ ...data, email: trimmedEmail, step: PREINSCRIPTION_STEPS.CONFIRM });
@@ -118,29 +116,15 @@ export default function StepProfil() {
   const signUp = async () => {
     const values = {
       email: data.email,
-      phone: data.phone,
-      phoneZone: data.phoneZone,
+      password: data.password,
       firstName: data.firstName,
       lastName: data.lastName,
-      frenchNationality: data.frenchNationality,
-      password: data.password,
       birthdateAt: dayjs(data.birthDate).locale("fr").format("YYYY-MM-DD"),
-      classeId,
-      // etablissementId,
-      schooled: "true",
+      frenchNationality: data.frenchNationality,
+      phone: data.phone,
+      phoneZone: data.phoneZone,
       source: "CLE",
-      // schoolName: data.school?.fullName,
-      // schoolType: data.school?.type,
-      // schoolAddress: data.school?.address || data.school?.adresse,
-      // schoolZip: data.school?.postCode || data.school?.postcode,
-      // schoolCity: data.school?.city,
-      // schoolDepartment: data.school?.departmentName || data.school?.department,
-      // schoolRegion: data.school?.region,
-      // schoolCountry: data.school?.country,
-      // schoolId: data.school?.id,
-      // zip: data.zip,
-      // cohort: data.cohort,
-      // grade: data.scolarity,
+      classeId,
     };
 
     try {

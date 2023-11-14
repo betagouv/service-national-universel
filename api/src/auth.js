@@ -12,6 +12,8 @@ const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
 const { YOUNG_SOURCE_LIST } = require("snu-lib/constants");
+const ClasseEngagee = require("./models/ClasseEngagee/classe");
+const Etablissement = require("./models/ClasseEngagee/etablissement");
 
 class Auth {
   constructor(model) {
@@ -66,7 +68,27 @@ class Auth {
       let inscriptionData = {};
 
       if (source === "CLE") {
-        // TODO: fetch class and etablissement to complete data
+        const classe = await ClasseEngagee.findById(value.classeId);
+        if (!classe) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+        const etablissement = await Etablissement.findById(classe.etablissementId);
+        if (!etablissement) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+        inscriptionData = {
+          schooled: "true",
+          schoolName: etablissement.name,
+          schoolType: etablissement.type,
+          schoolAddress: etablissement.address,
+          schoolZip: etablissement.zip,
+          schoolCity: etablissement.city,
+          schoolDepartment: etablissement.department,
+          schoolRegion: etablissement.region,
+          schoolCountry: etablissement.country,
+          schoolId: etablissement.id,
+          zip: etablissement.zip,
+          cohort: classe.name,
+          grade: classe.grade,
+        }
       } else {
         inscriptionData = {
           schooled: value.schooled,
