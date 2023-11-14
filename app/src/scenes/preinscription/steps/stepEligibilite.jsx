@@ -81,7 +81,7 @@ export default function StepEligibilite() {
         }
       } else {
         // School
-        if ((!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip) || !data?.school?.city || !data?.school?.fullName) {
+        if ((!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip && !data?.school?.codePays) || !data?.school?.city || !data?.school?.fullName) {
           // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
           errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }

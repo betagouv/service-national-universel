@@ -8,7 +8,7 @@ const CreatableSelect = ({ label, options, value, onChange, placeholder = "Séle
       <label className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>{label}</label>
       <Select
         styles={customStyles}
-        value={options.find((option) => option.value === value) || null}
+        value={options.find((option) => option.value === value) || { label: value } || null}
         onChange={(option) => onChange(option.value)}
         options={options}
         isSearchable
