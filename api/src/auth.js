@@ -4,13 +4,14 @@ const Joi = require("joi");
 
 const { capture } = require("./sentry");
 const config = require("./config");
-const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
+const { sendTemplate, } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, TRUST_TOKEN_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
 const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
+const { YOUNG_SOURCE_LIST } = require("snu-lib/constants");
 
 class Auth {
   constructor(model) {
@@ -32,19 +33,26 @@ class Auth {
         password: Joi.string().required(),
         birthdateAt: Joi.date().required(),
         frenchNationality: Joi.string().trim().required(),
-        schooled: Joi.string().trim().required(),
-        grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
-        schoolName: Joi.string().trim(),
-        schoolType: Joi.string().trim(),
-        schoolAddress: Joi.string().trim(),
-        schoolZip: Joi.string().trim().allow(null, ""),
-        schoolCity: Joi.string().trim(),
-        schoolDepartment: Joi.string().trim(),
-        schoolRegion: Joi.string().trim(),
-        schoolCountry: Joi.string().trim(),
-        schoolId: Joi.string().trim(),
-        zip: Joi.string().trim(),
-        cohort: Joi.string().trim().required(),
+        source: Joi.string().trim().valid(YOUNG_SOURCE_LIST).allow(null, ""),
+      }).when(Joi.object({ source: Joi.string().trim().valid("CLE") }).unknown(), {
+        then: Joi.object({
+          classeId: Joi.string().trim().required(),
+        }),
+        otherwise: Joi.object({
+          schooled: Joi.string().trim().required(),
+          grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+          schoolName: Joi.string().trim(),
+          schoolType: Joi.string().trim(),
+          schoolAddress: Joi.string().trim(),
+          schoolZip: Joi.string().trim().allow(null, ""),
+          schoolCity: Joi.string().trim(),
+          schoolDepartment: Joi.string().trim(),
+          schoolRegion: Joi.string().trim(),
+          schoolCountry: Joi.string().trim(),
+          schoolId: Joi.string().trim(),
+          zip: Joi.string().trim(),
+          cohort: Joi.string().trim().required(),
+        })
       }).validate(req.body);
 
       if (error) {
@@ -53,29 +61,30 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const {
-        email,
-        phone,
-        phoneZone,
-        firstName,
-        lastName,
-        password,
-        birthdateAt,
-        frenchNationality,
-        schooled,
-        schoolName,
-        schoolType,
-        schoolAddress,
-        schoolZip,
-        schoolCity,
-        schoolDepartment,
-        schoolRegion,
-        schoolCountry,
-        schoolId,
-        zip,
-        cohort,
-        grade,
-      } = value;
+      const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality, source } = value;
+
+      let inscriptionData = {};
+
+      if (source === "CLE") {
+        // TODO: fetch class and etablissement to complete data
+      } else {
+        inscriptionData = {
+          schooled: value.schooled,
+          schoolName: value.schoolName,
+          schoolType: value.schoolType,
+          schoolAddress: value.schoolAddress,
+          schoolZip: value.schoolZip,
+          schoolCity: value.schoolCity,
+          schoolDepartment: value.schoolDepartment,
+          schoolRegion: value.schoolRegion,
+          schoolCountry: value.schoolCountry,
+          schoolId: value.schoolId,
+          zip: value.zip,
+          cohort: value.cohort,
+          grade: value.grade,
+        }
+      };
+
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
       const formatedDate = birthdateAt;
@@ -84,10 +93,11 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
-      if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
-      const session = sessions.find(({ name }) => name === value.cohort);
-      if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      if (!value.source === "CLE") {
+        let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
+        const session = sessions.find(({ name }) => name === value.cohort);
+        if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
 
       const tokenEmailValidation = await crypto.randomInt(1000000);
 
@@ -102,24 +112,12 @@ class Auth {
         password,
         birthdateAt: formatedDate,
         frenchNationality,
-        schooled,
-        schoolName,
-        schoolType,
-        schoolAddress,
-        schoolZip,
-        schoolCity,
-        schoolDepartment,
-        schoolRegion,
-        schoolCountry,
-        schoolId,
-        zip,
-        cohort,
-        grade,
         inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
         emailVerified: "false",
         tokenEmailValidation,
         attemptsEmailValidation: 0,
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
+        ...inscriptionData
       });
 
       if (isEmailValidationEnabled) {

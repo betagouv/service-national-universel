@@ -29,7 +29,6 @@ import DatePicker from "@/components/dsfr/forms/DatePicker";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
-  console.log("🚀 ~ file: stepProfil.jsx:32 ~ StepProfil ~ data:", data)
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState({});
@@ -92,18 +91,20 @@ export default function StepProfil() {
     }
 
     errors = { ...errors, ...validate() };
-
+    
     if (data.acceptCGU !== "true") {
       errors.acceptCGU = "Vous devez accepter les Conditions Générales d'Utilisation (CGU)";
     }
-
+    
     if (data.rulesYoung !== "true") {
       errors.rulesYoung = "Vous devez accepter les modalités de traitement de mes données personnelles";
     }
     setError(errors);
-    if (!Object.keys(errors).length) return;
-
+    console.log("🚀 ~ file: stepProfil.jsx:94 ~ onSubmit ~ errors:", errors)
+    if (Object.keys(errors).length) return;
+    
     if (parcours === "cle") {
+      console.log("🚀 ~ file: stepProfil.jsx:96 ~ onSubmit ~ data", data)
       await signUp();
     } else {
       setData({ ...data, email: trimmedEmail, step: PREINSCRIPTION_STEPS.CONFIRM });
@@ -338,8 +339,8 @@ export default function StepProfil() {
         </div>
         <SignupButtonContainer
           onClickNext={() => onSubmit()}
-          onClickPrevious={() => history.push("/preinscription/sejour")}
-          labelNext={parcours === "cle" ? "Recevoir un code d’activation par e-mail." : "Continuer"}
+          onClickPrevious={parcours === "hts" ? () => history.push("/preinscription/sejour") : null}
+          labelNext={parcours === "cle" ? "Recevoir un code d’activation par e-mail" : "Continuer"}
           labelPrevious="Retour au choix du séjour"
           collapsePrevious={true}
           disabled={loading}
