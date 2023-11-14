@@ -11,7 +11,7 @@ const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
-const { YOUNG_SOURCE_LIST } = require("snu-lib/constants");
+const {  YOUNG_SOURCE, YOUNG_SOURCE_LIST } = require("snu-lib/constants");
 const ClasseEngagee = require("./models/ClasseEngagee/classe");
 const Etablissement = require("./models/ClasseEngagee/etablissement");
 
@@ -20,6 +20,7 @@ class Auth {
     this.model = model;
   }
 
+  
   // route is currrently only used for young signup
   async signUp(req, res) {
     try {
@@ -27,16 +28,16 @@ class Auth {
         email: Joi.string().lowercase().trim().email().required(),
         phone: Joi.string().trim().required(),
         phoneZone: Joi.string()
-          .trim()
-          .valid(...PHONE_ZONES_NAMES_ARR)
+        .trim()
+        .valid(...PHONE_ZONES_NAMES_ARR)
           .required(),
-        firstName: validateFirstName().trim().required(),
+          firstName: validateFirstName().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().required(),
         birthdateAt: Joi.date().required(),
         frenchNationality: Joi.string().trim().required(),
         source: Joi.string().trim().valid(YOUNG_SOURCE_LIST).allow(null, ""),
-      }).when(Joi.object({ source: Joi.string().trim().valid("CLE") }).unknown(), {
+      }).when(Joi.object({ source: Joi.string().trim().valid(YOUNG_SOURCE.CLE) }).unknown(), {
         then: Joi.object({
           classeId: Joi.string().trim().required(),
         }),
@@ -57,6 +58,8 @@ class Auth {
         })
       }).validate(req.body);
 
+      const isClasseEngagee = value.source === YOUNG_SOURCE.CLE;
+      
       if (error) {
         if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
         if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
@@ -67,7 +70,7 @@ class Auth {
 
       let inscriptionData = {};
 
-      if (source === "CLE") {
+      if (isClasseEngagee) {
         const classe = await ClasseEngagee.findById(value.classeId);
         if (!classe) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -115,7 +118,7 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      if (!value.source === "CLE") {
+      if (!isClasseEngagee) {
         let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
         const session = sessions.find(({ name }) => name === value.cohort);
         if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });

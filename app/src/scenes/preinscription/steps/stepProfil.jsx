@@ -22,6 +22,7 @@ import PhoneField from "@/components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
 import { translate } from "snu-lib/translation";
+import { YOUNG_SOURCE } from "snu-lib/constants";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import IconFrance from "@/assets/IconFrance";
 import { RiInformationLine } from "react-icons/ri";
@@ -37,7 +38,7 @@ export default function StepProfil() {
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
   const dispatch = useDispatch();
-  const parcours = new URLSearchParams(window.location.search).get("parcours") || "hts";
+  const parcours = new URLSearchParams(window.location.search).get("parcours") || YOUNG_SOURCE.VOLONTAIRE;
   const classeId = new URLSearchParams(window.location.search).get("classeId");
 
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
@@ -102,7 +103,7 @@ export default function StepProfil() {
     setError(errors);
     if (Object.keys(errors).length) return;
 
-    if (parcours === "cle") {
+    if (parcours === YOUNG_SOURCE.CLE) {
       await signUp();
     } else {
       setData({ ...data, email: trimmedEmail, step: PREINSCRIPTION_STEPS.CONFIRM });
@@ -123,7 +124,7 @@ export default function StepProfil() {
       frenchNationality: data.frenchNationality,
       phone: data.phone,
       phoneZone: data.phoneZone,
-      source: "CLE",
+      source: YOUNG_SOURCE.CLE,
       classeId,
     };
 
@@ -154,12 +155,13 @@ export default function StepProfil() {
 
   return (
     <>
-      {parcours === "hts" && <ProgressBar />}
+      {parcours === YOUNG_SOURCE.VOLONTAIRE && <ProgressBar />}
+
       <DSFRContainer
         title="Créez votre compte"
         supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
         supportEvent="Phase0/aide preinscription - infos persos">
-        {parcours === "cle" && (
+        {parcours === YOUNG_SOURCE.CLE && (
           <>
             <div className="flex items-center gap-2 mb-2">
               <label htmlFor="nationalite" className="m-0">
@@ -207,18 +209,18 @@ export default function StepProfil() {
 
         <div className="space-y-5">
           <label className="w-full">
-            Prénom {parcours === "cle" ? "de l'élève" : "du volontaire"}
+            Prénom {parcours === YOUNG_SOURCE.CLE ? "de l'élève" : "du volontaire"}
             <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} />
             {error.firstName && <span className="text-sm text-red-500">{error.firstName}</span>}
           </label>
 
           <label className="w-full">
-            Nom de famille {parcours === "cle" ? "de l'élève" : "du volontaire"}
+            Nom de famille {parcours === YOUNG_SOURCE.CLE ? "de l'élève" : "du volontaire"}
             <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
             {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
           </label>
 
-          {parcours === "cle" && (
+          {parcours === YOUNG_SOURCE.CLE && (
             <label className="w-full">
               Date de naissance
               <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} />
@@ -323,8 +325,8 @@ export default function StepProfil() {
         </div>
         <SignupButtonContainer
           onClickNext={() => onSubmit()}
-          onClickPrevious={parcours === "hts" ? () => history.push("/preinscription/sejour") : null}
-          labelNext={parcours === "cle" ? "Recevoir un code d’activation par e-mail" : "Continuer"}
+          onClickPrevious={parcours === YOUNG_SOURCE.VOLONTAIRE ? () => history.push("/preinscription/sejour") : null}
+          labelNext={parcours === YOUNG_SOURCE.CLE ? "Recevoir un code d’activation par e-mail" : "Continuer"}
           labelPrevious="Retour au choix du séjour"
           collapsePrevious={true}
           disabled={loading}

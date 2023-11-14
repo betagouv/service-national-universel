@@ -3,6 +3,7 @@ import { Redirect, Switch, useParams } from "react-router-dom";
 import api from "@/services/api";
 import PreInscriptionContextProvider, { PreInscriptionContext } from "../../context/PreInscriptionContextProvider";
 import { SentryRoute, capture } from "../../sentry";
+import { environment } from "@/config";
 
 import StepEligibilite from "./steps/stepEligibilite";
 import StepNonEligible from "./steps/stepNonEligible";
@@ -18,7 +19,7 @@ import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import Loader from "@/components/Loader";
 import { toastr } from "react-redux-toastr";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
-import { environment } from "@/config";
+import { YOUNG_SOURCE } from "snu-lib/constants";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -31,7 +32,7 @@ function renderStepResponsive(step) {
 const Step = () => {
   const [data] = useContext(PreInscriptionContext);
   const { step } = useParams();
-  const parcours = new URLSearchParams(window.location.search).get("parcours") || "hts";
+  const parcours = new URLSearchParams(window.location.search).get("parcours") || YOUNG_SOURCE.VOLONTAIRE;
 
   const [isInscriptionOpen, setInscriptionOpen] = useState(false);
   const [isInscriptionOpenLoading, setInscriptionOpenLoading] = useState(true);
