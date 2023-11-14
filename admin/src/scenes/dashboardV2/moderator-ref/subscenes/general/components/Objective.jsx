@@ -23,7 +23,7 @@ export default function Index({ user }) {
   });
 
   useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts);
+    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
     setSelectedFilters({ cohort: cohortsFilters });
   }, []);
 
