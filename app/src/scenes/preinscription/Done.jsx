@@ -12,7 +12,6 @@ import { YOUNG_SOURCE } from "snu-lib/constants";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young);
-  const isClasseEngagee = young?.source === YOUNG_SOURCE.CLE;
   const history = useHistory();
   async function handleClick() {
     try {
@@ -23,14 +22,16 @@ export default function Done() {
     }
   }
 
+  const parcours = young.source || YOUNG_SOURCE.VOLONTAIRE;
+
   const content = {
     title: {
       VOLONTAIRE: "Votre compte volontaire a été créé.",
       CLE: "Votre compte élève a été créé.",
     },
     text: {
-      VOLONTAIRE: "Vous pouvez dès à présent finaliser votre inscription ou la reprendre à tout moment depuis le mail envoyé à ",
-      CLE: "Vous pouvez dès à présent finaliser votre inscription ou la reprendre à tout moment depuis le mail envoyé à ",
+      VOLONTAIRE: "Attention, votre inscription sur la plateforme SNU est indispensable avant votre départ en séjour de cohésion.",
+      CLE: "Attention, une inscription complète est indispensable pour valider votre candidature au SNU.",
     },
   };
 
@@ -38,19 +39,15 @@ export default function Done() {
     <>
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <h1 className="text-3xl font-semibold leading-snug">Bienvenue {young?.firstName} 🎉</h1>
-        <h1 className="text-3xl font-semibold leading-snug">{content.title[young.source]}</h1>
+        <h1 className="text-3xl font-semibold leading-snug">{content.title[parcours]}</h1>
         <p className="py-2 mt-2 text-gray-600">
           Vous pouvez dès à présent <strong>finaliser votre inscription</strong> ou la reprendre à tout moment depuis le mail envoyé à {young?.email}, ou depuis l’écran de
           connexion.
         </p>
-        <p className="py-2 text-gray-600">
-          {isClasseEngagee
-            ? "Attention, votre inscription sur la plateforme SNU est indispensable avant votre départ en séjour de cohésion."
-            : "Attention, une inscription complète est indispensable pour valider votre candidature au SNU."}
-        </p>
+        <p className="py-2 text-gray-600">{content.text[parcours]}</p>
         <hr className="mt-4" />
 
-        {!isClasseEngagee && (
+        {parcours === YOUNG_SOURCE.VOLONTAIRE && (
           <>
             <h2 className="text-lg font-semibold">Préparez le document suivant :</h2>
             <div className="flex py-2 gap-3 mb-2">
