@@ -4,7 +4,7 @@ const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
 const { capture } = require("../../sentry");
-const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, canInviteCoordinateur } = require("snu-lib");
 const { ERRORS, inSevenDays } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const config = require("../../config");
@@ -26,6 +26,8 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
+    if (!canInviteCoordinateur(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const { email, firstName, lastName } = value;
 
     //for now, only one chef per etablissement
@@ -35,7 +37,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
     }
 
     //for now, only one sous-chef per etablissement
-    if (etablissement.sousChefIds.length > 0) {
+    if (etablissement.sousChefIds.length) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 

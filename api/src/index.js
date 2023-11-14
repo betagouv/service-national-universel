@@ -117,7 +117,7 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
   app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
   app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
-  app.use("/CLE", require("./controllers/CLE"));
+  app.use("/cle", require("./controllers/cle"));
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));
