@@ -3,7 +3,6 @@ import { RiSearchLine } from "react-icons/ri";
 import { toastr } from "react-redux-toastr";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { debounce } from "@/utils";
-import { capture } from "@/sentry";
 
 export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOptions, value, onChange, errorMessage }) {
   const [open, setOpen] = useState(false);
@@ -36,17 +35,13 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
     debounce(async (query) => {
       try {
         setLoading(true);
-        const { options, error } = await getOptions(query);
-        if (error) {
-          toastr.error("Erreur", `Une erreur est survenue lors de la recherche : ${error}`, { timeOut: 10_000 });
-          return;
-        }
+        const options = await getOptions(query);
         if (options?.length) {
           setOptions(options);
           return;
         }
       } catch (e) {
-        capture(e);
+        toastr.error("Erreur", "Une erreur est survenue lors de la recherche", { timeOut: 10_000 });
       } finally {
         setLoading(false);
       }
@@ -64,7 +59,9 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
     setOptions([]);
     const query = e.target.value;
     setQuery(query);
-    debouncedOptions(query);
+    if (query.length > 1) {
+      debouncedOptions(query);
+    }
   };
 
   const handleSelect = (option) => {

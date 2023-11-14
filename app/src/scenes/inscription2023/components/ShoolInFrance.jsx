@@ -7,6 +7,7 @@ import AddressForm from "@/components/dsfr/forms/AddressForm";
 import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
 import { getAddressOptions } from "@/services/api-adresse";
+import { capture } from "@/sentry";
 
 export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
   const [city, setCity] = useState(school?.city);
@@ -15,17 +16,14 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   const [manualSchool, setManualSchool] = useState(school ?? {});
 
   async function getCities(query) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const res = await api.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
-        if (res.status === 500) {
-          reject("Impossible de récupérer les établissements");
-        }
-        resolve({ options: res.responses[0].aggregations.cities.buckets.map((e) => ({ label: e.key[0] + " - " + e.key[1], value: e.key })) });
-      } catch (e) {
-        reject(e);
-      }
-    });
+    try {
+      const { responses } = await api.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
+      const cities = responses[0].aggregations.cities.buckets;
+      return cities.map((e) => ({ label: e.key[0] + " - " + e.key[1], value: e.key })) ?? [];
+    } catch (e) {
+      capture(e);
+      return [];
+    }
   }
 
   async function getSchools(city) {
@@ -85,7 +83,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <AsyncCombobox label="Rechercher une commune" hint="Aucune commune trouvée." getOptions={getCities} value={city} onChange={handleChangeCity} error={errors.city} />
       <CreatableSelect
         label="Nom de l'établissement"
-        value={school && `${school.fullName} - ${school.adresse}`}
+        value={school?.fullName && `${school.fullName} - ${school.adresse}`}
         options={schools
           .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
           .sort()
