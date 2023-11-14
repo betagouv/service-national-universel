@@ -38,7 +38,6 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
         const options = await getOptions(query);
         if (options?.length) {
           setOptions(options);
-          return;
         }
       } catch (e) {
         toastr.error("Erreur", "Une erreur est survenue lors de la recherche", { timeOut: 10_000 });
