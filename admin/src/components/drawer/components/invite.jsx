@@ -84,7 +84,6 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                   obj.cohesionCenterName = null;
                   obj.sessionPhase1Id = null;
                 }
-
                 if (obj.department && !obj.region) obj.region = department2region[obj.department];
                 const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
 
