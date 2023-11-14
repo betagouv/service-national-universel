@@ -11,7 +11,7 @@ const ROLES = {
   DSNJ: "dsnj",
   TRANSPORTER: "transporter",
   ADMINISTRATEUR_CLE: "administrateur_cle",
-  REFERENT_CLASSE : "referent_classe",
+  REFERENT_CLASSE: "referent_classe",
 };
 
 const SUB_ROLES = {
