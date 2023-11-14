@@ -51,6 +51,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
       subRole: SUB_ROLES.coordinateur_cle,
       invitationToken: invitation_token,
       invitationExpires: inSevenDays(),
+      department: etablissement.department,
     });
 
     etablissement.set({
