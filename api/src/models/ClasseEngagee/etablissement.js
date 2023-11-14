@@ -14,6 +14,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  uai: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Code UAI de l'établissement",
+    },
+  },
+
   name: {
     type: String,
     required: true,
