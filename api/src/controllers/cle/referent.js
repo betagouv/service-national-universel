@@ -3,8 +3,9 @@ const passport = require("passport");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { capture } = require("../../sentry");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, canInviteCoordinateur } = require("snu-lib");
+
+const { capture } = require("../../sentry");
 const { ERRORS, inSevenDays } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const config = require("../../config");
