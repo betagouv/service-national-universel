@@ -11,7 +11,7 @@ const ROLES = {
   DSNJ: "dsnj",
   TRANSPORTER: "transporter",
   ADMINISTRATEUR_CLE: "administrateur_cle",
-  REFERENT_CLASSE : "referent_classe",
+  REFERENT_CLASSE: "referent_classe",
 };
 
 const SUB_ROLES = {
@@ -820,6 +820,11 @@ function canUpdateMyself({ actor, modifiedTarget }) {
   return isMe;
 }
 
+//CLE
+function canInviteCoordinateur(actor) {
+  return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -945,4 +950,5 @@ export {
   canSeeDashboardEngagementStatus,
   canSeeDashboardSejourHeadCenter,
   canUpdateMyself,
+  canInviteCoordinateur,
 };

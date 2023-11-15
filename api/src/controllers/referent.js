@@ -288,6 +288,8 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     referentProperties.invitationToken = invitation_token;
     referentProperties.invitationExpires = inSevenDays();
 
+    if (referentProperties.role === ROLES.ADMINISTRATEUR_CLE) referentProperties.subRole = SUB_ROLES.referent_etablissement;
+
     const referent = await ReferentModel.create(referentProperties);
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
