@@ -17,7 +17,7 @@ export const parcoursConfig = {
       youngAppellation: "élève",
       isCniRequested: false,
       welcomeText: "Bienvenue {firstName} 🎉",
-      accountCreatedText: "Votre compte volontaire a été créé.",
+      accountCreatedText: "Votre compte élève a été créé.",
       finalizeInscription:
         "Vous pouvez dès à présent **finaliser votre inscription** ou la reprendre à tout moment depuis le mail envoyé à {email}, ou depuis l’écran de connexion.",
       importantNote: "Attention, une inscription complète est indispensable pour valider votre candidature au SNU.",
