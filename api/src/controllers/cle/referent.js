@@ -8,7 +8,7 @@ const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, canInviteCoordinateur } = requir
 const { ERRORS, inSevenDays } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const config = require("../../config");
-const EtablissementModel = require("../../models/ClasseEngagee/etablissement");
+const EtablissementModel = require("../../models/cle/etablissement");
 const ReferentModel = require("../../models/referent");
 
 router.post("/invite-coordonnateur", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
