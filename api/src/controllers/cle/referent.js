@@ -62,7 +62,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
 
     await etablissement.save({ fromUser: req.user });
 
-    const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
+    const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`;
     const fromName = `${req.user.firstName} ${req.user.lastName}`;
     const toName = `${referent.firstName} ${referent.lastName}`;
 
