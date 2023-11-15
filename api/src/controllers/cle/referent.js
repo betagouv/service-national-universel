@@ -42,7 +42,7 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const invitation_token = crypto.randomBytes(20).toString("hex");
+    const invitationToken = crypto.randomBytes(20).toString("hex");
 
     const referent = await ReferentModel.create({
       email,
