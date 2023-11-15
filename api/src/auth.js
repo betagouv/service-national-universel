@@ -4,7 +4,7 @@ const Joi = require("joi");
 
 const { capture } = require("./sentry");
 const config = require("./config");
-const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
+const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, TRUST_TOKEN_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
 const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME, YOUNG_SOURCE, YOUNG_SOURCE_LIST } = require("snu-lib");
@@ -34,27 +34,32 @@ class Auth {
         password: Joi.string().required(),
         birthdateAt: Joi.date().required(),
         frenchNationality: Joi.string().trim().required(),
-        source: Joi.string().trim().valid(YOUNG_SOURCE_LIST).allow(null, ""),
-      }).when(Joi.object({ source: Joi.string().trim().valid(YOUNG_SOURCE.CLE) }).unknown(), {
-        then: Joi.object({
-          classeId: Joi.string().trim().required(),
-        }),
-        otherwise: Joi.object({
-          schooled: Joi.string().trim().required(),
-          grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
-          schoolName: Joi.string().trim(),
-          schoolType: Joi.string().trim(),
-          schoolAddress: Joi.string().trim(),
-          schoolZip: Joi.string().trim().allow(null, ""),
-          schoolCity: Joi.string().trim(),
-          schoolDepartment: Joi.string().trim(),
-          schoolRegion: Joi.string().trim(),
-          schoolCountry: Joi.string().trim(),
-          schoolId: Joi.string().trim(),
-          zip: Joi.string().trim(),
-          cohort: Joi.string().trim().required(),
+        source: Joi.string()
+          .trim()
+          .valid(...YOUNG_SOURCE_LIST)
+          .allow(null, ""),
+      })
+        .when(Joi.object({ source: Joi.string().trim().valid(YOUNG_SOURCE.CLE) }).unknown(), {
+          then: Joi.object({
+            classeId: Joi.string().trim().required(),
+          }),
+          otherwise: Joi.object({
+            schooled: Joi.string().trim().required(),
+            grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+            schoolName: Joi.string().trim(),
+            schoolType: Joi.string().trim(),
+            schoolAddress: Joi.string().trim(),
+            schoolZip: Joi.string().trim().allow(null, ""),
+            schoolCity: Joi.string().trim(),
+            schoolDepartment: Joi.string().trim(),
+            schoolRegion: Joi.string().trim(),
+            schoolCountry: Joi.string().trim(),
+            schoolId: Joi.string().trim(),
+            zip: Joi.string().trim(),
+            cohort: Joi.string().trim().required(),
+          }),
         })
-      }).validate(req.body);
+        .validate(req.body);
 
       const isClasseEngagee = value.source === YOUNG_SOURCE.CLE;
 
@@ -69,8 +74,15 @@ class Auth {
       let inscriptionData = {};
 
       if (isClasseEngagee) {
-        const classe = await ClasseEngagee.findById(value.classeId);
-        if (!classe) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+        // const classe = await ClasseEngagee.findById(value.classeId);
+        // if (!classe) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+        // For testing purposes
+        const classe = {
+          etablissementId: "655486d44a807f53c1fea9fc",
+          cohort: "Juillet 2024",
+          grade: "4eme",
+        };
 
         const etablissement = await Etablissement.findById(classe.etablissementId);
         if (!etablissement) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -78,7 +90,7 @@ class Auth {
         inscriptionData = {
           schooled: "true",
           schoolName: etablissement.name,
-          schoolType: etablissement.type,
+          schoolType: etablissement.type[0],
           schoolAddress: etablissement.address,
           schoolZip: etablissement.zip,
           schoolCity: etablissement.city,
@@ -87,9 +99,9 @@ class Auth {
           schoolCountry: etablissement.country,
           schoolId: etablissement.id,
           zip: etablissement.zip,
-          cohort: classe.name,
+          cohort: classe.cohort,
           grade: classe.grade,
-        }
+        };
       } else {
         inscriptionData = {
           schooled: value.schooled,
@@ -105,8 +117,8 @@ class Auth {
           zip: value.zip,
           cohort: value.cohort,
           grade: value.grade,
-        }
-      };
+        };
+      }
 
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
@@ -126,7 +138,7 @@ class Auth {
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
-      const user = await this.model.create({
+      const newUser = {
         email,
         phone,
         phoneZone,
@@ -135,25 +147,16 @@ class Auth {
         password,
         birthdateAt: formatedDate,
         frenchNationality,
-        schooled,
-        schoolName,
-        schoolType,
-        schoolAddress,
-        schoolZip,
-        schoolCity,
-        schoolDepartment,
-        schoolRegion,
-        schoolCountry,
-        schoolId,
-        zip,
-        cohort,
-        grade,
         inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
         emailVerified: "false",
         tokenEmailValidation,
         attemptsEmailValidation: 0,
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
-      });
+        source,
+        ...inscriptionData,
+      };
+
+      const user = await this.model.create(newUser);
 
       if (isEmailValidationEnabled) {
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {

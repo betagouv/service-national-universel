@@ -20,9 +20,14 @@ import { translate } from "snu-lib/translation";
 import { YOUNG_SOURCE } from "snu-lib/constants";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import IconFrance from "@/assets/IconFrance";
-import { RiInformationLine } from "react-icons/ri";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
 import { useDispatch } from "react-redux";
+import ReactTooltip from "react-tooltip";
+import dayjs from "dayjs";
+import API from "@/services/api";
+import { setYoung } from "@/redux/auth/actions";
+import { capture } from "@/sentry";
+import { RiInformationLine } from "react-icons/ri";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -33,7 +38,7 @@ export default function StepProfil() {
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
   const dispatch = useDispatch();
-  const parcours = new URLSearchParams(window.location.search).get("parcours") || YOUNG_SOURCE.VOLONTAIRE;
+  const parcours = new URLSearchParams(window.location.search).get("parcours").toUpperCase() || YOUNG_SOURCE.VOLONTAIRE;
   const classeId = new URLSearchParams(window.location.search).get("classeId");
 
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
@@ -157,14 +162,21 @@ export default function StepProfil() {
         supportEvent="Phase0/aide preinscription - infos persos">
         {parcours === YOUNG_SOURCE.CLE && (
           <>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-3">
               <label htmlFor="nationalite" className="m-0">
                 Je suis de nationalié française
               </label>
               <IconFrance />
-              <button onClick={() => window.alert("Vous devez être de nationalité française pour vous inscrire au SNU")}>
+
+              <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                <span className="text-gray-800">
+                  Cette information est nécessaire pour l’obtention du certificat individuel de participation à la JDC après réalisation du séjour de cohésion.
+                </span>
+              </ReactTooltip>
+
+              <div data-tip data-for="tooltip-nationalite">
                 <RiInformationLine className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
-              </button>
+              </div>
             </div>
 
             <div className="flex flex-col md:flex-row mb-4">
@@ -189,7 +201,7 @@ export default function StepProfil() {
                   id="non"
                   name="nationalite"
                   value="false"
-                  checked={data.frenchNationality === "false" || data.frenchNationality === undefined}
+                  checked={data.frenchNationality === "false"}
                   onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
                 />
                 <label className="mb-0" htmlFor="non">
@@ -237,7 +249,7 @@ export default function StepProfil() {
           <h2 className="text-base font-bold my-4">Mes identifiants de connexion</h2>
           <p className="pl-3 border-l-4 border-l-indigo-500">
             Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte {parcours === "cle" ? "élève" : "volontaire"}.
-          </p>  
+          </p>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <label className="w-full">
               E-mail
