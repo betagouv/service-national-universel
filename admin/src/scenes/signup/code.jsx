@@ -1,5 +1,5 @@
-import React from "react";
-import { useHistory } from "react-router-dom";
+import React, { useState } from "react";
+import { useHistory, useLocation } from "react-router-dom";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
@@ -7,10 +7,26 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 
 import { Section, Container } from "@snu/ds/dsfr";
+import api from "@/services/api";
 
-export default function code() {
+export default function code({ user }) {
   const history = useHistory();
-  const [email, setEmail] = React.useState("blabla@email.com");
+  const { search } = useLocation();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const invitationToken = urlParams.get("token");
+  const codeUrl = urlParams.get("code");
+  const [code, setCode] = useState(codeUrl);
+
+  const submit = async () => {
+    try {
+      // todo : handle 2FA, copier l'existant
+      history.push(`/creer-mon-compte/informations${search}`);
+    } catch (error) {
+      console.log(error);
+      if (error?.message) return toastr.error(error?.message);
+    }
+  };
 
   return (
     <Section>
@@ -27,7 +43,7 @@ export default function code() {
           <Alert
             description={
               <div>
-                Pour valider la création de votre compte administrateur SNU, vous devez entrer le code d'activation reçu à l'adresse email <b>{email}</b>.
+                Pour valider la création de votre compte administrateur SNU, vous devez entrer le code d'activation reçu à l'adresse email <b>{user.email}</b>.
               </div>
             }
             severity="info"
@@ -35,7 +51,16 @@ export default function code() {
           />
         </div>
         <div className="w-full">
-          <Input label="Code" state="default" />
+          <Input
+            label="Code"
+            state="default"
+            nativeInputProps={{
+              placeholder: "000000",
+              type: "number",
+              value: code,
+              onChange: (e) => setCode(e.target.value),
+            }}
+          />
         </div>
         <div className="flex flex-col gap-4">
           <p className="text-lg font-bold">Si vous ne recevez pas de mail, veuillez vérifier que :</p>
@@ -50,7 +75,7 @@ export default function code() {
         </div>
         <hr className="p-1" />
         <div className="flex justify-end">
-          <Button onClick={() => history.push(`/creer-mon-compte/informations`)}>Continuer</Button>
+          <Button onClick={submit}>Continuer</Button>
         </div>
       </Container>
     </Section>
