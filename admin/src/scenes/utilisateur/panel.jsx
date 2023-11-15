@@ -104,20 +104,18 @@ export default function UserPanel({ onChange, value }) {
     <PanelV2 open={value ? true : false} onClose={onChange} title={`${value.firstName} ${value.lastName}`}>
       <Panel>
         <div className="info">
-          {canUpdateReferent({ actor: user, originalTarget: value, structure: structure }) && (
-            <div style={{ display: "flex", flexWrap: "wrap" }}>
-              <Link to={`/user/${value._id}`}>
-                <PanelActionButton icon="eye" title="Consulter" />
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
+            <Link to={`/user/${value._id}`}>
+              <PanelActionButton icon="eye" title="Consulter" />
+            </Link>
+            {user.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
+            {canDeleteReferent({ actor: user, originalTarget: value, structure }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
+            {structure ? (
+              <Link to={`/structure/${structure._id}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
+                <PanelActionButton icon="eye" title="Voir la structure" />
               </Link>
-              {user.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
-              {canDeleteReferent({ actor: user, originalTarget: value, structure }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
-              {structure ? (
-                <Link to={`/structure/${structure._id}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
-                  <PanelActionButton icon="eye" title="Voir la structure" />
-                </Link>
-              ) : null}
-            </div>
-          )}
+            ) : null}
+          </div>
         </div>
         <Info title="Coordonnées">
           <Details title="E-mail" value={value.email} copy />

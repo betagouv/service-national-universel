@@ -200,8 +200,11 @@ function canViewReferent(actor, target) {
   const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
   const isResponsibleModifyingResponsible = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) && [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(target.role);
   const isHeadCenter = actor.role === ROLES.HEAD_CENTER && [ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(target.role);
+  const isAdministratorCLE = actor.role === ROLES.ADMINISTRATEUR_CLE && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(target.role);
+  const isReferentClasse = actor.role === ROLES.REFERENT_CLASSE && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(target.role);
+  //@todo update doc
   // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-  return isMe || isAdminOrReferent || isResponsibleModifyingResponsible || isHeadCenter;
+  return isMe || isAdminOrReferent || isResponsibleModifyingResponsible || isHeadCenter || isAdministratorCLE || isReferentClasse;
 }
 
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }) {
@@ -636,7 +639,16 @@ function canSearchInElasticSearch(actor, index) {
   } else if (index === "structure") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "referent") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(actor.role);
+    return [
+      ROLES.ADMIN,
+      ROLES.REFERENT_REGION,
+      ROLES.REFERENT_DEPARTMENT,
+      ROLES.RESPONSIBLE,
+      ROLES.SUPERVISOR,
+      ROLES.HEAD_CENTER,
+      ROLES.ADMINISTRATEUR_CLE,
+      ROLES.REFERENT_CLASSE,
+    ].includes(actor.role);
   } else if (index === "application") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "cohesioncenter") {

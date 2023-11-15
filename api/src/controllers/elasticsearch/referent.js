@@ -10,6 +10,8 @@ const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const StructureObject = require("../../models/structure");
 const Joi = require("joi");
 const { serializeReferents } = require("../../utils/es-serializer");
+const EtablissementModel = require("../../models/cle/etablissement");
+const ClasseModel = require("../../models/cle/classe");
 
 async function buildReferentContext(user) {
   const contextFilters = [];
@@ -63,6 +65,48 @@ async function buildReferentContext(user) {
     });
   }
 
+  if (user.role === ROLES.ADMINISTRATEUR_CLE) {
+    /*
+      Can see:
+      - all referents dep of the department of his etablissement
+      - all ref ADMIN CLE of his etablissement
+      - all ref Classe of his etablissement
+    */
+    const refIds = [];
+    const etablissement = await EtablissementModel.findOne({ chefIds: user._id });
+    if (!etablissement) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id });
+    refIds.push(...classes.flatMap((c) => c.classeReferentIds), ...etablissement.chefIds, ...etablissement.sousChefIds);
+    contextFilters.push({
+      bool: {
+        should: [
+          { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "department.keyword": etablissement.department } }] } },
+          { bool: { must: { ids: { values: refIds } } } },
+        ],
+      },
+    });
+  }
+
+  if (user.role === ROLES.REFERENT_CLASSE) {
+    /*
+      Can see:
+      - all referents dep of the department of his etablissement
+      - all ref ADMIN CLE of his etablissement
+      - all ref Classe of his etablissement and all ref of hiis departement
+    */
+    const classes = await ClasseModel.findOne({ classeReferentIds: user._id });
+    if (!classes) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const etablissement = await EtablissementModel.findOne({ _id: classes.etablissementId });
+    const refIds = [...etablissement.chefIds, ...etablissement.sousChefIds];
+    contextFilters.push({
+      bool: {
+        should: [
+          { bool: { must: [{ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE] } }, { term: { "department.keyword": etablissement.department } }] } },
+          { bool: { must: { ids: { values: refIds } } } },
+        ],
+      },
+    });
+  }
   return { referentContextFilters: contextFilters };
 }
 
