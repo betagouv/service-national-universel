@@ -8,7 +8,6 @@ import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { capture } from "../../sentry";
 import { supportURL } from "@/config";
-// import { parcoursConfig } from "../../utils/youngMapping";
 import useParcours from "@/services/useParcours";
 
 export default function Done() {
@@ -27,13 +26,6 @@ export default function Done() {
   return (
     <>
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
-        {/* <h1 className="text-3xl font-semibold leading-snug">Bienvenue {young?.firstName} 🎉</h1>
-        <h1 className="text-3xl font-semibold leading-snug">Votre compte {currentParcoursConfig.youngAppellation} a été créé.</h1>
-        <p className="py-2 mt-2 text-gray-600">
-          Vous pouvez dès à présent <strong>finaliser votre inscription</strong> ou la reprendre à tout moment depuis le mail envoyé à {young?.email}, ou depuis l’écran de
-          connexion.
-        </p>
-        <p className="py-2 text-gray-600">Attention, une inscription complète est indispensable pour valider votre candidature au SNU.</p> */}
         <h1 className="text-3xl font-semibold leading-snug">{stepDoneBeforeinscriptionConfig.welcomeText}</h1>
         <h1 className="text-3xl font-semibold leading-snug">{stepDoneBeforeinscriptionConfig.accountCreatedText}</h1>
         <p className="py-2 mt-2 text-gray-600">{stepDoneBeforeinscriptionConfig.finalizeInscription}</p>
