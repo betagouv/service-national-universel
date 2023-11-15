@@ -9,7 +9,7 @@ import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButton
 import { capture } from "../../sentry";
 import { supportURL } from "@/config";
 // import { parcoursConfig } from "../../utils/youngMapping";
-import useParcours from "@/utils/parcoursService";
+import useParcours from "@/services/useParcours";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young);
@@ -37,8 +37,8 @@ export default function Done() {
         <h1 className="text-3xl font-semibold leading-snug">{stepDoneBeforeinscriptionConfig.welcomeText}</h1>
         <h1 className="text-3xl font-semibold leading-snug">{stepDoneBeforeinscriptionConfig.accountCreatedText}</h1>
         <p className="py-2 mt-2 text-gray-600">{stepDoneBeforeinscriptionConfig.finalizeInscription}</p>
-        <p className="py-2 text-gray-600">{stepDoneBeforeinscriptionConfig.importantNote}.</p>
-        {stepDoneBeforeinscriptionConfig.showDocument && (
+        <p className="py-2 text-gray-600">{stepDoneBeforeinscriptionConfig.importantNote}</p>
+        {stepDoneBeforeinscriptionConfig.isCniRequested && (
           <>
             <hr className="mt-4" />
             <h2 className="text-lg font-semibold">Préparez le document suivant :</h2>

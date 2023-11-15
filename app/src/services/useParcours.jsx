@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useHistory } from "react-router-dom";
-import parcoursConfig from "./parcoursConfig.json";
+import parcoursConfig from "../utils/parcoursConfig";
 import { setYoung } from "../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 
@@ -18,7 +18,7 @@ export const useParcours = () => {
   };
 
   const getStepConfig = (source, stepName) => {
-    const sourceConfig = parcoursConfig[source] || parcoursConfig["hts"];
+    const sourceConfig = parcoursConfig[source] || parcoursConfig["VOLONTAIRE"];
     const stepConfig = sourceConfig[stepName];
     if (!stepConfig) return null;
 
