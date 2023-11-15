@@ -11,8 +11,8 @@ const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
-const ClasseEngagee = require("./models/ClasseEngagee/classe");
-const Etablissement = require("./models/ClasseEngagee/etablissement");
+const ClasseEngagee = require("./models/cle/classe");
+const Etablissement = require("./models/cle/etablissement");
 
 class Auth {
   constructor(model) {
