@@ -2,8 +2,12 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const { ROLES, SUB_ROLES, PHONE_ZONES_NAMES_ARR, SENDINBLUE_TEMPLATES } = require("snu-lib");
 
+const { cookieOptions, JWT_MAX_AGE, COOKIE_MAX_AGE, TRUST_TOKEN_MAX_AGE } = require("../../cookie-options");
+
+const config = require("../../config");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
@@ -28,11 +32,14 @@ router.get("/token/:token", async (req, res) => {
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // We want to make sure the email is rightly provided by the user
+    const token = jwt.sign({ _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_MAX_AGE));
+
     delete referent.email;
     delete referent.firstName;
     delete referent.lastName;
 
-    return res.status(200).send({ ok: true, data: referent });
+    return res.status(200).send({ ok: true, data: referent, token });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -53,7 +60,8 @@ router.put("/request-confirmation-email", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
-    if (value.email !== value.confirmEmail) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
+    if (value.email !== value.confirmEmail)
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
     const referent = await ReferentModel.findOne({ invitationToken: value.token });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -73,8 +81,7 @@ router.put("/request-confirmation-email", async (req, res) => {
       ok: true,
       code: "2FA_REQUIRED",
     });
-  } catch (error) {
-  }
+  } catch (error) {}
 });
 
 router.post("/", async (req, res) => {
@@ -108,7 +115,7 @@ router.post("/", async (req, res) => {
       phoneZone: value.phoneZone,
       password: value.password,
       invitationToken: null,
-    })
+    });
     await referent.save();
 
     return ReferentAuth.signin(req, res);

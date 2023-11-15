@@ -262,7 +262,11 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     const referent = await ReferentModel.create(referentProperties);
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
-    const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
+    let cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
+    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referentProperties.role)) {
+      // fixme: update url
+      cta = `${config.ADMIN_URL}/creer-mon-compte?token=${invitation_token}`;
+    }
     const fromName = `${req.user.firstName} ${req.user.lastName}`;
     const toName = `${referent.firstName} ${referent.lastName}`;
 
