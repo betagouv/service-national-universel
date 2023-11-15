@@ -513,7 +513,7 @@ export default function StepCoordonnees() {
             <Input
               list="suggestions"
               value={birthCity}
-              label="Commune de naissance"
+              label="Ville de naissance"
               onChange={wasBornInFranceBool ? updateBirthCity : updateData("birthCity")}
               error={errors.birthCity}
               correction={corrections?.birthCity}
@@ -541,6 +541,18 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
+        <Select
+          label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
+          options={situationOptions}
+          value={situation}
+          onChange={updateData("situation")}
+          error={errors.situation}
+          correction={corrections?.situation}
+        />
+        <hr className="my-2 h-px border-0 bg-gray-200" />
+        <div className="flex mt-4 items-center gap-3 mb-6">
+          <h2 className="m-0 text-lg font-semibold leading-6 align-left">Adresse de résidence</h2>
+        </div>
         <RadioButton
           label="Je réside..."
           options={inFranceOrAbroadOptions}
@@ -617,14 +629,6 @@ export default function StepCoordonnees() {
           </>
         )}
 
-        <Select
-          label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
-          options={situationOptions}
-          value={situation}
-          onChange={updateData("situation")}
-          error={errors.situation}
-          correction={corrections?.situation}
-        />
         <hr className="my-2 h-px border-0 bg-gray-200" />
         <div className="flex mt-4 items-center gap-3 mb-4">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Situations particulières</h2>

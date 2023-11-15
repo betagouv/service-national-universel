@@ -16,7 +16,7 @@ export default function Footer() {
           </li>
           <li>
             <a href="https://snu.gouv.fr/accessibilite" target="_blank" rel="noreferrer">
-              Accessibilité
+              Accessibilité : non conforme
             </a>
           </li>
           <li>

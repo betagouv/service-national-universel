@@ -63,7 +63,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
       />
       <CreatableSelect
         label="Nom de l'établissement"
-        value={school && `${school.fullName}${school.city ? ` - ${school.city}` : ""}`}
+        value={school.fullName ? `${school.fullName}${school.city ? ` - ${school.city}` : ""}` : ""}
         options={schools
           .map((e) => `${e.fullName} - ${e.city}`)
           .sort()

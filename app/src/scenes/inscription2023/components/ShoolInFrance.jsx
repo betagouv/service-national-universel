@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import api from "../../../services/api";
 import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
 import CreatableSelect from "../../../components/CreatableSelect";
 import Input from "./Input";
@@ -7,34 +6,13 @@ import AddressForm from "@/components/dsfr/forms/AddressForm";
 import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
 import { getAddressOptions } from "@/services/api-adresse";
+import { getCities, getSchools } from "../utils";
 
 export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
   const [city, setCity] = useState(school?.city);
   const [schools, setSchools] = useState([]);
   const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
   const [manualSchool, setManualSchool] = useState(school ?? {});
-
-  async function getCities(query) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const { responses } = await api.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
-        if (!responses[0].aggregations?.cities.buckets.length) {
-          reject("Impossible de récupérer les établissements");
-        }
-        resolve({ options: responses[0].aggregations.cities.buckets.map((e) => ({ label: e.key[0] + " - " + e.key[1], value: e.key })) });
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
-
-  async function getSchools(city) {
-    if (!city?.value.length === 2) return;
-    const { responses } = await api.post("/elasticsearch/schoolramses/public/search", {
-      filters: { country: ["FRANCE"], city: [city.value[0]], departmentName: [city.value[1]] },
-    });
-    setSchools(responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } })));
-  }
 
   async function handleChangeCity(city) {
     if (!city) {
@@ -43,7 +21,9 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
     }
     onSelectSchool(undefined);
     setCity(city);
-    await getSchools(city);
+    if (!city?.value.length === 2) return;
+    const schools = await getSchools(city);
+    setSchools(schools);
   }
 
   return manualFilling ? (
@@ -85,7 +65,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <AsyncCombobox label="Rechercher une commune" hint="Aucune commune trouvée." getOptions={getCities} value={city} onChange={handleChangeCity} error={errors.city} />
       <CreatableSelect
         label="Nom de l'établissement"
-        value={school && `${school.fullName} - ${school.adresse}`}
+        value={school?.fullName && `${school.fullName} - ${school.adresse}`}
         options={schools
           .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
           .sort()
