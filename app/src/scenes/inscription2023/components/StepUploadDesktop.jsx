@@ -109,7 +109,7 @@ export default function StepUploadDesktop({
         )}
       </div>
 
-      <div className="border-l-8 border-l-[#6A6AF4] pl-8 leading-loose">
+      <div className="pl-3 border-l-4 border-l-indigo-500 text-[#3A3A3A] text-[16px] my-4 leading-6">
         Toutes les informations doivent être <strong>lisibles</strong>, le document doit être visible <strong>entièrement</strong>, la photo doit être <strong>nette</strong>. Le
         document doit être téléversé en <strong>recto</strong> et <strong>verso</strong>.
       </div>

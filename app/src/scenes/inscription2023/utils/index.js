@@ -10,6 +10,8 @@ import cniOldDate from "../../../assets/IDProof/cniOldDate.jpg";
 import cniOldFront from "../../../assets/IDProof/cniOldFront.jpg";
 import passport from "../../../assets/IDProof/passport.jpg";
 import passportDate from "../../../assets/IDProof/passportDate.jpg";
+import API from "@/services/api";
+import { capture } from "@/sentry";
 
 countries.registerLocale(fr);
 const countriesList = countries.getNames("fr", { select: "official" });
@@ -96,3 +98,26 @@ export const ID = {
     imgDate: passportDate,
   },
 };
+
+export async function getCities(query) {
+  try {
+    const { responses } = await API.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
+    const cities = responses[0].aggregations.cities.buckets;
+    return cities.map((e) => ({ label: e.key[0] + " - " + e.key[1], value: e.key })) ?? [];
+  } catch (e) {
+    capture(e);
+    return [];
+  }
+}
+
+export async function getSchools(city) {
+  try {
+    const { responses } = await API.post("/elasticsearch/schoolramses/public/search", {
+      filters: { country: ["FRANCE"], city: [city.value[0]], departmentName: [city.value[1]] },
+    });
+    const schools = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
+    return schools;
+  } catch (e) {
+    capture(e);
+  }
+}

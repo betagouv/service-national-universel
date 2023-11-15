@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { RiLoader2Line, RiSearchLine } from "react-icons/ri";
+import { RiSearchLine } from "react-icons/ri";
 import { toastr } from "react-redux-toastr";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { debounce } from "@/utils";
-import { capture } from "@/sentry";
 
 export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOptions, value, onChange, errorMessage }) {
-  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(value);
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
@@ -14,8 +14,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setQuery("");
-        setOptions([]);
+        setOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -25,8 +24,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
   useEffect(() => {
     function handleKeyDown(event) {
       if (event.key === "Escape") {
-        setQuery("");
-        setOptions([]);
+        setOpen(false);
       }
     }
     document.addEventListener("keydown", handleKeyDown);
@@ -37,36 +35,38 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
     debounce(async (query) => {
       try {
         setLoading(true);
-        const { options, error } = await getOptions(query);
-        if (error) {
-          toastr.error("Erreur", `Une erreur est survenue lors de la recherche : ${error}`, { timeOut: 10_000 });
-          setOptions([]);
-          return;
-        }
-        if (options) {
+        const options = await getOptions(query);
+        if (options?.length) {
           setOptions(options);
-          return;
         }
       } catch (e) {
-        capture(e);
+        toastr.error("Erreur", "Une erreur est survenue lors de la recherche", { timeOut: 10_000 });
       } finally {
         setLoading(false);
       }
-    }, 500),
+    }, 300),
     [],
   );
 
+  function handleFocus() {
+    setQuery("");
+    onChange(null);
+    setOpen(true);
+  }
+
   const handleChangeQuery = async (e) => {
+    setOptions([]);
     const query = e.target.value;
     setQuery(query);
-    if (query.trim().length < 3) return;
-    debouncedOptions(query);
+    if (query.length > 1) {
+      debouncedOptions(query);
+    }
   };
 
   const handleSelect = (option) => {
     onChange(option);
     setQuery("");
-    setOptions([]);
+    setOpen(false);
   };
 
   return (
@@ -78,10 +78,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
             type="text"
             value={query || value?.label || ""}
             onChange={(e) => handleChangeQuery(e)}
-            onFocus={() => {
-              setQuery("");
-              onChange(null);
-            }}
+            onFocus={handleFocus}
             className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5"
           />
           <span className="material-icons absolute right-5 mt-[12px] text-lg">
@@ -89,7 +86,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOpt
           </span>
         </div>
       </label>
-      {query?.trim().length > 2 && <Dropdown options={options} handleSelect={handleSelect} loading={loading} hint={hint} />}
+      {open && <Dropdown options={options} handleSelect={handleSelect} loading={loading} hint={hint} />}
       <ErrorMessage>{errorMessage}</ErrorMessage>
     </div>
   );
@@ -100,10 +97,7 @@ function Dropdown({ loading, options, handleSelect, hint }) {
     <div className="relative">
       <div className="bg-white border flex flex-col absolute z-10 -top-2 w-full shadow">
         {loading ? (
-          <div className="w-full p-3 flex gap-2 items-center justify-center text-gray-800 animate-pulse">
-            <RiLoader2Line className="animate-spin text-lg" />
-            <p>Chargement...</p>
-          </div>
+          <p className="p-3 text-center text-gray-800 animate-pulse">Chargement...</p>
         ) : options.length ? (
           options.map((option) => (
             <button key={option.label} onClick={() => handleSelect(option)} className="px-3 py-2.5 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
