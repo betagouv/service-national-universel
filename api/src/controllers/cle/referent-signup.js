@@ -63,7 +63,7 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (value.email !== value.confirmEmail)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
-    const referent = await ReferentModel.findOne({ invitationToken: value.token });
+    const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const token2FA = await crypto.randomInt(1000000);
@@ -73,7 +73,7 @@ router.put("/request-confirmation-email", async (req, res) => {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: value.email }],
       params: {
         token2FA,
-        cta: `${config.APP_URL}/creer-mon-compte/code?invitationToken=${invitationToken}&code=${token2FA}`,
+        cta: `${config.ADMIN_URL}/creer-mon-compte/code?token=${value.invitationToken}&code=${token2FA}`,
       },
     });
 
