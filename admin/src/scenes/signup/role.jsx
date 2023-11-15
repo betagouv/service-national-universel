@@ -1,17 +1,16 @@
 import React, { useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Section, Container } from "@snu/ds/dsfr";
-import { useSelector } from "react-redux";
 import { translate } from "snu-lib";
 
-export default function role() {
+export default function role({ user }) {
   const history = useHistory();
-  const [etablissement, setEtablissement] = React.useState();
+  const { search } = useLocation();
 
-  const user = useSelector((state) => state.Auth.user);
+  const [etablissement, setEtablissement] = React.useState();
 
   const getEtablissement = () => {
     //todo : recuperer l'etablissement via l'id du user
@@ -43,7 +42,7 @@ export default function role() {
         </p>
         <hr className="p-1" />
         <div className="flex justify-end">
-          <Button onClick={() => history.push("/creer-mon-compte/email")}>Je confirme</Button>
+          <Button onClick={() => history.push(`/creer-mon-compte/email${search}`)}>Je confirme</Button>
         </div>
       </Container>
     </Section>
