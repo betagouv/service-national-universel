@@ -14,7 +14,7 @@ export default function EmailPanel({ open, setOpen, email }) {
   const [copied, setCopied] = React.useState(false);
 
   const regex = /<(.*)@smtp-relay.mailin.fr>/;
-  const ID = email.messageId.match(regex)[1];
+  const ID = email.messageId.match(regex)?.[1];
   const events = formatEvents(emailData?.events) || [];
 
   function formatEvents(events) {
