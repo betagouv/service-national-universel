@@ -14,6 +14,22 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  uai: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Code UAI de l'établissement",
+    },
+  },
+
+  name: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Nom de l'établissement",
+    },
+  },
+
   chefIds: {
     type: [String],
     required: true,
@@ -61,7 +77,7 @@ const Schema = new mongoose.Schema({
       description: "Ville de l'établissement",
     },
   },
-  
+
   address: {
     type: String,
     required: true,
@@ -81,7 +97,6 @@ const Schema = new mongoose.Schema({
   //TODO update with the good type enum
   type: {
     type: [String],
-    required: true,
     enum: CLE_TYPE_LIST,
     documentation: {
       description: "Type d'établissement",
@@ -91,7 +106,6 @@ const Schema = new mongoose.Schema({
   //TODO update with the good sector enum
   sector: {
     type: [String],
-    required: true,
     enum: CLE_SECTOR_LIST,
     documentation: {
       description: "Secteur de l'établissement",
