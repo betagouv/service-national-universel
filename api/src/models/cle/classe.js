@@ -58,7 +58,6 @@ const Schema = new mongoose.Schema({
 
   name: {
     type: String,
-    required: true,
     documentation: {
       description: "Nom de la classe",
     },
@@ -67,7 +66,6 @@ const Schema = new mongoose.Schema({
   //TODO update enum
   coloration: {
     type: String,
-    required: true,
     enum: CLE_COLORATION_LIST,
     documentation: {
       description: "Couleur de la classe",
@@ -76,7 +74,6 @@ const Schema = new mongoose.Schema({
 
   totalSeats: {
     type: Number,
-    required: true,
     documentation: {
       description: "Nombre de places total de la classe",
     },
@@ -84,7 +81,6 @@ const Schema = new mongoose.Schema({
 
   seatsTaken: {
     type: Number,
-    required: true,
     default: 0,
     documentation: {
       description: "Nombre de places prises de la classe",
@@ -94,7 +90,6 @@ const Schema = new mongoose.Schema({
   //TODO update with the good type enum
   type: {
     type: String,
-    required: true,
     enum: CLE_TYPE_LIST,
     documentation: {
       description: "Type de la classe",
@@ -104,7 +99,6 @@ const Schema = new mongoose.Schema({
   //TODO update with the good sector enum
   sector: {
     type: String,
-    required: true,
     enum: CLE_SECTOR_LIST,
     documentation: {
       description: "Filière de l'établissement",
@@ -113,7 +107,6 @@ const Schema = new mongoose.Schema({
 
   grade: {
     type: String,
-    required: true,
     enum: CLE_GRADE_LIST,
     documentation: {
       description: "Niveau de la classe",
