@@ -3,7 +3,7 @@ import ModalTailwind from "../../../components/ui/modals/Modal";
 import { RiArrowRightLine, RiCloseFill } from "react-icons/ri";
 import Button from "../../../components/dsfr/ui/buttons/Button";
 import SecondaryButton from "../../../components/dsfr/ui/buttons/SecondaryButton";
-import { translateGrade } from "snu-lib";
+import { translateGrade, GRADES } from "snu-lib";
 
 export default function ModalRecap({ isOpen, title, message, onCancel, onConfirm, confirmText = "Confirmer", cancelText = "Annuler", young }) {
   const [sending, setSending] = useState(false);
@@ -33,7 +33,7 @@ export default function ModalRecap({ isOpen, title, message, onCancel, onConfirm
         </div>
         <hr className="my-2" />
         <div className="mb-3">
-          {young.scolarity === "NOT_SCOLARISE" ? (
+          {young.scolarity === GRADES.NOT_SCOLARISE ? (
             <>
               <p className="text-gray-500">Code postal</p>
               <p className="font-bold">{young?.zip}</p>
