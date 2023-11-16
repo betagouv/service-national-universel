@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Switch, Link, NavLink } from "react-router-dom";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import useDocumentCss from "@/hooks/useDocumentCss";
 import { SentryRoute } from "@/sentry";
+import { toastr } from "react-redux-toastr";
 
 // DSFR Requirements
 import { fr } from "@codegouvfr/react-dsfr";
@@ -19,10 +20,39 @@ import Email from "./email";
 import Code from "./code";
 import Informations from "./informations";
 import Confirmation from "./confirmation";
+import api from "@/services/api";
+import { ROLES } from "snu-lib";
 
 export default function Index() {
   useDocumentTitle("Creer mon compte");
   useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+
+  const [serviceTagline, setServiceTagline] = useState("Classe engagée");
+
+  const [onboardedUser, setOnboardedUser] = useState(null);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const invitationToken = urlParams.get("token");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!invitationToken) return toastr.error("Votre lien d'invitation a expiré");
+        const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
+        if (ok && data) setOnboardedUser(data);
+      } catch (error) {
+        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return toastr.error("Votre lien d'invitation a expiré");
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!onboardedUser) return;
+    if (onboardedUser.role === ROLES.ADMINISTRATEUR_CLE) setServiceTagline("Compte administrateur CLE");
+    if (onboardedUser.role === ROLES.REFERENT_CLASSE) setServiceTagline("Compte Responsable Classe engagée");
+  }, [onboardedUser]);
+
+  if (!onboardedUser) return <div>Chargement...</div>;
 
   return (
     <Page>
@@ -45,7 +75,7 @@ export default function Index() {
           title: "Accueil - Nom de l’entité (ministère, secrétariat d‘état, gouvernement)",
         }}
         serviceTitle="Service National Universel"
-        serviceTagline="Compte Responsable Classe engagée"
+        serviceTagline={serviceTagline}
         quickAccessItems={[
           {
             iconId: fr.cx("fr-icon-todo-fill"),
@@ -73,11 +103,11 @@ export default function Index() {
       />
 
       <Switch>
-        <SentryRoute path="/creer-mon-compte" exact component={Role} />
+        <SentryRoute path="/creer-mon-compte" exact component={() => <Role user={onboardedUser} />} />
         <SentryRoute path="/creer-mon-compte/email" component={Email} />
-        <SentryRoute path="/creer-mon-compte/code" component={Code} />
-        <SentryRoute path="/creer-mon-compte/informations" component={Informations} />
-        <SentryRoute path="/creer-mon-compte/confirmation" component={Confirmation} />
+        <SentryRoute path="/creer-mon-compte/code" component={() => <Code user={onboardedUser} />} />
+        <SentryRoute path="/creer-mon-compte/informations" component={() => <Informations user={onboardedUser} />} />
+        <SentryRoute path="/creer-mon-compte/confirmation" component={() => <Confirmation user={onboardedUser} />} />
       </Switch>
 
       <Section>
