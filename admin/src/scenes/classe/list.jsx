@@ -1,5 +1,7 @@
 import ClasseIcon from "@/components/drawer/icons/Classe";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
+import { capture } from "@/sentry";
+import api from "@/services/api";
 import { translate } from "@/utils";
 import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { useEffect, useState } from "react";
@@ -9,7 +11,7 @@ import { Link, useHistory } from "react-router-dom";
 import { ROLES, STATUS_CLASSE } from "snu-lib";
 
 export default function list() {
-  const [classes, setClasses] = useState(false);
+  const [classes, setClasses] = useState(null);
   const [data, setData] = useState([]);
   const pageId = "classe-list";
   const [selectedFilters, setSelectedFilters] = useState({});
@@ -34,7 +36,18 @@ export default function list() {
   useEffect(() => {
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return setClasses(true);
     //else fetch classes
+    (async () => {
+      try {
+        const { data } = await api.get(`/cle/classe/hasClasse`);
+        setClasses(data);
+      } catch (e) {
+        setClasses(false);
+        capture(e);
+      }
+    })();
   }, []);
+
+  if (classes === null) return null;
 
   return (
     <Page>
