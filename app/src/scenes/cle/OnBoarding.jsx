@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { toastr } from "react-redux-toastr";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
+import api from "../../services/api";
 import { List } from "@snu/ds/dsfr";
 
 const Title = () => (
@@ -12,12 +14,15 @@ const Title = () => (
 );
 
 const Subtitle = ({ refName }) => (
-  <div>
+  <span>
     Vous êtes invité(e) par votre référent <strong>{refName}</strong> à vous inscrire dès maintenant au programme “Classe engagée” du SNU.`
-  </div>
+  </span>
 );
 
+const fetchClasse = async ({ id }) => api.get(`/cle/classe/${id}`);
+
 const OnBoarding = () => {
+  const [classe, setClasse] = useState(null);
   const name = "Jean Mi";
   const fields = [
     {
@@ -34,6 +39,19 @@ const OnBoarding = () => {
     },
   ];
 
+  const id = "6556412374be5e9ff2ca4e28";
+
+  useEffect(() => {
+    (async () => {
+      if (classe) return;
+      const { data, ok } = await fetchClasse({ id });
+      if (!ok) return toastr.error("Impossible de joindre le service.");
+      setClasse(data);
+    })();
+  }, [classe]);
+
+  console.log("MA CLASSE");
+  console.log(classe);
   return (
     <DSFRLayout title="Inscription de l'élève">
       <DSFRContainer title={<Title />} subtitle={<Subtitle refName={name} />}>

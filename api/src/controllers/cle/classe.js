@@ -4,12 +4,13 @@ const passport = require("passport");
 const Joi = require("joi");
 const { CLE_COLORATION_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST, ROLES, canWriteClasse } = require("snu-lib");
 const mongoose = require("mongoose");
-
-const { capture } = require("../../sentry");
+const { capture, captureMessage } = require("../../sentry");
 const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
+const { ERRORS } = require("../../utils");
+const { validateId } = require("../../utils/validator");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   let session;
@@ -37,7 +38,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: req.user._id });
     if (!etablissement) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const uniqueKey = `${etaglissement.uai}_${new Date().toLocaleDateString("fr-FR")}`;
+    const uniqueKey = `${etablissement.uai}_${new Date().toLocaleDateString("fr-FR")}`;
     const previousClasse = await ClasseModel.findOne({ uniqueKey, uniqueId: value.uniqueId, etablissementId: etablissement._id });
     if (previousClasse) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
@@ -52,17 +53,20 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       const defaultCleCohort = await CohortModel.findOne({ name: value.cohort }, { session });
       if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
 
-      classe = await ClasseModel.create({
-        ...value,
-        cohort: defaultCleCohort.name,
-        uniqueKey,
-        uniqueId: value.uniqueId,
-        referentClasseIds: [referent._id],
-        etablissementId: etablissement._id,
-      }, { session });
+      classe = await ClasseModel.create(
+        {
+          ...value,
+          cohort: defaultCleCohort.name,
+          uniqueKey,
+          uniqueId: value.uniqueId,
+          referentClasseIds: [referent._id],
+          etablissementId: etablissement._id,
+        },
+        { session },
+      );
 
       // We send the email invitation once we are sure both the referent and the classe are created
-      await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user })
+      await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user });
     });
 
     if (!classe) throw new Error("Classe not created.");
@@ -116,6 +120,27 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     classe = await classe.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: classe });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const { error, value } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const data = await ClasseModel.findById(value);
+    if (!data) {
+      captureMessage("Error finding classe with id : " + JSON.stringify(value));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
