@@ -73,6 +73,7 @@ export default function List() {
 
   useEffect(() => {
     (async () => {
+      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) return;
       const { data, ok } = await api.get("/structure");
       if (!ok) return;
       setStructures(data);

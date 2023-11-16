@@ -208,7 +208,7 @@ function canViewReferent(actor, target) {
 }
 
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }) {
-  const isMe = actor._id === originalTarget._id;
+  const isMe = actor._id?.toString() === originalTarget._id?.toString();
   const isAdmin = actor.role === ROLES.ADMIN;
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
   const isResponsibleModifyingResponsibleWithoutChangingRole =
@@ -611,7 +611,16 @@ function canChangeYoungCohort(actor, young) {
 }
 
 function canViewDepartmentService(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(actor.role);
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.RESPONSIBLE,
+    ROLES.SUPERVISOR,
+    ROLES.HEAD_CENTER,
+    ROLES.ADMINISTRATEUR_CLE,
+    ROLES.REFERENT_CLASSE,
+  ].includes(actor.role);
 }
 
 function canAssignManually(actor, young, cohort) {

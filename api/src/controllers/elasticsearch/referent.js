@@ -73,10 +73,10 @@ async function buildReferentContext(user) {
       - all ref Classe of his etablissement
     */
     const refIds = [];
-    const etablissement = await EtablissementModel.findOne({ chefIds: user._id });
+    const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: user._id });
     if (!etablissement) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     const classes = await ClasseModel.find({ etablissementId: etablissement._id });
-    refIds.push(...classes.flatMap((c) => c.classeReferentIds), ...etablissement.chefIds, ...etablissement.sousChefIds);
+    refIds.push(...classes.flatMap((c) => c.referentClasseIds), ...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds);
     contextFilters.push({
       bool: {
         should: [
@@ -94,10 +94,10 @@ async function buildReferentContext(user) {
       - all ref ADMIN CLE of his etablissement
       - all ref Classe of his etablissement and all ref of hiis departement
     */
-    const classes = await ClasseModel.findOne({ classeReferentIds: user._id });
+    const classes = await ClasseModel.findOne({ referentClasseIds: user._id });
     if (!classes) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     const etablissement = await EtablissementModel.findOne({ _id: classes.etablissementId });
-    const refIds = [...etablissement.chefIds, ...etablissement.sousChefIds];
+    const refIds = [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds];
     contextFilters.push({
       bool: {
         should: [
