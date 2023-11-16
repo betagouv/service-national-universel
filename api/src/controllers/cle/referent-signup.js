@@ -31,15 +31,11 @@ router.get("/token/:token", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.token });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // We want to make sure the email is rightly provided by the user
-    const token = jwt.sign({ _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_MAX_AGE));
-
     delete referent.email;
     delete referent.firstName;
     delete referent.lastName;
 
-    return res.status(200).send({ ok: true, data: referent, token });
+    return res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
