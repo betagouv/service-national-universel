@@ -127,7 +127,7 @@ router.post("/public/search", async (req, res) => {
     if (req.query.searchCity) {
       query = {
         query: {
-          match: {
+          match_bool_prefix: {
             "city.folded": req.query.searchCity,
           },
         },
