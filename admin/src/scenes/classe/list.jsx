@@ -1,212 +1,40 @@
-import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
-import { Page, Header, Container, Button, Badge } from "@snu/ds/admin";
-import { HiPlus, HiUsers } from "react-icons/hi";
 import ClasseIcon from "@/components/drawer/icons/Classe";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
+import { translate } from "@/utils";
+import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
+import { useEffect, useState } from "react";
+import { HiPlus, HiUsers } from "react-icons/hi";
 import { useSelector } from "react-redux";
-import api from "@/services/api";
-import { ROLES, translate, translateVisibilty } from "@/utils";
-import DateFilter from "@/components/filters-system-v2/components/customComponent/DateFilter";
-import { formatDateFR, getDepartmentNumber, translateApplication, translateMission, translateSource, MISSION_STATUS } from "snu-lib";
+import { Link, useHistory } from "react-router-dom";
+import { ROLES, STATUS_CLASSE } from "snu-lib";
 
 export default function list() {
-  const [classes, setClasses] = useState(true);
-
-  //ICI ON PREND LEXEMPLE DES MISSIONS POUR LA DEMO, A SUPPRIMER ENSUITE
-  const [mission, setMission] = useState(null);
-  const [structure, setStructure] = useState();
-  const user = useSelector((state) => state.Auth.user);
-  const [data, setData] = useState([
-    {
-      _id: "653b6c145b79ba06a96c0e3c",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "DRAFT",
-    },
-    {
-      _id: "65367584dc601b0685cf91f5",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "CANCEL",
-    },
-    {
-      _id: "65254df5b8d07a068ee9328c",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "VALIDATED",
-    },
-    {
-      _id: "65254d27b8d07a068ee93225",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "WAITING_VALIDATION",
-    },
-    {
-      _id: "6524fc56d4c5ff068945e7cb",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "WAITING_CORRECTION",
-    },
-    {
-      _id: "650dab3b4d1fa106860fba66",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "REFUSED",
-    },
-    {
-      _id: "650da840eef483e2f104f095",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "DRAFT",
-    },
-    {
-      _id: "650da6f34d1fa106860fb93e",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "WAITING_VALIDATION",
-    },
-    {
-      _id: "650da6d04d1fa106860fb8d7",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "VALIDATED",
-    },
-    {
-      _id: "650da6d04d1fa106860fb8d7",
-      name: "CLASS NAME",
-      placeLeft: "10",
-      placeTotal: "20",
-      status: "ARCHIVED",
-    },
-  ]);
-  const pageId = "missions-list";
+  const [classes, setClasses] = useState(false);
+  const [data, setData] = useState([]);
+  const pageId = "classe-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({
     page: 0,
   });
   const [size, setSize] = useState(10);
-
-  useEffect(() => {
-    (async () => {
-      if (!user.structureId) return;
-      const { data } = await api.get(`/structure/${user.structureId}`);
-      setStructure(data);
-    })();
-    return;
-  }, []);
+  const user = useSelector((state) => state.Auth.user);
 
   const filterArray = [
-    { title: "Région", name: "region", parentGroup: "Général", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
-    {
-      title: "Département",
-      name: "department",
-      parentGroup: "Général",
-      missingLabel: "Non renseigné",
-      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
-      translate: (e) => getDepartmentNumber(e) + " - " + e,
-    },
-    {
-      title: "Statut",
-      name: "status",
-      parentGroup: "Général",
-      translate: (e) => translate(e),
-    },
-    {
-      title: "Source",
-      name: "isJvaMission",
-      parentGroup: "Général",
-      translate: (value) => translateSource(value),
-    },
-    {
-      title: "Visibilité",
-      name: "visibility",
-      parentGroup: "Général",
-      translate: (value) => translateVisibilty(value),
-    },
-    {
-      title: "Domaine d'action principal",
-      name: "mainDomain",
-      parentGroup: "Modalités",
-      translate: (value) => translate(value),
-      missingLabel: "Non renseigné",
-    },
-    {
-      title: "Places restantes",
-      name: "placesLeft",
-      parentGroup: "Modalités",
-    },
-    {
-      title: "Tuteur",
-      name: "tutorName",
-      parentGroup: "Modalités",
-    },
-    {
-      title: "Préparation Militaire",
-      name: "isMilitaryPreparation",
-      parentGroup: "Modalités",
-      translate: (value) => translate(value),
-    },
-    {
-      title: "Hébergement",
-      name: "hebergement",
-      parentGroup: "Modalités",
-      translate: (value) => translate(value),
-      missingLabel: "Non renseigné",
-    },
-    {
-      title: "Hébergement Payant",
-      name: "hebergementPayant",
-      parentGroup: "Modalités",
-      translate: (value) => translate(value),
-      missingLabel: "Non renseigné",
-    },
-    {
-      title: "Place occupées",
-      name: "placesStatus",
-      parentGroup: "Modalités",
-      translate: (value) => translateMission(value),
-      missingLabel: "Non renseigné",
-    },
-    {
-      title: "Statut de candidature",
-      name: "applicationStatus",
-      parentGroup: "Modalités",
-      missingLabel: "Aucune candidature ni proposition",
-      translate: (value) => translateApplication(value),
-    },
-    {
-      title: "Date de début",
-      name: "fromDate",
-      parentGroup: "Dates",
-      customComponent: (setFilter, filter) => <DateFilter setValue={setFilter} value={filter} />,
-      translate: formatDateFR,
-    },
-    {
-      title: "Date de fin",
-      name: "toDate",
-      parentGroup: "Dates",
-      customComponent: (setFilter, filter) => <DateFilter setValue={setFilter} value={filter} />,
-      translate: formatDateFR,
-    },
-    user.role === ROLES.SUPERVISOR
-      ? {
-          title: "Structure",
-          name: "structureName",
-          parentGroup: "Structure",
-        }
-      : null,
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné" },
+    { title: "Numéro d'identification", name: "uniqueKey", missingLabel: "Non renseigné" },
+    { title: "Statut", name: "status", missingLabel: "Non renseigné" },
+    { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné" },
+    { title: "Nom", name: "name", missingLabel: "Non renseigné" },
+    { title: "Couleur", name: "coloration", missingLabel: "Non renseigné" },
+    { title: "Type", name: "type", missingLabel: "Non renseigné" },
+    { title: "Secteur", name: "sector", missingLabel: "Non renseigné" },
+    { title: "Niveau", name: "grade", missingLabel: "Non renseigné" },
   ].filter(Boolean);
-  //FIN DE LA ZONE A SUPPRIMER
+
+  useEffect(() => {
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return setClasses(true);
+    //else fetch classes
+  }, []);
 
   return (
     <Page>
@@ -236,12 +64,12 @@ export default function list() {
         </Container>
       )}
       {classes && (
-        <Container className="!p-3">
+        <Container className="!p-0">
           <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
             <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
               <Filters
                 pageId={pageId}
-                route="/elasticsearch/mission/search"
+                route="/elasticsearch/cle/classe/search"
                 setData={(value) => setData(value)}
                 filters={filterArray}
                 searchPlaceholder="Rechercher par mots clés, ville, code postal..."
@@ -253,12 +81,10 @@ export default function list() {
               />
               <SortOption
                 sortOptions={[
+                  { label: "Nom (A > Z)", field: "name.keyword", order: "asc" },
+                  { label: "Nom (Z > A)", field: "name.keyword", order: "desc" },
                   { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
                   { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
-                  { label: "Nombre de place (croissant)", field: "placesLeft", order: "asc" },
-                  { label: "Nombre de place (décroissant)", field: "placesLeft", order: "desc" },
-                  { label: "Nom de la mission (A > Z)", field: "name.keyword", order: "asc" },
-                  { label: "Nom de la mission (Z > A)", field: "name.keyword", order: "desc" },
                 ]}
                 selectedFilters={selectedFilters}
                 paramData={paramData}
@@ -292,7 +118,7 @@ export default function list() {
                       <span className="w-[20%]">Statuts</span>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-gray-100">
                     {data.map((hit) => (
                       <Hit key={hit._id} hit={hit} />
                     ))}
@@ -315,27 +141,28 @@ export default function list() {
 
 const Hit = ({ hit }) => {
   const history = useHistory();
-
   return (
     <tr className="flex items-center py-3 px-4 hover:bg-gray-50">
       <td className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mes-classes/${hit._id}`)}>
         <div className="flex w-full flex-col justify-center">
           <div className="m-0 table w-full table-fixed border-collapse">
-            <div className="table-cell truncate font-bold text-gray-900 text-base leading-5">{hit.name}</div>
+            {hit?.name ? (
+              <div className="table-cell truncate font-bold text-gray-900 text-base leading-5">{hit.name}</div>
+            ) : (
+              <div className="table-cell  text-gray-400 italic leading-5">Nom à préciser</div>
+            )}
           </div>
           <div className="m-0 mt-1 table w-full table-fixed border-collapse">
-            <div className="table-cel truncate text-xs leading-5 text-gray-500 ">id: {hit._id}</div>
+            <div className="table-cel truncate text-xs leading-5 text-gray-500 ">id: {hit.uniqueKey}</div>
           </div>
         </div>
       </td>
       <td className="flex w-[20%] flex-col gap-2">
-        <Badge title={"CLE 23-24"} leftIcon={<HiUsers color="#EC4899" size={20} />} />
+        <Badge title={hit.cohort} leftIcon={<HiUsers color="#EC4899" size={20} />} />
       </td>
-      <td className="flex w-[20%] flex-col gap-2">
-        <Badge title={hit.placeLeft + "/" + hit.placeTotal} />
-      </td>
+      <td className="flex w-[20%] flex-col gap-2">{hit?.totalSeats ? <Badge title={hit.seatsTaken + "/" + hit.totalSeats} /> : <Badge title="À préciser" />}</td>
       <td className="w-[20%]">
-        <Badge title={translate(MISSION_STATUS[hit.status])} status={hit.status} />
+        <Badge title={translate(STATUS_CLASSE[hit.status])} status={hit.status} />
       </td>
     </tr>
   );
