@@ -13,13 +13,13 @@ async function buildClasseContext(user) {
   const contextFilters = [];
 
   if (user.role === ROLES.ADMINISTRATEUR_CLE) {
-    const etablissement = await EtablissementModel.findOne({ $or: [{ chefIds: user._id }, { sousChefIds: user._id }] });
+    const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
     if (!etablissement) return { classeContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     contextFilters.push({ term: { "etablissementId.keyword": etablissement._id.toString() } });
   }
 
   if (user.role === ROLES.REFERENT_CLASSE) {
-    contextFilters.push({ term: { "classeReferentIds.keyword": user._id.toString() } });
+    contextFilters.push({ term: { "referentClasseIds.keyword": user._id.toString() } });
   }
 
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
