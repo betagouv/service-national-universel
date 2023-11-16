@@ -6,6 +6,22 @@ const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "classe";
 
 const Schema = new mongoose.Schema({
+  etablissementId: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "ID de l'établissement",
+    },
+  },
+
+  referentClasseIds: {
+    type: [String],
+    required: true,
+    documentation: {
+      description: "ID du référent de classe",
+    },
+  },
+
   cohort: {
     type: String,
     required: true,
@@ -18,41 +34,15 @@ const Schema = new mongoose.Schema({
     type: String,
     required: true,
     documentation: {
-      description: "Clé unique de la classe (UAI_DATE_XXXX)",
+      description: "Clé unique de la classe (UAI_DATE_*)",
     },
   },
 
-  classeReferentIds: {
-    type: [String],
-    required: true,
-    documentation: {
-      description: "ID du référent de classe",
-    },
-  },
-
-  etablissementId: {
+  uniqueId: {
     type: String,
     required: true,
     documentation: {
-      description: "ID de l'établissement",
-    },
-  },
-
-  status: {
-    type: String,
-    required: true,
-    enum: STATUS_CLASSE_LIST,
-    documentation: {
-      description: "Statut de la classe",
-    },
-  },
-
-  statusPhase1: {
-    type: String,
-    required: true,
-    enum: STATUS_PHASE1_CLASSE_LIST,
-    documentation: {
-      description: "Statut de la classe pour la phase 1",
+      description: "ID unique de la classe (*_XXXX)",
     },
   },
 
@@ -110,6 +100,24 @@ const Schema = new mongoose.Schema({
     enum: CLE_GRADE_LIST,
     documentation: {
       description: "Niveau de la classe",
+    },
+  },
+
+  status: {
+    type: String,
+    required: true,
+    enum: STATUS_CLASSE_LIST,
+    documentation: {
+      description: "Statut de la classe",
+    },
+  },
+
+  statusPhase1: {
+    type: String,
+    required: true,
+    enum: STATUS_PHASE1_CLASSE_LIST,
+    documentation: {
+      description: "Statut de la classe pour la phase 1",
     },
   },
 
