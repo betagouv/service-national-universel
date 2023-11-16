@@ -122,7 +122,7 @@ class Auth {
           schoolDepartment: etablissement.department,
           schoolRegion: etablissement.region,
           schoolCountry: etablissement.country,
-          schoolId: etablissement._id,
+          schoolId: etablissement.schoolId,
           zip: etablissement.zip,
           classeId: classe._id,
           etablissementId: etablissement._id,
