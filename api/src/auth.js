@@ -94,6 +94,7 @@ class Auth {
 
         // For testing purposes
         const classe = {
+          _id: "0123456789",
           etablissementId: "655486d44a807f53c1fea9fc",
           cohort: "Juillet 2024",
           grade: "2nde",
@@ -121,10 +122,10 @@ class Auth {
           schoolDepartment: etablissement.department,
           schoolRegion: etablissement.region,
           schoolCountry: etablissement.country,
-          schoolId: etablissement.id,
+          schoolId: etablissement._id,
           zip: etablissement.zip,
           classeId: classe._id,
-          etablissementId: etablissement.id,
+          etablissementId: etablissement._id,
           cohort: classe.cohort,
           grade: classe.grade,
         };
