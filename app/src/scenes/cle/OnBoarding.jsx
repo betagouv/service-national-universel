@@ -5,6 +5,8 @@ import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
 import api from "../../services/api";
 import { List } from "@snu/ds/dsfr";
+import Button from "@/components/dsfr/ui/buttons/Button";
+import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 
 const Title = () => (
   <div>
@@ -56,6 +58,12 @@ const OnBoarding = () => {
     <DSFRLayout title="Inscription de l'élève">
       <DSFRContainer title={<Title />} subtitle={<Subtitle refName={name} />}>
         <List title={"Ma classe engagée"} fields={fields}></List>
+        <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
+          <InlineButton className="pt-2 md:pr-2" onClick={function noRefCheck() {}}>
+            J'ai déjà un compte volontaire
+          </InlineButton>
+          <Button onClick={function noRefCheck() {}}>Démarrer mon inscription</Button>
+        </div>
       </DSFRContainer>
     </DSFRLayout>
   );
