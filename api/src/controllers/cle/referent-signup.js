@@ -2,18 +2,15 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const jwt = require("jsonwebtoken");
 const { ROLES, SUB_ROLES, PHONE_ZONES_NAMES_ARR, SENDINBLUE_TEMPLATES } = require("snu-lib");
-
-const { cookieOptions, JWT_MAX_AGE, COOKIE_MAX_AGE, TRUST_TOKEN_MAX_AGE } = require("../../cookie-options");
 
 const config = require("../../config");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
-const AuthObject = require("../../auth");
-const ReferentAuth = new AuthObject(ReferentModel);
+const ClasseModel = require("../../models/cle/classe");
+const EtablissementModel = require("../../models/cle/etablissement");
 
 router.get("/token/:token", async (req, res) => {
   try {
@@ -73,10 +70,7 @@ router.put("/request-confirmation-email", async (req, res) => {
       },
     });
 
-    return res.status(200).send({
-      ok: true,
-      code: "2FA_REQUIRED",
-    });
+    return res.status(200).send({ ok: true, data: "2FA_REQUIRED" });
   } catch (error) {}
 });
 
@@ -123,8 +117,8 @@ router.post("/", async (req, res) => {
       lastName: Joi.string().required(),
       phone: Joi.string().required(),
       phoneZone: Joi.string().allow(PHONE_ZONES_NAMES_ARR).required(),
-      // role: Joi.string().allow([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]).required(),
-      // subRole: Joi.string().allow([SUB_ROLES.referent_etablissement], [SUB_ROLES.coordinateur_cle]), // Optional when role is ROLES.REFERENT_CLASSE
+      role: Joi.string().allow([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]).required(),
+      subRole: Joi.string().allow([SUB_ROLES.referent_etablissement], [SUB_ROLES.coordinateur_cle]), // Optional when role is ROLES.REFERENT_CLASSE
       password: Joi.string().required(),
       invitationToken: Joi.string().required(),
     })
@@ -139,6 +133,19 @@ router.post("/", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const etablissement = await EtablissementModel.findOne({ _id: value.etablissementId });
+    // Check if the referent is correctly linked to the etablissementId
+    if (
+      !etablissement
+      || (role === ROLES.ADMINISTRATEUR_CLE && subRole === SUB_ROLES.referent_etablissement && !etablissement.referentEtablissementIds.includes(referent._id.toString()))
+      || (role === ROLES.ADMINISTRATEUR_CLE && subRole === SUB_ROLES.coordinateur_cle && !etablissement.coordinateurIds.includes(referent._id.toString()))
+    ) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Check if the referent de classe is correctly linked to the classe x etablissementId
+    if (role === ROLES.REFERENT_CLASSE) {
+      const classe = await ClasseModel.findOne({ etablissementId: value.etablissementId, referentClasseIds: referent._id.toString() });
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     referent.set({
       firstName: value.firstName,
       lastName: value.lastName,
@@ -148,6 +155,9 @@ router.post("/", async (req, res) => {
       invitationToken: null,
     });
     await referent.save();
+
+    delete referent.password;
+
     return res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
