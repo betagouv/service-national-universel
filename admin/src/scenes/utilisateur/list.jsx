@@ -231,7 +231,9 @@ const Hit = ({ hit, onClick, user, structure }) => {
   return (
     <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={onClick}>
       <td className="w-[30%] table-cell truncate cursor-pointer">
-        <span className="font-bold text-gray-900 text-base leading-5">{hit.status !== "DELETED" ? `${hit.firstName} ${hit.lastName}` : "Compte supprimé"}</span>
+        <span className="font-bold text-gray-900 text-base leading-5">
+          {hit.firstName} {hit.lastName}
+        </span>
         <p className="text-xs text-gray-500 leading-5">{hit.email}</p>
       </td>
       <td className="flex w-[30%] flex-col gap-2">
