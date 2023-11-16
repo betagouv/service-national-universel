@@ -21,9 +21,16 @@ class Auth {
 
   // route is currrently only used for young signup
   async signUp(req, res) {
-    try {
-      const isCle = req.body.source === YOUNG_SOURCE.CLE;
+    const isCLE = req.body.source === YOUNG_SOURCE.CLE;
+    if (isCLE) {
+      await this.signupCLE(req, res);
+    } else {
+      await sigupVolontaire(req, res);
+    }
+  }
 
+  async signupCLE(req, res) {
+    try {
       let schema = {
         email: Joi.string().lowercase().trim().email().required(),
         phone: Joi.string().trim().required(),
@@ -40,39 +47,8 @@ class Auth {
           .trim()
           .valid(...YOUNG_SOURCE_LIST)
           .allow(null, ""),
-      };
-
-      const cleUserSchema = {
         classeId: Joi.string().trim().required(),
       };
-
-      const volontaireSchema = {
-        schooled: Joi.string().trim().required(),
-        grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
-        schoolName: Joi.string().trim(),
-        schoolType: Joi.string().trim(),
-        schoolAddress: Joi.string().trim(),
-        schoolZip: Joi.string().trim().allow(null, ""),
-        schoolCity: Joi.string().trim(),
-        schoolDepartment: Joi.string().trim(),
-        schoolRegion: Joi.string().trim(),
-        schoolCountry: Joi.string().trim(),
-        schoolId: Joi.string().trim(),
-        zip: Joi.string().trim(),
-        cohort: Joi.string().trim().required(),
-      };
-
-      if (isCle) {
-        schema = {
-          ...schema,
-          ...cleUserSchema,
-        };
-      } else {
-        schema = {
-          ...schema,
-          ...volontaireSchema,
-        };
-      }
 
       const { error, value } = Joi.object(schema).validate(req.body);
 
@@ -84,67 +60,28 @@ class Auth {
 
       const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality } = value;
 
-      let inscriptionData = {};
+      // const classe = await ClasseEngagee.findOne({ _id: value.classeId, status: "DONE" });
+      // if (!classe) {
+      //   return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // }
 
-      if (isCle) {
-        // const classe = await ClasseEngagee.findOne({ _id: value.classeId, status: "DONE" });
-        // if (!classe) {
-        //   return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
-        // }
+      // For testing purposes
+      const classe = {
+        _id: "0123456789",
+        etablissementId: "65562bb939c11e7038a41013",
+        cohort: "Juillet 2024",
+        grade: "2nde",
+        placesLeft: 30,
+        status: "DONE",
+      };
 
-        // For testing purposes
-        const classe = {
-          _id: "0123456789",
-          etablissementId: "655486d44a807f53c1fea9fc",
-          cohort: "Juillet 2024",
-          grade: "2nde",
-          placesLeft: 30,
-          status: "DONE",
-        };
+      if (classe.placesLeft <= 0) {
+        return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
 
-        if (classe.placesLeft <= 0) {
-          return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-        }
-
-        const etablissement = await Etablissement.findById(classe.etablissementId);
-        if (!etablissement) {
-          return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
-        }
-
-        inscriptionData = {
-          source: YOUNG_SOURCE.CLE,
-          schooled: "true",
-          schoolName: etablissement.name,
-          schoolType: etablissement.type[0],
-          schoolAddress: etablissement.address,
-          schoolZip: etablissement.zip,
-          schoolCity: etablissement.city,
-          schoolDepartment: etablissement.department,
-          schoolRegion: etablissement.region,
-          schoolCountry: etablissement.country,
-          schoolId: etablissement.schoolId,
-          zip: etablissement.zip,
-          classeId: classe._id,
-          etablissementId: etablissement._id,
-          cohort: classe.cohort,
-          grade: classe.grade,
-        };
-      } else {
-        inscriptionData = {
-          schooled: value.schooled,
-          schoolName: value.schoolName,
-          schoolType: value.schoolType,
-          schoolAddress: value.schoolAddress,
-          schoolZip: value.schoolZip,
-          schoolCity: value.schoolCity,
-          schoolDepartment: value.schoolDepartment,
-          schoolRegion: value.schoolRegion,
-          schoolCountry: value.schoolCountry,
-          schoolId: value.schoolId,
-          zip: value.zip,
-          cohort: value.cohort,
-          grade: value.grade,
-        };
+      const etablissement = await Etablissement.findById(classe.etablissementId);
+      if (!etablissement) {
+        return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
 
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
@@ -154,12 +91,6 @@ class Auth {
 
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-
-      if (!isCle) {
-        let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
-        const session = sessions.find(({ name }) => name === value.cohort);
-        if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
 
       const tokenEmailValidation = await crypto.randomInt(1000000);
 
@@ -179,7 +110,22 @@ class Auth {
         tokenEmailValidation,
         attemptsEmailValidation: 0,
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
-        ...inscriptionData,
+        source: YOUNG_SOURCE.CLE,
+        schooled: "true",
+        schoolName: etablissement.name,
+        schoolType: etablissement.type[0],
+        schoolAddress: etablissement.address,
+        schoolZip: etablissement.zip,
+        schoolCity: etablissement.city,
+        schoolDepartment: etablissement.department,
+        schoolRegion: etablissement.region,
+        schoolCountry: etablissement.country,
+        schoolId: etablissement.schoolId,
+        zip: etablissement.zip,
+        classeId: classe._id,
+        etablissementId: etablissement._id,
+        cohort: classe.cohort,
+        grade: classe.grade,
       };
 
       const user = await this.model.create(newUser);
