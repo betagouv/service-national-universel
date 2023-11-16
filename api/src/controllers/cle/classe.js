@@ -121,3 +121,5 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+module.exports = router;
