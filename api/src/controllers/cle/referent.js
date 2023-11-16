@@ -2,17 +2,17 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 const Joi = require("joi");
-const crypto = require("crypto");
-const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, canInviteCoordinateur } = require("snu-lib");
+const mongoose = require("mongoose");
+const { ROLES, canInviteCoordinateur } = require("snu-lib");
 
 const { capture } = require("../../sentry");
-const { ERRORS, inSevenDays } = require("../../utils");
-const { sendTemplate } = require("../../sendinblue");
-const config = require("../../config");
+const { ERRORS } = require("../../utils");
 const EtablissementModel = require("../../models/cle/etablissement");
-const ReferentModel = require("../../models/referent");
+const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 
 router.post("/invite-coordonnateur", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  let session;
+
   try {
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),
@@ -32,43 +32,25 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
     const { email, firstName, lastName } = value;
 
     //for now, only one chef per etablissement
-    const etablissement = await EtablissementModel.findOne({ chefIds: req.user._id });
-    if (!etablissement) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
+    const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: req.user._id });
+    if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    //for now, only one sous-chef per etablissement
-    if (etablissement.sousChefIds.length) {
+    //for now, only 2 coordinateurs per etablissement
+    if (etablissement.coordinateurIds.length >= 2) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const invitationToken = crypto.randomBytes(20).toString("hex");
+    session = await mongoose.startSession();
+    session.withTransaction(async () => {
+      const referent = await findOrCreateReferent({ email, firstName, lastName }, { etablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle, session });
+  
+      etablissement.set({
+        coordinateurIds: [...etablissement.coordinateurIds, referent._id.toString()],
+      });
+      await etablissement.save({ fromUser: req.user, session });
 
-    const referent = await ReferentModel.create({
-      email,
-      firstName,
-      lastName,
-      role: ROLES.ADMINISTRATEUR_CLE,
-      subRole: SUB_ROLES.coordinateur_cle,
-      invitationToken,
-      invitationExpires: inSevenDays(),
-      department: etablissement.department,
-      region: etablissement.region,
-    });
-
-    etablissement.set({
-      sousChefIds: [referent._id.toString()],
-    });
-
-    await etablissement.save({ fromUser: req.user });
-
-    const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`;
-    const fromName = `${req.user.firstName} ${req.user.lastName}`;
-    const toName = `${referent.firstName} ${referent.lastName}`;
-
-    await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[ROLES.ADMINISTRATEUR_CLE], {
-      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-      params: { cta, fromName, toName },
+      // We send the email invitation once we are sure both the referent and the classe are created
+      await inviteReferent(referent, { role: ROLES.ADMINISTRATEUR_CLE, user: req.user })
     });
 
     return res.status(200).send({ ok: true });
@@ -76,6 +58,8 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  } finally {
+    session?.endSession();
   }
 });
 

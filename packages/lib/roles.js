@@ -820,6 +820,10 @@ function canInviteCoordinateur(actor) {
   return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
 }
 
+function canWriteClasse(actor) {
+  return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -945,4 +949,5 @@ export {
   canSeeDashboardEngagementStatus,
   canSeeDashboardSejourHeadCenter,
   canInviteCoordinateur,
+  canWriteClasse,
 };
