@@ -39,7 +39,7 @@ class Auth {
           .valid(...YOUNG_SOURCE_LIST)
           .allow(null, ""),
       })
-        .when(Joi.object({ source: Joi.string().trim().valid(YOUNG_SOURCE.CLE) }), {
+        .when(Joi.object({ source: Joi.valid("CLE") }).unknown(), {
           then: Joi.object({
             classeId: Joi.string().trim().required(),
           }),
@@ -70,25 +70,35 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality, source } = value;
+      const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality } = value;
 
       let inscriptionData = {};
 
       if (isClasseEngagee) {
         // const classe = await ClasseEngagee.findById(value.classeId);
-        // if (!classe) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+        // if (!classe) {
+        //   return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+        // }
 
         // For testing purposes
         const classe = {
           etablissementId: "655486d44a807f53c1fea9fc",
           cohort: "Juillet 2024",
           grade: "4eme",
+          placesLeft: 30,
         };
 
+        if (classe.placesLeft <= 0) {
+          return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+
         const etablissement = await Etablissement.findById(classe.etablissementId);
-        if (!etablissement) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (!etablissement) {
+          return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+        }
 
         inscriptionData = {
+          source: YOUNG_SOURCE.CLE,
           schooled: "true",
           schoolName: etablissement.name,
           schoolType: etablissement.type[0],
@@ -153,7 +163,6 @@ class Auth {
         tokenEmailValidation,
         attemptsEmailValidation: 0,
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
-        source,
         ...inscriptionData,
       };
 

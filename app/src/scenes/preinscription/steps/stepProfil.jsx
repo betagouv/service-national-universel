@@ -14,14 +14,12 @@ import { getPasswordErrorMessage } from "../../../utils";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
-import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
-import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
-import { translate } from "snu-lib/translation";
-import { YOUNG_SOURCE } from "snu-lib/constants";
+import { PHONE_ZONES, isPhoneNumberWellFormated, FEATURES_NAME, isFeatureEnabled, translate, YOUNG_SOURCE } from "snu-lib";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import IconFrance from "@/assets/IconFrance";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
 import { useDispatch } from "react-redux";
+import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
 import dayjs from "dayjs";
 import API from "@/services/api";
@@ -38,7 +36,7 @@ export default function StepProfil() {
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
   const dispatch = useDispatch();
-  const parcours = new URLSearchParams(window.location.search).get("parcours").toUpperCase() || YOUNG_SOURCE.VOLONTAIRE;
+  const isCLE = new URLSearchParams(window.location.search).get("parcours").toUpperCase() === YOUNG_SOURCE.CLE;
   const classeId = new URLSearchParams(window.location.search).get("classeId");
 
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
@@ -48,11 +46,11 @@ export default function StepProfil() {
   const validate = () => {
     let errors = {};
 
-    if (parcours === "cle" && !data?.frenchNationality) {
+    if (isCLE && !data?.frenchNationality) {
       errors.frenchNationality = "Ce champ est obligatoire";
     }
 
-    if (parcours === "cle" && !data?.birthDate) {
+    if (isCLE && !data?.birthDate) {
       errors.birthDate = "Ce champ est obligatoire";
     }
     if (data?.phone && !isPhoneNumberWellFormated(trimmedPhone, data?.phoneZone)) {
@@ -102,7 +100,7 @@ export default function StepProfil() {
     setError(errors);
     if (Object.keys(errors).length) return;
 
-    if (parcours === YOUNG_SOURCE.CLE) {
+    if (isCLE) {
       await signUp();
     } else {
       setData({ ...data, email: trimmedEmail, step: PREINSCRIPTION_STEPS.CONFIRM });
@@ -130,37 +128,38 @@ export default function StepProfil() {
     try {
       setLoading(true);
       const { code, ok, token, user } = await API.post(`/young/signup`, values);
+      if (code === "USER_ALREADY_REGISTERED") {
+        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
+        return;
+      }
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
-      } else {
-        if (user) {
-          plausibleEvent("Phase0/CTA preinscription - inscription");
-          if (token) API.setToken(token);
-          dispatch(setYoung(user));
-          history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
-        }
+        return;
+      }
+      if (user) {
+        plausibleEvent("Phase0/CTA preinscription - inscription");
+        if (token) API.setToken(token);
+        dispatch(setYoung(user));
+        history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
       }
     } catch (e) {
+      capture(e);
+      toastr.error("Erreur", `Une erreur s'est produite : ${translate(e.code)}`);
+    } finally {
       setLoading(false);
-      if (e.code === "USER_ALREADY_REGISTERED")
-        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
-      else {
-        capture(e);
-        setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
-      }
     }
   };
 
   return (
     <>
-      {parcours === YOUNG_SOURCE.VOLONTAIRE && <ProgressBar />}
+      {!isCLE && <ProgressBar />}
 
       <DSFRContainer
         title="Créez votre compte"
         supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
         supportEvent="Phase0/aide preinscription - infos persos">
-        {parcours === YOUNG_SOURCE.CLE && (
+        {isCLE && (
           <>
             <div className="flex items-center gap-2 mb-3">
               <label htmlFor="nationalite" className="m-0">
@@ -215,18 +214,18 @@ export default function StepProfil() {
 
         <div className="space-y-5">
           <label className="w-full">
-            Prénom {parcours === YOUNG_SOURCE.CLE ? "de l'élève" : "du volontaire"}
+            {isCLE ? "Prénom de l'élève" : "Prénom du volontaire"}
             <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} />
             {error.firstName && <span className="text-sm text-red-500">{error.firstName}</span>}
           </label>
 
           <label className="w-full">
-            Nom de famille {parcours === YOUNG_SOURCE.CLE ? "de l'élève" : "du volontaire"}
+            {isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
             <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
             {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
           </label>
 
-          {parcours === YOUNG_SOURCE.CLE && (
+          {isCLE && (
             <label className="w-full">
               Date de naissance
               <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} />
@@ -248,7 +247,7 @@ export default function StepProfil() {
           <hr className="my-4" />
           <h2 className="text-base font-bold my-4">Mes identifiants de connexion</h2>
           <p className="pl-3 border-l-4 border-l-indigo-500">
-            Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte {parcours === "cle" ? "élève" : "volontaire"}.
+            Les identifiants choisis seront ceux à utiliser pour vous connecter sur votre compte {isCLE ? "élève" : "volontaire"}.
           </p>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <label className="w-full">
@@ -328,10 +327,11 @@ export default function StepProfil() {
             {error.rulesYoung ? <span className="text-sm text-red-500">{error.rulesYoung}</span> : null}
           </div>
         </div>
+        <ErrorMessage>{error?.text}</ErrorMessage>
         <SignupButtonContainer
           onClickNext={() => onSubmit()}
-          onClickPrevious={parcours === YOUNG_SOURCE.VOLONTAIRE ? () => history.push("/preinscription/sejour") : null}
-          labelNext={parcours === YOUNG_SOURCE.CLE ? "Recevoir un code d’activation par e-mail" : "Continuer"}
+          onClickPrevious={isCLE ? () => history.push("/preinscription/sejour") : null}
+          labelNext={isCLE ? "Recevoir un code d’activation par e-mail" : "Continuer"}
           labelPrevious="Retour au choix du séjour"
           collapsePrevious={true}
           disabled={loading}
