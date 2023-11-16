@@ -63,10 +63,7 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const token2FA = await crypto.randomInt(1000000);
-
-    // todo : est ce qu'on change l'adresse mail du user ici ?
-
-    referent.set({ email, token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
+    referent.set({ emailWaitingValidation: email, token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
     await referent.save();
     await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: value.email }],
@@ -83,14 +80,49 @@ router.put("/request-confirmation-email", async (req, res) => {
   } catch (error) {}
 });
 
+router.post("/confirm-email", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      code: Joi.string().required(),
+      invitationToken: Joi.string().required(),
+    })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (referent.token2FA !== value.code) {
+      referent.set({ attempts2FA: referent.attempts2FA + 1 });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    referent.set({
+      email: referent.emailWaitingValidation,
+      emailValidatedAt: Date.now(),
+      emailWaitingValidation: null,
+      token2FA: null,
+      token2FAExpires: null,
+      attempts2FA: 0,
+    });
+
+    return res.status(200).send({ ok: true, data: referent });
+  } catch (error) {}
+});
+
 router.post("/", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      // etablissementId: Joi.string().required(),
+      etablissementId: Joi.string().required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
-      // phone: Joi.string().required(),
-      // phoneZone: Joi.string().allow(PHONE_ZONES_NAMES_ARR).required(),
+      phone: Joi.string().required(),
+      phoneZone: Joi.string().allow(PHONE_ZONES_NAMES_ARR).required(),
       // role: Joi.string().allow([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]).required(),
       // subRole: Joi.string().allow([SUB_ROLES.referent_etablissement], [SUB_ROLES.coordinateur_cle]), // Optional when role is ROLES.REFERENT_CLASSE
       password: Joi.string().required(),
@@ -110,10 +142,10 @@ router.post("/", async (req, res) => {
     referent.set({
       firstName: value.firstName,
       lastName: value.lastName,
-      // phone: value.phone,
-      // phoneZone: value.phoneZone,
+      phone: value.phone,
+      phoneZone: value.phoneZone,
       password: value.password,
-      // invitationToken: null,
+      invitationToken: null,
     });
     await referent.save();
     return res.status(200).send({ ok: true, data: referent });
