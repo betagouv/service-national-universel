@@ -8,6 +8,7 @@ const { capture, captureMessage } = require("../../sentry");
 const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
+const ReferentModel = require("../../models/referent");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");
@@ -139,8 +140,11 @@ router.get("/:id", async (req, res) => {
       captureMessage("Error finding classe with id : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+    const { etablissementId, referentClasseIds } = data;
+    const etablissement = etablissementId ? await EtablissementModel.findById(etablissementId) : {};
+    const referentClasse = referentClasseIds.length ? await ReferentModel.findById(referentClasseIds[0]) : {};
 
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: { ...data, etablissement, referentClasse } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

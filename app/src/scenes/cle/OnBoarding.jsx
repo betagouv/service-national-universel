@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
@@ -21,15 +22,17 @@ const Subtitle = ({ refName }) => (
   </span>
 );
 
-const fetchClasse = async ({ id }) => api.get(`/cle/classe/${id}`);
+const fetchClasse = async (id) => api.get(`/cle/classe/${id}`);
 
 const OnBoarding = () => {
   const [classe, setClasse] = useState(null);
+  let { id } = useParams();
+  console.log(`ID IS ${id}`);
   const name = "Jean Mi";
   const fields = [
     {
       label: "Nom",
-      value: "Cap VERT",
+      value: "",
     },
     {
       label: "coloration",
@@ -39,18 +42,22 @@ const OnBoarding = () => {
       label: "Établissement scolaire",
       value: "Charles de foucauld",
     },
+    {
+      label: "Date de séjour",
+      value: "Charles de foucauld",
+    },
   ];
 
-  const id = "6556412374be5e9ff2ca4e28";
+  // const id = "6556412374be5e9ff2ca4e28";
 
   useEffect(() => {
     (async () => {
       if (classe) return;
-      const { data, ok } = await fetchClasse({ id });
+      const { data, ok } = await fetchClasse(id);
       if (!ok) return toastr.error("Impossible de joindre le service.");
       setClasse(data);
     })();
-  }, [classe]);
+  }, [id, classe]);
 
   console.log("MA CLASSE");
   console.log(classe);
