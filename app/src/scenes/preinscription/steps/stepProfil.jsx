@@ -36,7 +36,7 @@ export default function StepProfil() {
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
   const dispatch = useDispatch();
-  const isCLE = new URLSearchParams(window.location.search).get("parcours").toUpperCase() === YOUNG_SOURCE.CLE;
+  const isCLE = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase() === YOUNG_SOURCE.CLE;
   const classeId = new URLSearchParams(window.location.search).get("classeId");
 
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
@@ -49,7 +49,6 @@ export default function StepProfil() {
     if (isCLE && !data?.frenchNationality) {
       errors.frenchNationality = "Ce champ est obligatoire";
     }
-
     if (isCLE && !data?.birthDate) {
       errors.birthDate = "Ce champ est obligatoire";
     }
@@ -75,10 +74,6 @@ export default function StepProfil() {
     }
     return errors;
   };
-
-  React.useEffect(() => {
-    setError(validate());
-  }, [data.email, data.emailConfirm, data.password, data.confirmPassword, data.acceptCGU, data.rulesYoung]);
 
   const onSubmit = async () => {
     let errors = {};
@@ -128,24 +123,23 @@ export default function StepProfil() {
     try {
       setLoading(true);
       const { code, ok, token, user } = await API.post(`/young/signup`, values);
-      if (code === "USER_ALREADY_REGISTERED") {
-        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
-        return;
-      }
       if (!ok) {
         setError({ text: `Une erreur s'est produite : ${translate(code)}` });
         setLoading(false);
-        return;
       }
       if (user) {
-        plausibleEvent("Phase0/CTA preinscription - inscription");
+        // plausibleEvent(); Event name TBD
         if (token) API.setToken(token);
         dispatch(setYoung(user));
         history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
       }
     } catch (e) {
-      capture(e);
-      toastr.error("Erreur", `Une erreur s'est produite : ${translate(e.code)}`);
+      if (e.code === "USER_ALREADY_REGISTERED") {
+        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
+      } else {
+        capture(e);
+        toastr.error("Erreur", `Une erreur s'est produite : ${translate(e.code)}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -186,7 +180,7 @@ export default function StepProfil() {
                   id="oui"
                   name="nationalite"
                   value="true"
-                  checked={data.frenchNationality === "true"}
+                  checked={data.frenchNationality === "true" || false}
                   onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
                 />
                 <label className="mb-0" htmlFor="oui">
@@ -200,7 +194,7 @@ export default function StepProfil() {
                   id="non"
                   name="nationalite"
                   value="false"
-                  checked={data.frenchNationality === "false"}
+                  checked={data.frenchNationality === "false" || false}
                   onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
                 />
                 <label className="mb-0" htmlFor="non">

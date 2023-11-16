@@ -22,7 +22,9 @@ class Auth {
   // route is currrently only used for young signup
   async signUp(req, res) {
     try {
-      const { error, value } = Joi.object({
+      const isCle = req.body.source === YOUNG_SOURCE.CLE;
+
+      let schema = {
         email: Joi.string().lowercase().trim().email().required(),
         phone: Joi.string().trim().required(),
         phoneZone: Joi.string()
@@ -38,33 +40,43 @@ class Auth {
           .trim()
           .valid(...YOUNG_SOURCE_LIST)
           .allow(null, ""),
-      })
-        .when(Joi.object({ source: Joi.valid("CLE") }).unknown(), {
-          then: Joi.object({
-            classeId: Joi.string().trim().required(),
-          }),
-          otherwise: Joi.object({
-            schooled: Joi.string().trim().required(),
-            grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
-            schoolName: Joi.string().trim(),
-            schoolType: Joi.string().trim(),
-            schoolAddress: Joi.string().trim(),
-            schoolZip: Joi.string().trim().allow(null, ""),
-            schoolCity: Joi.string().trim(),
-            schoolDepartment: Joi.string().trim(),
-            schoolRegion: Joi.string().trim(),
-            schoolCountry: Joi.string().trim(),
-            schoolId: Joi.string().trim(),
-            zip: Joi.string().trim(),
-            cohort: Joi.string().trim().required(),
-          }),
-        })
-        .validate(req.body);
+      };
 
-      const isClasseEngagee = value.source === YOUNG_SOURCE.CLE;
+      const cleUserSchema = {
+        classeId: Joi.string().trim().required(),
+      };
+
+      const volontaireSchema = {
+        schooled: Joi.string().trim().required(),
+        grade: Joi.string().trim().valid("NOT_SCOLARISE", "4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre"),
+        schoolName: Joi.string().trim(),
+        schoolType: Joi.string().trim(),
+        schoolAddress: Joi.string().trim(),
+        schoolZip: Joi.string().trim().allow(null, ""),
+        schoolCity: Joi.string().trim(),
+        schoolDepartment: Joi.string().trim(),
+        schoolRegion: Joi.string().trim(),
+        schoolCountry: Joi.string().trim(),
+        schoolId: Joi.string().trim(),
+        zip: Joi.string().trim(),
+        cohort: Joi.string().trim().required(),
+      };
+
+      if (isCle) {
+        schema = {
+          ...schema,
+          ...cleUserSchema,
+        };
+      } else {
+        schema = {
+          ...schema,
+          ...volontaireSchema,
+        };
+      }
+
+      const { error, value } = Joi.object(schema).validate(req.body);
 
       if (error) {
-        console.log("🚀 ~ file: auth.js:67 ~ Auth ~ signUp ~ error:", error)
         if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
         if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -74,8 +86,8 @@ class Auth {
 
       let inscriptionData = {};
 
-      if (isClasseEngagee) {
-        // const classe = await ClasseEngagee.findById(value.classeId);
+      if (isCle) {
+        // const classe = await ClasseEngagee.findOne({ _id: value.classeId, status: "DONE" });
         // if (!classe) {
         //   return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
         // }
@@ -84,8 +96,9 @@ class Auth {
         const classe = {
           etablissementId: "655486d44a807f53c1fea9fc",
           cohort: "Juillet 2024",
-          grade: "4eme",
+          grade: "2nde",
           placesLeft: 30,
+          status: "DONE",
         };
 
         if (classe.placesLeft <= 0) {
@@ -110,6 +123,8 @@ class Auth {
           schoolCountry: etablissement.country,
           schoolId: etablissement.id,
           zip: etablissement.zip,
+          classeId: classe._id,
+          etablissementId: etablissement.id,
           cohort: classe.cohort,
           grade: classe.grade,
         };
@@ -139,7 +154,7 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      if (!isClasseEngagee) {
+      if (!isCle) {
         let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
         const session = sessions.find(({ name }) => name === value.cohort);
         if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
