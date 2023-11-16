@@ -1,5 +1,5 @@
 import React from "react";
-import { useHistory, useLocation } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
@@ -10,35 +10,10 @@ import { PasswordInput } from "@codegouvfr/react-dsfr/blocks/PasswordInput";
 import { InputPhone } from "@snu/ds/dsfr";
 
 import { Section, Container } from "@snu/ds/dsfr";
-import { toastr } from "react-redux-toastr";
-import api from "@/services/api";
 
-export default function informations({ user }) {
-  const history = useHistory();
-  const { search } = useLocation();
-  const urlParams = new URLSearchParams(window.location.search);
-  const invitationToken = urlParams.get("token");
-
+export default function informations() {
   const [etablissement, setEtablissement] = React.useState("");
-  const [firstName, setFirstName] = React.useState(user.firstName);
-  const [lastName, setLastName] = React.useState(user.lastName);
-
-  //todo : handle phone
-  const [phone, setPhone] = React.useState(user.phone);
-
-  const [password, setPassword] = React.useState("");
-  const [confirmPassword, setConfirmPassword] = React.useState("");
-
-  const submit = async () => {
-    try {
-      const { ok, data, code, message } = await api.post(`/cle/referent-signup`, { firstName, lastName, phone, password, confirmPassword, invitationToken });
-      if (!ok) return toastr.error(message || translate(code));
-      history.push(`/creer-mon-compte/confirmation${search}`);
-    } catch (error) {
-      console.log(error);
-      if (error?.message) return toastr.error(error?.message);
-    }
-  };
+  const history = useHistory();
 
   return (
     <Section>
@@ -59,8 +34,6 @@ export default function informations({ user }) {
               stateRelatedMessage="Email invalide"
               nativeInputProps={{
                 placeholder: "Jean",
-                value: firstName,
-                onChange: (e) => setFirstName(e.target.value),
               }}
             />
           </div>
@@ -71,8 +44,6 @@ export default function informations({ user }) {
               stateRelatedMessage="Email invalide"
               nativeInputProps={{
                 placeholder: "Michel",
-                value: lastName,
-                onChange: (e) => setLastName(e.target.value),
               }}
             />
           </div>
@@ -99,17 +70,17 @@ export default function informations({ user }) {
         <div className="flex flex-col gap-2">
           <div className="flex gap-6">
             <div className="w-full">
-              <PasswordInput label="Mot de passe" nativeInputProps={{ value: password, onChange: (e) => setPassword(e.target.value) }} />
+              <PasswordInput label="Mot de passe" nativeInputProps={{}} />
             </div>
             <div className="w-full">
-              <PasswordInput label="Confirmer votre mot de passe" nativeInputProps={{ value: confirmPassword, onChange: (e) => setConfirmPassword(e.target.value) }} />
+              <PasswordInput label="Confirmer votre mot de passe" nativeInputProps={{}} />
             </div>
           </div>
           <p className="text-neutral-600 text-sm">Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</p>
         </div>
         <hr className="p-1" />
         <div className="flex justify-end">
-          <Button onClick={submit}>Continuer</Button>
+          <Button onClick={() => history.push(`/creer-mon-compte/confirmation`)}>Continuer</Button>
         </div>
       </Container>
     </Section>

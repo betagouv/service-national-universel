@@ -1,25 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useHistory } from "react-router-dom";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Section, Container } from "@snu/ds/dsfr";
-import { translate } from "snu-lib";
 
-export default function confirmation({ user }) {
+export default function confirmation() {
   const history = useHistory();
-  const [etablissement, setEtablissement] = useState("");
 
-  const getEtablissement = async () => {
-    // todo
-  };
-
-  useEffect(() => {
-    getEtablissement();
-  }, [user]);
-
-  const submit = () => {
+  const handleSubmit = () => {
     console.log("DONE");
     history.push("/auth");
   };
@@ -42,27 +32,27 @@ export default function confirmation({ user }) {
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Établissement scolaire :</div>
-            <div className="text-right text-[#161616]">{etablissement}</div>
+            <div className="text-right text-[#161616]">Lycée Professionnel Marie Laurencin</div>
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Rôle :</div>
-            <div className="text-right text-[#161616]">{translate(user.role)}</div>
+            <div className="text-right text-[#161616]">Administrateur CLE</div>
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Fonction :</div>
-            <div className="text-right text-[#161616]">{translate(user.subRole)}</div>
+            <div className="text-right text-[#161616]">Coordinateur d’établissement</div>
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Prénom :</div>
-            <div className="text-right text-[#161616]">{user.firstName}</div>
+            <div className="text-right text-[#161616]">Maxime</div>
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Nom :</div>
-            <div className="text-right text-[#161616]">{user.lastName}</div>
+            <div className="text-right text-[#161616]">PISTACHE</div>
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Numéro de téléphone :</div>
-            <div className="text-right text-[#161616]">{user.phone}</div>
+            <div className="text-right text-[#161616]">(+33) 06 07 08 09 01</div>
           </div>
         </div>
         <div>
@@ -72,7 +62,7 @@ export default function confirmation({ user }) {
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Adresse email :</div>
-            <div className="text-right text-[#161616]">{user.email}</div>
+            <div className="text-right text-[#161616]">maxime.pistache@ac-paris.fr</div>
           </div>
         </div>
         <hr className="p-1" />
@@ -105,7 +95,7 @@ export default function confirmation({ user }) {
         />
         <hr className="p-1" />
         <div className="flex justify-end">
-          <Button onClick={submit}>Valider</Button>
+          <Button onClick={handleSubmit}>Valider</Button>
         </div>
       </Container>
     </Section>
