@@ -38,17 +38,17 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["cohort.keyword", "uniqueKey.keyword", "name.keyword"];
+    const searchFields = ["cohort.keyword", "name.keyword", "uniqueIdAndKey.keyword"];
     const filterFields = [
       "cohort.keyword",
-      "uniqueKey.keyword",
+      "coloration.keyword",
+      "grade.keyword",
+      "name.keyword",
+      "sector.keyword",
       "status.keyword",
       "statusPhase1.keyword",
-      "name.keyword",
-      "coloration.keyword",
       "type.keyword",
-      "sector.keyword",
-      "grade.keyword",
+      "uniqueIdAndKey.keyword",
     ];
 
     const sortFields = ["createdAt", "name.keyword"];

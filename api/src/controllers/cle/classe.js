@@ -37,7 +37,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: req.user._id });
     if (!etablissement) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const uniqueKey = `${etaglissement.uai}_${new Date().toLocaleDateString("fr-FR")}`;
+    const uniqueKey = `${etablissement.uai}_${new Date().toLocaleDateString("fr-FR")}`;
     const previousClasse = await ClasseModel.findOne({ uniqueKey, uniqueId: value.uniqueId, etablissementId: etablissement._id });
     if (previousClasse) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
@@ -57,7 +57,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
           ...value,
           cohort: defaultCleCohort.name,
           uniqueKey,
-          uniqueId: value.uniqueId,
+          uniqueIdAndKey: uniqueKey + "_" + value.uniqueId,
           referentClasseIds: [referent._id],
           etablissementId: etablissement._id,
         },
@@ -109,6 +109,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
 
     classe.set({
       uniqueId: value.uniqueId,
+      uniqueIdAndKey: classe.uniqueKey + "_" + value.uniqueId,
       name: value.name,
       totalSeats: value.totalSeats,
       coloration: value.coloration,

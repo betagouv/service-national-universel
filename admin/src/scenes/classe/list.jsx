@@ -23,7 +23,7 @@ export default function list() {
 
   const filterArray = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné" },
-    { title: "Numéro d'identification", name: "uniqueKey", missingLabel: "Non renseigné" },
+    { title: "Numéro d'identification", name: "uniqueIdAndKey", missingLabel: "Non renseigné" },
     { title: "Statut", name: "status", missingLabel: "Non renseigné" },
     { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné" },
     { title: "Nom", name: "name", missingLabel: "Non renseigné" },
@@ -166,7 +166,7 @@ const Hit = ({ hit }) => {
             )}
           </div>
           <div className="m-0 mt-1 table w-full table-fixed border-collapse">
-            <div className="table-cel truncate text-xs leading-5 text-gray-500 ">id: {hit.uniqueKey}</div>
+            <div className="table-cel truncate text-xs leading-5 text-gray-500 ">id: {hit.uniqueIdAndKey}</div>
           </div>
         </div>
       </td>

@@ -46,6 +46,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  uniqueIdAndKey: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Key_ID unique de la classe (UAI_DATE_XXXX)",
+    },
+  },
+
   name: {
     type: String,
     documentation: {
