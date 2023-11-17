@@ -18,6 +18,7 @@ import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import Loader from "@/components/Loader";
 import { toastr } from "react-redux-toastr";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
+import { YOUNG_SOURCE } from "snu-lib/constants";
 import { environment } from "@/config";
 
 function renderStepResponsive(step) {
@@ -59,7 +60,8 @@ const Step = () => {
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === data.step);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
 
-  if (currentStepIndex > eligibleStepIndex) {
+  const isCLE = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase() === YOUNG_SOURCE.CLE;
+  if (!isCLE && currentStepIndex > eligibleStepIndex) {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
