@@ -57,6 +57,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
           ...value,
           cohort: defaultCleCohort.name,
           uniqueKey,
+          uniqueId: value.uniqueId,
           uniqueIdAndKey: uniqueKey + "_" + value.uniqueId,
           referentClasseIds: [referent._id],
           etablissementId: etablissement._id,
