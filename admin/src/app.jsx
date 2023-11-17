@@ -26,7 +26,7 @@ import TableDeRepartition from "./scenes/plan-transport/table-repartition";
 import PointDeRassemblement from "./scenes/pointDeRassemblement";
 import Profil from "./scenes/profil";
 import PublicSupport from "./scenes/public-support-center";
-import Etablissement from "./scenes/school";
+import School from "./scenes/school";
 import SessionShareIndex from "./scenes/session-phase1/index";
 import Settings from "./scenes/settings";
 import Structure from "./scenes/structure";
@@ -36,7 +36,7 @@ import Validate from "./scenes/validate";
 import Volontaires from "./scenes/volontaires";
 import VolontairesHeadCenter from "./scenes/volontaires-head-center";
 import VolontairesResponsible from "./scenes/volontaires-responsible";
-import Institution from "./scenes/institution";
+import Etablissement from "./scenes/etablissement";
 import Classe from "./scenes/classe";
 import VolontaireCle from "./scenes/volontaire-cle";
 import Contact from "./scenes/contact";
@@ -218,7 +218,7 @@ const Home = (props) => {
               <RestrictedRoute path="/alerte" component={Alerte} />
               <RestrictedRoute path="/profil" component={Profil} />
               <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-              <RestrictedRoute path="/etablissement" component={Etablissement} />
+              <RestrictedRoute path="/school" component={School} />
               <RestrictedRoute path="/mission" component={Missions} />
               <RestrictedRoute path="/inscription" component={Inscription} />
               <RestrictedRoute path="/user" component={Utilisateur} />
@@ -242,7 +242,7 @@ const Home = (props) => {
               <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
               <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
               {/* Institution */}
-              <RestrictedRoute path="/mon-etablissement" component={Institution} />
+              <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
               <RestrictedRoute path="/mes-classes" component={Classe} />
               <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
               <RestrictedRoute path="/mes-contacts" component={Contact} />
