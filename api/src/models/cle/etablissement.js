@@ -30,17 +30,19 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  chefIds: {
+  referentEtablissementIds: {
     type: [String],
     required: true,
+    default: [],
     documentation: {
       description: "Liste des ids des chefs d'établissement",
     },
   },
 
-  sousChefIds: {
+  coordinateurIds: {
     type: [String],
     required: true,
+    default: [],
     documentation: {
       description: "Liste des ids des coordinateurs d'établissement",
     },
