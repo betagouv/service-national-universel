@@ -38,8 +38,8 @@ export default function list() {
     //else fetch classes
     (async () => {
       try {
-        const { data } = await api.get(`/cle/classe/hasClasse`);
-        setClasses(data);
+        const res = await api.post(`/elasticsearch/cle/classe/search`, { filters: {} });
+        setClasses(res.responses[0].hits.total.value > 0);
       } catch (e) {
         setClasses(false);
         capture(e);

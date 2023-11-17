@@ -127,27 +127,4 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
   }
 });
 
-router.get("/hasClasse", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { user } = req;
-    if (!canViewClasse(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let classe;
-    if (user.role === ROLES.ADMINISTRATEUR_CLE) {
-      const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
-      classe = await ClasseModel.findOne({
-        $or: [{ referentClasseIds: user._id }, { etablissementId: etablissement._id }],
-      });
-    } else {
-      classe = await ClasseModel.findOne({
-        referentClasseIds: user._id,
-      });
-    }
-
-    return res.status(200).send({ ok: true, data: !!classe });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 module.exports = router;
