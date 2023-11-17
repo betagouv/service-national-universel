@@ -20,7 +20,7 @@ type OwnProps = {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   className?: string;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 export default function Badge({

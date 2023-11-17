@@ -350,7 +350,7 @@ export default function Details({ user, setUser, currentUser }) {
         <Box className="p-6">
           <div className="mb-6 flex justify-between">
             <div className="text-lg font-medium">Informations générales</div>
-            {!isSaving && (
+            {!isSaving && roleMode !== MODE_DEFAULT && (
               <>
                 {mode === MODE_EDITION ? (
                   <div className="flex items-center">
