@@ -38,7 +38,7 @@ import VolontairesHeadCenter from "./scenes/volontaires-head-center";
 import VolontairesResponsible from "./scenes/volontaires-responsible";
 import Institution from "./scenes/institution";
 import Classe from "./scenes/classe";
-import Student from "./scenes/student";
+import VolontaireCle from "./scenes/volontaire-cle";
 import Contact from "./scenes/contact";
 import Signup from "./scenes/signup";
 
@@ -244,7 +244,7 @@ const Home = (props) => {
               {/* Institution */}
               <RestrictedRoute path="/mon-etablissement" component={Institution} />
               <RestrictedRoute path="/mes-classes" component={Classe} />
-              <RestrictedRoute path="/mes-eleves" component={Student} />
+              <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
               <RestrictedRoute path="/mes-contacts" component={Contact} />
               {/* Only for developper eyes... */}
               {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? (
