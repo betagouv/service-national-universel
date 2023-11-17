@@ -60,15 +60,19 @@ export default function UserHeader({ user, tab, currentUser }) {
             <Tab isActive={tab === "profile"} onClick={() => history.push(`/user/${user._id}`)}>
               <div className="flex items-center">Profil</div>
             </Tab>
-            <Tab isActive={tab === "notifications"} onClick={() => history.push(`/user/${user._id}/notifications`)}>
-              Notifications
-            </Tab>
-            <Tab isActive={tab === "historique"} onClick={() => history.push(`/user/${user._id}/historique`)}>
-              <div className="flex items-center">
-                <History className="mr-[4px] block flex-[0_0_18px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
-                Historique
-              </div>
-            </Tab>
+            {![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(currentUser.role) && (
+              <>
+                <Tab isActive={tab === "notifications"} onClick={() => history.push(`/user/${user._id}/notifications`)}>
+                  Notifications
+                </Tab>
+                <Tab isActive={tab === "historique"} onClick={() => history.push(`/user/${user._id}/historique`)}>
+                  <div className="flex items-center">
+                    <History className="mr-[4px] block flex-[0_0_18px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
+                    Historique
+                  </div>
+                </Tab>
+              </>
+            )}
           </TabList>
         </div>
       </div>
