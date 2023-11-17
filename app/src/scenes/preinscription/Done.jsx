@@ -6,6 +6,7 @@ import { RiAttachmentFill } from "react-icons/ri";
 import plausibleEvent from "../../services/plausible";
 import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
+import ReactMarkdown from "react-markdown";
 import { capture } from "../../sentry";
 import { supportURL } from "@/config";
 import useParcours from "@/services/useParcours";
@@ -28,7 +29,9 @@ export default function Done() {
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <h1 className="text-3xl font-semibold leading-snug">{stepDoneBeforeinscriptionConfig.welcomeText}</h1>
         <h1 className="text-3xl font-semibold leading-snug">{stepDoneBeforeinscriptionConfig.accountCreatedText}</h1>
-        <p className="py-2 mt-2 text-gray-600">{stepDoneBeforeinscriptionConfig.finalizeInscription}</p>
+        <p className="py-2 mt-2 text-gray-600">
+          <ReactMarkdown>{stepDoneBeforeinscriptionConfig.finalizeInscription}</ReactMarkdown>
+        </p>
         <p className="py-2 text-gray-600">{stepDoneBeforeinscriptionConfig.importantNote}</p>
         {stepDoneBeforeinscriptionConfig.isCniRequested && (
           <>
