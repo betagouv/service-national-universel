@@ -199,7 +199,7 @@ class Auth {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality } = value;
+      const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality, classeId } = value;
 
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
@@ -209,12 +209,12 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      const classe = await ClasseEngagee.findOne({ uniqueKey: value.classeId, status: "DONE" });
+      const classe = await ClasseEngagee.findOne({ _id: classeId, status: "DONE" });
       if (!classe) {
         return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
 
-      const countOfUsersInClass = await this.model.countDocuments({ classeId: classe._id });
+      const countOfUsersInClass = await this.model.countDocuments({ classeId, deletedAt: { $exists: false } });
       if (countOfUsersInClass >= classe.totalSeats) {
         return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
