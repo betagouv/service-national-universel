@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST } = require("snu-lib");
+const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
@@ -659,6 +659,7 @@ const Schema = new mongoose.Schema({
   source: {
     type: String,
     enum: YOUNG_SOURCE_LIST,
+    default: YOUNG_SOURCE.VOLONTAIRE,
     documentation: {
       description: "Type de parcours d'un jeune",
     },
