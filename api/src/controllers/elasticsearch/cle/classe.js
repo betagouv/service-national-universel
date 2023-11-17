@@ -38,7 +38,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["cohort.keyword", "name.keyword", "uniqueIdAndKey.keyword"];
+    const searchFields = ["cohort.keyword", "name.keyword", "uniqueKeyAndId.keyword"];
     const filterFields = [
       "cohort.keyword",
       "coloration.keyword",
@@ -48,7 +48,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "status.keyword",
       "statusPhase1.keyword",
       "type.keyword",
-      "uniqueIdAndKey.keyword",
+      "uniqueKeyAndId.keyword",
     ];
 
     const sortFields = ["createdAt", "name.keyword"];

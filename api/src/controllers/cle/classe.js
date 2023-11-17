@@ -58,7 +58,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
           cohort: defaultCleCohort.name,
           uniqueKey,
           uniqueId: value.uniqueId,
-          uniqueIdAndKey: uniqueKey + "_" + value.uniqueId,
+          uniqueKeyAndId: uniqueKey + "_" + value.uniqueId,
           referentClasseIds: [referent._id],
           etablissementId: etablissement._id,
         },
@@ -110,7 +110,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
 
     classe.set({
       uniqueId: value.uniqueId,
-      uniqueIdAndKey: classe.uniqueKey + "_" + value.uniqueId,
+      uniqueKeyAndId: classe.uniqueKey + "_" + value.uniqueId,
       name: value.name,
       totalSeats: value.totalSeats,
       coloration: value.coloration,

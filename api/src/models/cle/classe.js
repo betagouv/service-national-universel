@@ -46,7 +46,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  uniqueIdAndKey: {
+  uniqueKeyAndId: {
     type: String,
     required: true,
     documentation: {
