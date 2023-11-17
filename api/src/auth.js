@@ -13,7 +13,6 @@ const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
 const ClasseEngagee = require("./models/cle/classe");
 const Etablissement = require("./models/cle/etablissement");
-const mongoose = require("mongoose");
 class Auth {
   constructor(model) {
     this.model = model;
@@ -25,11 +24,11 @@ class Auth {
     if (isCLE) {
       await this.signupCLE(req, res);
     } else {
-      await this.sigupVolontaire(req, res);
+      await this.signupVolontaire(req, res);
     }
   }
 
-  async signUpVolontaire(req, res) {
+  async signupVolontaire(req, res) {
     try {
       const { error, value } = Joi.object({
         email: Joi.string().lowercase().trim().email().required(),
