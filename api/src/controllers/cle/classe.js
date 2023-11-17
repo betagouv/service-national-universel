@@ -135,16 +135,16 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const data = await ClasseModel.findById(value);
-    if (!data) {
+    const classe = await ClasseModel.findById(value)?.lean();
+    if (!classe) {
       captureMessage("Error finding classe with id : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    const { etablissementId, referentClasseIds } = data;
-    const etablissement = etablissementId ? await EtablissementModel.findById(etablissementId) : {};
-    const referentClasse = referentClasseIds.length ? await ReferentModel.findById(referentClasseIds[0]) : {};
+    const { etablissementId, referentClasseIds } = classe;
+    const etablissement = etablissementId ? await EtablissementModel.findById(etablissementId)?.lean() : {};
+    const referentClasse = referentClasseIds.length ? await ReferentModel.findById(referentClasseIds[0])?.lean() : {};
 
-    return res.status(200).send({ ok: true, data: { ...data, etablissement, referentClasse } });
+    return res.status(200).send({ ok: true, data: { ...classe, etablissement, referentClasse } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
