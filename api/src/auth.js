@@ -13,13 +13,13 @@ const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
 const ClasseEngagee = require("./models/cle/classe");
 const Etablissement = require("./models/cle/etablissement");
-
+const mongoose = require("mongoose");
 class Auth {
   constructor(model) {
     this.model = model;
   }
 
-  // route is currrently only used for young signup
+  // Young signup (not refs)
   async signUp(req, res) {
     const isCLE = req.body.source === YOUNG_SOURCE.CLE;
     if (isCLE) {
@@ -29,7 +29,6 @@ class Auth {
     }
   }
 
-  // route is currrently only used for young signup
   async signUpVolontaire(req, res) {
     try {
       const { error, value } = Joi.object({
@@ -200,30 +199,6 @@ class Auth {
 
       const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality } = value;
 
-      // const classe = await ClasseEngagee.findOne({ _id: value.classeId, status: "DONE" });
-      // if (!classe) {
-      //   return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
-      // }
-
-      // For testing purposes
-      const classe = {
-        _id: "0123456789",
-        etablissementId: "65562bb939c11e7038a41013",
-        cohort: "Juillet 2024",
-        grade: "2nde",
-        placesLeft: 30,
-        status: "DONE",
-      };
-
-      if (classe.placesLeft <= 0) {
-        return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-
-      const etablissement = await Etablissement.findById(classe.etablissementId);
-      if (!etablissement) {
-        return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
-      }
-
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
       const formatedDate = birthdateAt;
@@ -232,11 +207,26 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
+      const classe = await ClasseEngagee.findOne({ uniqueKey: value.classeId, status: "DONE" });
+      if (!classe) {
+        return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+
+      const countOfUsersInClass = await this.model.countDocuments({ classeId: classe._id });
+      if (countOfUsersInClass >= classe.totalSeats) {
+        return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const etablissement = await Etablissement.findById(classe.etablissementId);
+      if (!etablissement) {
+        return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+
       const tokenEmailValidation = await crypto.randomInt(1000000);
 
       const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
 
-      const newUser = {
+      const userData = {
         email,
         phone,
         phoneZone,
@@ -268,7 +258,16 @@ class Auth {
         grade: classe.grade,
       };
 
-      const user = await this.model.create(newUser);
+      const user = await this.model.create(userData);
+      if (!user) {
+        throw new Error("Error while creating user");
+      }
+
+      classe.set({ seatsTaken: classe.seatsTaken + 1 });
+      const updatedClasse = await classe.save({ fromUser: user });
+      if (!updatedClasse) {
+        throw new Error("Error while updating classe");
+      }
 
       if (isEmailValidationEnabled) {
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
