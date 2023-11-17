@@ -18,7 +18,7 @@ const Title = () => (
 
 const Subtitle = ({ refName }) => (
   <span>
-    Vous êtes invité(e) par votre référent <strong>{refName}</strong> à vous inscrire dès maintenant au programme “Classe engagée” du SNU.`
+    Vous êtes invité(e) par votre référent <strong>{refName}</strong> à vous inscrire dès maintenant au programme “Classe engagée” du SNU.
   </span>
 );
 

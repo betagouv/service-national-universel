@@ -98,7 +98,11 @@ export default function DropdownButton({
               rightIcon && <HiChevronDown size={20} className="mt-0.5" />
             }
             className={buttonClassName}
-            onClick={() => setOpen((e) => !e)}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setOpen((open) => !open);
+            }}
           />
         ) : (
           <Button
@@ -110,7 +114,11 @@ export default function DropdownButton({
               rightIcon && <HiChevronDown size={20} className="mt-0.5" />
             }
             disabled={disabled || loading}
-            onClick={() => setOpen((e) => !e)}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              setOpen((open) => !open);
+            }}
           />
         )}
 
@@ -145,9 +153,16 @@ export default function DropdownButton({
   );
 }
 
-const getDivClass = ({ open, position }: { open?: boolean, position: EPosition }) => {
-  const baseClass =
-    `absolute top-[55px] min-w-[250px] rounded-lg bg-white transition ${position === EPosition.Left ? "left-0" : "right-0"} border-3 z-50 overflow-hidden shadow-md border border-gray-100`;
+const getDivClass = ({
+  open,
+  position,
+}: {
+  open?: boolean;
+  position: EPosition;
+}) => {
+  const baseClass = `absolute top-[55px] min-w-[250px] rounded-lg bg-white transition ${
+    position === EPosition.Left ? "left-0" : "right-0"
+  } border-3 z-50 overflow-hidden shadow-md border border-gray-100`;
   if (open) {
     return classNames(baseClass, "block");
   } else {

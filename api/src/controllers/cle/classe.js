@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const { CLE_COLORATION_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST, ROLES, canWriteClasse } = require("snu-lib");
+const { CLE_COLORATION_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST, ROLES, canWriteClasse, canViewClasse } = require("snu-lib");
 const mongoose = require("mongoose");
 const { capture, captureMessage } = require("../../sentry");
 const EtablissementModel = require("../../models/cle/etablissement");
@@ -60,6 +60,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
           cohort: defaultCleCohort.name,
           uniqueKey,
           uniqueId: value.uniqueId,
+          uniqueKeyAndId: uniqueKey + "_" + value.uniqueId,
           referentClasseIds: [referent._id],
           etablissementId: etablissement._id,
         },
@@ -111,6 +112,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
 
     classe.set({
       uniqueId: value.uniqueId,
+      uniqueKeyAndId: classe.uniqueKey + "_" + value.uniqueId,
       name: value.name,
       totalSeats: value.totalSeats,
       coloration: value.coloration,

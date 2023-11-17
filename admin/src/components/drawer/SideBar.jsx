@@ -189,7 +189,7 @@ const SideBar = (props) => {
     <SimpleNavItem sideBarOpen={open} Icon={StudentIcon} title="Mes élèves" link="/mes-eleves" active={path.includes("mes-eleves")} setCurrentOpen={setDropDownOpen} />
   );
   const Contact = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={AdminIcon} title="Mes contacts" link="/mes-contacts" active={path.includes("mes-contacts")} setCurrentOpen={setDropDownOpen} />
+    <SimpleNavItem sideBarOpen={open} Icon={AdminIcon} title="Mes contacts" link="/user" active={path.includes("mes-contacts")} setCurrentOpen={setDropDownOpen} />
   );
 
   //MultiNavLinks
