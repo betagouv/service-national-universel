@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { toastr } from "react-redux-toastr";
+import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
@@ -8,6 +10,8 @@ import api from "../../services/api";
 import { List } from "@snu/ds/dsfr";
 import Button from "@/components/dsfr/ui/buttons/Button";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
+import { ModalContainer, Content } from "../../components/modals/Modal";
+import CloseSvg from "../../assets/Close";
 
 const Title = () => (
   <div>
@@ -22,10 +26,30 @@ const Subtitle = ({ refName }) => (
   </span>
 );
 
+const ModalInfo = ({ isOpen, onCancel, onChange }) => (
+  <Modal centered isOpen={isOpen} toggle={onCancel || onChange}>
+    <ModalContainer>
+      <CloseSvg className="close-icon" height={10} width={10} onClick={onCancel || onChange} />
+      <Content className="text-left">
+        <h1>→ Attention</h1>
+        <p>
+          Vous avez déjà un compte volontaire et vous souhaitez participer au SNU dans le cadre des classes engagées ? Contactez le support pour mettre à jour votre compte et vous
+          faire gagner du temps.
+        </p>
+        <InlineButton className="pt-2 md:pr-2" onClick={function noRefCheck() {}}>
+          Contacter le support
+        </InlineButton>
+      </Content>
+    </ModalContainer>
+  </Modal>
+);
+
 const fetchClasse = async (id) => api.get(`/cle/classe/${id}`);
 
 const OnBoarding = () => {
   const [classe, setClasse] = useState(null);
+  const history = useHistory();
+  const [showContactSupport, setShowContactSupport] = useState(false);
   const { id } = queryString.parse(location.search);
 
   useEffect(() => {
@@ -71,20 +95,21 @@ const OnBoarding = () => {
           <List title={"Ma classe engagée"} fields={fields}></List>
           {!classe.isFull && (
             <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-              <InlineButton className="pt-2 md:pr-2" onClick={function noRefCheck() {}}>
+              <InlineButton className="pt-2 md:pr-2" onClick={() => setShowContactSupport(true)}>
                 J'ai déjà un compte volontaire
               </InlineButton>
-              <Button onClick={function noRefCheck() {}}>Démarrer mon inscription</Button>
+              <Button onClick={() => history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`)}>Démarrer mon inscription</Button>
             </div>
           )}
           {classe.isFull && (
             <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
-              <Button className="sm:w-full md:w-52 md:self-end" disabled onClick={function noRefCheck() {}}>
+              <Button className="sm:w-full md:w-52 md:self-end" disabled>
                 Classe complète
               </Button>
               <span className="md:self-end">Pour plus d'informations contactez votre référent.</span>
             </div>
           )}
+          <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)}></ModalInfo>
         </DSFRContainer>
       )}
     </DSFRLayout>
