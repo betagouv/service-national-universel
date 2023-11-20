@@ -71,6 +71,7 @@
     "reactstrap": "8.10.1",
     "redux": "4.2.1",
     "regenerator-runtime": "0.13.9",
+    "remark-gfm": "^4.0.0",
     "slugify": "^1.6.5",
     "snu-lib": "*",
     "styled-components": "5.3.11",

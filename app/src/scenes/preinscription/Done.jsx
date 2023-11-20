@@ -6,7 +6,6 @@ import { RiAttachmentFill } from "react-icons/ri";
 import plausibleEvent from "../../services/plausible";
 import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
-import ReactMarkdown from "react-markdown";
 import { capture } from "../../sentry";
 import { supportURL } from "@/config";
 import useParcours from "@/services/useParcours";
@@ -14,7 +13,7 @@ import useParcours from "@/services/useParcours";
 export default function Done() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
-  const { stepDoneBeforeinscriptionConfig } = useParcours();
+  const { stepPreinscriptionDoneConfig } = useParcours();
   async function handleClick() {
     try {
       plausibleEvent("Phase0/CTA preinscription - finaliser");
@@ -27,13 +26,11 @@ export default function Done() {
   return (
     <>
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
-        <h1 className="text-3xl font-semibold leading-snug">{stepDoneBeforeinscriptionConfig.welcomeText}</h1>
-        <h1 className="text-3xl font-semibold leading-snug">{stepDoneBeforeinscriptionConfig.accountCreatedText}</h1>
-        <p className="py-2 mt-2 text-gray-600">
-          <ReactMarkdown>{stepDoneBeforeinscriptionConfig.finalizeInscription}</ReactMarkdown>
-        </p>
-        <p className="py-2 text-gray-600">{stepDoneBeforeinscriptionConfig.importantNote}</p>
-        {stepDoneBeforeinscriptionConfig.isCniRequested && (
+        <h1 className="text-3xl font-semibold leading-snug">{stepPreinscriptionDoneConfig.welcomeText}</h1>
+        <h1 className="text-3xl font-semibold leading-snug">{stepPreinscriptionDoneConfig.accountCreatedText}</h1>
+        <p className="py-2 mt-2 text-gray-600">{stepPreinscriptionDoneConfig.finalizeInscription}</p>
+        <p className="py-2 text-gray-600">{stepPreinscriptionDoneConfig.importantNote}</p>
+        {stepPreinscriptionDoneConfig.isCniRequested && (
           <>
             <hr className="mt-4" />
             <h2 className="text-lg font-semibold">Préparez le document suivant :</h2>
