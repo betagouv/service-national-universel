@@ -11,11 +11,11 @@ import { Section, Container } from "@snu/ds/dsfr";
 import api from "@/services/api";
 import { translate } from "snu-lib";
 
-export default function email() {
+export default function email({ user }) {
   const history = useHistory();
   const { search } = useLocation();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(user.email);
   const [confirmEmail, setConfirmEmail] = useState("");
 
   const urlParams = new URLSearchParams(window.location.search);

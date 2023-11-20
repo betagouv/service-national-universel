@@ -56,11 +56,13 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (value.email !== value.confirmEmail)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
+    //todo : check si l'email est bien une adresse académique
+
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const token2FA = await crypto.randomInt(1000000);
-    referent.set({ emailWaitingValidation: email, token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
+    referent.set({ emailWaitingValidation: value.email, token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
     await referent.save();
     await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: value.email }],
@@ -136,10 +138,11 @@ router.post("/", async (req, res) => {
     const etablissement = await EtablissementModel.findOne({ _id: value.etablissementId });
     // Check if the referent is correctly linked to the etablissementId
     if (
-      !etablissement
-      || (role === ROLES.ADMINISTRATEUR_CLE && subRole === SUB_ROLES.referent_etablissement && !etablissement.referentEtablissementIds.includes(referent._id.toString()))
-      || (role === ROLES.ADMINISTRATEUR_CLE && subRole === SUB_ROLES.coordinateur_cle && !etablissement.coordinateurIds.includes(referent._id.toString()))
-    ) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      !etablissement ||
+      (role === ROLES.ADMINISTRATEUR_CLE && subRole === SUB_ROLES.referent_etablissement && !etablissement.referentEtablissementIds.includes(referent._id.toString())) ||
+      (role === ROLES.ADMINISTRATEUR_CLE && subRole === SUB_ROLES.coordinateur_cle && !etablissement.coordinateurIds.includes(referent._id.toString()))
+    )
+      return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     // Check if the referent de classe is correctly linked to the classe x etablissementId
     if (role === ROLES.REFERENT_CLASSE) {
       const classe = await ClasseModel.findOne({ etablissementId: value.etablissementId, referentClasseIds: referent._id.toString() });
