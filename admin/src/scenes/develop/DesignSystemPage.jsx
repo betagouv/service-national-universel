@@ -371,6 +371,22 @@ export default function DesignSystemPage() {
             onChange={handleMonoSelectChange}
           />
           <Select
+            placeholder="Mono Select"
+            defaultValue={SelectOptions[0]}
+            options={SelectOptions}
+            isActive={true}
+            value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
+            onChange={handleMonoSelectChange}
+          />
+          <Select
+            placeholder="Mono Select"
+            defaultValue={SelectOptions[0]}
+            options={SelectOptions}
+            readOnly={true}
+            value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
+            onChange={handleMonoSelectChange}
+          />
+          <Select
             placeholder="Mono Select with Label"
             options={SelectOptions}
             value={SelectOptions.find((option) => option.value === valueSelect.monoSelect)}
