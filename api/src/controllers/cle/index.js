@@ -4,5 +4,6 @@ const router = express.Router();
 router.use("/classe", require("./classe"));
 router.use("/etablissement", require("./etablissement"));
 router.use("/referent", require("./referent"));
+router.use("/referent-signup", require("./referent-signup"));
 
 module.exports = router;
