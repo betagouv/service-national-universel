@@ -25,7 +25,7 @@ async function getFilteredSessions(young, timeZoneOffset = null) {
       session.eligibility?.zones.includes(region2zone[region]) &&
       session.eligibility?.schoolLevels.includes(young.grade) &&
       session.eligibility?.bornAfter <= young.birthdateAt &&
-      session.eligibility?.bornBefore >= young.birthdateAt &&
+      session.eligibility?.bornBefore.setTime(session.eligibility?.bornBefore.getTime() + 11 * 60 * 60 * 1000) >= young.birthdateAt &&
       !!session.inscriptionStartDate &&
       session.inscriptionStartDate <= now &&
       ((session.inscriptionEndDate && session.inscriptionEndDate > now) ||
