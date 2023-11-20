@@ -1,6 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import gfm from "remark-gfm";
+import gfm from 'remark-gfm';
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useHistory } from "react-router-dom";
 import parcoursConfig from "../utils/parcoursConfig";
@@ -18,11 +18,6 @@ export const useParcours = () => {
     return Object.entries(placeholders).reduce((acc, [key, value]) => {
       return acc.replace(new RegExp(`{${key}}`, "g"), value);
     }, text);
-  };
-
-  const replaceCustomMarkdown = (text) => {
-    const underlineRegex = /##\[(.*?)\]\((.*?)\)##/g;
-    return text.replace(underlineRegex, (match, text, url) => `<u><a href="${url}">${text}</a></u>`);
   };
 
   const getStepConfig = (source, stepName) => {

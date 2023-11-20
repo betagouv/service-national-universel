@@ -9,7 +9,7 @@ export const parcoursConfig = {
       accountCreatedText: "Votre compte volontaire a été créé.",
       finalizeInscription:
         "Vous pouvez dès à présent **finaliser votre inscription** ou la reprendre à tout moment depuis le mail envoyé à {email}, ou depuis l’écran de connexion.",
-      importantNote: "Attention, une inscription complète est indispensable pour valider votre candidature au SNU. aller sur [Google](https://www.google.com)",
+      importantNote: "Attention, une inscription complète est indispensable pour valider votre candidature au SNU.",
     },
   },
   [YOUNG_SOURCE.CLE]: {
