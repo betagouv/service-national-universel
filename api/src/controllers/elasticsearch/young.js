@@ -16,7 +16,7 @@ const SessionPhase1Object = require("../../models/sessionPhase1");
 const CohesionCenterObject = require("../../models/cohesionCenter");
 const MissionObject = require("../../models/mission");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
-const { populateYoungExport } = require("./utils/populateYoung");
+const { populateYoungExport } = require("./populate/populateYoung");
 
 function getYoungsFilters(user) {
   return [

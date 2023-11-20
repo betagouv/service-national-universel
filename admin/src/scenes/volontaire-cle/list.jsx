@@ -11,7 +11,7 @@ import { Link, useHistory } from "react-router-dom";
 import { YOUNG_STATUS, getAge, youngCleExportFields } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import api from "@/services/api";
-import { getFilterArray, transformVolontairesCLE } from "./utils";
+import { getFilterArray, transformVolontairesCLE } from "./utils/list";
 
 export default function list() {
   const user = useSelector((state) => state.Auth.user);
