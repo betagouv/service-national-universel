@@ -30,6 +30,7 @@ const Schema = new mongoose.Schema({
       description: "Nom de l'utilisateur",
     },
   },
+
   email: {
     type: String,
     required: true,
@@ -37,6 +38,19 @@ const Schema = new mongoose.Schema({
     trim: true,
     documentation: {
       description: "Email de l'utilisateur",
+    },
+  },
+  emailValidatedAt: {
+    type: Date,
+    documentation: {
+      description: "[CLE] Date à laquelle l'email a été validé",
+    },
+  },
+  emailWaitingValidation: {
+    type: String,
+    trim: true,
+    documentation: {
+      description: "[CLE] Email renseigné par l'utilisateur pendant l'inscription mais pas encore validé (code envoyé)",
     },
   },
 
