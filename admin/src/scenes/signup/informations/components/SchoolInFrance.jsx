@@ -1,0 +1,110 @@
+import React, { useState } from "react";
+import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
+import CreatableSelect from "../../../../components/CreatableSelect";
+import Input from "./Input";
+import AddressForm from "@/components/dsfr/forms/AddressForm";
+import GhostButton from "@/components/dsfr/ui/buttons/GhostButton";
+import { FiChevronLeft } from "react-icons/fi";
+import { getAddressOptions } from "@/services/api-adresse";
+import API from "@/services/api";
+
+export async function getCities(query) {
+  try {
+    const { responses } = await API.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
+    const cities = responses[0].aggregations.cities.buckets;
+    return cities.map((e) => ({ label: e.key[0] + " - " + e.key[1], value: e.key })) ?? [];
+  } catch (e) {
+    capture(e);
+    return [];
+  }
+}
+
+export async function getSchools(city) {
+  try {
+    const { responses } = await API.post("/elasticsearch/schoolramses/public/search", {
+      filters: { country: ["FRANCE"], city: [city.value[0]], departmentName: [city.value[1]] },
+    });
+    const schools = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
+    return schools;
+  } catch (e) {
+    capture(e);
+  }
+}
+
+export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
+  const [city, setCity] = useState(school?.city);
+  const [schools, setSchools] = useState([]);
+  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
+  const [manualSchool, setManualSchool] = useState(school ?? {});
+
+  async function handleChangeCity(city) {
+    if (!city) {
+      setCity(null);
+      return;
+    }
+    onSelectSchool(undefined);
+    setCity(city);
+    if (!city?.value.length === 2) return;
+    const schools = await getSchools(city);
+    setSchools(schools);
+  }
+
+  return manualFilling ? (
+    <>
+      <Input
+        value={manualSchool.fullName}
+        label="Nom de l'établissement"
+        onChange={(value) => {
+          setManualSchool({ ...manualSchool, fullName: value });
+          onSelectSchool(null);
+        }}
+        error={errors?.manualFullName}
+        correction={corrections?.schoolName}
+      />
+      <AddressForm
+        data={manualSchool}
+        updateData={(newData) => {
+          setManualSchool({ ...manualSchool, ...newData });
+          onSelectSchool({ ...newData, fullName: manualSchool.fullName });
+        }}
+        getOptions={getAddressOptions}
+        error={errors?.school}
+        correction={corrections?.schoolAddress}
+      />
+      <GhostButton
+        name={
+          <div className="flex items-center justify-center gap-1 text-center">
+            <FiChevronLeft className="font-bold text-[#000091]" />
+            Revenir à la liste des établissements
+          </div>
+        }
+        onClick={() => {
+          setManualFilling(false);
+        }}
+      />
+    </>
+  ) : (
+    <>
+      <AsyncCombobox label="Rechercher une commune" hint="Aucune commune trouvée." getOptions={getCities} value={city} onChange={handleChangeCity} error={errors?.city} />
+      <CreatableSelect
+        label="Nom de l'établissement"
+        value={school?.fullName && `${school.fullName} - ${school.adresse}`}
+        options={schools
+          .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
+          .sort()
+          .map((c) => ({ value: c, label: c }))}
+        onChange={(value) => {
+          onSelectSchool(schools.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
+        }}
+        placeholder="Sélectionnez un établissement"
+        onCreateOption={(value) => {
+          setManualSchool({ fullName: value });
+          onSelectSchool(null);
+          setManualFilling(true);
+        }}
+        error={errors?.school}
+        correction={corrections?.schoolName}
+      />
+    </>
+  );
+}
