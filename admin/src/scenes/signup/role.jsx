@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Section, Container } from "@snu/ds/dsfr";
-import { translate } from "snu-lib";
+import { ROLES, SUB_ROLES, translate } from "snu-lib";
 
 export default function role({ user }) {
   const history = useHistory();
@@ -22,6 +22,23 @@ export default function role({ user }) {
     getEtablissement();
   }, [user]);
 
+  const displayText = () => {
+    if (!user) return "";
+    if (user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement) {
+      return (
+        <span>
+          Vous allez créez un compte Administrateur CLE en tant que <b>{translate(user.role)}</b>.
+        </span>
+      );
+    }
+    if (!etablissement) return "";
+    return (
+      <span>
+        Vous allez créez un compte Administrateur CLE en tant que <b>{translate(user.role)}</b> du <b>{etablissement}</b>.
+      </span>
+    );
+  };
+
   if (!user || !etablissement) return <div>Chargement...</div>;
 
   return (
@@ -36,7 +53,7 @@ export default function role({ user }) {
         </div>
         <hr className="p-1" />
         <p>
-          Vous allez créez un compte Administrateur CLE en tant que <b>{translate(user.role)}</b> du <b>{etablissement}</b>.
+          {displayText()}
           <br />
           Confirmez-vous qu’il s’agit bien de votre rôle et de votre fonction ?
         </p>
