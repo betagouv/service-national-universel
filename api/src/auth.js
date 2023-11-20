@@ -4,21 +4,31 @@ const Joi = require("joi");
 
 const { capture } = require("./sentry");
 const config = require("./config");
-const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
+const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, TRUST_TOKEN_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
-const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME, YOUNG_SOURCE, YOUNG_SOURCE_LIST } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
-
+const ClasseEngagee = require("./models/cle/classe");
+const Etablissement = require("./models/cle/etablissement");
 class Auth {
   constructor(model) {
     this.model = model;
   }
 
-  // route is currrently only used for young signup
+  // Young signup (not refs)
   async signUp(req, res) {
+    const isCLE = req.body.source === YOUNG_SOURCE.CLE;
+    if (isCLE) {
+      await this.signupCLE(req, res);
+    } else {
+      await this.signupVolontaire(req, res);
+    }
+  }
+
+  async signupVolontaire(req, res) {
     try {
       const { error, value } = Joi.object({
         email: Joi.string().lowercase().trim().email().required(),
@@ -121,6 +131,142 @@ class Auth {
         attemptsEmailValidation: 0,
         tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
       });
+
+      if (isEmailValidationEnabled) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
+          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+          params: {
+            registration_code: tokenEmailValidation,
+            cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
+          },
+        });
+      } else {
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
+          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+          params: {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
+          },
+        });
+      }
+
+      const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, { expiresIn: JWT_MAX_AGE });
+      res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
+
+      return res.status(200).send({
+        ok: true,
+        token,
+        user: serializeYoung(user, user),
+      });
+    } catch (error) {
+      console.log("Error ", error);
+      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async signupCLE(req, res) {
+    try {
+      let schema = {
+        email: Joi.string().lowercase().trim().email().required(),
+        phone: Joi.string().trim().required(),
+        phoneZone: Joi.string()
+          .trim()
+          .valid(...PHONE_ZONES_NAMES_ARR)
+          .required(),
+        firstName: validateFirstName().trim().required(),
+        lastName: Joi.string().uppercase().trim().required(),
+        password: Joi.string().required(),
+        birthdateAt: Joi.date().required(),
+        frenchNationality: Joi.string().trim().required(),
+        source: Joi.string()
+          .trim()
+          .valid(...YOUNG_SOURCE_LIST)
+          .allow(null, ""),
+        classeId: Joi.string().trim().required(),
+      };
+
+      const { error, value } = Joi.object(schema).validate(req.body);
+
+      if (error) {
+        if (error.details[0].path.find((e) => e === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+        if (error.details[0].path.find((e) => e === "password")) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const { email, phone, phoneZone, firstName, lastName, password, birthdateAt, frenchNationality, classeId } = value;
+
+      if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+
+      const formatedDate = birthdateAt;
+      formatedDate.setUTCHours(11, 0, 0);
+
+      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
+      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+      const classe = await ClasseEngagee.findOne({ _id: classeId, status: "DONE" });
+      if (!classe) {
+        return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+
+      const countOfUsersInClass = await this.model.countDocuments({ classeId, deletedAt: { $exists: false } });
+      if (countOfUsersInClass >= classe.totalSeats) {
+        return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const etablissement = await Etablissement.findById(classe.etablissementId);
+      if (!etablissement) {
+        return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+
+      const tokenEmailValidation = await crypto.randomInt(1000000);
+
+      const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, config.ENVIRONMENT);
+
+      const userData = {
+        email,
+        phone,
+        phoneZone,
+        firstName,
+        lastName,
+        password,
+        birthdateAt: formatedDate,
+        frenchNationality,
+        inscriptionStep2023: isEmailValidationEnabled ? STEPS2023.EMAIL_WAITING_VALIDATION : STEPS2023.COORDONNEES,
+        emailVerified: "false",
+        tokenEmailValidation,
+        attemptsEmailValidation: 0,
+        tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
+        source: YOUNG_SOURCE.CLE,
+        schooled: "true",
+        schoolName: etablissement.name,
+        schoolType: etablissement.type[0],
+        schoolAddress: etablissement.address,
+        schoolZip: etablissement.zip,
+        schoolCity: etablissement.city,
+        schoolDepartment: etablissement.department,
+        schoolRegion: etablissement.region,
+        schoolCountry: etablissement.country,
+        schoolId: etablissement.schoolId,
+        zip: etablissement.zip,
+        classeId: classe._id,
+        etablissementId: etablissement._id,
+        cohort: classe.cohort,
+        grade: classe.grade,
+      };
+
+      const user = await this.model.create(userData);
+      if (!user) {
+        throw new Error("Error while creating user");
+      }
+
+      classe.set({ seatsTaken: classe.seatsTaken + 1 });
+      const updatedClasse = await classe.save({ fromUser: user });
+      if (!updatedClasse) {
+        throw new Error("Error while updating classe");
+      }
 
       if (isEmailValidationEnabled) {
         await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {

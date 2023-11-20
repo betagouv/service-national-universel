@@ -15,6 +15,7 @@ const sessions2024CohortNames = [
   "Juin 2024 - 1",
   "Juin 2024 - 2",
   "Juillet 2024",
+  "CLE 23-24",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
