@@ -1,5 +1,4 @@
 import { capture } from "../sentry";
-
 // https://adresse.data.gouv.fr/api-doc/adresse
 // Filtres possibles : postcode, citycode (INSEE), type, limit, autocomplete
 

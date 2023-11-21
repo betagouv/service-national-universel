@@ -1,7 +1,9 @@
 /** @format */
 
 import React from "react";
-import Select, { GroupBase } from "react-select";
+import Select, { GroupBase, StylesConfig } from "react-select";
+
+type CustomStyles = StylesConfig<string, boolean, GroupBase<string>>;
 
 const ComboBox = ({
   label,
@@ -11,8 +13,8 @@ const ComboBox = ({
   placeholder = "Sélectionner une option",
 }: {
   label: string;
-  options: { label: string; value: string }[];
-  value: string;
+  options?: GroupBase<string>[];
+  value: string | null;
   onChange: (e: string) => void;
   placeholder?: string;
 }) => {
@@ -22,12 +24,12 @@ const ComboBox = ({
       <Select
         styles={customStyles}
         value={
-          options.find((option) => option.value === value) || {
+          options?.find((option) => option.value === value) || {
             label: value,
           } ||
           null
         }
-        onChange={(option) => onChange(option.value)}
+        onChange={(option) => onChange(option?.value)}
         options={options}
         isSearchable
         placeholder={placeholder}
@@ -37,7 +39,7 @@ const ComboBox = ({
   );
 };
 
-const customStyles = {
+const customStyles: CustomStyles = {
   option: (provided, state) => {
     return {
       ...provided,
@@ -55,16 +57,12 @@ const customStyles = {
       borderColor: "#EEEEEE",
       ["&:hover"]: {
         borderColor: "#EEEEEE",
-        borderBottom: state.selectProps.error
-          ? "2px solid #CE0500"
-          : "2px solid #3A3A3A",
+        borderBottom: "2px solid #3A3A3A",
       },
       boxShadow: "0 0 0 0 #EEEEEE",
       borderTopLeftRadius: 4,
       borderTopRightRadius: 4,
-      borderBottom: state.selectProps.error
-        ? "2px solid #CE0500"
-        : "2px solid #3A3A3A",
+      borderBottom: "2px solid #3A3A3A",
       background: "#EEEEEE",
       height: 40,
       paddingLeft: 24,
