@@ -15,6 +15,8 @@ export const parcoursConfig = {
       title: "Mon profil volontaire",
       selectSchoolSituation: true,
       articleSlug: "je-minscris-et-remplis-mon-profil",
+      supportEvent: "Phase0/aide inscription - coordonnees",
+      CTAEvent: "Phase0/CTA inscription - profil",
     },
   },
   [YOUNG_SOURCE.CLE]: {
@@ -31,6 +33,8 @@ export const parcoursConfig = {
       title: "Mon profil élève",
       selectSchoolSituation: false,
       articleSlug: "je-minscris-et-remplis-mon-profil",
+      supportEvent: "Phase0/aide inscription - coordonnees",
+      CTAEvent: "",
     },
   },
 };

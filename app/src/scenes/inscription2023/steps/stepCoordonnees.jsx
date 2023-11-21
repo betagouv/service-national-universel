@@ -129,7 +129,7 @@ export default function StepCoordonnees() {
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
   const { stepCoordonneesConfig } = useParcours();
-  const { title, askForSchoolSituation, articleSlug } = stepCoordonneesConfig;
+  const { title, selectShoolSituation, articleSlug, supportEvent, CTAEvent } = stepCoordonneesConfig;
 
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
 
@@ -335,7 +335,7 @@ export default function StepCoordonnees() {
       requiredFields.push("specificAmenagmentType");
     }
 
-    if (askForSchoolSituation) {
+    if (selectShoolSituation) {
       fieldToUpdate.push("situation");
       requiredFields.push("situation");
     }
@@ -382,7 +382,7 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
-        plausibleEvent("Phase0/CTA inscription - profil");
+        plausibleEvent(CTAEvent);
         dispatch(setYoung(responseData));
         history.push("/inscription2023/consentement");
       } catch (e) {
@@ -500,7 +500,7 @@ export default function StepCoordonnees() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <DSFRContainer title={title} supportLink={`${supportURL}/base-de-connaissance/${articleSlug}`} supportEvent="Phase0/aide inscription - coordonnees">
+      <DSFRContainer title={title} supportLink={`${supportURL}/base-de-connaissance/${articleSlug}`} supportEvent={supportEvent}>
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect
@@ -546,7 +546,7 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        {askForSchoolSituation && (
+        {selectShoolSituation && (
           <Select
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
             options={situationOptions}
