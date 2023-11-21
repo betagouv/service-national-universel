@@ -23,6 +23,7 @@ export default function informations({ user }) {
   const [firstName, setFirstName] = React.useState(user.firstName);
   const [lastName, setLastName] = React.useState(user.lastName);
 
+  const LOCAL_STORAGE_KEY = "cle_inscription_school";
   const [school, setSchool] = React.useState();
 
   //todo : handle phone
@@ -31,7 +32,6 @@ export default function informations({ user }) {
 
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const LOCAL_STORAGE_KEY = "cle_inscription_school";
 
   const submit = async () => {
     try {

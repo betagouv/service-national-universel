@@ -3,10 +3,13 @@ const passport = require("passport");
 const router = express.Router();
 const Joi = require("joi");
 const { CLE_TYPE_LIST, CLE_SECTOR_LIST, canUpdateEtablissement } = require("snu-lib");
+const mongoose = require("mongoose");
 
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const EtablissementModel = require("../../models/cle/etablissement");
+const SchoolRamsesModel = require("../../models/schoolRamses");
+const ReferentModel = require("../../models/referent");
 
 router.put("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -45,10 +48,11 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
   }
 });
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/", async (req, res) => {
   let session;
   try {
     const { error, value } = Joi.object({
+      invitationToken: Joi.string().required(),
       schoolId: Joi.string().required(),
     })
       .unknown()
@@ -59,25 +63,25 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    if (!canUpdateEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     session = await mongoose.startSession();
     session.withTransaction(async () => {
-      const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
-      if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
       const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
-
       const data = await EtablissementModel.create({
         schoolId: value.schoolId,
         uai: ramsesSchool.uai,
-        name: ramsesSchool.name,
+        name: ramsesSchool.fullName,
         referentEtablissementIds: [referent._id.toString()],
-        department: ramsesSchool.department,
+        address: ramsesSchool.adresse,
+        department: ramsesSchool.departmentName,
         region: ramsesSchool.region,
-        zip: ramsesSchool.zip,
+        zip: ramsesSchool.postcode,
         city: ramsesSchool.city,
-        address: ramsesSchool.address,
+        country: ramsesSchool.country,
 
         //todo : add type, sector,
       });

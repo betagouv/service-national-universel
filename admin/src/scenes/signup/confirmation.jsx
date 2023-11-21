@@ -6,11 +6,29 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Section, Container } from "@snu/ds/dsfr";
 import { translate } from "snu-lib";
+import api from "@/services/api";
 
-export default function confirmation({ user }) {
+export default function confirmation() {
   const history = useHistory();
   const [etablissement, setEtablissement] = useState("");
   const LOCAL_STORAGE_KEY = "cle_inscription_school";
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const invitationToken = urlParams.get("token");
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!invitationToken) return toastr.error("Votre lien d'invitation a expiré");
+        const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
+        if (ok && data) setUser(data);
+      } catch (error) {
+        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return toastr.error("Votre lien d'invitation a expiré");
+      }
+    })();
+  }, []);
 
   const getEtablissement = async () => {
     const localStorageEtablissement = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -23,10 +41,20 @@ export default function confirmation({ user }) {
     getEtablissement();
   }, [user]);
 
-  const submit = () => {
+  const submit = async () => {
     // todo : create the etablissement
-    // todo : refirect to the auth screen
+    try {
+      const schoolLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const school = JSON.parse(schoolLocalStorage);
+      const response = await api.post("/cle/etablissement", { schoolId: school.id.toString(), invitationToken });
+
+      // todo : refirect to the auth screen
+    } catch (e) {
+      console.log(e);
+    }
   };
+
+  if (!user) return <div>Chargement...</div>;
 
   return (
     <Section>
