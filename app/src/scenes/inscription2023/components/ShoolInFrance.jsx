@@ -11,10 +11,17 @@ import { toastr } from "react-redux-toastr";
 
 export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
   const [loading, setLoading] = useState(false);
-  const [city, setCity] = useState(school ? { label: school.city + " - " + school.departmentName, value: [school.city, school.departmentName] } : null);
+  const [city, setCity] = useState(getInitialSchoolValue());
   const [schoolOptions, setSchoolOptions] = useState([]);
   const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
   const [manualSchool, setManualSchool] = useState(school ?? {});
+
+  function getInitialSchoolValue() {
+    if (school?.city && school?.departmentName) {
+      return { label: school.city + " - " + school.departmentName, value: [school.city, school.departmentName] };
+    }
+    return null;
+  }
 
   async function fetchSchools(city) {
     try {
@@ -40,7 +47,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   }
 
   useEffect(() => {
-    if (city?.value.length === 2 && !loading && !schoolOptions.length) {
+    if (city?.value[0] && city?.value[1] && !loading && !schoolOptions.length) {
       fetchSchools(city);
     }
   }, [city, loading, schoolOptions]);
