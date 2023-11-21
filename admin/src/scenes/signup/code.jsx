@@ -56,7 +56,7 @@ export default function code({ user }) {
             state="default"
             nativeInputProps={{
               placeholder: "000000",
-              type: "number",
+              type: "text",
               value: code,
               onChange: (e) => setCode(e.target.value),
             }}

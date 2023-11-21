@@ -10,9 +10,13 @@ import { translate } from "snu-lib";
 export default function confirmation({ user }) {
   const history = useHistory();
   const [etablissement, setEtablissement] = useState("");
+  const LOCAL_STORAGE_KEY = "cle_inscription_school";
 
   const getEtablissement = async () => {
-    // todo
+    const localStorageEtablissement = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (localStorageEtablissement) {
+      setEtablissement(JSON.parse(localStorageEtablissement));
+    }
   };
 
   useEffect(() => {
@@ -20,9 +24,8 @@ export default function confirmation({ user }) {
   }, [user]);
 
   const submit = () => {
-    console.log("DONE");
-    // todo : log the user ?
-    // todo : redirect to auth ?
+    // todo : create the etablissement
+    // todo : refirect to the auth screen
   };
 
   return (
@@ -43,7 +46,9 @@ export default function confirmation({ user }) {
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Établissement scolaire :</div>
-            <div className="text-right text-[#161616]">{etablissement}</div>
+            <div className="text-right text-[#161616]">
+              {etablissement?.fullName}, {etablissement?.postcode}, {etablissement?.city}
+            </div>
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Rôle :</div>

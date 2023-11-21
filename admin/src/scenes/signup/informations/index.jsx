@@ -13,7 +13,6 @@ import { toastr } from "react-redux-toastr";
 import api from "@/services/api";
 
 import SchoolInFrance from "./components/SchoolInFrance";
-import Toggle from "@/components/dsfr/forms/toggle";
 
 export default function informations({ user }) {
   const history = useHistory();
@@ -24,7 +23,6 @@ export default function informations({ user }) {
   const [firstName, setFirstName] = React.useState(user.firstName);
   const [lastName, setLastName] = React.useState(user.lastName);
 
-  const [schoolInFrance, setSchoolInFrance] = React.useState(true);
   const [school, setSchool] = React.useState();
 
   //todo : handle phone
@@ -32,10 +30,13 @@ export default function informations({ user }) {
 
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
+  const LOCAL_STORAGE_KEY = "cle_inscription_school";
 
   const submit = async () => {
     try {
-      const { ok, data, code, message } = await api.post(`/cle/referent-signup`, { firstName, lastName, phone, password, confirmPassword, invitationToken });
+      // stocker dans local storage
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(school));
+      const { ok, data, code, message } = await api.post(`/cle/referent-signup/chef-etablissement`, { firstName, lastName, phone, password, confirmPassword, invitationToken });
       if (!ok) return toastr.error(message || translate(code));
       history.push(`/creer-mon-compte/confirmation${search}`);
     } catch (error) {
@@ -83,25 +84,8 @@ export default function informations({ user }) {
         </div>
         <div className="w-full">
           <>
-            <div className="flex items-center justify-between">
-              <div>
-                <div>
-                  <span className="font-bold">Mon établissement scolaire est</span> en France
-                </div>
-                <div className="flex h-5 items-center">
-                  <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
-                </div>
-              </div>
-
-              <Toggle onClick={() => setSchoolInFrance((e) => !e)} toggled={schoolInFrance} />
-            </div>
-
-            {schoolInFrance ? (
-              <SchoolInFrance school={school} onSelectSchool={(s) => setSchool(s)} />
-            ) : (
-              <div>pas fait</div>
-              // <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} corrections={corrections} />
-            )}
+            <div className="flex items-center justify-between">Établissement scolaire</div>
+            <SchoolInFrance school={school} onSelectSchool={(s) => setSchool(s)} />
           </>
         </div>
         <div className="flex w-full">

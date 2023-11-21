@@ -111,16 +111,15 @@ router.post("/confirm-email", async (req, res) => {
   } catch (error) {}
 });
 
-router.post("/", async (req, res) => {
+router.post("/chef-etablissement", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      etablissementId: Joi.string().required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
-      phone: Joi.string().required(),
-      phoneZone: Joi.string().allow(PHONE_ZONES_NAMES_ARR).required(),
-      role: Joi.string().allow([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]).required(),
-      subRole: Joi.string().allow([SUB_ROLES.referent_etablissement], [SUB_ROLES.coordinateur_cle]), // Optional when role is ROLES.REFERENT_CLASSE
+      phone: Joi.string(),
+      // phoneZone: Joi.string().valid(PHONE_ZONES_NAMES_ARR).required(),
+      // role: Joi.string().valid(ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE).required(),
+      // subRole: Joi.string().valid(...SUB_ROLES.referent_etablissement, ...SUB_ROLES.coordinateur_cle), // Optional when role is ROLES.REFERENT_CLASSE
       password: Joi.string().required(),
       invitationToken: Joi.string().required(),
     })
@@ -135,31 +134,18 @@ router.post("/", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const etablissement = await EtablissementModel.findOne({ _id: value.etablissementId });
-    // Check if the referent is correctly linked to the etablissementId
-    if (
-      !etablissement ||
-      (role === ROLES.ADMINISTRATEUR_CLE && subRole === SUB_ROLES.referent_etablissement && !etablissement.referentEtablissementIds.includes(referent._id.toString())) ||
-      (role === ROLES.ADMINISTRATEUR_CLE && subRole === SUB_ROLES.coordinateur_cle && !etablissement.coordinateurIds.includes(referent._id.toString()))
-    )
-      return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    // Check if the referent de classe is correctly linked to the classe x etablissementId
-    if (role === ROLES.REFERENT_CLASSE) {
-      const classe = await ClasseModel.findOne({ etablissementId: value.etablissementId, referentClasseIds: referent._id.toString() });
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
     referent.set({
       firstName: value.firstName,
       lastName: value.lastName,
       phone: value.phone,
       phoneZone: value.phoneZone,
       password: value.password,
-      invitationToken: null,
     });
     await referent.save();
 
     delete referent.password;
+
+    // todo: serialize referent
 
     return res.status(200).send({ ok: true, data: referent });
   } catch (error) {

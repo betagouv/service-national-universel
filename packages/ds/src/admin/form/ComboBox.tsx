@@ -1,26 +1,38 @@
-import React from "react";
-import Select from "react-select/creatable";
-import ErrorMessage from "./dsfr/forms/ErrorMessage";
+/** @format */
 
-const CreatableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "", onCreateOption = null, correction = "" }) => {
+import React from "react";
+import Select, { GroupBase } from "react-select";
+
+const ComboBox = ({
+  label,
+  options,
+  value,
+  onChange,
+  placeholder = "Sélectionner une option",
+}: {
+  label: string;
+  options: { label: string; value: string }[];
+  value: string;
+  onChange: (e: string) => void;
+  placeholder?: string;
+}) => {
   return (
     <div className="my-2 text-[#161616]" style={{ fontFamily: "Marianne" }}>
-      <label className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>{label}</label>
+      <label className={`my-2 ${"text-[#161616]}"}`}>{label}</label>
       <Select
         styles={customStyles}
-        value={options.find((option) => option.value === value) || { label: value } || null}
+        value={
+          options.find((option) => option.value === value) || {
+            label: value,
+          } ||
+          null
+        }
         onChange={(option) => onChange(option.value)}
         options={options}
         isSearchable
         placeholder={placeholder}
         noOptionsMessage={() => "Pas d'options"}
-        formatCreateLabel={(inputValue) => `Ajoutez manuellement : ${inputValue}`}
-        onCreateOption={onCreateOption}
-        error={correction || error}
       />
-
-      <ErrorMessage>{error}</ErrorMessage>
-      <ErrorMessage>{correction}</ErrorMessage>
     </div>
   );
 };
@@ -43,12 +55,16 @@ const customStyles = {
       borderColor: "#EEEEEE",
       ["&:hover"]: {
         borderColor: "#EEEEEE",
-        borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
+        borderBottom: state.selectProps.error
+          ? "2px solid #CE0500"
+          : "2px solid #3A3A3A",
       },
       boxShadow: "0 0 0 0 #EEEEEE",
       borderTopLeftRadius: 4,
       borderTopRightRadius: 4,
-      borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
+      borderBottom: state.selectProps.error
+        ? "2px solid #CE0500"
+        : "2px solid #3A3A3A",
       background: "#EEEEEE",
       height: 40,
       paddingLeft: 24,
@@ -71,4 +87,4 @@ const customStyles = {
   },
 };
 
-export default CreatableSelect;
+export default ComboBox;

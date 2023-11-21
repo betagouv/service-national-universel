@@ -101,7 +101,7 @@ function Dropdown({ loading, options, handleSelect, hint }) {
         ) : options.length ? (
           options.map((option) => (
             <button key={option.label} onClick={() => handleSelect(option)} className="px-3 py-2.5 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
-              <p className="text-left">{option.label}</p>
+              <p className="text-left text-black m-0">{option.label}</p>
             </button>
           ))
         ) : (

@@ -1,8 +1,11 @@
+/** @format */
+
 // Form
 import InputText from "./form/InputText";
 import InputPhone from "./form/InputPhone";
 import Label from "./form/Label";
 import Select from "./form/Select";
+import ComboBox from "./form/ComboBox";
 
 // Layout
 import Container from "./layout/Container";
@@ -22,6 +25,7 @@ export {
   InputText,
   InputPhone,
   Label,
+  ComboBox,
 
   // Layout
   Container,
