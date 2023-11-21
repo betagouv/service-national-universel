@@ -1,10 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { RiSearchLine } from "react-icons/ri";
+import { toastr } from "react-redux-toastr";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import { debounce } from "@/utils";
 
-export default function Combobox({ label, hint = "Aucun résultat.", options, value, loading = false, onChangeQuery, onChange, errorMessage }) {
+export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOptions, value, onChange, errorMessage }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState();
+  const [options, setOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -27,16 +31,36 @@ export default function Combobox({ label, hint = "Aucun résultat.", options, va
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const debouncedOptions = useCallback(
+    debounce(async (query) => {
+      try {
+        setLoading(true);
+        const options = await getOptions(query);
+        if (options?.length) {
+          setOptions(options);
+        }
+      } catch (e) {
+        toastr.error("Erreur", "Une erreur est survenue lors de la recherche", { timeOut: 10_000 });
+      } finally {
+        setLoading(false);
+      }
+    }, 300),
+    [],
+  );
+
   function handleFocus() {
     setQuery("");
     onChange(null);
     setOpen(true);
   }
 
-  const handleChange = (e) => {
+  const handleChangeQuery = async (e) => {
+    setOptions([]);
     const query = e.target.value;
     setQuery(query);
-    onChangeQuery(query);
+    if (query.length > 1) {
+      debouncedOptions(query);
+    }
   };
 
   const handleSelect = (option) => {
@@ -53,7 +77,7 @@ export default function Combobox({ label, hint = "Aucun résultat.", options, va
           <input
             type="text"
             value={query || value?.label || ""}
-            onChange={handleChange}
+            onChange={(e) => handleChangeQuery(e)}
             onFocus={handleFocus}
             className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5"
           />
