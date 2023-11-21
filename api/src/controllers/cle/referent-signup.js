@@ -9,8 +9,7 @@ const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
-const ClasseModel = require("../../models/cle/classe");
-const EtablissementModel = require("../../models/cle/etablissement");
+const { serializeReferent } = require("../../utils/serializer");
 
 router.get("/token/:token", async (req, res) => {
   try {
@@ -28,11 +27,7 @@ router.get("/token/:token", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.token });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    delete referent.email;
-    delete referent.firstName;
-    delete referent.lastName;
-
-    return res.status(200).send({ ok: true, data: referent });
+    return res.status(200).send({ ok: true, data: serializeReferent(referent) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -107,19 +102,19 @@ router.post("/confirm-email", async (req, res) => {
       attempts2FA: 0,
     });
 
-    return res.status(200).send({ ok: true, data: referent });
+    return res.status(200).send({ ok: true, data: serializeReferent(referent) });
   } catch (error) {}
 });
 
-router.post("/chef-etablissement", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const { error, value } = Joi.object({
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
       phone: Joi.string(),
-      // phoneZone: Joi.string().valid(PHONE_ZONES_NAMES_ARR).required(),
-      // role: Joi.string().valid(ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE).required(),
-      // subRole: Joi.string().valid(...SUB_ROLES.referent_etablissement, ...SUB_ROLES.coordinateur_cle), // Optional when role is ROLES.REFERENT_CLASSE
+      phoneZone: Joi.string()
+        // .valid(PHONE_ZONES_NAMES_ARR)
+        .required(),
       password: Joi.string().required(),
       invitationToken: Joi.string().required(),
     })
@@ -143,11 +138,7 @@ router.post("/chef-etablissement", async (req, res) => {
     });
     await referent.save();
 
-    delete referent.password;
-
-    // todo: serialize referent
-
-    return res.status(200).send({ ok: true, data: referent });
+    return res.status(200).send({ ok: true, data: serializeReferent(referent) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

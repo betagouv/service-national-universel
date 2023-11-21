@@ -45,4 +45,50 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
   }
 });
 
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  let session;
+  try {
+    const { error, value } = Joi.object({
+      schoolId: Joi.string().required(),
+    })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!canUpdateEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    session = await mongoose.startSession();
+    session.withTransaction(async () => {
+      const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
+      if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
+
+      const data = await EtablissementModel.create({
+        schoolId: value.schoolId,
+        uai: ramsesSchool.uai,
+        name: ramsesSchool.name,
+        referentEtablissementIds: [referent._id.toString()],
+        department: ramsesSchool.department,
+        region: ramsesSchool.region,
+        zip: ramsesSchool.zip,
+        city: ramsesSchool.city,
+        address: ramsesSchool.address,
+
+        //todo : add type, sector,
+      });
+      return res.status(200).send({ ok: true, data });
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  } finally {
+    session?.endSession();
+  }
+});
+
 module.exports = router;

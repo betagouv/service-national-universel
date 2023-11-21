@@ -27,6 +27,7 @@ export default function informations({ user }) {
 
   //todo : handle phone
   const [phone, setPhone] = React.useState(user.phone);
+  const [phoneZone, setPhoneZone] = React.useState();
 
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -36,7 +37,15 @@ export default function informations({ user }) {
     try {
       // stocker dans local storage
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(school));
-      const { ok, data, code, message } = await api.post(`/cle/referent-signup/chef-etablissement`, { firstName, lastName, phone, password, confirmPassword, invitationToken });
+      const { ok, data, code, message } = await api.post(`/cle/referent-signup`, {
+        firstName,
+        lastName,
+        phone,
+        phoneZone,
+        password,
+        confirmPassword,
+        invitationToken,
+      });
       if (!ok) return toastr.error(message || translate(code));
       history.push(`/creer-mon-compte/confirmation${search}`);
     } catch (error) {
@@ -89,7 +98,7 @@ export default function informations({ user }) {
           </>
         </div>
         <div className="flex w-full">
-          <InputPhone label="Numéro de téléphone" />
+          <InputPhone value={phone} zoneValue={phoneZone} label="Numéro de téléphone" onChange={(e) => setPhone(e)} onChangeZone={(e) => setPhoneZone(e)} />
         </div>
         <div className="flex flex-col gap-2">
           <div className="w-full">
