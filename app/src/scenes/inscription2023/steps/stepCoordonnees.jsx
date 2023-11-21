@@ -36,6 +36,7 @@ import { apiAdress, getAddressOptions } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
+import useParcours from "@/services/useParcours";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -57,12 +58,11 @@ const addressFields = ["address", "zip", "city", "cityCode", "region", "departme
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [...birthPlaceFields, ...addressFields, "gender", "situation", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
+const commonFields = [...birthPlaceFields, ...addressFields, "gender", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
 
 const commonRequiredFields = [
   ...birthPlaceFields,
   "gender",
-  "situation",
   "livesInFrance",
   "address",
   "addressVerified",
@@ -128,6 +128,8 @@ export default function StepCoordonnees() {
   const { step } = useParams();
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
+  const { stepCoordonneesConfig } = useParcours();
+  const { title, askForSchoolSituation, articleSlug } = stepCoordonneesConfig;
 
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
 
@@ -333,6 +335,11 @@ export default function StepCoordonnees() {
       requiredFields.push("specificAmenagmentType");
     }
 
+    if (askForSchoolSituation) {
+      fieldToUpdate.push("situation");
+      requiredFields.push("situation");
+    }
+
     if (hasSpecialSituation === null) {
       errors.hasSelectedSpecialSituation = "Ce champ est obligatoire";
     }
@@ -490,12 +497,10 @@ export default function StepCoordonnees() {
     }
   };
 
-  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`;
-
   return (
     <>
       <Navbar onSave={onSave} />
-      <DSFRContainer title="Mon profil volontaire" supportLink={supportLink} supportEvent="Phase0/aide inscription - coordonnees">
+      <DSFRContainer title={title} supportLink={`${supportURL}/base-de-connaissance/${articleSlug}`} supportEvent="Phase0/aide inscription - coordonnees">
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect
@@ -541,14 +546,16 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        <Select
-          label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
-          options={situationOptions}
-          value={situation}
-          onChange={updateData("situation")}
-          error={errors.situation}
-          correction={corrections?.situation}
-        />
+        {askForSchoolSituation && (
+          <Select
+            label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
+            options={situationOptions}
+            value={situation}
+            onChange={updateData("situation")}
+            error={errors.situation}
+            correction={corrections?.situation}
+          />
+        )}
         <hr className="my-2 h-px border-0 bg-gray-200" />
         <div className="flex mt-4 items-center gap-3 mb-6">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Adresse de résidence</h2>
