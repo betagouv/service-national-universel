@@ -214,7 +214,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       }),
     };
 
-    if (!req.body.source || req.body.source === YOUNG_SOURCE.VOLONTAIRE || req.body.source !== YOUNG_SOURCE.CLE) {
+    const isCle = young.source === YOUNG_SOURCE.CLE;
+    if (!isCle) {
       coordonneeSchema.situation = Joi.alternatives().conditional("schooled", {
         is: "true",
         then: needRequired(
