@@ -13,6 +13,8 @@ type OwnProps = {
   className?: string;
   placeholder?: string;
   label?: string;
+  isActive?: boolean;
+  readOnly?: boolean;
   disabled?: boolean;
   error?: string;
   maxMenuHeight?: number;
@@ -37,6 +39,8 @@ export default function SelectButton({
   defaultValue,
   className,
   label,
+  isActive,
+  readOnly,
   placeholder,
   disabled = false,
   error,
@@ -87,10 +91,10 @@ export default function SelectButton({
     control: (styles, state) => ({
       ...styles,
       backgroundColor: disabled ? "#F9FAFB" : "white",
-      border: error ? "1px solid #EF4444" : "1px solid #E5E7EB",
+      border: error ? "1px solid #EF4444" : isActive ? "1px solid #3B82F6" : "1px solid #E5E7EB",
       boxShadow: "none",
       "&:hover": {
-        border: error ? "1px solid #EF4444" : "1px solid #E5E7EB",
+        border: error ? "1px solid #EF4444" : isActive ? "1px solid #3B82F6" : "1px solid #E5E7EB",
       },
       ...(state.isFocused && {
         outline: "solid",
@@ -123,8 +127,8 @@ export default function SelectButton({
     input: (styles) => ({
       ...styles,
       height: "46px",
-      padding: paddingStyle,
       cursor: "pointer",
+      padding: paddingStyle,
     }),
     singleValue: (styles) => ({
       ...styles,
@@ -148,6 +152,7 @@ export default function SelectButton({
     dropdownIndicator: (styles) => ({
       ...styles,
       cursor: "pointer",
+      color: disabled || readOnly ? "#D1D5DB" : "#6B7280",
       marginRight: error ? "25px" : "0",
     }),
     menu: (styles) => ({
@@ -205,7 +210,7 @@ export default function SelectButton({
             defaultValue={defaultValue}
             maxMenuHeight={maxMenuHeight}
             isMulti={isMulti}
-            isDisabled={disabled}
+            isDisabled={disabled || readOnly}
             closeMenuOnSelect={closeMenuOnSelect}
             hideSelectedOptions={hideSelectedOptions}
             isClearable={isClearable}

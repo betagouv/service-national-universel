@@ -19,6 +19,7 @@ const {
   formatPhoneNumberFromPhoneZone,
   getCohortNames,
   isYoungInReinscription,
+  YOUNG_SOURCE,
 } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
@@ -151,21 +152,6 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       birthCountry: needRequired(Joi.string().trim(), isRequired),
       birthCity: needRequired(Joi.string().trim(), isRequired),
       birthCityZip: Joi.string().trim().allow(null, ""),
-      situation: Joi.alternatives().conditional("schooled", {
-        is: "true",
-        then: needRequired(
-          Joi.string()
-            .trim()
-            .valid(...youngSchooledSituationOptions),
-          isRequired,
-        ),
-        otherwise: needRequired(
-          Joi.string()
-            .trim()
-            .valid(...youngActiveSituationOptions),
-          isRequired,
-        ),
-      }),
       livesInFrance: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
       addressVerified: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
       coordinatesAccuracyLevel: Joi.string().trim().valid("housenumber", "street", "locality", "municipality").allow(null, ""),
@@ -227,6 +213,25 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         otherwise: Joi.isError(new Error()),
       }),
     };
+
+    const isCle = young.source === YOUNG_SOURCE.CLE;
+    if (!isCle) {
+      coordonneeSchema.situation = Joi.alternatives().conditional("schooled", {
+        is: "true",
+        then: needRequired(
+          Joi.string()
+            .trim()
+            .valid(...youngSchooledSituationOptions),
+          isRequired,
+        ),
+        otherwise: needRequired(
+          Joi.string()
+            .trim()
+            .valid(...youngActiveSituationOptions),
+          isRequired,
+        ),
+      });
+    }
 
     let { error, value } = Joi.object(coordonneeSchema).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
 
