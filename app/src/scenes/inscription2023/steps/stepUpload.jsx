@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { setYoung } from "../../../redux/auth/actions";
-import { capture } from "../../../sentry";
+import { capture, captureMessage } from "../../../sentry";
 import dayjs from "dayjs";
 
 import api from "../../../services/api";
@@ -46,6 +46,12 @@ export default function StepUpload() {
     }
 
     if (recto) {
+      if (["image/jpeg", "image/png", "image/jpg"].includes(recto.type)) {
+        captureMessage("CNI recto upload", { file: recto.name });
+        setError({ text: "Le format de votre fichier n'est pas supporté." });
+        resetState();
+        return { ok: false };
+      }
       const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, recto, { category, expirationDate, side: "recto" });
       if (!res.ok) {
         capture(res.code);
@@ -56,6 +62,12 @@ export default function StepUpload() {
     }
 
     if (verso) {
+      if (["image/jpeg", "image/png", "image/jpg"].includes(recto.type)) {
+        captureMessage("CNI recto upload", { file: recto.name });
+        setError({ text: "Le format de votre fichier n'est pas supporté." });
+        resetState();
+        return { ok: false };
+      }
       const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, verso, { category, expirationDate, side: "verso" });
       if (!res.ok) {
         capture(res.code); // UNSUPPORTED_TYPE
