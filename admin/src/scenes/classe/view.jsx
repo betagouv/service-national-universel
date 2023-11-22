@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Badge, Label, InputText, Modal, Select } from "@snu/ds/admin";
 import { HiOutlinePencil } from "react-icons/hi";
@@ -11,10 +11,21 @@ import { MdContentCopy } from "react-icons/md";
 
 export default function View() {
   const [modalInvite, setModalInvite] = useState(false);
-  const [classe, setClasse] = useState({
-    name: "CAP vert",
-    _id: "075IDF765098",
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [url, setUrl] = useState("");
+  const [classe, setClasse] = useState();
+
+  useEffect(() => {
+    const data = {
+      name: "Ma classe",
+      _id: "123456789",
+    };
+    setClasse(data);
+    setUrl(`${appURL}/je-rejoins-ma-classe-engagee/${data._id.toString()}`);
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) return null;
 
   return (
     <Page>
@@ -113,8 +124,8 @@ export default function View() {
             <ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />
             <h1 className="text-xl leading-7 font-medium text-gray-900 mt-6">Invitez des élèves à rejoindre votre classe !</h1>
             <p className="text-base leading-5 font-normal text-gray-900 mt-6">Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien : </p>
-            <a href={`${appURL}/je-rejoins-ma-classe-engagee/${classe._id.toString()}`} className="text-base leading-5 font-normal text-blue-600" rel="noreferrer" target="_blank">
-              {appURL}/je-rejoins-ma-classe-engagee/{classe._id.toString()}
+            <a href={url} className="text-base leading-5 font-normal text-blue-600" rel="noreferrer" target="_blank">
+              {url}
             </a>
             <Button
               type="secondary"
@@ -122,7 +133,7 @@ export default function View() {
               title="Copier le lien"
               className="mt-6 !w-80 flex items-center justify-center"
               onClick={() => {
-                copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${classe._id.toString()}`);
+                copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${url}`);
                 setModalInvite(false);
               }}
             />
