@@ -8,10 +8,11 @@ import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
 import api from "../../services/api";
 import { List } from "@snu/ds/dsfr";
-import Button from "@/components/dsfr/ui/buttons/Button";
+import PrimaryButton from "@/components/dsfr/ui/buttons/PrimaryButton";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
+import { TEST_MARIN } from "@/config";
 
 const Title = () => (
   <div>
@@ -75,7 +76,7 @@ const OnBoarding = () => {
       value: classe?.name,
     },
     {
-      label: "coloration",
+      label: "Coloration",
       value: classe?.coloration,
     },
     {
@@ -87,25 +88,28 @@ const OnBoarding = () => {
       value: classe?.dateStart,
     },
   ];
+  console.log("TEST_MARIN:");
+  console.log(TEST_MARIN);
 
   return (
     <DSFRLayout title="Inscription de l'élève">
       {classe && (
         <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
           <List title={"Ma classe engagée"} fields={fields}></List>
+          <hr className="my-4 h-px border-0 bg-gray-200" />
           {!classe.isFull && (
             <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-              <InlineButton className="pt-2 md:pr-2" onClick={() => setShowContactSupport(true)}>
+              <InlineButton className="md:pr-4 pt-2 md:pr-2 pb-1" onClick={() => setShowContactSupport(true)}>
                 J'ai déjà un compte volontaire
               </InlineButton>
-              <Button onClick={() => history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`)}>Démarrer mon inscription</Button>
+              <PrimaryButton onClick={() => history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`)}>Démarrer mon inscription</PrimaryButton>
             </div>
           )}
           {classe.isFull && (
             <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
-              <Button className="sm:w-full md:w-52 md:self-end" disabled>
+              <PrimaryButton className="sm:w-full md:w-52 md:self-end" disabled>
                 Classe complète
-              </Button>
+              </PrimaryButton>
               <span className="md:self-end">Pour plus d'informations contactez votre référent.</span>
             </div>
           )}
