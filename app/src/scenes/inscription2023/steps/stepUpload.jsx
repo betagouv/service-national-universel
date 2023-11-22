@@ -58,7 +58,7 @@ export default function StepUpload() {
     if (verso) {
       const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, verso, { category, expirationDate, side: "verso" });
       if (!res.ok) {
-        capture(res.code);
+        capture(res.code); // UNSUPPORTED_TYPE
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
         resetState();
         return { ok: false };
@@ -72,7 +72,7 @@ export default function StepUpload() {
     try {
       setLoading(true);
 
-      const { ok: uploadOk } = await uploadFiles();
+      const { ok: uploadOk } = await uploadFiles(resetState);
       if (!uploadOk) return;
 
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: expirationDate, latestCNIFileCategory: category });
