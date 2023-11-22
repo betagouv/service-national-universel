@@ -97,9 +97,9 @@ export default function MissionsComponent() {
 
         {!young.location?.lat ? (
           <div className="flex flex-col gap-2 w-full justify-center items-center">
-            <p className="text-center text-sm text-gray-600">Veuillez renseigner à nouveau votre adresse pour nous permettre de vous proposer des missions près de chez vous.</p>
+            <p className="text-center text-sm text-gray-600">Veuillez valider votre adresse pour trouver des missions près de chez vous.</p>
             <Link className="text-blue-600 cursor-pointer text-center" to="/account/general">
-              Cliquez ici pour mettre à jour votre adresse
+              Cliquez ici pour valider votre adresse
             </Link>
           </div>
         ) : null}
