@@ -1,23 +1,9 @@
 /** @format */
 
 import React from "react";
-import Select, { GroupBase, StylesConfig } from "react-select";
+import Select from "react-select";
 
-type CustomStyles = StylesConfig<string, boolean, GroupBase<string>>;
-
-const ComboBox = ({
-  label,
-  options,
-  value,
-  onChange,
-  placeholder = "Sélectionner une option",
-}: {
-  label: string;
-  options?: GroupBase<string>[];
-  value: string | null;
-  onChange: (e: string) => void;
-  placeholder?: string;
-}) => {
+const ComboBox = ({ label, options, value, onChange, placeholder = "Sélectionner une option" }) => {
   return (
     <div className="my-2 text-[#161616]" style={{ fontFamily: "Marianne" }}>
       <label className={`my-2 ${"text-[#161616]}"}`}>{label}</label>
@@ -39,7 +25,7 @@ const ComboBox = ({
   );
 };
 
-const customStyles: CustomStyles = {
+const customStyles = {
   option: (provided, state) => {
     return {
       ...provided,
