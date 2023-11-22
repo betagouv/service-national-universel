@@ -47,7 +47,7 @@ export default function StepUpload() {
 
     if (recto) {
       if (!["image/jpeg", "image/png", "image/jpg"].includes(recto.type)) {
-        captureMessage("CNI recto upload", { file: recto.name });
+        captureMessage("CNI recto upload", { extra: { file: recto.name, type: recto.type } });
         setError({ text: "Le format de votre fichier n'est pas supporté." });
         resetState();
         return { ok: false };
@@ -62,8 +62,8 @@ export default function StepUpload() {
     }
 
     if (verso) {
-      if (!["image/jpeg", "image/png", "image/jpg"].includes(recto.type)) {
-        captureMessage("CNI verso upload", { file: recto.name });
+      if (!["image/jpeg", "image/png", "image/jpg"].includes(verso.type)) {
+        captureMessage("CNI verso upload", { extra: { file: verso.name, type: verso.type } });
         setError({ text: "Le format de votre fichier n'est pas supporté." });
         resetState();
         return { ok: false };
