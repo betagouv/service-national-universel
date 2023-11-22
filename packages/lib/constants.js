@@ -863,6 +863,7 @@ const STATUS_PHASE1_CLASSE = {
 //TODO to update with ARBITRAGE
 const CLE_TYPE = {
   LYC: "LYC",
+  COL: "COL",
 };
 
 //TODO to update with ARBITRAGE

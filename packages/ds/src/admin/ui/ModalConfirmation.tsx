@@ -58,8 +58,7 @@ export default function ModalConfirmation({
                     !!action.isDestructive && "bg-red-500 hover:bg-red-700"
                   }`}
                   onClick={() => {
-                    onClose();
-                    action.onClick?.();
+                    action.onClick ? action.onClick?.() : onClose();
                   }}
                 />
               ))

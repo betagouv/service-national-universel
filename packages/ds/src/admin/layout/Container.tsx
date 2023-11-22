@@ -37,7 +37,9 @@ export default function Container({
           )}
 
           {/* Actions */}
-          {actions && <div>{actions}</div>}
+          {actions && (
+            <div className="flex items-center justify-end ml-6">{actions}</div>
+          )}
         </div>
       )}
 

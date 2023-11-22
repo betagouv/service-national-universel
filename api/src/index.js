@@ -97,6 +97,7 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   app.use("/elasticsearch", require("./controllers/elasticsearch"));
   app.use("/email", require("./controllers/email"));
   app.use("/es", require("./controllers/es"));
+  app.use("/etablissement", require("./controllers/cle/etablissement"));
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters"));
   app.use("/inscription-goal", require("./controllers/inscription-goal"));

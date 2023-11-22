@@ -96,6 +96,11 @@ function canInviteUser(actorRole, targetRole) {
     return targetRole === ROLES.RESPONSIBLE || targetRole === ROLES.SUPERVISOR;
   }
 
+  // ADMINISTRATOR_CLE can invite only ADMINSISTRATOR_CLE and REFERENT_CLASSE
+  if (actorRole === ROLES.ADMINISTRATEUR_CLE) {
+    return targetRole === ROLES.ADMINISTRATEUR_CLE || targetRole === ROLES.REFERENT_CLASSE;
+  }
+
   return false;
 }
 
@@ -859,6 +864,10 @@ function canUpdateEtablissement(actor) {
   return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
 }
 
+function canViewEtablissement(actor) {
+  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -987,4 +996,5 @@ export {
   canWriteClasse,
   canViewClasse,
   canUpdateEtablissement,
+  canViewEtablissement,
 };
