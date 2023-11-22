@@ -21,7 +21,7 @@ export default function View() {
       _id: "123456789",
     };
     setClasse(data);
-    setUrl(`${appURL}/je-rejoins-ma-classe-engagee/${data._id.toString()}`);
+    setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${data._id.toString()}`);
     setIsLoading(false);
   }, []);
 
