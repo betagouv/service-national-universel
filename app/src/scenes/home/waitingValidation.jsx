@@ -11,6 +11,7 @@ import API from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { inscriptionModificationOpenForYoungs, translate, YOUNG_STATUS } from "../../utils";
 import { getCohort } from "@/utils/cohorts";
+import { YOUNG_SOURCE } from "snu-lib";
 
 export default function WaitingValidation() {
   const young = useSelector((state) => state.Auth.young);
@@ -40,19 +41,32 @@ export default function WaitingValidation() {
         <div className="m-10 w-full">
           <div className="flex items-center justify-between rounded-xl bg-white ">
             <div className="flex w-1/2 flex-col gap-8 py-6 pl-10 pr-3">
-              <div className="text-[44px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
-              </div>
+              {YOUNG_SOURCE.VOLONTAIRE === young.source ? (
+                <div className="text-[44px] font-medium leading-tight tracking-tight text-gray-800">
+                  <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
+                </div>
+              ) : (
+                <div className="text-[44px] font-medium leading-tight tracking-tight text-gray-800">
+                  <strong>{young.firstName},</strong> bienvenue sur votre compte élève.
+                </div>
+              )}
               <div className="mt-2 text-xl font-bold text-[#242526]">Merci, votre inscription a bien été enregistrée.</div>
               <hr className="text-gray-200" />
               <div className="flex items-center gap-5">
                 <div className="h-8 w-8">
                   <Clock />
                 </div>
-                <div className="text-sm leading-5 text-[#6B7280]">
-                  Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement
-                  de votre inscription.
-                </div>
+                {YOUNG_SOURCE.VOLONTAIRE === young.source ? (
+                  <div className="text-sm leading-5 text-[#6B7280]">
+                    Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement
+                    de votre inscription.
+                  </div>
+                ) : (
+                  <div className="text-sm leading-5 text-[#6B7280]">
+                    Votre dossier est en cours de traitement par votre établissement scolaire. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de
+                    l&apos;avancement de votre inscription.
+                  </div>
+                )}
               </div>
               <hr className="text-gray-200" />
               <div>
