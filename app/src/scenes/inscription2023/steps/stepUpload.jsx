@@ -63,7 +63,7 @@ export default function StepUpload() {
 
     if (verso) {
       if (!["image/jpeg", "image/png", "image/jpg"].includes(recto.type)) {
-        captureMessage("CNI recto upload", { file: recto.name });
+        captureMessage("CNI verso upload", { file: recto.name });
         setError({ text: "Le format de votre fichier n'est pas supporté." });
         resetState();
         return { ok: false };
