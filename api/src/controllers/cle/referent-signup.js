@@ -112,9 +112,6 @@ router.post("/", async (req, res) => {
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
       phone: Joi.string(),
-      phoneZone: Joi.string()
-        // .valid(PHONE_ZONES_NAMES_ARR)
-        .required(),
       password: Joi.string().required(),
       invitationToken: Joi.string().required(),
     })

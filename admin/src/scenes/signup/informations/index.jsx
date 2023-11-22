@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
@@ -14,19 +14,21 @@ import api from "@/services/api";
 
 import SchoolInFrance from "./components/SchoolInFrance";
 
-export default function informations({ user }) {
+export default function informations() {
   const history = useHistory();
   const { search } = useLocation();
   const urlParams = new URLSearchParams(window.location.search);
   const invitationToken = urlParams.get("token");
 
-  const [firstName, setFirstName] = React.useState(user.firstName);
-  const [lastName, setLastName] = React.useState(user.lastName);
+  const [user, setUser] = useState(null);
+
+  const [firstName, setFirstName] = React.useState();
+  const [lastName, setLastName] = React.useState();
 
   const LOCAL_STORAGE_KEY = "cle_inscription_school";
   const [school, setSchool] = React.useState();
 
-  const [phone, setPhone] = React.useState(user.phone);
+  const [phone, setPhone] = React.useState();
 
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -50,6 +52,32 @@ export default function informations({ user }) {
       if (error?.message) return toastr.error(error?.message);
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!invitationToken) {
+          history.push("/auth");
+          return toastr.error("Votre lien d'invitation a expiré");
+        }
+        const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
+        if (ok && data) setUser(data);
+      } catch (error) {
+        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") {
+          history.push("/auth");
+          return toastr.error("Votre lien d'invitation a expiré");
+        }
+      }
+    })();
+  }, []);
+  useEffect(() => {
+    if (!user) return;
+    setFirstName(user.firstName);
+    setLastName(user.lastName);
+    setPhone(user.phone);
+  }, [user]);
+
+  if (!user) return <div>Chargement...</div>;
 
   return (
     <Section>

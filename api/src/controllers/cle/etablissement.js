@@ -8,7 +8,7 @@ const mongoose = require("mongoose");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const EtablissementModel = require("../../models/cle/etablissement");
-const SchoolRamsesModel = require("../../models/schoolRamses");
+const SchoolRamsesModel = require("../../models/schoolRAMSES");
 const ReferentModel = require("../../models/referent");
 
 router.put("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {

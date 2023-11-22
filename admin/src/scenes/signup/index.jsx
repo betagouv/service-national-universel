@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Switch, Link, NavLink } from "react-router-dom";
+import { Switch, Link, NavLink, useHistory } from "react-router-dom";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import useDocumentCss from "@/hooks/useDocumentCss";
 import { SentryRoute } from "@/sentry";
@@ -26,6 +26,7 @@ import { ROLES } from "snu-lib";
 export default function Index() {
   useDocumentTitle("Creer mon compte");
   useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+  const history = useHistory();
 
   const [serviceTagline, setServiceTagline] = useState("Classe engagée");
 
@@ -37,11 +38,17 @@ export default function Index() {
   useEffect(() => {
     (async () => {
       try {
-        if (!invitationToken) return toastr.error("Votre lien d'invitation a expiré");
+        if (!invitationToken) {
+          history.push("/auth");
+          return toastr.error("Votre lien d'invitation a expiré");
+        }
         const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
         if (ok && data) setOnboardedUser(data);
       } catch (error) {
-        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return toastr.error("Votre lien d'invitation a expiré");
+        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") {
+          history.push("/auth");
+          return toastr.error("Votre lien d'invitation a expiré");
+        }
       }
     })();
   }, []);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
@@ -12,6 +12,7 @@ export default function confirmation() {
   const history = useHistory();
   const [etablissement, setEtablissement] = useState("");
   const LOCAL_STORAGE_KEY = "cle_inscription_school";
+  const { search } = useLocation();
 
   const urlParams = new URLSearchParams(window.location.search);
   const invitationToken = urlParams.get("token");
@@ -102,7 +103,9 @@ export default function confirmation() {
         <div>
           <div className="flex items-start justify-between">
             <h2 className="text-lg">Mon compte</h2>
-            <i className={fr.cx("fr-icon-edit-fill", "text-[var(--background-action-high-blue-france)] cursor-pointer")} onClick={() => history.goBack()}></i>
+            <i
+              className={fr.cx("fr-icon-edit-fill", "text-[var(--background-action-high-blue-france)] cursor-pointer")}
+              onClick={() => history.push(`/creer-mon-compte/email${search}`)}></i>
           </div>
           <div className="flex items-start justify-between">
             <div className="text-[#666]">Adresse email :</div>

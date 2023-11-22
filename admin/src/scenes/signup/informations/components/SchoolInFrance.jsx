@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
 import api from "@/services/api";
-import { ComboBox } from "@snu/ds/admin";
 import ComboBox from "@/components/dsfr/forms/Combobox";
 
 export async function getCities(query) {
