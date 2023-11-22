@@ -1,8 +1,6 @@
 import React from "react";
-
+import { BsQuestionCircleFill } from "react-icons/bs";
 import Navbar from "../components/Navbar";
-
-import QuestionMarkBlueCircle from "../../../assets/icons/QuestionMarkBlueCircle";
 import Button from "../../../components/dsfr/ui/buttons/Button";
 import Help from "./Help";
 import { supportURL } from "../../../config";
@@ -30,7 +28,7 @@ export default function DesktopPageContainer({
             <div className="mt-2 flex w-full items-center justify-between">
               <h1 className="text-xl font-bold">{title}</h1>
               <a className="hover:scale-105" href={supportLink} target="_blank" rel="noreferrer">
-                <QuestionMarkBlueCircle />
+                <BsQuestionCircleFill size={20} className="fill-blue-france-sun-113 hover:fill-blue-france-sun-113-hover" />
               </a>
             </div>
             {subTitle && <div className="mt-2 text-sm text-gray-800">{subTitle}</div>}
