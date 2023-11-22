@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory, useParams } from "react-router-dom";
+import { Redirect, useHistory, useParams } from "react-router-dom";
 import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import Error from "../../../components/error";
@@ -21,6 +21,7 @@ import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import useParcours from "@/services/useParcours";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -39,7 +40,8 @@ export default function StepRepresentants() {
   const dispatch = useDispatch();
   const { step } = useParams();
   const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
-  if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) history.push("/");
+  const { stepRepresentantsConfig } = useParcours();
+  const { supportEvent, CTAEvent, articleSlug, nextStepURL } = stepRepresentantsConfig;
 
   const [data, setData] = React.useState({
     parent1Status: young.parent1Status || "",
@@ -142,8 +144,8 @@ export default function StepRepresentants() {
           return;
         }
         dispatch(setYoung(responseData));
-        plausibleEvent("Phase0/CTA inscription - representants legaux");
-        history.push("/inscription2023/documents");
+        plausibleEvent(CTAEvent);
+        history.push(nextStepURL);
       } catch (e) {
         capture(e);
         setErrors({
@@ -251,12 +253,14 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
-  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`;
+  if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
+    return <Redirect to="/" />;
+  }
 
   return (
     <>
       <Navbar onSave={onSave} />
-      <DSFRContainer title="Mes représentants légaux" supportLink={supportLink} supportEvent="Phase0/aide inscription - rep leg">
+      <DSFRContainer title="Mes représentants légaux" supportLink={supportURL + "/base-de-connaissance/" + articleSlug} supportEvent={supportEvent}>
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
         <hr className="my-4 h-px border-0 bg-gray-200" />
@@ -265,6 +269,7 @@ export default function StepRepresentants() {
             checked={isParent2Visible}
             onChange={(e) => {
               plausibleEvent("Phase0/CTA inscription - ajouter rep leg");
+              // Event mal nommé, pas un call to action. Ne pas confondre avec l'event envoyé lors du clic sur le bouton "Suivant".
               setIsParent2Visible(e);
             }}
           />
@@ -279,7 +284,7 @@ export default function StepRepresentants() {
           <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
         )}
       </DSFRContainer>
-      <Help supportLink={supportLink} />
+      <Help supportLink={supportURL + "/base-de-connaissance/" + articleSlug} />
     </>
   );
 }

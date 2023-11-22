@@ -35,10 +35,12 @@ export const useParcours = () => {
 
   const stepPreinscriptionDoneConfig = getStepConfig(young.source, "stepPreinscriptionDone");
   const stepCoordonneesConfig = getStepConfig(young.source, "stepCoordonnees");
+  const stepRepresentantsConfig = getStepConfig(young.source, "stepRepresentants");
 
   return {
     stepPreinscriptionDoneConfig,
     stepCoordonneesConfig,
+    stepRepresentantsConfig,
   };
 };
 

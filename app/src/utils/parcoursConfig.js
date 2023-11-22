@@ -18,6 +18,15 @@ export const parcoursConfig = {
       supportEvent: "Phase0/aide inscription - coordonnees",
       CTAEvent: "Phase0/CTA inscription - profil",
     },
+    // TODO: Déplacer la liste des étapes depuis le fichier utils de admin vers la lib
+    // et l'utiliser ici à la place des "stepMachin"
+    stepRepresentant: {
+      articleSlug: "je-minscris-et-indique-mes-representants-legaux",
+      supportEvent: "Phase0/aide inscription - rep leg",
+      CTAEvent: "Phase0/CTA inscription - representants legaux",
+      // TODO: centraliser la gestion des successions d'étapes
+      nextStepURL: "/inscription2023/documents",
+    },
   },
   [YOUNG_SOURCE.CLE]: {
     stepPreinscriptionDone: {
@@ -35,6 +44,12 @@ export const parcoursConfig = {
       articleSlug: "je-minscris-et-remplis-mon-profil",
       supportEvent: "Phase0/aide inscription - coordonnees",
       CTAEvent: "",
+    },
+    stepRepresentant: {
+      articleSlug: "je-minscris-et-indique-mes-representants-legaux",
+      supportEvent: "Phase0/aide inscription - rep leg",
+      CTAEvent: "",
+      nextStepURL: "/inscription2023/confirm",
     },
   },
 };
