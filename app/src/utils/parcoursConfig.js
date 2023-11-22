@@ -11,6 +11,13 @@ export const parcoursConfig = {
         "Vous pouvez dès à présent **finaliser votre inscription** ou la reprendre à tout moment depuis le mail envoyé à {email}, ou depuis l’écran de connexion.",
       importantNote: "Attention, une inscription complète est indispensable pour valider votre candidature au SNU.",
     },
+    stepCoordonnees: {
+      title: "Mon profil volontaire",
+      selectSchoolSituation: true,
+      articleSlug: "je-minscris-et-remplis-mon-profil",
+      supportEvent: "Phase0/aide inscription - coordonnees",
+      CTAEvent: "Phase0/CTA inscription - profil",
+    },
   },
   [YOUNG_SOURCE.CLE]: {
     stepPreinscriptionDone: {
@@ -21,6 +28,13 @@ export const parcoursConfig = {
       finalizeInscription:
         "Vous pouvez dès à présent **finaliser votre inscription** ou la reprendre à tout moment depuis le mail envoyé à {email}, ou depuis l’écran de connexion.",
       importantNote: "Attention, une inscription complète est indispensable pour valider votre candidature au SNU.",
+    },
+    stepCoordonnees: {
+      title: "Mon profil élève",
+      selectSchoolSituation: false,
+      articleSlug: "je-minscris-et-remplis-mon-profil",
+      supportEvent: "Phase0/aide inscription - coordonnees",
+      CTAEvent: "",
     },
   },
 };
