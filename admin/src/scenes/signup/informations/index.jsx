@@ -26,9 +26,7 @@ export default function informations({ user }) {
   const LOCAL_STORAGE_KEY = "cle_inscription_school";
   const [school, setSchool] = React.useState();
 
-  //todo : handle phone
   const [phone, setPhone] = React.useState(user.phone);
-  const [phoneZone, setPhoneZone] = React.useState();
 
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -41,7 +39,6 @@ export default function informations({ user }) {
         firstName,
         lastName,
         phone,
-        phoneZone,
         password,
         confirmPassword,
         invitationToken,
@@ -70,7 +67,6 @@ export default function informations({ user }) {
             <Input
               label="Prénom"
               state="default"
-              stateRelatedMessage="Email invalide"
               nativeInputProps={{
                 placeholder: "Jean",
                 value: firstName,
@@ -82,7 +78,6 @@ export default function informations({ user }) {
             <Input
               label="Nom"
               state="default"
-              stateRelatedMessage="Email invalide"
               nativeInputProps={{
                 placeholder: "Michel",
                 value: lastName,
@@ -97,8 +92,17 @@ export default function informations({ user }) {
             <SchoolInFrance school={school} onSelectSchool={(s) => setSchool(s)} />
           </>
         </div>
-        <div className="flex w-full">
-          <InputPhone value={phone} zoneValue={phoneZone} label="Numéro de téléphone" onChange={(e) => setPhone(e)} onChangeZone={(e) => setPhoneZone(e)} />
+        <div className="w-full">
+          {/* todo : handle phone zone */}
+          <Input
+            label="Numéro de téléphone"
+            state="default"
+            nativeInputProps={{
+              placeholder: "06123456789",
+              value: phone,
+              onChange: (e) => setPhone(e.target.value),
+            }}
+          />
         </div>
         <div className="flex flex-col gap-2">
           <div className="w-full">
