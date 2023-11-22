@@ -112,7 +112,7 @@ export default function StepUpload() {
     try {
       setLoading(true);
 
-      const { ok: uploadOk } = await uploadFiles();
+      const { ok: uploadOk } = await uploadFiles(resetState);
       if (!uploadOk) return;
 
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
