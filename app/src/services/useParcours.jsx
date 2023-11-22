@@ -1,17 +1,11 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import gfm from 'remark-gfm';
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useHistory } from "react-router-dom";
+import gfm from "remark-gfm";
+import { useSelector } from "react-redux";
 import parcoursConfig from "../utils/parcoursConfig";
 import { YOUNG_SOURCE } from "snu-lib";
-import { setYoung } from "../redux/auth/actions";
-import { toastr } from "react-redux-toastr";
 
 export const useParcours = () => {
-  const dispatch = useDispatch();
-  const history = useHistory();
-  const { pathname } = useLocation();
   const young = useSelector((state) => state.Auth.young);
 
   const replacePlaceholders = (text, placeholders) => {
@@ -40,9 +34,11 @@ export const useParcours = () => {
   };
 
   const stepPreinscriptionDoneConfig = getStepConfig(young.source, "stepPreinscriptionDone");
+  const stepCoordonneesConfig = getStepConfig(young.source, "stepCoordonnees");
 
   return {
     stepPreinscriptionDoneConfig,
+    stepCoordonneesConfig,
   };
 };
 
