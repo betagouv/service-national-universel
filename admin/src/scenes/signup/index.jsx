@@ -44,6 +44,10 @@ export default function Index() {
         }
         const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
         if (ok && data) setOnboardedUser(data);
+        if (!ok) {
+          history.push("/auth");
+          return toastr.error("Votre lien d'invitation a expiré");
+        }
       } catch (error) {
         if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") {
           history.push("/auth");

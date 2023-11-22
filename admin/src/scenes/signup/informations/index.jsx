@@ -70,6 +70,7 @@ export default function informations() {
       }
     })();
   }, []);
+
   useEffect(() => {
     if (!user) return;
     setFirstName(user.firstName);

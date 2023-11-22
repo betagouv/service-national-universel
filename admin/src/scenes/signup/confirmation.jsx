@@ -18,6 +18,8 @@ export default function confirmation() {
   const invitationToken = urlParams.get("token");
 
   const [user, setUser] = useState(null);
+  const [cguChecked, setCguChecked] = useState(false);
+  const [donneesChecked, setDonneesChecked] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -42,14 +44,15 @@ export default function confirmation() {
     getEtablissement();
   }, [user]);
 
-  const submit = async () => {
-    // todo : create the etablissement
+  const submit = async (e) => {
+    e.preventDefault();
     try {
       const schoolLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY);
       const school = JSON.parse(schoolLocalStorage);
-      const response = await api.post("/cle/etablissement", { schoolId: school.id.toString(), invitationToken });
+      const response = await api.post("/cle/referent-signup/confirm-signup", { schoolId: school.id.toString(), invitationToken });
 
       // todo : refirect to the auth screen
+      history.push("/auth");
     } catch (e) {
       console.log(e);
     }
@@ -63,87 +66,93 @@ export default function confirmation() {
         <Stepper currentStep={5} stepCount={5} title="Création d’un compte : confirmation" />
       </div>
       <Container className="flex flex-col gap-8">
-        <div className="flex items-start justify-between">
-          <h1 className="text-xl font-bold">Validez vos informations</h1>
-          <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
-        </div>
-        <hr className="p-1" />
-        <div>
+        <form onSubmit={submit}>
           <div className="flex items-start justify-between">
-            <h2 className="text-lg">Mon profil</h2>
-            <i className={fr.cx("fr-icon-edit-fill", "text-[var(--background-action-high-blue-france)] cursor-pointer")} onClick={() => history.goBack()}></i>
+            <h1 className="text-xl font-bold">Validez vos informations</h1>
+            <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
           </div>
-          <div className="flex items-start justify-between">
-            <div className="text-[#666]">Établissement scolaire :</div>
-            <div className="text-right text-[#161616]">
-              {etablissement?.fullName}, {etablissement?.postcode}, {etablissement?.city}
+          <hr className="p-1" />
+          <div>
+            <div className="flex items-start justify-between">
+              <h2 className="text-lg">Mon profil</h2>
+              <i className={fr.cx("fr-icon-edit-fill", "text-[var(--background-action-high-blue-france)] cursor-pointer")} onClick={() => history.goBack()}></i>
+            </div>
+            <div className="flex items-start justify-between">
+              <div className="text-[#666]">Établissement scolaire :</div>
+              <div className="text-right text-[#161616]">
+                {etablissement?.fullName}, {etablissement?.postcode}, {etablissement?.city}
+              </div>
+            </div>
+            <div className="flex items-start justify-between">
+              <div className="text-[#666]">Rôle :</div>
+              <div className="text-right text-[#161616]">{translate(user.role)}</div>
+            </div>
+            <div className="flex items-start justify-between">
+              <div className="text-[#666]">Fonction :</div>
+              <div className="text-right text-[#161616]">{translate(user.subRole)}</div>
+            </div>
+            <div className="flex items-start justify-between">
+              <div className="text-[#666]">Prénom :</div>
+              <div className="text-right text-[#161616]">{user.firstName}</div>
+            </div>
+            <div className="flex items-start justify-between">
+              <div className="text-[#666]">Nom :</div>
+              <div className="text-right text-[#161616]">{user.lastName}</div>
+            </div>
+            <div className="flex items-start justify-between">
+              <div className="text-[#666]">Numéro de téléphone :</div>
+              <div className="text-right text-[#161616]">{user.phone}</div>
             </div>
           </div>
-          <div className="flex items-start justify-between">
-            <div className="text-[#666]">Rôle :</div>
-            <div className="text-right text-[#161616]">{translate(user.role)}</div>
+          <div>
+            <div className="flex items-start justify-between">
+              <h2 className="text-lg">Mon compte</h2>
+              <i
+                className={fr.cx("fr-icon-edit-fill", "text-[var(--background-action-high-blue-france)] cursor-pointer")}
+                onClick={() => history.push(`/creer-mon-compte/email${search}`)}></i>
+            </div>
+            <div className="flex items-start justify-between">
+              <div className="text-[#666]">Adresse email :</div>
+              <div className="text-right text-[#161616]">{user.email}</div>
+            </div>
           </div>
-          <div className="flex items-start justify-between">
-            <div className="text-[#666]">Fonction :</div>
-            <div className="text-right text-[#161616]">{translate(user.subRole)}</div>
-          </div>
-          <div className="flex items-start justify-between">
-            <div className="text-[#666]">Prénom :</div>
-            <div className="text-right text-[#161616]">{user.firstName}</div>
-          </div>
-          <div className="flex items-start justify-between">
-            <div className="text-[#666]">Nom :</div>
-            <div className="text-right text-[#161616]">{user.lastName}</div>
-          </div>
-          <div className="flex items-start justify-between">
-            <div className="text-[#666]">Numéro de téléphone :</div>
-            <div className="text-right text-[#161616]">{user.phone}</div>
-          </div>
-        </div>
-        <div>
-          <div className="flex items-start justify-between">
-            <h2 className="text-lg">Mon compte</h2>
-            <i
-              className={fr.cx("fr-icon-edit-fill", "text-[var(--background-action-high-blue-france)] cursor-pointer")}
-              onClick={() => history.push(`/creer-mon-compte/email${search}`)}></i>
-          </div>
-          <div className="flex items-start justify-between">
-            <div className="text-[#666]">Adresse email :</div>
-            <div className="text-right text-[#161616]">{user.email}</div>
-          </div>
-        </div>
-        <hr className="p-1" />
-        <Checkbox
-          options={[
-            {
-              label: (
-                <p className="p-0 m-0 !pl-8">
-                  J'ai lu et j'accepte les <a href="#">Conditions Générales d'Utilisation (CGU)</a> de la plateforme du Service National Universel.
-                </p>
-              ),
-              nativeInputProps: {
-                name: "checkboxes-1",
-                value: "value1",
+          <hr className="p-1" />
+          <Checkbox
+            options={[
+              {
+                label: (
+                  <p className="p-0 m-0 !pl-8">
+                    J'ai lu et j'accepte les <a href="#">Conditions Générales d'Utilisation (CGU)</a> de la plateforme du Service National Universel.
+                  </p>
+                ),
+                nativeInputProps: {
+                  name: "checkboxes-1",
+                  value: cguChecked,
+                  onClick: () => setCguChecked((e) => !e),
+                  required: true,
+                },
               },
-            },
-            {
-              label: (
-                <p className="p-0 m-0 !pl-8">
-                  J’ai pris connaissance des <a href="#">modalités de traitement de mes données personnelles</a>.
-                </p>
-              ),
-              nativeInputProps: {
-                name: "checkboxes-1",
-                value: "value2",
+              {
+                label: (
+                  <p className="p-0 m-0 !pl-8">
+                    J’ai pris connaissance des <a href="#">modalités de traitement de mes données personnelles</a>.
+                  </p>
+                ),
+                nativeInputProps: {
+                  name: "checkboxes-1",
+                  value: donneesChecked,
+                  onClick: () => setDonneesChecked((e) => !e),
+                  required: true,
+                },
               },
-            },
-          ]}
-          small
-        />
-        <hr className="p-1" />
-        <div className="flex justify-end">
-          <Button onClick={submit}>Valider</Button>
-        </div>
+            ]}
+            small
+          />
+          <hr className="p-1" />
+          <div className="flex justify-end">
+            <Button type="submit">Valider</Button>
+          </div>
+        </form>
       </Container>
     </Section>
   );
