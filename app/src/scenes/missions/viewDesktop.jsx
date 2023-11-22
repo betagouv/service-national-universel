@@ -73,7 +73,7 @@ export default function viewDesktop() {
       if (mission?.application?.contractId) {
         const { ok, data, code } = await api.get(`/contract/${mission.application.contractId}`);
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);

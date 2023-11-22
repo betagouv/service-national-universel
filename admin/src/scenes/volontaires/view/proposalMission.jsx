@@ -32,7 +32,7 @@ export default function ProposeMission({ young, onSend }) {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
     if (!ok) {
-      capture(code);
+      capture(new Error(code));
       return toastr.error("Oups, une erreur est survenue", code);
     }
     return data;

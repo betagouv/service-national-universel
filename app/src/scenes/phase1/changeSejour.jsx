@@ -91,7 +91,7 @@ export default function ChangeSejour() {
         cohort: newSejour,
       });
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", translate(code));
       }
       toastr.success("Cohorte modifiée avec succés. Votre nouvelle session se tiendra en " + newSejour);
@@ -111,7 +111,7 @@ export default function ChangeSejour() {
         cohort: newSejour,
       });
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", translate(code));
       }
       toastr.success("Vous avez été ajouté en liste d'attente");

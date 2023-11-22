@@ -56,7 +56,7 @@ export default function Contract({ young }) {
       // let { ok, data, code } = await api.get(`/application/${applicationId}`);
       let { ok, data, code } = await api.get(`/young/${young._id}/application`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       const currentApplication = data.find((e) => e._id === applicationId);
@@ -64,7 +64,7 @@ export default function Contract({ young }) {
       if (currentApplication.contractId) {
         ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);
@@ -79,7 +79,7 @@ export default function Contract({ young }) {
       if (!application) return;
       const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       return setMission(data);
@@ -127,7 +127,7 @@ export default function Contract({ young }) {
       if (!application) return;
       const { ok, data, code } = await api.get(`/structure/${application.structureId}`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       return setStructure(data);

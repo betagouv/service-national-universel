@@ -117,7 +117,7 @@ export default function StepEligibilite() {
       } else {
         const { ok, code } = await api.put("/young/reinscription/not-eligible");
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           setError({ text: "Impossible de vérifier votre éligibilité" });
           return;
         }
@@ -147,7 +147,7 @@ export default function StepEligibilite() {
     });
 
     if (!ok) {
-      capture(code);
+      capture(new Error(code));
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
@@ -156,7 +156,7 @@ export default function StepEligibilite() {
       if (isLoggedIn) {
         const { ok, data, code } = await api.put("/young/reinscription/not-eligible");
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           setError({ text: "Impossible de vérifier votre éligibilité" });
           setLoading(false);
           return;
