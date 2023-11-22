@@ -90,7 +90,7 @@ export default function StepUpload() {
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: expirationDate, latestCNIFileCategory: category });
 
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: code });
         resetState();
         return;
@@ -118,7 +118,7 @@ export default function StepUpload() {
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
         setLoading(false);
         return;

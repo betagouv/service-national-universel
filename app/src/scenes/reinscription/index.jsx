@@ -57,7 +57,7 @@ export default function ReInscription() {
     try {
       const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       setReinscriptionOpen(data);

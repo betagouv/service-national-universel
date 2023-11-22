@@ -74,7 +74,7 @@ export default function Phase2Application({ young, onChange }) {
     // todo : why not just
     let { ok, data, code } = await api.get(`/application/${applicationId}`);
     if (!ok) {
-      capture(code);
+      capture(new Error(code));
       return toastr.error("Oups, une erreur est survenue", code);
     }
 
@@ -89,7 +89,7 @@ export default function Phase2Application({ young, onChange }) {
     if (!application?.missionId) return;
     const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
     if (!ok) {
-      capture(code);
+      capture(new Error(code));
       return toastr.error("Oups, une erreur est survenue", code);
     }
     setMission(data);
@@ -109,7 +109,7 @@ export default function Phase2Application({ young, onChange }) {
       if (application?.contractId) {
         const { ok, data, code } = await api.get(`/contract/${application.contractId}`);
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);
