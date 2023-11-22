@@ -24,7 +24,7 @@ export default function StepWaitingConsent() {
   const [loading, setLoading] = React.useState(false);
   const notAuthorised = young?.parentAllowSNU === "false";
   const { stepInscriptionDoneConfig } = useParcours();
-  const { text1, isJdaRequested } = stepInscriptionDoneConfig();
+  const { textWaitingValidation, textValidated, isJdaRequested } = stepInscriptionDoneConfig;
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -90,14 +90,14 @@ export default function StepWaitingConsent() {
           <p className="text-base text-[#161616] ">
             Bonne nouvelle, votre représentant légal a <strong>déjà donné son consentement.</strong>
           </p>
-          <p className="mt-2 text-base text-[#161616]">Vous pouvez désormais accéder à votre compte</p>
+          <p className="mt-2 text-base text-[#161616]">{textValidated}</p>
           <SignupButtonContainer labelNext="Accéder à mon compte" onClickNext={handleDone} />
         </DSFRContainer>
       ) : (
         <>
           <DSFRContainer title="Bravo, vous avez terminé votre inscription.">
             {error?.text && <Error {...error} onClose={() => setError({})} />}
-            <p className="mt-2 text-sm text-[#666666]">{text1}</p>
+            <p className="mt-2 text-sm text-[#666666]">{textWaitingValidation}</p>
 
             <div className="mt-4 flex flex-col gap-1 border-[1px] border-b-4 border-[#E5E5E5] border-b-[#000091] p-4">
               <div className="text-base font-bold text-[#161616]">En attente du consentement de :</div>

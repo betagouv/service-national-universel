@@ -12,7 +12,8 @@ export const parcoursConfig = {
       importantNote: "Attention, une inscription complète est indispensable pour valider votre candidature au SNU.",
     },
     stepInscriptionDone: {
-      text1: "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider.",
+      textValidated: "Vous pouvez désormais accéder à votre compte volontaire",
+      textWaitingValidation: "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider.",
       isJdaRequested: true,
     },
   },
@@ -27,7 +28,9 @@ export const parcoursConfig = {
       importantNote: "Attention, une inscription complète est indispensable pour valider votre candidature au SNU.",
     },
     stepInscriptionDone: {
-      popInText1: "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à votre établissement scolaire pour le valider.",
+      textValidated: "Vous pouvez désormais accéder à votre compte élève",
+      textWaitingValidation:
+        "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à votre établissement scolaire pour le valider.",
       isJdaRequested: false,
     },
   },

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import gfm from 'remark-gfm';
+import gfm from "remark-gfm";
 import { useSelector } from "react-redux";
 import parcoursConfig from "../utils/parcoursConfig";
 import { YOUNG_SOURCE } from "snu-lib";
@@ -35,10 +35,12 @@ export const useParcours = () => {
 
   const stepPreinscriptionDoneConfig = getStepConfig(young.source, "stepPreinscriptionDone");
   const stepInscriptionDoneConfig = getStepConfig(young.source, "stepInscriptionDone");
+  const waitingValidationConfig = getStepConfig(young.source, "waitingValidation");
 
   return {
     stepPreinscriptionDoneConfig,
     stepInscriptionDoneConfig,
+    waitingValidationConfig,
   };
 };
 
