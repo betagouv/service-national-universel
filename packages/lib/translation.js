@@ -1068,6 +1068,32 @@ const translateCniExpired = (cniExpired) => {
   }
 };
 
+const translateEtbalissementSector = (sector) => {
+  switch (sector) {
+    case "pro":
+      return "Professionnel";
+    case "gen":
+      return "Général";
+    default:
+      return sector;
+  }
+};
+
+const translateColoration = (coloration) => {
+  switch (coloration) {
+    case "SPORT":
+      return "Sport";
+    case "ENVIRONMENT":
+      return "Environnement";
+    case "DEFENSE":
+      return "Défense";
+    case "RESILIENCE":
+      return "Résilience";
+    default:
+      return coloration;
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé pour traduire l'historique des plans de transport
 
@@ -1165,6 +1191,8 @@ export {
   translateBusPatchesField,
   translateInscriptionStatus,
   translateCniExpired,
+  translateEtbalissementSector,
+  translateColoration,
 };
 export default {
   translate,
@@ -1196,4 +1224,6 @@ export default {
   translateBusPatchesField,
   translateInscriptionStatus,
   translateCniExpired,
+  translateEtbalissementSector,
+  translateColoration,
 };
