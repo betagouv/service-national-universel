@@ -1,25 +1,30 @@
 import React, { useState } from "react";
 import { ProfilePic } from "@snu/ds";
-import { Page, Header, Container, Button, Badge, Label, InputText, ModalConfirmation, Select } from "@snu/ds/admin";
+import { Page, Header, Container, Button, Badge, Label, InputText, Modal, Select } from "@snu/ds/admin";
 import { HiOutlinePencil } from "react-icons/hi";
 import { BsSend, BsTrash3 } from "react-icons/bs";
-import { VscCopy } from "react-icons/vsc";
 import ClasseIcon from "@/components/drawer/icons/Classe";
 import { Link } from "react-router-dom";
+import { appURL } from "@/config";
+import { copyToClipboard } from "@/utils";
+import { MdContentCopy } from "react-icons/md";
 
-export default function view() {
-  const [form, setForm] = useState({ name: "CAP vert" });
+export default function View() {
   const [modalInvite, setModalInvite] = useState(false);
+  const [classe, setClasse] = useState({
+    name: "CAP vert",
+    _id: "075IDF765098",
+  });
 
   return (
     <Page>
       <Header
-        title={form.name}
+        title={classe.name}
         titleComponent={<Badge className="mx-4" title="En cours d'inscription" status="inProgress" />}
         breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
         actions={[<Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />]}
       />
-      <Container title="Informations générales" actions={[<Button key="update" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" />]}>
+      <Container title="Inclasseations générales" actions={[<Button key="update" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" />]}>
         <div className="flex items-stretch justify-stretch">
           <div className="flex-1">
             <Label title="Cohorte" tooltip="This is a test and need to be replaced." />
@@ -30,7 +35,7 @@ export default function view() {
               <InputText className="flex-1" placeholder="ABCDE" />
             </div>
             <Label title="Nom de la classe engagée" tooltip="This is a test and need to be replaced." />
-            <InputText className="mb-3" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <InputText className="mb-3" value={classe.name} onChange={(e) => setClasse({ ...classe, name: e.target.value })} />
             <Label title="Coloration" tooltip="This is a test and need to be replaced." />
             <Select value={{ value: "Environnement", label: "Environnement" }} options={[{ value: "Environnement", label: "Environnement" }]} />
           </div>
@@ -99,23 +104,30 @@ export default function view() {
           </table>
         </div>
       </Container>
-
-      <ModalConfirmation
+      <Modal
         isOpen={modalInvite}
+        className="w-[700px]"
         onClose={() => setModalInvite(false)}
-        icon={<ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />}
-        title="Invitez des élèves à rejoindre votre classe !"
-        text={
-          <>
-            <p>
-              Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien :{" "}
-              <a href="https://moncompte.snu.gouv.fr/classe-engagee/075IDF765098" className="text-primary">
-                https://moncompte.snu.gouv.fr/classe-engagee/075IDF765098
-              </a>
-            </p>
-          </>
+        content={
+          <div className="flex flex-col items-center justify-center">
+            <ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />
+            <h1 className="text-xl leading-7 font-medium text-gray-900 mt-6">Invitez des élèves à rejoindre votre classe !</h1>
+            <p className="text-base leading-5 font-normal text-gray-900 mt-6">Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien : </p>
+            <a href={`${appURL}/je-rejoins-ma-classe-engagee/${classe._id.toString()}`} className="text-base leading-5 font-normal text-blue-600" rel="noreferrer" target="_blank">
+              {appURL}/je-rejoins-ma-classe-engagee/{classe._id.toString()}
+            </a>
+            <Button
+              type="secondary"
+              leftIcon={<MdContentCopy className="h-5 w-5" />}
+              title="Copier le lien"
+              className="mt-6 !w-80 flex items-center justify-center"
+              onClick={() => {
+                copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${classe._id.toString()}`);
+                setModalInvite(false);
+              }}
+            />
+          </div>
         }
-        actions={[{ leftIcon: <VscCopy />, title: "Copier le lien", isCancel: true, onClick: () => console.info("Copier le lien") }]}
       />
     </Page>
   );
