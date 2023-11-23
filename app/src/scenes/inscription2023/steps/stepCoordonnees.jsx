@@ -129,10 +129,10 @@ export default function StepCoordonnees() {
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
   const { stepCoordonneesConfig } = useParcours();
-  const { title, selectShoolSituation, articleSlug, supportEvent, CTAEvent } = stepCoordonneesConfig;
+  const { title, selectSchoolSituation, articleSlug, supportEvent, CTAEvent } = stepCoordonneesConfig;
 
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
-
+  console.log(selectSchoolSituation);
   const {
     birthCountry,
     birthCityZip,
@@ -335,7 +335,7 @@ export default function StepCoordonnees() {
       requiredFields.push("specificAmenagmentType");
     }
 
-    if (selectShoolSituation) {
+    if (selectSchoolSituation) {
       fieldToUpdate.push("situation");
       requiredFields.push("situation");
     }
@@ -546,7 +546,7 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        {selectShoolSituation && (
+        {selectSchoolSituation && (
           <Select
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
             options={situationOptions}
