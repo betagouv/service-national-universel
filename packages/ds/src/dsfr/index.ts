@@ -1,5 +1,3 @@
-/** @format */
-
 // Form
 import InputPhone from "./form/InputPhone";
 

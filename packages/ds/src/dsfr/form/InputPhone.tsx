@@ -3,7 +3,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 
 import { classNames } from "../../utils";
-import { PHONE_ZONES } from "../../common";
+import { PHONE_ZONES } from '../../common';
 
 type OwnProps = {
   name: string;
