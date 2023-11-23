@@ -4,8 +4,10 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { Section, Container } from "@snu/ds/dsfr";
+import { toastr } from "react-redux-toastr";
+
 import { translate } from "snu-lib";
+import { Section, Container } from "@snu/ds/dsfr";
 import api from "@/services/api";
 
 export default function confirmation() {
@@ -50,8 +52,13 @@ export default function confirmation() {
       const schoolLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY);
       const school = JSON.parse(schoolLocalStorage);
       const response = await api.post("/cle/referent-signup/confirm-signup", { schoolId: school.id.toString(), invitationToken });
+      if (!response.ok) {
+        return toastr.error(response.message || translate(response.code));
+      }
 
       // todo : refirect to the auth screen
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      localStorage.setItem("cle_referent_signup_first_time", true);
       history.push("/auth");
     } catch (e) {
       console.log(e);
