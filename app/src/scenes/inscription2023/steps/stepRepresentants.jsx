@@ -39,7 +39,7 @@ export default function StepRepresentants() {
   const dispatch = useDispatch();
   const { step } = useParams();
   const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
-  const isCle = young.cohort === YOUNG_SOURCE.CLE;
+  const isCle = young.source === YOUNG_SOURCE.CLE;
 
   const [data, setData] = React.useState({
     parent1Status: young.parent1Status || "",
