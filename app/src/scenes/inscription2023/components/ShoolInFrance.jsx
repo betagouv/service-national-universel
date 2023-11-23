@@ -52,6 +52,12 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
     }
   }, [city, loading, schoolOptions]);
 
+  function formatSchoolName(school) {
+    if (!school?.fullName) return "";
+    if (!school?.adresse) return school.fullName;
+    return school.fullName + " - " + school.adresse;
+  }
+
   return manualFilling ? (
     <>
       <Input
@@ -91,7 +97,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <AsyncCombobox label="Rechercher une commune" hint="Aucune commune trouvée." getOptions={getCities} value={city} onChange={handleChangeCity} error={errors.city} />
       <CreatableSelect
         label="Nom de l'établissement"
-        value={school?.fullName && `${school.fullName} - ${school.adresse}`}
+        value={formatSchoolName(school)}
         options={schoolOptions
           .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
           .sort()
