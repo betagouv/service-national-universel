@@ -16,8 +16,19 @@ import { GoTools } from "react-icons/go";
 import MenuLinkExternal from "./MenuLinkExternal";
 import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
 
+// WAITING FOR FINAL DECISION: What should we do with Phase 3?
+// Meanwhile we prevent 2024 cohorts' youngs from seeing the phase 3 in menu.
+const hasAccessToPhase3 = (cohort) => {
+  if (!cohort) return false;
+  if (cohort.indexOf("2024") !== -1) return false;
+  if (cohort.indexOf("à venir") !== -1) return false;
+  return true;
+};
+
 export default function NavigationMenu({ onClose = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
+  console.log("YOUNG");
+  console.log(young);
 
   return (
     <nav className="flex h-full w-full flex-col justify-between bg-[#212B44] p-[24px] transition-all md:flex-1 md:p-[8px] md:pb-[24px]">
@@ -25,11 +36,13 @@ export default function NavigationMenu({ onClose = () => {} }) {
         <MenuLink to="/" icon={<IconHome />} text="Accueil" onClose={onClose} />
         <MenuLink to="/phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} onClose={onClose} />
         <MenuLink to="/phase2" icon={<IconPhase2 />} text="Phase 2 - MIG" enabled={permissionPhase2(young)} status={young.statusPhase2} onClose={onClose} />
-        <MenuGroup to="/phase3" icon={<IconPhase3 />} text="Phase 3 - Engagement" enabled={permissionPhase3(young)} status={young.statusPhase3} onClose={onClose}>
-          <MenuLink to="/les-programmes" text="Les programmes" onClose={onClose} />
-          <MenuLink to="/phase3/mission" text="Trouver une mission" onClose={onClose} />
-          <MenuLink to="/phase3/valider" text="Valider ma phase 3" onClose={onClose} />
-        </MenuGroup>
+        {hasAccessToPhase3(young?.cohort) && (
+          <MenuGroup to="/phase3" icon={<IconPhase3 />} text="Phase 3 - Engagement" enabled={permissionPhase3(young)} status={young.statusPhase3} onClose={onClose}>
+            <MenuLink to="/les-programmes" text="Les programmes" onClose={onClose} />
+            <MenuLink to="/phase3/mission" text="Trouver une mission" onClose={onClose} />
+            <MenuLink to="/phase3/valider" text="Valider ma phase 3" onClose={onClose} />
+          </MenuGroup>
+        )}
         <div className="m-8" />
         <MenuLinkExternal
           onClick={plausibleEvent("Compte/Besoin d'aide")}
