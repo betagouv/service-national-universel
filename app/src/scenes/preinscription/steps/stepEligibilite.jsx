@@ -13,8 +13,10 @@ import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ModalRecap from "../components/ModalRecap";
 import { environment } from "../../../config";
+import { PaddedContainer } from "@snu/ds/dsfr";
 
 import IconFrance from "../../../assets/IconFrance";
+import School from "../../../assets/school.png";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import Input from "../../../components/dsfr/forms/input";
 import Toggle from "../../../components/dsfr/forms/toggle";
@@ -27,6 +29,7 @@ import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupBut
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -175,6 +178,23 @@ export default function StepEligibilite() {
   return (
     <>
       <ProgressBar isReinscription={isLoggedIn} />
+      {!isLoggedIn && (
+        <PaddedContainer className="flex py-4 sm:flex-row-reverse md:flex-row">
+          <div className="md:pr-4 sm:w-52 md:w-40">
+            <img src={School} alt="" />
+          </div>
+          <div>
+            <p className="mb-2 text-lg font-bold">Classes engagées</p>
+            <p className="text-sm">
+              Si vous envisagez une participation au SNU dans le cadre des classes engagées, vous ne pouvez pas vous inscrire ici. Veuillez attendre que votre référent classe vous
+              indique la procédure à suivre.
+            </p>
+            <InlineButton className="md:pr-4 pt-2 md:pr-2 pb-1">
+              <a href="WAITING FOR INPUT @MARGAUX">En savoir plus →</a>
+            </InlineButton>
+          </div>
+        </PaddedContainer>
+      )}
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
         <div className="space-y-5">
           {!isLoggedIn && (
