@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Redirect, useHistory, useParams } from "react-router-dom";
-import { YOUNG_STATUS } from "snu-lib";
+import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import Error from "../../../components/error";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -21,7 +21,6 @@ import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
-import useParcours from "@/services/useParcours";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -40,8 +39,7 @@ export default function StepRepresentants() {
   const dispatch = useDispatch();
   const { step } = useParams();
   const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
-  const { stepRepresentantsConfig } = useParcours();
-  const { supportEvent, CTAEvent, articleSlug, nextStepURL } = stepRepresentantsConfig;
+  const isCle = young.cohort === YOUNG_SOURCE.CLE;
 
   const [data, setData] = React.useState({
     parent1Status: young.parent1Status || "",
@@ -144,8 +142,13 @@ export default function StepRepresentants() {
           return;
         }
         dispatch(setYoung(responseData));
-        plausibleEvent(CTAEvent);
-        history.push(nextStepURL);
+        if (isCle) {
+          plausibleEvent("TBD");
+          history.push("/inscription2023/confirm");
+        } else {
+          plausibleEvent("Phase0/CTA inscription - representants legaux");
+          history.push("/inscription2023/documents");
+        }
       } catch (e) {
         capture(e);
         setErrors({
@@ -253,6 +256,8 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
+  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`;
+
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
     return <Redirect to="/" />;
   }
@@ -260,7 +265,7 @@ export default function StepRepresentants() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <DSFRContainer title="Mes représentants légaux" supportLink={supportURL + "/base-de-connaissance/" + articleSlug} supportEvent={supportEvent}>
+      <DSFRContainer title="Mes représentants légaux" supportLink={supportLink} supportEvent="Phase0/aide inscription - rep leg">
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
         <hr className="my-4 h-px border-0 bg-gray-200" />
@@ -284,7 +289,7 @@ export default function StepRepresentants() {
           <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
         )}
       </DSFRContainer>
-      <Help supportLink={supportURL + "/base-de-connaissance/" + articleSlug} />
+      <Help supportLink={supportLink} />
     </>
   );
 }
