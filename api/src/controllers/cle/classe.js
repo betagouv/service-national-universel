@@ -4,12 +4,14 @@ const passport = require("passport");
 const Joi = require("joi");
 const { CLE_COLORATION_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST, ROLES, canWriteClasse, canViewClasse } = require("snu-lib");
 const mongoose = require("mongoose");
-
-const { capture } = require("../../sentry");
+const { capture, captureMessage } = require("../../sentry");
 const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
+const ReferentModel = require("../../models/referent");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
+const { ERRORS } = require("../../utils");
+const { validateId } = require("../../utils/validator");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   let session;
@@ -121,6 +123,30 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     classe = await classe.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: classe });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const { error, value } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const classe = await ClasseModel.findById(value)?.lean();
+    if (!classe) {
+      captureMessage("Error finding classe with id : " + JSON.stringify(value));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    const { etablissementId, referentClasseIds } = classe;
+    const etablissement = etablissementId ? await EtablissementModel.findById(etablissementId)?.lean() : {};
+    const referentClasse = referentClasseIds.length ? await ReferentModel.findById(referentClasseIds[0])?.lean() : {};
+
+    return res.status(200).send({ ok: true, data: { ...classe, etablissement, referentClasse } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
