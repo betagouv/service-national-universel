@@ -3,8 +3,8 @@ const passport = require("passport");
 const router = express.Router();
 const Joi = require("joi");
 const mongoose = require("mongoose");
-const { ROLES, canInviteCoordinateur } = require("snu-lib");
-
+const { ROLES, SUB_ROLES, canInviteCoordinateur } = require("snu-lib");
+const { MongoError } = require("mongodb");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const EtablissementModel = require("../../models/cle/etablissement");
@@ -43,20 +43,25 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
     session = await mongoose.startSession();
     session.withTransaction(async () => {
       const referent = await findOrCreateReferent({ email, firstName, lastName }, { etablissement, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle, session });
-  
+      if (!referent) {
+        return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+      }
+      if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
       etablissement.set({
         coordinateurIds: [...etablissement.coordinateurIds, referent._id.toString()],
       });
-      await etablissement.save({ fromUser: req.user, session });
+
+      await etablissement.save({ fromUser: req.user });
 
       // We send the email invitation once we are sure both the referent and the classe are created
-      await inviteReferent(referent, { role: ROLES.ADMINISTRATEUR_CLE, user: req.user })
-    });
+      await inviteReferent(referent, { role: ROLES.ADMINISTRATEUR_CLE, user: req.user });
 
-    return res.status(200).send({ ok: true });
+      return res.status(200).send({ ok: true });
+    });
   } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
+    await session?.abortTransaction();
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   } finally {
     session?.endSession();

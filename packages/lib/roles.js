@@ -96,11 +96,6 @@ function canInviteUser(actorRole, targetRole) {
     return targetRole === ROLES.RESPONSIBLE || targetRole === ROLES.SUPERVISOR;
   }
 
-  // ADMINISTRATOR_CLE can invite only ADMINSISTRATOR_CLE and REFERENT_CLASSE
-  if (actorRole === ROLES.ADMINISTRATEUR_CLE) {
-    return targetRole === ROLES.ADMINISTRATEUR_CLE || targetRole === ROLES.REFERENT_CLASSE;
-  }
-
   return false;
 }
 

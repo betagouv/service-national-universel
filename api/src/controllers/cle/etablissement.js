@@ -9,7 +9,7 @@ const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");
 const EtablissementModel = require("../../models/cle/etablissement");
 
-router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/from-user", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     if (!canViewEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -44,9 +44,10 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.put("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
+      id: Joi.string().required(),
       type: Joi.array()
         .items(Joi.string().valid(...CLE_TYPE_LIST))
         .required(),
@@ -55,7 +56,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
         .required(),
     })
       .unknown()
-      .validate(req.body, { stripUnknown: true });
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
     if (error) {
       capture(error);
@@ -64,7 +65,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
 
     if (!canUpdateEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [req.user._id] } });
+    const etablissement = await EtablissementModel.findById(value.id);
     if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     etablissement.set({

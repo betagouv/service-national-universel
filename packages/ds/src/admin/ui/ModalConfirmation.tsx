@@ -1,6 +1,8 @@
 import React from "react";
 import Button from "./Button";
 import Modal from "./Modal";
+import ReactTooltip, { TooltipProps } from "react-tooltip";
+import { HiOutlineInformationCircle } from "react-icons/hi";
 
 type TAction = {
   title: string;
@@ -19,6 +21,9 @@ type OwnProps = {
   icon?: React.ReactNode;
   title?: string;
   text?: React.ReactNode;
+  tooltip?: React.ReactNode;
+  tooltipProps?: TooltipProps;
+  tooltipClassName?: string;
 };
 
 export default function ModalConfirmation({
@@ -29,7 +34,11 @@ export default function ModalConfirmation({
   icon,
   title,
   text,
+  tooltip,
+  tooltipProps,
+  tooltipClassName,
 }: OwnProps) {
+  const tooltipId = `tooltip-${title}`;
   return (
     <Modal
       isOpen={isOpen}
@@ -38,9 +47,39 @@ export default function ModalConfirmation({
       header={icon && <div className="flex justify-center">{icon}</div>}
       content={
         <div className="text-center">
-          {title && (
-            <h3 className="text-xl font-bold text-ds-gray-900">{title}</h3>
-          )}
+          <div className="flex items-center justify-center">
+            {title && (
+              <h3 className="text-xl font-bold text-ds-gray-900">{title}</h3>
+            )}
+            {tooltip && (
+              <>
+                <HiOutlineInformationCircle
+                  size={20}
+                  className="ml-3 text-gray-400"
+                  data-tip
+                  data-for={tooltipId}
+                />
+                <ReactTooltip
+                  id={tooltipId}
+                  type="light"
+                  place="top"
+                  effect="solid"
+                  className="custom-tooltip-radius !opacity-100 !shadow-md"
+                  {...(tooltipProps || {})}
+                >
+                  <div
+                    className={
+                      "w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600 " +
+                      tooltipClassName
+                    }
+                  >
+                    {tooltip}
+                  </div>
+                </ReactTooltip>
+              </>
+            )}
+          </div>
+
           {text && <div className="mt-2 text-ds-gray-500">{text}</div>}
         </div>
       }
