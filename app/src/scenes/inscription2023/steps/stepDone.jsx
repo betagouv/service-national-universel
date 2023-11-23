@@ -16,6 +16,7 @@ import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonCont
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
 import plausibleEvent from "@/services/plausible";
 import useParcours from "../../../services/useParcours";
+import { YOUNG_SOURCE } from "snu-lib";
 
 export default function StepWaitingConsent() {
   const young = useSelector((state) => state.Auth.young);
@@ -23,8 +24,7 @@ export default function StepWaitingConsent() {
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const notAuthorised = young?.parentAllowSNU === "false";
-  const { stepInscriptionDoneConfig } = useParcours();
-  const { textWaitingValidation, textValidated, isJdaRequested } = stepInscriptionDoneConfig;
+  const isCle = YOUNG_SOURCE.CLE === young.source;
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -90,14 +90,20 @@ export default function StepWaitingConsent() {
           <p className="text-base text-[#161616] ">
             Bonne nouvelle, votre représentant légal a <strong>déjà donné son consentement.</strong>
           </p>
-          <p className="mt-2 text-base text-[#161616]">{textValidated}</p>
+          <p className="mt-2 text-base text-[#161616]">
+            {isCle ? "Vous pouvez désormais accéder à votre compte élève" : "Vous pouvez désormais accéder à votre compte volontaire"}
+          </p>
           <SignupButtonContainer labelNext="Accéder à mon compte" onClickNext={handleDone} />
         </DSFRContainer>
       ) : (
         <>
           <DSFRContainer title="Bravo, vous avez terminé votre inscription.">
             {error?.text && <Error {...error} onClose={() => setError({})} />}
-            <p className="mt-2 text-sm text-[#666666]">{textWaitingValidation}</p>
+            <p className="mt-2 text-sm text-[#666666]">
+              {isCle
+                ? "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à votre établissement scolaire pour le valider."
+                : "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider."}
+            </p>
 
             <div className="mt-4 flex flex-col gap-1 border-[1px] border-b-4 border-[#E5E5E5] border-b-[#000091] p-4">
               <div className="text-base font-bold text-[#161616]">En attente du consentement de :</div>
@@ -119,7 +125,7 @@ export default function StepWaitingConsent() {
               <EditPen />
               Modifier mes informations
             </div>
-            {isJdaRequested && (
+            {!isCle && (
               <div className="flex w-full justify-end">
                 <a className="w-36" href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3504?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f">
                   <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
