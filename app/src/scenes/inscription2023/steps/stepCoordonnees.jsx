@@ -36,7 +36,7 @@ import { apiAdress, getAddressOptions } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
-import useParcours from "@/services/useParcours";
+import { YOUNG_SOURCE } from "snu-lib";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -128,9 +128,8 @@ export default function StepCoordonnees() {
   const { step } = useParams();
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
-  const { stepCoordonneesConfig } = useParcours();
-  const { title, selectShoolSituation, articleSlug, supportEvent, CTAEvent } = stepCoordonneesConfig;
 
+  const isCle = YOUNG_SOURCE.CLE === young.source;
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
 
   const {
@@ -335,7 +334,7 @@ export default function StepCoordonnees() {
       requiredFields.push("specificAmenagmentType");
     }
 
-    if (selectShoolSituation) {
+    if (!isCle) {
       fieldToUpdate.push("situation");
       requiredFields.push("situation");
     }
@@ -382,7 +381,7 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
-        plausibleEvent(CTAEvent);
+        plausibleEvent("Phase0/CTA inscription - profil");
         dispatch(setYoung(responseData));
         history.push("/inscription2023/consentement");
       } catch (e) {
@@ -500,7 +499,10 @@ export default function StepCoordonnees() {
   return (
     <>
       <Navbar onSave={onSave} />
-      <DSFRContainer title={title} supportLink={`${supportURL}/base-de-connaissance/${articleSlug}`} supportEvent={supportEvent}>
+      <DSFRContainer
+        title={isCle ? "Mon profil élève" : "Mon profil volontaire"}
+        supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}
+        supportEvent="Phase0/aide inscription - coordonnees">
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect
@@ -546,7 +548,7 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        {selectShoolSituation && (
+        {!isCle && (
           <Select
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
             options={situationOptions}
