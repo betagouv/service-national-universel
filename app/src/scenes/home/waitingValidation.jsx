@@ -11,9 +11,11 @@ import API from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { inscriptionModificationOpenForYoungs, translate, YOUNG_STATUS } from "../../utils";
 import { getCohort } from "@/utils/cohorts";
+import { YOUNG_SOURCE } from "snu-lib";
 
 export default function WaitingValidation() {
   const young = useSelector((state) => state.Auth.young);
+  const isCle = YOUNG_SOURCE.CLE === young.source;
   const cohort = getCohort(young.cohort);
   const history = useHistory();
   const dispatch = useDispatch();
