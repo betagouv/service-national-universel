@@ -87,7 +87,6 @@ const OnBoarding = () => {
       value: classe?.dateStart,
     },
   ];
-  
   return (
     <DSFRLayout title="Inscription de l'élève">
       {classe && (
