@@ -93,7 +93,7 @@ router.post("/confirm-email", async (req, res) => {
 
     if (referent.token2FA !== value.code) {
       referent.set({ attempts2FA: referent.attempts2FA + 1 });
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "Le code est erronné." });
     }
 
     referent.set({
