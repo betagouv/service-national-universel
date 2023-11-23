@@ -65,8 +65,8 @@ export default function confirmation() {
       <div className="m-auto max-w-[587px]">
         <Stepper currentStep={5} stepCount={5} title="Création d’un compte : confirmation" />
       </div>
-      <Container className="flex flex-col gap-8">
-        <form onSubmit={submit}>
+      <form onSubmit={submit}>
+        <Container className="flex flex-col gap-8">
           <div className="flex items-start justify-between">
             <h1 className="text-xl font-bold">Validez vos informations</h1>
             <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
@@ -152,8 +152,8 @@ export default function confirmation() {
           <div className="flex justify-end">
             <Button type="submit">Valider</Button>
           </div>
-        </form>
-      </Container>
+        </Container>
+      </form>
     </Section>
   );
 }

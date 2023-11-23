@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 
 const config = require("../../config");
 const { capture } = require("../../sentry");
-const { ERRORS } = require("../../utils");
+const { ERRORS, validatePassword } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
 const SchoolRamsesModel = require("../../models/schoolRAMSES");
@@ -170,6 +170,8 @@ router.post("/", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
+
+    if (!validatePassword(value.password)) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

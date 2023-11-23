@@ -33,9 +33,11 @@ export default function informations() {
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
 
-  const submit = async () => {
+  const submit = async (e) => {
+    e.preventDefault();
     try {
-      // stocker dans local storage
+      if (password !== confirmPassword) return toastr.error("Les mots de passe ne correspondent pas");
+      // stocker dans local storage, pour une création de compte en plusieurs étapes
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(school));
       const { ok, data, code, message } = await api.post(`/cle/referent-signup`, {
         firstName,
@@ -45,10 +47,15 @@ export default function informations() {
         confirmPassword,
         invitationToken,
       });
-      if (!ok) return toastr.error(message || translate(code));
+      if (!ok) {
+        return toastr.error(message || translate(code));
+      }
       history.push(`/creer-mon-compte/confirmation${search}`);
     } catch (error) {
-      console.log(error);
+      if (error.code === "PASSWORD_NOT_VALIDATED")
+        return toastr.error("Mot de passe incorrect", "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole", {
+          timeOut: 10000,
+        });
       if (error?.message) return toastr.error(error?.message);
     }
   };
@@ -72,6 +79,13 @@ export default function informations() {
   }, []);
 
   useEffect(() => {
+    const localStorageEtablissement = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (localStorageEtablissement) {
+      setSchool(JSON.parse(localStorageEtablissement));
+    }
+  }, []);
+
+  useEffect(() => {
     if (!user) return;
     setFirstName(user.firstName);
     setLastName(user.lastName);
@@ -85,68 +99,76 @@ export default function informations() {
       <div className="m-auto max-w-[587px]">
         <Stepper currentStep={4} stepCount={5} title="Création d’un compte : informations" nextTitle="Confirmation" />
       </div>
-      <Container className="flex flex-col gap-8">
-        <div className="flex items-start justify-between">
-          <h1 className="text-xl font-bold">Complétez ces informations</h1>
-          <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
-        </div>
-        <hr className="p-1" />
-        <div className="flex gap-6">
+      <form onSubmit={submit}>
+        <Container className="flex flex-col gap-8">
+          <div className="flex items-start justify-between">
+            <h1 className="text-xl font-bold">Complétez ces informations</h1>
+            <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
+          </div>
+          <hr className="p-1" />
+          <div className="flex gap-6">
+            <div className="w-full">
+              <Input
+                label="Prénom"
+                state="default"
+                nativeInputProps={{
+                  placeholder: "Jean",
+                  value: firstName,
+                  onChange: (e) => setFirstName(e.target.value),
+                  required: true,
+                }}
+              />
+            </div>
+            <div className="w-full">
+              <Input
+                label="Nom"
+                state="default"
+                nativeInputProps={{
+                  placeholder: "Michel",
+                  value: lastName,
+                  onChange: (e) => setLastName(e.target.value),
+                  required: true,
+                }}
+              />
+            </div>
+          </div>
           <div className="w-full">
+            <>
+              <div className="flex items-center justify-between">Établissement scolaire</div>
+              <SchoolInFrance school={school} onSelectSchool={(s) => setSchool(s)} />
+            </>
+          </div>
+          <div className="w-full">
+            {/* todo : handle phone zone */}
             <Input
-              label="Prénom"
+              label="Numéro de téléphone"
               state="default"
               nativeInputProps={{
-                placeholder: "Jean",
-                value: firstName,
-                onChange: (e) => setFirstName(e.target.value),
+                placeholder: "06123456789",
+                value: phone,
+                onChange: (e) => setPhone(e.target.value),
+                required: true,
               }}
             />
           </div>
-          <div className="w-full">
-            <Input
-              label="Nom"
-              state="default"
-              nativeInputProps={{
-                placeholder: "Michel",
-                value: lastName,
-                onChange: (e) => setLastName(e.target.value),
-              }}
-            />
+          <div className="flex flex-col gap-2">
+            <div className="w-full">
+              <PasswordInput label="Mot de passe" nativeInputProps={{ value: password, onChange: (e) => setPassword(e.target.value), required: true }} />
+            </div>
+            <p className="text-neutral-600 text-sm">Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</p>
+            <div className="w-full">
+              <PasswordInput
+                label="Confirmer votre mot de passe"
+                nativeInputProps={{ value: confirmPassword, onChange: (e) => setConfirmPassword(e.target.value), required: true }}
+              />
+            </div>
           </div>
-        </div>
-        <div className="w-full">
-          <>
-            <div className="flex items-center justify-between">Établissement scolaire</div>
-            <SchoolInFrance school={school} onSelectSchool={(s) => setSchool(s)} />
-          </>
-        </div>
-        <div className="w-full">
-          {/* todo : handle phone zone */}
-          <Input
-            label="Numéro de téléphone"
-            state="default"
-            nativeInputProps={{
-              placeholder: "06123456789",
-              value: phone,
-              onChange: (e) => setPhone(e.target.value),
-            }}
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <div className="w-full">
-            <PasswordInput label="Mot de passe" nativeInputProps={{ value: password, onChange: (e) => setPassword(e.target.value) }} />
+          <hr className="p-1" />
+          <div className="flex justify-end">
+            <Button type="submit">Continuer</Button>
           </div>
-          <p className="text-neutral-600 text-sm">Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</p>
-          <div className="w-full">
-            <PasswordInput label="Confirmer votre mot de passe" nativeInputProps={{ value: confirmPassword, onChange: (e) => setConfirmPassword(e.target.value) }} />
-          </div>
-        </div>
-        <hr className="p-1" />
-        <div className="flex justify-end">
-          <Button onClick={submit}>Continuer</Button>
-        </div>
-      </Container>
+        </Container>
+      </form>
     </Section>
   );
 }
