@@ -190,7 +190,9 @@ export default function StepEligibilite() {
               indique la procédure à suivre.
             </p>
             <InlineButton className="md:pr-4 pt-2 md:pr-2 pb-1">
-              <a href="WAITING FOR INPUT @MARGAUX">En savoir plus →</a>
+              <a rel="noreferrer noopener" target="blank" href="#">
+                En savoir plus →
+              </a>
             </InlineButton>
           </div>
         </PaddedContainer>
