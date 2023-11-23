@@ -1,8 +1,8 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory, useParams } from "react-router-dom";
-import { YOUNG_STATUS } from "snu-lib";
+import { Redirect, useHistory, useParams } from "react-router-dom";
+import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import Error from "../../../components/error";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -39,7 +39,7 @@ export default function StepRepresentants() {
   const dispatch = useDispatch();
   const { step } = useParams();
   const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
-  if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) history.push("/");
+  const isCle = young.source === YOUNG_SOURCE.CLE;
 
   const [data, setData] = React.useState({
     parent1Status: young.parent1Status || "",
@@ -142,8 +142,13 @@ export default function StepRepresentants() {
           return;
         }
         dispatch(setYoung(responseData));
-        plausibleEvent("Phase0/CTA inscription - representants legaux");
-        history.push("/inscription2023/documents");
+        if (isCle) {
+          plausibleEvent("TBD");
+          history.push("/inscription2023/confirm");
+        } else {
+          plausibleEvent("Phase0/CTA inscription - representants legaux");
+          history.push("/inscription2023/documents");
+        }
       } catch (e) {
         capture(e);
         setErrors({
@@ -253,6 +258,10 @@ export default function StepRepresentants() {
 
   const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`;
 
+  if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
+    return <Redirect to="/" />;
+  }
+
   return (
     <>
       <Navbar onSave={onSave} />
@@ -265,6 +274,7 @@ export default function StepRepresentants() {
             checked={isParent2Visible}
             onChange={(e) => {
               plausibleEvent("Phase0/CTA inscription - ajouter rep leg");
+              // Event mal nommé, pas un call to action. Ne pas confondre avec l'event envoyé lors du clic sur le bouton "Suivant".
               setIsParent2Visible(e);
             }}
           />
