@@ -352,11 +352,13 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       value.parent2Inscription2023Token = "";
     }
 
+    const isCle = young.source === YOUNG_SOURCE.CLE;
+
     if (type === "next") {
       if (isYoungInReinscription(young)) {
-        value.reinscriptionStep2023 = STEPS2023.DOCUMENTS;
+        value.reinscriptionStep2023 = isCle ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
       } else {
-        value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+        value.inscriptionStep2023 = isCle ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
       }
 
       if (!young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
