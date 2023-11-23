@@ -28,8 +28,6 @@ export default function Index() {
   useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
   const history = useHistory();
 
-  const [serviceTagline, setServiceTagline] = useState("Classe engagée");
-
   const [onboardedUser, setOnboardedUser] = useState(null);
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -57,11 +55,10 @@ export default function Index() {
     })();
   }, []);
 
-  useEffect(() => {
-    if (!onboardedUser) return;
-    if (onboardedUser.role === ROLES.ADMINISTRATEUR_CLE) setServiceTagline("Compte administrateur CLE");
-    if (onboardedUser.role === ROLES.REFERENT_CLASSE) setServiceTagline("Compte Responsable Classe engagée");
-  }, [onboardedUser]);
+  const TAGLINE = {
+    [ROLES.ADMINISTRATEUR_CLE]: "Compte administrateur CLE",
+    [ROLES.REFERENT_CLASSE]: "Compte Responsable Classe engagée",
+  };
 
   if (!onboardedUser) return <div>Chargement...</div>;
 
@@ -86,7 +83,7 @@ export default function Index() {
           title: "Accueil - Nom de l’entité (ministère, secrétariat d‘état, gouvernement)",
         }}
         serviceTitle="Service National Universel"
-        serviceTagline={serviceTagline}
+        serviceTagline={TAGLINE[onboardedUser.role] || ""}
         quickAccessItems={[
           {
             iconId: fr.cx("fr-icon-todo-fill"),
@@ -117,8 +114,8 @@ export default function Index() {
         <SentryRoute path="/creer-mon-compte" exact component={() => <Role user={onboardedUser} />} />
         <SentryRoute path="/creer-mon-compte/email" component={() => <Email user={onboardedUser} />} />
         <SentryRoute path="/creer-mon-compte/code" component={() => <Code user={onboardedUser} />} />
-        <SentryRoute path="/creer-mon-compte/informations" component={() => <Informations user={onboardedUser} />} />
-        <SentryRoute path="/creer-mon-compte/confirmation" component={() => <Confirmation user={onboardedUser} />} />
+        <SentryRoute path="/creer-mon-compte/informations" component={() => <Informations />} />
+        <SentryRoute path="/creer-mon-compte/confirmation" component={() => <Confirmation />} />
       </Switch>
 
       <Section>
