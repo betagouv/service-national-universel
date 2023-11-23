@@ -27,8 +27,6 @@ const hasAccessToPhase3 = (cohort) => {
 
 export default function NavigationMenu({ onClose = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
-  console.log("YOUNG");
-  console.log(young);
 
   return (
     <nav className="flex h-full w-full flex-col justify-between bg-[#212B44] p-[24px] transition-all md:flex-1 md:p-[8px] md:pb-[24px]">
