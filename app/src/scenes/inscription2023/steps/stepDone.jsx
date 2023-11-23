@@ -15,7 +15,6 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
 import plausibleEvent from "@/services/plausible";
-import useParcours from "../../../services/useParcours";
 import { YOUNG_SOURCE } from "snu-lib";
 
 export default function StepWaitingConsent() {
