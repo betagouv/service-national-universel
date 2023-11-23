@@ -33,8 +33,6 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
 });
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  let session;
-
   try {
     const { error, value } = Joi.object({
       // Classe
@@ -63,32 +61,24 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (previousClasse) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
     let classe;
-    // Learn more about session/transaction with mongoos here: https://mongoosejs.com/docs/transactions.html
-    session = await mongoose.startSession();
-    // Transaction make sure all ressources are created/updated or none will be persisted in the database
-    session.withTransaction(async () => {
-      const referent = await findOrCreateReferent(value.referent, { role: ROLES.REFERENT_CLASSE, session });
-      if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
+    const referent = await findOrCreateReferent(value.referent, { role: ROLES.REFERENT_CLASSE });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
 
-      const defaultCleCohort = await CohortModel.findOne({ name: value.cohort }, { session });
-      if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
+    const defaultCleCohort = await CohortModel.findOne({ name: value.cohort });
+    if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
 
-      classe = await ClasseModel.create(
-        {
-          ...value,
-          cohort: defaultCleCohort.name,
-          uniqueKey,
-          uniqueId: value.uniqueId,
-          uniqueKeyAndId: uniqueKey + "_" + value.uniqueId,
-          referentClasseIds: [referent._id],
-          etablissementId: etablissement._id,
-        },
-        { session },
-      );
-
-      // We send the email invitation once we are sure both the referent and the classe are created
-      await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user });
+    classe = await ClasseModel.create({
+      ...value,
+      cohort: defaultCleCohort.name,
+      uniqueKey,
+      uniqueId: value.uniqueId,
+      uniqueKeyAndId: uniqueKey + "_" + value.uniqueId,
+      referentClasseIds: [referent._id],
+      etablissementId: etablissement._id,
     });
+
+    // We send the email invitation once we are sure both the referent and the classe are created
+    await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user });
 
     if (!classe) throw new Error("Classe not created.");
 
@@ -96,8 +86,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  } finally {
-    session?.endSession();
   }
 });
 

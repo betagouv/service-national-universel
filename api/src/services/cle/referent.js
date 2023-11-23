@@ -7,7 +7,7 @@ const ReferentModel = require("../../models/referent");
 const { inSevenDays } = require("../../utils");
 const { capture } = require("../../sentry");
 
-const findOrCreateReferent = async (referent, { etablissement, role, subRole, session }) => {
+const findOrCreateReferent = async (referent, { etablissement, role, subRole }) => {
   try {
     // Return if already exists
     if (referent._id) return referent;
@@ -15,22 +15,17 @@ const findOrCreateReferent = async (referent, { etablissement, role, subRole, se
     // Create referent
     if (!referent.email || !referent.firstName || !referent.lastName) throw new Error("Missing referent email or firstName or lastName");
     const invitationToken = crypto.randomBytes(20).toString("hex");
-    referent = await ReferentModel.create(
-      [
-        {
-          ...referent,
-          role,
-          subRole,
-          invitationToken,
-          invitationExpires: inSevenDays(),
-          department: etablissement.department,
-          region: etablissement.region,
-        },
-      ],
-      { session: session },
-    );
+    referent = await ReferentModel.create({
+      ...referent,
+      role,
+      subRole,
+      invitationToken,
+      invitationExpires: inSevenDays(),
+      department: etablissement.department,
+      region: etablissement.region,
+    });
 
-    return referent[0];
+    return referent;
   } catch (e) {
     if (e.code === 11000) return ERRORS.USER_ALREADY_REGISTERED;
     capture(e);
