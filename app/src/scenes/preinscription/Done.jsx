@@ -30,7 +30,7 @@ export default function Done() {
         <h1 className="text-3xl font-semibold leading-snug">{isCle ? "Votre compte élève a été créé." : "Votre compte volontaire a été créé."}</h1>
         <p className="py-2 mt-2 text-gray-600">
           {" "}
-          "Vous pouvez dès à présent <strong>finaliser votre inscription</strong> ou la reprendre à tout moment depuis le mail envoyé à {young.email}, ou depuis l’écran de
+          Vous pouvez dès à présent <strong>finaliser votre inscription</strong> ou la reprendre à tout moment depuis le mail envoyé à {young.email}, ou depuis l’écran de
           connexion.
         </p>
         <p className="py-2 text-gray-600">Attention, une inscription complète est indispensable pour valider votre candidature au SNU.</p>
