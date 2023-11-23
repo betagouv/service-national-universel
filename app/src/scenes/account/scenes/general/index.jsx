@@ -21,7 +21,6 @@ import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
 import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
-import { YOUNG_SOURCE } from "snu-lib";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -196,16 +195,14 @@ const AccountGeneralPage = () => {
           </div>
         </form>
       </div>
-      {YOUNG_SOURCE.VOLONTAIRE === young.source ? (
-        <div className="flex flex-col items-center gap-6 py-8 lg:flex-row">
-          {youngCanChangeSession(young) ? (
-            <Link to="/changer-de-sejour" className="flex items-center gap-2 text-sm text-blue-600">
-              Changer de séjour
-            </Link>
-          ) : null}
-          <Withdrawal young={young} />
-        </div>
-      ) : null}
+      <div className="flex flex-col items-center gap-6 py-8 lg:flex-row">
+        {youngCanChangeSession(young) ? (
+          <Link to="/changer-de-sejour" className="flex items-center gap-2 text-sm text-blue-600">
+            Changer de séjour
+          </Link>
+        ) : null}
+        <Withdrawal young={young} />
+      </div>
     </>
   );
 };
