@@ -159,6 +159,7 @@ router.post("/", async (req, res) => {
     const { error, value } = Joi.object({
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
+      // todo : check phone format
       phone: Joi.string(),
       password: Joi.string().required(),
       invitationToken: Joi.string().required(),

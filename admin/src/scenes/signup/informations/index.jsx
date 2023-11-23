@@ -134,6 +134,8 @@ export default function informations() {
           </div>
           <div className="w-full">
             <>
+              {/* todo : flag it as required */}
+              {/* todo : on reload the state seems broken : there is the city prefilled, but we no school is available in the list */}
               <div className="flex items-center justify-between">Établissement scolaire</div>
               <SchoolInFrance school={school} onSelectSchool={(s) => setSchool(s)} />
             </>
