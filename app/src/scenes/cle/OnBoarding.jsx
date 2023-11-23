@@ -12,7 +12,6 @@ import PrimaryButton from "@/components/dsfr/ui/buttons/PrimaryButton";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
-import { TEST_MARIN } from "@/config";
 
 const Title = () => (
   <div>
@@ -88,9 +87,7 @@ const OnBoarding = () => {
       value: classe?.dateStart,
     },
   ];
-  console.log("TEST_MARIN:");
-  console.log(TEST_MARIN);
-
+  
   return (
     <DSFRLayout title="Inscription de l'élève">
       {classe && (
