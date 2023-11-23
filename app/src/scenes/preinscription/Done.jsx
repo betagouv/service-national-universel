@@ -8,12 +8,12 @@ import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { capture } from "../../sentry";
 import { supportURL } from "@/config";
-import useParcours from "@/services/useParcours";
+import { YOUNG_SOURCE } from "snu-lib";
 
 export default function Done() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
-  const { stepPreinscriptionDoneConfig } = useParcours();
+  const isCle = YOUNG_SOURCE.CLE === young.source;
   async function handleClick() {
     try {
       plausibleEvent("Phase0/CTA preinscription - finaliser");
@@ -26,11 +26,15 @@ export default function Done() {
   return (
     <>
       <DSFRContainer supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
-        <h1 className="text-3xl font-semibold leading-snug">{stepPreinscriptionDoneConfig.welcomeText}</h1>
-        <h1 className="text-3xl font-semibold leading-snug">{stepPreinscriptionDoneConfig.accountCreatedText}</h1>
-        <p className="py-2 mt-2 text-gray-600">{stepPreinscriptionDoneConfig.finalizeInscription}</p>
-        <p className="py-2 text-gray-600">{stepPreinscriptionDoneConfig.importantNote}</p>
-        {stepPreinscriptionDoneConfig.isCniRequested && (
+        <h1 className="text-3xl font-semibold leading-snug">Bienvenue {young.firstName} 🎉</h1>
+        <h1 className="text-3xl font-semibold leading-snug">{isCle ? "Votre compte élève a été créé." : "Votre compte volontaire a été créé."}</h1>
+        <p className="py-2 mt-2 text-gray-600">
+          {" "}
+          Vous pouvez dès à présent <strong>finaliser votre inscription</strong> ou la reprendre à tout moment depuis le mail envoyé à {young.email}, ou depuis l’écran de
+          connexion.
+        </p>
+        <p className="py-2 text-gray-600">Attention, une inscription complète est indispensable pour valider votre candidature au SNU.</p>
+        {!isCle && (
           <>
             <hr className="mt-4" />
             <h2 className="text-lg font-semibold">Préparez le document suivant :</h2>
