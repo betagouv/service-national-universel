@@ -32,15 +32,16 @@ const findOrCreateReferent = async (referent, { etablissement, role, subRole }) 
   }
 };
 
-const inviteReferent = async (referent, { role, user }) => {
+const inviteReferent = async (referent, { role, user }, etablissement) => {
   // Send invite
   const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${referent.invitationToken}`;
   const fromName = `${user.firstName} ${user.lastName}`;
   const toName = `${referent.firstName} ${referent.lastName}`;
+  const name_school = `${etablissement.name}`;
 
   await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[role], {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { cta, fromName, toName },
+    params: { cta, fromName, toName, name_school },
   });
 };
 
