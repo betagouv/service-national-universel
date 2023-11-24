@@ -48,11 +48,12 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { error, value } = Joi.object({
       // Classe
       uniqueKey: Joi.string().required(),
-      uniqueId: Joi.string().alphanum().min(0).max(15).required(),
+      uniqueId: Joi.string().alphanum().min(0).max(15).allow("").required(),
       cohort: Joi.string().default("CLE 23-24").required(),
       etablissementId: Joi.string().required(),
       // Referent
       referent: Joi.object({
+        _id: Joi.string().optional(),
         firstName: Joi.string(),
         lastName: Joi.string(),
         email: Joi.string(),
@@ -82,14 +83,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     classe = await ClasseModel.create({
       ...value,
-      status: STATUS_CLASSE.DRAFT,
+      status: STATUS_CLASSE.INSCRIPTION_IN_PROGRESS,
       statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
       cohort: defaultCleCohort.name,
       uniqueKeyAndId: value.uniqueKey + "_" + value.uniqueId,
       referentClasseIds: [referent._id],
     });
-    console.log(value.etablissement);
-    // We send the email invitation once we are sure both the referent and the classe are created
+
     await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user }, value.etablissement);
 
     if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });

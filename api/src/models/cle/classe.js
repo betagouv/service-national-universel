@@ -40,7 +40,6 @@ const Schema = new mongoose.Schema({
 
   uniqueId: {
     type: String,
-    required: true,
     documentation: {
       description: "ID unique de la classe (*_XXXX)",
     },

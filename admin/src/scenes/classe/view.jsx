@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Badge, Label, InputText, ModalConfirmation, Select } from "@snu/ds/admin";
 import { HiOutlinePencil } from "react-icons/hi";
@@ -6,16 +6,42 @@ import { BsSend, BsTrash3 } from "react-icons/bs";
 import { VscCopy } from "react-icons/vsc";
 import ClasseIcon from "@/components/drawer/icons/Classe";
 import { Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import { toastr } from "react-redux-toastr";
+import { translate, STATUS_CLASSE } from "snu-lib";
 
 export default function view() {
-  const [form, setForm] = useState({ name: "CAP vert" });
+  const [classe, setClasse] = useState({});
   const [modalInvite, setModalInvite] = useState(false);
+  const { id } = useParams();
+
+  const getClasse = async () => {
+    try {
+      const { ok, code, data: response } = await api.get(`/cle/classe/${id}`);
+
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
+      }
+      setClasse(response);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe");
+    }
+  };
+
+  useEffect(() => {
+    getClasse();
+  }, []);
+
+  console.log(classe);
 
   return (
     <Page>
       <Header
-        title={form.name}
-        titleComponent={<Badge className="mx-4" title="En cours d'inscription" status="inProgress" />}
+        title={classe.name || "Informations nécessaires"}
+        titleComponent={<Badge className="mx-4" title={translate(classe.status)} status="inProgress" />}
         breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
         actions={[<Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />]}
       />
@@ -30,7 +56,7 @@ export default function view() {
               <InputText className="flex-1" placeholder="ABCDE" />
             </div>
             <Label title="Nom de la classe engagée" tooltip="This is a test and need to be replaced." />
-            <InputText className="mb-3" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <InputText className="mb-3" value={classe.name} onChange={(e) => setclasse({ ...classe, name: e.target.value })} />
             <Label title="Coloration" tooltip="This is a test and need to be replaced." />
             <Select value={{ value: "Environnement", label: "Environnement" }} options={[{ value: "Environnement", label: "Environnement" }]} />
           </div>
@@ -60,42 +86,48 @@ export default function view() {
         ]}>
         <div className="flex items-stretch justify-between">
           <table className="flex-1 shrink-0">
-            <tr>
-              <td className="font-bold pr-4">Objectif :</td>
-              <td className="px-4 font-bold text-lg text-center">27</td>
-              <td className="text-gray-500 text-center">Élèves</td>
-            </tr>
-            <tr className="mt-8">
-              <td className="font-bold pr-4">Total :</td>
-              <td className="px-4 font-bold text-lg text-center">0</td>
-              <td className="text-gray-500 text-center">0%</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td className="font-bold pr-4">Objectif :</td>
+                <td className="px-4 font-bold text-lg text-center">27</td>
+                <td className="text-gray-500 text-center">Élèves</td>
+              </tr>
+              <tr className="mt-8">
+                <td className="font-bold pr-4">Total :</td>
+                <td className="px-4 font-bold text-lg text-center">0</td>
+                <td className="text-gray-500 text-center">0%</td>
+              </tr>
+            </tbody>
           </table>
           <div className="mx-8 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
           <table className="flex-1 shrink-0">
-            <tr>
-              <td className="font-bold text-lg text-right">0</td>
-              <td className="px-4 flex-1">Élves inscrits</td>
-              <td className="text-gray-500">(0%)</td>
-            </tr>
-            <tr>
-              <td className="font-bold text-lg text-right">0</td>
-              <td className="px-4 flex-1">Élèves en attente de consentement </td>
-              <td className="text-gray-500">(0%)</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td className="font-bold text-lg text-right">0</td>
+                <td className="px-4 flex-1">Élves inscrits</td>
+                <td className="text-gray-500">(0%)</td>
+              </tr>
+              <tr>
+                <td className="font-bold text-lg text-right">0</td>
+                <td className="px-4 flex-1">Élèves en attente de consentement </td>
+                <td className="text-gray-500">(0%)</td>
+              </tr>
+            </tbody>
           </table>
           <div className="mx-8 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
           <table className="flex-1 shrink-0">
-            <tr>
-              <td className="font-bold text-lg text-right">0</td>
-              <td className="px-4 flex-1">Élèves en cours d’inscription</td>
-              <td className="text-gray-500">(0%)</td>
-            </tr>
-            <tr>
-              <td className="font-bold text-lg text-right">0</td>
-              <td className="px-4 flex-1">Places libres</td>
-              <td className="text-gray-500">(0%)</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td className="font-bold text-lg text-right">0</td>
+                <td className="px-4 flex-1">Élèves en cours d’inscription</td>
+                <td className="text-gray-500">(0%)</td>
+              </tr>
+              <tr>
+                <td className="font-bold text-lg text-right">0</td>
+                <td className="px-4 flex-1">Places libres</td>
+                <td className="text-gray-500">(0%)</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </Container>

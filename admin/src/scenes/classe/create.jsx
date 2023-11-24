@@ -6,14 +6,14 @@ import { useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, ROLES, SUB_ROLES } from "snu-lib";
+import { translate } from "snu-lib";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
 
 export default function create() {
-  const [etablissement, setEtablissement] = useState({});
   const [classe, setClasse] = useState({
     cohort: "CLE 23-24",
+    uniqueId: "",
   });
   const [errors, setErrors] = useState({});
   const [referentClasse, setReferentClasse] = useState({});
@@ -23,16 +23,14 @@ export default function create() {
 
   const getEtablissement = async () => {
     try {
-      const { ok, code, data: response } = await api.get("/etablissement");
+      const { ok, code, data: response } = await api.get("/cle/etablissement");
 
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
       }
-      setEtablissement(response);
       setClasse({ ...classe, uniqueKey: response.uai, etablissementId: response._id, etablissement: response });
       getReferents(response._id);
     } catch (e) {
-      console.log(e);
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement");
     }
@@ -209,7 +207,7 @@ export default function create() {
               <div className="text-lg mb-2">Informations générales</div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex-1">Numéro d’identification</div>
-                <div className="flex-1 font-bold text-right">{classe.uniqueKey + classe.uniqueId}</div>
+                <div className="flex-1 font-bold text-right">{classe.uniqueKey + (classe?.uniqueId ?? "")}</div>
               </div>
             </div>
             <div className="my-6">
