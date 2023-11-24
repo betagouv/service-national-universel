@@ -38,11 +38,7 @@ export default defineConfig(({ mode }) => {
       port: 8081,
     },
     plugins: plugins,
-    build: {
-      sourcemap: mode === "development" ? false : true,
-      outDir: "build",
-      rollupOptions: { external: ["@codegouvfr/react-dsfr"] },
-    },
+    build: { sourcemap: mode === "development" ? false : true, outDir: "build" },
     optimizeDeps: {
       include: ["@sentry/react", "snu-lib", "@snu/ds"],
       force: true,
