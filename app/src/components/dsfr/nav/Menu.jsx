@@ -6,7 +6,7 @@ import { HiOutlineClipboard, HiOutlineQuestionMarkCircle, HiOutlineUserCircle } 
 import { supportURL } from "@/config";
 
 const ModalMenu = ({ isOpen, setIsOpen }) => {
-  const { loginOrLogout, isLoggedIn } = useAuth();
+  const { isCLE, loginOrLogout, isLoggedIn } = useAuth();
 
   const { pathname } = useLocation();
   return (
@@ -31,7 +31,7 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             isLoggedIn && (
               <Link to="/" className="flex items-center py-3 gap-2">
                 <HiOutlineUserCircle className="text-lg" />
-                Mon compte volontaire
+                {isCLE ? "Mon compte élève" : "Mon compte volontaire"}
               </Link>
             )
           )}
