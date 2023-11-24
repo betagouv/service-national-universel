@@ -862,13 +862,18 @@ const STATUS_PHASE1_CLASSE = {
 
 //TODO to update with ARBITRAGE
 const CLE_TYPE = {
-  LYC: "LYC",
+  GENERAL_HIGHSCHOOL: "Lycée Général",
+  GENERAL_AND_TECHNOLOGICAL_HIGHSCHOOL: "Lycée Général et Technologique",
+  PROFESSIONAL_HIGHSCHOOL: "Lycée Professionnel",
+  POLYVALENT_HIGHSCHOOL: "Lycée Polyvalent",
+  AGRICULTURAL_HIGHSCHOOL: "Lycée Agricole (EPLEFPA)",
+  MILITARY_HIGHSCHOOL: "Lycée Militaire",
 };
 
 //TODO to update with ARBITRAGE
 const CLE_SECTOR = {
-  pro: "pro",
-  gen: "gen",
+  PUBLIC: "Statut public",
+  PRIVATE: " Statut privé",
 };
 
 //TODO to update with ARBITRAGE
