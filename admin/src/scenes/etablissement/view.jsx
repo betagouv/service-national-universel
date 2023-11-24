@@ -46,7 +46,7 @@ export default function view() {
       setIsLoading(true);
       setErrors({});
       let errors = {};
-      if (!etablissement.address) errors.type = "Ce champ est obligatoire";
+      if (!etablissement.address) errors.address = "Ce champ est obligatoire";
       if (!etablissement.type || etablissement.type.length === 0) errors.type = "Ce champ est obligatoire";
       if (!etablissement.sector || etablissement.sector.length === 0) errors.sector = "Ce champ est obligatoire";
 
