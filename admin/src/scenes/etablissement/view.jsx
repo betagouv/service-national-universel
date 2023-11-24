@@ -14,6 +14,7 @@ import { capture } from "@/sentry";
 import { toastr } from "react-redux-toastr";
 import { copyToClipboard } from "@/utils";
 import validator from "validator";
+import { ERRORS } from "snu-lib/errors";
 
 export default function view() {
   const user = useSelector((state) => state.Auth.user);
@@ -163,7 +164,7 @@ export default function view() {
       capture(e);
       setNewCoordinator({});
       setModalAddCoordinator(false);
-      if (e.code === "USER_ALREADY_REGISTERED")
+      if (e.code === ERRORS.USER_ALREADY_REGISTERED)
         return toastr.error("Cette adresse email est déjà utilisée.", `${newCoordinator.email} a déjà un compte sur cette plateforme.`, { timeOut: 10000 });
       toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
     }
