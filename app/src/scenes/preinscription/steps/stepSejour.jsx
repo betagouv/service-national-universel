@@ -31,7 +31,11 @@ export default function StepSejour() {
         {scolarity == GRADES["1ereGT"] && (
           <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
         )}
-        <div className="my-4">{data.sessions?.map((e) => SessionButton(e))}</div>
+        <div className="my-4">
+          {data.sessions?.map((e) => (
+            <SessionButton key={e.name} session={e} />
+          ))}
+        </div>
         <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
         <div className="text-sm text-gray-500">
           La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
@@ -48,7 +52,7 @@ export default function StepSejour() {
   );
 }
 
-function SessionButton(session) {
+function SessionButton({ session }) {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
   const [route, context, step] = isLoggedIn
     ? ["/reinscription/confirm", ReinscriptionContext, REINSCRIPTION_STEPS.CONFIRM]
