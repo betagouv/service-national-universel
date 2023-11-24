@@ -2,7 +2,18 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const { CLE_COLORATION_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST, ROLES, canCreateClasse, canUpdateClasse, canViewClasse } = require("snu-lib");
+const {
+  CLE_COLORATION_LIST,
+  CLE_TYPE_LIST,
+  CLE_SECTOR_LIST,
+  CLE_GRADE_LIST,
+  ROLES,
+  STATUS_CLASSE,
+  STATUS_PHASE1_CLASSE,
+  canCreateClasse,
+  canUpdateClasse,
+  canViewClasse,
+} = require("snu-lib");
 const mongoose = require("mongoose");
 
 const { validateId } = require("../../utils/validator");
@@ -36,14 +47,19 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   try {
     const { error, value } = Joi.object({
       // Classe
-      uniqueId: Joi.string().alphanum().min(1).max(5).required(),
+      uniqueKey: Joi.string().required(),
+      uniqueId: Joi.string().alphanum().min(0).max(15).required(),
       cohort: Joi.string().default("CLE 23-24").required(),
+      etablissementId: Joi.string().required(),
       // Referent
       referent: Joi.object({
-        _id: Joi.string(),
         firstName: Joi.string(),
         lastName: Joi.string(),
         email: Joi.string(),
+      }).required(),
+      etablissement: Joi.object({
+        department: Joi.string(),
+        region: Joi.string(),
       }).required(),
     }).validate(req.body, { stripUnknown: true });
     if (error) {
@@ -53,34 +69,29 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!canCreateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: req.user._id });
-    if (!etablissement) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const uniqueKey = `${etablissement.uai}_${new Date().toLocaleDateString("fr-FR")}`;
-    const previousClasse = await ClasseModel.findOne({ uniqueKey, uniqueId: value.uniqueId, etablissementId: etablissement._id });
+    const previousClasse = await ClasseModel.findOne({ uniqueKey: value.uniqueKey, uniqueId: value.uniqueId, etablissementId: value.etablissementId });
     if (previousClasse) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
 
-    let classe;
-    const referent = await findOrCreateReferent(value.referent, { role: ROLES.REFERENT_CLASSE });
+    const referent = await findOrCreateReferent(value.referent, { etablissement: value.etablissement, role: ROLES.REFERENT_CLASSE });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Referent not found/created." });
+    if (referent === ERRORS.USER_ALREADY_REGISTERED) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
     const defaultCleCohort = await CohortModel.findOne({ name: value.cohort });
     if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
 
     classe = await ClasseModel.create({
       ...value,
+      status: STATUS_CLASSE.DRAFT,
+      statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
       cohort: defaultCleCohort.name,
-      uniqueKey,
-      uniqueId: value.uniqueId,
-      uniqueKeyAndId: uniqueKey + "_" + value.uniqueId,
+      uniqueKeyAndId: value.uniqueKey + "_" + value.uniqueId,
       referentClasseIds: [referent._id],
-      etablissementId: etablissement._id,
     });
 
     // We send the email invitation once we are sure both the referent and the classe are created
     await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user });
 
-    if (!classe) throw new Error("Classe not created.");
+    if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
 
     return res.status(200).send({ ok: true, data: classe });
   } catch (error) {

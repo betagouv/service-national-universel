@@ -7,17 +7,18 @@ import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
 import { translate, ROLES, SUB_ROLES } from "snu-lib";
+import validator from "validator";
+import { ERRORS } from "snu-lib/errors";
 
 export default function create() {
   const [etablissement, setEtablissement] = useState({});
   const [classe, setClasse] = useState({
-    cohort: "CLE 23-24", // cohorte a définir
+    cohort: "CLE 23-24",
   });
   const [errors, setErrors] = useState({});
   const [referentClasse, setReferentClasse] = useState({});
   const [referentList, setReferentList] = useState([]);
   const [modalConfirmation, setModalConfirmation] = useState(false);
-
   const history = useHistory();
 
   const getEtablissement = async () => {
@@ -28,7 +29,7 @@ export default function create() {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
       }
       setEtablissement(response);
-      setClasse({ ...classe, uniqueKey: response.uai + "_11/10/2024_" }); //date a définir
+      setClasse({ ...classe, uniqueKey: response.uai, etablissementId: response._id, etablissement: response });
       getReferents(response._id);
     } catch (e) {
       console.log(e);
@@ -62,13 +63,54 @@ export default function create() {
     getEtablissement();
   }, []);
 
+  const validate = () => {
+    setErrors({});
+    let errors = {};
+    const uniqueIdRegex = /^[a-zA-Z0-9]{0,15}$/;
+    if (!uniqueIdRegex.test(classe?.uniqueId)) {
+      errors.uniqueId = "Le champ doit contenir entre 0 et 15 caractères alphanumériques.";
+    }
+    if (!referentClasse.lastName) errors.lastName = "Ce champ est obligatoire";
+    if (!referentClasse.firstName) errors.firstName = "Ce champ est obligatoire";
+    if (!referentClasse.email || !validator.isEmail(referentClasse.email)) errors.email = "L'email est incorrect";
+
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
+      return;
+    }
+    setClasse({ ...classe, referent: referentClasse });
+    setModalConfirmation(true);
+  };
+
+  const sendValue = async () => {
+    try {
+      const { ok, code } = await api.post("/cle/classe", classe);
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la création de la classe", translate(code));
+      }
+      toastr.success("La classe a bien été créée");
+      history.push("/mes-classes");
+    } catch (e) {
+      capture(e);
+      if (e.code === ERRORS.USER_ALREADY_REGISTERED)
+        return toastr.error("Cette adresse email est déjà utilisée. Si vous souhaitez désigner un referent de classe existant pour cette classe, utilisez le menu Select", {
+          timeOut: 10000,
+        });
+      if (e.code === ERRORS.ALREADY_EXISTS)
+        return toastr.error("Cette classe existe déjá. Utilisez le Numéro d'Identification de la classe pour les différencier ", {
+          timeOut: 10000,
+        });
+      toastr.error("Oups, une erreur est survenue lors de la création de la classe");
+    }
+  };
+
   const actions = [
     <a key="cancel" href="/mes-classes" className="mr-2">
       <Button title="Annuler" type="secondary" />
     </a>,
-    <Button key="create" leftIcon={<ClasseIcon />} title="Créer cette classe" disabled={!classe.uniqueId} onClick={() => setModalConfirmation(true)} />,
+    <Button key="create" leftIcon={<ClasseIcon />} title="Créer cette classe" onClick={() => validate()} />,
   ];
-  console.log(classe);
+
   return (
     <Page>
       <Header
@@ -79,12 +121,16 @@ export default function create() {
       <Container title="Informations générales">
         <div className="flex items-stretch justify-stretch">
           <div className="flex-1">
-            <Label title="Cohorte" tooltip="This is a test and need to be replaced." />
+            <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la validation des dates d'affectation." />
             <InputText value={classe.cohort} disabled />
           </div>
           <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
           <div className="flex-1">
-            <Label title="Numéro d’identification" tooltip="This is a test and need to be replaced." />
+            <Label
+              title="Numéro d’identification"
+              name="Numéro d'identification"
+              tooltip="Vous pouvez personnaliser l'identifiant de votre classe comme vous le souhaitez dans la limite de 15 caractères"
+            />
             <div className="flex items-center justify-between gap-3">
               <InputText className="flex-1" value={classe.uniqueKey} disabled />
               <InputText
@@ -145,7 +191,6 @@ export default function create() {
               onChange={(options) => {
                 options ? setReferentClasse(referentList.find((referent) => referent._id === options.value)) : setReferentClasse({});
               }}
-              error={errors.type}
             />
           </div>
         </div>
@@ -182,7 +227,7 @@ export default function create() {
         }
         actions={[
           { title: "Modifier", isCancel: true },
-          { title: "Valider", onClick: () => history.push("/mes-classes/1") },
+          { title: "Valider", onClick: () => sendValue() },
         ]}
       />
     </Page>

@@ -26,9 +26,9 @@ const findOrCreateReferent = async (referent, { etablissement, role, subRole }) 
     });
 
     return referent;
-  } catch (e) {
-    if (e.code === 11000) return ERRORS.USER_ALREADY_REGISTERED;
-    capture(e);
+  } catch (error) {
+    if (error.code === 11000) return ERRORS.USER_ALREADY_REGISTERED;
+    capture(error);
   }
 };
 
