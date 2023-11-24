@@ -87,7 +87,11 @@ export default function ModalSejour({ isOpen, onCancel }) {
                 {grade == GRADES["1ereGT"] && (
                   <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
                 )}
-                <div className="my-4">{cohorts?.map((e) => SessionButton(e))}</div>
+                <div className="my-4">
+                  {cohorts?.map((e) => (
+                    <SessionButton key={e.name} session={e} onSubmit={onSubmit} />
+                  ))}
+                </div>
               </>
             ) : (
               <div className="my-2 text-sm text-gray-500">Aucun séjour de cohésion n’est disponible pour le moment.</div>
@@ -108,21 +112,21 @@ export default function ModalSejour({ isOpen, onCancel }) {
       </div>
     </Modal>
   );
+}
 
-  function SessionButton(session) {
-    return (
-      <div
-        key={session.id}
-        className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
-        onClick={() => {
-          plausibleEvent(session.event);
-          onSubmit(session.name);
-        }}>
-        <div>
-          Séjour <strong>{getCohortPeriod(session)}</strong>
-        </div>
-        <ArrowRightBlueSquare />
+function SessionButton({ session, onSubmit }) {
+  return (
+    <div
+      key={session.id}
+      className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
+      onClick={() => {
+        plausibleEvent(session.event);
+        onSubmit(session.name);
+      }}>
+      <div>
+        Séjour <strong>{getCohortPeriod(session)}</strong>
       </div>
-    );
-  }
+      <ArrowRightBlueSquare />
+    </div>
+  );
 }
