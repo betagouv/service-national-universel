@@ -13,7 +13,7 @@ import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import Help from "../components/Help";
 import MyDocs from "../components/MyDocs";
-import Navbar from "../components/Navbar";
+import InscriptionStepper from "../components/InscriptionStepper";
 import Info from "../../../components/info";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import plausibleEvent from "@/services/plausible";
@@ -84,7 +84,7 @@ export default function StepDocuments() {
 
   return (
     <>
-      <Navbar />
+      <InscriptionStepper />
       <DSFRContainer title="Ma pièce d’identité" supportLink={supportLink} supportEvent="Phase0/aide inscription - CI">
         <div className="my-4">
           {corrections?.map((e) => (

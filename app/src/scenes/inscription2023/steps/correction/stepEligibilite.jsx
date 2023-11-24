@@ -20,7 +20,7 @@ import api from "../../../../services/api";
 import { translate } from "../../../../utils";
 import DatePicker from "../../../../components/dsfr/forms/DatePicker";
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
-import Navbar from "../../components/Navbar";
+import InscriptionStepper from "../../components/InscriptionStepper";
 import { supportURL } from "@/config";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
@@ -205,7 +205,7 @@ export default function StepEligibilite() {
   if (!corrections) return <Redirect to="/" />;
   return (
     <>
-      <Navbar />
+      <InscriptionStepper />
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="flex-start my-4 flex flex-col">
           <div className="flex items-center">
