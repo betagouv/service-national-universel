@@ -58,6 +58,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         email: Joi.string(),
       }).required(),
       etablissement: Joi.object({
+        name: Joi.string(),
         department: Joi.string(),
         region: Joi.string(),
       }).required(),
@@ -87,9 +88,9 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       uniqueKeyAndId: value.uniqueKey + "_" + value.uniqueId,
       referentClasseIds: [referent._id],
     });
-
+    console.log(value.etablissement);
     // We send the email invitation once we are sure both the referent and the classe are created
-    await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user });
+    await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user }, value.etablissement);
 
     if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
 
