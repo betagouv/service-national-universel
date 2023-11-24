@@ -21,6 +21,7 @@ import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
 import { environment } from "../../config";
 import { getCohort } from "@/utils/cohorts";
+import useAuth from "@/services/useAuth";
 
 function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
@@ -36,7 +37,8 @@ function renderStep(step) {
 
 const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscriptionStep2023 } }) => {
   const { step } = useParams();
-
+  const { isCLE } = useAuth();
+  const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
 
   const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
@@ -57,7 +59,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
     return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  return <DSFRLayout title="Inscription du volontaire">{renderStep(currentStep)}</DSFRLayout>;
+  return <DSFRLayout title={title}>{renderStep(currentStep)}</DSFRLayout>;
 };
 
 function renderStepCorrection(step) {
@@ -72,12 +74,13 @@ function renderStepCorrection(step) {
 
 const StepCorrection = () => {
   const { step } = useParams();
-
+  const { isCLE } = useAuth();
+  const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
   if (renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST)) === false) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  return <DSFRLayout title="Inscription du volontaire">{renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST))}</DSFRLayout>;
+  return <DSFRLayout title={title}>{renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST))}</DSFRLayout>;
 };
 
 export default function Index() {

@@ -10,7 +10,7 @@ import { supportURL } from "@/config";
 import { HiOutlineClipboard, HiOutlineQuestionMarkCircle, HiOutlineUserCircle } from "react-icons/hi";
 
 const Header = ({ title }) => {
-  const { isLoggedIn, loginOrLogout } = useAuth();
+  const { isCLE, isLoggedIn, loginOrLogout } = useAuth();
 
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -44,7 +44,7 @@ const Header = ({ title }) => {
             isLoggedIn && (
               <Link to="/" className="flex items-center py-1 px-2 gap-2 hover:bg-gray-100 hover:text-blue-france-sun-113">
                 <HiOutlineUserCircle className="text-base" />
-                Mon compte volontaire
+                {isCLE ? "Mon compte élève" : "Mon compte volontaire"}
               </Link>
             )
           )}
