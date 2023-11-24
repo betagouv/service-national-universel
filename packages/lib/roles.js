@@ -859,6 +859,10 @@ function canUpdateEtablissement(actor) {
   return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
 }
 
+function canViewEtablissement(actor) {
+  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -987,4 +991,5 @@ export {
   canWriteClasse,
   canViewClasse,
   canUpdateEtablissement,
+  canViewEtablissement,
 };

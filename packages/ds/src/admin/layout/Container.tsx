@@ -37,7 +37,7 @@ export default function Container({
           )}
 
           {/* Actions */}
-          {actions && <div>{actions}</div>}
+          {actions}
         </div>
       )}
 
