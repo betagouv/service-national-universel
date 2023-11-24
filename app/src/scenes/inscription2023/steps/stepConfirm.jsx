@@ -100,7 +100,6 @@ export default function StepConfirm() {
           <Details title="Adresse de résidence" value={young.address} />
           <Details title="Ville de résidence" value={young.city} />
           <Details title="Code postal de résidence" value={young.zip} />
-          {!isCLE && <Details title="Ma situation scolaire" value={young.situation} />}
           <Details title="Téléphone" value={concatPhoneNumberWithZone(young.phone, young.phoneZone)} />
           {young.foreignAddress && (
             <>
@@ -111,7 +110,7 @@ export default function StepConfirm() {
               <Details title="Pays à l'étranger" value={young.foreignCity} />
             </>
           )}
-          <Details title={young.schooled === "true" ? "Ma situation scolaire" : "Ma situation"} value={translate(young.situation)} />
+          {!isCLE && <Details title={young.schooled === "true" ? "Ma situation scolaire" : "Ma situation"} value={translate(young.situation)} />}
           {hasHandicap ? (
             <>
               <Details title="Handicap" value={translate(young.handicap)} />
