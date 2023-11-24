@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const { CLE_COLORATION_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST, ROLES, canWriteClasse, canViewClasse } = require("snu-lib");
+const { CLE_COLORATION_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST, ROLES, canCreateClasse, canUpdateClasse, canViewClasse } = require("snu-lib");
 const mongoose = require("mongoose");
 
 const { validateId } = require("../../utils/validator");
@@ -51,7 +51,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canWriteClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: req.user._id });
     if (!etablissement) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -89,7 +89,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.put("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       _id: Joi.string().required(),
@@ -100,13 +100,13 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
       type: Joi.string().allow(CLE_TYPE_LIST).required(),
       sector: Joi.string().allow(CLE_SECTOR_LIST).required(),
       grade: Joi.string().allow(CLE_GRADE_LIST).required(),
-    }).validate(req.body, { stripUnknown: true });
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canWriteClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: req.user._id });
     if (!etablissement) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -136,13 +136,14 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+    if (!canViewClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const classe = await ClasseModel.findById(value)?.lean();
     if (!classe) {
@@ -154,6 +155,40 @@ router.get("/:id", async (req, res) => {
     const referentClasse = referentClasseIds.length ? await ReferentModel.findById(referentClasseIds[0])?.lean() : {};
 
     return res.status(200).send({ ok: true, data: { ...classe, etablissement, referentClasse } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/from-etablissement/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canViewClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const classes = await ClasseModel.find({ etablissementId: value })?.lean();
+    if (!classes) {
+      captureMessage("Error finding classe with etablissementId : " + JSON.stringify(value));
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    const findReferentsById = async (referentClasseIds) => {
+      const uniqueReferentIds = [...new Set(referentClasseIds)];
+      const referentsPromises = uniqueReferentIds.map((referentId) => {
+        return ReferentModel.findById(referentId).lean();
+      });
+      return Promise.all(referentsPromises);
+    };
+    for (const classe of classes) {
+      const referents = await findReferentsById(classe.referentClasseIds);
+      classe.referents = referents;
+    }
+
+    return res.status(200).send({ ok: true, data: classes });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

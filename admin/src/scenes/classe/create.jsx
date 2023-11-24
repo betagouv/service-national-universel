@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
+import { translate, ROLES, SUB_ROLES } from "snu-lib";
 
 export default function create() {
   const [etablissement, setEtablissement] = useState({});
@@ -15,7 +15,6 @@ export default function create() {
   });
   const [errors, setErrors] = useState({});
   const [referentClasse, setReferentClasse] = useState({});
-  const [contacts, setContacts] = useState([]);
   const [referentList, setReferentList] = useState([]);
   const [modalConfirmation, setModalConfirmation] = useState(false);
 
@@ -30,7 +29,7 @@ export default function create() {
       }
       setEtablissement(response);
       setClasse({ ...classe, uniqueKey: response.uai + "_11/10/2024_" }); //date a définir
-      getContacts(response);
+      getReferents(response._id);
     } catch (e) {
       console.log(e);
       capture(e);
@@ -38,21 +37,21 @@ export default function create() {
     }
   };
 
-  const getContacts = async (etablissement) => {
-    let contactList = etablissement.referentEtablissementIds.concat(etablissement.coordinateurIds);
+  const getReferents = async (id) => {
     try {
-      const requests = contactList.map(async (referentId) => {
-        const { ok, code, data: response } = await api.get(`/referent/${referentId}`);
+      const { ok, code, data: classes } = await api.get(`/cle/classe/from-etablissement/${id}`);
 
-        if (!ok) {
-          return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
-        }
-
-        return response;
-      });
-      const contactResponses = await Promise.all(requests);
-      setContacts(contactResponses);
-      setReferentList(contactResponses.map((contact) => ({ label: `${contact.firstName} ${contact.lastName}`, value: contact.id })));
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération des referents", translate(code));
+      }
+      const referentsList = classes.flatMap((classe) =>
+        classe.referents.map((referent) => ({
+          ...referent,
+          value: referent._id,
+          label: `${referent.firstName} ${referent.lastName}`,
+        })),
+      );
+      setReferentList(referentsList);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des contacts");
@@ -65,11 +64,11 @@ export default function create() {
 
   const actions = [
     <a key="cancel" href="/mes-classes" className="mr-2">
-      <Button title="Annuler" type="secondary" disabled />
+      <Button title="Annuler" type="secondary" />
     </a>,
     <Button key="create" leftIcon={<ClasseIcon />} title="Créer cette classe" disabled={!classe.uniqueId} onClick={() => setModalConfirmation(true)} />,
   ];
-
+  console.log(classe);
   return (
     <Page>
       <Header
@@ -91,6 +90,7 @@ export default function create() {
               <InputText
                 className="flex-1"
                 placeholder="Préciser (15 caractères max.)"
+                active={true}
                 value={classe.uniqueId}
                 onChange={(e) => setClasse({ ...classe, uniqueId: e.target.value })}
                 error={errors.uniqueId}
@@ -107,22 +107,28 @@ export default function create() {
               className="mb-3"
               label="Nom"
               placeholder="Préciser"
-              value={referentClasse.lastName}
+              active={true}
+              value={referentClasse?.lastName || ""}
               onChange={(e) => setReferentClasse({ ...referentClasse, lastName: e.target.value })}
+              error={errors.lastName}
             />
             <InputText
               className="mb-3"
               label="Prénom"
               placeholder="Préciser"
-              value={referentClasse.firstName}
+              active={true}
+              value={referentClasse?.firstName || ""}
               onChange={(e) => setReferentClasse({ ...referentClasse, firstName: e.target.value })}
+              error={errors.firstName}
             />
             <InputText
               label="Adresse email"
               type="email"
               placeholder="Préciser"
-              value={referentClasse.email}
+              active={true}
+              value={referentClasse?.email || ""}
               onChange={(e) => setReferentClasse({ ...referentClasse, email: e.target.value })}
+              error={errors.email}
             />
           </div>
           <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
@@ -134,9 +140,10 @@ export default function create() {
               placeholder={"Choisissez un référent éxistant"}
               options={referentList}
               closeMenuOnSelect={true}
-              value={referentClasse._id ? { label: `${referentClasse?.firstName} ${referentClasse?.lastName}`, value: referentClasse._id } : null}
+              isClearable={true}
+              value={referentClasse?._id ? { label: `${referentClasse?.firstName} ${referentClasse?.lastName}`, value: referentClasse._id } : null}
               onChange={(options) => {
-                setReferentClasse(referentList.find((referent) => referent.id === options.value));
+                options ? setReferentClasse(referentList.find((referent) => referent._id === options.value)) : setReferentClasse({});
               }}
               error={errors.type}
             />
@@ -157,18 +164,18 @@ export default function create() {
               <div className="text-lg mb-2">Informations générales</div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex-1">Numéro d’identification</div>
-                <div className="flex-1 font-bold text-right">75IDF_11/10/2024_XYZ12</div>
+                <div className="flex-1 font-bold text-right">{classe.uniqueKey + classe.uniqueId}</div>
               </div>
             </div>
             <div className="my-6">
               <div className="text-lg mb-2">Référent de classe</div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex-1">Prénom et Nom</div>
-                <div className="flex-1 font-bold text-right">Amandine PIGNON</div>
+                <div className="flex-1 font-bold text-right">{referentClasse.firstName + " " + referentClasse.lastName}</div>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex-1">Adresse email</div>
-                <div className="flex-1 font-bold text-right">amandine.pignon@ac-paris.fr</div>
+                <div className="flex-1 font-bold text-right">{referentClasse.email}</div>
               </div>
             </div>
           </div>

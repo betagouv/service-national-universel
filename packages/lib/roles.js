@@ -847,8 +847,12 @@ function canInviteCoordinateur(actor) {
   return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
 }
 
-function canWriteClasse(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
+function canCreateClasse(actor) {
+  return actor.role === ROLES.ADMINISTRATEUR_CLE;
+}
+
+function canUpdateClasse(actor) {
+  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE;
 }
 
 function canViewClasse(actor) {
@@ -988,7 +992,8 @@ export {
   canSeeDashboardEngagementStatus,
   canSeeDashboardSejourHeadCenter,
   canInviteCoordinateur,
-  canWriteClasse,
+  canCreateClasse,
+  canUpdateClasse,
   canViewClasse,
   canUpdateEtablissement,
   canViewEtablissement,
