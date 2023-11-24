@@ -62,6 +62,7 @@ const Step = ({ step }) => {
 };
 
 export default function Index() {
+  document.body.style.backgroundColor = "#F9F6F2";
   return (
     <Switch>
       <SentryRoute path="/representants-legaux/token-invalide" component={() => <Step step={STEPS.TOKEN_INVALIDE} />} />

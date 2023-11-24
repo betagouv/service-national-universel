@@ -31,6 +31,7 @@ function renderStepResponsive(step) {
 }
 
 const Step = () => {
+  document.body.style.backgroundColor = "#F9F6F2";
   const [data] = useContext(PreInscriptionContext);
   const { step } = useParams();
 

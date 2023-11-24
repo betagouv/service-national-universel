@@ -36,6 +36,8 @@ function renderStep(step) {
 }
 
 const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscriptionStep2023 } }) => {
+  document.body.style.backgroundColor = "#F9F6F2";
+
   const { step } = useParams();
   const { isCLE } = useAuth();
   const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
