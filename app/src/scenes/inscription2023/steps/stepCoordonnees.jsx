@@ -12,7 +12,7 @@ import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import Input from "../components/Input";
 import Select from "../../../components/dsfr/forms/Select";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
-import Navbar from "../components/Navbar";
+import InscriptionStepper from "../components/InscriptionStepper";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
@@ -498,7 +498,7 @@ export default function StepCoordonnees() {
 
   return (
     <>
-      <Navbar onSave={onSave} />
+      <InscriptionStepper onSave={onSave} />
       <DSFRContainer
         title={isCle ? "Mon profil élève" : "Mon profil volontaire"}
         supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}

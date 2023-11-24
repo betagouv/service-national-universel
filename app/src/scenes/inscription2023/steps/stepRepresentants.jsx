@@ -16,7 +16,7 @@ import { getCorrectionByStep } from "../../../utils/navigation";
 import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 import Help from "../components/Help";
 import Input from "../components/Input";
-import Navbar from "../components/Navbar";
+import InscriptionStepper from "../components/InscriptionStepper";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -264,7 +264,7 @@ export default function StepRepresentants() {
 
   return (
     <>
-      <Navbar onSave={onSave} />
+      <InscriptionStepper onSave={onSave} />
       <DSFRContainer title="Mes représentants légaux" supportLink={supportLink} supportEvent="Phase0/aide inscription - rep leg">
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
