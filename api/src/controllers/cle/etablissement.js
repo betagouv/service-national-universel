@@ -48,6 +48,12 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
+      name: Joi.string().required(),
+      address: Joi.string().required(),
+      zip: Joi.string().required(),
+      city: Joi.string().required(),
+      department: Joi.string().required(),
+      region: Joi.string().required(),
       type: Joi.array()
         .items(Joi.string().valid(...CLE_TYPE_LIST))
         .required(),
