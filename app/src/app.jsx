@@ -48,7 +48,7 @@ import ViewMessage from "./scenes/echanges/View";
 
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
-import { ENABLE_PM, YOUNG_STATUS } from "./utils";
+import { ENABLE_PM, YOUNG_STATUS, setBodyColor } from "./utils";
 import {
   youngCanChangeSession,
   inscriptionModificationOpenForYoungs,
@@ -75,6 +75,8 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  setBodyColor("#F9F6F2");
+  console.log("🚀 ~ file: app.jsx:73 ~ App ~ F9F6F2:", "F9F6F2")
   return (
     <Sentry.ErrorBoundary fallback={myFallback}>
       <QueryClientProvider client={queryClient}>
@@ -208,7 +210,7 @@ const MandatoryLogIn = () => {
 };
 
 const Espace = () => {
-  document.body.style.backgroundColor = "#f4f5f7";
+  setBodyColor({ color: "#f4f5f7" });
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);

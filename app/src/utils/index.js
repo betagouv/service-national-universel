@@ -144,4 +144,8 @@ export const debounce = (fn, delay) => {
   };
 };
 
+export function setBodyColor({ color }) {
+  document.documentElement.style.setProperty("--bodyColor", color);
+}
+
 export const desktopBreakpoint = 768;

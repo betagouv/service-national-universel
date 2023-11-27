@@ -94,9 +94,13 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bodyColor: #F9F6F2;
+}
+
 body {
   font-weight: 400;
-  background-color: #F9F6F2;
+  background-color: var(--bodyColor);
   font-family: "Marianne", sans-serif;
   /* position: fixed;  */
 }
