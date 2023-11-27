@@ -3,7 +3,7 @@ const config = require("./config");
 // It seems session length is broken, we should investigate.
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30 * 1000; // 1month
 const COOKIE_MAX_AGE_2H = 60 * 60 * 2 * 1000; //2h
-const JWT_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
+const JWT_MAX_AGE = 60 * 60 * 2; // 2h
 const TRUST_TOKEN_MAX_AGE = 60 * 60 * 24 * 30 * 1000; // 1 mois
 
 function cookieOptions(maxAge) {
