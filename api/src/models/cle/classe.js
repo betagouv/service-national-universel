@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
-const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_TYPE_LIST, CLE_SECTOR_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST } = require("snu-lib");
+const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "classe";
 
@@ -84,21 +84,12 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO update with the good type enum
-  type: {
+  //TODO update with the good filiere enum
+  filiere: {
     type: String,
-    enum: CLE_TYPE_LIST,
+    enum: CLE_FILIERE_LIST,
     documentation: {
-      description: "Type de la classe",
-    },
-  },
-
-  //TODO update with the good sector enum
-  sector: {
-    type: String,
-    enum: CLE_SECTOR_LIST,
-    documentation: {
-      description: "Filière de l'établissement",
+      description: "Filière de la classe",
     },
   },
 

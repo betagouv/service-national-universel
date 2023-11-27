@@ -9,6 +9,7 @@ import { HiPlus, HiUsers } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES, STATUS_CLASSE } from "snu-lib";
+import { statusClassForBadge } from "./utils";
 
 export default function list() {
   const [classes, setClasses] = useState(null);
@@ -55,10 +56,6 @@ export default function list() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes" }]}
         actions={[
-          <Button key="empty" title={`(Voir template ${classes ? "vide" : "liste"})`} type="secondary" onClick={() => setClasses(classes ? undefined : [])} />,
-          <Link key="view" to="/mes-classes/1" className="ml-2">
-            <Button title="Vue classe" type="secondary" />
-          </Link>,
           <Link key="list" to="/mes-classes/create" className="ml-2">
             <Button leftIcon={<ClasseIcon />} title="Créer une classe" />
           </Link>,
@@ -175,7 +172,7 @@ const Hit = ({ hit }) => {
       </td>
       <td className="flex w-[20%] flex-col gap-2">{hit?.totalSeats ? <Badge title={hit.seatsTaken + "/" + hit.totalSeats} /> : <Badge title="À préciser" />}</td>
       <td className="w-[20%]">
-        <Badge title={translate(STATUS_CLASSE[hit.status])} status={hit.status} />
+        <Badge title={translate(hit.status)} status={statusClassForBadge(hit.status)} />
       </td>
     </tr>
   );

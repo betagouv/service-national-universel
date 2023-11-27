@@ -4,8 +4,7 @@ const passport = require("passport");
 const Joi = require("joi");
 const {
   CLE_COLORATION_LIST,
-  CLE_TYPE_LIST,
-  CLE_SECTOR_LIST,
+  CLE_FILIERE_LIST,
   CLE_GRADE_LIST,
   ROLES,
   STATUS_CLASSE,
@@ -13,9 +12,8 @@ const {
   canCreateClasse,
   canUpdateClasse,
   canViewClasse,
+  canDeleteClasse,
 } = require("snu-lib");
-const mongoose = require("mongoose");
-
 const { validateId } = require("../../utils/validator");
 const { ERRORS } = require("../../utils");
 const { capture, captureMessage } = require("../../sentry");
@@ -24,24 +22,6 @@ const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
-
-router.get("/from-etablissement/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    if (!canViewClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const classes = await ClasseModel.find({ etablissementId: id });
-    if (!classes) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data: classes });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -104,14 +84,18 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      _id: Joi.string().required(),
-      uniqueId: Joi.string().alphanum().min(1).max(5).required(),
+      id: Joi.string().required(),
       name: Joi.string().required(),
       totalSeats: Joi.number().required(),
-      coloration: Joi.string().allow(CLE_COLORATION_LIST).required(),
-      type: Joi.string().allow(CLE_TYPE_LIST).required(),
-      sector: Joi.string().allow(CLE_SECTOR_LIST).required(),
-      grade: Joi.string().allow(CLE_GRADE_LIST).required(),
+      coloration: Joi.string()
+        .valid(...CLE_COLORATION_LIST)
+        .required(),
+      filiere: Joi.string()
+        .valid(...CLE_FILIERE_LIST)
+        .required(),
+      grade: Joi.string()
+        .valid(...CLE_GRADE_LIST)
+        .required(),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
@@ -120,25 +104,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: req.user._id });
-    if (!etablissement) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    let classe = await ClasseModel.findOne({ _id: value._id, etablissementId: etablissement._id });
+    let classe = await ClasseModel.findById(value.id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const previousClasse = await ClasseModel.findOne({ uniqueKey: classe.uniqueKey, uniqueId: value.uniqueId, etablissementId: etablissement._id });
-    if (previousClasse) return res.status(409).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
-
     classe.set({
-      uniqueId: value.uniqueId,
-      uniqueKeyAndId: classe.uniqueKey + "_" + value.uniqueId,
-      name: value.name,
-      totalSeats: value.totalSeats,
-      coloration: value.coloration,
-      type: value.type,
-      sector: value.sector,
-      grade: value.grade,
+      ...value,
+      status: STATUS_CLASSE.INSCRIPTION_TO_CHECK,
     });
+    console.log(classe);
     classe = await classe.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: classe });
@@ -183,7 +156,7 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
 
     if (!canViewClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const classes = await ClasseModel.find({ etablissementId: value })?.lean();
+    const classes = await ClasseModel.find({ etablissementId: value, deletedAt: { $exists: false } })?.lean();
     if (!classes) {
       captureMessage("Error finding classe with etablissementId : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -197,10 +170,34 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
     };
     for (const classe of classes) {
       const referents = await findReferentsById(classe.referentClasseIds);
-      classe.referents = referents;
+      classe.referent = referents;
     }
 
     return res.status(200).send({ ok: true, data: classes });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    if (!canDeleteClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const classe = await ClasseModel.findById(id);
+    if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const now = new Date();
+    classe.set({ deletedAt: now });
+    await classe.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -131,6 +131,7 @@ export default function view() {
 
   const cancel = () => {
     setEdit(!edit);
+    setErrors({});
   };
 
   const sendInvitation = async () => {
@@ -198,8 +199,6 @@ export default function view() {
     : user.subRole === SUB_ROLES.referent_etablissement && [
         <Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />,
       ];
-  console.log(typeOptions);
-  console.log(etablissement.type?.map((type1) => ({ value: type1, label: typeOptions.find((type2) => type2.value === type1)?.label })));
 
   return (
     <Page>

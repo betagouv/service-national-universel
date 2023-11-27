@@ -23,7 +23,7 @@ export default function create() {
 
   const getEtablissement = async () => {
     try {
-      const { ok, code, data: response } = await api.get("/cle/etablissement");
+      const { ok, code, data: response } = await api.get("/cle/etablissement/from-user");
 
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
@@ -43,8 +43,9 @@ export default function create() {
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des referents", translate(code));
       }
+      console.log(classes);
       const referentsList = classes.flatMap((classe) =>
-        classe.referents.map((referent) => ({
+        classe.referent.map((referent) => ({
           ...referent,
           value: referent._id,
           label: `${referent.firstName} ${referent.lastName}`,

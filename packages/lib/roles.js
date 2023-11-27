@@ -867,6 +867,14 @@ function canViewEtablissement(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
+function canSearchStudent(actor) {
+  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
+function canDeleteClasse(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -997,4 +1005,6 @@ export {
   canViewClasse,
   canUpdateEtablissement,
   canViewEtablissement,
+  canSearchStudent,
+  canDeleteClasse,
 };
