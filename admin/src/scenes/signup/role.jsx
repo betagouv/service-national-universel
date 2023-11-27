@@ -1,24 +1,45 @@
 import React, { useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Section, Container } from "@snu/ds/dsfr";
+import { ROLES, SUB_ROLES, translate } from "snu-lib";
 
-export default function role() {
+export default function role({ user }) {
   const history = useHistory();
-  const [role, setRole] = React.useState("chef_etablissement");
-  const [etablissement, setEtablissement] = React.useState("Lycée ABC");
+  const { search } = useLocation();
 
-  const ROLES_CLE = {
-    chef_etablissement: "Chef d'établissement",
-    administrateur_cle: "Administrateur CLE",
-    referent_cle: "Référent CLE",
-    referent_snu: "Référent SNU",
+  const [etablissement, setEtablissement] = React.useState();
+
+  const getEtablissement = () => {
+    //todo : recuperer l'etablissement via l'id du user
+    setEtablissement("ABC");
   };
 
-  // TODO : get dynamiquement le role et l'etablissement
-  // ...?role=chef_etablissement&etablissement_id=abc123
+  useEffect(() => {
+    if (!user) return;
+    getEtablissement();
+  }, [user]);
+
+  const displayText = () => {
+    if (!user) return "";
+    if (user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement) {
+      return (
+        <span>
+          Vous allez créez un compte Administrateur CLE en tant que <b>{translate(user.role)}</b>.
+        </span>
+      );
+    }
+    if (!etablissement) return "";
+    return (
+      <span>
+        Vous allez créez un compte Administrateur CLE en tant que <b>{translate(user.role)}</b> du <b>{etablissement}</b>.
+      </span>
+    );
+  };
+
+  if (!user || !etablissement) return <div>Chargement...</div>;
 
   return (
     <Section>
@@ -32,13 +53,13 @@ export default function role() {
         </div>
         <hr className="p-1" />
         <p>
-          Vous allez créez un compte Administrateur CLE en tant que <b>{ROLES_CLE[role]}</b> du <b>{etablissement}</b>.
+          {displayText()}
           <br />
           Confirmez-vous qu’il s’agit bien de votre rôle et de votre fonction ?
         </p>
         <hr className="p-1" />
         <div className="flex justify-end">
-          <Button onClick={() => history.push("/creer-mon-compte/email")}>Je confirme</Button>
+          <Button onClick={() => history.push(`/creer-mon-compte/email${search}`)}>Je confirme</Button>
         </div>
       </Container>
     </Section>

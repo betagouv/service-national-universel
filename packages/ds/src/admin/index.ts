@@ -1,3 +1,5 @@
+/** @format */
+
 // Form
 import InputText from "./form/InputText";
 import InputPhone from "./form/InputPhone";
