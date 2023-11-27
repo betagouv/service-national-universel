@@ -38,7 +38,7 @@ export default function WaitingAffectation() {
               <span>Mon séjour de cohésion</span>
               <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : getCohortPeriod(young.cohort)}</strong>
             </h1>
-            {!isCle ? (youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null) : (<div className="mt-20"></div>)}
+            {!isCle ? youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null : <div className="mt-20"></div>}
             {allowedGrades.includes(young.grade) && (
               <BannerTermJuly responsive={"flex items-start justify-center max-w-[688px] mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:items-center"} />
             )}
@@ -65,9 +65,9 @@ export default function WaitingAffectation() {
                 </p>
               </div>
             </div>
-            <div className="bg-[#EFF6FF] flex items-center justify-center max-w-[688px] text-sm leading-5 p-3 mt-2">
-              <RiInformationFill className="text-xl text-[#60A5FA]" />
-              <p className="text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
+            <div className="bg-[#EFF6FF] rounded-lg flex items-center justify-center max-w-[688px] leading-5 p-3 mt-2">
+              <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
+              <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
             </div>
           </article>
           <img src={hero2} className="-mr-4 hidden md:block" width={344} />
