@@ -1056,7 +1056,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateMyself({ actor: user, originalTarget: value })) {
+    if (!canUpdateMyself({ actor: user, modifiedTarget: value })) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
