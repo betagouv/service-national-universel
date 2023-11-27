@@ -43,7 +43,7 @@ export default function WaitingValidation() {
           <div className="flex items-center justify-between rounded-xl bg-white ">
             <div className="flex w-1/2 flex-col gap-8 py-6 pl-10 pr-3">
               <div className="text-[44px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong>
+                <strong>{young.firstName}, </strong>
                 {isCle ? "bienvenue sur votre compte élève." : "bienvenue sur votre compte volontaire."}
               </div>
               <div className="mt-2 text-xl font-bold text-[#242526]">Merci, votre inscription a bien été enregistrée.</div>
@@ -54,8 +54,8 @@ export default function WaitingValidation() {
                 </div>
                 <div className="text-sm leading-5 text-[#6B7280]">
                   {isCle
-                    ? "Votre dossier est en cours de traitement par votre établissement scolaire. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement de votre inscription."
-                    : "Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement de votre inscription."}
+                    ? "Votre dossier est en cours de traitement par votre établissement scolaire. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."
+                    : "Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."}
                 </div>
               </div>
               <hr className="text-gray-200" />
