@@ -13,7 +13,7 @@ const ContractModel = require("../models/contract");
 const config = require("../config");
 const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib");
 const { JWT_SIGNIN_MAX_AGE } = require("../jwt-options");
-const { cookieOptions } = require("../cookie-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../cookie-options");
 const { ERRORS, checkStatusContract } = require("../utils");
 
 router.get("/signin", async (req, res) => {
