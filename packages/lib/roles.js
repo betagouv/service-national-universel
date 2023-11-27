@@ -811,6 +811,12 @@ function canSeeDashboardEngagementStatus(actor) {
   return [ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(actor.role);
 }
 
+function canUpdateMyself({ actor, modifiedTarget }) {
+  const isMe = actor._id.toString() === modifiedTarget._id.toString();
+
+  return isMe;
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -935,4 +941,5 @@ export {
   canSeeDashboardEngagementInfo,
   canSeeDashboardEngagementStatus,
   canSeeDashboardSejourHeadCenter,
+  canUpdateMyself,
 };
