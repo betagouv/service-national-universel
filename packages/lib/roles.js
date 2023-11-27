@@ -812,16 +812,9 @@ function canSeeDashboardEngagementStatus(actor) {
 }
 
 function canUpdateMyself({ actor, modifiedTarget }) {
-  const isMe = actor._id === modifiedTarget._id;
-  const withoutChangingRole = actor.role === modifiedTarget?.role;
+  const isMe = actor._id.toString() === modifiedTarget._id.toString();
 
-  const withoutChangingDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department === modifiedTarget?.department;
-  const withoutChangingRegion = [ROLES.REFERENT_REGION, ROLES.VISITOR].includes(actor.role) && actor.region === modifiedTarget?.region;
-  const withoutChangingStructure = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) && actor.structureId === modifiedTarget?.structureId;
-
-  //Todo new role CLE ADMIN_CLE / REFERENT_CLE
-
-  return isMe && withoutChangingRole && (withoutChangingDepartment || withoutChangingRegion || withoutChangingStructure);
+  return isMe;
 }
 
 export {
