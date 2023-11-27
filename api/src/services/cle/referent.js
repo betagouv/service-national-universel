@@ -34,7 +34,7 @@ const findOrCreateReferent = async (referent, { etablissement, role, subRole }) 
 
 const inviteReferent = async (referent, { role, user }, etablissement) => {
   // Send invite
-  const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${referent.invitationToken}`;
+  const cta = `${config.ADMIN_URL}/creer-mon-compte?token=${referent.invitationToken}`;
   const fromName = `${user.firstName} ${user.lastName}`;
   const toName = `${referent.firstName} ${referent.lastName}`;
   const name_school = `${etablissement.name}`;

@@ -30,7 +30,12 @@ router.get("/token/:token", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.token });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data: serializeReferent(referent) });
+    let etablissement;
+    if (referent.subRole === "coordinateur_cle") {
+      etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
+    }
+
+    return res.status(200).send({ ok: true, data: { referent: serializeReferent(referent), etablissement } });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -114,7 +119,7 @@ router.post("/confirm-signup", async (req, res) => {
   try {
     const { error, value } = Joi.object({
       invitationToken: Joi.string().required(),
-      schoolId: Joi.string().required(),
+      schoolId: Joi.string(),
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
@@ -127,27 +132,29 @@ router.post("/confirm-signup", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (value.schoolId) {
+      if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
-    const body = {
-      schoolId: value.schoolId,
-      uai: ramsesSchool.uai,
-      name: ramsesSchool.fullName,
-      referentEtablissementIds: [referent._id.toString()],
-      address: ramsesSchool.adresse,
-      department: ramsesSchool.departmentName,
-      region: ramsesSchool.region,
-      zip: ramsesSchool.postcode,
-      city: ramsesSchool.city,
-      country: ramsesSchool.country,
-    };
-    console.log("✌️  body", body);
+      const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
+      const body = {
+        schoolId: value.schoolId,
+        uai: ramsesSchool.uai,
+        name: ramsesSchool.fullName,
+        referentEtablissementIds: [referent._id.toString()],
+        address: ramsesSchool.adresse,
+        department: ramsesSchool.departmentName,
+        region: ramsesSchool.region,
+        zip: ramsesSchool.postcode,
+        city: ramsesSchool.city,
+        country: ramsesSchool.country,
+      };
 
-    const data = await EtablissementModel.create([body], { session });
+      await EtablissementModel.create([body], { session });
+    }
+
     referent.set({ invitationToken: null, acceptCGU: true });
     await referent.save({ fromUser: referent, session });
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
