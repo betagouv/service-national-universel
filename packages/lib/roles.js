@@ -811,7 +811,7 @@ function canSeeDashboardEngagementStatus(actor) {
   return [ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(actor.role);
 }
 
-function canUpdateMyself(actor, modifiedTarget) {
+function canUpdateMyself({ actor, modifiedTarget }) {
   const isMe = actor._id === modifiedTarget._id;
   const withoutChangingRole = actor.role === modifiedTarget?.role;
 
