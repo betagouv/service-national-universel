@@ -15,9 +15,12 @@ import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExterna
 import { getCohort } from "../../utils/cohorts";
 import { useSelector } from "react-redux";
 import BannerTermJuly from "./components/BannerTermJuly";
+import { YOUNG_SOURCE } from "snu-lib";
+import { RiInformationFill } from "react-icons/ri";
 
 export default function WaitingAffectation() {
   const young = useSelector((state) => state.Auth.young);
+  const isCle = YOUNG_SOURCE.CLE === young.source;
   const cohort = getCohort(young.cohort);
   const departureDate = cohort ? getDepartureDate(young, {}, cohort) : null;
   const returnDate = cohort ? getReturnDate(young, {}, cohort) : null;
@@ -35,7 +38,7 @@ export default function WaitingAffectation() {
               <span>Mon séjour de cohésion</span>
               <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : getCohortPeriod(young.cohort)}</strong>
             </h1>
-            {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
+            {!isCle ? (youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null) : (<div className="mt-20"></div>)}
             {allowedGrades.includes(young.grade) && (
               <BannerTermJuly responsive={"flex items-start justify-center max-w-[688px] mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:items-center"} />
             )}
@@ -51,10 +54,20 @@ export default function WaitingAffectation() {
                   <h2 className="m-0 text-lg font-bold">Vous êtes en attente d&apos;affectation à un centre</h2>
                 </div>
                 <p className="text-sm">
-                  Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
-                  préparer votre fiche sanitaire ci-dessous !
+                  {isCle ? (
+                    <>Votre affectation vous sera communiquée par votre établissement scolaire.</>
+                  ) : (
+                    <>
+                      Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
+                      préparer votre fiche sanitaire ci-dessous !
+                    </>
+                  )}
                 </p>
               </div>
+            </div>
+            <div className="bg-[#EFF6FF] flex items-center justify-center max-w-[688px] text-sm leading-5 p-3 mt-2">
+              <RiInformationFill className="text-xl text-[#60A5FA]" />
+              <p className="text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
             </div>
           </article>
           <img src={hero2} className="-mr-4 hidden md:block" width={344} />
@@ -62,7 +75,7 @@ export default function WaitingAffectation() {
         <Files young={young} />
         <hr className="mx-auto mt-12 mb-7 w-full" />
         <CheckYourSpamSection />
-        <FaqSection />
+        {!isCle ?? <FaqSection />}
         <TestimonialsSection />
         <section className="mt-12 pb-32 md:mt-32">
           <h2 className="mb-8 text-center text-xl font-bold">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>

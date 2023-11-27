@@ -6,12 +6,14 @@ import { setYoung } from "../../../../redux/auth/actions";
 import API from "../../../../services/api";
 import { permissionPhase2 } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
+import { YOUNG_SOURCE } from "snu-lib";
 
 export default function User({ ticketsInfo }) {
   const user = useSelector((state) => state.Auth.young);
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef();
   const buttonRef = React.useRef();
+  const isCle = YOUNG_SOURCE.CLE === user.source;
 
   function onClose() {
     setOpen(false);
@@ -51,7 +53,7 @@ export default function User({ ticketsInfo }) {
           </div>
           <div>
             <p className="font-semibold hover:text-[#D2DAEF]">{user.firstName}</p>
-            <p className="text-xs text-[#768BAC]">Volontaire</p>
+            <p className="text-xs text-[#768BAC]">{isCle ? "Élève classe engagée" : "Volontaire"}</p>
           </div>
         </Link>
         <button

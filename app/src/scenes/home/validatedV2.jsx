@@ -7,11 +7,13 @@ import { YOUNG_STATUS_PHASE1 } from "snu-lib";
 import Clock from "../../assets/icons/Clock";
 import DiscoverStayWithArrow from "../../assets/icons/DiscoverStayWithArrow";
 import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
+import { YOUNG_SOURCE } from "snu-lib";
 
 import plausibleEvent from "../../services/plausible";
 
 export default function ValidatedV2() {
   const young = useSelector((state) => state.Auth.young);
+  const isCle = YOUNG_SOURCE.CLE === young.source;
   const history = useHistory();
 
   return (
@@ -22,7 +24,8 @@ export default function ValidatedV2() {
           <div className="flex items-center justify-between rounded-lg bg-white ">
             <div className="w-1/2 py-6 pl-10">
               <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
+                <strong>{young.firstName}, </strong>
+                {isCle ? "bienvenue sur votre compte élève." : "bienvenue sur votre compte volontaire."}
               </div>
               <div className="left-7 mt-3 font-bold text-[#242526]">Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</div>
               <div className="mt-4 flex items-center ">
