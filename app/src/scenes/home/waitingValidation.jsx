@@ -86,7 +86,7 @@ export default function WaitingValidation() {
         <div className="flex flex-col-reverse bg-white">
           <div className="flex flex-col gap-4 px-4 pb-8   ">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
-              <strong>{young.firstName},</strong>
+              <strong>{young.firstName}, </strong>
               {isCle ? "bienvenue sur votre compte élève." : "bienvenue sur votre compte volontaire."}
             </div>
             <div className="mt-3 text-lg font-bold text-[#242526]">Merci, votre inscription a bien été enregistrée.</div>
