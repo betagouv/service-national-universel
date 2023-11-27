@@ -811,6 +811,19 @@ function canSeeDashboardEngagementStatus(actor) {
   return [ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(actor.role);
 }
 
+function canUpdateMyself(actor, modifiedTarget) {
+  const isMe = actor._id === modifiedTarget._id;
+  const withoutChangingRole = actor.role === modifiedTarget?.role;
+
+  const withoutChangingDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department === modifiedTarget?.department;
+  const withoutChangingRegion = [ROLES.REFERENT_REGION, ROLES.VISITOR].includes(actor.role) && actor.region === modifiedTarget?.region;
+  const withoutChangingStructure = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) && actor.structureId === modifiedTarget?.structureId;
+
+  //Todo new role CLE ADMIN_CLE / REFERENT_CLE
+
+  return isMe && withoutChangingRole && (withoutChangingDepartment || withoutChangingRegion || withoutChangingStructure);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -935,4 +948,5 @@ export {
   canSeeDashboardEngagementInfo,
   canSeeDashboardEngagementStatus,
   canSeeDashboardSejourHeadCenter,
+  canUpdateMyself,
 };
