@@ -55,7 +55,7 @@ export default function WaitingValidation() {
                 <div className="text-sm leading-5 text-[#6B7280]">
                   {isCle
                     ? "Votre dossier est en cours de traitement par votre établissement scolaire. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."
-                    : "Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."}
+                    : "Votre dossier est en cours de traitement par l'administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."}
                 </div>
               </div>
               <hr className="text-gray-200" />
@@ -97,8 +97,8 @@ export default function WaitingValidation() {
               </div>
               <div className="text-sm text-[#738297]">
                 {isCle
-                  ? "Votre dossier est en cours de traitement par votre établissement scolaire. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement de votre inscription."
-                  : "Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement de votre inscription."}
+                  ? "Votre dossier est en cours de traitement par votre établissement scolaire. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."
+                  : "Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."}
               </div>
             </div>
             <hr className="text-gray-200" />
