@@ -208,6 +208,7 @@ const MandatoryLogIn = () => {
 };
 
 const Espace = () => {
+  document.body.style.backgroundColor = "#f4f5f7";
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);

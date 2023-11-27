@@ -49,7 +49,6 @@ const Step = () => {
 };
 
 export default function ReInscription() {
-  document.body.style.backgroundColor = "#F9F6F2";
   const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
   const young = useSelector((state) => state.Auth.young);
