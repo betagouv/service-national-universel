@@ -204,14 +204,12 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
   const isMe = actor._id === originalTarget._id;
   const isAdmin = actor.role === ROLES.ADMIN;
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
-  const isResponsibleModifyingResponsibleWithoutChangingRoleAndStructureId =
+  const isResponsibleModifyingResponsibleWithoutChangingRole =
     // Is responsible...
     [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) &&
     // ... modifying responsible ...
     [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) &&
-    withoutChangingRole &&
-    // ... without changing its structureId.
-    actor.structureId === originalTarget.structureId;
+    withoutChangingRole;
 
   const isSupervisorModifyingTeamMember =
     // Is supervisor...
@@ -257,7 +255,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     (isMeWithoutChangingRole ||
       isAdmin ||
       isSupervisorModifyingTeamMember ||
-      isResponsibleModifyingResponsibleWithoutChangingRoleAndStructureId ||
+      isResponsibleModifyingResponsibleWithoutChangingRole ||
       isReferentModifyingReferentWithoutChangingRole ||
       isReferentModifyingHeadCenterWithoutChangingRole) &&
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
