@@ -4,7 +4,8 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
-import { articleSummaries, questions, categories } from "../contact.utils";
+import { categories, getArticles, getQuestionOptions } from "../contact.utils";
+import useAuth from "@/services/useAuth";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
@@ -16,6 +17,7 @@ import Unlock from "@/assets/icons/Unlock";
 import Solutions from "./Solutions";
 
 export default function ContactForm() {
+  const { young } = useAuth();
   const history = useHistory();
   const { files, addFiles, deleteFile, error } = useFileUpload();
 
@@ -30,8 +32,8 @@ export default function ContactForm() {
   const [message, setMessage] = useState("");
 
   // Derived state
-  const questionOptions = questions.filter((e) => e.category === category && e.roles.includes("young"));
-  const articles = articleSummaries.filter((e) => questionOptions.find((e) => e.value === question)?.articles?.includes(e.slug));
+  const questionOptions = getQuestionOptions(category, "young", young.source);
+  const articles = getArticles(question);
 
   useEffect(() => {
     if (error) {

@@ -6,7 +6,7 @@ const Alert = ({ children, className }) => (
     <div className="bg-blue-france-info px-3 py-3">
       <IoIosInformation className="align-top text-blue-france-info bg-white rounded"></IoIosInformation>
     </div>
-    <div className="p-2">{children}</div>
+    <div className="px-3 py-2.5">{children}</div>
   </div>
 );
 

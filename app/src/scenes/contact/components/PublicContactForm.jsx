@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { department2region, departmentList, translate } from "snu-lib";
+import useAuth from "@/services/useAuth";
+import { department2region, translate, YOUNG_SOURCE } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
-import { articleSummaries, questions, categories } from "../contact.utils";
+import { categories, departmentOptions, getQuestionOptions, getArticles } from "../contact.utils";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
@@ -13,16 +14,22 @@ import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
 import Select from "@/components/dsfr/forms/Select";
 import Solutions from "./Solutions";
 import Textarea from "@/components/dsfr/forms/Textarea";
+import SchoolPictogram from "@/assets/pictograms/School";
+import AvatarPictogram from "@/assets/pictograms/Avatar";
+import Alert from "@/components/dsfr/ui/Alert";
+import { RichRadioButton } from "@/components/dsfr/forms/RichRadioButton";
 
 export default function PublicContactForm() {
   const history = useHistory();
   const { files, addFiles, deleteFile, error } = useFileUpload();
+  const { isCLE } = useAuth();
 
   // Form state
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Form data
+  const [parcours, setParcours] = useState(isCLE ? YOUNG_SOURCE.CLE : undefined);
   const [role, setRole] = useState(null);
   const [category, setCategory] = useState(null);
   const [question, setQuestion] = useState(null);
@@ -34,9 +41,8 @@ export default function PublicContactForm() {
 
   // Derived state
   const disabled = !message || !firstName || !lastName || !email || !department || !category || !question || !role || loading;
-  const departmentOptions = departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label));
-  const questionOptions = questions.filter((e) => e.category === category && e.roles.includes("public"));
-  const articles = articleSummaries.filter((e) => questionOptions.find((e) => e.value === question)?.articles?.includes(e.slug));
+  const questionOptions = getQuestionOptions(category, "public", parcours);
+  const articles = getArticles(question);
 
   useEffect(() => {
     if (error) {
@@ -67,6 +73,7 @@ export default function PublicContactForm() {
         email,
         department,
         role,
+        parcours,
         subjectStep1: category,
         subjectStep2: question,
         region: department2region[department],
@@ -88,8 +95,37 @@ export default function PublicContactForm() {
 
   return (
     <>
+      <fieldset id="parcours" className="my-4 space-y-4">
+        <legend className="text-base">Choisir le type de profil qui me concerne :</legend>
+        <RichRadioButton
+          label="Volontaire au SNU"
+          description="Programme basé sur le volontariat, en dehors du temps scolaire"
+          picto={<AvatarPictogram />}
+          checked={parcours === YOUNG_SOURCE.VOLONTAIRE}
+          onChange={() => setParcours(YOUNG_SOURCE.VOLONTAIRE)}
+          disabled={isCLE}
+        />
+        <RichRadioButton
+          label="Elève en classe engagée"
+          description="Programme proposé au sein de mon établissement scolaire"
+          picto={<SchoolPictogram />}
+          checked={parcours === YOUNG_SOURCE.CLE}
+          onChange={() => setParcours(YOUNG_SOURCE.CLE)}
+          disabled={isCLE}
+        />
+      </fieldset>
+
       <Select label="Ma demande" options={categories} value={category} onChange={setCategory} />
-      {category && <Select label="Sujet" options={questionOptions} value={question} onChange={setQuestion} />}
+
+      {category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={setQuestion} />}
+
+      {category && !questionOptions.length && parcours === YOUNG_SOURCE.CLE && (
+        <Alert>
+          <p className="text-lg font-semibold">Information</p>
+          <p>Si vous avez une question sur votre parcours SNU, contactez directement votre référent classe. Il sera en mesure de vous répondre.</p>
+        </Alert>
+      )}
+
       {articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
 
       {question && (articles.length === 0 || showForm) && (

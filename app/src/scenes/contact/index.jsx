@@ -1,5 +1,5 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 import ContactForm from "./components/ContactForm";
@@ -9,7 +9,7 @@ import PublicContactForm from "./components/PublicContactForm";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
-  const young = useSelector((state) => state.Auth.young);
+  const { isLoggedIn } = useAuth();
 
   // TODO: fetch questions and articles from API
 
@@ -19,7 +19,7 @@ export default function Contact() {
         <p className="leading-relaxed">
           Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
         </p>
-        {young ? <ContactForm /> : <PublicContactForm />}
+        {isLoggedIn ? <ContactForm /> : <PublicContactForm />}
       </DSFRContainer>
     </DSFRLayout>
   );
