@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AsyncCombobox from "@/components/dsfr/forms/AsyncComboBox";
+import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
 import api from "@/services/api";
 import ComboBox from "@/components/dsfr/forms/ComboBox";
 import { capture } from "@/sentry";
