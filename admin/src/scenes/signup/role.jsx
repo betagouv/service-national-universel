@@ -56,7 +56,7 @@ export default function role() {
     );
   };
 
-  if (!user || !etablissement) return <div>Chargement...</div>;
+  if (!user) return <div>Chargement...</div>;
 
   return (
     <Section>
