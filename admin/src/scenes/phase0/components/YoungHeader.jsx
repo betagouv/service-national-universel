@@ -276,7 +276,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                   )}
                 </div>
               </Tab>
-              {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && (
+              {![YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS].includes(young.status) && (
                 <>
                   <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
                     <div className="flex items-center">
