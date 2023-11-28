@@ -39,7 +39,7 @@ export default function informations() {
     e.preventDefault();
     try {
       if (password !== confirmPassword) return toastr.error("Les mots de passe ne correspondent pas");
-      if (validator.isMobilePhone(phone, "fr-FR") === false) return toastr.error("Le numéro de téléphone n'est pas valide");
+      if (!validator.isMobilePhone(phone, "fr-FR")) return toastr.error("Le numéro de téléphone n'est pas valide");
       // stocker dans local storage, pour une création de compte en plusieurs étapes
       if (school) localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(school));
       const { ok, data, code, message } = await api.post(`/cle/referent-signup`, {
@@ -55,7 +55,6 @@ export default function informations() {
       }
       history.push(`/creer-mon-compte/confirmation${search}`);
     } catch (error) {
-      console.log("yo");
       if (error.code === "PASSWORD_NOT_VALIDATED")
         return toastr.error("Mot de passe incorrect", "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole", {
           timeOut: 10000,
