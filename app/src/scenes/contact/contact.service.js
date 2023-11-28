@@ -5,6 +5,13 @@ export const categories = [
   { label: "J'ai un problème technique", value: "TECHNICAL" },
 ];
 
+export const roleOptions = [
+  { label: "Un volontaire", value: "young" },
+  { label: "Un représentant légal", value: "parent" },
+];
+
+export const departmentOptions = departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label));
+
 export const articleSummaries = [
   {
     title: "Phase 0: Quelles sont les dates des séjours 2024 ?",
@@ -183,12 +190,10 @@ export const questions = [
   },
 ];
 
-export const departmentOptions = departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label));
-
 /**
- * @param {("QUESTION"|"TECHNICAL")} category 
+ * @param {("QUESTION"|"TECHNICAL")} category
  * @param {("public"|"young")} role: public: not logged in, young: young logged in
- * @param {"CLE"|"VOLONTAIRE"} parcours 
+ * @param {"CLE"|"VOLONTAIRE"} parcours
  * @returns list of available questions
  */
 export function getQuestionOptions(category, role, parcours) {

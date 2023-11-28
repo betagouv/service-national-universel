@@ -14,9 +14,16 @@ export default function Select({ label, options, value, placeholder = "Sélectio
         setOpen(false);
       }
     };
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
     document.addEventListener("click", handleClickOutside, true);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
       document.removeEventListener("click", handleClickOutside, true);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -65,12 +72,12 @@ export default function Select({ label, options, value, placeholder = "Sélectio
             alignItems === "right" ? "right-0" : "left-0"
           } border-3 z-50 overflow-hidden border-red-600 shadow`}>
           {options.map((option, index) => (
-            <div key={option?.key || index} onClick={() => handleChangeValue(option)} className={`${option.value === value && "bg-gray font-bold"}`}>
+            <button key={option?.key || index} onClick={() => handleChangeValue(option)} className={`w-full text-left ${option.value === value && "bg-gray font-bold"}`}>
               <div className="group flex cursor-pointer items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50">
                 <div>{option.label}</div>
                 {option.value === value ? <BsCheck2 /> : null}
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
