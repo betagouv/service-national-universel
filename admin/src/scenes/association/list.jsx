@@ -45,7 +45,7 @@ export default function List() {
                 bool: {
                   should: [
                     {
-                      terms: { "associationRna.keyword": rnas },
+                      terms: { "associationRNA.keyword": rnas },
                     },
                     {
                       terms: { "organizationRNA.keyword": rnas },
@@ -53,7 +53,6 @@ export default function List() {
                   ],
                 },
               },
-              { match: { deleted: "no" } },
             ],
           },
         },
@@ -72,7 +71,7 @@ export default function List() {
 
         if (res.hits?.hits?.length > 0) {
           for (const association of associations) {
-            const hits = res.hits.hits.filter((e) => e._source.associationRna === association._source.id_rna || e._source.organizationRNA === association._source.id_rna);
+            const hits = res.hits.hits.filter((e) => e._source.associationRNA === association._source.id_rna || e._source.organizationRNA === association._source.id_rna);
             result[association._id] = {
               countMissions: hits.length,
               countPlaces: hits.reduce((prev, curr) => (curr._source.places ? prev + curr._source.places : 0), 0),
