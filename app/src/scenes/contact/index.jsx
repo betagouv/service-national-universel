@@ -22,12 +22,19 @@ export default function Contact() {
   useDocumentTitle("Formulaire de contact");
   const { isLoggedIn, isCLE } = useAuth();
 
-  const [parcours, setParcours] = useState(isCLE ? YOUNG_SOURCE.CLE : undefined);
+  const [parcours, setParcours] = useState(getInitialParcoursState());
   const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState(null);
   const [question, setQuestion] = useState(null);
 
-  const questionOptions = getQuestionOptions(category, "public", parcours);
+  function getInitialParcoursState() {
+    if (isCLE) return YOUNG_SOURCE.CLE;
+    if (isLoggedIn) return YOUNG_SOURCE.VOLONTAIRE;
+    return undefined;
+  }
+
+  const knowledgeBaseRole = isLoggedIn ? "young" : "public";
+  const questionOptions = getQuestionOptions(category, knowledgeBaseRole, parcours);
   const articles = getArticles(question);
 
   const handleSelectCategory = (value) => {
@@ -59,7 +66,7 @@ export default function Contact() {
             />
           </>
         ) : (
-          <fieldset id="parcours" className="my-4 space-y-5">
+          <fieldset id="parcours" className="my-4 space-y-4">
             <legend className="text-base">Choisir le type de profil qui me concerne :</legend>
             <EnhancedRadioButton
               label="Volontaire au SNU"
@@ -70,7 +77,7 @@ export default function Contact() {
               disabled={isCLE}
             />
             <EnhancedRadioButton
-              label="Elève en classe engagée"
+              label="Élève en classe engagée"
               description="Programme proposé au sein de mon établissement scolaire"
               picto={<SchoolPictogram />}
               checked={parcours === YOUNG_SOURCE.CLE}
@@ -80,7 +87,7 @@ export default function Contact() {
           </fieldset>
         )}
 
-        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} />}
+        {!!parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} />}
 
         {!!category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} />}
         {!!category && questionOptions.length === 0 && (

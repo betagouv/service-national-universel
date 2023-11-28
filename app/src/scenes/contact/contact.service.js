@@ -6,8 +6,8 @@ export const categories = [
 ];
 
 export const roleOptions = [
-  { label: "Un volontaire", value: "young" },
-  { label: "Un représentant légal", value: "parent" },
+  { label: "Le volontaire/l'élève", value: "young" },
+  { label: "Son représentant légal", value: "parent" },
 ];
 
 export const departmentOptions = departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label));
