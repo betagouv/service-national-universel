@@ -9,6 +9,7 @@ const {
   ROLES,
   STATUS_CLASSE,
   STATUS_PHASE1_CLASSE,
+  YOUNG_STATUS,
   canCreateClasse,
   canUpdateClasse,
   canViewClasse,
@@ -21,6 +22,7 @@ const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
+const YoungModel = require("../../models/young");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -63,7 +65,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     classe = await ClasseModel.create({
       ...value,
-      status: STATUS_CLASSE.INSCRIPTION_IN_PROGRESS,
+      status: STATUS_CLASSE.DRAFT,
       statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
       cohort: defaultCleCohort.name,
       uniqueKeyAndId: value.uniqueKey + "_" + value.uniqueId,
@@ -103,13 +105,36 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     if (!canUpdateClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     let classe = await ClasseModel.findById(value.id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (req.user.role === ROLES.REFERENT_CLASSE && !classe.referentClasseIds.includes(req.user._id))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (etablissement.referentEtablissementIds.includes(req.user._id) && etablissement.coordinateurIds.includes(req.user._id)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    const getStatus = async (classe) => {
+      const students = await YoungModel.find({ classeId: classe._id })?.lean();
+      const studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS);
+      const studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_CORRECTION);
+      const studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
+      let status = STATUS_CLASSE.INSCRIPTION_IN_PROGRESS;
+      if (studentInProgress.length === 0 && studentWaiting.length > 0) status = STATUS_CLASSE.INSCRIPTION_TO_CHECK;
+      if (studentValidated.length === classe.totalSeats) status = STATUS_CLASSE.DONE;
+      return status;
+    };
+
+    const status = classe.seatsTaken === 0 ? STATUS_CLASSE.CREATED : await getStatus(classe);
+    // TODO : A modifier avec une fonction qui retourne le status en fonction du statut des jeunes
+
     classe.set({
       ...value,
-      status: STATUS_CLASSE.INSCRIPTION_TO_CHECK,
+      status: status,
     });
     classe = await classe.save({ fromUser: req.user });
 
@@ -120,14 +145,13 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (!canViewClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const classe = await ClasseModel.findById(value)?.lean();
     if (!classe) {
@@ -193,8 +217,19 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const now = new Date();
-    classe.set({ deletedAt: now });
+    classe.set({ status: STATUS_CLASSE.WITHDRAWN, deletedAt: now });
     await classe.save({ fromUser: req.user });
+
+    const students = await YoungModel.find({ classeId: classe._id })?.lean();
+
+    const updateStatusStudent = async (youngId, user) => {
+      const young = await YoungModel.findById(youngId);
+      if (!young) return;
+      young.set({ status: YOUNG_STATUS.ABANDONED });
+      await young.save({ fromUser: user });
+    };
+    await Promise.all(students.map((student) => updateStatusStudent(student._id, req.user)));
+    //TODO : A modifier ? (voir avec la fonction getStatus)
 
     res.status(200).send({ ok: true });
   } catch (error) {

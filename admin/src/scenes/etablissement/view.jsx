@@ -15,6 +15,7 @@ import { toastr } from "react-redux-toastr";
 import { copyToClipboard } from "@/utils";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
+import Loader from "@/components/Loader";
 
 export default function view() {
   const user = useSelector((state) => state.Auth.user);
@@ -200,6 +201,8 @@ export default function view() {
         <Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />,
       ];
 
+  if (!etablissement) return <Loader />;
+
   return (
     <Page>
       <Header
@@ -231,7 +234,7 @@ export default function view() {
                 <div className="text-base font-bold text-ds-gray-900">
                   {contact.firstName} {contact.lastName}
                 </div>
-                <div className="mb-4 text-ds-gray-500">{translate(contact.role)}</div>
+                <div className="mb-4 text-ds-gray-500">{translate(contact.subRole)}</div>
                 <div className="flex items-center justify-start mb-2">
                   <HiOutlinePhone size={20} className="mr-2" />
                   {contact.phone}

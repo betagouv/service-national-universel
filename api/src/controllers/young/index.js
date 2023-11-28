@@ -1188,6 +1188,5 @@ router.use("/inscription2023", require("./inscription2023"));
 router.use("/note", require("./note"));
 router.use("/:id/point-de-rassemblement", require("./point-de-rassemblement"));
 router.use("/account", require("./account"));
-router.use("/cle", require("./cle"));
 
 module.exports = router;

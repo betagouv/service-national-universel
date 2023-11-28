@@ -13,6 +13,9 @@ export const statusClassForBadge = (status) => {
       break;
 
     case STATUS_CLASSE.CREATED:
+      statusClasse = "WAITING_LIST";
+      break;
+
     case STATUS_CLASSE.DONE:
       statusClasse = "VALIDATED";
       break;

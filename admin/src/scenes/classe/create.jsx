@@ -190,7 +190,8 @@ export default function create() {
             <Select
               className="mb-3"
               isActive={true}
-              placeholder={"Choisissez un référent éxistant"}
+              placeholder={"Choisissez un référent existant"}
+              noOptionsMessage={"Aucun référent trouvé"}
               options={referentList}
               closeMenuOnSelect={true}
               isClearable={true}

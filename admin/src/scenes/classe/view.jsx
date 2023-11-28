@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ProfilePic } from "@snu/ds";
-import { Page, Header, Container, Button, Badge, Label, InputText, ModalConfirmation, Select } from "@snu/ds/admin";
+import { Page, Header, Container, Button, Badge, Label, InputText, Modal, Select } from "@snu/ds/admin";
 import { HiOutlinePencil } from "react-icons/hi";
 import { BsSend, BsTrash3 } from "react-icons/bs";
-import { VscCopy } from "react-icons/vsc";
 import ClasseIcon from "@/components/drawer/icons/Classe";
 import { Link } from "react-router-dom";
 import { useParams, useHistory } from "react-router-dom";
@@ -13,9 +12,14 @@ import { toastr } from "react-redux-toastr";
 import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, YOUNG_STATUS } from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
+import { appURL } from "@/config";
+import { copyToClipboard } from "@/utils";
+import { MdContentCopy } from "react-icons/md";
+import Loader from "@/components/Loader";
 
 export default function view() {
   const [classe, setClasse] = useState({});
+  const [url, setUrl] = useState("");
   const [studentsWaiting, setStudentsWaiting] = useState([]);
   const [studentsInProgress, setStudentsInProgress] = useState([]);
   const [modalInvite, setModalInvite] = useState(false);
@@ -47,6 +51,7 @@ export default function view() {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
       setClasse(response);
+      setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${response._id.toString()}`);
       getStudents(response._id);
     } catch (e) {
       capture(e);
@@ -56,12 +61,12 @@ export default function view() {
 
   const getStudents = async (id) => {
     try {
-      const { ok, code, data: response } = await api.get(`/young/cle/by-classe/${id}`);
+      const { ok, code, data: response } = await api.get(`/cle/young/by-classe/${id}`);
 
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des élèves", translate(code));
       }
-      setStudentsWaiting(response.filter((young) => young.status === YOUNG_STATUS.WAITING_VALIDATION));
+      setStudentsWaiting(response.filter((young) => young.status === YOUNG_STATUS.WAITING_CORRECTION));
       setStudentsInProgress(response.filter((young) => young.status === YOUNG_STATUS.IN_PROGRESS));
     } catch (e) {
       capture(e);
@@ -141,6 +146,8 @@ export default function view() {
     ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
     : null;
 
+  if (!classe) return <Loader />;
+
   return (
     <Page>
       <Header
@@ -181,7 +188,7 @@ export default function view() {
             <Label
               title="Nombre d'élèves"
               name="totalSeats"
-              tooltip="Pour qu'une classe soit considérée comme complète et puisse être validée, 100% des élèves doivent être inscrit (ou désisté). Vous pouvez modifier le nombre d'élève dans le cas d'un changement d'effectif en cours d'année."
+              tooltip="Pour qu'une classe soit considérée comme complète et puisse être validée, 100% des élèves doivent être inscrits (ou désistés). Vous pouvez modifier le nombre d'élèves dans le cas d'un changement d'effectif en cours d'année."
             />
             <InputText
               className="mb-3"
@@ -289,22 +296,30 @@ export default function view() {
         </div>
       </Container>
 
-      <ModalConfirmation
+      <Modal
         isOpen={modalInvite}
+        className="w-[700px]"
         onClose={() => setModalInvite(false)}
-        icon={<ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />}
-        title="Invitez des élèves à rejoindre votre classe !"
-        text={
-          <>
-            <p>
-              Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien :{" "}
-              <a href={`https://moncompte.snu.gouv.fr/classe-engagee/${classe?._id}`} className="text-primary">
-                https://moncompte.snu.gouv.fr/classe-engagee/{classe?._id}
-              </a>
-            </p>
-          </>
+        content={
+          <div className="flex flex-col items-center justify-center">
+            <ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />
+            <h1 className="text-xl leading-7 font-medium text-gray-900 mt-6">Invitez des élèves à rejoindre votre classe !</h1>
+            <p className="text-base leading-5 font-normal text-gray-900 mt-6">Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien : </p>
+            <a href={url} className="text-base leading-5 font-normal text-blue-600" rel="noreferrer" target="_blank">
+              {url}
+            </a>
+            <Button
+              type="secondary"
+              leftIcon={<MdContentCopy className="h-5 w-5" />}
+              title="Copier le lien"
+              className="mt-6 !w-80 flex items-center justify-center"
+              onClick={() => {
+                copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${url}`);
+                setModalInvite(false);
+              }}
+            />
+          </div>
         }
-        actions={[{ leftIcon: <VscCopy />, title: "Copier le lien", isCancel: true, onClick: () => console.info("Copier le lien") }]}
       />
     </Page>
   );
