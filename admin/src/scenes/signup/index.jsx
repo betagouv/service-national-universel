@@ -41,7 +41,7 @@ export default function Index() {
           return toastr.error("Votre lien d'invitation a expiré");
         }
         const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
-        if (ok && data) setOnboardedUser(data);
+        if (ok && data) setOnboardedUser(data.referent);
         if (!ok) {
           history.push("/auth");
           return toastr.error("Votre lien d'invitation a expiré");
@@ -111,7 +111,7 @@ export default function Index() {
       />
 
       <Switch>
-        <SentryRoute path="/creer-mon-compte" exact component={() => <Role user={onboardedUser} />} />
+        <SentryRoute path="/creer-mon-compte" exact component={() => <Role />} />
         <SentryRoute path="/creer-mon-compte/email" component={() => <Email user={onboardedUser} />} />
         <SentryRoute path="/creer-mon-compte/code" component={() => <Code user={onboardedUser} />} />
         <SentryRoute path="/creer-mon-compte/informations" component={() => <Informations />} />
