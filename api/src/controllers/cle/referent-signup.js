@@ -110,6 +110,7 @@ router.post("/confirm-email", async (req, res) => {
       token2FAExpires: null,
       attempts2FA: 0,
     });
+    await referent.save();
 
     return res.status(200).send({ ok: true, data: serializeReferent(referent) });
   } catch (error) {}
