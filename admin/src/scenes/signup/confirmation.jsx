@@ -28,30 +28,32 @@ export default function confirmation() {
       try {
         if (!invitationToken) return toastr.error("Votre lien d'invitation a expiré");
         const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
-        if (ok && data) setUser(data);
+        if (ok && data) setUser(data.referent);
+
+        if (data.etablissement) {
+          setEtablissement(data.etablissement);
+        } else {
+          const localStorageEtablissement = localStorage.getItem(LOCAL_STORAGE_KEY);
+          if (localStorageEtablissement) {
+            setEtablissement(JSON.parse(localStorageEtablissement));
+          }
+        }
       } catch (error) {
         if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return toastr.error("Votre lien d'invitation a expiré");
       }
     })();
   }, []);
 
-  const getEtablissement = async () => {
-    const localStorageEtablissement = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (localStorageEtablissement) {
-      setEtablissement(JSON.parse(localStorageEtablissement));
-    }
-  };
-
-  useEffect(() => {
-    getEtablissement();
-  }, [user]);
-
   const submit = async (e) => {
     e.preventDefault();
     try {
+      const body = { invitationToken };
       const schoolLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY);
-      const school = JSON.parse(schoolLocalStorage);
-      const response = await api.post("/cle/referent-signup/confirm-signup", { schoolId: school.id.toString(), invitationToken });
+      if (schoolLocalStorage) {
+        const school = JSON.parse(schoolLocalStorage);
+        body.schoolId = school.id.toString();
+      }
+      const response = await api.post("/cle/referent-signup/confirm-signup", body);
       if (!response.ok) {
         return toastr.error(response.message || translate(response.code));
       }
@@ -87,7 +89,13 @@ export default function confirmation() {
             <div className="flex items-start justify-between">
               <div className="text-[#666]">Établissement scolaire :</div>
               <div className="text-right text-[#161616]">
-                {etablissement?.fullName}, {etablissement?.postcode}, {etablissement?.city}
+                {etablissement ? (
+                  <span>
+                    {etablissement?.fullName || etablissement?.name}, {etablissement?.postcode || etablissement?.zip}, {etablissement?.city}
+                  </span>
+                ) : (
+                  <span className="text-gray-400 italic">Aucun établissement sélectionné</span>
+                )}
               </div>
             </div>
             <div className="flex items-start justify-between">
