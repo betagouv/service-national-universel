@@ -11,7 +11,6 @@ const { capture, captureMessage } = require("../../sentry");
 const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
-const ReferentModel = require("../../models/referent");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 
 router.get("/from-etablissement/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
@@ -144,16 +143,13 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const classe = await ClasseModel.findById(value)?.lean();
-    if (!classe) {
+    // We need to populate the model with the 2 virtuals etablissement and referents
+    const data = await ClasseModel.findById(value).populate("etablissement").populate("referents");
+    if (!data) {
       captureMessage("Error finding classe with id : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    const { etablissementId, referentClasseIds } = classe;
-    const etablissement = etablissementId ? await EtablissementModel.findById(etablissementId)?.lean() : {};
-    const referentClasse = referentClasseIds.length ? await ReferentModel.findById(referentClasseIds[0])?.lean() : {};
-
-    return res.status(200).send({ ok: true, data: { ...classe, etablissement, referentClasse } });
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
