@@ -9,8 +9,6 @@ import PublicContactForm from "./components/PublicContactForm";
 import { categories, getArticles, getQuestionOptions } from "./contact.service";
 import { YOUNG_SOURCE } from "snu-lib";
 import Unlock from "@/assets/icons/Unlock";
-import { Link } from "react-router-dom";
-import { HiArrowRight } from "react-icons/hi";
 import QuestionBubbleV2 from "@/assets/icons/QuestionBubbleReimport";
 import EnhancedRadioButton from "@/components/dsfr/forms/EnhancedRadioButton";
 import AvatarPictogram from "@/assets/pictograms/Avatar";
@@ -18,6 +16,7 @@ import SchoolPictogram from "@/assets/pictograms/School";
 import Select from "@/components/dsfr/forms/Select";
 import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
+import CardLink from "@/components/dsfr/ui/CardLink";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
@@ -42,7 +41,7 @@ export default function Contact() {
     setShowForm(false);
   };
 
-  // If CLE users have no question available, we display an Alert prompting them to contact their class referent.
+  // If CLE users have no questions available, we display an Alert prompting them to contact their class referent.
   const shouldDisplayCleAlert = !!category && !questionOptions.length && parcours === YOUNG_SOURCE.CLE;
 
   // If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly.
@@ -55,6 +54,7 @@ export default function Contact() {
           Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
         </p>
 
+        {/* Logged in user get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (
           <>
             <CardLink label="Débloquez votre accès gratuit au code de la route" picto={<Unlock />} url="/phase1" />
@@ -101,20 +101,5 @@ export default function Contact() {
         {shouldDisplayForm && !isLoggedIn && <PublicContactForm category={category} question={question} parcours={parcours} />}
       </DSFRContainer>
     </DSFRLayout>
-  );
-}
-
-function CardLink({ label, picto, url }) {
-  return (
-    <div className="my-8 flex gap-4 p-2 items-center w-full border-[1px] text-sm">
-      <div className="flex-none flex items-center justify-center w-12 md:w-24 h-24">{picto}</div>
-      <div>
-        <p className="leading-relaxed">{label}</p>
-        <Link to={url} className="text-blue-france-sun-113 underline underline-offset-4">
-          En savoir plus
-          <HiArrowRight className="inline-block ml-2" />
-        </Link>
-      </div>
-    </div>
   );
 }
