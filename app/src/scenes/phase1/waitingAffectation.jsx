@@ -65,10 +65,12 @@ export default function WaitingAffectation() {
                 </p>
               </div>
             </div>
-            <div className="bg-[#EFF6FF] rounded-lg flex items-center justify-center max-w-[688px] leading-5 p-3 mt-2">
-              <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
-              <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
-            </div>
+            {isCle && (
+              <div className="bg-[#EFF6FF] rounded-lg flex items-center justify-center max-w-[688px] leading-5 p-3 mt-2">
+                <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
+                <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
+              </div>
+            )}
           </article>
           <img src={hero2} className="-mr-4 hidden md:block" width={344} />
         </section>
