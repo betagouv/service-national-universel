@@ -41,12 +41,6 @@ export default function Contact() {
     setShowForm(false);
   };
 
-  // If CLE users have no questions available, we display an Alert prompting them to contact their class referent.
-  const shouldDisplayCleAlert = !!category && !questionOptions.length && parcours === YOUNG_SOURCE.CLE;
-
-  // If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly.
-  const shouldDisplayForm = !!question && questionOptions.length > 0 && (articles.length === 0 || showForm);
-
   return (
     <DSFRLayout title="Formulaire de contact">
       <DSFRContainer title="Je n'ai pas trouvé de réponse à ma question">
@@ -88,17 +82,23 @@ export default function Contact() {
 
         {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} />}
 
-        {shouldDisplayCleAlert && (
+        {!!category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} />}
+        {!!category && questionOptions.length === 0 && (
           <Alert className="my-8">
             <p className="text-lg font-semibold">Information</p>
-            <p>Si vous avez une question sur votre parcours SNU, contactez directement votre référent classe. Il sera en mesure de vous répondre.</p>
+            <p>
+              {isCLE
+                ? "Si vous avez une question sur votre parcours SNU, contactez directement votre référent classe. Il sera en mesure de vous répondre."
+                : "Aucun sujet disponible."}
+            </p>
           </Alert>
         )}
 
-        {category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} />}
-        {questionOptions.length > 0 && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
-        {shouldDisplayForm && isLoggedIn && <ContactForm category={category} question={question} />}
-        {shouldDisplayForm && !isLoggedIn && <PublicContactForm category={category} question={question} parcours={parcours} />}
+        {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
+        {!!question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
+        {!!question &&
+          (articles.length === 0 || showForm) &&
+          (isLoggedIn ? <ContactForm category={category} question={question} /> : <PublicContactForm category={category} question={question} parcours={parcours} />)}
       </DSFRContainer>
     </DSFRLayout>
   );
