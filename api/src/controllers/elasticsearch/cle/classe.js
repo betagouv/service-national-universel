@@ -62,7 +62,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     }
 
     // Context filters
-    const contextFilters = [...classeContextFilters];
+    const contextFilters = [...classeContextFilters, { bool: { must_not: { exists: { field: "deletedAt" } } } }];
+
     // Body params validation
     const { queryFilters, page, sort, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body: body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });

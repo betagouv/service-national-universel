@@ -849,7 +849,7 @@ const STATUS_CLASSE = {
   CREATED: "CREATED",
   INSCRIPTION_IN_PROGRESS: "INSCRIPTION_IN_PROGRESS",
   INSCRIPTION_TO_CHECK: "INSCRIPTION_TO_CHECK",
-  DONE: "DONE",
+  VALIDATED: "VALIDATED",
 };
 
 //TODO to update with ARBITRAGE
@@ -886,12 +886,24 @@ const CLE_COLORATION = {
 
 //TODO to update with ARBITRAGE
 const CLE_GRADE = {
+  "4eme": "4eme",
+  "3eme": "3eme",
   "2ndePro": GRADES["2ndePro"],
   "2ndeGT": GRADES["2ndeGT"],
   "1ereGT": GRADES["1ereGT"],
   "1erePro": GRADES["1erePro"],
   TermGT: GRADES["TermGT"],
   TermPro: GRADES["TermPro"],
+  CAP: "CAP",
+  Autre: "Autre",
+};
+
+const CLE_FILIERE = {
+  GENERAL_AND_TECHNOLOGIC: "Générale et technologique",
+  PROFESSIONAL: "Professionnelle",
+  APPRENTICESHIP: "Apprentissage",
+  ADAPTED: "Enseignement adapté",
+  MIXED: "Mixte",
 };
 
 const YOUNG_SOURCE = {
@@ -906,6 +918,7 @@ const STATUS_CLASSE_LIST = Object.values(STATUS_CLASSE);
 const STATUS_PHASE1_CLASSE_LIST = Object.values(STATUS_PHASE1_CLASSE);
 const YOUNG_SOURCE_LIST = Object.values(YOUNG_SOURCE);
 const CLE_COLORATION_LIST = Object.values(CLE_COLORATION);
+const CLE_FILIERE_LIST = Object.values(CLE_FILIERE);
 
 export {
   YOUNG_STATUS,
@@ -970,6 +983,7 @@ export {
   YOUNG_SOURCE_LIST,
   CLE_COLORATION,
   CLE_COLORATION_LIST,
+  CLE_FILIERE_LIST,
 };
 export default {
   YOUNG_STATUS,

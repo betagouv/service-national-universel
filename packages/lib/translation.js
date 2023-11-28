@@ -352,6 +352,10 @@ const translate = (value) => {
       return "De l'hébergement d'un proche";
     case "N/A":
       return "Non renseigné";
+    case "INSCRIPTION_IN_PROGRESS":
+      return "Inscription en cours";
+    case "INSCRIPTION_TO_CHECK":
+      return "Inscription à vérifier";
     default:
       return value;
   }
