@@ -9,9 +9,10 @@ import { translateField, translateCorrectionReason, translate, YOUNG_STATUS, ins
 import plausibleEvent from "../../services/plausible";
 import { redirectToCorrection } from "../../utils/navigation";
 import { getCohort } from "@/utils/cohorts";
+import useAuth from "@/services/useAuth";
 
 export default function WaitingCorrectionV2() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
   const history = useHistory();
 
@@ -23,7 +24,8 @@ export default function WaitingCorrectionV2() {
           <div className="flex items-stretch justify-between rounded-lg bg-white">
             <div className="w-1/2 py-6 pl-10">
               <div className="text-[44px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
+                <strong>{young.firstName}, </strong>
+                {isCLE ? "bienvenue sur votre compte élève." : "bienvenue sur votre compte volontaire."}
               </div>
               <div className="mt-3 text-xl font-bold text-[#242526]">Votre dossier d’inscription est en attente de correction.</div>
               <div className="mt-3 flex max-h-[250px] flex-col gap-5 overflow-auto">
@@ -59,14 +61,16 @@ export default function WaitingCorrectionV2() {
             </div>
             <img className="w-1/2 object-fill" src={Img3} />
           </div>
-          <div className="mt-10 flex justify-end">
-            <a
-              className="w-40"
-              href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
-              onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
-              <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
-            </a>
-          </div>
+          {!isCLE && (
+            <div className="mt-10 flex justify-end">
+              <a
+                className="w-40"
+                href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
+                onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
+                <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
+              </a>
+            </div>
+          )}
         </div>
       </div>
       {/* MOBILE */}
