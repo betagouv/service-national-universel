@@ -12,6 +12,11 @@ export const roleOptions = [
 
 export const departmentOptions = departmentList.map((d) => ({ value: d, label: d }))?.sort((a, b) => a.label.localeCompare(b.label));
 
+export const alertMessage = {
+  [YOUNG_SOURCE.CLE]: "Si vous avez une question sur votre parcours SNU, contactez directement votre référent classe. Il sera en mesure de vous répondre.",
+  [YOUNG_SOURCE.VOLONTAIRE]: "Aucun sujet disponible.",
+};
+
 export const articleSummaries = [
   {
     title: "Phase 0: Quelles sont les dates des séjours 2024 ?",

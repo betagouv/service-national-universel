@@ -6,7 +6,7 @@ import ContactForm from "./components/ContactForm";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import PublicContactForm from "./components/PublicContactForm";
-import { categories, getArticles, getQuestionOptions } from "./contact.service";
+import { alertMessage, categories, getArticles, getQuestionOptions } from "./contact.service";
 import { YOUNG_SOURCE } from "snu-lib";
 import Unlock from "@/assets/icons/Unlock";
 import QuestionBubbleV2 from "@/assets/icons/QuestionBubbleReimport";
@@ -86,11 +86,7 @@ export default function Contact() {
         {!!category && questionOptions.length === 0 && (
           <Alert className="my-8">
             <p className="text-lg font-semibold">Information</p>
-            <p>
-              {isCLE
-                ? "Si vous avez une question sur votre parcours SNU, contactez directement votre référent classe. Il sera en mesure de vous répondre."
-                : "Aucun sujet disponible."}
-            </p>
+            <p>{alertMessage[parcours]}</p>
           </Alert>
         )}
 
