@@ -113,7 +113,7 @@ export default function Index() {
       <Switch>
         <SentryRoute path="/creer-mon-compte" exact component={() => <Role />} />
         <SentryRoute path="/creer-mon-compte/email" component={() => <Email user={onboardedUser} />} />
-        <SentryRoute path="/creer-mon-compte/code" component={() => <Code user={onboardedUser} />} />
+        <SentryRoute path="/creer-mon-compte/code" component={() => <Code />} />
         <SentryRoute path="/creer-mon-compte/informations" component={() => <Informations />} />
         <SentryRoute path="/creer-mon-compte/confirmation" component={() => <Confirmation />} />
       </Switch>
