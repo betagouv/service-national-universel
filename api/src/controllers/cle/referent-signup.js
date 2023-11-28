@@ -13,6 +13,7 @@ const ReferentModel = require("../../models/referent");
 const SchoolRamsesModel = require("../../models/schoolRAMSES");
 const EtablissementModel = require("../../models/cle/etablissement");
 const { serializeReferent } = require("../../utils/serializer");
+const { validateEmailAcademique } = require("../../services/cle/referent");
 
 router.get("/token/:token", async (req, res) => {
   try {
@@ -59,7 +60,7 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (value.email !== value.confirmEmail)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
-    //todo : check si l'email est bien une adresse académique
+    if (!validateEmailAcademique(value.email)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
