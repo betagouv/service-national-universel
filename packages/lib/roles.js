@@ -861,8 +861,12 @@ function canInviteCoordinateur(actor) {
   return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
 }
 
-function canWriteClasse(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
+function canCreateClasse(actor) {
+  return actor.role === ROLES.ADMINISTRATEUR_CLE;
+}
+
+function canUpdateClasse(actor) {
+  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE;
 }
 
 function canViewClasse(actor) {
@@ -875,6 +879,14 @@ function canUpdateEtablissement(actor) {
 
 function canViewEtablissement(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
+function canSearchStudent(actor) {
+  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
+function canDeleteClasse(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
 export {
@@ -1003,8 +1015,11 @@ export {
   canSeeDashboardSejourHeadCenter,
   canUpdateMyself,
   canInviteCoordinateur,
-  canWriteClasse,
+  canCreateClasse,
+  canUpdateClasse,
   canViewClasse,
   canUpdateEtablissement,
   canViewEtablissement,
+  canSearchStudent,
+  canDeleteClasse,
 };
