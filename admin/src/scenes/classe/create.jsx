@@ -9,6 +9,7 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
+import Loader from "@/components/Loader";
 
 export default function create() {
   const [classe, setClasse] = useState({
@@ -117,6 +118,8 @@ export default function create() {
     </a>,
     <Button key="create" leftIcon={<ClasseIcon />} title="Créer cette classe" onClick={() => validate()} />,
   ];
+
+  if (!classe) return <Loader />;
 
   return (
     <Page>
