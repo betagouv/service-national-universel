@@ -19,7 +19,7 @@ import useAuth from "@/services/useAuth";
 import { RiInformationFill } from "react-icons/ri";
 
 export default function WaitingAffectation() {
-  const {young, isCLE} = useAuth();
+  const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
   const departureDate = cohort ? getDepartureDate(young, {}, cohort) : null;
   const returnDate = cohort ? getReturnDate(young, {}, cohort) : null;
@@ -81,7 +81,11 @@ export default function WaitingAffectation() {
         <section className="mt-12 pb-32 md:mt-32">
           <h2 className="mb-8 text-center text-xl font-bold">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>
           <div className="flex justify-center">
-            <ButtonExternalLinkPrimary href="https://www.snu.gouv.fr/phase-1-sejour-cohesion/" target="_blank" rel="noreferrer" className="w-52">
+            <ButtonExternalLinkPrimary
+              href={isCLE ? " https://www.snu.gouv.fr/classes-engagees/" : "https://www.snu.gouv.fr/phase-1-sejour-cohesion/"}
+              target="_blank"
+              rel="noreferrer"
+              className="w-52">
               Découvrir
             </ButtonExternalLinkPrimary>
           </div>
