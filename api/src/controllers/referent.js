@@ -22,6 +22,8 @@ const ReferentAuth = new AuthObject(ReferentModel);
 const patches = require("./patches");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
+const EtablissementModel = require("../models/cle/etablissement");
+const ClasseModel = require("../models/cle/classe");
 
 const { getQPV, getDensity } = require("../geo");
 const config = require("../config");
@@ -76,6 +78,7 @@ const {
   getCohortPeriod,
   formatPhoneNumberFromPhoneZone,
   canCheckIfRefExist,
+  YOUNG_SOURCE,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 
@@ -959,7 +962,18 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
       const structure = await StructureModel.findById(application.structureId);
       applications.push({ ...application._doc, structure: structure ? serializeStructure(structure, req.user) : null });
     }
-    return res.status(200).send({ ok: true, data: { ...data._doc, applications } });
+
+    let etablissement = undefined;
+    let classe = undefined;
+
+    if (data.source === YOUNG_SOURCE.CLE) {
+      etablissement = await EtablissementModel.findById(data.etablissementId);
+      classe = await ClasseModel.findById(data.classeId);
+      //Can throw 404 because when preinsciption for young CLE is finished, we already this information
+      if (!etablissement || !classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    return res.status(200).send({ ok: true, data: { ...data._doc, applications, etablissement, classe } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -531,7 +531,16 @@ function canGetYoungByEmail(actor) {
 }
 
 function canViewYoung(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.HEAD_CENTER,
+    ROLES.RESPONSIBLE,
+    ROLES.SUPERVISOR,
+    ROLES.ADMINISTRATEUR_CLE,
+    ROLES.REFERENT_CLASSE,
+  ].includes(actor.role);
 }
 
 function canViewBus(actor) {
