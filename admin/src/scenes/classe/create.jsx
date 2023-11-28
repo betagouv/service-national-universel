@@ -43,7 +43,6 @@ export default function create() {
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des referents", translate(code));
       }
-      console.log(classes);
       const referentsList = classes.flatMap((classe) =>
         classe.referent.map((referent) => ({
           ...referent,
@@ -51,7 +50,16 @@ export default function create() {
           label: `${referent.firstName} ${referent.lastName}`,
         })),
       );
-      setReferentList(referentsList);
+      const uniqueIds = new Set();
+
+      const uniqueArray = referentsList.filter((item) => {
+        if (!uniqueIds.has(item._id)) {
+          uniqueIds.add(item._id);
+          return true;
+        }
+        return false;
+      });
+      setReferentList(uniqueArray);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des contacts");

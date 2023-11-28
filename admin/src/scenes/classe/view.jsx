@@ -10,7 +10,7 @@ import { useParams, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, YOUNG_STATUS, STATUS_CLASSE } from "snu-lib";
+import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, YOUNG_STATUS } from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
 
@@ -101,7 +101,6 @@ export default function view() {
       setIsLoading(false);
       setErrors({});
     } catch (e) {
-      console.log(e);
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la classe");
     } finally {

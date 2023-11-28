@@ -111,7 +111,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       ...value,
       status: STATUS_CLASSE.INSCRIPTION_TO_CHECK,
     });
-    console.log(classe);
     classe = await classe.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: classe });

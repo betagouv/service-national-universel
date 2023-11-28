@@ -20,6 +20,9 @@ export const statusClassForBadge = (status) => {
     case STATUS_CLASSE.WITHDRAWN:
       statusClasse = "CANCEL";
       break;
+    case STATUS_CLASSE.DRAFT:
+      statusClasse = "DRAFT";
+      break;
 
     default:
       statusClasse = null;

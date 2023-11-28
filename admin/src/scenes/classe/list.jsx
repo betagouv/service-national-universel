@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { HiPlus, HiUsers } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, STATUS_CLASSE } from "snu-lib";
+import { ROLES } from "snu-lib";
 import { statusClassForBadge } from "./utils";
 
 export default function list() {
