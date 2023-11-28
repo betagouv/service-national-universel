@@ -61,6 +61,7 @@ export default function confirmation() {
       // todo : refirect to the auth screen
       localStorage.removeItem(LOCAL_STORAGE_KEY);
       localStorage.setItem("cle_referent_signup_first_time", true);
+      toastr.success("Votre compte a bien été créé. Vous pouvez maintenant vous connecter.");
       history.push("/auth");
     } catch (e) {
       console.log(e);
