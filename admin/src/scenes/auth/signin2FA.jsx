@@ -37,6 +37,7 @@ export default function Signin() {
       if (response.user) {
         plausibleEvent("2FA / Connexion réussie");
         dispatch(setUser(response.user));
+        if (!redirect) return history.push("/");
         const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
         if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });
