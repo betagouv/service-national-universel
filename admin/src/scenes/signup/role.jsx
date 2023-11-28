@@ -43,16 +43,34 @@ export default function role() {
     if (!user) return "";
     if (user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement) {
       return (
-        <span>
-          Vous allez créez un compte Administrateur CLE en tant que <b>{translate(user.role)}</b>.
-        </span>
+        <p>
+          <span>
+            Vous allez créez un compte {translate(user.role)} en tant que <b>{translate(user.subRole)}</b>.
+          </span>
+          <br />
+          Confirmez-vous qu’il s’agit bien de votre rôle et de votre fonction ?
+        </p>
       );
     }
-    if (!etablissement) return "";
+    if (user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.coordinateur_cle) {
+      return (
+        <p>
+          <span>
+            Vous allez créez un compte {translate(user.role)} en tant que <b>{translate(user.subRole)}</b> du <b>{etablissement?.name}</b>.
+          </span>
+          <br />
+          Confirmez-vous qu’il s’agit bien de votre rôle et de votre fonction ?
+        </p>
+      );
+    }
     return (
-      <span>
-        Vous allez créez un compte Administrateur CLE en tant que <b>{translate(user.subRole)}</b> du <b>{etablissement?.name}</b>.
-      </span>
+      <p>
+        <span>
+          Vous allez créez un compte SNU en tant que <b>{translate(user.role)}</b> du <b>{etablissement?.name}</b>.
+        </span>
+        <br />
+        Confirmez-vous qu’il s’agit bien de votre rôle ?
+      </p>
     );
   };
 
@@ -69,11 +87,7 @@ export default function role() {
           <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
         </div>
         <hr className="p-1" />
-        <p>
-          {displayText()}
-          <br />
-          Confirmez-vous qu’il s’agit bien de votre rôle et de votre fonction ?
-        </p>
+        {displayText()}
         <hr className="p-1" />
         <div className="flex justify-end">
           <Button onClick={() => history.push(`/creer-mon-compte/email${search}`)}>Je confirme</Button>
