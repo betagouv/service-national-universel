@@ -18,7 +18,7 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
     const query = {};
     let valueField = { $in: [req.user._id] };
     if (req.user.role === ROLES.REFERENT_CLASSE) {
-      const classe = await ClasseModel.findOne({ referentClasseIds: { $in: req.user._id }, deletedAt: { $exists: false } });
+      const classe = await ClasseModel.findOne({ referentClasseIds: { $in: req.user._id } });
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       valueField = classe.etablissementId;
     }

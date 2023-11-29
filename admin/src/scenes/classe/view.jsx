@@ -9,7 +9,7 @@ import { useParams, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, YOUNG_STATUS } from "snu-lib";
+import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, YOUNG_STATUS, translateGrade, translateColoration, STATUS_CLASSE } from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
@@ -32,7 +32,7 @@ export default function view() {
 
   const colorOptions = Object.keys(CLE_COLORATION_LIST).map((value) => ({
     value: CLE_COLORATION_LIST[value],
-    label: CLE_COLORATION_LIST[value],
+    label: translateColoration(CLE_COLORATION_LIST[value]),
   }));
   const filiereOptions = Object.keys(CLE_FILIERE_LIST).map((value) => ({
     value: CLE_FILIERE_LIST[value],
@@ -40,7 +40,7 @@ export default function view() {
   }));
   const gradeOptions = Object.keys(CLE_GRADE_LIST).map((value) => ({
     value: CLE_GRADE_LIST[value],
-    label: CLE_GRADE_LIST[value],
+    label: translateGrade(CLE_GRADE_LIST[value]),
   }));
 
   const getClasse = async () => {
@@ -154,7 +154,7 @@ export default function view() {
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translate(classe?.status)} status={statusClassForBadge(classe?.status)} />}
         breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
-        actions={[<Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />]}
+        actions={classe?.status !== STATUS_CLASSE.DRAFT && [<Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />]}
       />
       <Container title="Informations générales" actions={actionList}>
         <div className="flex items-stretch justify-stretch">
@@ -224,7 +224,7 @@ export default function view() {
               placeholder={"Choisissez un niveau"}
               options={gradeOptions}
               closeMenuOnSelect={true}
-              value={classe?.grade ? { value: classe?.grade, label: translate(classe?.grade) } : null}
+              value={classe?.grade ? { value: classe?.grade, label: translateGrade(classe?.grade) } : null}
               onChange={(options) => {
                 setClasse({ ...classe, grade: options.value });
               }}
@@ -241,60 +241,62 @@ export default function view() {
           </div>
         </div>
       </Container>
-      <Container
-        title="Suivi de la classe"
-        actions={[
-          <Link key="list-students" to="/mes-eleves">
-            <Button type="tertiary" title="Voir les élèves" />
-          </Link>,
-        ]}>
-        <div className="flex items-stretch justify-between">
-          <table className="flex-1 shrink-0">
-            <tbody>
-              <tr>
-                <td className="font-bold pr-4">Objectif :</td>
-                <td className="px-4 font-bold text-lg text-center">{classe?.totalSeats || 0}</td>
-                <td className="text-gray-500 text-center">Élèves</td>
-              </tr>
-              <tr className="mt-8">
-                <td className="font-bold pr-4">Total :</td>
-                <td className="px-4 font-bold text-lg text-center">{classe?.seatsTaken || 0}</td>
-                <td className="text-gray-500 text-center">({Math.round((classe?.seatsTaken * 100) / classe?.totalSeats || 0)}%)</td>
-              </tr>
-            </tbody>
-          </table>
-          <div className="mx-8 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
-          <table className="flex-1 shrink-0">
-            <tbody>
-              <tr>
-                <td className="font-bold text-lg text-right">{classe?.seatsTaken || 0}</td>
-                <td className="px-4 flex-1">Élèves inscrits</td>
-                <td className="text-gray-500">({Math.round((classe?.seatsTaken * 100) / classe?.totalSeats || 0)}%)</td>
-              </tr>
-              <tr>
-                <td className="font-bold text-lg text-right">{studentsWaiting?.length || 0}</td>
-                <td className="px-4 flex-1">Élèves en attente de consentement </td>
-                <td className="text-gray-500">({Math.round((studentsWaiting?.length * 100) / classe?.totalSeats || 0)}%)</td>
-              </tr>
-            </tbody>
-          </table>
-          <div className="mx-8 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
-          <table className="flex-1 shrink-0">
-            <tbody>
-              <tr>
-                <td className="font-bold text-lg text-right">{studentsInProgress?.length || 0}</td>
-                <td className="px-4 flex-1">Élèves en cours d’inscription</td>
-                <td className="text-gray-500">({Math.round((studentsInProgress?.length * 100) / classe?.totalSeats || 0)}%)</td>
-              </tr>
-              <tr>
-                <td className="font-bold text-lg text-right">{classe?.totalSeats - classe?.seatsTaken || 0}</td>
-                <td className="px-4 flex-1">Places libres</td>
-                <td className="text-gray-500">({Math.round(100 - (classe?.seatsTaken * 100) / classe?.totalSeats || 0)}%)</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </Container>
+      {classe?.status !== STATUS_CLASSE.DRAFT ? (
+        <Container
+          title="Suivi de la classe"
+          actions={[
+            <Link key="list-students" to="/mes-eleves">
+              <Button type="tertiary" title="Voir les élèves" />
+            </Link>,
+          ]}>
+          <div className="flex items-stretch justify-between">
+            <table className="flex-1 shrink-0">
+              <tbody>
+                <tr>
+                  <td className="font-bold pr-4">Objectif :</td>
+                  <td className="px-4 font-bold text-lg text-center">{classe?.totalSeats || 0}</td>
+                  <td className="text-gray-500 text-center">Élèves</td>
+                </tr>
+                <tr className="mt-8">
+                  <td className="font-bold pr-4">Total :</td>
+                  <td className="px-4 font-bold text-lg text-center">{classe?.seatsTaken || 0}</td>
+                  <td className="text-gray-500 text-center">({Math.round((classe?.seatsTaken * 100) / classe?.totalSeats || 0)}%)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="mx-8 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
+            <table className="flex-1 shrink-0">
+              <tbody>
+                <tr>
+                  <td className="font-bold text-lg text-right">{classe?.seatsTaken || 0}</td>
+                  <td className="px-4 flex-1">Élèves inscrits</td>
+                  <td className="text-gray-500">({Math.round((classe?.seatsTaken * 100) / classe?.totalSeats || 0)}%)</td>
+                </tr>
+                <tr>
+                  <td className="font-bold text-lg text-right">{studentsWaiting?.length || 0}</td>
+                  <td className="px-4 flex-1">Élèves en attente de consentement </td>
+                  <td className="text-gray-500">({Math.round((studentsWaiting?.length * 100) / classe?.totalSeats || 0)}%)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div className="mx-8 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
+            <table className="flex-1 shrink-0">
+              <tbody>
+                <tr>
+                  <td className="font-bold text-lg text-right">{studentsInProgress?.length || 0}</td>
+                  <td className="px-4 flex-1">Élèves en cours d’inscription</td>
+                  <td className="text-gray-500">({Math.round((studentsInProgress?.length * 100) / classe?.totalSeats || 0)}%)</td>
+                </tr>
+                <tr>
+                  <td className="font-bold text-lg text-right">{classe?.totalSeats - classe?.seatsTaken || 0}</td>
+                  <td className="px-4 flex-1">Places libres</td>
+                  <td className="text-gray-500">({Math.round(100 - (classe?.seatsTaken * 100) / classe?.totalSeats || 0)}%)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </Container>
+      ) : null}
 
       <Modal
         isOpen={modalInvite}
