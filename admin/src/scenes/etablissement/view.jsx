@@ -35,7 +35,7 @@ export default function view() {
     value: CLE_SECTOR_LIST[value],
     label: CLE_SECTOR_LIST[value],
   }));
-  const [modalChef, setModalChef] = useState(false);
+  const [modalChef, setModalChef] = useState(true);
   const [modalClassReferent, setModalClassReferent] = useState(false);
   const [modalCoordinator, setModalCoordinator] = useState(false);
   const [modalAddCoordinator, setModalAddCoordinator] = useState(false);
@@ -330,12 +330,12 @@ export default function view() {
           localStorage.removeItem("cle_referent_signup_first_time");
         }}
         className="md:max-w-[700px]"
-        icon={<ProfilePic initials="ep" />}
+        icon={<ProfilePic initials={`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`} />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
         text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un coordinateur d'établissement."
         actions={[
           { title: "Créer une classe engagée", leftIcon: <ClasseIcon />, onClick: () => history.push("/mes-classes/create") },
-          { title: "Ajouter un coordinateur", leftIcon: <HiPlus />, onClick: () => setModalAddCoordinator(true) },
+          { title: "Ajouter un coordinateur", leftIcon: <HiPlus size={20} />, onClick: () => setModalAddCoordinator(true) },
         ]}
       />
       {/* First login ADMINISTRATEUR_CLE coordinateur-cle */}
@@ -346,7 +346,7 @@ export default function view() {
           localStorage.removeItem("cle_referent_signup_first_time");
         }}
         className="md:max-w-[700px]"
-        icon={<ProfilePic initials="ep" />}
+        icon={<ProfilePic initials={`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`} />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
         text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Coordinateur d’établissement. Vous pouvez créer une classe engagée, suivre l'évolution de celles déjà créées et consulter les inscriptions des élèves."
         actions={[
@@ -362,7 +362,7 @@ export default function view() {
           localStorage.removeItem("cle_referent_signup_first_time");
         }}
         className="md:max-w-[700px]"
-        icon={<ProfilePic initials="ap" />}
+        icon={<ProfilePic initials={`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`} />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
         text="Bienvenue sur votre compte SNU en tant que Référent de classe. Vous pouvez compléter la fiche de votre classe en renseignant toutes les informations."
         actions={[

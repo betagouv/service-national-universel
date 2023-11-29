@@ -357,7 +357,7 @@ const translate = (value) => {
     case "INSCRIPTION_TO_CHECK":
       return "Inscription à vérifier";
     case "CREATED":
-      return "Créé";
+      return "Créée";
     default:
       return value;
   }

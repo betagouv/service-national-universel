@@ -8,9 +8,9 @@ const { capture, captureMessage } = require("../../sentry");
 const ClasseModel = require("../../models/cle/classe");
 const YoungModel = require("../../models/young");
 const EtablissementModel = require("../../models/cle/etablissement");
-const { canSearchStudent, ROLES, SUB_ROLES } = require("snu-lib");
+const { canSearchStudent, ROLES, SUB_ROLES, YOUNG_STATUS } = require("snu-lib");
 
-router.get("/by-classe/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/by-classe-stats/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
@@ -35,7 +35,30 @@ router.get("/by-classe/:id", passport.authenticate("referent", { session: false,
 
     const students = await YoungModel.find({ classeId: value })?.lean();
 
-    return res.status(200).send({ ok: true, data: students });
+    const countYoungByStatus = (students) => {
+      const statusCount = {};
+
+      students.forEach((student) => {
+        const status = student.status;
+
+        if (statusCount[status]) {
+          statusCount[status]++;
+        } else {
+          statusCount[status] = 1;
+        }
+      });
+
+      const result = { total: students.length };
+      Object.keys(statusCount).forEach((status) => {
+        result[YOUNG_STATUS[status]] = statusCount[status];
+      });
+
+      return result;
+    };
+
+    const result = countYoungByStatus(students);
+
+    return res.status(200).send({ ok: true, data: result });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
