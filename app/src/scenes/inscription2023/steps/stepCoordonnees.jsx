@@ -571,13 +571,7 @@ export default function StepCoordonnees() {
           correction={corrections?.livesInFrance}
         />
         {isFrenchResident ? (
-          <AddressForm
-            data={data}
-            updateData={(newData) => setData({ ...data, ...newData })}
-            getOptions={getAddressOptions}
-            error={errors.address}
-            correction={corrections?.address}
-          />
+          <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} correction={corrections} />
         ) : (
           <>
             <SearchableSelect

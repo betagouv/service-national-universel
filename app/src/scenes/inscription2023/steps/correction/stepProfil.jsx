@@ -15,9 +15,10 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
+import useAuth from "@/services/useAuth";
 
 export default function StepProfil() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const history = useHistory();
   const { step } = useParams();
   const dispatch = useDispatch();
@@ -107,52 +108,58 @@ export default function StepProfil() {
     <>
       <DSFRContainer title="Mon profil" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="flex flex-col">
-          <div className="flex items-center gap-2 mb-3">
-            <label htmlFor="nationalite" className="m-0">
-              Je suis de nationalié française
-            </label>
-            <IconFrance />
-          </div>
-          <div className="flex flex-col md:flex-row mb-4">
-            <div className="pr-4 border-r">
-              <input
-                className="mr-2"
-                type="radio"
-                id="oui"
-                name="nationalite"
-                value="true"
-                checked={data.frenchNationality === "true" || false}
-                onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
-              />
-              <label className="mb-0" htmlFor="oui">
-                Oui
-              </label>
-            </div>
-            <div className="md:px-6">
-              <input
-                className="mr-2"
-                type="radio"
-                id="non"
-                name="nationalite"
-                value="false"
-                checked={data.frenchNationality === "false" || false}
-                onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
-              />
-              <label className="mb-0" htmlFor="non">
-                Non
-              </label>
-            </div>
-            {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
-            {corrections.frenchNationality ? <span className="text-sm text-red-500">{corrections.frenchNationality}</span> : null}
-          </div>
+          {isCLE ?? (
+            <>
+              <div className="flex items-center gap-2 mb-3">
+                <label htmlFor="nationalite" className="m-0">
+                  Je suis de nationalié française
+                </label>
+                <IconFrance />
+              </div>
+              <div className="flex flex-col md:flex-row mb-4">
+                <div className="pr-4 border-r">
+                  <input
+                    className="mr-2"
+                    type="radio"
+                    id="oui"
+                    name="nationalite"
+                    value="true"
+                    checked={data.frenchNationality === "true" || false}
+                    onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
+                  />
+                  <label className="mb-0" htmlFor="oui">
+                    Oui
+                  </label>
+                </div>
+                <div className="md:px-6">
+                  <input
+                    className="mr-2"
+                    type="radio"
+                    id="non"
+                    name="nationalite"
+                    value="false"
+                    checked={data.frenchNationality === "false" || false}
+                    onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
+                  />
+                  <label className="mb-0" htmlFor="non">
+                    Non
+                  </label>
+                </div>
+                {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
+                {corrections.frenchNationality ? <span className="text-sm text-red-500">{corrections.frenchNationality}</span> : null}
+              </div>
+            </>
+          )}
           <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} label="Prénom" error={error.firstName} correction={corrections.firstName} />
           <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} label="Nom" error={error.lastName} correction={corrections.lastName} />
-          <label className="w-full">
-            Date de naissance
-            <DatePicker value={new Date(data.birthdateAt)} onChange={(date) => setData({ ...data, birthdateAt: date })} />
-            {error.birthdateAt ? <span className="text-sm text-red-500">{error.birthdateAt}</span> : null}
-            {corrections.birthdateAt ? <span className="text-sm text-red-500">{corrections.birthdateAt}</span> : null}
-          </label>
+          {isCLE ?? (
+            <label className="w-full">
+              Date de naissance
+              <DatePicker value={new Date(data.birthdateAt)} onChange={(date) => setData({ ...data, birthdateAt: date })} />
+              {error.birthdateAt ? <span className="text-sm text-red-500">{error.birthdateAt}</span> : null}
+              {corrections.birthdateAt ? <span className="text-sm text-red-500">{corrections.birthdateAt}</span> : null}
+            </label>
+          )}
           <PhoneField
             label="Téléphone"
             onChange={(e) => setData({ ...data, phone: e })}

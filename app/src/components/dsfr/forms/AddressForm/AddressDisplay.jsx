@@ -23,6 +23,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
             <input disabled type="text" value={data.address || data.adresse} className="w-full text-gray-400 bg-[#EEEEEE]" />
             <HiCheckCircle />
           </div>
+          <ErrorMessage>{correction?.address}</ErrorMessage>
         </label>
       ) : (
         <>
@@ -34,6 +35,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
               onChange={(e) => updateData({ address: e.target.value })}
               className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 border-b-2 border-gray-800"
             />
+            <ErrorMessage>{correction?.address}</ErrorMessage>
           </label>
         </>
       )}
@@ -45,6 +47,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
             <input type="text" value={data.city} disabled className="w-full text-gray-400 bg-[#EEEEEE]" />
             <HiCheckCircle />
           </div>
+          <ErrorMessage>{correction?.city}</ErrorMessage>
         </label>
 
         <label className="flex flex-col gap-2 w-full">
@@ -53,10 +56,10 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
             <input type="text" value={data.zip} disabled className="w-full text-gray-400 bg-[#EEEEEE]" />
             <HiCheckCircle />
           </div>
+          <ErrorMessage>{correction?.zip}</ErrorMessage>
         </label>
       </div>
       <ErrorMessage>{error}</ErrorMessage>
-      <ErrorMessage>{correction}</ErrorMessage>
       <button onClick={handleClick} className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover ml-auto py-1 w-fit flex gap-2 items-center">
         <RiSearchLine />
         Rechercher une nouvelle adresse
