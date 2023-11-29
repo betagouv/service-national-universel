@@ -22,10 +22,14 @@ export default function Contact() {
   useDocumentTitle("Formulaire de contact");
   const { isLoggedIn, isCLE } = useAuth();
 
+  const showFormFromURl = new URLSearchParams(window.location.search).get("showForm");
+  const categoryFromURl = new URLSearchParams(window.location.search).get("category");
+  const questionFromURl = new URLSearchParams(window.location.search).get("question");
+
   const [parcours, setParcours] = useState(getInitialParcoursState());
-  const [showForm, setShowForm] = useState(false);
-  const [category, setCategory] = useState(null);
-  const [question, setQuestion] = useState(null);
+  const [showForm, setShowForm] = useState(showFormFromURl === "true");
+  const [category, setCategory] = useState(categoryFromURl);
+  const [question, setQuestion] = useState(questionFromURl);
 
   function getInitialParcoursState() {
     if (isCLE) return YOUNG_SOURCE.CLE;
@@ -87,9 +91,11 @@ export default function Contact() {
           </fieldset>
         )}
 
-        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} />}
+        {/* Catégorie */}
+        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disbled={categoryFromURl} />}
 
-        {category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} />}
+        {/* Question */}
+        {category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} />}
         {category && questionOptions.length === 0 && (
           <Alert className="my-8">
             <p className="text-lg font-semibold">Information</p>
