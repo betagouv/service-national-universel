@@ -270,7 +270,7 @@ export const getCorrectionByStep = (young, step) => {
   } else {
     CORRECTION_LINK = WAITING_CORRECTION_LINK;
   }
-  const keyList = WAITING_CORRECTION_LINK.find((link) => link.step === step);
+  const keyList = CORRECTION_LINK.find((link) => link.step === step);
   const corrections = young?.correctionRequests.reduce((acc, curr) => {
     if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field) && curr.cohort === young.cohort) {
       acc[curr.field] = curr.message;
@@ -286,7 +286,13 @@ export const getCorrectionsForStepUpload = (young) => {
     ?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field));
 };
 
-export const redirectToCorrection = (field) => {
-  const correction = WAITING_CORRECTION_LINK.find((correction) => correction.field.includes(field));
+export const redirectToCorrection = (young, field) => {
+  let CORRECTION_LINK;
+  if (young.source === "CLE") {
+    CORRECTION_LINK = WAITING_CORRECTION_LINK_CLE;
+  } else {
+    CORRECTION_LINK = WAITING_CORRECTION_LINK;
+  }
+  const correction = CORRECTION_LINK.find((correction) => correction.field.includes(field));
   return correction ? correction.redirect : "/";
 };

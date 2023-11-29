@@ -619,12 +619,15 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       email: Joi.string().lowercase().trim().email().required(),
+      birthdateAt: Joi.string().trim().required(),
+      frenchNationality: Joi.string().trim().required(),
       phone: Joi.string().trim().required(),
       phoneZone: Joi.string()
         .trim()
         .valid(...PHONE_ZONES_NAMES_ARR)
         .required(),
     };
+    console.log(req.body)
     const { error, value } = Joi.object(profilSchema).validate(req.body, { stripUnknown: true });
 
     if (error) {

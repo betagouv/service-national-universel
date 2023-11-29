@@ -2,7 +2,6 @@ import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
-import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import { translateField, translateCorrectionReason, translate, YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
@@ -45,7 +44,7 @@ export default function WaitingCorrectionV2() {
                         </div>
                         <button
                           className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:!disabled:bg-blue-600 hover:!disabled:text-white disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50"
-                          onClick={() => history.push(redirectToCorrection(correction.field))}
+                          onClick={() => history.push(redirectToCorrection(young, correction.field))}
                           disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(cohort)}>
                           Corriger
                         </button>
@@ -78,7 +77,8 @@ export default function WaitingCorrectionV2() {
         <div className="flex w-full flex-col-reverse">
           <div className="w-full flex-col px-4 pb-4">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
-              <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
+              <strong>{young.firstName}, </strong>
+              {isCLE ? "bienvenue sur votre compte élève." : "bienvenue sur votre compte volontaire."}
             </div>
             <div className="mt-3 text-base font-bold text-[#242526]">Votre dossier d’inscription est en attente de correction.</div>
             <div className="mt-3 flex flex-col gap-5">
@@ -99,7 +99,7 @@ export default function WaitingCorrectionV2() {
                       <button
                         disabled={young.status === YOUNG_STATUS.WAITING_CORRECTION && !inscriptionModificationOpenForYoungs(cohort)}
                         className="rounded-lg border-[1px] border-blue-600 px-2 py-2 text-sm font-medium text-blue-600 hover:!disabled:bg-blue-600 hover:!disabled:text-white disabled:cursor-not-allowed disabled:bg-gray-100 disabled:opacity-50"
-                        onClick={() => history.push(redirectToCorrection(correction.field))}>
+                        onClick={() => history.push(redirectToCorrection(young, correction.field))}>
                         Corriger
                       </button>
                     </div>
@@ -111,14 +111,16 @@ export default function WaitingCorrectionV2() {
                 );
               })}
             </div>
-            <div className="mt-20 flex justify-center">
-              <a
-                className="w-36"
-                href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
-                onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
-                <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
-              </a>
-            </div>
+            {!isCLE && (
+              <div className="mt-20 flex justify-end">
+                <a
+                  className="w-36"
+                  href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f"
+                  onClick={() => plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) })}>
+                  <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
+                </a>
+              </div>
+            )}
           </div>
           <img src={Img2} />
         </div>
