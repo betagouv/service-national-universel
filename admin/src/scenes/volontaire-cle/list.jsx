@@ -187,7 +187,7 @@ const Hit = ({ hit }) => {
                 {
                   key: "view",
                   render: (
-                    <Link to={`/volonatire/${hit._id}`} className="appearance-none w-full">
+                    <Link to={`/volontaire/${hit._id}`} className="appearance-none w-full">
                       <p>Consulter le profil</p>
                     </Link>
                   ),

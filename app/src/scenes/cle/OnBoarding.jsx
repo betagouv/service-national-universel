@@ -6,12 +6,14 @@ import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
-import api from "../../services/api";
+import api from "@/services/api";
 import { List } from "@snu/ds/dsfr";
 import PrimaryButton from "@/components/dsfr/ui/buttons/PrimaryButton";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
+import useAuth from "@/services/useAuth";
+import { STATUS_CLASSE } from "snu-lib";
 
 const Title = () => (
   <div>
@@ -47,6 +49,7 @@ const ModalInfo = ({ isOpen, onCancel, onChange }) => (
 const fetchClasse = async (id) => api.get(`/cle/classe/${id}`);
 
 const OnBoarding = () => {
+  const { isLoggedIn, logout } = useAuth();
   const [classe, setClasse] = useState(null);
   const history = useHistory();
   const [showContactSupport, setShowContactSupport] = useState(false);
@@ -55,19 +58,28 @@ const OnBoarding = () => {
   useEffect(() => {
     (async () => {
       if (classe) return;
+      // Preventive logout in case user is already logged on an HTS account.
+      if (isLoggedIn) await logout({ redirect: false });
       const { data, ok } = await fetchClasse(id);
       if (!ok) return toastr.error("Impossible de joindre le service.");
-      const { name, coloration, seatsTaken, totalSeats, referentClasse, etablissement } = data;
+      const { name, coloration, seatsTaken, totalSeats, referents, etablissement, status } = data;
+      const [referent] = referents;
+      //Checking if there is remaining seats in the class
+      const isFull = parseInt(totalSeats) - parseInt(seatsTaken) <= 0;
+      // Checking if the onboarding page shouldbe active.
+      const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
       setClasse({
         name,
         coloration,
-        isFull: parseInt(totalSeats) - parseInt(seatsTaken) <= 0,
-        referent: `${referentClasse.firstName} ${referentClasse.lastName}`,
+        status,
+        isFull,
+        isInscriptionOpen,
+        referent: `${referent.firstName} ${referent.lastName}`,
         etablissement: etablissement.name,
         dateStart: "À venir",
       });
     })();
-  }, [id, classe]);
+  });
 
   const fields = [
     {
@@ -93,7 +105,7 @@ const OnBoarding = () => {
         <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
           <List title={"Ma classe engagée"} fields={fields}></List>
           <hr className="my-4 h-px border-0 bg-gray-200" />
-          {!classe.isFull && (
+          {classe.isInscriptionOpen && (
             <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
               <InlineButton className="md:pr-4 pt-2 md:pr-2 pb-1" onClick={() => setShowContactSupport(true)}>
                 J'ai déjà un compte volontaire
@@ -101,10 +113,10 @@ const OnBoarding = () => {
               <PrimaryButton onClick={() => history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`)}>Démarrer mon inscription</PrimaryButton>
             </div>
           )}
-          {classe.isFull && (
+          {!classe.isInscriptionOpen && (
             <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
               <PrimaryButton className="sm:w-full md:w-52 md:self-end" disabled>
-                Classe complète
+                {classe.isFull ? "Classe complète" : "Inscriptions désactivées"}
               </PrimaryButton>
               <span className="md:self-end">Pour plus d'informations contactez votre référent.</span>
             </div>

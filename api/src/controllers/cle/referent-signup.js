@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, canUpdateEtablissement } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES } = require("snu-lib");
 const mongoose = require("mongoose");
 
 const config = require("../../config");
@@ -12,6 +12,7 @@ const { sendTemplate } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
 const SchoolRamsesModel = require("../../models/schoolRAMSES");
 const EtablissementModel = require("../../models/cle/etablissement");
+const ClasseModel = require("../../models/cle/classe");
 const { serializeReferent } = require("../../utils/serializer");
 const { validateEmailAcademique } = require("../../services/cle/referent");
 
@@ -32,8 +33,13 @@ router.get("/token/:token", async (req, res) => {
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let etablissement;
-    if (referent.subRole === "coordinateur_cle") {
+    if (referent.subRole === SUB_ROLES.coordinateur_cle) {
       etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
+    }
+    if (referent.role === ROLES.REFERENT_CLASSE) {
+      const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      etablissement = await EtablissementModel.findById(classe.etablissementId);
     }
 
     return res.status(200).send({ ok: true, data: { referent: serializeReferent(referent), etablissement } });
@@ -60,7 +66,8 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (value.email !== value.confirmEmail)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
-    if (!validateEmailAcademique(value.email)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
+    if (config.ENVIRONMENT !== "development" && !validateEmailAcademique(value.email))
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

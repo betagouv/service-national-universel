@@ -6,7 +6,7 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { toastr } from "react-redux-toastr";
 
-import { translate } from "snu-lib";
+import { ROLES, translate } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 import api from "@/services/api";
 
@@ -61,6 +61,7 @@ export default function confirmation() {
       // todo : refirect to the auth screen
       localStorage.removeItem(LOCAL_STORAGE_KEY);
       localStorage.setItem("cle_referent_signup_first_time", true);
+      toastr.success("Votre compte a bien été créé. Vous pouvez maintenant vous connecter.");
       history.push("/auth");
     } catch (e) {
       console.log(e);
@@ -102,10 +103,12 @@ export default function confirmation() {
               <div className="text-[#666]">Rôle :</div>
               <div className="text-right text-[#161616]">{translate(user.role)}</div>
             </div>
-            <div className="flex items-start justify-between">
-              <div className="text-[#666]">Fonction :</div>
-              <div className="text-right text-[#161616]">{translate(user.subRole)}</div>
-            </div>
+            {user.role === ROLES.ADMINISTRATEUR_CLE ? (
+              <div className="flex items-start justify-between">
+                <div className="text-[#666]">Fonction :</div>
+                <div className="text-right text-[#161616]">{translate(user.subRole)}</div>
+              </div>
+            ) : null}
             <div className="flex items-start justify-between">
               <div className="text-[#666]">Prénom :</div>
               <div className="text-right text-[#161616]">{user.firstName}</div>

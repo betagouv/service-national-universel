@@ -15,6 +15,7 @@ import { toastr } from "react-redux-toastr";
 import { copyToClipboard } from "@/utils";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
+import Loader from "@/components/Loader";
 
 export default function view() {
   const user = useSelector((state) => state.Auth.user);
@@ -131,6 +132,7 @@ export default function view() {
 
   const cancel = () => {
     setEdit(!edit);
+    setErrors({});
   };
 
   const sendInvitation = async () => {
@@ -198,8 +200,8 @@ export default function view() {
     : user.subRole === SUB_ROLES.referent_etablissement && [
         <Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />,
       ];
-  console.log(typeOptions);
-  console.log(etablissement.type?.map((type1) => ({ value: type1, label: typeOptions.find((type2) => type2.value === type1)?.label })));
+
+  if (!etablissement) return <Loader />;
 
   return (
     <Page>
@@ -232,7 +234,7 @@ export default function view() {
                 <div className="text-base font-bold text-ds-gray-900">
                   {contact.firstName} {contact.lastName}
                 </div>
-                <div className="mb-4 text-ds-gray-500">{translate(contact.role)}</div>
+                <div className="mb-4 text-ds-gray-500">{translate(contact.subRole)}</div>
                 <div className="flex items-center justify-start mb-2">
                   <HiOutlinePhone size={20} className="mr-2" />
                   {contact.phone}
@@ -327,9 +329,10 @@ export default function view() {
           setModalChef(false);
           localStorage.removeItem("cle_referent_signup_first_time");
         }}
+        className="md:max-w-[700px]"
         icon={<ProfilePic initials="ep" />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
-        text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un référent d’établissement."
+        text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un coordinateur d'établissement."
         actions={[
           { title: "Créer une classe engagée", leftIcon: <ClasseIcon />, onClick: () => history.push("/mes-classes/create") },
           { title: "Ajouter un coordinateur", leftIcon: <HiPlus />, onClick: () => setModalAddCoordinator(true) },
@@ -342,6 +345,7 @@ export default function view() {
           setModalCoordinator(false);
           localStorage.removeItem("cle_referent_signup_first_time");
         }}
+        className="md:max-w-[700px]"
         icon={<ProfilePic initials="ep" />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
         text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Coordinateur d’établissement. Vous pouvez créer une classe engagée, suivre l'évolution de celles déjà créées et consulter les inscriptions des élèves."
@@ -357,6 +361,7 @@ export default function view() {
           setModalClassReferent(false);
           localStorage.removeItem("cle_referent_signup_first_time");
         }}
+        className="md:max-w-[700px]"
         icon={<ProfilePic initials="ap" />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
         text="Bienvenue sur votre compte SNU en tant que Référent de classe. Vous pouvez compléter la fiche de votre classe en renseignant toutes les informations."

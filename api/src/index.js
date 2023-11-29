@@ -83,6 +83,7 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
   app.use("/application", require("./controllers/application"));
   app.use("/bus", require("./controllers/bus"));
+  app.use("/classe", require("./controllers/cle/classe"));
   app.use("/cle", require("./controllers/cle"));
   app.use("/cohesion-center", require("./controllers/cohesion-center"));
   app.use("/cohort", require("./controllers/cohort"));
