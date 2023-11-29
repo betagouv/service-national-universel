@@ -63,7 +63,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const defaultCleCohort = await CohortModel.findOne({ name: value.cohort });
     if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
 
-    classe = await ClasseModel.create({
+    const classe = await ClasseModel.create({
       ...value,
       status: STATUS_CLASSE.DRAFT,
       statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
@@ -153,16 +153,15 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const classe = await ClasseModel.findById(value)?.lean();
-    if (!classe) {
+    // We need to populate the model with the 2 virtuals etablissement and referents
+    const data = await ClasseModel.findById(value)
+      .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
+      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1 } } });
+    if (!data) {
       captureMessage("Error finding classe with id : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    const { etablissementId, referentClasseIds } = classe;
-    const etablissement = etablissementId ? await EtablissementModel.findById(etablissementId)?.lean() : {};
-    const referentClasse = referentClasseIds.length ? await ReferentModel.findById(referentClasseIds[0])?.lean() : {};
-
-    return res.status(200).send({ ok: true, data: { ...classe, etablissement, referentClasse } });
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
