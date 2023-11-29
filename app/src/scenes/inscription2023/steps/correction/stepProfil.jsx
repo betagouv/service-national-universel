@@ -26,8 +26,6 @@ export default function StepProfil() {
   const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) history.push("/");
 
-  console.log(corrections);
-
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
   const [data, setData] = React.useState({
@@ -40,8 +38,6 @@ export default function StepProfil() {
     frenchNationality: young.frenchNationality,
     birthdateAt: young.birthdateAt,
   });
-
-  console.log(data);
 
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
   const trimmedEmail = data?.email.trim();

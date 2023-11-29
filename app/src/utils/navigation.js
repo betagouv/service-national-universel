@@ -1,3 +1,5 @@
+import { YOUNG_SOURCE } from "snu-lib";
+
 export const INSCRIPTION_STEPS = {
   COORDONNEES: "COORDONNEES",
   CONSENTEMENTS: "CONSENTEMENTS",
@@ -165,15 +167,7 @@ const WAITING_CORRECTION_LINK = [
 
 const WAITING_CORRECTION_LINK_CLE = [
   {
-    field: [
-      "firstName",
-      "lastName",
-      "frenchNationality",
-      "phone",
-      "email",
-      "birthdateAt",
-      "grade",
-    ],
+    field: ["firstName", "lastName", "frenchNationality", "phone", "email", "birthdateAt", "grade"],
     redirect: "/inscription2023/correction/profil",
     step: "profil",
   },
@@ -233,14 +227,13 @@ const WAITING_CORRECTION_LINK_CLE = [
   },
 ];
 
+const getCorrectionLink = (young) => {
+  return young.source === YOUNG_SOURCE.CLE ? WAITING_CORRECTION_LINK_CLE : WAITING_CORRECTION_LINK;
+};
+
 export const getCorrectionByStep = (young, step) => {
-  let CORRECTION_LINK;
-  if (young.source === "CLE") {
-    CORRECTION_LINK = WAITING_CORRECTION_LINK_CLE;
-  } else {
-    CORRECTION_LINK = WAITING_CORRECTION_LINK;
-  }
-  const keyList = CORRECTION_LINK.find((link) => link.step === step);
+  const correctionLink = getCorrectionLink(young);
+  const keyList = correctionLink.find((link) => link.step === step);
   const corrections = young?.correctionRequests.reduce((acc, curr) => {
     if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field) && curr.cohort === young.cohort) {
       acc[curr.field] = curr.message;
@@ -257,12 +250,7 @@ export const getCorrectionsForStepUpload = (young) => {
 };
 
 export const redirectToCorrection = (young, field) => {
-  let CORRECTION_LINK;
-  if (young.source === "CLE") {
-    CORRECTION_LINK = WAITING_CORRECTION_LINK_CLE;
-  } else {
-    CORRECTION_LINK = WAITING_CORRECTION_LINK;
-  }
-  const correction = CORRECTION_LINK.find((correction) => correction.field.includes(field));
+  const correctionLink = getCorrectionLink(young);
+  const correction = correctionLink.find((correction) => correction.field.includes(field));
   return correction ? correction.redirect : "/";
 };
