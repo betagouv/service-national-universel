@@ -19,16 +19,16 @@ router.get("/by-classe/:id", passport.authenticate("referent", { session: false,
     }
     if (!canSearchStudent(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const classe = await ClasseModel.findOne({ _id: value, deletedAt: { $exists: false } })?.lean();
+    const classe = await ClasseModel.findOne({ _id: value })?.lean();
     if (!classe) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    if (req.user.role === ROLES.REFERENT_CLASSE && !classe.referentClasseIds.includes(req.user._id))
+    if (req.user.role === ROLES.REFERENT_CLASSE && !classe.referentClasseIds.includes(req.user._id.toString()))
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
       if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (etablissement.referentEtablissementIds.includes(req.user._id) && etablissement.coordinateurIds.includes(req.user._id)) {
+      if (!etablissement.referentEtablissementIds.includes(req.user._id.toString()) && !etablissement.coordinateurIds.includes(req.user._id.toString())) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }

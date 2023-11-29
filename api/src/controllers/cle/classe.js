@@ -179,7 +179,7 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
 
     if (!canViewClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const classes = await ClasseModel.find({ etablissementId: value, deletedAt: { $exists: false } })?.lean();
+    const classes = await ClasseModel.find({ etablissementId: value })?.lean();
     if (!classes) {
       captureMessage("Error finding classe with etablissementId : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -216,8 +216,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const now = new Date();
-    classe.set({ status: STATUS_CLASSE.WITHDRAWN, deletedAt: now });
+    classe.set({ status: STATUS_CLASSE.WITHDRAWN });
     await classe.save({ fromUser: req.user });
 
     const students = await YoungModel.find({ classeId: classe._id })?.lean();
