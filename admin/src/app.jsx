@@ -119,7 +119,7 @@ const Home = (props) => {
   const renderVolontaire = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <VolontairesResponsible />;
     if (user?.role === ROLES.HEAD_CENTER) return <VolontairesHeadCenter />;
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <Volontaires />;
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user?.role)) return <Volontaires />;
     return null;
   };
 
@@ -281,11 +281,11 @@ const limitedAccess = {
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {
-    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil"],
+    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire"],
     default: "/mon-etablissement",
   },
   [ROLES.REFERENT_CLASSE]: {
-    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil"],
+    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire"],
     default: "/mon-etablissement",
   },
 };

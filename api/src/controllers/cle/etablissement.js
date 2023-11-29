@@ -2,20 +2,27 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 const Joi = require("joi");
-const { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, canUpdateEtablissement, canViewEtablissement } = require("snu-lib");
+const { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");
 const EtablissementModel = require("../../models/cle/etablissement");
+const ClasseModel = require("../../models/cle/classe");
 
 router.get("/from-user", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     if (!canViewEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const searchField = req.user.subRole === SUB_ROLES.referent_etablissement ? "referentEtablissementIds" : "coordinateurIds";
+    const searchField = req.user.role === ROLES.REFERENT_CLASSE ? "_id" : req.user.subRole === SUB_ROLES.referent_etablissement ? "referentEtablissementIds" : "coordinateurIds";
     const query = {};
-    query[searchField] = { $in: [req.user._id] };
+    let valueField = { $in: [req.user._id] };
+    if (req.user.role === ROLES.REFERENT_CLASSE) {
+      const classe = await ClasseModel.findOne({ referentClasseIds: { $in: req.user._id }, deletedAt: { $exists: false } });
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      valueField = classe.etablissementId;
+    }
+    query[searchField] = valueField;
     const etablissement = await EtablissementModel.findOne(query);
     if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: etablissement });
