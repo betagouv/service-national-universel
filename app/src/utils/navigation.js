@@ -163,7 +163,113 @@ const WAITING_CORRECTION_LINK = [
   },
 ];
 
+const WAITING_CORRECTION_LINK_CLE = [
+  {
+    field: [
+      "firstName",
+      "lastName",
+      "phone",
+      "email",
+      "birthdateAt",
+      "schooled",
+      "grade",
+      "schoolName",
+      "schoolType",
+      "schoolAddress",
+      "schoolZip",
+      "schoolCity",
+      "schoolDepartment",
+      "schoolRegion",
+      "schoolCountry",
+      "schoolId",
+      "zip",
+    ],
+    redirect: "/inscription2023/correction/profil",
+    step: "profil",
+  },
+  // {
+  //   field: [
+  //     "birthdateAt",
+  //     "schooled",
+  //     "grade",
+  //     "schoolName",
+  //     "schoolType",
+  //     "schoolAddress",
+  //     "schoolZip",
+  //     "schoolCity",
+  //     "schoolDepartment",
+  //     "schoolRegion",
+  //     "schoolCountry",
+  //     "schoolId",
+  //     "zip",
+  //   ],
+  //   redirect: "/inscription2023/correction/eligibilite",
+  //   step: "eligibilite",
+  // },
+  {
+    field: [
+      "parent1Status",
+      "parent1FirstName",
+      "parent1LastName",
+      "parent1Email",
+      "parent1Phone",
+      "parent2",
+      "parent2Status",
+      "parent2FirstName",
+      "parent2LastName",
+      "parent2Email",
+      "parent2Phone",
+    ],
+    redirect: "/inscription2023/correction/representants",
+    step: "representants",
+  },
+  {
+    field: [
+      "gender",
+      "frenchNationality",
+      "birthCountry",
+      "birthCity",
+      "birthCityZip",
+      "situation",
+      "livesInFrance",
+      "addressVerified",
+      "country",
+      "city",
+      "zip",
+      "address",
+      "location",
+      "department",
+      "region",
+      "cityCode",
+      "foreignCountry",
+      "foreignCity",
+      "foreignZip",
+      "foreignAddress",
+      "hostLastName",
+      "hostFirstName",
+      "hostRelationship",
+      "handicap",
+      "ppsBeneficiary",
+      "paiBeneficiary",
+      "allergies",
+      "moreInformation",
+      "specificAmenagment",
+      "specificAmenagmentType",
+      "reducedMobilityAccess",
+      "handicapInSameDepartment",
+    ],
+    redirect: "/inscription2023/correction/coordonnee",
+    step: "coordonnee",
+  },
+];
+
 export const getCorrectionByStep = (young, step) => {
+  let CORRECTION_LINK;
+  if (young.source === "CLE") {
+    CORRECTION_LINK = WAITING_CORRECTION_LINK_CLE;
+  } else {
+    CORRECTION_LINK = WAITING_CORRECTION_LINK;
+  }
   const keyList = WAITING_CORRECTION_LINK.find((link) => link.step === step);
   const corrections = young?.correctionRequests.reduce((acc, curr) => {
     if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field) && curr.cohort === young.cohort) {
