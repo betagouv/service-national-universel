@@ -35,7 +35,7 @@ export default function view() {
     value: CLE_SECTOR_LIST[value],
     label: CLE_SECTOR_LIST[value],
   }));
-  const [modalChef, setModalChef] = useState(true);
+  const [modalChef, setModalChef] = useState(false);
   const [modalClassReferent, setModalClassReferent] = useState(false);
   const [modalCoordinator, setModalCoordinator] = useState(false);
   const [modalAddCoordinator, setModalAddCoordinator] = useState(false);

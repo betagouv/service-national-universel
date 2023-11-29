@@ -8,17 +8,17 @@ const { capture, captureMessage } = require("../../sentry");
 const ClasseModel = require("../../models/cle/classe");
 const YoungModel = require("../../models/young");
 const EtablissementModel = require("../../models/cle/etablissement");
-const { canSearchStudent, ROLES, SUB_ROLES, YOUNG_STATUS } = require("snu-lib");
+const { canSearchStudent, ROLES, YOUNG_STATUS } = require("snu-lib");
 
-router.get("/by-classe-stats/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = validateId(req.params.id);
+    const { error, value } = validateId(req.params.idClasse);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     if (!canSearchStudent(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+    console.log(value);
     const classe = await ClasseModel.findOne({ _id: value })?.lean();
     if (!classe) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -33,20 +33,14 @@ router.get("/by-classe-stats/:id", passport.authenticate("referent", { session: 
       }
     }
 
-    const students = await YoungModel.find({ classeId: value })?.lean();
+    const getYoungCountByStatus = async (value) => {
+      const students = await YoungModel.find({ classeId: value })?.lean();
 
-    const countYoungByStatus = (students) => {
-      const statusCount = {};
-
-      students.forEach((student) => {
+      const statusCount = students.reduce((acc, student) => {
         const status = student.status;
-
-        if (statusCount[status]) {
-          statusCount[status]++;
-        } else {
-          statusCount[status] = 1;
-        }
-      });
+        acc[status] = (acc[status] || 0) + 1;
+        return acc;
+      }, {});
 
       const result = { total: students.length };
       Object.keys(statusCount).forEach((status) => {
@@ -56,7 +50,7 @@ router.get("/by-classe-stats/:id", passport.authenticate("referent", { session: 
       return result;
     };
 
-    const result = countYoungByStatus(students);
+    const result = await getYoungCountByStatus(value);
 
     return res.status(200).send({ ok: true, data: result });
   } catch (error) {

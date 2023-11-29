@@ -282,22 +282,22 @@ export default function view() {
                 <tr>
                   <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.VALIDATED] || 0}</td>
                   <td className="px-4 flex-1">Élèves validés</td>
-                  <td className="text-gray-500">({Math.round((studentStatus.total * 100) / studentStatus[YOUNG_STATUS.VALIDATED] || 0)}%)</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.VALIDATED] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
                 <tr>
                   <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.IN_PROGRESS] || 0}</td>
                   <td className="px-4 flex-1">Élèves en cours d'inscription</td>
-                  <td className="text-gray-500">({Math.round((studentStatus.total * 100) / studentStatus[YOUNG_STATUS.IN_PROGRESS] || 0)}%)</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.IN_PROGRESS] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
                 <tr>
                   <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.WAITING_VALIDATION] || 0}</td>
                   <td className="px-4 flex-1">Élèves en attente de validation</td>
-                  <td className="text-gray-500">({Math.round((studentStatus.total * 100) / studentStatus[YOUNG_STATUS.WAITING_VALIDATION] || 0)}%)</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.WAITING_VALIDATION] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
                 <tr>
                   <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.WAITING_CORRECTION] || 0}</td>
                   <td className="px-4 flex-1">Élèves en attente de correction</td>
-                  <td className="text-gray-500">({Math.round((studentStatus.total * 100) / studentStatus[YOUNG_STATUS.WAITING_CORRECTION] || 0)}%)</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.WAITING_CORRECTION] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
               </tbody>
             </table>
@@ -307,22 +307,22 @@ export default function view() {
                 <tr>
                   <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.ABANDONED] || 0}</td>
                   <td className="px-4 flex-1">Inscriptions abandonnées</td>
-                  <td className="text-gray-500">({Math.round((studentStatus.total * 100) / studentStatus[YOUNG_STATUS.ABANDONED] || 0)}%)</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.ABANDONED] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
                 <tr className="">
                   <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.NOT_AUTORISED] || 0}</td>
                   <td className="px-4 flex-1">Élèves non autorisés</td>
-                  <td className="text-gray-500">({Math.round((studentStatus.total * 100) / studentStatus[YOUNG_STATUS.NOT_AUTORISED] || 0)}%)</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.NOT_AUTORISED] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
                 <tr>
                   <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.WITHDRAWN] || 0}</td>
                   <td className="px-4 flex-1">Élèves désistés</td>
-                  <td className="text-gray-500">({Math.round((studentStatus.total * 100) / studentStatus[YOUNG_STATUS.WITHDRAWN] || 0)}%)</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.WITHDRAWN] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
                 <tr>
                   <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.REFUSED] || 0}</td>
                   <td className="px-4 flex-1">Élèves refusés</td>
-                  <td className="text-gray-500">({Math.round((studentStatus.total * 100) / studentStatus[YOUNG_STATUS.REFUSED] || 0)}%)</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.REFUSED] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
               </tbody>
             </table>
