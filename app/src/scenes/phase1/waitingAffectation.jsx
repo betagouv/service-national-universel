@@ -13,15 +13,15 @@ import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import { getCohort } from "../../utils/cohorts";
-import { useSelector } from "react-redux";
-import BannerTermJuly from "./components/BannerTermJuly";
+import useAuth from "@/services/useAuth";
+import { RiInformationFill } from "react-icons/ri";
 
 export default function WaitingAffectation() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
   const departureDate = cohort ? getDepartureDate(young, {}, cohort) : null;
   const returnDate = cohort ? getReturnDate(young, {}, cohort) : null;
-  const allowedGrades = ["TermGT", "TermPro"];
+  const shouldShowChangeStayLink = !isCLE && youngCanChangeSession(young);
 
   return (
     <>
@@ -35,10 +35,7 @@ export default function WaitingAffectation() {
               <span>Mon séjour de cohésion</span>
               <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : getCohortPeriod(young.cohort)}</strong>
             </h1>
-            {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
-            {allowedGrades.includes(young.grade) && (
-              <BannerTermJuly responsive={"flex items-start justify-center max-w-[688px] mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:items-center"} />
-            )}
+            {shouldShowChangeStayLink ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : <div className="mt-20"></div> }
             <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
               <div className="hidden h-[42px] w-[42px] md:block">
                 <WaitFor />
@@ -51,23 +48,39 @@ export default function WaitingAffectation() {
                   <h2 className="m-0 text-lg font-bold">Vous êtes en attente d&apos;affectation à un centre</h2>
                 </div>
                 <p className="text-sm">
-                  Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
-                  préparer votre fiche sanitaire ci-dessous !
+                  {isCLE ? (
+                    <>Votre affectation vous sera communiquée par votre établissement scolaire.</>
+                  ) : (
+                    <>
+                      Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
+                      préparer votre fiche sanitaire ci-dessous !
+                    </>
+                  )}
                 </p>
               </div>
             </div>
+            {isCLE && (
+              <div className="bg-[#EFF6FF] rounded-lg flex items-center justify-center max-w-[688px] leading-5 p-3 mt-2">
+                <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
+                <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
+              </div>
+            )}
           </article>
           <img src={hero2} className="-mr-4 hidden md:block" width={344} />
         </section>
         <Files young={young} />
         <hr className="mx-auto mt-12 mb-7 w-full" />
         <CheckYourSpamSection />
-        <FaqSection />
+        {!isCLE ?? <FaqSection />}
         <TestimonialsSection />
         <section className="mt-12 pb-32 md:mt-32">
           <h2 className="mb-8 text-center text-xl font-bold">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>
           <div className="flex justify-center">
-            <ButtonExternalLinkPrimary href="https://www.snu.gouv.fr/phase-1-sejour-cohesion/" target="_blank" rel="noreferrer" className="w-52">
+            <ButtonExternalLinkPrimary
+              href={isCLE ? "https://www.snu.gouv.fr/classes-engagees/" : "https://www.snu.gouv.fr/phase-1-sejour-cohesion/"}
+              target="_blank"
+              rel="noreferrer"
+              className="w-52">
               Découvrir
             </ButtonExternalLinkPrimary>
           </div>
