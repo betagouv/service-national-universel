@@ -93,14 +93,14 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-          foreignCountry: "",
-          foreignAddress: "",
-          foreignCity: "",
-          foreignZip: "",
-          hostFirstName: "",
-          hostLastName: "",
-          hostRelationship: "",
-        }
+            foreignCountry: "",
+            foreignAddress: "",
+            foreignCity: "",
+            foreignZip: "",
+            hostFirstName: "",
+            hostLastName: "",
+            hostRelationship: "",
+          }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
@@ -627,7 +627,6 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
         .valid(...PHONE_ZONES_NAMES_ARR)
         .required(),
     };
-    console.log(req.body)
     const { error, value } = Joi.object(profilSchema).validate(req.body, { stripUnknown: true });
 
     if (error) {

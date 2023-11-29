@@ -399,7 +399,6 @@ export default function StepCoordonnees() {
     let errors = {};
     const fieldToUpdate = [...commonFields];
     const requiredFields = [...commonRequiredFields];
-
     if (!isFrenchResident) {
       fieldToUpdate.push(...foreignAddressFields);
       requiredFields.push(...requiredFieldsForeigner);
@@ -413,6 +412,11 @@ export default function StepCoordonnees() {
     if (specificAmenagment === "true") {
       fieldToUpdate.push("specificAmenagmentType");
       requiredFields.push("specificAmenagmentType");
+    }
+
+    if (!isCle) {
+      fieldToUpdate.push("situation");
+      requiredFields.push("situation");
     }
 
     for (const key of requiredFields) {
