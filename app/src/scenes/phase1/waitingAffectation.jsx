@@ -35,7 +35,6 @@ export default function WaitingAffectation() {
               <span>Mon séjour de cohésion</span>
               <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : getCohortPeriod(young.cohort)}</strong>
             </h1>
-            {/* {!isCLE ? youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null : <div className="mt-20"></div>} */}
             {shouldShowChangeStayLink ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : <div className="mt-20"></div> }
             <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
               <div className="hidden h-[42px] w-[42px] md:block">
