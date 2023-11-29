@@ -24,8 +24,34 @@ export default function AdminMenu() {
     role: getModifiedRole(originalUser.role),
   };
 
-  const categoryAccessibleReferent = ["referent", "structure", "head_center", "young", "visitor"];
-  const withSeeAs = ["admin", "referent", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
+  const categoryAccessibleReferent = {
+    referent: [
+      "referent",
+      "structure",
+      "head_center",
+      "young",
+      "visitor",
+      "young_cle",
+      "administrateur_cle_coordinateur_cle",
+      "administrateur_cle_referent_etablissement",
+      "referent_classe",
+    ],
+    administrateur_cle_referent_etablissement: ["young_cle", "administrateur_cle_coordinateur_cle", "administrateur_cle_referent_etablissement", "referent_classe"],
+    administrateur_cle_coordinateur_cle: ["young_cle", "administrateur_cle_coordinateur_cle", "referent_classe", "head_center"],
+    referent_classe: ["young_cle", "administrateur_cle_coordinateur_cle", "referent_classe", "head_center"],
+  };
+
+  const withSeeAs = [
+    "admin",
+    "referent",
+    "head_center",
+    "structure",
+    "visitor",
+    "dsnj",
+    "administrateur_cle_coordinateur_cle",
+    "administrateur_cle_referent_etablissement",
+    "referent_classe",
+  ].includes(user?.role);
 
   useEffect(() => {
     if (user && user.role && seeAs === null) {
@@ -57,7 +83,12 @@ export default function AdminMenu() {
           <Popover.Panel className="absolute right-0 top-10 z-10 min-w-[208px] shadow-md lg:min-w-[300px]">
             <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
               {roles
-                .filter((role) => (user.role === "admin" ? true : categoryAccessibleReferent.includes(role)))
+                .filter((role) => {
+                  console.log("User role: ", user.role);
+                  console.log("Checking role: ", role);
+                  console.log("Accessible roles for user: ", categoryAccessibleReferent[user.role]);
+                  return user.role === "admin" ? true : categoryAccessibleReferent[user.role]?.includes(role);
+                })
                 .map((role) => (
                   <a
                     key={role}

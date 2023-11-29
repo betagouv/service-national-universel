@@ -20,8 +20,18 @@ const Wrapper = ({ home, children }) => {
     role: getModifiedRole(originalUser.role),
   };
 
-  const withSeeAs = ["admin", "referent", "head_center", "structure", "visitor", "dsnj"].includes(user?.role);
-  const withSeeAsPublicAndYoung = ["public", "young"].includes(seeAs);
+  const withSeeAs = [
+    "admin",
+    "referent",
+    "head_center",
+    "structure",
+    "visitor",
+    "dsnj",
+    "administrateur_cle_coordinateur_cle",
+    "administrateur_cle_referent_etablissement",
+    "referent_classe",
+  ].includes(user?.role);
+  const withSeeAsPublicAndYoung = ["public", "young", "young_cle"].includes(seeAs);
 
   return (
     <>
