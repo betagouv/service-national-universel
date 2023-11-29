@@ -52,7 +52,9 @@ export default function view() {
       }
       setClasse(response);
       setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${response._id.toString()}`);
-      getStudents(response._id);
+      if (response.status !== STATUS_CLASSE.DRAFT) {
+        getStudents(response._id);
+      }
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération de la classe");
