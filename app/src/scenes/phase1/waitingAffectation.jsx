@@ -13,8 +13,6 @@ import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import { getCohort } from "../../utils/cohorts";
-import { useSelector } from "react-redux";
-import BannerTermJuly from "./components/BannerTermJuly";
 import useAuth from "@/services/useAuth";
 import { RiInformationFill } from "react-icons/ri";
 
@@ -23,7 +21,7 @@ export default function WaitingAffectation() {
   const cohort = getCohort(young.cohort);
   const departureDate = cohort ? getDepartureDate(young, {}, cohort) : null;
   const returnDate = cohort ? getReturnDate(young, {}, cohort) : null;
-  const allowedGrades = ["TermGT", "TermPro"];
+  const shouldShowChangeStayLink = !isCLE && youngCanChangeSession(young);
 
   return (
     <>
@@ -37,10 +35,8 @@ export default function WaitingAffectation() {
               <span>Mon séjour de cohésion</span>
               <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : getCohortPeriod(young.cohort)}</strong>
             </h1>
-            {!isCLE ? youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null : <div className="mt-20"></div>}
-            {allowedGrades.includes(young.grade) && (
-              <BannerTermJuly responsive={"flex items-start justify-center max-w-[688px] mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:items-center"} />
-            )}
+            {/* {!isCLE ? youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null : <div className="mt-20"></div>} */}
+            {shouldShowChangeStayLink ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : <div className="mt-20"></div> }
             <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
               <div className="hidden h-[42px] w-[42px] md:block">
                 <WaitFor />
@@ -82,7 +78,7 @@ export default function WaitingAffectation() {
           <h2 className="mb-8 text-center text-xl font-bold">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>
           <div className="flex justify-center">
             <ButtonExternalLinkPrimary
-              href={isCLE ? " https://www.snu.gouv.fr/classes-engagees/" : "https://www.snu.gouv.fr/phase-1-sejour-cohesion/"}
+              href={isCLE ? "https://www.snu.gouv.fr/classes-engagees/" : "https://www.snu.gouv.fr/phase-1-sejour-cohesion/"}
               target="_blank"
               rel="noreferrer"
               className="w-52">

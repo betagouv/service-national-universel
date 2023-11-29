@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import { setYoung } from "../../../../redux/auth/actions";
@@ -9,7 +9,7 @@ import { toastr } from "react-redux-toastr";
 import useAuth from "@/services/useAuth";
 
 export default function User({ ticketsInfo }) {
-  const {young, isCLE} = useAuth();
+  const { young, isCLE } = useAuth();
   const [open, setOpen] = React.useState(false);
   const menuRef = React.useRef();
   const buttonRef = React.useRef();
