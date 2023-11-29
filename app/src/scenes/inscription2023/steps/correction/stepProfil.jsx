@@ -11,8 +11,6 @@ import { getCorrectionByStep } from "../../../../utils/navigation";
 import Input from "../../components/Input";
 import { supportURL } from "@/config";
 import IconFrance from "@/assets/IconFrance";
-import ReactTooltip from "react-tooltip";
-import { RiInformationLine } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
@@ -39,7 +37,7 @@ export default function StepProfil() {
     firstName: young.firstName,
     lastName: young.lastName,
     frenchNationality: young.frenchNationality,
-    birthdateAt: young.birthdateAt
+    birthdateAt: young.birthdateAt,
   });
 
   console.log(data);
@@ -109,66 +107,52 @@ export default function StepProfil() {
     <>
       <DSFRContainer title="Mon profil" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="flex flex-col">
-        <div className="flex items-center gap-2 mb-3">
-              <label htmlFor="nationalite" className="m-0">
-                Je suis de nationalié française
+          <div className="flex items-center gap-2 mb-3">
+            <label htmlFor="nationalite" className="m-0">
+              Je suis de nationalié française
+            </label>
+            <IconFrance />
+          </div>
+          <div className="flex flex-col md:flex-row mb-4">
+            <div className="pr-4 border-r">
+              <input
+                className="mr-2"
+                type="radio"
+                id="oui"
+                name="nationalite"
+                value="true"
+                checked={data.frenchNationality === "true" || false}
+                onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
+              />
+              <label className="mb-0" htmlFor="oui">
+                Oui
               </label>
-              <IconFrance />
-
-              <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-                <span className="text-gray-800">
-                  Cette information est nécessaire pour l’obtention du certificat individuel de participation à la JDC après réalisation du séjour de cohésion.
-                </span>
-              </ReactTooltip>
-
-              <div data-tip data-for="tooltip-nationalite">
-                <RiInformationLine className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
-              </div>
             </div>
-
-            <div className="flex flex-col md:flex-row mb-4">
-              <div className="pr-4 border-r">
-                <input
-                  className="mr-2"
-                  type="radio"
-                  id="oui"
-                  name="nationalite"
-                  value="true"
-                  checked={data.frenchNationality === "true" || false}
-                  onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
-                />
-                <label className="mb-0" htmlFor="oui">
-                  Oui
-                </label>
-              </div>
-              <div className="md:px-6">
-                <input
-                  className="mr-2"
-                  type="radio"
-                  id="non"
-                  name="nationalite"
-                  value="false"
-                  checked={data.frenchNationality === "false" || false}
-                  onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
-                  // error={error.frenchNationality}
-                  // correction={corrections.frenchNationality}
-                />
-                <label className="mb-0" htmlFor="non">
-                  Non
-                </label>
-              </div>
-              {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
-              {corrections.frenchNationality ? <span className="text-sm text-red-500">{corrections.frenchNationality}</span> : null}
+            <div className="md:px-6">
+              <input
+                className="mr-2"
+                type="radio"
+                id="non"
+                name="nationalite"
+                value="false"
+                checked={data.frenchNationality === "false" || false}
+                onChange={(e) => setData({ ...data, frenchNationality: e.target.value })}
+              />
+              <label className="mb-0" htmlFor="non">
+                Non
+              </label>
             </div>
-            {/* <ErrorMessage>{error?.frenchNationality}</ErrorMessage> */}
+            {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
+            {corrections.frenchNationality ? <span className="text-sm text-red-500">{corrections.frenchNationality}</span> : null}
+          </div>
           <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} label="Prénom" error={error.firstName} correction={corrections.firstName} />
           <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} label="Nom" error={error.lastName} correction={corrections.lastName} />
           <label className="w-full">
-              Date de naissance
-              <DatePicker value={new Date(data.birthdateAt)} onChange={(date) => setData({ ...data, birthdateAt: date })} />
-              {error.birthdateAt ? <span className="text-sm text-red-500">{error.birthdateAt}</span> : null}
-              {corrections.birthdateAt ? <span className="text-sm text-red-500">{corrections.birthdateAt}</span> : null}
-            </label>
+            Date de naissance
+            <DatePicker value={new Date(data.birthdateAt)} onChange={(date) => setData({ ...data, birthdateAt: date })} />
+            {error.birthdateAt ? <span className="text-sm text-red-500">{error.birthdateAt}</span> : null}
+            {corrections.birthdateAt ? <span className="text-sm text-red-500">{corrections.birthdateAt}</span> : null}
+          </label>
           <PhoneField
             label="Téléphone"
             onChange={(e) => setData({ ...data, phone: e })}
