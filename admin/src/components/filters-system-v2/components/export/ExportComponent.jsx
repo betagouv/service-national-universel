@@ -134,19 +134,18 @@ async function toArrayOfArray(results, transform) {
 }
 
 async function getAllResults(route, selectedFilters, searchType, fieldsToExport) {
-  let result;
   if (searchType === "_msearch") {
     throw new Error("Not implemented");
     // TODO ......
   } else {
-    result = await api.post(route, {
+    const { data } = await api.post(route, {
       filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
         return { ...e, [key]: value.filter };
       }, {}),
       exportFields: fieldsToExport,
     });
-    if (!result.data.length) return [];
-    return result.data;
+    if (!data?.length) return [];
+    return data;
   }
 }
 
