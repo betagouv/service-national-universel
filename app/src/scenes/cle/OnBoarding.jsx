@@ -62,10 +62,9 @@ const OnBoarding = () => {
       if (isLoggedIn) await logout({ redirect: false });
       const { data, ok } = await fetchClasse(id);
       if (!ok) return toastr.error("Impossible de joindre le service.");
-      const { name, coloration, seatsTaken, totalSeats, referents, etablissement, status } = data;
-      const [referent] = referents;
+      const { name, status, coloration, isFull, referents, etablissement } = data;
+      const [{ fullName: referent }] = referents;
       //Checking if there is remaining seats in the class
-      const isFull = parseInt(totalSeats) - parseInt(seatsTaken) <= 0;
       // Checking if the onboarding page shouldbe active.
       const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
       setClasse({
@@ -74,7 +73,7 @@ const OnBoarding = () => {
         status,
         isFull,
         isInscriptionOpen,
-        referent: `${referent.firstName} ${referent.lastName}`,
+        referent,
         etablissement: etablissement.name,
         dateStart: "À venir",
       });
