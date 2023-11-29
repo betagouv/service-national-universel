@@ -329,9 +329,10 @@ export default function view() {
           setModalChef(false);
           localStorage.removeItem("cle_referent_signup_first_time");
         }}
+        className="md:max-w-[700px]"
         icon={<ProfilePic initials="ep" />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
-        text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un référent d’établissement."
+        text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un coordinateur d'établissement."
         actions={[
           { title: "Créer une classe engagée", leftIcon: <ClasseIcon />, onClick: () => history.push("/mes-classes/create") },
           { title: "Ajouter un coordinateur", leftIcon: <HiPlus />, onClick: () => setModalAddCoordinator(true) },
@@ -344,6 +345,7 @@ export default function view() {
           setModalCoordinator(false);
           localStorage.removeItem("cle_referent_signup_first_time");
         }}
+        className="md:max-w-[700px]"
         icon={<ProfilePic initials="ep" />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
         text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Coordinateur d’établissement. Vous pouvez créer une classe engagée, suivre l'évolution de celles déjà créées et consulter les inscriptions des élèves."
@@ -359,6 +361,7 @@ export default function view() {
           setModalClassReferent(false);
           localStorage.removeItem("cle_referent_signup_first_time");
         }}
+        className="md:max-w-[700px]"
         icon={<ProfilePic initials="ap" />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
         text="Bienvenue sur votre compte SNU en tant que Référent de classe. Vous pouvez compléter la fiche de votre classe en renseignant toutes les informations."
