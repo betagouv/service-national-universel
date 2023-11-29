@@ -236,7 +236,7 @@ export default function view() {
               <div className="flex items-center justify-end mt-6">
                 <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={onDelete}>
                   <BsTrash3 className="mr-2" />
-                  Supprimer la classe
+                  Désister la classe
                 </button>
               </div>
             ) : null}
