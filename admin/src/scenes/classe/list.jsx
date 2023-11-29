@@ -152,8 +152,8 @@ export default function list() {
 const Hit = ({ hit }) => {
   const history = useHistory();
   return (
-    <tr className="flex items-center py-3 px-4 hover:bg-gray-50">
-      <td className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mes-classes/${hit._id}`)}>
+    <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={() => history.push(`/mes-classes/${hit._id}`)}>
+      <td className="flex w-[40%] cursor-pointer items-center gap-4">
         <div className="flex w-full flex-col justify-center">
           <div className="m-0 table w-full table-fixed border-collapse">
             {hit?.name ? (
