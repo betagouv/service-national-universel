@@ -141,12 +141,22 @@ router.post("/logout", passport.authenticate("referent", { session: false, failW
 router.post("/signup", async (req, res) => {
   try {
     const { error, value } = Joi.object({
+      // referent
       email: Joi.string().lowercase().trim().email().required(),
       firstName: Joi.string().lowercase().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
       acceptCGU: Joi.string().required(),
       phone: Joi.string().required(),
+      // structure
+      name: Joi.string().required(),
+      description: Joi.string().allow(null, ""),
+      legalStatus: Joi.string().required(),
+      types: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      zip: Joi.string().required(),
+      region: Joi.string().required(),
+      department: Joi.string().required(),
+      sousType: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate(req.body);
@@ -164,6 +174,23 @@ router.post("/signup", async (req, res) => {
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
     const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE });
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+
+    //Create structure
+    const { name, description, legalStatus, types, zip, region, department, sousType } = value;
+    const structure = await StructureModel.create({
+      name,
+      description,
+      legalStatus,
+      types,
+      zip,
+      region,
+      department,
+      sousType,
+    });
+
+    //Update user with structureId
+    user.set({ structureId: structure._id });
+    await user.save({ fromUser: user });
 
     return res.status(200).send({ user, token, ok: true });
   } catch (error) {
