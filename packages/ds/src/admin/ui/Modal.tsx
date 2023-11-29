@@ -44,7 +44,7 @@ export default function Modal({
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
               <Dialog.Panel
-                className={`relative w-full transform transition-all md:w-auto md:max-w-[540px] ${className}`}
+                className={`relative w-full transform transition-all ${className}`}
               >
                 <div className={"p-8 rounded-md bg-white " + classNameContent}>
                   {header && <div className="mb-6">{header}</div>}
