@@ -5,6 +5,8 @@ import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { PasswordInput } from "@codegouvfr/react-dsfr/blocks/PasswordInput";
+import { ROLES, SUB_ROLES, translate } from "snu-lib";
+import validator from "validator";
 
 import { InputPhone } from "@snu/ds/dsfr";
 
@@ -37,8 +39,9 @@ export default function informations() {
     e.preventDefault();
     try {
       if (password !== confirmPassword) return toastr.error("Les mots de passe ne correspondent pas");
+      if (!validator.isMobilePhone(phone, "fr-FR")) return toastr.error("Le numéro de téléphone n'est pas valide");
       // stocker dans local storage, pour une création de compte en plusieurs étapes
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(school));
+      if (school) localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(school));
       const { ok, data, code, message } = await api.post(`/cle/referent-signup`, {
         firstName,
         lastName,
@@ -56,7 +59,7 @@ export default function informations() {
         return toastr.error("Mot de passe incorrect", "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole", {
           timeOut: 10000,
         });
-      if (error?.message) return toastr.error(error?.message);
+      return toastr.error(error?.message || translate(error?.code));
     }
   };
 
@@ -68,7 +71,7 @@ export default function informations() {
           return toastr.error("Votre lien d'invitation a expiré");
         }
         const { data, ok } = await api.get(`/cle/referent-signup/token/${invitationToken}`);
-        if (ok && data) setUser(data);
+        if (ok && data) setUser(data.referent);
       } catch (error) {
         if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") {
           history.push("/auth");
@@ -93,6 +96,21 @@ export default function informations() {
   }, [user]);
 
   if (!user) return <div>Chargement...</div>;
+
+  const renderSchool = () => {
+    if (!user) return null;
+    if (user.role === ROLES.ADMINISTRATEUR_CLE && user.subRole === SUB_ROLES.referent_etablissement) {
+      return (
+        <div className="w-full">
+          {/* todo : flag it as required */}
+          {/* todo : on reload the state seems broken : there is the city prefilled, but we no school is available in the list */}
+          <div className="flex items-center justify-between">Établissement scolaire</div>
+          <SchoolInFrance school={school} onSelectSchool={(s) => setSchool(s)} />
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Section>
@@ -132,14 +150,7 @@ export default function informations() {
               />
             </div>
           </div>
-          <div className="w-full">
-            <>
-              {/* todo : flag it as required */}
-              {/* todo : on reload the state seems broken : there is the city prefilled, but we no school is available in the list */}
-              <div className="flex items-center justify-between">Établissement scolaire</div>
-              <SchoolInFrance school={school} onSelectSchool={(s) => setSchool(s)} />
-            </>
-          </div>
+          {renderSchool()}
           <div className="w-full">
             {/* todo : handle phone zone */}
             <Input

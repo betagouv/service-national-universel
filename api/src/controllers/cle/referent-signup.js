@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, canUpdateEtablissement } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES } = require("snu-lib");
 const mongoose = require("mongoose");
 
 const config = require("../../config");
@@ -12,7 +12,9 @@ const { sendTemplate } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
 const SchoolRamsesModel = require("../../models/schoolRAMSES");
 const EtablissementModel = require("../../models/cle/etablissement");
+const ClasseModel = require("../../models/cle/classe");
 const { serializeReferent } = require("../../utils/serializer");
+const { validateEmailAcademique } = require("../../services/cle/referent");
 
 router.get("/token/:token", async (req, res) => {
   try {
@@ -30,7 +32,17 @@ router.get("/token/:token", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.token });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data: serializeReferent(referent) });
+    let etablissement;
+    if (referent.subRole === SUB_ROLES.coordinateur_cle) {
+      etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
+    }
+    if (referent.role === ROLES.REFERENT_CLASSE) {
+      const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      etablissement = await EtablissementModel.findById(classe.etablissementId);
+    }
+
+    return res.status(200).send({ ok: true, data: { referent: serializeReferent(referent), etablissement } });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -54,7 +66,8 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (value.email !== value.confirmEmail)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
-    //todo : check si l'email est bien une adresse académique
+    if (config.ENVIRONMENT !== "development" && !validateEmailAcademique(value.email))
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -104,6 +117,7 @@ router.post("/confirm-email", async (req, res) => {
       token2FAExpires: null,
       attempts2FA: 0,
     });
+    await referent.save();
 
     return res.status(200).send({ ok: true, data: serializeReferent(referent) });
   } catch (error) {}
@@ -114,7 +128,7 @@ router.post("/confirm-signup", async (req, res) => {
   try {
     const { error, value } = Joi.object({
       invitationToken: Joi.string().required(),
-      schoolId: Joi.string().required(),
+      schoolId: Joi.string(),
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
@@ -127,27 +141,29 @@ router.post("/confirm-signup", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (value.schoolId) {
+      if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
-    const body = {
-      schoolId: value.schoolId,
-      uai: ramsesSchool.uai,
-      name: ramsesSchool.fullName,
-      referentEtablissementIds: [referent._id.toString()],
-      address: ramsesSchool.adresse,
-      department: ramsesSchool.departmentName,
-      region: ramsesSchool.region,
-      zip: ramsesSchool.postcode,
-      city: ramsesSchool.city,
-      country: ramsesSchool.country,
-    };
-    console.log("✌️  body", body);
+      const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
+      const body = {
+        schoolId: value.schoolId,
+        uai: ramsesSchool.uai,
+        name: ramsesSchool.fullName,
+        referentEtablissementIds: [referent._id.toString()],
+        address: ramsesSchool.adresse,
+        department: ramsesSchool.departmentName,
+        region: ramsesSchool.region,
+        zip: ramsesSchool.postcode,
+        city: ramsesSchool.city,
+        country: ramsesSchool.country,
+      };
 
-    const data = await EtablissementModel.create([body], { session });
+      await EtablissementModel.create([body], { session });
+    }
+
     referent.set({ invitationToken: null, acceptCGU: true });
     await referent.save({ fromUser: referent, session });
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
