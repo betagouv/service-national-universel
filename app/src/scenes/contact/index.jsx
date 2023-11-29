@@ -6,14 +6,14 @@ import ContactForm from "./components/ContactForm";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import PublicContactForm from "./components/PublicContactForm";
-import { alertMessage, categories, getArticles, getQuestionOptions } from "./contact.service";
+import { alertMessage, categories, getArticles, getCategoryFromQuestion, getQuestionOptions } from "./contact.service";
 import { YOUNG_SOURCE } from "snu-lib";
 import Unlock from "@/assets/icons/Unlock";
 import QuestionBubbleV2 from "@/assets/icons/QuestionBubbleReimport";
 import EnhancedRadioButton from "@/components/dsfr/forms/EnhancedRadioButton";
 import AvatarPictogram from "@/assets/pictograms/Avatar";
 import SchoolPictogram from "@/assets/pictograms/School";
-import Select from "@/components/dsfr/forms/Select";
+import Select from "@/components/dsfr/forms/SelectV2";
 import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
@@ -22,13 +22,10 @@ export default function Contact() {
   useDocumentTitle("Formulaire de contact");
   const { isLoggedIn, young } = useAuth();
 
-  const urlParamsIterator = new URLSearchParams(window.location.search).entries();
-  console.log("🚀 ~ file: index.jsx:26 ~ Contact ~ urlParamsIterator:", urlParamsIterator);
-
   const parcoursFromURl = new URLSearchParams(window.location.search).get("parcours");
   const showFormFromURl = new URLSearchParams(window.location.search).get("showForm");
-  const categoryFromURl = new URLSearchParams(window.location.search).get("category");
-  const questionFromURl = new URLSearchParams(window.location.search).get("question");
+  const questionFromURl = new URLSearchParams(window.location.search).get("q");
+  const categoryFromURl = getCategoryFromQuestion(questionFromURl);
 
   const [parcours, setParcours] = useState(isLoggedIn ? young.source : parcoursFromURl || undefined);
   const [showForm, setShowForm] = useState(showFormFromURl === "true");
@@ -68,7 +65,7 @@ export default function Contact() {
             />
           </div>
         ) : (
-          <fieldset id="parcours" className="my-4 space-y-4">
+          <fieldset id="parcours" className="my-10 space-y-4">
             <legend className="text-base">Choisir le type de profil qui me concerne :</legend>
             <EnhancedRadioButton
               label="Volontaire au SNU"
@@ -90,10 +87,12 @@ export default function Contact() {
         )}
 
         {/* Category */}
-        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} />}
+        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} name="Catégorie" />}
 
         {/* Question */}
-        {category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} />}
+        {category && questionOptions.length > 0 && (
+          <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} name="Question" />
+        )}
         {category && questionOptions.length === 0 && (
           <Alert className="my-8">
             <p className="text-lg font-semibold">Information</p>

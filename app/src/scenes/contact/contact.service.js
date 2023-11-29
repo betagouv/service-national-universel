@@ -211,3 +211,7 @@ export function getArticles(question) {
   if (!articles) return [];
   return articles;
 }
+
+export function getCategoryFromQuestion(question) {
+  return questions.find((e) => e.value === question)?.category;
+}

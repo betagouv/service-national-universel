@@ -10,7 +10,7 @@ import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
 import Input from "@/components/dsfr/forms/input";
 import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
-import Select from "@/components/dsfr/forms/Select";
+import Select from "@/components/dsfr/forms/SelectV2";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
@@ -79,7 +79,7 @@ export default function PublicContactForm({ category, question, parcours }) {
 
   return (
     <form onSubmit={handleSubmit} disabled={disabled()} autoComplete="on">
-      <Select label="Je suis" options={roleOptions} value={role} onChange={setRole} />
+      <Select label="Je suis" name="Role" options={roleOptions} value={role} onChange={setRole} />
 
       <label className="w-full">
         Nom du volontaire

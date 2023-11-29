@@ -4,18 +4,7 @@ import { IoMdClose } from "react-icons/io";
 import ErrorMessage from "./ErrorMessage";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 
-export default function Select({
-  label,
-  options,
-  value,
-  placeholder = "Sélectionner une option",
-  Icon = null,
-  alignItems = "left",
-  onChange,
-  error = "",
-  correction = "",
-  disabled = false,
-}) {
+export default function Select({ label, options, value, placeholder = "Sélectionner une option", Icon = null, alignItems = "left", onChange, error = "", correction = "" }) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef(null);
 
@@ -40,28 +29,12 @@ export default function Select({
     setOpen(false);
   };
 
-  if (disabled) {
-    return (
-      <div className="mt-2 mb-6">
-        <label className="w-full text-gray-400">
-          {label}
-          <select disabled id={label} className="w-full border-b-[2px] rounded-t bg-gray-100 mt-2 px-4 py-2 appearance-none text-gray-500">
-            <option>{options.find((option) => option.value === value)?.label || placeholder}</option>
-          </select>
-        </label>
-      </div>
-    );
-  }
-
   return (
     <div className="mt-2 mb-6 text-[#161616]" style={{ fontFamily: "Marianne" }} ref={ref}>
-      <label htmlFor={label} className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>
-        {label}
-      </label>
+      <label className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>{label}</label>
       <div className="relative">
         {/* select item */}
         <button
-          id={label}
           className={`flex w-full items-center justify-between gap-3 border-b-[2px] bg-[#EEEEEE] px-4 py-2 ${
             correction || error ? "border-[#CE0500]" : "border-[#3A3A3A]"
           } rounded-t-[4px]`}

@@ -9,7 +9,7 @@ import useAuth from "@/services/useAuth";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
-import Select from "@/components/dsfr/forms/Select";
+import Select from "@/components/dsfr/forms/SelectV2";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
@@ -68,7 +68,7 @@ export default function ContactForm({ category, question }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Select label="Je suis" options={roleOptions} value={role} onChange={setRole} />
+      <Select label="Je suis" name="Role" options={roleOptions} value={role} onChange={setRole} />
       <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
       <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       <ErrorMessage error={error} />
