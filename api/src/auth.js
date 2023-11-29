@@ -209,7 +209,7 @@ class Auth {
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
-      const classe = await ClasseEngagee.findOne({ _id: classeId, status: "DONE" });
+      const classe = await ClasseEngagee.findOne({ _id: classeId });
       if (!classe) {
         return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
