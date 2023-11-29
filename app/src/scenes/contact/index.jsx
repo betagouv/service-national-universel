@@ -20,22 +20,20 @@ import CardLink from "@/components/dsfr/ui/CardLink";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
-  const { isLoggedIn, isCLE } = useAuth();
+  const { isLoggedIn, young } = useAuth();
 
+  const urlParamsIterator = new URLSearchParams(window.location.search).entries();
+  console.log("🚀 ~ file: index.jsx:26 ~ Contact ~ urlParamsIterator:", urlParamsIterator);
+
+  const parcoursFromURl = new URLSearchParams(window.location.search).get("parcours");
   const showFormFromURl = new URLSearchParams(window.location.search).get("showForm");
   const categoryFromURl = new URLSearchParams(window.location.search).get("category");
   const questionFromURl = new URLSearchParams(window.location.search).get("question");
 
-  const [parcours, setParcours] = useState(getInitialParcoursState());
+  const [parcours, setParcours] = useState(isLoggedIn ? young.source : parcoursFromURl || undefined);
   const [showForm, setShowForm] = useState(showFormFromURl === "true");
   const [category, setCategory] = useState(categoryFromURl);
   const [question, setQuestion] = useState(questionFromURl);
-
-  function getInitialParcoursState() {
-    if (isCLE) return YOUNG_SOURCE.CLE;
-    if (isLoggedIn) return YOUNG_SOURCE.VOLONTAIRE;
-    return undefined;
-  }
 
   const knowledgeBaseRole = isLoggedIn ? "young" : "public";
   const questionOptions = getQuestionOptions(category, knowledgeBaseRole, parcours);
@@ -61,14 +59,14 @@ export default function Contact() {
 
         {/* Logged in users get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (
-          <>
+          <div className="my-8 space-x-8">
             <CardLink label="Débloquez votre accès gratuit au code de la route" picto={<Unlock />} url="/phase1" />
             <CardLink
               label="Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?"
               picto={<QuestionBubbleV2 />}
               url="/phase1"
             />
-          </>
+          </div>
         ) : (
           <fieldset id="parcours" className="my-4 space-y-4">
             <legend className="text-base">Choisir le type de profil qui me concerne :</legend>
@@ -78,7 +76,7 @@ export default function Contact() {
               picto={<AvatarPictogram />}
               checked={parcours === YOUNG_SOURCE.VOLONTAIRE}
               onChange={() => setParcours(YOUNG_SOURCE.VOLONTAIRE)}
-              disabled={isCLE}
+              disabled={parcoursFromURl}
             />
             <EnhancedRadioButton
               label="Élève en classe engagée"
@@ -86,13 +84,13 @@ export default function Contact() {
               picto={<SchoolPictogram />}
               checked={parcours === YOUNG_SOURCE.CLE}
               onChange={() => setParcours(YOUNG_SOURCE.CLE)}
-              disabled={isCLE}
+              disabled={parcoursFromURl}
             />
           </fieldset>
         )}
 
-        {/* Catégorie */}
-        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disbled={categoryFromURl} />}
+        {/* Category */}
+        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} />}
 
         {/* Question */}
         {category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} />}

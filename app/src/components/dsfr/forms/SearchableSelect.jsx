@@ -46,19 +46,21 @@ const SearchableSelect = ({
 
   return (
     <div className="text-[#161616]" style={{ fontFamily: "Marianne" }}>
-      <label className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>{label}</label>
-      <Select
-        styles={customStyles}
-        value={options.find((option) => option.value === value)}
-        onChange={(option) => onChange(option.value)}
-        options={isDebounced ? filteredOptions : options}
-        isSearchable
-        placeholder={placeholder}
-        noOptionsMessage={() => noOptionsMessage}
-        error={correction || error}
-        onInputChange={handleInputChange}
-        onKeyDown={handleClearDebounce}
-      />
+      <label className={`w-full my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>
+        {label}
+        <Select
+          styles={customStyles}
+          value={options.find((option) => option.value === value)}
+          onChange={(option) => onChange(option.value)}
+          options={isDebounced ? filteredOptions : options}
+          isSearchable
+          placeholder={placeholder}
+          noOptionsMessage={() => noOptionsMessage}
+          error={correction || error}
+          onInputChange={handleInputChange}
+          onKeyDown={handleClearDebounce}
+        />
+      </label>
       <ErrorMessage>{error}</ErrorMessage>
       <ErrorMessage>{correction}</ErrorMessage>
     </div>
