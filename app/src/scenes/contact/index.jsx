@@ -55,7 +55,7 @@ export default function Contact() {
           Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
         </p>
 
-        {/* Logged in user get two links to phase 1, unlogged users are shown the parcours selector. */}
+        {/* Logged in users get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (
           <>
             <CardLink label="Débloquez votre accès gratuit au code de la route" picto={<Unlock />} url="/phase1" />
@@ -87,10 +87,10 @@ export default function Contact() {
           </fieldset>
         )}
 
-        {!!parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} />}
+        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} />}
 
-        {!!category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} />}
-        {!!category && questionOptions.length === 0 && (
+        {category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} />}
+        {category && questionOptions.length === 0 && (
           <Alert className="my-8">
             <p className="text-lg font-semibold">Information</p>
             <p>{alertMessage[parcours]}</p>
@@ -98,8 +98,8 @@ export default function Contact() {
         )}
 
         {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
-        {!!question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
-        {!!question &&
+        {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
+        {question &&
           (articles.length === 0 || showForm) &&
           (isLoggedIn ? <ContactForm category={category} question={question} /> : <PublicContactForm category={category} question={question} parcours={parcours} />)}
       </DSFRContainer>
