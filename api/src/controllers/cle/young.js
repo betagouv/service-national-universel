@@ -18,7 +18,7 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     if (!canSearchStudent(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    console.log(value);
+
     const classe = await ClasseModel.findOne({ _id: value })?.lean();
     if (!classe) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -33,24 +33,18 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
       }
     }
 
-    const getYoungCountByStatus = async (value) => {
-      const students = await YoungModel.find({ classeId: value })?.lean();
+    const students = await YoungModel.find({ classeId: value })?.lean();
 
-      const statusCount = students.reduce((acc, student) => {
-        const status = student.status;
-        acc[status] = (acc[status] || 0) + 1;
-        return acc;
-      }, {});
+    const statusCount = students.reduce((acc, student) => {
+      const status = student.status;
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
 
-      const result = { total: students.length };
-      Object.keys(statusCount).forEach((status) => {
-        result[YOUNG_STATUS[status]] = statusCount[status];
-      });
-
-      return result;
-    };
-
-    const result = await getYoungCountByStatus(value);
+    const result = { total: students.length };
+    Object.keys(statusCount).forEach((status) => {
+      result[YOUNG_STATUS[status]] = statusCount[status];
+    });
 
     return res.status(200).send({ ok: true, data: result });
   } catch (error) {
