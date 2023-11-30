@@ -63,7 +63,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const defaultCleCohort = await CohortModel.findOne({ name: value.cohort });
     if (!defaultCleCohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohort not found." });
 
-    classe = await ClasseModel.create({
+    const classe = await ClasseModel.create({
       ...value,
       status: STATUS_CLASSE.DRAFT,
       statusPhase1: STATUS_PHASE1_CLASSE.WAITING_AFFECTATION,
@@ -120,12 +120,13 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const getStatus = async (classe) => {
       const students = await YoungModel.find({ classeId: classe._id })?.lean();
-      const studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS);
-      const studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_CORRECTION);
+      const studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION);
+      const studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION);
       const studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
+
       let status = STATUS_CLASSE.INSCRIPTION_IN_PROGRESS;
       if (studentInProgress.length === 0 && studentWaiting.length > 0) status = STATUS_CLASSE.INSCRIPTION_TO_CHECK;
-      if (studentValidated.length === classe.totalSeats) status = STATUS_CLASSE.DONE;
+      if (studentValidated.length === classe.totalSeats) status = STATUS_CLASSE.VALIDATED;
       return status;
     };
 
@@ -153,16 +154,15 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const classe = await ClasseModel.findById(value)?.lean();
-    if (!classe) {
+    // We need to populate the model with the 2 virtuals etablissement and referents
+    const data = await ClasseModel.findById(value)
+      .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
+      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1 } } });
+    if (!data) {
       captureMessage("Error finding classe with id : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    const { etablissementId, referentClasseIds } = classe;
-    const etablissement = etablissementId ? await EtablissementModel.findById(etablissementId)?.lean() : {};
-    const referentClasse = referentClasseIds.length ? await ReferentModel.findById(referentClasseIds[0])?.lean() : {};
-
-    return res.status(200).send({ ok: true, data: { ...classe, etablissement, referentClasse } });
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -179,7 +179,7 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
 
     if (!canViewClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const classes = await ClasseModel.find({ etablissementId: value, deletedAt: { $exists: false } })?.lean();
+    const classes = await ClasseModel.find({ etablissementId: value })?.lean();
     if (!classes) {
       captureMessage("Error finding classe with etablissementId : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -216,8 +216,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const now = new Date();
-    classe.set({ status: STATUS_CLASSE.WITHDRAWN, deletedAt: now });
+    classe.set({ status: STATUS_CLASSE.WITHDRAWN });
     await classe.save({ fromUser: req.user });
 
     const students = await YoungModel.find({ classeId: classe._id })?.lean();

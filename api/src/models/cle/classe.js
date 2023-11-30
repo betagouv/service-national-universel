@@ -124,12 +124,32 @@ const Schema = new mongoose.Schema({
   deletedAt: { type: Date },
 });
 
+Schema.virtual("etablissement", {
+  ref: "etablissement",
+  localField: "etablissementId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+Schema.virtual("referents", {
+  ref: "referent",
+  localField: "referentClasseIds",
+  foreignField: "_id",
+});
+
+Schema.virtual("isFull").get(function () {
+  return this.totalSeats - this.seatsTaken <= 0;
+});
+
 Schema.virtual("user").set(function (user) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;
     this._user = { _id, role, department, region, email, firstName, lastName, model };
   }
 });
+
+Schema.set("toObject", { virtuals: true });
+Schema.set("toJSON", { virtuals: true });
 
 Schema.pre("save", function (next, params) {
   this.user = params?.fromUser;
