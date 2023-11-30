@@ -193,6 +193,13 @@ export const questions = [
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
   },
+  {
+    category: "TECHNICAL",
+    value: "HTS_TO_CLE",
+    label: "Inscription classe engagée : j’ai déjà un compte volontaire",
+    roles: ["public", "young"],
+    parcours: [YOUNG_SOURCE.CLE],
+  },
 ];
 
 /**
@@ -202,7 +209,11 @@ export const questions = [
  * @returns list of available questions
  */
 export function getQuestionOptions(category, role, parcours) {
-  return questions.filter((e) => e.category === category && e.roles.includes(role) && e.parcours.includes(parcours));
+  let res = questions;
+  if (category) res = res.filter((e) => e.category === category);
+  if (role) res = res.filter((e) => e.roles.includes(role));
+  if (parcours) res = res.filter((e) => e.parcours.includes(parcours));
+  return res;
 }
 
 export function getArticles(question) {
@@ -210,4 +221,8 @@ export function getArticles(question) {
   const articles = articleSlugs?.map((slug) => articleSummaries.find((e) => e.slug === slug));
   if (!articles) return [];
   return articles;
+}
+
+export function getCategoryFromQuestion(question) {
+  return questions.find((e) => e.value === question)?.category;
 }

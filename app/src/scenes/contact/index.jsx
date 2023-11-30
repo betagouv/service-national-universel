@@ -6,7 +6,7 @@ import ContactForm from "./components/ContactForm";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import PublicContactForm from "./components/PublicContactForm";
-import { alertMessage, categories, getArticles, getQuestionOptions } from "./contact.service";
+import { alertMessage, categories, getArticles, getCategoryFromQuestion, getQuestionOptions } from "./contact.service";
 import { YOUNG_SOURCE } from "snu-lib";
 import Unlock from "@/assets/icons/Unlock";
 import QuestionBubbleV2 from "@/assets/icons/QuestionBubbleReimport";
@@ -20,18 +20,17 @@ import CardLink from "@/components/dsfr/ui/CardLink";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
-  const { isLoggedIn, isCLE } = useAuth();
+  const { isLoggedIn, young } = useAuth();
 
-  const [parcours, setParcours] = useState(getInitialParcoursState());
-  const [showForm, setShowForm] = useState(false);
-  const [category, setCategory] = useState(null);
-  const [question, setQuestion] = useState(null);
+  const parcoursFromURl = new URLSearchParams(window.location.search).get("parcours");
+  const showFormFromURl = new URLSearchParams(window.location.search).get("showForm");
+  const questionFromURl = new URLSearchParams(window.location.search).get("q");
+  const categoryFromURl = getCategoryFromQuestion(questionFromURl);
 
-  function getInitialParcoursState() {
-    if (isCLE) return YOUNG_SOURCE.CLE;
-    if (isLoggedIn) return YOUNG_SOURCE.VOLONTAIRE;
-    return undefined;
-  }
+  const [parcours, setParcours] = useState(isLoggedIn ? young.source : parcoursFromURl || undefined);
+  const [showForm, setShowForm] = useState(showFormFromURl === "true");
+  const [category, setCategory] = useState(categoryFromURl);
+  const [question, setQuestion] = useState(questionFromURl);
 
   const knowledgeBaseRole = isLoggedIn ? "young" : "public";
   const questionOptions = getQuestionOptions(category, knowledgeBaseRole, parcours);
@@ -57,16 +56,16 @@ export default function Contact() {
 
         {/* Logged in users get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (
-          <>
+          <div className="my-8 space-y-6">
             <CardLink label="Débloquez votre accès gratuit au code de la route" picto={<Unlock />} url="/phase1" />
             <CardLink
               label="Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?"
               picto={<QuestionBubbleV2 />}
               url="/phase1"
             />
-          </>
+          </div>
         ) : (
-          <fieldset id="parcours" className="my-4 space-y-4">
+          <fieldset id="parcours" className="my-10 space-y-4">
             <legend className="text-base">Choisir le type de profil qui me concerne :</legend>
             <EnhancedRadioButton
               label="Volontaire au SNU"
@@ -74,7 +73,7 @@ export default function Contact() {
               picto={<AvatarPictogram />}
               checked={parcours === YOUNG_SOURCE.VOLONTAIRE}
               onChange={() => setParcours(YOUNG_SOURCE.VOLONTAIRE)}
-              disabled={isCLE}
+              disabled={parcoursFromURl}
             />
             <EnhancedRadioButton
               label="Élève en classe engagée"
@@ -82,26 +81,34 @@ export default function Contact() {
               picto={<SchoolPictogram />}
               checked={parcours === YOUNG_SOURCE.CLE}
               onChange={() => setParcours(YOUNG_SOURCE.CLE)}
-              disabled={isCLE}
+              disabled={parcoursFromURl}
             />
           </fieldset>
         )}
 
-        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} />}
+        {parcours && (
+          <>
+            {/* Category */}
+            <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} name="Catégorie" />
 
-        {category && questionOptions.length > 0 && <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} />}
-        {category && questionOptions.length === 0 && (
-          <Alert className="my-8">
-            <p className="text-lg font-semibold">Information</p>
-            <p>{alertMessage[parcours]}</p>
-          </Alert>
+            {/* Question */}
+            {category && questionOptions.length > 0 && (
+              <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} name="Question" />
+            )}
+            {category && questionOptions.length === 0 && (
+              <Alert className="my-8">
+                <p className="text-lg font-semibold">Information</p>
+                <p>{alertMessage[parcours]}</p>
+              </Alert>
+            )}
+
+            {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
+            {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
+            {question &&
+              (articles.length === 0 || showForm) &&
+              (isLoggedIn ? <ContactForm category={category} question={question} /> : <PublicContactForm category={category} question={question} parcours={parcours} />)}
+          </>
         )}
-
-        {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
-        {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
-        {question &&
-          (articles.length === 0 || showForm) &&
-          (isLoggedIn ? <ContactForm category={category} question={question} /> : <PublicContactForm category={category} question={question} parcours={parcours} />)}
       </DSFRContainer>
     </DSFRLayout>
   );
