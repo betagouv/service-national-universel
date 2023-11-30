@@ -104,3 +104,7 @@ export const headCenterArticles = [
     url: `${supportURL}/base-de-connaissance/chef-de-centre-mon-tableau-de-bord`,
   },
 ];
+
+export const administrator_CLEArticles = [];
+
+export const referent_classeArticles = [];
