@@ -137,6 +137,10 @@ Schema.virtual("referents", {
   foreignField: "_id",
 });
 
+Schema.virtual("isFull").get(function () {
+  return this.totalSeats - this.seatsTaken <= 0;
+});
+
 Schema.virtual("user").set(function (user) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;

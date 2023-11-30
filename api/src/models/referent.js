@@ -243,6 +243,12 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.virtual("fullName").get(function () {
+  const { firstName, lastName } = this;
+  if (firstName && lastName) return `${firstName} ${lastName}`;
+  else return firstName || lastName;
+});
+
 Schema.pre("save", async function (next) {
   if (this.isModified("password")) {
     const hashedPassword = await bcrypt.hash(this.password, 10);
@@ -337,6 +343,9 @@ Schema.plugin(
   }),
   MODELNAME,
 );
+
+Schema.set("toObject", { virtuals: true });
+Schema.set("toJSON", { virtuals: true });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 
