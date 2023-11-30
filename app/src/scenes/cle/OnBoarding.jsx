@@ -13,7 +13,7 @@ import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import useAuth from "@/services/useAuth";
-import { STATUS_CLASSE } from "snu-lib";
+import { STATUS_CLASSE, CLE_COLORATION_LIST, translateColoration } from "snu-lib";
 
 const Title = () => (
   <div>
@@ -69,7 +69,7 @@ const OnBoarding = () => {
       const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
       setClasse({
         name,
-        coloration,
+        coloration: translateColoration(CLE_COLORATION_LIST[coloration]),
         status,
         isFull,
         isInscriptionOpen,
