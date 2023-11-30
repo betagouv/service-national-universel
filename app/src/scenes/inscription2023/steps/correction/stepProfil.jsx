@@ -104,7 +104,7 @@ export default function StepProfil() {
     <>
       <DSFRContainer title="Mon profil" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="flex flex-col">
-          {isCLE ?? (
+          {isCLE && (
             <>
               <div className="flex items-center gap-2 mb-3">
                 <label htmlFor="nationalite" className="m-0">
