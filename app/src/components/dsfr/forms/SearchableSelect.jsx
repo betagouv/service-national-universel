@@ -81,6 +81,7 @@ const customStyles = {
   control: (provided, state) => {
     return {
       ...provided,
+      marginTop: 8,
       border: "none",
       borderRadius: 0,
       borderColor: "#EEEEEE",

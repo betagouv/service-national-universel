@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
@@ -19,7 +19,7 @@ export default function ContactForm({ category, question }) {
   const { files, addFiles, deleteFile, error } = useFileUpload();
 
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState("");
   const [message, setMessage] = useState("");
 
   const disabled = () => {

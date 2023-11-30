@@ -20,7 +20,7 @@ export default function PublicContactForm({ category, question, parcours }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [department, setDepartment] = useState("");

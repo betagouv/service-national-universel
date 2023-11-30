@@ -202,7 +202,11 @@ export const questions = [
  * @returns list of available questions
  */
 export function getQuestionOptions(category, role, parcours) {
-  return questions.filter((e) => e.category === category && e.roles.includes(role) && e.parcours.includes(parcours));
+  let res = questions;
+  if (category) res = res.filter((e) => e.category === category);
+  if (role) res = res.filter((e) => e.roles.includes(role));
+  if (parcours) res = res.filter((e) => e.parcours.includes(parcours));
+  return res;
 }
 
 export function getArticles(question) {

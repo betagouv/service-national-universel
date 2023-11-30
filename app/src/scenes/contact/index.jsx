@@ -56,7 +56,7 @@ export default function Contact() {
 
         {/* Logged in users get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (
-          <div className="my-8 space-x-8">
+          <div className="my-8 space-y-6">
             <CardLink label="Débloquez votre accès gratuit au code de la route" picto={<Unlock />} url="/phase1" />
             <CardLink
               label="Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?"
@@ -86,25 +86,29 @@ export default function Contact() {
           </fieldset>
         )}
 
-        {/* Category */}
-        {parcours && <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} name="Catégorie" />}
+        {parcours && (
+          <>
+            {/* Category */}
+            <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} name="Catégorie" />
 
-        {/* Question */}
-        {category && questionOptions.length > 0 && (
-          <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} name="Question" />
-        )}
-        {category && questionOptions.length === 0 && (
-          <Alert className="my-8">
-            <p className="text-lg font-semibold">Information</p>
-            <p>{alertMessage[parcours]}</p>
-          </Alert>
-        )}
+            {/* Question */}
+            {category && questionOptions.length > 0 && (
+              <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} name="Question" />
+            )}
+            {category && questionOptions.length === 0 && (
+              <Alert className="my-8">
+                <p className="text-lg font-semibold">Information</p>
+                <p>{alertMessage[parcours]}</p>
+              </Alert>
+            )}
 
-        {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
-        {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
-        {question &&
-          (articles.length === 0 || showForm) &&
-          (isLoggedIn ? <ContactForm category={category} question={question} /> : <PublicContactForm category={category} question={question} parcours={parcours} />)}
+            {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
+            {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
+            {question &&
+              (articles.length === 0 || showForm) &&
+              (isLoggedIn ? <ContactForm category={category} question={question} /> : <PublicContactForm category={category} question={question} parcours={parcours} />)}
+          </>
+        )}
       </DSFRContainer>
     </DSFRLayout>
   );
