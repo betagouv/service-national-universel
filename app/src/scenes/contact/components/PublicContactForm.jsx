@@ -10,7 +10,7 @@ import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
 import Input from "@/components/dsfr/forms/input";
 import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
-import Select from "@/components/dsfr/forms/SelectV2";
+import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 

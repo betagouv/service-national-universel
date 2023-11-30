@@ -13,7 +13,7 @@ import QuestionBubbleV2 from "@/assets/icons/QuestionBubbleReimport";
 import EnhancedRadioButton from "@/components/dsfr/forms/EnhancedRadioButton";
 import AvatarPictogram from "@/assets/pictograms/Avatar";
 import SchoolPictogram from "@/assets/pictograms/School";
-import Select from "@/components/dsfr/forms/SelectV2";
+import Select from "@/components/dsfr/forms/Select";
 import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
