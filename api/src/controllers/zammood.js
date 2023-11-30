@@ -163,6 +163,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const obj = {
       subject: req.body.subject,
       message: req.body.message,
+      parcours: req.body.parcours,
       fromPage: req.body.fromPage,
       author: req.body.subjectStep0,
       formSubjectStep1: req.body.subjectStep1,
@@ -173,6 +174,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const { error, value } = Joi.object({
       subject: Joi.string().required(),
       message: Joi.string().required(),
+      parcours: Joi.string().required(),
       fromPage: Joi.string().allow(null),
       author: Joi.string(),
       formSubjectStep1: Joi.string(),
@@ -191,7 +193,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { subject, message, author, formSubjectStep1, formSubjectStep2, files } = value;
+    const { subject, message, author, formSubjectStep1, formSubjectStep2, files, parcours } = value;
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
       method: "POST",
@@ -203,6 +205,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         source: "PLATFORM",
+        parcours,
         author,
         formSubjectStep1,
         formSubjectStep2,
@@ -244,6 +247,7 @@ router.post("/ticket/form", async (req, res) => {
       message: req.body.message,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
+      parcours: req.body.parcours,
       department: req.body.department,
       region: req.body.region,
       formSubjectStep1: req.body.subjectStep1,
@@ -258,6 +262,7 @@ router.post("/ticket/form", async (req, res) => {
       message: Joi.string().required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
+      parcours: Joi.string().required(),
       department: Joi.string().required(),
       region: Joi.string().required(),
       formSubjectStep1: Joi.string().required(),
@@ -278,7 +283,7 @@ router.post("/ticket/form", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files } = value;
+    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours } = value;
 
     const userAttributes = [
       { name: "departement", value: department },
@@ -293,6 +298,7 @@ router.post("/ticket/form", async (req, res) => {
       body: JSON.stringify({
         message,
         email,
+        parcours,
         clientId,
         subject,
         firstName,
