@@ -619,7 +619,7 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       email: Joi.string().lowercase().trim().email().required(),
-      birthdateAt: Joi.string().trim().required(),
+      birthdateAt: Joi.string().trim(),
       // frenchNationality: Joi.string().trim().required(),
       phone: Joi.string().trim().required(),
       phoneZone: Joi.string()
