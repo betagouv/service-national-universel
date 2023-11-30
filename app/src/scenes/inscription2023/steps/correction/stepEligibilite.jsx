@@ -25,9 +25,10 @@ import { supportURL } from "@/config";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import Loader from "@/components/Loader";
+import useAuth from "@/services/useAuth";
 
 export default function StepEligibilite() {
-  const young = useSelector((state) => state.Auth.young);
+  const {young, isCLE} = useAuth();
   const [data, setData] = React.useState({
     frenchNationality: young?.frenchNationality,
     birthDate: new Date(young?.birthdateAt),
@@ -209,10 +210,9 @@ export default function StepEligibilite() {
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="flex-start my-4 flex flex-col">
           <div className="flex items-center">
-            <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
+            <CheckBox disabled={!isCLE} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
             <div className="flex items-center backdrop-opacity-100">
-              <span className="ml-2 mr-2 text-[#929292]">Je suis de nationalité française</span>
-              {/* // ! J'arrive pas a griser le drapeau */}
+              <span className={`ml-2 mr-2 ${!isCLE && "text-[#929292]"}`}>Je suis de nationalité française</span>
               <IconFrance />
             </div>
           </div>
