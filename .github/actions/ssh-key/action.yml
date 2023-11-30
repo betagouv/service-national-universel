@@ -1,0 +1,27 @@
+name: "Create SSH key"
+
+inputs:
+  ssh_private_key:
+    description: "SSH private key"
+    required: true
+  ssh_known_hosts:
+    description: "SSH known hosts"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create SSH key
+      run: |
+        mkdir -p ~/.ssh/
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+        sudo chmod 600 ~/.ssh/id_ed25519
+        echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+      shell: bash
+      env:
+        SSH_PRIVATE_KEY: ${{ inputs.ssh_private_key }}
+        SSH_KNOWN_HOSTS: ${{ inputs.ssh_known_hosts }}
+
+    - name: Change ssh key file permissions
+      shell: bash
+      run: chmod go-rwx ~/.ssh/id_ed25519

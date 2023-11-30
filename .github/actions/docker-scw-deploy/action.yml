@@ -1,0 +1,21 @@
+name: "Scaleway container deploy"
+description: "Deploy a Scaleway container"
+
+inputs:
+  secret_key:
+    description: "Scaleway secret key"
+    required: true
+  container_id:
+    description: "ID of the Scaleway container"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Deploy Container
+      shell: bash
+      run: |
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "X-Auth-Token: ${{ inputs.secret_key }}" \
+          "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/${{ inputs.container_id }}/deploy"

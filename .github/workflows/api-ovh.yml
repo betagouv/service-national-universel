@@ -1,0 +1,49 @@
+name: API - Build Docker image & Deploy OVH
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - api/**
+      - packages/**
+
+jobs:
+  build_deploy:
+    runs-on: ubuntu-latest
+    env:
+      ACTIVE_HOSTING: ${{ secrets.ACTIVE_HOSTING }}
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Create SSH key
+        uses: ./.github/actions/ssh-key
+        with:
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Remove git folder
+        run: rm -rf .git
+
+      - name: Docker Build & Publish
+        uses: ./.github/actions/docker
+        with:
+          username: ${{ secrets.OVH_USERNAME }}
+          password: ${{ secrets.OVH_PASSWORD }}
+          registry: ${{ secrets.OVH_REGISTRY_ENDPOINT }}
+          image_name: api
+          dockerfile_path: api/Dockerfile
+
+      - name: OVH container deploy
+        if: env.ACTIVE_HOSTING == 'ovh'
+        uses: ./.github/actions/docker-ovh-deploy
+        with:
+          ssh_username: ${{ secrets.OVH_SSH_USERNAME }}
+          ssh_host: ${{ secrets.OVH_SSH_HOST }}
+          ssh_private_key: ${{ secrets.OVH_SSH_PRIVATE_KEY }}
+          registry: ${{ secrets.OVH_REGISTRY_ENDPOINT }}
+          username: ${{ secrets.OVH_USERNAME }}
+          password: ${{ secrets.OVH_PASSWORD }}
+          image_name: api

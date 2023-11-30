@@ -1,0 +1,48 @@
+name: "OVH container deploy"
+description: "Deploy a OVH container"
+
+inputs:
+  ssh_username:
+    description: "OVH Container SSH username"
+    required: true
+  ssh_host:
+    description: "OVH Container SSH host"
+    required: true
+  ssh_private_key:
+    description: "OVH Container SSH private key"
+    required: true
+  registry:
+    description: "OVH Container Registry"
+    required: true
+  username:
+    description: "OVH Container Registry username"
+    required: true
+  password:
+    description: "OVH Container Registry password"
+    required: true
+  image_name:
+    description: "OVH Container image name"
+    required: true
+  image_tag:
+    description: "OVH Container image tag"
+    required: false
+    default: "latest"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Deploy Container
+      shell: bash
+      run: |
+        echo "${{ inputs.ssh_private_key }}" > ~/.ssh/ovh_rsa
+        chmod 600 ~/.ssh/ovh_rsa
+        eval `ssh-agent -s`
+        ssh-add ~/.ssh/ovh_rsa
+        ssh -T ${{ inputs.ssh_username }}@${{ inputs.ssh_host }} -i ~/.ssh/ovh_rsa << EOF
+          docker login ${{ inputs.registry }} -u ${{ inputs.username }} -p ${{ inputs.password }}
+          docker pull ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag }}
+          docker stop $(docker ps -aq)
+          docker rm $(docker ps -aq)
+          docker run -d -p 80:8080 ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag }}
+          exit
+        EOF

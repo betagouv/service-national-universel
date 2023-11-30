@@ -1,0 +1,51 @@
+name: API - Build Docker image & Deploy Scaleway
+
+# on:
+#   push:
+#     branches:
+#       - main
+#     paths:
+#       - api/**
+#       - packages/**
+
+on:
+  push:
+    branches:
+      - feat-1469
+
+jobs:
+  build_deploy:
+    runs-on: ubuntu-latest
+    env:
+      ACTIVE_HOSTING: ${{ secrets.ACTIVE_HOSTING }}
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Create SSH key
+        uses: ./.github/actions/ssh-key
+        with:
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Remove git folder
+        run: rm -rf .git
+
+      - name: Docker Build & Publish
+        uses: ./.github/actions/docker
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_SECRET_KEY }}
+          # registry: ${{ secrets.SCW_CONTAINER_REGISTRY_ENDPOINT }}
+          registry: rg.fr-par.scw.cloud/funcscwsnutestvfku19oc
+          image_name: api
+          dockerfile_path: api/Dockerfile
+
+      - name: Scaleway container deploy
+        if: env.ACTIVE_HOSTING == 'scaleway'
+        uses: ./.github/actions/docker-scw-deploy
+        with:
+          secret_key: ${{ secrets.SCW_SECRET_KEY }}
+          container_id: 616eb9d6-36b5-4c08-9620-d090a6ae6c69
+          # container_id: ${{ secrets.SCW_API_CONTAINER_ID }}
