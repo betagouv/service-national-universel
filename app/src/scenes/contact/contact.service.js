@@ -193,6 +193,13 @@ export const questions = [
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
   },
+  {
+    category: "TECHNICAL",
+    value: "HTS_TO_CLE",
+    label: "Inscription classe engagée : j’ai déjà un compte volontaire",
+    roles: ["public", "young"],
+    parcours: [YOUNG_SOURCE.CLE],
+  },
 ];
 
 /**

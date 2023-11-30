@@ -98,7 +98,7 @@ const OnBoarding = () => {
               <InlineButton className="md:pr-4 pt-2 md:pr-2 pb-1" onClick={() => setShowContactSupport(true)}>
                 J'ai déjà un compte volontaire
               </InlineButton>
-              <PrimaryButton onClick={() => history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`)}>Démarrer mon inscription</PrimaryButton>
+              <PrimaryButton onClick={() => history.push(`/preinscription/profil?parcours=CLE&classeId=${id}&q=HTS_TO_CLE`)}>Démarrer mon inscription</PrimaryButton>
             </div>
           )}
           {classe.isFull && (
