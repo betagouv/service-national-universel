@@ -120,12 +120,13 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     const getStatus = async (classe) => {
       const students = await YoungModel.find({ classeId: classe._id })?.lean();
-      const studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS);
-      const studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_CORRECTION);
+      const studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION);
+      const studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION);
       const studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
+
       let status = STATUS_CLASSE.INSCRIPTION_IN_PROGRESS;
       if (studentInProgress.length === 0 && studentWaiting.length > 0) status = STATUS_CLASSE.INSCRIPTION_TO_CHECK;
-      if (studentValidated.length === classe.totalSeats) status = STATUS_CLASSE.DONE;
+      if (studentValidated.length === classe.totalSeats) status = STATUS_CLASSE.VALIDATED;
       return status;
     };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ProfilePic } from "@snu/ds";
-import { Page, Header, Container, Button, Badge, Label, InputText, Modal, Select } from "@snu/ds/admin";
+import { Page, Header, Container, Button, Badge, Label, InputText, Modal, Select, ModalConfirmation } from "@snu/ds/admin";
 import { HiOutlinePencil } from "react-icons/hi";
 import { BsSend, BsTrash3 } from "react-icons/bs";
 import ClasseIcon from "@/components/drawer/icons/Classe";
@@ -16,13 +16,15 @@ import { appURL } from "@/config";
 import { copyToClipboard } from "@/utils";
 import { MdContentCopy } from "react-icons/md";
 import Loader from "@/components/Loader";
+import { IoWarningOutline } from "react-icons/io5";
+import { MdOutlineDangerous } from "react-icons/md";
 
 export default function view() {
   const [classe, setClasse] = useState({});
   const [url, setUrl] = useState("");
-  const [studentsWaiting, setStudentsWaiting] = useState([]);
-  const [studentsInProgress, setStudentsInProgress] = useState([]);
+  const [studentStatus, setStudentStatus] = useState([]);
   const [modalInvite, setModalInvite] = useState(false);
+  const [modalDelete, setModalDelete] = useState(false);
   const { id } = useParams();
   const [errors, setErrors] = useState({});
   const user = useSelector((state) => state.Auth.user);
@@ -63,13 +65,12 @@ export default function view() {
 
   const getStudents = async (id) => {
     try {
-      const { ok, code, data: response } = await api.get(`/cle/young/by-classe/${id}`);
+      const { ok, code, data: response } = await api.get(`/cle/young/by-classe-stats/${id}`);
 
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des élèves", translate(code));
       }
-      setStudentsWaiting(response.filter((young) => young.status === YOUNG_STATUS.WAITING_CORRECTION));
-      setStudentsInProgress(response.filter((young) => young.status === YOUNG_STATUS.IN_PROGRESS));
+      setStudentStatus(response);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des élèves");
@@ -144,7 +145,7 @@ export default function view() {
           <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
         </div>,
       ]
-    : user.role === ROLES.ADMINISTRATEUR_CLE || user.role === ROLES.REFERENT_CLASSE
+    : (user.role === ROLES.ADMINISTRATEUR_CLE || user.role === ROLES.REFERENT_CLASSE) && classe?.status !== STATUS_CLASSE.WITHDRAWN
     ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
     : null;
 
@@ -154,9 +155,13 @@ export default function view() {
     <Page>
       <Header
         title={classe.name || "Informations nécessaires"}
-        titleComponent={<Badge className="mx-4 mt-2" title={translate(classe?.status)} status={statusClassForBadge(classe?.status)} />}
+        titleComponent={<Badge className="mx-4 mt-2" title={translate(classe.status)} status={statusClassForBadge(classe.status)} />}
         breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
-        actions={classe?.status !== STATUS_CLASSE.DRAFT && [<Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />]}
+        actions={
+          classe.status !== STATUS_CLASSE.DRAFT && classe.status !== STATUS_CLASSE.WITHDRAWN && classe.status !== STATUS_CLASSE.VALIDATED
+            ? [<Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />]
+            : null
+        }
       />
       <Container title="Informations générales" actions={actionList}>
         <div className="flex items-stretch justify-stretch">
@@ -234,7 +239,7 @@ export default function view() {
             />
             {edit && user.role === ROLES.ADMINISTRATEUR_CLE ? (
               <div className="flex items-center justify-end mt-6">
-                <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={onDelete}>
+                <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={() => setModalDelete(true)}>
                   <BsTrash3 className="mr-2" />
                   Désister la classe
                 </button>
@@ -251,54 +256,94 @@ export default function view() {
               <Button type="tertiary" title="Voir les élèves" />
             </Link>,
           ]}>
-          <div className="flex items-stretch justify-between">
-            <table className="flex-1 shrink-0">
+          <div className="flex justify-between">
+            <table className="flex-1">
               <tbody>
-                <tr>
-                  <td className="font-bold pr-4">Objectif :</td>
-                  <td className="px-4 font-bold text-lg text-center">{classe?.totalSeats || 0}</td>
-                  <td className="text-gray-500 text-center">Élèves</td>
+                <tr className="border-b border-gray-200">
+                  <td className="font-bold pr-4 py-2">Objectif :</td>
+                  <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats || 0}</td>
+                  <td className="text-gray-500 text-center py-2">Élèves</td>
                 </tr>
-                <tr className="mt-8">
-                  <td className="font-bold pr-4">Total :</td>
-                  <td className="px-4 font-bold text-lg text-center">{classe?.seatsTaken || 0}</td>
-                  <td className="text-gray-500 text-center">({Math.round((classe?.seatsTaken * 100) / classe?.totalSeats || 0)}%)</td>
+                <tr className="border-b border-gray-200">
+                  <td className="font-bold pr-4 py-2">Total :</td>
+                  <td className="px-4 font-bold text-lg text-center py-2">{classe.seatsTaken || 0}</td>
+                  <td className="text-gray-500 text-center py-2">({Math.round((classe.seatsTaken * 100) / classe.totalSeats || 0)}%)</td>
+                </tr>
+                <tr>
+                  <td className="font-bold pr-4 py-2">Places libres</td>
+                  <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - classe.seatsTaken || 0}</td>
+                  <td className="text-gray-500 text-center py-2">({Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats || 0)}%)</td>
                 </tr>
               </tbody>
             </table>
-            <div className="mx-8 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
-            <table className="flex-1 shrink-0">
+            <div className="mx-8 w-[1px] bg-gray-200">&nbsp;</div>
+            <table className="flex-1">
               <tbody>
                 <tr>
-                  <td className="font-bold text-lg text-right">{classe?.seatsTaken || 0}</td>
-                  <td className="px-4 flex-1">Élèves inscrits</td>
-                  <td className="text-gray-500">({Math.round((classe?.seatsTaken * 100) / classe?.totalSeats || 0)}%)</td>
+                  <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.VALIDATED] || 0}</td>
+                  <td className="px-4 flex-1">Élèves validés</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.VALIDATED] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
                 <tr>
-                  <td className="font-bold text-lg text-right">{studentsWaiting?.length || 0}</td>
-                  <td className="px-4 flex-1">Élèves en attente de consentement </td>
-                  <td className="text-gray-500">({Math.round((studentsWaiting?.length * 100) / classe?.totalSeats || 0)}%)</td>
+                  <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.IN_PROGRESS] || 0}</td>
+                  <td className="px-4 flex-1">Élèves en cours d'inscription</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.IN_PROGRESS] * 100) / studentStatus.total || 0)}%)</td>
+                </tr>
+                <tr>
+                  <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.WAITING_VALIDATION] || 0}</td>
+                  <td className="px-4 flex-1">Élèves en attente de validation</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.WAITING_VALIDATION] * 100) / studentStatus.total || 0)}%)</td>
+                </tr>
+                <tr>
+                  <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.WAITING_CORRECTION] || 0}</td>
+                  <td className="px-4 flex-1">Élèves en attente de correction</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.WAITING_CORRECTION] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
               </tbody>
             </table>
-            <div className="mx-8 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
-            <table className="flex-1 shrink-0">
+            <div className="mx-8 w-[1px] bg-gray-200">&nbsp;</div>
+            <table className="flex-1">
               <tbody>
                 <tr>
-                  <td className="font-bold text-lg text-right">{studentsInProgress?.length || 0}</td>
-                  <td className="px-4 flex-1">Élèves en cours d’inscription</td>
-                  <td className="text-gray-500">({Math.round((studentsInProgress?.length * 100) / classe?.totalSeats || 0)}%)</td>
+                  <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.ABANDONED] || 0}</td>
+                  <td className="px-4 flex-1">Inscriptions abandonnées</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.ABANDONED] * 100) / studentStatus.total || 0)}%)</td>
+                </tr>
+                <tr className="">
+                  <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.NOT_AUTORISED] || 0}</td>
+                  <td className="px-4 flex-1">Élèves non autorisés</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.NOT_AUTORISED] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
                 <tr>
-                  <td className="font-bold text-lg text-right">{classe?.totalSeats - classe?.seatsTaken || 0}</td>
-                  <td className="px-4 flex-1">Places libres</td>
-                  <td className="text-gray-500">({Math.round(100 - (classe?.seatsTaken * 100) / classe?.totalSeats || 0)}%)</td>
+                  <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.WITHDRAWN] || 0}</td>
+                  <td className="px-4 flex-1">Élèves désistés</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.WITHDRAWN] * 100) / studentStatus.total || 0)}%)</td>
+                </tr>
+                <tr>
+                  <td className="font-bold text-lg text-right">{studentStatus[YOUNG_STATUS.REFUSED] || 0}</td>
+                  <td className="px-4 flex-1">Élèves refusés</td>
+                  <td className="text-gray-500">({Math.round((studentStatus[YOUNG_STATUS.REFUSED] * 100) / studentStatus.total || 0)}%)</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </Container>
       ) : null}
+
+      <ModalConfirmation
+        isOpen={modalDelete}
+        onClose={() => {
+          setModalDelete(false);
+        }}
+        className="md:max-w-[700px]"
+        icon={<IoWarningOutline className="text-red-500" size={40} />}
+        title="Attention, vous êtes sur le point de désister cette classe."
+        text="Cette action entraînera l'abandon de l'inscription de tous les élèves de cette classe."
+        actions={[
+          { title: "Annuler", isCancel: true },
+          { title: "Désister la classe", leftIcon: <MdOutlineDangerous size={20} />, onClick: onDelete, isDestructive: true },
+        ]}
+      />
 
       <Modal
         isOpen={modalInvite}
