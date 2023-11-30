@@ -13,7 +13,7 @@ import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import useAuth from "@/services/useAuth";
-import { STATUS_CLASSE } from "snu-lib";
+import { STATUS_CLASSE, CLE_COLORATION_LIST, translateColoration } from "snu-lib";
 
 const Title = () => (
   <div>
@@ -62,19 +62,18 @@ const OnBoarding = () => {
       if (isLoggedIn) await logout({ redirect: false });
       const { data, ok } = await fetchClasse(id);
       if (!ok) return toastr.error("Impossible de joindre le service.");
-      const { name, coloration, seatsTaken, totalSeats, referents, etablissement, status } = data;
-      const [referent] = referents;
+      const { name, status, coloration, isFull, referents, etablissement } = data;
+      const [{ fullName: referent }] = referents;
       //Checking if there is remaining seats in the class
-      const isFull = parseInt(totalSeats) - parseInt(seatsTaken) <= 0;
       // Checking if the onboarding page shouldbe active.
       const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
       setClasse({
         name,
-        coloration,
+        coloration: translateColoration(CLE_COLORATION_LIST[coloration]),
         status,
         isFull,
         isInscriptionOpen,
-        referent: `${referent.firstName} ${referent.lastName}`,
+        referent,
         etablissement: etablissement.name,
         dateStart: "À venir",
       });
