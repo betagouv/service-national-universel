@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Input({ value, placeholder = null, onChange, disabled = false, type = "text", name = null }) {
+export default function Input({ value, placeholder = null, onChange, disabled = false, type = "text", name = null, autocomplete = "off" }) {
   return (
     <input
       disabled={disabled}
@@ -10,6 +10,8 @@ export default function Input({ value, placeholder = null, onChange, disabled = 
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       name={name}
+      id={name}
+      autoComplete={autocomplete}
     />
   );
 }

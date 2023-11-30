@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
@@ -19,7 +19,7 @@ export default function ContactForm({ category, question }) {
   const { files, addFiles, deleteFile, error } = useFileUpload();
 
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState("");
   const [message, setMessage] = useState("");
 
   const disabled = () => {
@@ -68,7 +68,7 @@ export default function ContactForm({ category, question }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Select label="Je suis" options={roleOptions} value={role} onChange={setRole} />
+      <Select label="Je suis" name="Role" options={roleOptions} value={role} onChange={setRole} />
       <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
       <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       <ErrorMessage error={error} />
