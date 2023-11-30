@@ -5,6 +5,8 @@ import Pencil from "../../assets/icons/Pencil";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
+import { MdInfoOutline } from "react-icons/md";
+import ReactTooltip from "react-tooltip";
 import Field from "./components/Field";
 import dayjs from "@/utils/dayjs.utils";
 import {
@@ -700,6 +702,11 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
     });
   };
 
+  const nationalityOptions = [
+    { value: "true", label: translate("true") },
+    { value: "false", label: translate("false") },
+  ];
+
   return (
     <SectionContext.Provider value={{ errors }}>
       <Section
@@ -826,6 +833,25 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
               options={countryOptions}
               filterOnType
               onChange={(value) => onLocalChange("birthCountry", value)}
+              young={young}
+            />
+          </div>
+          <div className="mt-[32px]">
+            <MiniTitle>Nationalité Française</MiniTitle>
+            <Field
+              name="frenchNationality"
+              label="Nationalité Française"
+              value={data.frenchNationality}
+              mode={sectionMode}
+              className="mb-[16px]"
+              onStartRequest={onStartRequest}
+              currentRequest={currentRequest}
+              correctionRequest={getCorrectionRequest(requests, "frenchNationality")}
+              onCorrectionRequestChange={onCorrectionRequestChange}
+              type="select"
+              options={nationalityOptions}
+              transformer={translate}
+              onChange={(value) => onLocalChange("frenchNationality", value)}
               young={young}
             />
           </div>
@@ -1308,6 +1334,14 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
     return result;
   }
 
+  const [isChecked, setIsChecked] = useState(young.sameSchool === "true");
+
+  const handleCheckboxChange = () => {
+    const newValue = !isChecked;
+    setIsChecked(newValue);
+    setData({ ...data, sameSchool: newValue ? "true" : "false" });
+  };
+
   function parentHasRequest(parentId) {
     return (
       requests &&
@@ -1442,6 +1476,17 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                   />
                   <Field name="etablissementCity" label="Ville de l'établissement" value={data?.etablissement?.city} mode="readonly" className="mb-[16px]" young={young} />
                   <Field name="classeGrade" label="Classe" value={data?.classe?.grade} mode="readonly" className="mb-[16px]" young={young} transformer={translateGrade} />
+                  <div className="flex items-center">
+                    <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} className="mr-2" />
+                    <p className="text-xs font-base text-gray-900 mr-1">Situation de l’élève différente de celle de la Classe engagée</p>
+                    <MdInfoOutline data-tip data-for="info_sameSchool" className="h-5 w-5 cursor-pointer text-gray-400" />
+                    <ReactTooltip id="info_sameSchool" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                      <ul className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                        <li>à remplir</li>
+                        <li>blabla</li>
+                      </ul>
+                    </ReactTooltip>
+                  </div>
                 </>
               )}
             </div>
