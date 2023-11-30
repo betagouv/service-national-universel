@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { setYoung } from "./redux/auth/actions";
 import { toastr } from "react-redux-toastr";
@@ -68,34 +69,38 @@ function FallbackComponent() {
 
 const myFallback = <FallbackComponent />;
 
+const queryClient = new QueryClient();
+
 export default function App() {
   return (
-    <Sentry.ErrorBoundary fallback={myFallback}>
-      <Router history={history}>
-        <ScrollToTop />
-        <div className="flex h-screen flex-col justify-between">
-          {maintenance ? (
-            <Switch>
-              <SentryRoute path="/" component={Maintenance} />
-            </Switch>
-          ) : (
-            <Switch>
-              {/* Aucune authentification nécessaire */}
-              <SentryRoute path="/noneligible" component={NonEligible} />
-              <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-              <SentryRoute path="/validate-contract/done" component={ContractDone} />
-              <SentryRoute path="/validate-contract" component={Contract} />
-              <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-              <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
-              {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci", "/preinscription"]} component={() => <OptionalLogIn />} />
-              {/* Authentification nécessaire */}
-              <SentryRoute path="/" component={() => <MandatoryLogIn />} />
-            </Switch>
-          )}
-        </div>
-      </Router>
-    </Sentry.ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <Sentry.ErrorBoundary fallback={myFallback}>
+        <Router history={history}>
+          <ScrollToTop />
+          <div className="flex h-screen flex-col justify-between">
+            {maintenance ? (
+              <Switch>
+                <SentryRoute path="/" component={Maintenance} />
+              </Switch>
+            ) : (
+              <Switch>
+                {/* Aucune authentification nécessaire */}
+                <SentryRoute path="/noneligible" component={NonEligible} />
+                <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+                <SentryRoute path="/validate-contract/done" component={ContractDone} />
+                <SentryRoute path="/validate-contract" component={Contract} />
+                <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
+                <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+                {/* Authentification accessoire */}
+                <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci", "/preinscription"]} component={() => <OptionalLogIn />} />
+                {/* Authentification nécessaire */}
+                <SentryRoute path="/" component={() => <MandatoryLogIn />} />
+              </Switch>
+            )}
+          </div>
+        </Router>
+      </Sentry.ErrorBoundary>
+    </QueryClientProvider>
   );
 }
 
