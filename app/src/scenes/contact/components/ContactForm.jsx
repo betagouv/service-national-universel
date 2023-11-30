@@ -13,7 +13,7 @@ import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
-export default function ContactForm({ category, question }) {
+export default function ContactForm({ category, question, parcours }) {
   const { young } = useAuth();
   const history = useHistory();
   const { files, addFiles, deleteFile, error } = useFileUpload();
@@ -49,6 +49,7 @@ export default function ContactForm({ category, question }) {
         message,
         subject: `${categories.find((e) => e.value === category)?.label} - ${questionOptions.find((e) => e.value === question)?.label}`,
         fromPage: new URLSearchParams(window.location.search).get("from "),
+        parcours,
         subjectStep0: role,
         subjectStep1: category,
         subjectStep2: question,
