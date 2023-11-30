@@ -101,7 +101,11 @@ export default function Contact() {
         {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
         {question &&
           (articles.length === 0 || showForm) &&
-          (isLoggedIn ? <ContactForm category={category} question={question} /> : <PublicContactForm category={category} question={question} parcours={parcours} />)}
+          (isLoggedIn ? (
+            <ContactForm category={category} question={question} parcours={parcours} />
+          ) : (
+            <PublicContactForm category={category} question={question} parcours={parcours} />
+          ))}
       </DSFRContainer>
     </DSFRLayout>
   );
