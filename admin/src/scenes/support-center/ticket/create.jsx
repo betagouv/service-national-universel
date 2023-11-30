@@ -83,7 +83,7 @@ export default function Create(props) {
               }
               const { subject, type, message, messageSubject } = values;
               let title = type?.label;
-              if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) title = messageSubject;
+              if ([ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) title = messageSubject;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
               const response = await api.post("/zammood/ticket", {
                 message,

@@ -38,7 +38,7 @@ const Dashboard = (props) => {
       setKbRole("visitor");
     } else if (user.role === ROLES.ADMINISTRATEUR_CLE) {
       setArticles(administrator_CLEArticles);
-      setKbRole("administrator_CLE");
+      setKbRole(`${user.role}_${user.subRole}`);
     } else if (user.role === ROLES.REFERENT_CLASSE) {
       setArticles(referent_classeArticles);
       setKbRole("referent_classe");

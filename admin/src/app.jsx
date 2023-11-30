@@ -289,7 +289,6 @@ const limitedAccess = {
     default: "/mon-etablissement",
   },
 };
-/* test; */
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
   const { pathname } = useLocation();

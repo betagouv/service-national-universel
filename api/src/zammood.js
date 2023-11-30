@@ -9,10 +9,6 @@ const getCustomerIdByEmail = async (email) => {
 
 const api = async (path, options = {}) => {
   if (!SUPPORT_URL) return { ok: true, code: "ignore zammood, no support url" };
-  console.log(`${SUPPORT_URL}${path}`, {
-    ...options,
-    headers: { "Content-Type": "application/json", apikey: process.env.SUPPORT_APIKEY, ...(options.headers || {}) },
-  });
   const res = await fetch(`${SUPPORT_URL}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", apikey: process.env.SUPPORT_APIKEY, ...(options.headers || {}) },
