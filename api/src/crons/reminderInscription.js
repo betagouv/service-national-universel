@@ -38,8 +38,6 @@ exports.handler = async () => {
           },
         ],
       }).cursor();
-      console.log(threeDaysBefore.begin);
-      console.log(threeDaysBefore.end);
 
       if (!cursor) return;
 
