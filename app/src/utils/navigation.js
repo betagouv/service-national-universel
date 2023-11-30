@@ -1,3 +1,5 @@
+import { YOUNG_SOURCE } from "snu-lib";
+
 export const INSCRIPTION_STEPS = {
   COORDONNEES: "COORDONNEES",
   CONSENTEMENTS: "CONSENTEMENTS",
@@ -163,8 +165,75 @@ const WAITING_CORRECTION_LINK = [
   },
 ];
 
+const WAITING_CORRECTION_LINK_CLE = [
+  {
+    field: ["firstName", "lastName", "frenchNationality", "phone", "email", "birthdateAt", "grade"],
+    redirect: "/inscription2023/correction/profil",
+    step: "profil",
+  },
+  {
+    field: [
+      "parent1Status",
+      "parent1FirstName",
+      "parent1LastName",
+      "parent1Email",
+      "parent1Phone",
+      "parent2",
+      "parent2Status",
+      "parent2FirstName",
+      "parent2LastName",
+      "parent2Email",
+      "parent2Phone",
+    ],
+    redirect: "/inscription2023/correction/representants",
+    step: "representants",
+  },
+  {
+    field: [
+      "gender",
+      "birthCountry",
+      "birthCity",
+      "birthCityZip",
+      "situation",
+      "livesInFrance",
+      "addressVerified",
+      "country",
+      "city",
+      "zip",
+      "address",
+      "location",
+      "department",
+      "region",
+      "cityCode",
+      "foreignCountry",
+      "foreignCity",
+      "foreignZip",
+      "foreignAddress",
+      "hostLastName",
+      "hostFirstName",
+      "hostRelationship",
+      "handicap",
+      "ppsBeneficiary",
+      "paiBeneficiary",
+      "allergies",
+      "moreInformation",
+      "specificAmenagment",
+      "specificAmenagmentType",
+      "reducedMobilityAccess",
+      "handicapInSameDepartment",
+    ],
+    redirect: "/inscription2023/correction/coordonnee",
+    step: "coordonnee",
+  },
+];
+
+const getCorrectionLink = (young) => {
+  return young.source === YOUNG_SOURCE.CLE ? WAITING_CORRECTION_LINK_CLE : WAITING_CORRECTION_LINK;
+};
+
 export const getCorrectionByStep = (young, step) => {
-  const keyList = WAITING_CORRECTION_LINK.find((link) => link.step === step);
+  const correctionLink = getCorrectionLink(young);
+  const keyList = correctionLink.find((link) => link.step === step);
   const corrections = young?.correctionRequests.reduce((acc, curr) => {
     if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field) && curr.cohort === young.cohort) {
       acc[curr.field] = curr.message;
@@ -180,7 +249,8 @@ export const getCorrectionsForStepUpload = (young) => {
     ?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field));
 };
 
-export const redirectToCorrection = (field) => {
-  const correction = WAITING_CORRECTION_LINK.find((correction) => correction.field.includes(field));
+export const redirectToCorrection = (young, field) => {
+  const correctionLink = getCorrectionLink(young);
+  const correction = correctionLink.find((correction) => correction.field.includes(field));
   return correction ? correction.redirect : "/";
 };
