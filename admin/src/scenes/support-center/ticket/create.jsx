@@ -35,13 +35,13 @@ export default function Create(props) {
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
       setTypeList(typesReferent);
       setSubjectsList(subjectsReferent);
-    } else if ([ROLES.ADMIN].includes(user.role)) {
+    } else if ([ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) {
       setTypeList(typesAdmin);
       setSubjectsList(subjectsAdmin);
     } else if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
       setTypeList(typesStructure);
       setSubjectsList(subjectsStructure);
-    } else if ([ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) {
+    } else if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) {
       setTypeList(step1Public);
     }
   }, [user]);
@@ -83,7 +83,7 @@ export default function Create(props) {
               }
               const { subject, type, message, messageSubject } = values;
               let title = type?.label;
-              if ([ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) title = messageSubject;
+              if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) title = messageSubject;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
               const response = await api.post("/zammood/ticket", {
                 message,
