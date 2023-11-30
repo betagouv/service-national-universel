@@ -20,7 +20,7 @@ export default function PublicContactForm({ category, question, parcours }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [department, setDepartment] = useState("");
@@ -78,17 +78,23 @@ export default function PublicContactForm({ category, question, parcours }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} disabled={disabled}>
-      <Select label="Je suis" options={roleOptions} value={role} onChange={setRole} />
+    <form onSubmit={handleSubmit} disabled={disabled()} autoComplete="on">
+      <Select label="Je suis" name="Role" options={roleOptions} value={role} onChange={setRole} />
 
-      <label>Nom du volontaire</label>
-      <Input value={firstName} onChange={setFirstName} required />
+      <label className="w-full">
+        Nom du volontaire
+        <Input value={firstName} onChange={setFirstName} name="lastname" required />
+      </label>
 
-      <label className="mt-8">Prénom du volontaire</label>
-      <Input value={lastName} onChange={setLastName} required />
+      <label className="w-full mt-8">
+        Prénom du volontaire
+        <Input value={lastName} onChange={setLastName} name="firstname" required />
+      </label>
 
-      <label className="mt-8">E-mail du volontaire</label>
-      <Input label="Votre email" type="email" value={email} onChange={setEmail} required />
+      <label className="w-full my-8">
+        E-mail du volontaire
+        <Input label="Votre email" type="email" value={email} onChange={setEmail} name="email" autocomplete="on" required />
+      </label>
 
       <br />
       <SearchableSelect label="Département" options={departmentOptions} value={department} onChange={setDepartment} required />

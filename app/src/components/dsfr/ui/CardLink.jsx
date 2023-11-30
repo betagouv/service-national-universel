@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function CardLink({ label, picto, url }) {
   return (
-    <div className="my-8 flex gap-4 p-2 items-center w-full border-[1px] text-sm">
+    <div className="flex gap-4 p-2 items-center w-full border-[1px] text-sm">
       <div className="flex-none flex items-center justify-center w-12 md:w-24 h-24">{picto}</div>
       <div>
         <p className="leading-relaxed">{label}</p>
