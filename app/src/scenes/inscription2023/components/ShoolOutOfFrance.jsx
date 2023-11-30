@@ -48,6 +48,12 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
     getSchools();
   }, [country]);
 
+  function formatSchoolName(school) {
+    if (!school?.fullName) return "";
+    if (!school?.city) return school.fullName;
+    return school.fullName + " - " + school.city;
+  }
+
   return (
     <>
       <CreatableSelect
@@ -63,7 +69,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
       />
       <CreatableSelect
         label="Nom de l'établissement"
-        value={school.fullName ? `${school.fullName}${school.city ? ` - ${school.city}` : ""}` : ""}
+        value={formatSchoolName(school)}
         options={schools
           .map((e) => `${e.fullName} - ${e.city}`)
           .sort()
@@ -71,6 +77,9 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
         onChange={(value) => {
           const selectedSchool = schools.find((e) => `${e.fullName} - ${e.city}` === value);
           onSelectSchool(selectedSchool ?? { fullName: value, country });
+        }}
+        onCreateOption={(value) => {
+          onSelectSchool({ fullName: value, country });
         }}
         placeholder="Sélectionnez un établissement"
         error={errors.fullName}
