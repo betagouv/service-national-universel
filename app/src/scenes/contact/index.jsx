@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import useAuth from "@/services/useAuth";
+import useClass from "@/services/useClass";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
 
 import ContactForm from "./components/ContactForm";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import PublicContactForm from "./components/PublicContactForm";
 import { alertMessage, categories, getArticles, getCategoryFromQuestion, getQuestionOptions } from "./contact.service";
-import { YOUNG_SOURCE, translateColoration } from "snu-lib";
+import { YOUNG_SOURCE } from "snu-lib";
 import Unlock from "@/assets/icons/Unlock";
 import QuestionBubbleV2 from "@/assets/icons/QuestionBubbleReimport";
 import EnhancedRadioButton from "@/components/dsfr/forms/EnhancedRadioButton";
@@ -18,8 +18,7 @@ import Select from "@/components/dsfr/forms/Select";
 import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
-import { List } from "@snu/ds/dsfr";
-import { apiURL } from "@/config";
+import MyClass from "../cle/MyClass";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
@@ -28,9 +27,9 @@ export default function Contact() {
   const parcoursFromURl = new URLSearchParams(window.location.search).get("parcours");
   const showFormFromURl = new URLSearchParams(window.location.search).get("showForm");
   const questionFromURl = new URLSearchParams(window.location.search).get("q");
-  console.log("🚀 ~ file: index.jsx:31 ~ Contact ~ questionFromURl:", questionFromURl);
   const categoryFromURl = getCategoryFromQuestion(questionFromURl);
   const classeId = new URLSearchParams(window.location.search).get("classeId");
+  const { isPending, isError, classe, error } = useClass(classeId);
 
   const [parcours, setParcours] = useState(isLoggedIn ? young.source : parcoursFromURl || undefined);
   const [showForm, setShowForm] = useState(showFormFromURl === "true");
@@ -107,56 +106,27 @@ export default function Contact() {
               </Alert>
             )}
 
-            {question === "HTS_TO_CLE" && classeId && <MyClass classeId={classeId} />}
+            {question === "HTS_TO_CLE" && classeId && (
+              <div className="flex items-center border my-12">
+                <div className="hidden flex-none w-48 h-48 border-r-[1px] md:flex items-center justify-center">
+                  <SchoolPictogram className="w-36 h-36" />
+                </div>
+                {isPending ? <p className="animate-pulse">Chargement de la classe...</p> : isError ? <p>Erreur: {error.message}</p> : <MyClass classe={classe} />}
+              </div>
+            )}
 
             {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
             {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
             {question &&
               (articles.length === 0 || showForm) &&
               (isLoggedIn ? (
-                <ContactForm category={category} question={question} parcours={parcours} />
+                <ContactForm category={category} question={question} parcours={parcours} classe={classe} />
               ) : (
-                <PublicContactForm category={category} question={question} parcours={parcours} />
+                <PublicContactForm category={category} question={question} parcours={parcours} classe={classe} />
               ))}
           </>
         )}
       </DSFRContainer>
     </DSFRLayout>
-  );
-}
-
-function MyClass({ classeId }) {
-  const { isPending, isError, data, error } = useQuery({ queryKey: ["class"], queryFn: getClass });
-  function getClass() {
-    return fetch(`${apiURL}/cle/classe/${classeId}`).then((res) => res.json());
-  }
-
-  const fields = [
-    {
-      label: "Nom",
-      value: data?.data.name,
-    },
-    {
-      label: "Coloration",
-      value: translateColoration(data?.data.coloration),
-    },
-    {
-      label: "Établissement scolaire",
-      value: data?.data.etablissement.name,
-    },
-    {
-      label: "Date de séjour",
-      value: data?.data?.dateStart || "À venir",
-    },
-  ];
-
-  if (isPending) return <p className="animate-pulse">Chargement de la classe...</p>;
-  if (isError) return <p>Erreur: {error.message}</p>;
-  if (!data) return null;
-  return (
-    <div className="w-fit flex border p-4 gap-4">
-      <SchoolPictogram className="text-5xl flex-none" />
-      <List title={"Ma classe engagée"} fields={fields} />
-    </div>
   );
 }

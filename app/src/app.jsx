@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
 
 import { setYoung } from "./redux/auth/actions";
 import { toastr } from "react-redux-toastr";
@@ -56,7 +56,7 @@ import {
   isFeatureEnabled,
   FEATURES_NAME,
 } from "snu-lib";
-import { history, initSentry, SentryRoute } from "./sentry";
+import { capture, history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
 
@@ -69,12 +69,14 @@ function FallbackComponent() {
 
 const myFallback = <FallbackComponent />;
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: (error) => capture(error) }),
+});
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Sentry.ErrorBoundary fallback={myFallback}>
+    <Sentry.ErrorBoundary fallback={myFallback}>
+      <QueryClientProvider client={queryClient}>
         <Router history={history}>
           <ScrollToTop />
           <div className="flex h-screen flex-col justify-between">
@@ -99,8 +101,8 @@ export default function App() {
             )}
           </div>
         </Router>
-      </Sentry.ErrorBoundary>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </Sentry.ErrorBoundary>
   );
 }
 

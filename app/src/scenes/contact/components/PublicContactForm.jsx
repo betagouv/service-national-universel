@@ -14,7 +14,7 @@ import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
-export default function PublicContactForm({ category, question, parcours }) {
+export default function PublicContactForm({ category, question, parcours, classe }) {
   const history = useHistory();
   const { files, addFiles, deleteFile, error } = useFileUpload();
   const [loading, setLoading] = useState(false);
@@ -49,7 +49,7 @@ export default function PublicContactForm({ category, question, parcours }) {
         uploadedFiles = filesResponse.data;
       }
 
-      const response = await API.post("/zammood/ticket/form", {
+      let body = {
         message,
         subject: `${categories.find((e) => e.value === category)?.label} - ${questionOptions.find((e) => e.value === question)?.label}`,
         firstName,
@@ -63,7 +63,20 @@ export default function PublicContactForm({ category, question, parcours }) {
         region: department2region[department],
         fromPage: new URLSearchParams(window.location.search).get("from "),
         files: uploadedFiles,
-      });
+      };
+
+      if (classe) {
+        body = {
+          ...body,
+          classeId: classe._id,
+          classeName: classe.name,
+          etablissement: classe.etablissement,
+          dateStart: classe.dateStart,
+          cohort: classe.cohort,
+        };
+      }
+
+      const response = await API.post("/zammood/ticket/form", body);
 
       if (!response.ok) {
         setLoading(false);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { toastr } from "react-redux-toastr";
@@ -6,15 +6,14 @@ import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
-import api from "@/services/api";
-import { List } from "@snu/ds/dsfr";
+import MyClass from "./MyClass";
 import PrimaryButton from "@/components/dsfr/ui/buttons/PrimaryButton";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
-import { STATUS_CLASSE, CLE_COLORATION_LIST, translateColoration } from "snu-lib";
+import { useClass } from "@/services/useClass";
 
 const Title = () => (
   <div>
@@ -56,63 +55,21 @@ const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
   );
 };
 
-const fetchClasse = async (id) => api.get(`/cle/classe/${id}`);
-
 const OnBoarding = () => {
   const { isLoggedIn, logout } = useAuth();
-  const [classe, setClasse] = useState(null);
   const history = useHistory();
   const [showContactSupport, setShowContactSupport] = useState(false);
   const { id } = queryString.parse(location.search);
 
-  useEffect(() => {
-    (async () => {
-      if (classe) return;
-      // Preventive logout in case user is already logged on an HTS account.
-      if (isLoggedIn) await logout({ redirect: false });
-      const { data, ok } = await fetchClasse(id);
-      if (!ok) return toastr.error("Impossible de joindre le service.");
-      const { name, status, coloration, isFull, referents, etablissement } = data;
-      const [{ fullName: referent }] = referents;
-      //Checking if there is remaining seats in the class
-      // Checking if the onboarding page shouldbe active.
-      const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
-      setClasse({
-        name,
-        coloration: translateColoration(CLE_COLORATION_LIST[coloration]),
-        status,
-        isFull,
-        isInscriptionOpen,
-        referent,
-        etablissement: etablissement.name,
-        dateStart: "À venir",
-      });
-    })();
-  });
+  if (isLoggedIn) logout({ redirect: false });
+  const { classe, isError } = useClass(id);
+  if (isError) toastr.error("Impossible de joindre le service.");
 
-  const fields = [
-    {
-      label: "Nom",
-      value: classe?.name,
-    },
-    {
-      label: "Coloration",
-      value: classe?.coloration,
-    },
-    {
-      label: "Établissement scolaire",
-      value: classe?.etablissement,
-    },
-    {
-      label: "Date de séjour",
-      value: classe?.dateStart,
-    },
-  ];
   return (
     <DSFRLayout title="Inscription de l'élève">
       {classe && (
         <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
-          <List title={"Ma classe engagée"} fields={fields}></List>
+          <MyClass classe={classe} />
           <hr className="my-4 h-px border-0 bg-gray-200" />
           {classe.isInscriptionOpen && (
             <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
