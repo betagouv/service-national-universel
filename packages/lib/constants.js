@@ -852,7 +852,6 @@ const STATUS_CLASSE = {
   VALIDATED: "VALIDATED",
 };
 
-//TODO to update with ARBITRAGE
 const STATUS_PHASE1_CLASSE = {
   WAITING_AFFECTATION: "WAITING_AFFECTATION",
   AFFECTED: "AFFECTED",
@@ -860,7 +859,6 @@ const STATUS_PHASE1_CLASSE = {
   DONE: "DONE",
 };
 
-//TODO to update with ARBITRAGE
 const CLE_TYPE = {
   GENERAL_HIGHSCHOOL: "Lycée Général",
   GENERAL_AND_TECHNOLOGICAL_HIGHSCHOOL: "Lycée Général et Technologique",
@@ -868,15 +866,14 @@ const CLE_TYPE = {
   POLYVALENT_HIGHSCHOOL: "Lycée Polyvalent",
   AGRICULTURAL_HIGHSCHOOL: "Lycée Agricole (EPLEFPA)",
   MILITARY_HIGHSCHOOL: "Lycée Militaire",
+  OTHER: "Autre",
 };
 
-//TODO to update with ARBITRAGE
 const CLE_SECTOR = {
   PUBLIC: "Statut public",
   PRIVATE: " Statut privé",
 };
 
-//TODO to update with ARBITRAGE
 const CLE_COLORATION = {
   SPORT: "SPORT",
   ENVIRONMENT: "ENVIRONMENT",
@@ -884,7 +881,6 @@ const CLE_COLORATION = {
   RESILIENCE: "RESILIENCE",
 };
 
-//TODO to update with ARBITRAGE
 const CLE_GRADE = {
   "4eme": "4eme",
   "3eme": "3eme",
