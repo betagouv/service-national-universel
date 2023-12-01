@@ -3,6 +3,8 @@ const config = require("../config");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
 const { getToken } = require("../passport");
+const { checkJwtSigninVersion } = require("../jwt-options");
+const Joi = require("joi");
 
 const optionalAuth = async (req, _, next) => {
   try {
@@ -15,12 +17,16 @@ const optionalAuth = async (req, _, next) => {
           resolve(decoded);
         });
       });
-      if (!jwtPayload._id) {
-        return;
-      }
-      user = await ReferentObject.findOne(jwtPayload);
+      const { error, value } = Joi.object({ __v: Joi.string().required(), _id: Joi.string().required(), passwordChangedAt: Joi.string(), lastLogoutAt: Joi.date() }).validate({
+        ...jwtPayload,
+      });
+      if (error) return;
+      if (!checkJwtSigninVersion(value)) return;
+      delete value.__v;
+
+      user = await ReferentObject.findOne(value);
       if (!user) {
-        user = await YoungObject.findOne(jwtPayload);
+        user = await YoungObject.findOne(value);
       }
       if (user) {
         req.user = user;

@@ -12,10 +12,11 @@ const YoungModel = require("../models/young");
 const ContractModel = require("../models/contract");
 const config = require("../config");
 const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib");
-const { JWT_SIGNIN_MAX_AGE } = require("../jwt-options");
+const { JWT_SIGNIN_MAX_AGE, checkJwtSigninVersion, JWT_SIGNIN_VERSION } = require("../jwt-options");
 const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../cookie-options");
 const { ERRORS, checkStatusContract } = require("../utils");
 
+// ! Appelé par le front de JVA
 router.get("/signin", async (req, res) => {
   try {
     const { error, value } = Joi.object({ token_jva: Joi.string().required() }).validate(req.query);
@@ -26,13 +27,27 @@ router.get("/signin", async (req, res) => {
 
     const { token_jva } = value;
 
-    const { _id } = jwt.verify(token_jva, config.secret);
-    if (!_id) return res.status(401).send({ ok: false, code: ERRORS.TOKEN_INVALID });
+    const jwtPayload = await new Promise((resolve, reject) => {
+      jwt.verify(token_jva, config.secret, function (err, decoded) {
+        if (err) reject(err);
+        resolve(decoded);
+      });
+    });
+    if (!jwtPayload) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    const { error_token, value_token } = Joi.object({
+      __v: Joi.string().required(),
+      _id: Joi.string().required(),
+      passwordChangedAt: Joi.string(),
+      lastLogoutAt: Joi.date(),
+    }).validate({
+      ...jwtPayload,
+    });
+    if (error_token) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    if (!checkJwtSigninVersion(value_token)) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    delete value.__v;
 
-    const user = await ReferentModel.findById(_id);
-
-    // si l'utilisateur n'existe pas, on bloque
-    if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    const user = await ReferentModel.find(value_token);
+    if (!user) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
 
     const structure = await StructureModel.findById(user.structureId);
 
@@ -44,7 +59,9 @@ router.get("/signin", async (req, res) => {
       user.set({ lastLoginAt: Date.now() });
       await user.save();
 
-      const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE });
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+        expiresIn: JWT_SIGNIN_MAX_AGE,
+      });
       res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
 
       return res.redirect(config.ADMIN_URL);
@@ -55,6 +72,7 @@ router.get("/signin", async (req, res) => {
   }
 });
 
+// ! Appelé par le back de JVA
 router.get("/getToken", async (req, res) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), api_key: Joi.string().required() }).validate(req.query);
@@ -74,7 +92,9 @@ router.get("/getToken", async (req, res) => {
     // si l'utilisateur n'existe pas, on bloque
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
 
-    const token_jva = jwt.sign({ _id: user._id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE });
+    const token_jva = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user._id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+      expiresIn: JWT_SIGNIN_MAX_AGE,
+    });
 
     return res.status(200).send({ ok: true, data: { token_jva } });
   } catch (error) {
