@@ -615,26 +615,28 @@ router.put("/goToInscriptionAgain", passport.authenticate("young", { session: fa
 
 router.put("/profil", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const isCle = young.source === YOUNG_SOURCE.CLE;
     const profilSchema = {
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       email: Joi.string().lowercase().trim().email().required(),
-      birthdateAt: Joi.string().trim(),
-      // frenchNationality: Joi.string().trim().required(),
       phone: Joi.string().trim().required(),
       phoneZone: Joi.string()
         .trim()
         .valid(...PHONE_ZONES_NAMES_ARR)
         .required(),
+      birthdateAt: isCle ? Joi.string().trim().required() : Joi.string().trim(),
+      frenchNationality: isCle ? Joi.string().trim().required() : Joi.string().trim(),
     };
+
     const { error, value } = Joi.object(profilSchema).validate(req.body, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
-    const young = await YoungObject.findById(req.user._id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const keyList = Object.keys(profilSchema);
     let data = { ...value, ...validateCorrectionRequest(young, keyList) };
