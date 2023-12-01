@@ -329,7 +329,6 @@ export default function view() {
           </div>
         </Container>
       ) : null}
-
       <ModalConfirmation
         isOpen={modalDelete}
         onClose={() => {
@@ -344,7 +343,6 @@ export default function view() {
           { title: "Désister la classe", leftIcon: <MdOutlineDangerous size={20} />, onClick: onDelete, isDestructive: true },
         ]}
       />
-
       <Modal
         isOpen={modalInvite}
         className="w-[700px]"
