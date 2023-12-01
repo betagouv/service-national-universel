@@ -1339,7 +1339,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   const handleCheckboxChange = () => {
     const newValue = !isChecked;
     setIsChecked(newValue);
-    setData({ ...data, sameSchoolCLE: newValue ? "true" : "false" });
+    setData({ ...data, sameSchoolCLE: newValue ? "false" : "true" });
   };
 
   function parentHasRequest(parentId) {
