@@ -118,20 +118,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
-    const getStatus = async (classe) => {
-      const students = await YoungModel.find({ classeId: classe._id })?.lean();
-      const studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION);
-      const studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION);
-      const studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
-
-      let status = STATUS_CLASSE.INSCRIPTION_IN_PROGRESS;
-      if (studentInProgress.length === 0 && studentWaiting.length > 0) status = STATUS_CLASSE.INSCRIPTION_TO_CHECK;
-      if (studentValidated.length === classe.totalSeats) status = STATUS_CLASSE.VALIDATED;
-      return status;
-    };
-
-    const status = classe.seatsTaken === 0 ? STATUS_CLASSE.CREATED : await getStatus(classe);
-    // TODO : A modifier avec une fonction qui retourne le status en fonction du statut des jeunes
+    const status = classe.seatsTaken === 0 ? STATUS_CLASSE.CREATED : classe.status;
 
     classe.set({
       ...value,
@@ -224,11 +211,15 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const updateStatusStudent = async (youngId, user) => {
       const young = await YoungModel.findById(youngId);
       if (!young) return;
-      young.set({ status: YOUNG_STATUS.ABANDONED });
+      young.set({
+        status: YOUNG_STATUS.ABANDONED,
+        lastStatusAt: Date.now(),
+        withdrawnMessage: "classe désistée",
+        withdrawnReason: "other",
+      }); // we keep the classeId to keep the history
       await young.save({ fromUser: user });
     };
     await Promise.all(students.map((student) => updateStatusStudent(student._id, req.user)));
-    //TODO : A modifier ? (voir avec la fonction getStatus)
 
     res.status(200).send({ ok: true });
   } catch (error) {
