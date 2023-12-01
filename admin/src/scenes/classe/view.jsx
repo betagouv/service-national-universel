@@ -163,7 +163,6 @@ export default function view() {
             : null
         }
       />
-      test
       <Container title="Informations générales" actions={actionList}>
         <div className="flex items-stretch justify-stretch">
           <div className="flex-1">
