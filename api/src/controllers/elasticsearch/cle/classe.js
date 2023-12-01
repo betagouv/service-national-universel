@@ -27,7 +27,7 @@ async function buildClasseContext(user) {
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
   }
   if (user.role === ROLES.REFERENT_REGION) {
-    const etablissements = await EtablissementModel.find({ department: user.region });
+    const etablissements = await EtablissementModel.find({ region: user.region });
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
   }
 
