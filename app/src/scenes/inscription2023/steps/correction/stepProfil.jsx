@@ -148,7 +148,7 @@ export default function StepProfil() {
           )}
           <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} label="Prénom" error={error.firstName} correction={corrections.firstName} />
           <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} label="Nom" error={error.lastName} correction={corrections.lastName} />
-          {isCLE ?? (
+          {isCLE && (
             <label className="w-full">
               Date de naissance
               <DatePicker value={new Date(data.birthdateAt)} onChange={(date) => setData({ ...data, birthdateAt: date })} />
