@@ -11,16 +11,6 @@ export const useAuth = () => {
   const young = useSelector((state) => state.Auth.young);
   const { pathname } = useLocation();
 
-  // const logout = async () => {
-  //   const isLogout = await logoutYoung();
-  //   if (isLogout) {
-  //     dispatch(setYoung(null));
-  //     toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
-  //     return history.push("/auth");
-  //   }
-  //   return true;
-  // };
-
   const logout = async ({ redirect = true }) => {
     await logoutYoung();
     dispatch(setYoung(null));

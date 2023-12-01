@@ -615,38 +615,6 @@ router.put("/goToInscriptionAgain", passport.authenticate("young", { session: fa
 
 router.put("/profil", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    // try {
-    //   const young = await YoungObject.findById(req.user._id);
-    //   if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    //   const dataToValidate = {
-    //     ...req.body,
-    //     source: young.source, // Ajoutez la source à l'objet de validation
-    //   };
-
-    //   const profilSchema = Joi.object({
-    //     source: Joi.string().required(),
-    //     firstName: validateFirstName().trim().required(),
-    //     lastName: Joi.string().uppercase().trim().required(),
-    //     email: Joi.string().lowercase().trim().email().required(),
-    //     phone: Joi.string().trim().required(),
-    //     phoneZone: Joi.string()
-    //       .trim()
-    //       .valid(...PHONE_ZONES_NAMES_ARR)
-    //       .required(),
-    //     birthdateAt: Joi.alternatives().conditional("source", {
-    //       is: YOUNG_SOURCE.CLE,
-    //       then: Joi.string().trim().required(),
-    //       otherwise: Joi.string().trim(),
-    //     }),
-    //     frenchNationality: Joi.alternatives().conditional("source", {
-    //       is: YOUNG_SOURCE.CLE,
-    //       then: Joi.string().trim().required(),
-    //       otherwise: Joi.string().trim(),
-    //     }),
-    //   });
-
-    //   const { error, value } = profilSchema.validate(dataToValidate, { stripUnknown: true });
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -664,18 +632,6 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
       frenchNationality: isCle ? Joi.string().trim().required() : Joi.string().trim(),
     };
 
-    // const profilSchema = {
-    //   firstName: validateFirstName().trim().required(),
-    //   lastName: Joi.string().uppercase().trim().required(),
-    //   email: Joi.string().lowercase().trim().email().required(),
-    //   birthdateAt: Joi.string().trim(),
-    //   frenchNationality: Joi.string().trim(),
-    //   phone: Joi.string().trim().required(),
-    //   phoneZone: Joi.string()
-    //     .trim()
-    //     .valid(...PHONE_ZONES_NAMES_ARR)
-    //     .required(),
-    // };
     const { error, value } = Joi.object(profilSchema).validate(req.body, { stripUnknown: true });
 
     if (error) {
