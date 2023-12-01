@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import useAuth from "@/services/useAuth";
-import useClass from "@/services/useClass";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 
 import ContactForm from "./components/ContactForm";
@@ -29,7 +28,6 @@ export default function Contact() {
   const questionFromURl = new URLSearchParams(window.location.search).get("q");
   const categoryFromURl = getCategoryFromQuestion(questionFromURl);
   const classeId = new URLSearchParams(window.location.search).get("classeId");
-  const { isPending, isError, classe, error } = useClass(classeId);
 
   const [parcours, setParcours] = useState(isLoggedIn ? young.source : parcoursFromURl || undefined);
   const [showForm, setShowForm] = useState(showFormFromURl === "true");
@@ -111,7 +109,7 @@ export default function Contact() {
                 <div className="hidden flex-none w-48 h-48 border-r-[1px] md:flex items-center justify-center">
                   <SchoolPictogram className="w-36 h-36" />
                 </div>
-                {isPending ? <p className="animate-pulse">Chargement de la classe...</p> : isError ? <p>Erreur: {error.message}</p> : <MyClass classe={classe} />}
+                <MyClass classeId={classeId} />
               </div>
             )}
 
@@ -120,9 +118,9 @@ export default function Contact() {
             {question &&
               (articles.length === 0 || showForm) &&
               (isLoggedIn ? (
-                <ContactForm category={category} question={question} parcours={parcours} classe={classe} />
+                <ContactForm category={category} question={question} parcours={parcours} />
               ) : (
-                <PublicContactForm category={category} question={question} parcours={parcours} classe={classe} />
+                <PublicContactForm category={category} question={question} parcours={parcours} classeId={classeId} />
               ))}
           </>
         )}

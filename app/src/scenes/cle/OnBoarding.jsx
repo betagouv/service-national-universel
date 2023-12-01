@@ -13,7 +13,7 @@ import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
-import { useClass } from "@/services/useClass";
+import useClass from "@/services/useClass";
 
 const Title = () => (
   <div>
