@@ -1502,7 +1502,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  sameSchool: {
+  sameSchoolCLE: {
     type: String,
     enum: ["true", "false"],
     documentation: {
