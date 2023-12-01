@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
@@ -13,13 +13,13 @@ import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
-export default function ContactForm({ category, question }) {
+export default function ContactForm({ category, question, parcours }) {
   const { young } = useAuth();
   const history = useHistory();
   const { files, addFiles, deleteFile, error } = useFileUpload();
 
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState("");
   const [message, setMessage] = useState("");
 
   const disabled = () => {
@@ -49,6 +49,7 @@ export default function ContactForm({ category, question }) {
         message,
         subject: `${categories.find((e) => e.value === category)?.label} - ${questionOptions.find((e) => e.value === question)?.label}`,
         fromPage: new URLSearchParams(window.location.search).get("from "),
+        parcours,
         subjectStep0: role,
         subjectStep1: category,
         subjectStep2: question,
@@ -68,7 +69,7 @@ export default function ContactForm({ category, question }) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Select label="Je suis" options={roleOptions} value={role} onChange={setRole} />
+      <Select label="Je suis" name="Role" options={roleOptions} value={role} onChange={setRole} />
       <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
       <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
       <ErrorMessage error={error} />
