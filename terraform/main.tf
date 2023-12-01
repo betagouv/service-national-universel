@@ -92,21 +92,56 @@ variable "pm2_slack_url" {
 
 # config
 
-variable "api_domain" {
+variable "api_subdomain" {
   type     = string
   nullable = false
 }
 
-variable "admin_domain" {
+variable "api_app_name" {
   type     = string
   nullable = false
 }
 
-variable "app_domain" {
+variable "admin_subdomain" {
   type     = string
   nullable = false
 }
 
+variable "admin_app_name" {
+  type     = string
+  nullable = false
+}
+
+variable "app_subdomain" {
+  type     = string
+  nullable = false
+}
+
+variable "app_app_name" {
+  type     = string
+  nullable = false
+}
+
+variable "dns_zone" {
+  type     = string
+  nullable = false
+}
+
+variable "environment" {
+  type     = string
+  nullable = false
+}
+
+variable "image_tag" {
+  type     = string
+  nullable = false
+}
+
+locals {
+  app_domain = "${var.app_subdomain}.${var.dns_zone}"
+  api_domain = "${var.api_subdomain}.${var.dns_zone}"
+  admin_domain = "${var.admin_subdomain}.${var.dns_zone}"
+}
 
 terraform {
   required_providers {
@@ -151,7 +186,7 @@ resource "scaleway_cockpit_grafana_user" "main" {
 # Container namespace
 resource scaleway_container_namespace test {
   project_id = scaleway_account_project.snu.id
-  name        = "snu-test"
+  name        = "snu-${var.environment}"
   description = "SNU container namespace for test environment"
 }
 
@@ -161,9 +196,9 @@ output "registry_endpoint" {
 }
 
 resource scaleway_container test_api {
-    name = "test-api"
+    name = "${var.environment}-${var.api_app_name}"
     namespace_id = scaleway_container_namespace.test.id
-    registry_image = "${scaleway_container_namespace.test.registry_endpoint}/api:latest"
+    registry_image = "${scaleway_container_namespace.test.registry_endpoint}/${var.api_app_name}:${var.image_tag}"
     port = 8080
     cpu_limit = 1120
     memory_limit = 1024
@@ -176,15 +211,15 @@ resource scaleway_container test_api {
     deploy = true
 
     environment_variables = {
-        "ADMIN_URL" = "https://${var.admin_domain}"
+        "ADMIN_URL" = "https://${local.admin_domain}"
         "API_ANALYTICS_ENDPOINT" = "https://app-3da9a603-eb67-4907-b545-ea40f3ffb7e0.cleverapps.io"
         "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = "AKIAR4ZAM5QBDHAG5NNW"
         "API_ASSOCIATION_CELLAR_ENDPOINT" = "cellar-c2.services.clever-cloud.com"
         "API_ASSOCIATION_CELLAR_KEYID" = "F7U1OXBT3Q2FQWXB3BAE"
         "API_ASSOCIATION_ES_ENDPOINT" = "unBpM6S9qVkQgfKVd6oZ:zRs3saRkQtY8NUhAYlkz@brs12j6ckwkl3ivnw4u4-elasticsearch.services.clever-cloud.com"
         "API_PDF_ENDPOINT" = "https://pdf.beta-snu.dev/render"
-        "APP_NAME" = "api"
-        "APP_URL" = "https://${var.app_domain}"
+        "APP_NAME" = var.api_app_name
+        "APP_URL" = "https://${local.app_domain}"
         "BUCKET_NAME" = "cni-bucket-staging"
         "CC_CLAMAV" = "true"
         "CELLAR_ENDPOINT" = "cellar-c2.services.clever-cloud.com"
@@ -226,15 +261,23 @@ resource scaleway_container test_api {
     }
 }
 
-resource scaleway_container_domain api {
+resource scaleway_domain_record test_api {
+  dns_zone = var.dns_zone
+  name     = var.api_subdomain
+  type     = "CNAME"
+  data     = "${scaleway_container.test_api.domain_name}." // Trailing dot is important in CNAME
+  ttl      = 600
+}
+
+resource scaleway_container_domain test_api {
   container_id = scaleway_container.test_api.id
-  hostname = var.api_domain
+  hostname = "${scaleway_domain_record.test_api.name}.${scaleway_domain_record.test_api.dns_zone}"
 }
 
 resource scaleway_container test_admin {
-    name = "test-admin"
+    name = "${var.environment}-${var.admin_app_name}"
     namespace_id = scaleway_container_namespace.test.id
-    registry_image = "${scaleway_container_namespace.test.registry_endpoint}/admin:latest"
+    registry_image = "${scaleway_container_namespace.test.registry_endpoint}/${var.admin_app_name}:${var.image_tag}"
     port = 8080
     cpu_limit = 1120
     memory_limit = 1024
@@ -247,11 +290,11 @@ resource scaleway_container test_admin {
     deploy = true
 
     environment_variables = {
-        "APP_NAME" = "admin"
+        "APP_NAME" = var.admin_app_name
         "CLE" = "true"
-        "DOCKER_ENV_VITE_ADMIN_URL" = "https://${var.admin_domain}"
-        "DOCKER_ENV_VITE_API_URL" = "https://${var.api_domain}"
-        "DOCKER_ENV_VITE_APP_URL" = "https://${var.app_domain}"
+        "DOCKER_ENV_VITE_ADMIN_URL" = "https://${local.admin_domain}"
+        "DOCKER_ENV_VITE_API_URL" = "https://${local.api_domain}"
+        "DOCKER_ENV_VITE_APP_URL" = "https://${local.app_domain}"
         "DOCKER_ENV_VITE_MAINTENANCE" = "false"
         "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.1"
         "DOCKER_ENV_VITE_SENTRY_URL" = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14"
@@ -265,15 +308,23 @@ resource scaleway_container test_admin {
     }
 }
 
-resource scaleway_container_domain admin {
+resource scaleway_domain_record test_admin {
+  dns_zone = var.dns_zone
+  name     = var.admin_subdomain
+  type     = "CNAME"
+  data     = "${scaleway_container.test_admin.domain_name}." // Trailing dot is important in CNAME
+  ttl      = 600
+}
+
+resource scaleway_container_domain test_admin {
   container_id = scaleway_container.test_admin.id
-  hostname = var.admin_domain
+  hostname = "${scaleway_domain_record.test_admin.name}.${scaleway_domain_record.test_admin.dns_zone}"
 }
 
 resource scaleway_container test_app {
-    name = "test-app"
+    name = "${var.environment}-${var.app_app_name}"
     namespace_id = scaleway_container_namespace.test.id
-    registry_image = "${scaleway_container_namespace.test.registry_endpoint}/app:latest"
+    registry_image = "${scaleway_container_namespace.test.registry_endpoint}/${var.app_app_name}:${var.image_tag}"
     port = 8080
     cpu_limit = 1120
     memory_limit = 1024
@@ -286,15 +337,15 @@ resource scaleway_container test_app {
     deploy = true
 
     environment_variables = {
-        "APP_NAME" = "app"
+        "APP_NAME" = var.app_app_name
         "CLE" = "true"
-        "DOCKER_ENV_VITE_ADMIN_URL" = "https://${var.admin_domain}"
-        "DOCKER_ENV_VITE_API_URL" = "https://${var.api_domain}"
-        "DOCKER_ENV_VITE_APP_URL" = "https://${var.app_domain}"
+        "DOCKER_ENV_VITE_ADMIN_URL" = "https://${local.admin_domain}"
+        "DOCKER_ENV_VITE_API_URL" = "https://${local.api_domain}"
+        "DOCKER_ENV_VITE_APP_URL" = "https://${local.app_domain}"
         "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.1"
         "DOCKER_ENV_VITE_SENTRY_URL" = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14"
         "DOCKER_ENV_VITE_SUPPORT_URL" = "https://support.beta-snu.dev"
-        "FOLDER_APP" = "app"
+        "FOLDER_APP" = var.app_app_name
         "STAGING" = "true"
     }
 
@@ -303,29 +354,15 @@ resource scaleway_container test_app {
     }
 }
 
-resource scaleway_container_domain app {
-  container_id = scaleway_container.test_app.id
-  hostname = var.app_domain
-}
-
-
-/*
-resource "scaleway_domain_zone" "test" {
-  project_id = scaleway_account_project.snu.id
-  domain    = "beta-snu.dev"
-  subdomain = "test-api"
-}
-
-resource scaleway_domain_record test_api {
-  dns_zone = "beta-snu.dev"
-  name     = "test-api"
+resource scaleway_domain_record test_app {
+  dns_zone = var.dns_zone
+  name     = var.app_subdomain
   type     = "CNAME"
-  data     = "${scaleway_container.test_api.domain_name}." // Trailing dot is important in CNAME
-  ttl      = 3600
+  data     = "${scaleway_container.test_app.domain_name}." // Trailing dot is important in CNAME
+  ttl      = 600
 }
 
-resource scaleway_container_domain test_api {
-  container_id = scaleway_container.test_api.id
-  hostname = "${scaleway_domain_record.test_api.name}.${scaleway_domain_record.test_api.dns_zone}"
+resource scaleway_container_domain test_app {
+  container_id = scaleway_container.test_app.id
+  hostname = "${scaleway_domain_record.test_app.name}.${scaleway_domain_record.test_app.dns_zone}"
 }
-*/
