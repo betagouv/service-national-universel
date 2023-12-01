@@ -1,10 +1,7 @@
-import useClass from "@/services/useClass";
 import { List } from "@snu/ds/dsfr";
 import React from "react";
 
-export default function MyClass({ classeId }) {
-  const { isPending, isError, classe, error } = useClass(classeId);
-
+export default function MyClass({ classe }) {
   const fields = [
     {
       label: "Nom",
@@ -24,7 +21,5 @@ export default function MyClass({ classeId }) {
     },
   ];
 
-  if (isPending) return <p className="animate-pulse">Chargement de la classe...</p>;
-  if (isError) return <p>Erreur: {error.message}</p>;
-  return <List title={"Ma classe engagée"} fields={fields} className="w-full p-4" />;
+  return <List title={"Ma classe engagée"} fields={fields} className="w-full" />;
 }

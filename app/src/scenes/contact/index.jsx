@@ -18,6 +18,7 @@ import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
 import MyClass from "../cle/MyClass";
+import useClass from "@/services/useClass";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
@@ -28,6 +29,7 @@ export default function Contact() {
   const questionFromURl = new URLSearchParams(window.location.search).get("q");
   const categoryFromURl = getCategoryFromQuestion(questionFromURl);
   const classeId = new URLSearchParams(window.location.search).get("classeId");
+  const { classe, isPending, isError, error } = useClass(classeId);
 
   const [parcours, setParcours] = useState(isLoggedIn ? young.source : parcoursFromURl || undefined);
   const [showForm, setShowForm] = useState(showFormFromURl === "true");
@@ -109,7 +111,9 @@ export default function Contact() {
                 <div className="hidden flex-none w-48 h-48 border-r-[1px] md:flex items-center justify-center">
                   <SchoolPictogram className="w-36 h-36" />
                 </div>
-                <MyClass classeId={classeId} />
+                <div className="w-full p-4">
+                  {isPending ? <p className="animate-pulse">Chargement de la classe...</p> : isError ? <p>Erreur: {error.message}</p> : <MyClass classe={classe} />}
+                </div>
               </div>
             )}
 
