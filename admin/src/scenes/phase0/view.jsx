@@ -836,25 +836,27 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
               young={young}
             />
           </div>
-          <div className="mt-[32px]">
-            <MiniTitle>Nationalité Française</MiniTitle>
-            <Field
-              name="frenchNationality"
-              label="Nationalité Française"
-              value={data.frenchNationality}
-              mode={sectionMode}
-              className="mb-[16px]"
-              onStartRequest={onStartRequest}
-              currentRequest={currentRequest}
-              correctionRequest={getCorrectionRequest(requests, "frenchNationality")}
-              onCorrectionRequestChange={onCorrectionRequestChange}
-              type="select"
-              options={nationalityOptions}
-              transformer={translate}
-              onChange={(value) => onLocalChange("frenchNationality", value)}
-              young={young}
-            />
-          </div>
+          {young.source === YOUNG_SOURCE.CLE && (
+            <div className="mt-[32px]">
+              <MiniTitle>Nationalité Française</MiniTitle>
+              <Field
+                name="frenchNationality"
+                label="Nationalité Française"
+                value={data.frenchNationality}
+                mode={sectionMode}
+                className="mb-[16px]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "frenchNationality")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                type="select"
+                options={nationalityOptions}
+                transformer={translate}
+                onChange={(value) => onLocalChange("frenchNationality", value)}
+                young={young}
+              />
+            </div>
+          )}
           <div className="mt-[32px]">
             <MiniTitle>Adresse</MiniTitle>
             <Field

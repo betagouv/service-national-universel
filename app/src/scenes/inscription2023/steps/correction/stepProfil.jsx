@@ -104,7 +104,7 @@ export default function StepProfil() {
     <>
       <DSFRContainer title="Mon profil" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="flex flex-col">
-          {isCLE ?? (
+          {isCLE && (
             <>
               <div className="flex items-center gap-2 mb-3">
                 <label htmlFor="nationalite" className="m-0">
@@ -148,7 +148,7 @@ export default function StepProfil() {
           )}
           <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} label="Prénom" error={error.firstName} correction={corrections.firstName} />
           <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} label="Nom" error={error.lastName} correction={corrections.lastName} />
-          {isCLE ?? (
+          {isCLE && (
             <label className="w-full">
               Date de naissance
               <DatePicker value={new Date(data.birthdateAt)} onChange={(date) => setData({ ...data, birthdateAt: date })} />
