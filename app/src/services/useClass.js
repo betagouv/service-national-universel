@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 const useClass = (classeId) => {
   const getClass = () => fetch(`${apiURL}/cle/classe/${classeId}`).then((res) => res.json());
   const { isPending, isError, data, error } = useQuery({ queryKey: [`class-${classeId}`], queryFn: getClass, enabled: !!classeId });
-  if (!data) return { isPending, isError, error };
+  if (!data?.data) return { isPending, isError, error };
 
   const { name, status, coloration, isFull, referents, etablissement, cohort } = data.data;
   const [{ fullName: referent }] = referents;

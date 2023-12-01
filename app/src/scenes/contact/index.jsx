@@ -19,6 +19,7 @@ import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
 import MyClass from "../cle/MyClass";
 import useClass from "@/services/useClass";
+import Input from "@/components/dsfr/forms/input";
 
 export default function Contact() {
   useDocumentTitle("Formulaire de contact");
@@ -28,13 +29,17 @@ export default function Contact() {
   const showFormFromURl = new URLSearchParams(window.location.search).get("showForm");
   const questionFromURl = new URLSearchParams(window.location.search).get("q");
   const categoryFromURl = getCategoryFromQuestion(questionFromURl);
-  const classeId = new URLSearchParams(window.location.search).get("classeId");
-  const { classe, isPending, isError, error } = useClass(classeId);
+  const classeIdFromURL = new URLSearchParams(window.location.search).get("classeId");
 
   const [parcours, setParcours] = useState(isLoggedIn ? young.source : parcoursFromURl || undefined);
   const [showForm, setShowForm] = useState(showFormFromURl === "true");
   const [category, setCategory] = useState(categoryFromURl);
   const [question, setQuestion] = useState(questionFromURl);
+  const [link, setLink] = useState("");
+
+  const classeIdFromLink = link.split("id=").pop();
+  const classeId = classeIdFromURL || classeIdFromLink;
+  const { classe, isPending, isError, error } = useClass(classeId);
 
   const knowledgeBaseRole = isLoggedIn ? "young" : "public";
   const questionOptions = getQuestionOptions(category, knowledgeBaseRole, parcours);
@@ -106,7 +111,14 @@ export default function Contact() {
               </Alert>
             )}
 
-            {question === "HTS_TO_CLE" && classeId && (
+            {!classeIdFromURL && (
+              <label className="w-full">
+                Lien transmis par le référent
+                <Input value={link} onChange={setLink} name="link" />
+              </label>
+            )}
+
+            {question === "HTS_TO_CLE" && classe && (
               <div className="flex items-center border my-12">
                 <div className="hidden flex-none w-48 h-48 border-r-[1px] md:flex items-center justify-center">
                   <SchoolPictogram className="w-36 h-36" />
