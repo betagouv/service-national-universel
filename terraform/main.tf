@@ -1,96 +1,4 @@
-# secrets
 
-variable "sentry_auth_token" {
-  type     = string
-  nullable = false
-}
-
-variable "userback_access_token" {
-  type     = string
-  nullable = false
-}
-
-variable "analytics_api_key" {
-  type     = string
-  nullable = false
-}
-
-variable "aws_secret_access_key" {
-  type     = string
-  nullable = false
-}
-
-variable "association_cellar_keysecret" {
-  type     = string
-  nullable = false
-}
-
-variable "cellar_keysecret" {
-  type     = string
-  nullable = false
-}
-
-variable "cellar_keysecret_support" {
-  type     = string
-  nullable = false
-}
-
-variable "file_encryption_secret" {
-  type     = string
-  nullable = false
-}
-
-variable "file_encryption_secret_support" {
-  type     = string
-  nullable = false
-}
-
-variable "france_connect_client_secret" {
-  type     = string
-  nullable = false
-}
-
-variable "api_secret" {
-  type     = string
-  nullable = false
-}
-
-variable "send_in_blue_key" {
-  type     = string
-  nullable = false
-}
-
-variable "token_load_test" {
-  type     = string
-  nullable = false
-}
-
-variable "zammad_token" {
-  type     = string
-  nullable = false
-}
-
-variable "mongo_url" {
-  type     = string
-  nullable = false
-}
-
-variable "jva_token" {
-  type     = string
-  nullable = false
-}
-
-variable "diagoriente_token" {
-  type     = string
-  nullable = false
-}
-
-variable "pm2_slack_url" {
-  type     = string
-  nullable = false
-}
-
-# config
 
 variable "api_subdomain" {
   type     = string
@@ -175,6 +83,21 @@ resource "scaleway_cockpit_grafana_user" "main" {
 }
 
 
+# secrets
+# scw secret secret create name=env-test description="Secrets for test environment"
+# scw secret version create secret-id="secret-id" data="@/path/to/file"
+# scw secret version access secret-id="secret-id" revision=1 -o json | jq -r ".data" | base64 -Dd
+
+data "scaleway_secret_version" "data_by_secret_name" {
+  secret_name = "env-${var.environment}"
+  revision    = "1"
+}
+
+locals {
+  secrets = jsondecode(base64decode(data.scaleway_secret_version.data_by_secret_name.data))
+}
+
+
 # registry_ns_id=$(scw container namespace list name=snu-test -o json | jq -r ".[0].id")
 # registry_endpoint=$(scw container namespace get $registry_ns_id -o json | jq -r ".registry_endpoint")
 # registry_endpoint=$(terraform output -raw registry_endpoint)
@@ -211,56 +134,64 @@ resource scaleway_container test_api {
     deploy = true
 
     environment_variables = {
-        "ADMIN_URL" = "https://${local.admin_domain}"
-        "API_ANALYTICS_ENDPOINT" = "https://app-3da9a603-eb67-4907-b545-ea40f3ffb7e0.cleverapps.io"
-        "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = "AKIAR4ZAM5QBDHAG5NNW"
-        "API_ASSOCIATION_CELLAR_ENDPOINT" = "cellar-c2.services.clever-cloud.com"
-        "API_ASSOCIATION_CELLAR_KEYID" = "F7U1OXBT3Q2FQWXB3BAE"
-        "API_ASSOCIATION_ES_ENDPOINT" = "unBpM6S9qVkQgfKVd6oZ:zRs3saRkQtY8NUhAYlkz@brs12j6ckwkl3ivnw4u4-elasticsearch.services.clever-cloud.com"
-        "API_PDF_ENDPOINT" = "https://pdf.beta-snu.dev/render"
-        "APP_NAME" = var.api_app_name
-        "APP_URL" = "https://${local.app_domain}"
-        "BUCKET_NAME" = "cni-bucket-staging"
-        "CC_CLAMAV" = "true"
-        "CELLAR_ENDPOINT" = "cellar-c2.services.clever-cloud.com"
-        "CELLAR_ENDPOINT_SUPPORT" = "cellar-c2.services.clever-cloud.com"
-        "CELLAR_KEYID" = "7XBDN3B9Z9RBMZGXWIXQ"
-        "CELLAR_KEYID_SUPPORT" = "79W03BFPUMK6P9L4QT9D"
-        "DIAGORIENTE_URL" = "https://api-ql-dev.projetttv.org/graphql"
-        "ES_ENDPOINT" = "vPV6iDOFlosg1i7wV59MFagcGZtvWEUt:TonO1QmF1ZK1L0VRNNu1Y1O9NLOESnHL@bvujrzvlgvfiyxvim7cx-elasticsearch.services.clever-cloud.com"
-        "FRANCE_CONNECT_CLIENT_ID" = "cde8fb49b9c9f0e271d572d5d4f777b8837b88ccf1660c1bae3b622dd71a97be"
-        "FRANCE_CONNECT_URL" = "https://fcp.integ01.dev-franceconnect.fr/api/v1"
-        "KNOWLEDGEBASE_URL" = "https://support.beta-snu.dev"
-        "PUBLIC_BUCKET_NAME" = "snu-bucket-staging"
-        "PUBLIC_BUCKET_NAME_SUPPORT" = "files_staging"
-        "SENTRY_PROFILE_SAMPLE_RATE" = "0.8"
-        "SENTRY_TRACING_SAMPLE_RATE" = "0.1"
-        "SENTRY_URL" = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14"
-        "STAGING" = "true"
-        "SUPPORT_APIKEY" = "2f017298-5333-466b-9673-bc3b8c6a49b4"
-        "SUPPORT_URL" = "https://app-923a364e-4cf7-439f-a6f0-b519d4244545.cleverapps.io"
+      "ADMIN_URL" = "https://${local.admin_domain}"
+      "APP_URL" = "https://${local.app_domain}"
+      "APP_NAME" = var.api_app_name
+      "STAGING" = "true"
+      "API_ANALYTICS_ENDPOINT" = local.secrets.API_ANALYTICS_ENDPOINT
+      "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
+      "API_ASSOCIATION_CELLAR_ENDPOINT" = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
+      "API_ASSOCIATION_CELLAR_KEYID" = local.secrets.API_ASSOCIATION_CELLAR_KEYID
+      "API_ASSOCIATION_ES_ENDPOINT" = local.secrets.API_ASSOCIATION_ES_ENDPOINT
+      "API_PDF_ENDPOINT" = local.secrets.API_PDF_ENDPOINT
+      "BUCKET_NAME" = local.secrets.BUCKET_NAME
+      "CC_CLAMAV":"true",
+      "CELLAR_ENDPOINT" = local.secrets.CELLAR_ENDPOINT
+      "CELLAR_ENDPOINT_SUPPORT" = local.secrets.CELLAR_ENDPOINT_SUPPORT
+      "CELLAR_KEYID" = local.secrets.CELLAR_KEYID
+      "CELLAR_KEYID_SUPPORT" = local.secrets.CELLAR_KEYID_SUPPORT
+      "DIAGORIENTE_URL" = local.secrets.DIAGORIENTE_URL
+      "FRANCE_CONNECT_CLIENT_ID" = local.secrets.FRANCE_CONNECT_CLIENT_ID
+      "FRANCE_CONNECT_URL" = local.secrets.FRANCE_CONNECT_URL
+      "KNOWLEDGEBASE_URL" = local.secrets.KNOWLEDGEBASE_URL
+      "PUBLIC_BUCKET_NAME" = local.secrets.PUBLIC_BUCKET_NAME
+      "PUBLIC_BUCKET_NAME_SUPPORT" = local.secrets.PUBLIC_BUCKET_NAME_SUPPORT
+      "SENTRY_PROFILE_SAMPLE_RATE":"0.8",
+      "SENTRY_TRACING_SAMPLE_RATE":"0.1",
+      "SENTRY_URL" = local.secrets.SENTRY_URL
+      "SUPPORT_APIKEY" = local.secrets.SUPPORT_APIKEY
+      "SUPPORT_URL" = local.secrets.SUPPORT_URL
     }
 
     secret_environment_variables = {
-      "API_ANALYTICS_API_KEY" = var.analytics_api_key
-      "API_ASSOCIATION_AWS_SECRET_ACCESS_KEY" = var.aws_secret_access_key
-      "API_ASSOCIATION_CELLAR_KEYSECRET" = var.association_cellar_keysecret
-      "CELLAR_KEYSECRET" = var.cellar_keysecret
-      "CELLAR_KEYSECRET_SUPPORT" = var.cellar_keysecret_support
-      "DIAGORIENTE_TOKEN" = var.diagoriente_token
-      "FILE_ENCRYPTION_SECRET" = var.file_encryption_secret
-      "FILE_ENCRYPTION_SECRET_SUPPORT" = var.file_encryption_secret_support
-      "FRANCE_CONNECT_CLIENT_SECRET" = var.france_connect_client_secret
-      "JVA_TOKEN" = var.jva_token
-      "MONGO_URL" = var.mongo_url
-      "SECRET" = var.api_secret
-      "SENDINBLUEKEY" = var.send_in_blue_key
-      "PM2_SLACK_URL" = var.pm2_slack_url
-      "TOKENLOADTEST" = var.token_load_test
-      "ZAMMAD_TOKEN" = var.zammad_token
+      "API_ANALYTICS_API_KEY" = local.secrets.API_ANALYTICS_API_KEY
+      "API_ASSOCIATION_AWS_SECRET_ACCESS_KEY" = local.secrets.API_ASSOCIATION_AWS_SECRET_ACCESS_KEY
+      "API_ASSOCIATION_CELLAR_KEYSECRET" = local.secrets.API_ASSOCIATION_CELLAR_KEYSECRET
+      "CELLAR_KEYSECRET" = local.secrets.CELLAR_KEYSECRET
+      "CELLAR_KEYSECRET_SUPPORT" = local.secrets.CELLAR_KEYSECRET_SUPPORT
+      "DIAGORIENTE_TOKEN" = local.secrets.DIAGORIENTE_TOKEN
+      "ES_ENDPOINT" = local.secrets.ES_ENDPOINT
+      "FILE_ENCRYPTION_SECRET" = local.secrets.FILE_ENCRYPTION_SECRET
+      "FILE_ENCRYPTION_SECRET_SUPPORT" = local.secrets.FILE_ENCRYPTION_SECRET_SUPPORT
+      "FRANCE_CONNECT_CLIENT_SECRET" = local.secrets.FRANCE_CONNECT_CLIENT_SECRET
+      "JVA_TOKEN" = local.secrets.JVA_TOKEN
+      "MONGO_URL" = local.secrets.MONGO_URL
+      "SECRET" = local.secrets.SECRET
+      "SENDINBLUEKEY" = local.secrets.SENDINBLUEKEY
+      "PM2_SLACK_URL" = local.secrets.PM2_SLACK_URL
+      "TOKENLOADTEST" = local.secrets.TOKENLOADTEST
+      "ZAMMAD_TOKEN" = local.secrets.ZAMMAD_TOKEN
     }
 }
 
+# Without DNS Zone
+resource scaleway_container_domain test_api {
+  container_id = scaleway_container.test_api.id
+  hostname = local.api_domain
+}
+
+
+/* With DNS Zone
 resource scaleway_domain_record test_api {
   dns_zone = var.dns_zone
   name     = var.api_subdomain
@@ -272,6 +203,12 @@ resource scaleway_domain_record test_api {
 resource scaleway_container_domain test_api {
   container_id = scaleway_container.test_api.id
   hostname = "${scaleway_domain_record.test_api.name}.${scaleway_domain_record.test_api.dns_zone}"
+}
+*/
+
+# terraform output -raw test_api_domain
+output "test_api_domain" {
+  value = scaleway_container.test_api.domain_name
 }
 
 resource scaleway_container test_admin {
@@ -297,17 +234,24 @@ resource scaleway_container test_admin {
         "DOCKER_ENV_VITE_APP_URL" = "https://${local.app_domain}"
         "DOCKER_ENV_VITE_MAINTENANCE" = "false"
         "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.1"
-        "DOCKER_ENV_VITE_SENTRY_URL" = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14"
+        "DOCKER_ENV_VITE_SENTRY_URL" = local.secrets.SENTRY_URL
         "DOCKER_ENV_VITE_SUPPORT_URL" = "https://support.beta-snu.dev"
         "STAGING" = "true"
     }
 
     secret_environment_variables = {
-      "DOCKER_ENV_VITE_USERBACK_ACCESS_TOKEN" = var.userback_access_token
-      "SENTRY_AUTH_TOKEN" = var.sentry_auth_token
+      "DOCKER_ENV_VITE_USERBACK_ACCESS_TOKEN" = local.secrets.USERBACK_ACCESS_TOKEN
+      "SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
     }
 }
 
+# Without DNS Zone
+resource scaleway_container_domain test_admin {
+  container_id = scaleway_container.test_admin.id
+  hostname = local.admin_domain
+}
+
+/* With DNS Zone
 resource scaleway_domain_record test_admin {
   dns_zone = var.dns_zone
   name     = var.admin_subdomain
@@ -319,6 +263,12 @@ resource scaleway_domain_record test_admin {
 resource scaleway_container_domain test_admin {
   container_id = scaleway_container.test_admin.id
   hostname = "${scaleway_domain_record.test_admin.name}.${scaleway_domain_record.test_admin.dns_zone}"
+}
+*/
+
+# terraform output -raw test_admin_domain
+output "test_admin_domain" {
+  value = scaleway_container.test_admin.domain_name
 }
 
 resource scaleway_container test_app {
@@ -343,17 +293,24 @@ resource scaleway_container test_app {
         "DOCKER_ENV_VITE_API_URL" = "https://${local.api_domain}"
         "DOCKER_ENV_VITE_APP_URL" = "https://${local.app_domain}"
         "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.1"
-        "DOCKER_ENV_VITE_SENTRY_URL" = "https://c5165ba99b4f4f2d8f1d4c0b16a654db@sentry.selego.co/14"
+        "DOCKER_ENV_VITE_SENTRY_URL" = local.secrets.SENTRY_URL
         "DOCKER_ENV_VITE_SUPPORT_URL" = "https://support.beta-snu.dev"
         "FOLDER_APP" = var.app_app_name
         "STAGING" = "true"
     }
 
     secret_environment_variables = {
-      "DOCKER_ENV_VITE_SENTRY_AUTH_TOKEN" = var.sentry_auth_token
+      "DOCKER_ENV_VITE_SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
     }
 }
 
+# Without DNS Zone
+resource scaleway_container_domain test_app {
+  container_id = scaleway_container.test_app.id
+  hostname = local.app_domain
+}
+
+/* With DNS Zone
 resource scaleway_domain_record test_app {
   dns_zone = var.dns_zone
   name     = var.app_subdomain
@@ -366,3 +323,22 @@ resource scaleway_container_domain test_app {
   container_id = scaleway_container.test_app.id
   hostname = "${scaleway_domain_record.test_app.name}.${scaleway_domain_record.test_app.dns_zone}"
 }
+*/
+
+# terraform output -raw test_app_domain
+output "test_app_domain" {
+  value = scaleway_container.test_app.domain_name
+}
+
+/*
+import {
+  to = scaleway_secret.env-test
+  id = "fr-par/7adb9d6f-2b17-4d79-bc6f-1a0da3bb7e18"
+}
+
+resource "scaleway_secret" "env-test" {
+  name        = "env-test"
+  project_id  = "a1ef63c1-0c6d-4a19-b368-29d9a20c8a04"
+  region      = "fr-par"
+}
+*/
