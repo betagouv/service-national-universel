@@ -145,7 +145,7 @@ resource scaleway_container test_api {
       "API_ASSOCIATION_ES_ENDPOINT" = local.secrets.API_ASSOCIATION_ES_ENDPOINT
       "API_PDF_ENDPOINT" = local.secrets.API_PDF_ENDPOINT
       "BUCKET_NAME" = local.secrets.BUCKET_NAME
-      "CC_CLAMAV":"true",
+      "CC_CLAMAV" = "true"
       "CELLAR_ENDPOINT" = local.secrets.CELLAR_ENDPOINT
       "CELLAR_ENDPOINT_SUPPORT" = local.secrets.CELLAR_ENDPOINT_SUPPORT
       "CELLAR_KEYID" = local.secrets.CELLAR_KEYID
@@ -156,8 +156,8 @@ resource scaleway_container test_api {
       "KNOWLEDGEBASE_URL" = local.secrets.KNOWLEDGEBASE_URL
       "PUBLIC_BUCKET_NAME" = local.secrets.PUBLIC_BUCKET_NAME
       "PUBLIC_BUCKET_NAME_SUPPORT" = local.secrets.PUBLIC_BUCKET_NAME_SUPPORT
-      "SENTRY_PROFILE_SAMPLE_RATE":"0.8",
-      "SENTRY_TRACING_SAMPLE_RATE":"0.1",
+      "SENTRY_PROFILE_SAMPLE_RATE" = "0.8"
+      "SENTRY_TRACING_SAMPLE_RATE" = "0.1"
       "SENTRY_URL" = local.secrets.SENTRY_URL
       "SUPPORT_APIKEY" = local.secrets.SUPPORT_APIKEY
       "SUPPORT_URL" = local.secrets.SUPPORT_URL
