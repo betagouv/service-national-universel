@@ -3,11 +3,17 @@ import { STATUS_CLASSE, translateColoration } from "snu-lib";
 import { useQuery } from "@tanstack/react-query";
 
 const useClass = (classeId) => {
-  const getClass = () => fetch(`${apiURL}/cle/classe/${classeId}`).then((res) => res.json());
+  const getClass = () =>
+    fetch(`${apiURL}/cle/classe/${classeId}`)
+      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(res.code);
+        return res.data;
+      });
   const { isPending, isError, data, error } = useQuery({ queryKey: [`class-${classeId}`], queryFn: getClass, enabled: !!classeId });
-  if (!data?.data) return { isPending, isError, error };
+  if (!data) return { isPending, isError, error };
 
-  const { name, status, coloration, isFull, referents, etablissement, cohort } = data.data;
+  const { name, status, coloration, isFull, referents, etablissement, cohort } = data;
   const [{ fullName: referent }] = referents;
   const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
   const classe = {

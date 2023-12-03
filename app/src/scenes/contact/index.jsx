@@ -25,25 +25,25 @@ export default function Contact() {
   useDocumentTitle("Formulaire de contact");
   const { isLoggedIn, young } = useAuth();
 
-  const parcoursFromURl = new URLSearchParams(window.location.search).get("parcours");
-  const showFormFromURl = new URLSearchParams(window.location.search).get("showForm");
-  const questionFromURl = new URLSearchParams(window.location.search).get("q");
+  const params = new URLSearchParams(window.location.search);
+  const parcoursFromURl = params.get("parcours");
+  const questionFromURl = params.get("q");
+  const classeIdFromURL = params.get("classeId");
   const categoryFromURl = getCategoryFromQuestion(questionFromURl);
-  const classeIdFromURL = new URLSearchParams(window.location.search).get("classeId");
 
   const [parcours, setParcours] = useState(isLoggedIn ? young.source : parcoursFromURl || undefined);
-  const [showForm, setShowForm] = useState(showFormFromURl === "true");
+  const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState(categoryFromURl);
   const [question, setQuestion] = useState(questionFromURl);
   const [link, setLink] = useState("");
 
-  const classeIdFromLink = link.split("id=").pop();
+  const classeIdFromLink = link ? new URL(link).searchParams.get("classeId") : undefined;
   const classeId = classeIdFromURL || classeIdFromLink;
-  const { classe, isPending, isError, error } = useClass(classeId);
-
+  const { classe, isPending, isError } = useClass(classeId);
   const knowledgeBaseRole = isLoggedIn ? "young" : "public";
   const questionOptions = getQuestionOptions(category, knowledgeBaseRole, parcours);
   const articles = getArticles(question);
+  const shouldShowForm = question && (articles.length === 0 || showForm);
 
   const handleSelectCategory = (value) => {
     setCategory(value);
@@ -95,15 +95,16 @@ export default function Contact() {
           </fieldset>
         )}
 
+        {/* Category */}
+        <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} name="Catégorie" />
+
+        {/* Question */}
+        {category && questionOptions.length > 0 && (
+          <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} name="Question" />
+        )}
+
         {parcours && (
           <>
-            {/* Category */}
-            <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} name="Catégorie" />
-
-            {/* Question */}
-            {category && questionOptions.length > 0 && (
-              <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} name="Question" />
-            )}
             {category && questionOptions.length === 0 && (
               <Alert className="my-8">
                 <p className="text-lg font-semibold">Information</p>
@@ -111,33 +112,30 @@ export default function Contact() {
               </Alert>
             )}
 
-            {!classeIdFromURL && (
+            {/* Classe */}
+            {question === "HTS_TO_CLE" && !classeIdFromURL && (
               <label className="w-full">
                 Lien transmis par le référent
                 <Input value={link} onChange={setLink} name="link" />
               </label>
             )}
-
-            {question === "HTS_TO_CLE" && classe && (
-              <div className="flex items-center border my-12">
+            {question === "HTS_TO_CLE" && classeId && (
+              <div className="flex items-center border my-12 p-2">
                 <div className="hidden flex-none w-48 h-48 border-r-[1px] md:flex items-center justify-center">
                   <SchoolPictogram className="w-36 h-36" />
                 </div>
                 <div className="w-full p-4">
-                  {isPending ? <p className="animate-pulse">Chargement de la classe...</p> : isError ? <p>Erreur: {error.message}</p> : <MyClass classe={classe} />}
+                  {isPending && <p className="animate-pulse text-center">Chargement de la classe...</p>}
+                  {isError && <p className="text-center">Impossible de récupérer les informations de votre classe engagée 🤔</p>}
+                  {classe && <MyClass classe={classe} />}
                 </div>
               </div>
             )}
 
             {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
             {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
-            {question &&
-              (articles.length === 0 || showForm) &&
-              (isLoggedIn ? (
-                <ContactForm category={category} question={question} parcours={parcours} />
-              ) : (
-                <PublicContactForm category={category} question={question} parcours={parcours} classeId={classeId} />
-              ))}
+            {shouldShowForm && isLoggedIn && <ContactForm category={category} question={question} parcours={parcours} />}
+            {shouldShowForm && !isLoggedIn && <PublicContactForm category={category} question={question} parcours={parcours} classeId={classeId} />}
           </>
         )}
       </DSFRContainer>
