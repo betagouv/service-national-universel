@@ -326,7 +326,7 @@ export default function StepProfil() {
           onClickNext={() => onSubmit()}
           onClickPrevious={isCLE ? () => history.push(`/je-rejoins-ma-classe-engagee?id=${classeId}`) : () => history.push("/preinscription/sejour")}
           labelNext={isCLE ? "Recevoir un code d’activation par e-mail" : "Continuer"}
-          labelPrevious="Retour au choix du séjour"
+          labelPrevious="Retour"
           collapsePrevious={true}
           disabled={loading}
         />
