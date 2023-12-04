@@ -11,7 +11,7 @@ export const useAuth = () => {
   const young = useSelector((state) => state.Auth.young);
   const { pathname } = useLocation();
 
-  const logout = async ({ redirect = true }) => {
+  const logout = async ({ redirect } = { redirect: true }) => {
     await logoutYoung();
     dispatch(setYoung(null));
     if (redirect) {
