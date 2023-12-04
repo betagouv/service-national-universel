@@ -37,7 +37,7 @@ export default function Contact() {
   const [question, setQuestion] = useState(questionFromURl);
   const [link, setLink] = useState("");
 
-  const classeIdFromLink = link ? new URL(link).searchParams.get("classeId") : undefined;
+  const classeIdFromLink = link ? new URL(link).searchParams.get("id") : undefined;
   const classeId = classeIdFromURL || classeIdFromLink;
   const { classe, isPending, isError } = useClass(classeId);
   const knowledgeBaseRole = isLoggedIn ? "young" : "public";
@@ -121,9 +121,9 @@ export default function Contact() {
             )}
             {question === "HTS_TO_CLE" && classeId && (
               <div className="flex items-center border my-12 p-2">
-                <div className="hidden flex-none w-48 h-48 border-r-[1px] md:flex items-center justify-center">
+                {/* <div className="hidden flex-none w-48 h-48 border-r-[1px] md:flex items-center justify-center">
                   <SchoolPictogram className="w-36 h-36" />
-                </div>
+                </div> */}
                 <div className="w-full p-4">
                   {isPending && <p className="animate-pulse text-center">Chargement de la classe...</p>}
                   {isError && <p className="text-center">Impossible de récupérer les informations de votre classe engagée 🤔</p>}
