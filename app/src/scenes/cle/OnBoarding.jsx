@@ -125,9 +125,9 @@ const OnBoarding = () => {
           {!classe.isInscriptionOpen && (
             <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
               <PrimaryButton className="sm:w-full md:w-52 md:self-end" disabled>
-                {classe.isFull ? "Classe complète" : "Inscriptions désactivées"}
+                {classe.isFull ? "☹ Classe complète" : "Inscriptions désactivées"}
               </PrimaryButton>
-              <span className="md:self-end">Pour plus d'informations contactez votre référent.</span>
+              <span className="text-[13px] md:self-end">Pour plus d'informations contactez votre référent.</span>
             </div>
           )}
           <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={id}></ModalInfo>
