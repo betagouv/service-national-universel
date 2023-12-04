@@ -28,45 +28,47 @@ export default function WaitingAffectation() {
         <img src={heroBanner} />
       </div>
       <Container>
-        <section className="mb-10 max-w-3xl z-40">
-          <header className="md:mt-12 mb-12 space-y-4">
-            <h1 className="m-0 text-3xl md:gap-3 text-gray-600 md:text-4xl md:leading-12 mb-1">Mon séjour de cohésion</h1>
-            <h2 className="m-0 text-3xl md:text-4xl font-bold">{isSejourDateAvailable ? getCohortPeriod(young.cohort) : "à venir"}</h2>
-            {shouldShowChangeStayLink && <ChangeStayLink />}
-          </header>
-          <div className="flex my-4 items-center gap-4 rounded-xl border-[1px] border-gray-200 bg-white p-3">
-            <div className="hidden h-[42px] w-[42px] md:block">
-              <WaitFor />
-            </div>
-            <div>
-              <div className="mb-[1rem] flex items-center gap-4 md:mb-1">
-                <div className="md:hidden">
-                  <WaitFor />
-                </div>
-                <h2 className="m-0 text-lg font-bold">Vous êtes en attente d&apos;affectation à un centre</h2>
+        <section className="flex justify-between">
+          <div className="mb-10 max-w-3xl">
+            <header className="md:mt-12 mb-12">
+              <h1 className="text-4xl md:text-5xl mt-0 mb-3">Mon séjour de cohésion</h1>
+              <h2 className="text-4xl md:text-5xl mt-0 mb-3 font-bold">{isSejourDateAvailable ? getCohortPeriod(young.cohort) : "à venir"}</h2>
+              {shouldShowChangeStayLink && <ChangeStayLink />}
+            </header>
+            <div className="flex my-4 items-center gap-4 rounded-xl border-[1px] border-gray-200 bg-white p-3">
+              <div className="hidden h-[42px] w-[42px] md:block">
+                <WaitFor />
               </div>
-              <p className="text-sm">
-                {isCLE ? (
-                  <>Votre affectation vous sera communiquée par votre établissement scolaire.</>
-                ) : (
-                  <>
-                    Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
-                    préparer votre fiche sanitaire ci-dessous !
-                  </>
-                )}
-              </p>
+              <div>
+                <div className="mb-[1rem] flex items-center gap-4 md:mb-1">
+                  <div className="md:hidden">
+                    <WaitFor />
+                  </div>
+                  <h2 className="m-0 text-lg font-bold">Vous êtes en attente d&apos;affectation à un centre</h2>
+                </div>
+                <p className="text-sm">
+                  {isCLE ? (
+                    <>Votre affectation vous sera communiquée par votre établissement scolaire.</>
+                  ) : (
+                    <>
+                      Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
+                      préparer votre fiche sanitaire ci-dessous !
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
+            {isCLE && (
+              <div className="bg-[#EFF6FF] rounded-xl flex items-center p-3 mt-4">
+                <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
+                <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
+              </div>
+            )}
           </div>
-          {isCLE && (
-            <div className="bg-[#EFF6FF] rounded-xl flex items-center p-3 mt-4">
-              <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
-              <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
-            </div>
-          )}
+          <div className="flex-none hidden md:block">
+            <img src={hero2} width={344} />
+          </div>
         </section>
-        <div className="absolute top-10 right-10">
-          <img src={hero2} className="hidden xl:block" width={344} />
-        </div>
         <Files young={young} />
         <hr className="mx-auto mt-12 mb-7 w-full" />
         <CheckYourSpamSection />
