@@ -11,17 +11,11 @@ const optionalAuth = async (req, _, next) => {
     const token = getToken(req);
     let user;
     if (token) {
-      const jwtPayload = await new Promise((resolve, reject) => {
-        jwt.verify(token, config.secret, function (err, decoded) {
-          if (err) reject(err);
-          resolve(decoded);
-        });
-      });
+      const jwtPayload = await jwt.verify(token, config.secret);
       const { error, value } = Joi.object({ __v: Joi.string().required(), _id: Joi.string().required(), passwordChangedAt: Joi.string(), lastLogoutAt: Joi.date() }).validate({
         ...jwtPayload,
       });
-      if (error) return;
-      if (!checkJwtSigninVersion(value)) return;
+      if (error || !checkJwtSigninVersion(value)) return;
       delete value.__v;
 
       user = await ReferentObject.findOne(value);

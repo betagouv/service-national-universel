@@ -27,12 +27,7 @@ router.get("/signin", async (req, res) => {
 
     const { token_jva } = value;
 
-    const jwtPayload = await new Promise((resolve, reject) => {
-      jwt.verify(token_jva, config.secret, function (err, decoded) {
-        if (err) reject(err);
-        resolve(decoded);
-      });
-    });
+    const jwtPayload = await jwt.verify(token_jva, config.secret);
     if (!jwtPayload) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
     const { error_token, value_token } = Joi.object({
       __v: Joi.string().required(),
@@ -42,8 +37,7 @@ router.get("/signin", async (req, res) => {
     }).validate({
       ...jwtPayload,
     });
-    if (error_token) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
-    if (!checkJwtSigninVersion(value_token)) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    if (error_token || !checkJwtSigninVersion(value_token)) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
     delete value.__v;
 
     const user = await ReferentModel.find(value_token);

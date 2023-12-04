@@ -38,18 +38,16 @@ router.get("/token", async (req, res) => {
   try {
     const token = getToken(req);
     if (!token) return res.status(401).send({ ok: false, user: { restriction: "public" } });
-    const jwtPayload = await new Promise((resolve, reject) => {
-      jwt.verify(token, config.secret, function (err, decoded) {
-        if (err) reject(err);
-        resolve(decoded);
-      });
+
+    const jwtPayload = await jwt.verify(token, config.secret);
+    const schema = Joi.object({
+      __v: Joi.string().required(),
+      _id: Joi.string().required(),
+      passwordChangedAt: Joi.string(),
+      lastLogoutAt: Joi.date(),
     });
-    if (!jwtPayload) return res.status(401).send({ ok: false, user: { restriction: "public" } });
-    const { error, value } = Joi.object({ __v: Joi.string().required(), _id: Joi.string().required(), passwordChangedAt: Joi.string(), lastLogoutAt: Joi.date() }).validate({
-      ...jwtPayload,
-    });
-    if (error) return res.status(401).send({ ok: false, user: { restriction: "public" } });
-    if (!checkJwtSigninVersion(value)) return res.status(401).send({ ok: false, user: { restriction: "public" } });
+    const { error, value } = schema.validate(jwtPayload);
+    if (error || !checkJwtSigninVersion(value)) return res.status(401).json({ ok: false, user: { restriction: "public" } });
     delete value.__v;
 
     const young = await Young.findOne(value);
