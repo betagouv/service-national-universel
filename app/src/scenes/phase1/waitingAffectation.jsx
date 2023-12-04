@@ -19,6 +19,9 @@ export default function WaitingAffectation() {
   const { young, isCLE } = useAuth();
   const shouldShowChangeStayLink = !isCLE && youngCanChangeSession(young);
 
+  const cohortDate = getCohortPeriod(young.cohort);
+  const isSejourDateAvailable = cohortDate !== young.cohort;
+
   return (
     <>
       <div className="relative z-[1] -mb-4 block bg-white md:hidden">
@@ -28,7 +31,7 @@ export default function WaitingAffectation() {
         <section className="mb-10 max-w-3xl z-40">
           <header className="md:mt-12 mb-12 space-y-4">
             <h1 className="m-0 text-3xl md:gap-3 text-gray-600 md:text-4xl md:leading-12 mb-1">Mon séjour de cohésion</h1>
-            <h2 className="m-0 text-3xl md:text-4xl font-bold">{getCohortPeriod(young.cohort)}</h2>
+            <h2 className="m-0 text-3xl md:text-4xl font-bold">{isSejourDateAvailable ? getCohortPeriod(young.cohort) : "à venir"}</h2>
             {shouldShowChangeStayLink && <ChangeStayLink />}
           </header>
           <div className="flex my-4 items-center gap-4 rounded-xl border-[1px] border-gray-200 bg-white p-3">
