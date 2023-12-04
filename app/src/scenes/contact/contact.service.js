@@ -226,3 +226,11 @@ export function getArticles(question) {
 export function getCategoryFromQuestion(question) {
   return questions.find((e) => e.value === question)?.category;
 }
+
+export function getClasseIdFromLink(link) {
+  try {
+    return new URL(link).searchParams.get("id");
+  } catch (e) {
+    return undefined;
+  }
+}

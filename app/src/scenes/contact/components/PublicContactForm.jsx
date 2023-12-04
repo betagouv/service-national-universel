@@ -14,11 +14,14 @@ import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
-export default function PublicContactForm({ category, question, parcours, classeId }) {
+export default function PublicContactForm({ category, question, parcours, classe }) {
   const history = useHistory();
+  const classeString = `Je souhaite m'inscrire au SNU dans le cadre de ma classe engagée : ${classe?.name}, établissement : ${classe?.etablissement}, statut : ${translate(
+    classe?.status,
+  )}.`;
   const { files, addFiles, deleteFile, error } = useFileUpload();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(classe?.id ? classeString : "");
 
   const [role, setRole] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -29,7 +32,7 @@ export default function PublicContactForm({ category, question, parcours, classe
   const disabled = () => {
     if (loading) return true;
     if (!role || !category || !question || !firstName || !lastName || !email || !department) return true;
-    if (!message || !classeId) return true;
+    if (!message) return true;
     return false;
   };
 
@@ -64,7 +67,7 @@ export default function PublicContactForm({ category, question, parcours, classe
         region: department2region[department],
         fromPage: new URLSearchParams(window.location.search).get("from "),
         files: uploadedFiles,
-        classeId,
+        classeId: classe?.id,
       };
 
       const response = await API.post("/zammood/ticket/form", body);

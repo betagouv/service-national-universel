@@ -17,6 +17,7 @@ const useClass = (classeId) => {
   const [{ fullName: referent }] = referents;
   const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
   const classe = {
+    id: classeId,
     name,
     coloration: translateColoration(coloration),
     cohort,
