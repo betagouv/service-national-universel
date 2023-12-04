@@ -14,7 +14,7 @@ import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
-import { STATUS_CLASSE, CLE_COLORATION_LIST, translateColoration } from "snu-lib";
+import { STATUS_CLASSE, CLE_COLORATION, translateColoration } from "snu-lib";
 
 const Title = () => (
   <div>
@@ -79,7 +79,7 @@ const OnBoarding = () => {
       const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
       setClasse({
         name,
-        coloration: translateColoration(CLE_COLORATION_LIST[coloration]),
+        coloration: translateColoration(CLE_COLORATION[coloration]),
         status,
         isFull,
         isInscriptionOpen,
