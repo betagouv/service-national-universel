@@ -19,47 +19,53 @@ export default function WaitingAffectation() {
   const { young, isCLE } = useAuth();
   const shouldShowChangeStayLink = !isCLE && youngCanChangeSession(young);
 
+  const cohortDate = getCohortPeriod(young.cohort);
+  const isSejour = cohortDate !== young.cohort;
+
   return (
     <>
       <div className="relative z-[1] -mb-4 block bg-white md:hidden">
         <img src={heroBanner} />
       </div>
       <Container>
-        <section className="mb-10 max-w-3xl z-40">
-          <header className="md:mt-12 mb-12 space-y-4">
-            <h1 className="m-0 text-3xl md:gap-3 text-gray-600 md:text-4xl md:leading-12 mb-1">Mon séjour de cohésion</h1>
-            <h2 className="m-0 text-3xl md:text-4xl font-bold">{getCohortPeriod(young.cohort)}</h2>
-            {shouldShowChangeStayLink && <ChangeStayLink />}
-          </header>
-          <div className="flex my-4 items-center gap-4 rounded-xl border-[1px] border-gray-200 bg-white p-3">
-            <div className="hidden h-[42px] w-[42px] md:block">
-              <WaitFor />
-            </div>
-            <div>
-              <div className="mb-[1rem] flex items-center gap-4 md:mb-1">
-                <div className="md:hidden">
-                  <WaitFor />
-                </div>
-                <h2 className="m-0 text-lg font-bold">Vous êtes en attente d&apos;affectation à un centre</h2>
+        <section className="mb-8 flex flex-col-reverse items-center justify-between lg:mb-11 lg:flex-row lg:items-center">
+          <article>
+            <h1 className={`mb-4 ${isCLE ? "mt-4" : ""} flex flex-col text-2xl leading-7 md:gap-3 md:text-[44px] md:text-5xl md:leading-12`}>
+              <span>Mon séjour de cohésion</span>
+              <strong className="flex items-center">{isSejour ? cohortDate : "à venir"}</strong>
+            </h1>
+            {shouldShowChangeStayLink ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : <div className="mt-6 md:mt-14"></div>}
+            <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
+              <div className="hidden h-[42px] w-[42px] md:block">
+                <WaitFor />
               </div>
-              <p className="text-sm">
-                {isCLE ? (
-                  <>Votre affectation vous sera communiquée par votre établissement scolaire.</>
-                ) : (
-                  <>
-                    Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
-                    préparer votre fiche sanitaire ci-dessous !
-                  </>
-                )}
-              </p>
+              <div>
+                <div className="mb-[1rem] flex items-center gap-4 md:mb-1">
+                  <div className="md:hidden">
+                    <WaitFor />
+                  </div>
+                  <h2 className="m-0 text-lg font-bold">Vous êtes en attente d&apos;affectation à un centre</h2>
+                </div>
+                <p className="text-sm">
+                  {isCLE ? (
+                    <>Votre affectation vous sera communiquée par votre établissement scolaire.</>
+                  ) : (
+                    <>
+                      Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
+                      préparer votre fiche sanitaire ci-dessous !
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
-          </div>
-          {isCLE && (
-            <div className="bg-[#EFF6FF] rounded-xl flex items-center p-3 mt-4">
-              <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
-              <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
-            </div>
-          )}
+            {isCLE && (
+              <div className="bg-[#EFF6FF] rounded-lg flex items-center justify-center max-w-[688px] leading-5 p-3 mt-4">
+                <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
+                <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
+              </div>
+            )}
+          </article>
+          <img src={hero2} className="-mr-4 hidden md:block" width={344} />
         </section>
         <div className="absolute top-10 right-10">
           <img src={hero2} className="hidden xl:block" width={344} />
