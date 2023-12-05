@@ -3,4 +3,4 @@
   admin_subdomain = "test-admin"
   app_subdomain = "test-app"
   dns_zone = "beta-snu.dev"
-  secret_revision = "2"
+  secret_revision = "1"
