@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { setYoung } from "../../../redux/auth/actions";
-import { capture } from "../../../sentry";
+import { capture, captureMessage } from "../../../sentry";
 import dayjs from "dayjs";
 
 import api from "../../../services/api";
@@ -46,6 +46,12 @@ export default function StepUpload() {
     }
 
     if (recto) {
+      if (!["application/pdf", "image/jpeg", "image/png", "image/jpg"].includes(recto.type)) {
+        captureMessage("CNI recto upload", { extra: { file: recto.name, type: recto.type } });
+        setError({ text: "Le format de votre fichier n'est pas supporté." });
+        resetState();
+        return { ok: false };
+      }
       const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, recto, { category, expirationDate, side: "recto" });
       if (!res.ok) {
         capture(res.code);
@@ -56,9 +62,15 @@ export default function StepUpload() {
     }
 
     if (verso) {
+      if (!["application/pdf", "image/jpeg", "image/png", "image/jpg"].includes(verso.type)) {
+        captureMessage("CNI verso upload", { extra: { file: verso.name, type: verso.type } });
+        setError({ text: "Le format de votre fichier n'est pas supporté." });
+        resetState();
+        return { ok: false };
+      }
       const res = await api.uploadFiles(`/young/${young._id}/documents/cniFiles`, verso, { category, expirationDate, side: "verso" });
       if (!res.ok) {
-        capture(res.code);
+        capture(res.code); // UNSUPPORTED_TYPE
         setError({ text: "Une erreur s'est produite lors du téléversement de votre fichier." });
         resetState();
         return { ok: false };
@@ -72,13 +84,13 @@ export default function StepUpload() {
     try {
       setLoading(true);
 
-      const { ok: uploadOk } = await uploadFiles();
+      const { ok: uploadOk } = await uploadFiles(resetState);
       if (!uploadOk) return;
 
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/next", { date: expirationDate, latestCNIFileCategory: category });
 
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: code });
         resetState();
         return;
@@ -100,13 +112,13 @@ export default function StepUpload() {
     try {
       setLoading(true);
 
-      const { ok: uploadOk } = await uploadFiles();
+      const { ok: uploadOk } = await uploadFiles(resetState);
       if (!uploadOk) return;
 
       const data = { latestCNIFileExpirationDate: date, latestCNIFileCategory: category };
       const { ok, code, data: responseData } = await api.put("/young/inscription2023/documents/correction", data);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         setError({ text: "Une erreur s'est produite lors de la mise à jour de vos données.", subText: translate(code) });
         setLoading(false);
         return;

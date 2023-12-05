@@ -12,7 +12,6 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ModalRecap from "../components/ModalRecap";
-import { environment } from "../../../config";
 import { PaddedContainer } from "@snu/ds/dsfr";
 
 import IconFrance from "../../../assets/IconFrance";
@@ -101,7 +100,7 @@ export default function StepEligibilite() {
       return;
     }
 
-    if (isLoggedIn && environment !== "production") {
+    if (isLoggedIn) {
       setConfirmationModal({
         isOpen: true,
         onConfirm: onSubmit,
@@ -121,7 +120,7 @@ export default function StepEligibilite() {
       } else {
         const { ok, code } = await api.put("/young/reinscription/not-eligible");
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           setError({ text: "Impossible de vérifier votre éligibilité" });
           return;
         }
@@ -151,7 +150,7 @@ export default function StepEligibilite() {
     });
 
     if (!ok) {
-      capture(code);
+      capture(new Error(code));
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
@@ -160,7 +159,7 @@ export default function StepEligibilite() {
       if (isLoggedIn) {
         const { ok, data, code } = await api.put("/young/reinscription/not-eligible");
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           setError({ text: "Impossible de vérifier votre éligibilité" });
           setLoading(false);
           return;

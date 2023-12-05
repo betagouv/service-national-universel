@@ -8,7 +8,7 @@ export default function GroupCreator({ group, className = "", onCreate }) {
   const [volume, setVolume] = useState(group.youngsVolume);
 
   useEffect(() => {
-    setVolume(Math.max(1, group.youngsVolume));
+    setVolume(Math.max(0, group.youngsVolume));
   }, [group]);
 
   function cancelCreation() {
@@ -24,7 +24,7 @@ export default function GroupCreator({ group, className = "", onCreate }) {
   }
 
   function changeVolume(vol) {
-    setVolume(Math.max(1, vol));
+    setVolume(Math.max(0, vol));
   }
 
   return (

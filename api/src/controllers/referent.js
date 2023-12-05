@@ -48,7 +48,8 @@ const {
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } = require("../utils/serializer");
-const { cookieOptions, JWT_MAX_AGE, COOKIE_MAX_AGE, TRUST_TOKEN_MAX_AGE } = require("../cookie-options");
+const { JWT_SIGNIN_MAX_AGE } = require("../jwt-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../cookie-options");
 const {
   ROLES_LIST,
   canInviteUser,
@@ -58,6 +59,7 @@ const {
   SUB_ROLES,
   ROLES,
   canUpdateReferent,
+  canUpdateMyself,
   canViewYoungMilitaryPreparationFile,
   canSigninAs,
   canGetReferentByEmail,
@@ -142,12 +144,22 @@ router.post("/logout", passport.authenticate("referent", { session: false, failW
 router.post("/signup", async (req, res) => {
   try {
     const { error, value } = Joi.object({
+      // referent
       email: Joi.string().lowercase().trim().email().required(),
       firstName: Joi.string().lowercase().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
       acceptCGU: Joi.string().required(),
       phone: Joi.string().required(),
+      // structure
+      name: Joi.string().required(),
+      description: Joi.string().allow(null, ""),
+      legalStatus: Joi.string().required(),
+      types: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      zip: Joi.string().required(),
+      region: Joi.string().required(),
+      department: Joi.string().required(),
+      sousType: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate(req.body);
@@ -163,8 +175,25 @@ router.post("/signup", async (req, res) => {
     const role = ROLES.RESPONSIBLE; // responsible by default
 
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
-    const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_MAX_AGE });
-    res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
+    const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+
+    //Create structure
+    const { name, description, legalStatus, types, zip, region, department, sousType } = value;
+    const structure = await StructureModel.create({
+      name,
+      description,
+      legalStatus,
+      types,
+      zip,
+      region,
+      department,
+      sousType,
+    });
+
+    //Update user with structureId
+    user.set({ structureId: structure._id });
+    await user.save({ fromUser: user });
 
     return res.status(200).send({ user, token, ok: true });
   } catch (error) {
@@ -194,10 +223,10 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 
     if (!canSigninAs(req.user, user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_MAX_AGE });
-    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(JWT_MAX_AGE));
+    const token = jwt.sign({ _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE });
+    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
     else if (type === "young") {
-      res.cookie("jwt_young", token, cookieOptions(JWT_MAX_AGE));
+      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
       return res.status(200).send({ ok: true });
     }
 
@@ -377,7 +406,7 @@ router.post("/signup_invite", async (req, res) => {
     });
 
     const token = jwt.sign({ _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_MAX_AGE));
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
@@ -1073,6 +1102,10 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     }
     const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateMyself({ actor: user, modifiedTarget: req.user })) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     user.set(value);
     user.set(cleanReferentData(user));

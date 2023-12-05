@@ -26,12 +26,10 @@ export default function Signup() {
   const user = useSelector((state) => state.Auth.user);
   if (user) return <Redirect to="/" />;
 
-  const createStructure = async (structureData) => {
+  const getStructure = (structureData) => {
     const region = getRegionByZip(structureData.zip);
     const department = getDepartmentByZip(structureData.zip);
-    const { data, ok, code } = await api.post("/structure", { ...structureData, region, department });
-    if (!ok) return toastr.error("Une erreur s'est produite lors de l'initialisation de votre structure", translate(code));
-    return data._id;
+    return { ...structureData, region, department };
   };
 
   return (
@@ -54,7 +52,23 @@ export default function Signup() {
         onSubmit={async (values, actions) => {
           try {
             const { firstName, lastName, email, password, acceptCGU, phone } = values?.user || {};
-            const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password, acceptCGU, phone });
+            const { name, description, legalStatus, types, zip, region, department, sousType } = getStructure(values?.structure || {});
+            const { user, token, code, ok } = await api.post(`/referent/signup`, {
+              firstName,
+              lastName,
+              email,
+              password,
+              acceptCGU,
+              phone,
+              name,
+              description,
+              legalStatus,
+              types,
+              zip,
+              region,
+              department,
+              sousType,
+            });
             if (!ok) {
               if (code === "PASSWORD_NOT_VALIDATED")
                 return toastr.error(
@@ -67,11 +81,6 @@ export default function Signup() {
             }
             setNewUser(user);
             if (token) api.setToken(token);
-            const structureId = await createStructure(values?.structure);
-            const responseResponsableUpdated = await api.put("/referent", { structureId });
-            if (!responseResponsableUpdated.ok)
-              return toastr.error("Une erreur s'est produite lors de l'affiliation de la structure :", translate(responseResponsableUpdated.code));
-            setNewUser(responseResponsableUpdated.data);
           } catch (e) {
             if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
             capture(e);

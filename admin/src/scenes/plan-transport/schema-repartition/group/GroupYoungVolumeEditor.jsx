@@ -13,6 +13,15 @@ export default function GroupYoungVolumeEditor({ value, className = "", onChange
     onChange && onChange(parseInt(value) + 1);
   }
 
+  const integerRegex = /^\d*$/; // Regex for integer numbers
+
+  function handleInputChange(e) {
+    const newValue = e.target.value;
+    if (integerRegex.test(newValue)) {
+      onChange && onChange(newValue);
+    }
+  }
+
   return (
     <div className={`flex items-center justify-between border-y border-y-[#E5E7EB] p-[19px] ${className}`}>
       <div className="grow">
@@ -26,10 +35,9 @@ export default function GroupYoungVolumeEditor({ value, className = "", onChange
           <Minus />
         </div>
         <input
-          type="number"
+          type="text"
           value={value}
-          onChange={(e) => onChange && onChange(e.target.value)}
-          min={1}
+          onChange={(e) => onChange && handleInputChange(e)}
           className="mx-[8px] w-[70px] appearance-none rounded-[8px] border-[1px] border-[#E5E7EB] bg-[#FFFFFF] px-[16px] text-[14px] text-[#19181A]"
         />
         <div

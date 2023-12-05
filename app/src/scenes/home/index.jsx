@@ -33,7 +33,7 @@ export default function Home() {
     try {
       const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       setReinscriptionOpen(data);

@@ -18,7 +18,7 @@ export default function application({ application, index, onChange, loading }) {
     (async () => {
       const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       setMission(data);

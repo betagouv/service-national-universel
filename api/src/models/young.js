@@ -454,14 +454,6 @@ const Schema = new mongoose.Schema({
       description: "Mot de passe du volontaire",
     },
   },
-  // ! To delete if trust_token works
-  userIps: {
-    type: [String],
-    default: [],
-    documentation: {
-      description: "Liste des IP utilisées par l'utilisateur",
-    },
-  },
   token2FA: {
     type: String,
     default: "",

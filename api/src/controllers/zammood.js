@@ -10,7 +10,7 @@ const { v4: uuid } = require("uuid");
 const { ROLES, SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 const slack = require("../slack");
-const { cookieOptions, COOKIE_MAX_AGE_2H } = require("../cookie-options");
+const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE } = require("../cookie-options");
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
@@ -59,7 +59,7 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
     const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    res.cookie("jwtzamoud", token, cookieOptions(COOKIE_MAX_AGE_2H));
+    res.cookie("jwtzamoud", token, cookieOptions(COOKIE_SNUPPORT_MAX_AGE));
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

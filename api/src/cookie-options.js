@@ -1,10 +1,10 @@
 const config = require("./config");
 
-// It seems session length is broken, we should investigate.
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 30 * 1000; // 1month
-const COOKIE_MAX_AGE_2H = 60 * 60 * 2 * 1000; //2h
-const JWT_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
-const TRUST_TOKEN_MAX_AGE = 60 * 60 * 24 * 30 * 1000; // 1 mois
+//!COOKIE need to be in milliseconds
+const COOKIE_SIGNIN_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
+const COOKIE_SNUPPORT_MAX_AGE = 60 * 60 * 2 * 1000; //2h
+const COOKIE_TRUST_TOKEN_JWT_MAX_AGE = 60 * 60 * 24 * 30 * 1000; // 1 mois
+//!COOKIE need to be in milliseconds
 
 function cookieOptions(maxAge) {
   if (config.ENVIRONMENT === "development") {
@@ -28,9 +28,8 @@ function logoutCookieOptions() {
 
 module.exports = {
   cookieOptions,
-  COOKIE_MAX_AGE,
-  JWT_MAX_AGE,
-  TRUST_TOKEN_MAX_AGE,
-  COOKIE_MAX_AGE_2H,
   logoutCookieOptions,
+  COOKIE_SIGNIN_MAX_AGE,
+  COOKIE_SNUPPORT_MAX_AGE,
+  COOKIE_TRUST_TOKEN_JWT_MAX_AGE,
 };

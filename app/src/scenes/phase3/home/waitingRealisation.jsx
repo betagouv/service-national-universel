@@ -19,18 +19,16 @@ export default function WaitingRealisation() {
 
   useEffect(() => {
     (async () => {
-      if (programs.length) return;
       const { data, ok } = await api.get("/program");
       if (!ok) return toastr.error("Une erreur est survenue.");
       setPrograms(data);
     })();
     (async () => {
-      if (data.hits?.length) return;
       if (!young.location?.lat) return;
       const filters = {
         location: {
-          lat: young?.location?.lat,
-          lon: young?.location?.lon,
+          lat: young.location.lat,
+          lon: young.location.lon,
         },
         distance: 0,
       };
@@ -38,7 +36,7 @@ export default function WaitingRealisation() {
       if (!res?.data) return toastr.error("Oups, une erreur est survenue lors de la recherche des missions");
       setData(res.data);
     })();
-  }, [young.location.lat, young.location.lon]);
+  }, []);
 
   return (
     <HeroContainer>
@@ -62,7 +60,7 @@ export default function WaitingRealisation() {
         <Row>
           {programs.slice(0, 3).map((p, i) => (
             <Col key={i}>
-              <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../assets/programmes-engagement/${p.imageString}`]?.default} />
+              <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../../assets/programmes-engagement/${p.imageString}`]?.default} />
             </Col>
           ))}
         </Row>

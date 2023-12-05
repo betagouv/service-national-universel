@@ -6,7 +6,7 @@ import { debounce } from "@/utils";
 
 export default function AsyncCombobox({ label, hint = "Aucun résultat.", getOptions, value, onChange, errorMessage }) {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState(value);
+  const [query, setQuery] = useState();
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);

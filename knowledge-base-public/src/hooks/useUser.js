@@ -13,6 +13,9 @@ const useUser = ({ redirectOnLoggedOut = "/base-de-connaissance" } = {}) => {
   const isLoading = !error && !data;
   const user = data && data?.ok ? { ...data.user, isLoggedIn: true } : { restriction: "public", isLoggedIn: false };
 
+  if (user.role === "administrateur_cle") user.role = `${user.role}_${user.subRole}`;
+  if (!user.role && user.source == "CLE") user.role = "young_cle";
+
   useEffect(() => {
     if (redirectOnLoggedOut && !isLoading && !user.isLoggedIn && user.restriction !== "public") {
       router.push(redirectOnLoggedOut);
@@ -21,7 +24,8 @@ const useUser = ({ redirectOnLoggedOut = "/base-de-connaissance" } = {}) => {
 
   const restriction = useMemo(() => {
     if (!user) return "public";
-    if (!["admin", "referent_region", "referent_department"].includes(user.role)) return user.allowedRole || "public";
+    if (!["admin", "referent_region", "referent_department", "administrateur_cle_referent_etablissement", "administrateur_cle_coordinateur_cle"].includes(user.role))
+      return user.allowedRole || "public";
     if (seeAs) return seeAs;
     return user.allowedRole || "public";
   }, [user?.allowedRole, seeAs]);

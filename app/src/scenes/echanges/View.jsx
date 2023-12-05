@@ -99,7 +99,7 @@ export default function TicketView(props) {
       const id = props.match?.params?.id;
       const { ok, code } = await API.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         setSending(false);
         toastr.error("Oups, une erreur est survenue", translate(code));
       }
