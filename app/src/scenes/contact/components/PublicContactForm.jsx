@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { department2region, translate } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
-import { categories, departmentOptions, getQuestionOptions, roleOptions } from "../contact.service";
+import { categories, departmentOptions, getClasseIdFromLink, getQuestions, roleOptions } from "../contact.service";
+import useClass from "@/services/useClass";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
@@ -13,21 +14,26 @@ import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
 import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import MyClass from "@/scenes/cle/MyClass";
 
-export default function PublicContactForm({ category, question, parcours, classe }) {
+export default function PublicContactForm({ category, question, parcours }) {
   const history = useHistory();
-  const classeString = `Je souhaite m'inscrire au SNU dans le cadre de ma classe engagée : ${classe?.name}, établissement : ${classe?.etablissement}, statut : ${translate(
-    classe?.status,
-  )}.`;
   const { files, addFiles, deleteFile, error } = useFileUpload();
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState(classe?.id ? classeString : "");
 
+  const [loading, setLoading] = useState(false);
+  const [link, setLink] = useState("");
   const [role, setRole] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [department, setDepartment] = useState("");
   const [email, setEmail] = useState("");
+
+  const params = new URLSearchParams(window.location.search);
+  const classeIdFromURL = params.get("classeId");
+  const classeIdFromLink = getClasseIdFromLink(link);
+  const classeId = classeIdFromURL || classeIdFromLink;
+  const { classe, isPending, isError } = useClass(classeId);
+  const [message, setMessage] = useState("");
 
   const disabled = () => {
     if (loading) return true;
@@ -36,7 +42,14 @@ export default function PublicContactForm({ category, question, parcours, classe
     return false;
   };
 
-  const questionOptions = getQuestionOptions(category, "public", parcours);
+  const questions = getQuestions(category, "public", parcours);
+
+  useEffect(() => {
+    if (classe?.name && classe?.etablissement) {
+      const classeString = `Je souhaite m'inscrire au SNU dans le cadre de ma classe engagée : ${classe?.name}, établissement : ${classe?.etablissement}.`;
+      setMessage(classeString);
+    }
+  }, [classe?.name, classe?.etablissement]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,7 +68,7 @@ export default function PublicContactForm({ category, question, parcours, classe
 
       let body = {
         message,
-        subject: `${categories.find((e) => e.value === category)?.label} - ${questionOptions.find((e) => e.value === question)?.label}`,
+        subject: `${categories.find((e) => e.value === category)?.label} - ${questions.find((e) => e.value === question)?.label}`,
         firstName,
         lastName,
         email,
@@ -85,34 +98,55 @@ export default function PublicContactForm({ category, question, parcours, classe
   };
 
   return (
-    <form onSubmit={handleSubmit} disabled={disabled()} autoComplete="on">
-      <Select label="Je suis" name="Role" options={roleOptions} value={role} onChange={setRole} />
+    <>
+      {/* Classe */}
+      {question === "HTS_TO_CLE" && !classeIdFromURL && (
+        <>
+          <label className="w-full">
+            Lien transmis par le référent
+            <Input value={link} onChange={setLink} name="link" />
+          </label>
+          {link && !classeIdFromLink && (
+            <ErrorMessage>Ce lien semble invalide. Veuillez vérifier que vous avez bien copié l'URL complète du lien qui vous a été transmis.</ErrorMessage>
+          )}
+        </>
+      )}
+      {question === "HTS_TO_CLE" && classeId && (
+        <div className="flex items-center border my-12 px-8 py-4">
+          {isPending && <p className="animate-pulse text-center">Chargement de la classe...</p>}
+          {isError && <p className="text-center">Impossible de récupérer les informations de votre classe engagée 🤔</p>}
+          {classe && <MyClass classe={classe} />}
+        </div>
+      )}
+      <form onSubmit={handleSubmit} disabled={disabled()} autoComplete="on">
+        <Select label="Je suis" name="Role" options={roleOptions} value={role} onChange={setRole} />
 
-      <label className="w-full">
-        Nom du volontaire
-        <Input value={firstName} onChange={setFirstName} name="lastname" required />
-      </label>
+        <label className="w-full">
+          Nom du volontaire
+          <Input value={firstName} onChange={setFirstName} name="lastname" required />
+        </label>
 
-      <label className="w-full mt-8">
-        Prénom du volontaire
-        <Input value={lastName} onChange={setLastName} name="firstname" required />
-      </label>
+        <label className="w-full mt-8">
+          Prénom du volontaire
+          <Input value={lastName} onChange={setLastName} name="firstname" required />
+        </label>
 
-      <label className="w-full my-8">
-        E-mail du volontaire
-        <Input label="Votre email" type="email" value={email} onChange={setEmail} name="email" autocomplete="on" required />
-      </label>
+        <label className="w-full my-8">
+          E-mail du volontaire
+          <Input label="Votre email" type="email" value={email} onChange={setEmail} name="email" autocomplete="on" required />
+        </label>
 
-      <br />
-      <SearchableSelect label="Département" options={departmentOptions} value={department} onChange={setDepartment} required />
+        <br />
+        <SearchableSelect label="Département" options={departmentOptions} value={department} onChange={setDepartment} required />
 
-      <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
-      <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
-      <ErrorMessage error={error} />
-      <hr />
-      <Button type="submit" className="my-8 ml-auto" disabled={disabled()}>
-        Envoyer
-      </Button>
-    </form>
+        <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
+        <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
+        <ErrorMessage error={error} />
+        <hr />
+        <Button type="submit" className="my-8 ml-auto" disabled={disabled()}>
+          Envoyer
+        </Button>
+      </form>
+    </>
   );
 }

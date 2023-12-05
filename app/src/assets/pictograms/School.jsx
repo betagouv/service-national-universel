@@ -1,8 +1,8 @@
 import React from "react";
 
-export default function SchoolPictogram({ className }) {
+export default function SchoolPictogram() {
   return (
-    <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         fillRule="evenodd"
         clipRule="evenodd"

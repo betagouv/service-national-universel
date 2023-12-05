@@ -208,7 +208,7 @@ export const questions = [
  * @param {"CLE"|"VOLONTAIRE"} parcours
  * @returns list of available questions
  */
-export function getQuestionOptions(category, role, parcours) {
+export function getQuestions(category, role, parcours) {
   let res = questions;
   if (category) res = res.filter((e) => e.category === category);
   if (role) res = res.filter((e) => e.roles.includes(role));
