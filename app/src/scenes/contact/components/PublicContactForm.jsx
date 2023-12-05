@@ -27,13 +27,15 @@ export default function PublicContactForm({ category, question, parcours }) {
   const [lastName, setLastName] = useState("");
   const [department, setDepartment] = useState("");
   const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
 
   const params = new URLSearchParams(window.location.search);
   const classeIdFromURL = params.get("classeId");
   const classeIdFromLink = getClasseIdFromLink(link);
   const classeId = classeIdFromURL || classeIdFromLink;
   const { classe, isPending, isError } = useClass(classeId);
-  const [message, setMessage] = useState("");
+
+  const questions = getQuestions(category, "public", parcours);
 
   const disabled = () => {
     if (loading) return true;
@@ -41,8 +43,6 @@ export default function PublicContactForm({ category, question, parcours }) {
     if (!message) return true;
     return false;
   };
-
-  const questions = getQuestions(category, "public", parcours);
 
   useEffect(() => {
     if (classe?.name && classe?.etablissement) {
@@ -66,7 +66,7 @@ export default function PublicContactForm({ category, question, parcours }) {
         uploadedFiles = filesResponse.data;
       }
 
-      let body = {
+      const response = await API.post("/zammood/ticket/form", {
         message,
         subject: `${categories.find((e) => e.value === category)?.label} - ${questions.find((e) => e.value === question)?.label}`,
         firstName,
@@ -81,9 +81,7 @@ export default function PublicContactForm({ category, question, parcours }) {
         fromPage: new URLSearchParams(window.location.search).get("from "),
         files: uploadedFiles,
         classeId: classe?.id,
-      };
-
-      const response = await API.post("/zammood/ticket/form", body);
+      });
 
       if (!response.ok) {
         setLoading(false);
@@ -98,8 +96,7 @@ export default function PublicContactForm({ category, question, parcours }) {
   };
 
   return (
-    <>
-      {/* Classe */}
+    <form onSubmit={handleSubmit} disabled={disabled()} autoComplete="on">
       {question === "HTS_TO_CLE" && !classeIdFromURL && (
         <>
           <label className="w-full">
@@ -118,35 +115,33 @@ export default function PublicContactForm({ category, question, parcours }) {
           {classe && <MyClass classe={classe} />}
         </div>
       )}
-      <form onSubmit={handleSubmit} disabled={disabled()} autoComplete="on">
-        <Select label="Je suis" name="Role" options={roleOptions} value={role} onChange={setRole} />
+      <Select label="Je suis" name="Role" options={roleOptions} value={role} onChange={setRole} />
 
-        <label className="w-full">
-          Nom du volontaire
-          <Input value={firstName} onChange={setFirstName} name="lastname" required />
-        </label>
+      <label className="w-full">
+        Nom du volontaire
+        <Input value={firstName} onChange={setFirstName} name="lastname" required />
+      </label>
 
-        <label className="w-full mt-8">
-          Prénom du volontaire
-          <Input value={lastName} onChange={setLastName} name="firstname" required />
-        </label>
+      <label className="w-full mt-8">
+        Prénom du volontaire
+        <Input value={lastName} onChange={setLastName} name="firstname" required />
+      </label>
 
-        <label className="w-full my-8">
-          E-mail du volontaire
-          <Input label="Votre email" type="email" value={email} onChange={setEmail} name="email" autocomplete="on" required />
-        </label>
+      <label className="w-full my-8">
+        E-mail du volontaire
+        <Input label="Votre email" type="email" value={email} onChange={setEmail} name="email" autocomplete="on" required />
+      </label>
 
-        <br />
-        <SearchableSelect label="Département" options={departmentOptions} value={department} onChange={setDepartment} required />
+      <br />
+      <SearchableSelect label="Département" options={departmentOptions} value={department} onChange={setDepartment} required />
 
-        <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
-        <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
-        <ErrorMessage error={error} />
-        <hr />
-        <Button type="submit" className="my-8 ml-auto" disabled={disabled()}>
-          Envoyer
-        </Button>
-      </form>
-    </>
+      <Textarea label="Votre message" value={message} onChange={(e) => setMessage(e.target.value)} />
+      <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
+      <ErrorMessage error={error} />
+      <hr />
+      <Button type="submit" className="my-8 ml-auto" disabled={disabled()}>
+        Envoyer
+      </Button>
+    </form>
   );
 }
