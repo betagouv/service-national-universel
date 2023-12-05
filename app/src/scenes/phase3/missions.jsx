@@ -12,8 +12,6 @@ import { useSelector } from "react-redux";
 import { Col, Container, CustomInput, Row } from "reactstrap";
 import MissionCard from "./components/missionCard";
 import Pagination from "../../components/nav/Pagination";
-import { Link } from "react-router-dom";
-import { HeroContainer } from "@/components/Content";
 
 export default function MissionsComponent() {
   const young = useSelector((state) => state.Auth.young);
@@ -49,12 +47,11 @@ export default function MissionsComponent() {
   );
 
   useEffect(() => {
-    if (!young.location?.lat) return;
     updateOnFilterChange(filters, page, size, sort, setData);
   }, [filters, page, size, sort]);
 
   return (
-    <HeroContainer>
+    <div>
       <Missions>
         <Heading>
           <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
@@ -95,15 +92,6 @@ export default function MissionsComponent() {
           </DomainsFilter>
         </Filters>
 
-        {!young.location?.lat ? (
-          <div className="flex flex-col gap-2 w-full justify-center items-center">
-            <p className="text-center text-sm text-gray-600">Veuillez valider votre adresse pour trouver des missions près de chez vous.</p>
-            <Link className="text-blue-600 cursor-pointer text-center" to="/account/general">
-              Cliquez ici pour valider votre adresse
-            </Link>
-          </div>
-        ) : null}
-
         {data?.total ? (
           <>
             <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
@@ -131,7 +119,7 @@ export default function MissionsComponent() {
           </>
         ) : null}
       </Missions>
-    </HeroContainer>
+    </div>
   );
 }
 

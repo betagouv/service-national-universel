@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
 import CreatableSelect from "../../../components/CreatableSelect";
 import Input from "./Input";
@@ -7,33 +7,12 @@ import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
 import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
-import { toastr } from "react-redux-toastr";
 
 export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
-  const [loading, setLoading] = useState(false);
-  const [city, setCity] = useState(getInitialSchoolValue());
-  const [schoolOptions, setSchoolOptions] = useState([]);
+  const [city, setCity] = useState(school?.city);
+  const [schools, setSchools] = useState([]);
   const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
   const [manualSchool, setManualSchool] = useState(school ?? {});
-
-  function getInitialSchoolValue() {
-    if (school?.city && school?.departmentName) {
-      return { label: school.city + " - " + school.departmentName, value: [school.city, school.departmentName] };
-    }
-    return null;
-  }
-
-  async function fetchSchools(city) {
-    try {
-      setLoading(true);
-      const schools = await getSchools(city);
-      setSchoolOptions(schools);
-    } catch (e) {
-      toastr.error("Erreur", "Une erreur est survenue lors de la recherche", { timeOut: 10_000 });
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleChangeCity(city) {
     if (!city) {
@@ -43,19 +22,8 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
     onSelectSchool(undefined);
     setCity(city);
     if (!city?.value.length === 2) return;
-    await fetchSchools(city);
-  }
-
-  useEffect(() => {
-    if (city?.value[0] && city?.value[1] && !loading && !schoolOptions.length) {
-      fetchSchools(city);
-    }
-  }, [city, loading, schoolOptions]);
-
-  function formatSchoolName(school) {
-    if (!school?.fullName) return "";
-    if (!school?.adresse) return school.fullName;
-    return school.fullName + " - " + school.adresse;
+    const schools = await getSchools(city);
+    setSchools(schools);
   }
 
   return manualFilling ? (
@@ -97,13 +65,13 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <AsyncCombobox label="Rechercher une commune" hint="Aucune commune trouvée." getOptions={getCities} value={city} onChange={handleChangeCity} error={errors.city} />
       <CreatableSelect
         label="Nom de l'établissement"
-        value={formatSchoolName(school)}
-        options={schoolOptions
+        value={school?.fullName && `${school.fullName} - ${school.adresse}`}
+        options={schools
           .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
           .sort()
           .map((c) => ({ value: c, label: c }))}
         onChange={(value) => {
-          onSelectSchool(schoolOptions.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
+          onSelectSchool(schools.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
         }}
         placeholder="Sélectionnez un établissement"
         onCreateOption={(value) => {

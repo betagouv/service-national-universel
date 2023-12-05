@@ -657,11 +657,16 @@ function validateSelf(referent) {
       lastName: Joi.string().uppercase().allow(null, ""),
       email: Joi.string().lowercase().trim().email().allow(null, ""),
       password: Joi.string().allow(null, ""),
+      region: Joi.string().allow(null, ""),
+      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"]),
+      cohesionCenterId: Joi.string().allow(null, ""),
+      cohesionCenterName: Joi.string().allow(null, ""),
       phone: Joi.string().allow(null, ""),
       mobile: Joi.string().allow(null, ""),
+      structureId: Joi.string().allow(null, ""),
     })
     .validate(referent, { stripUnknown: true });
 }

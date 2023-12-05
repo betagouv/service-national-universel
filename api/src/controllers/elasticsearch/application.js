@@ -43,7 +43,7 @@ async function populateApplications(applications, exportFields) {
   return applications;
 }
 
-router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
     // Configuration
@@ -99,7 +99,7 @@ router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["re
   }
 });
 
-router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:action(search|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
     // Configuration
@@ -210,7 +210,7 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
   }
 });
 
-router.post("/count-by-status", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/count-by-status", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
     // Configuration

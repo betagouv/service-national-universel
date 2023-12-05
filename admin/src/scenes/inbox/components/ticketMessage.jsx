@@ -62,7 +62,7 @@ export default function TicketMessage({ ticket: propTicket }) {
     if (!message) return setSending(false);
     const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message });
     if (!ok) {
-      capture(new Error(code));
+      capture(code);
       toastr.error("Oups, une erreur est survenue", translate(code));
     }
     setMessage("");

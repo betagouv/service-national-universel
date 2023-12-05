@@ -40,7 +40,7 @@ const {
   updateSeatsTakenInBusLine,
 } = require("../../utils");
 const { sendTemplate, unsync } = require("../../sendinblue");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../../cookie-options");
+const { cookieOptions, COOKIE_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
@@ -136,7 +136,7 @@ router.post("/signup_invite", async (req, res) => {
     young.set({ invitationExpires: null });
 
     const token = jwt.sign({ _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
-    res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+    res.cookie("jwt_young", token, cookieOptions(COOKIE_MAX_AGE));
 
     await young.save({ fromUser: req.user });
 

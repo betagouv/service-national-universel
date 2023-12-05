@@ -107,11 +107,11 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER] = async (user) =
           track_total_hits: 1000, // We don't need the exact number of hits when more than 1000.
           query: {
             bool: {
-              must: [{ terms: { "department.keyword": user.role === ROLES.REFERENT_DEPARTMENT ? user.department : region2department[user.region] } }],
+              must: { match_all: {} },
               filter: {
-                nested: {
-                  path: "representantEtat",
-                  query: { bool: { must_not: { exists: { field: "representantEtat.email.keyword" } } } },
+                bool: {
+                  must: [{ terms: { "department.keyword": user.role === ROLES.REFERENT_DEPARTMENT ? user.department : region2department[user.region] } }],
+                  must_not: { exists: { field: "representantEtat.email.keyword" } },
                 },
               },
             },

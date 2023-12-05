@@ -166,7 +166,7 @@ const ChefCenterBlock = ({ headCenterId }) => {
     (async () => {
       const { ok, data, code } = await api.get(`/referent/${headCenterId}`);
       if (!ok) {
-        capture(new Error(code));
+        capture(code);
         return toastr.error("Oups, une erreur est survenue", code);
       }
       setChefCenter(data);

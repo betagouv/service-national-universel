@@ -19,7 +19,7 @@ export default function History({ young, onChange }) {
       let { ok, data } = await api.get(`/application/${applicationId}/contract`);
       if (!ok) {
         return;
-        // capture(new Error(code));
+        // capture(code);
         // return toastr.error("Oups, une erreur est survenue", code);
       }
 
@@ -29,7 +29,7 @@ export default function History({ young, onChange }) {
       if (!young) return;
       let { ok, data, code } = await api.get(`/application/${applicationId}`);
       if (!ok) {
-        capture(new Error(code));
+        capture(code);
         return toastr.error("Oups, une erreur est survenue", code);
       }
 

@@ -57,7 +57,7 @@ export default function StepDocuments() {
       data: responseData,
     } = await api.put("/young/inscription2023/documents/next", { date: young.latestCNIFileExpirationDate, latestCNIFileCategory: young?.latestCNIFileCategory });
     if (!ok) {
-      capture(new Error(code));
+      capture(code);
       setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
       return;
     }

@@ -23,7 +23,7 @@ export default function application({ application: propsApplication, index, onCh
     (async () => {
       const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
       if (!ok) {
-        capture(new Error(code));
+        capture(code);
         return toastr.error("Oups, une erreur est survenue", code);
       }
       setMission(data);

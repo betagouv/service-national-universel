@@ -8,7 +8,7 @@ export default function GroupUpdateYoungCounts({ group, className = "", onChange
   const [volume, setVolume] = useState(group.youngsVolume);
 
   useEffect(() => {
-    setVolume(Math.max(0, group.youngsVolume));
+    setVolume(Math.max(1, group.youngsVolume));
   }, [group]);
 
   function save() {
@@ -16,7 +16,7 @@ export default function GroupUpdateYoungCounts({ group, className = "", onChange
   }
 
   function changeVolume(vol) {
-    setVolume(Math.max(0, vol));
+    setVolume(Math.max(1, vol));
   }
 
   return (

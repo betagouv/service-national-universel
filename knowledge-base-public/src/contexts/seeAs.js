@@ -3,20 +3,7 @@ import React, { useState } from "react";
 const SeeAsContext = React.createContext({});
 
 // FIXME: find a way to get roles defined for the organisation on admin side
-const roles = [
-  "admin",
-  "referent",
-  "structure",
-  "head_center",
-  "young",
-  "young_cle",
-  "public",
-  "visitor",
-  "dsnj",
-  "administrateur_cle_coordinateur_cle",
-  "administrateur_cle_referent_etablissement",
-  "referent_classe",
-];
+const roles = ["admin", "referent", "structure", "head_center", "young", "public", "visitor", "dsnj"];
 
 export const SeeAsProvider = ({ children }) => {
   const [seeAs, setSeeAsState] = useState(() => {
@@ -26,7 +13,6 @@ export const SeeAsProvider = ({ children }) => {
 
   const setSeeAs = (role) => {
     setSeeAsState(role);
-
     window.sessionStorage.setItem("snu-base-de-connaissancesee-as", role);
   };
 

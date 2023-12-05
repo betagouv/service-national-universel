@@ -84,7 +84,7 @@ export default function Signin() {
       try {
         const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen`);
         if (!ok) {
-          capture(new Error(code));
+          capture(code);
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setInscriptionOpen(data);

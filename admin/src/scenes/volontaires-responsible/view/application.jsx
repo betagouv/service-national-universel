@@ -79,7 +79,7 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
       if (code === "INVALID_PARAMS") {
         return toastr.error("Mauvaise URL", "Cette URL n'est pas valide");
       }
-      capture(new Error(code));
+      capture(code);
       return toastr.error("Oups, une erreur est survenue", code);
     }
 
@@ -94,7 +94,7 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
     if (!application?.missionId) return;
     const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
     if (!ok) {
-      capture(new Error(code));
+      capture(code);
       return toastr.error("Oups, une erreur est survenue", code);
     }
     setMission(data);
@@ -114,7 +114,7 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
       if (application?.contractId) {
         const { ok, data, code } = await api.get(`/contract/${application.contractId}`);
         if (!ok) {
-          capture(new Error(code));
+          capture(code);
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);

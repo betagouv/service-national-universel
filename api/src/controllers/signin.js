@@ -24,10 +24,6 @@ const allowedRole = (user) => {
       return "structure";
     case ROLES.HEAD_CENTER:
       return "head_center";
-    case ROLES.ADMIN_CLE:
-      return "administrateur_cle";
-    case ROLES.REFERENT_CLASSE:
-      return "referent_classe";
     default:
       return "public";
   }

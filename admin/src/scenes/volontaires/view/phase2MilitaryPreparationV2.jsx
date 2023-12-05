@@ -57,7 +57,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
     if (!ok) {
-      capture(new Error(code));
+      capture(code);
       return toastr.error("Oups, une erreur est survenue", code);
     }
     return setApplicationsToMilitaryPreparation(data?.filter((a) => a?.mission?.isMilitaryPreparation === "true"));

@@ -268,7 +268,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
       ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
-      (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
+        (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
       : true);
   return authorized;
 }
@@ -884,12 +884,6 @@ function canDeleteClasse(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
-function canUpdateMyself({ actor, modifiedTarget }) {
-  const isMe = actor._id.toString() === modifiedTarget._id.toString();
-
-  return isMe;
-}
-
 export {
   ROLES,
   SUB_ROLES,
@@ -1022,5 +1016,4 @@ export {
   canViewEtablissement,
   canSearchStudent,
   canDeleteClasse,
-  canUpdateMyself,
 };
