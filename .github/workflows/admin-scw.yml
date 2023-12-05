@@ -61,14 +61,14 @@ jobs:
           username: nologin
           password: ${{ secrets.SCW_SECRET_KEY }}
           # registry: ${{ secrets.SCW_CONTAINER_REGISTRY_ENDPOINT }}
-          registry: rg.fr-par.scw.cloud/funcscwsnutestvfku19oc
+          registry: rg.fr-par.scw.cloud/funcscwsnutestwxdlwomm
           image_name: admin
           dockerfile_path: admin/Dockerfile
 
-      - name: Scaleway container deploy
-        if: env.ACTIVE_HOSTING == 'scaleway'
-        uses: ./.github/actions/docker-scw-deploy
-        with:
-          secret_key: ${{ secrets.SCW_SECRET_KEY }}
-          container_id: 310cc00d-1d59-4c16-93e7-f357e7b42891
-          # container_id: ${{ secrets.SCW_ADMIN_CONTAINER_ID }}
+      # - name: Scaleway container deploy
+      #   if: env.ACTIVE_HOSTING == 'scaleway'
+      #   uses: ./.github/actions/docker-scw-deploy
+      #   with:
+      #     secret_key: ${{ secrets.SCW_SECRET_KEY }}
+      #     container_id: 310cc00d-1d59-4c16-93e7-f357e7b42891
+      #     # container_id: ${{ secrets.SCW_ADMIN_CONTAINER_ID }}
