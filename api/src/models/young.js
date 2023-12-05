@@ -1493,6 +1493,15 @@ const Schema = new mongoose.Schema({
       description: "Structure dans laquelle le volontaire est engagée en dehors du SNU",
     },
   },
+
+  sameSchoolCLE: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "savoir si le volontaire vient de la même école que sa classe engagée",
+    },
+  },
+
   specificAmenagment: {
     type: String,
     enum: ["true", "false"],
