@@ -12,7 +12,7 @@ const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 //https://my.sendinblue.com/lists/add-attributes
 
-const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|lexfo\.fr/;
+const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports|snu)\.gouv\.fr|lexfo\.fr/;
 
 const api = async (path, options = {}) => {
   try {
