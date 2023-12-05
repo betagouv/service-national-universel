@@ -66,7 +66,7 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (value.email !== value.confirmEmail)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
-    if (config.ENVIRONMENT !== "development" && !validateEmailAcademique(value.email))
+    if (config.ENVIRONMENT !== "production" && !validateEmailAcademique(value.email))
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
