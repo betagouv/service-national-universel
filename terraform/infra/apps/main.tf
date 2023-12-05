@@ -37,4 +37,5 @@ module "apps" {
   admin_subdomain = var.admin_subdomain
   app_subdomain = var.app_subdomain
   dns_zone = var.dns_zone
+  secret_revision = var.secret_revision
 }

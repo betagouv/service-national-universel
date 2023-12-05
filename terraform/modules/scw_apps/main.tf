@@ -9,7 +9,7 @@ terraform {
 
 data "scaleway_secret_version" main {
   secret_id = var.secret_id
-  revision = "1"
+  revision = var.secret_revision
 }
 
 locals {

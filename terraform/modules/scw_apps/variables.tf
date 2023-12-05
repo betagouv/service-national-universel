@@ -37,3 +37,8 @@ variable "dns_zone" {
   type     = string
   nullable = false
 }
+
+variable "secret_revision" {
+  type     = string
+  nullable = false
+}
