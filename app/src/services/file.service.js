@@ -1,5 +1,5 @@
 import { readAndCompressImage } from "browser-image-resizer";
-const convert = require("heic-convert/browser");
+import convert from "heic-convert/browser";
 import { environment } from "../config";
 
 export async function resizeImage(file, config = {}) {
