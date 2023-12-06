@@ -1,3 +1,16 @@
+# [1.345.0](https://github.com/betagouv/service-national-universel/compare/v1.344.0...v1.345.0) (2023-12-06)
+
+
+### Bug Fixes
+
+* **app:** Préinscription - Fix foreign school manual input ([#3317](https://github.com/betagouv/service-national-universel/issues/3317)) ([84d597b](https://github.com/betagouv/service-national-universel/commit/84d597b2576e16bb1534d5595350b0b90f7b4dd7))
+
+
+### Features
+
+* **api:** Put a version associated with signin token and trust token and force reset ([745b312](https://github.com/betagouv/service-national-universel/commit/745b312c674c1084fd008dc08394091da0f9bcbb))
+* **app:** 1444 - Hiding phase 3 for 2024 cohorts. ([#3290](https://github.com/betagouv/service-national-universel/issues/3290)) ([2f93c4b](https://github.com/betagouv/service-national-universel/commit/2f93c4b06c52ddb10634f35f31a325895722c993))
+
 # [1.344.0](https://github.com/betagouv/service-national-universel/compare/v1.343.0...v1.344.0) (2023-11-30)
 
 
