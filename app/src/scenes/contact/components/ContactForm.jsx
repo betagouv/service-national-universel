@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
-import { categories, getQuestionOptions, roleOptions } from "../contact.service";
+import { categories, getQuestions, roleOptions } from "../contact.service";
 import useAuth from "@/services/useAuth";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
@@ -28,7 +28,7 @@ export default function ContactForm({ category, question, parcours }) {
     return false;
   };
 
-  const questionOptions = getQuestionOptions(category, "young", young.source);
+  const questions = getQuestions(category, "young", young.source);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +47,7 @@ export default function ContactForm({ category, question, parcours }) {
 
       const response = await API.post("/zammood/ticket", {
         message,
-        subject: `${categories.find((e) => e.value === category)?.label} - ${questionOptions.find((e) => e.value === question)?.label}`,
+        subject: `${categories.find((e) => e.value === category)?.label} - ${questions.find((e) => e.value === question)?.label}`,
         fromPage: new URLSearchParams(window.location.search).get("from "),
         parcours,
         subjectStep0: role,
