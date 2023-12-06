@@ -99,10 +99,23 @@ export default function StepEligibilite() {
         }
       } else {
         // School
-        if (!data?.school) {
+        if (!validateSchool(data)) {
           // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
           errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
+      }
+    }
+
+    function validateSchool(data) {
+      if (data.isAbroad) {
+        if (!data?.school?.fullName) return false;
+        if (!data?.school?.country) return false;
+        return true;
+      } else {
+        if (!data?.school?.fullName) return false;
+        if (!data?.school?.city) return false;
+        if (!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip && !data?.school?.codePays) return false;
+        return true;
       }
     }
 
