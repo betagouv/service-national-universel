@@ -18,10 +18,12 @@ const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../c
 const { sendTemplate } = require("../sendinblue");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
+const ClasseObject = require("../models/cle/classe");
 const { validateId } = require("../utils/validator");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
 const optionalAuth = require("../middlewares/optionalAuth");
+const { serializeClasse } = require("../utils/serializer");
 
 const router = express.Router();
 
@@ -248,6 +250,7 @@ router.post("/ticket/form", async (req, res) => {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       parcours: req.body.parcours,
+      classeId: req.body.classeId,
       department: req.body.department,
       region: req.body.region,
       formSubjectStep1: req.body.subjectStep1,
@@ -263,6 +266,7 @@ router.post("/ticket/form", async (req, res) => {
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
       parcours: Joi.string().required(),
+      classeId: Joi.string().allow(null),
       department: Joi.string().required(),
       region: Joi.string().required(),
       formSubjectStep1: Joi.string().required(),
@@ -283,7 +287,7 @@ router.post("/ticket/form", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours } = value;
+    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours, classeId } = value;
 
     const userAttributes = [
       { name: "departement", value: department },
@@ -292,24 +296,32 @@ router.post("/ticket/form", async (req, res) => {
       { name: "page précédente", value: fromPage },
     ];
 
+    let body = {
+      message,
+      email,
+      parcours,
+      clientId,
+      subject,
+      firstName,
+      lastName,
+      source: "FORM",
+      attributes: userAttributes,
+      formSubjectStep1,
+      formSubjectStep2,
+      files,
+      author,
+    };
+
+    if (classeId) {
+      const classe = await ClasseObject.findById(classeId);
+      if (!classe) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      body = { ...body, classe: serializeClasse(classe) };
+    }
+
     const response = await zammood.api("/v0/message", {
       method: "POST",
       credentials: "include",
-      body: JSON.stringify({
-        message,
-        email,
-        parcours,
-        clientId,
-        subject,
-        firstName,
-        lastName,
-        source: "FORM",
-        attributes: userAttributes,
-        formSubjectStep1,
-        formSubjectStep2,
-        files,
-        author,
-      }),
+      body: JSON.stringify(body),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
     return res.status(200).send({ ok: true, data: response });

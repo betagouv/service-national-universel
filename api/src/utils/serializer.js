@@ -148,6 +148,10 @@ function serializeAlerteMessage(message) {
   return message.toObject();
 }
 
+function serializeClasse(classe) {
+  return classe.toObject();
+}
+
 // return only the initialValue's properties that are in the whitelist 'keys'
 const subObject = (initialValue, keys) =>
   keys.reduce((o, k) => {
@@ -170,4 +174,5 @@ module.exports = {
   serializeEmail,
   serializeContract,
   serializeAlerteMessage,
+  serializeClasse,
 };
