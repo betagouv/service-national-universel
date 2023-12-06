@@ -11,6 +11,7 @@ const { ERRORS } = require("../utils");
 const Young = require("../models/young");
 const Referent = require("../models/referent");
 const { capture } = require("../sentry");
+const { checkJwtSigninVersion } = require("../jwt-options");
 
 const allowedRole = (user) => {
   switch (user?.role) {
@@ -37,19 +38,17 @@ router.get("/token", async (req, res) => {
   try {
     const token = getToken(req);
     if (!token) return res.status(401).send({ ok: false, user: { restriction: "public" } });
-    const jwtPayload = await new Promise((resolve, reject) => {
-      jwt.verify(token, config.secret, function (err, decoded) {
-        if (err) reject(err);
-        resolve(decoded);
-      });
+
+    const jwtPayload = await jwt.verify(token, config.secret);
+    const schema = Joi.object({
+      __v: Joi.string().required(),
+      _id: Joi.string().required(),
+      passwordChangedAt: Joi.string(),
+      lastLogoutAt: Joi.date(),
     });
-    if (!jwtPayload) return res.status(401).send({ ok: false, user: { restriction: "public" } });
-    const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.string(), lastLogoutAt: Joi.date() }).validate({
-      _id: jwtPayload._id,
-      passwordChangedAt: jwtPayload.passwordChangedAt,
-      lastLogoutAt: jwtPayload.lastLogoutAt,
-    });
-    if (error) return res.status(200).send({ ok: true, user: { restriction: "public" } });
+    const { error, value } = schema.validate(jwtPayload);
+    if (error || !checkJwtSigninVersion(value)) return res.status(401).json({ ok: false, user: { restriction: "public" } });
+    delete value.__v;
 
     const young = await Young.findOne(value);
     if (young) {
