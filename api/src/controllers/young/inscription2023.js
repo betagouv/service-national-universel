@@ -19,7 +19,7 @@ const {
   formatPhoneNumberFromPhoneZone,
   getCohortNames,
   isYoungInReinscription,
-  YOUNG_SOURCE,
+  isCle,
 } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
@@ -93,14 +93,14 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-            foreignCountry: "",
-            foreignAddress: "",
-            foreignCity: "",
-            foreignZip: "",
-            hostFirstName: "",
-            hostLastName: "",
-            hostRelationship: "",
-          }
+          foreignCountry: "",
+          foreignAddress: "",
+          foreignCity: "",
+          foreignZip: "",
+          hostFirstName: "",
+          hostLastName: "",
+          hostRelationship: "",
+        }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
@@ -214,8 +214,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       }),
     };
 
-    const isCle = young.source === YOUNG_SOURCE.CLE;
-    if (!isCle) {
+    if (!isCle(young)) {
       coordonneeSchema.situation = Joi.alternatives().conditional("schooled", {
         is: "true",
         then: needRequired(
@@ -352,13 +351,11 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       value.parent2Inscription2023Token = "";
     }
 
-    const isCle = young.source === YOUNG_SOURCE.CLE;
-
     if (type === "next") {
       if (isYoungInReinscription(young)) {
-        value.reinscriptionStep2023 = isCle ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
+        value.reinscriptionStep2023 = isCle(young) ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
       } else {
-        value.inscriptionStep2023 = isCle ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
+        value.inscriptionStep2023 = isCle(young) ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
       }
 
       if (!young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
@@ -414,7 +411,9 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
         },
       });
 
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CONSENT, {
+      const templateForYoung = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CONSENT_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CONSENT;
+
+      await sendTemplate(templateForYoung, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
           cta: config.APP_URL,
@@ -618,7 +617,6 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const isCle = young.source === YOUNG_SOURCE.CLE;
     const profilSchema = {
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
@@ -628,8 +626,8 @@ router.put("/profil", passport.authenticate("young", { session: false, failWithE
         .trim()
         .valid(...PHONE_ZONES_NAMES_ARR)
         .required(),
-      birthdateAt: isCle ? Joi.string().trim().required() : Joi.string().trim(),
-      frenchNationality: isCle ? Joi.string().trim().required() : Joi.string().trim(),
+      birthdateAt: isCle(young) ? Joi.string().trim().required() : Joi.string().trim(),
+      frenchNationality: isCle(young) ? Joi.string().trim().required() : Joi.string().trim(),
     };
 
     const { error, value } = Joi.object(profilSchema).validate(req.body, { stripUnknown: true });

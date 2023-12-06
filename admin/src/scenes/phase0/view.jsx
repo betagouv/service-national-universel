@@ -23,6 +23,7 @@ import {
   YOUNG_SOURCE,
   translateEtbalissementSector,
   translateColoration,
+  isCle,
 } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
@@ -244,6 +245,8 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       await api.put(`/referent/young/${young._id}`, body);
 
       //Notify young
+      // TODO: move notification logic to referent controller
+      const validationTemplate = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED;
       switch (state) {
         case "REFUSED":
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message: body.inscriptionRefusedMessage });
@@ -253,7 +256,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
           break;
         case "VALIDATED":
-          await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
+          await api.post(`/young/${young._id}/email/${validationTemplate}`);
           break;
       }
 
