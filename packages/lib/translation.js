@@ -833,6 +833,8 @@ const translateField = (field) => {
       return "Email";
     case "phone":
       return "Téléphone";
+    case "frenchNationality":
+      return "Nationalité";
     case "birthdateAt":
       return "Date de naissance";
     case "birthCountry":
