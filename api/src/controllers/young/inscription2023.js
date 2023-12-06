@@ -411,9 +411,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
         },
       });
 
-      const templateForYoung = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CONSENT_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CONSENT;
-
-      await sendTemplate(templateForYoung, {
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CONSENT, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
           cta: config.APP_URL,
