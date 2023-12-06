@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import useAuth from "@/services/useAuth";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
+import { alertMessage, categories, getArticles, getCategoryFromQuestion, getQuestions } from "./contact.service";
+import { YOUNG_SOURCE } from "snu-lib";
 
 import ContactForm from "./components/ContactForm";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import PublicContactForm from "./components/PublicContactForm";
-import { alertMessage, categories, getArticles, getCategoryFromQuestion, getQuestionOptions } from "./contact.service";
-import { YOUNG_SOURCE } from "snu-lib";
-import Unlock from "@/assets/icons/Unlock";
-import QuestionBubbleV2 from "@/assets/icons/QuestionBubbleReimport";
-import EnhancedRadioButton from "@/components/dsfr/forms/EnhancedRadioButton";
+import UnlockPictogram from "@/assets/icons/Unlock";
+import QuestionBubblePictogram from "@/assets/icons/QuestionBubbleReimport";
 import AvatarPictogram from "@/assets/pictograms/Avatar";
 import SchoolPictogram from "@/assets/pictograms/School";
+import EnhancedRadioButton from "@/components/dsfr/forms/EnhancedRadioButton";
 import Select from "@/components/dsfr/forms/Select";
 import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
@@ -22,19 +22,25 @@ export default function Contact() {
   useDocumentTitle("Formulaire de contact");
   const { isLoggedIn, young } = useAuth();
 
-  const parcoursFromURl = new URLSearchParams(window.location.search).get("parcours");
-  const showFormFromURl = new URLSearchParams(window.location.search).get("showForm");
-  const questionFromURl = new URLSearchParams(window.location.search).get("q");
+  const params = new URLSearchParams(window.location.search);
+  const parcoursFromURl = params.get("parcours");
+  const questionFromURl = params.get("q");
   const categoryFromURl = getCategoryFromQuestion(questionFromURl);
-
   const [parcours, setParcours] = useState(isLoggedIn ? young.source : parcoursFromURl || undefined);
-  const [showForm, setShowForm] = useState(showFormFromURl === "true");
+  const [showForm, setShowForm] = useState(false);
   const [category, setCategory] = useState(categoryFromURl);
   const [question, setQuestion] = useState(questionFromURl);
 
   const knowledgeBaseRole = isLoggedIn ? "young" : "public";
-  const questionOptions = getQuestionOptions(category, knowledgeBaseRole, parcours);
+  const questions = getQuestions(category, knowledgeBaseRole, parcours);
   const articles = getArticles(question);
+  const shouldShowForm = question && (articles.length === 0 || showForm);
+
+  const handleSelectParcours = (value) => {
+    setParcours(value);
+    setQuestion(null);
+    setShowForm(false);
+  };
 
   const handleSelectCategory = (value) => {
     setCategory(value);
@@ -57,10 +63,10 @@ export default function Contact() {
         {/* Logged in users get two links to phase 1, unlogged users are shown the parcours selector. */}
         {isLoggedIn ? (
           <div className="my-8 space-y-6">
-            <CardLink label="Débloquez votre accès gratuit au code de la route" picto={<Unlock />} url="/phase1" />
+            <CardLink label="Débloquez votre accès gratuit au code de la route" picto={<UnlockPictogram />} url="/phase1" />
             <CardLink
               label="Des questions sur le Recensement, la Journée Défense et Mémoire (JDM) ou la Journée Défense et Citoyenneté (JDC) ?"
-              picto={<QuestionBubbleV2 />}
+              picto={<QuestionBubblePictogram />}
               url="/phase1"
             />
           </div>
@@ -72,7 +78,7 @@ export default function Contact() {
               description="Programme basé sur le volontariat, en dehors du temps scolaire"
               picto={<AvatarPictogram />}
               checked={parcours === YOUNG_SOURCE.VOLONTAIRE}
-              onChange={() => setParcours(YOUNG_SOURCE.VOLONTAIRE)}
+              onChange={() => handleSelectParcours(YOUNG_SOURCE.VOLONTAIRE)}
               disabled={parcoursFromURl}
             />
             <EnhancedRadioButton
@@ -80,22 +86,23 @@ export default function Contact() {
               description="Programme proposé au sein de mon établissement scolaire"
               picto={<SchoolPictogram />}
               checked={parcours === YOUNG_SOURCE.CLE}
-              onChange={() => setParcours(YOUNG_SOURCE.CLE)}
+              onChange={() => handleSelectParcours(YOUNG_SOURCE.CLE)}
               disabled={parcoursFromURl}
             />
           </fieldset>
         )}
 
+        {/* Category */}
+        <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} name="Catégorie" />
+
+        {/* Question */}
+        {category && questions.length > 0 && (
+          <Select label="Sujet" options={questions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} name="Question" />
+        )}
+
         {parcours && (
           <>
-            {/* Category */}
-            <Select label="Ma demande" options={categories} value={category} onChange={handleSelectCategory} disabled={categoryFromURl} name="Catégorie" />
-
-            {/* Question */}
-            {category && questionOptions.length > 0 && (
-              <Select label="Sujet" options={questionOptions} value={question} onChange={handleSelectQuestion} disabled={questionFromURl} name="Question" />
-            )}
-            {category && questionOptions.length === 0 && (
+            {category && questions.length === 0 && (
               <Alert className="my-8">
                 <p className="text-lg font-semibold">Information</p>
                 <p>{alertMessage[parcours]}</p>
@@ -104,13 +111,8 @@ export default function Contact() {
 
             {/* If there are articles for the selected question, we display them with a button to show the contact form. Otherwise, we show the form directly. */}
             {question && articles.length > 0 && <Solutions articles={articles} showForm={showForm} setShowForm={setShowForm} />}
-            {question &&
-              (articles.length === 0 || showForm) &&
-              (isLoggedIn ? (
-                <ContactForm category={category} question={question} parcours={parcours} />
-              ) : (
-                <PublicContactForm category={category} question={question} parcours={parcours} />
-              ))}
+            {shouldShowForm && isLoggedIn && <ContactForm category={category} question={question} parcours={parcours} />}
+            {shouldShowForm && !isLoggedIn && <PublicContactForm category={category} question={question} parcours={parcours} />}
           </>
         )}
       </DSFRContainer>

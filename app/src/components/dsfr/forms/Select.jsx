@@ -45,7 +45,10 @@ export default function Select({
       <div className="mt-2 mb-6 text-[#161616]" style={{ fontFamily: "Marianne" }} ref={ref}>
         <label className={`w-full my-2 ${correction || error ? "text-[#CE0500]" : "text-gray-500"}`}>
           {label}
-          <select className="w-full border-b-2 rounded-t px-4 py-2 mt-2 appearance-none bg-[#EEEEEE] text-gray-600" disabled>
+          <select
+            value={options.find((option) => option.value === value)?.label || placeholder}
+            className="w-full border-b-2 rounded-t px-4 py-2 mt-2 appearance-none bg-[#EEEEEE] text-gray-600"
+            disabled>
             {options.map((option, index) => (
               <option key={index}>{option.label}</option>
             ))}
