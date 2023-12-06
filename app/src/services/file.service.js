@@ -1,4 +1,5 @@
 import { readAndCompressImage } from "browser-image-resizer";
+const convert = require("heic-convert/browser");
 import { environment } from "../config";
 
 export async function resizeImage(file, config = {}) {
@@ -24,4 +25,23 @@ export async function resizeImage(file, config = {}) {
   }
 
   return image;
+}
+
+export async function convertImage(file, format = "PNG") {
+  const inputBuffer = await getFileBuffer(file);
+  const outputBuffer = await convert({
+    buffer: inputBuffer,
+    format,
+  });
+  return outputBuffer;
+}
+
+function getFileBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      resolve(event.target.result);
+    };
+    reader.readAsArrayBuffer(file);
+  });
 }

@@ -1,10 +1,18 @@
 import React from "react";
-import { resizeImage } from "../../../services/file.service";
+import { convertImage, resizeImage } from "../../../services/file.service";
 
 export default function FileImport({ id, file, setFile, setError = () => {}, onChange }) {
   async function handleChange(e) {
     if (!e.target.files.length) return;
-    const image = await resizeImage(e.target.files[0]);
+
+    let image = e.target.files[0];
+
+    if (image.type === "image/heic") {
+      image = await convertImage(image, "PNG");
+    }
+    if (image.size > 1_000_000) {
+      image = await resizeImage(image);
+    }
     setFile(image);
     setError({});
     onChange && onChange();
