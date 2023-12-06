@@ -1,9 +1,3 @@
-variable "project_id" {
-  type = string
-  default = "db949d19-5fe0-4def-a89b-f801aad2d050" # default
-  description = "Default project_id"
-}
-
 terraform {
   required_providers {
     scaleway = {
@@ -50,37 +44,16 @@ resource "scaleway_rdb_privilege" "terraform_backend" {
   permission    = "all"
 }
 
-output "admin_password" {
-  sensitive = true
-  value = random_password.admin_password.result
+module "production" {
+  source = "../modules/scw_backend_rdb"
+
+  rdb_instance_id = scaleway_rdb_instance.main.id
+  user_role = "production"
 }
 
-# env test
-resource "random_password" "test_password" {
-  length  = 32
-  special = true
-}
+module "dev" {
+  source = "../modules/scw_backend_rdb"
 
-resource "scaleway_rdb_database" "terraform_backend_test" {
-  instance_id    = scaleway_rdb_instance.main.id
-  name           = "terraform-backend-test"
-}
-
-resource "scaleway_rdb_user" "terraform_backend_test" {
-  instance_id = scaleway_rdb_instance.main.id
-  name        = "snu-test"
-  password    = random_password.test_password.result
-  is_admin    = false
-}
-
-resource "scaleway_rdb_privilege" "terraform_backend_test" {
-  instance_id   = scaleway_rdb_instance.main.id
-  user_name     = scaleway_rdb_user.terraform_backend_test.name
-  database_name = scaleway_rdb_database.terraform_backend_test.name
-  permission    = "all"
-}
-
-output "test_password" {
-  sensitive = true
-  value = random_password.test_password.result
+  rdb_instance_id = scaleway_rdb_instance.main.id
+  user_role = "dev"
 }
