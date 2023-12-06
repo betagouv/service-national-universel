@@ -1,6 +1,0 @@
-  image_tag = "latest"
-  api_subdomain = "test-api"
-  admin_subdomain = "test-admin"
-  app_subdomain = "test-app"
-  dns_zone = "beta-snu.dev"
-  secret_revision = "1"

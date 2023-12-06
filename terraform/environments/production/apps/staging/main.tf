@@ -1,3 +1,7 @@
+variable "image_tag" {
+  type    = string
+  default = "latest"
+}
 
 terraform {
   required_providers {
@@ -5,39 +9,64 @@ terraform {
       source = "scaleway/scaleway"
     }
   }
+  required_version = ">= 0.13"
+
+  backend "pg" {
+    schema_name = "apps_staging"
+  }
 }
 
-data "scaleway_secret_version" main {
-  secret_id = var.secret_id
-  revision = var.secret_revision
+provider "scaleway" {
+  zone   = "fr-par-1"
+  region = "fr-par"
 }
+
+data "terraform_remote_state" "project" {
+  backend = "pg"
+
+  config = {
+    schema_name = "project"
+  }
+}
+
 
 locals {
+  environment = "staging"
+  project = data.terraform_remote_state.project.outputs.environments[local.environment]
+  registry_endpoint = data.terraform_remote_state.project.outputs.registry_endpoint
   secrets = jsondecode(base64decode(data.scaleway_secret_version.main.data))
-  app_domain = "${var.app_subdomain}.${var.dns_zone}"
-  api_domain = "${var.api_subdomain}.${var.dns_zone}"
-  admin_domain = "${var.admin_subdomain}.${var.dns_zone}"
+  api_subdomain = "test-api"
+  admin_subdomain = "test-admin"
+  app_subdomain = "test-app"
+  dns_zone = "beta-snu.dev"
   api_app_name = "api"
   admin_app_name = "admin"
   app_app_name = "app"
+  app_domain = "${local.app_subdomain}.${local.dns_zone}"
+  api_domain = "${local.api_subdomain}.${local.dns_zone}"
+  admin_domain = "${local.admin_subdomain}.${local.dns_zone}"
 }
 
+data "scaleway_secret_version" main {
+  secret_id = local.project.secret_id
+  revision = 1
+}
 
 data "scaleway_container_namespace" main {
-  namespace_id = var.container_namespace_id
+  namespace_id = local.project.container_namespace_id
 }
 
 resource scaleway_container api {
-    name = "${var.environment}-${local.api_app_name}"
-    namespace_id = var.container_namespace_id
-    registry_image = "${data.scaleway_container_namespace.main.registry_endpoint}/${local.api_app_name}:${var.image_tag}"
+    name = "${local.environment}-${local.api_app_name}"
+    namespace_id = data.scaleway_container_namespace.main.id
+    registry_image = "${local.registry_endpoint}/${local.api_app_name}:${var.image_tag}"
     port = 8080
-    cpu_limit = 1120
+    cpu_limit = 768
     memory_limit = 1024
     min_scale = 1
     max_scale = 1
     timeout = 60
-    max_concurrency = 80
+    max_concurrency = 30
     privacy = "public"
     protocol = "http1"
     deploy = true
@@ -99,12 +128,12 @@ resource scaleway_container_domain api {
 }
 
 resource scaleway_container admin {
-    name = "${var.environment}-${local.admin_app_name}"
+    name = "${local.environment}-${local.admin_app_name}"
     namespace_id = data.scaleway_container_namespace.main.id
-    registry_image = "${data.scaleway_container_namespace.main.registry_endpoint}/${local.admin_app_name}:${var.image_tag}"
+    registry_image = "${local.registry_endpoint}/${local.admin_app_name}:${var.image_tag}"
     port = 8080
-    cpu_limit = 1120
-    memory_limit = 1024
+    cpu_limit = 256
+    memory_limit = 256
     min_scale = 1
     max_scale = 1
     timeout = 60
@@ -138,12 +167,12 @@ resource scaleway_container_domain admin {
 }
 
 resource scaleway_container app {
-    name = "${var.environment}-${local.app_app_name}"
+    name = "${local.environment}-${local.app_app_name}"
     namespace_id = data.scaleway_container_namespace.main.id
-    registry_image = "${data.scaleway_container_namespace.main.registry_endpoint}/${local.app_app_name}:${var.image_tag}"
+    registry_image = "${local.registry_endpoint}/${local.app_app_name}:${var.image_tag}"
     port = 8080
-    cpu_limit = 1120
-    memory_limit = 1024
+    cpu_limit = 256
+    memory_limit = 256
     min_scale = 1
     max_scale = 1
     timeout = 60

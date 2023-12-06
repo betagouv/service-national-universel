@@ -45,14 +45,14 @@ resource "scaleway_rdb_privilege" "terraform_backend" {
 }
 
 module "production" {
-  source = "../modules/scw_backend_rdb"
+  source = "./scw_backend_rdb"
 
   rdb_instance_id = scaleway_rdb_instance.main.id
   user_role = "production"
 }
 
 module "dev" {
-  source = "../modules/scw_backend_rdb"
+  source = "./scw_backend_rdb"
 
   rdb_instance_id = scaleway_rdb_instance.main.id
   user_role = "dev"
