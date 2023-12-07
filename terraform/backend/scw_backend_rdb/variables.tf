@@ -1,9 +1,9 @@
 variable "user_role" {
-  type = string
+  type     = string
   nullable = false
 }
 
 variable "rdb_instance_id" {
-  type = string
+  type     = string
   nullable = false
 }

@@ -17,14 +17,14 @@ provider "scaleway" {
 }
 
 locals {
-  iam_role = "development"
+  iam_role    = "development"
   environment = "ci"
-  domain = "beta-snu.dev"
+  domain      = "beta-snu.dev"
 }
 
 # Project
-resource scaleway_account_project main {
-  name = "snu-${local.iam_role}"
+resource "scaleway_account_project" "main" {
+  name        = "snu-${local.iam_role}"
   description = "SNU project for '${local.iam_role}'"
 }
 
@@ -49,8 +49,8 @@ resource "scaleway_secret" "main" {
 }
 
 # Containers namespace
-resource scaleway_container_namespace main {
-  project_id = scaleway_account_project.main.id
+resource "scaleway_container_namespace" "main" {
+  project_id  = scaleway_account_project.main.id
   name        = "snu-${local.environment}"
   description = "SNU container namespace for environment '${local.environment}'"
 }
@@ -62,12 +62,12 @@ resource "scaleway_iam_application" "main" {
 }
 
 # Deploy policy
-resource scaleway_iam_policy "deploy" {
-  name = "snu-deploy-${local.iam_role}-policy"
-  description = "Allow to deploy apps in '${local.iam_role}'"
+resource "scaleway_iam_policy" "deploy" {
+  name           = "snu-deploy-${local.iam_role}-policy"
+  description    = "Allow to deploy apps in '${local.iam_role}'"
   application_id = scaleway_iam_application.main.id
   rule {
-    project_ids = [scaleway_account_project.main.id]
+    project_ids          = [scaleway_account_project.main.id]
     permission_set_names = ["ContainersFullAccess", "ContainerRegistryFullAccess"]
   }
 }
@@ -80,8 +80,8 @@ resource "scaleway_iam_api_key" "main" {
 
 # DNS zone
 resource "scaleway_domain_zone" "main" {
-  domain    = local.domain
-  subdomain = local.environment
+  domain     = local.domain
+  subdomain  = local.environment
   project_id = scaleway_account_project.main.id
 }
 

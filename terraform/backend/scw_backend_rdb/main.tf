@@ -14,8 +14,8 @@ resource "random_password" "main" {
 }
 
 resource "scaleway_rdb_database" "main" {
-  instance_id    = var.rdb_instance_id
-  name           = "terraform-backend-${var.user_role}"
+  instance_id = var.rdb_instance_id
+  name        = "terraform-backend-${var.user_role}"
 }
 
 resource "scaleway_rdb_user" "main" {

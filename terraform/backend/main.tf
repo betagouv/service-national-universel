@@ -11,8 +11,8 @@ terraform {
 }
 
 provider "scaleway" {
-  zone   = "fr-par-1"
-  region = "fr-par"
+  zone       = "fr-par-1"
+  region     = "fr-par"
   project_id = var.project_id
 }
 
@@ -21,15 +21,15 @@ resource "random_password" "admin_password" {
   special = true
 }
 
-resource scaleway_rdb_instance main {
-    name = "snu-terraform-backend"
-    node_type = "db-dev-s"
-    engine = "PostgreSQL-15"
-    is_ha_cluster = false
-    disable_backup = true
-    user_name = "snu-admin"
-    password = random_password.admin_password.result
-    tags = [ "snu", "terraform" ]
+resource "scaleway_rdb_instance" "main" {
+  name           = "snu-terraform-backend"
+  node_type      = "db-dev-s"
+  engine         = "PostgreSQL-15"
+  is_ha_cluster  = false
+  disable_backup = true
+  user_name      = "snu-admin"
+  password       = random_password.admin_password.result
+  tags           = ["snu", "terraform"]
 }
 
 resource "scaleway_rdb_database" "terraform_backend" {
@@ -48,12 +48,12 @@ module "production" {
   source = "./scw_backend_rdb"
 
   rdb_instance_id = scaleway_rdb_instance.main.id
-  user_role = "production"
+  user_role       = "production"
 }
 
 module "dev" {
   source = "./scw_backend_rdb"
 
   rdb_instance_id = scaleway_rdb_instance.main.id
-  user_role = "dev"
+  user_role       = "dev"
 }

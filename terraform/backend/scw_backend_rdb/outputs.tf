@@ -8,5 +8,5 @@ output "user_name" {
 
 output "user_password" {
   sensitive = true
-  value = random_password.main.result
+  value     = random_password.main.result
 }
