@@ -12,7 +12,7 @@ terraform {
   required_version = ">= 0.13"
 
   backend "pg" {
-    schema_name = "apps"
+    schema_name = "apps_ci"
   }
 }
 
@@ -29,15 +29,16 @@ data "terraform_remote_state" "project" {
   }
 }
 
+
 locals {
-  environment = "production"
-  project = data.terraform_remote_state.project.outputs.environments[local.environment]
-  registry_endpoint = data.terraform_remote_state.project.outputs.registry_endpoint
+  environment = "ci"
+  project = data.terraform_remote_state.project.outputs
+  registry_endpoint = local.project.registry_endpoint
   secrets = jsondecode(base64decode(data.scaleway_secret_version.main.data))
   api_subdomain = "api"
   admin_subdomain = "admin"
-  app_subdomain = "moncompte"
-  dns_zone = "snu.gouv.fr"
+  app_subdomain = "app"
+  dns_zone = local.project.dns_zone_id
   api_app_name = "api"
   admin_app_name = "admin"
   app_app_name = "app"
@@ -63,7 +64,7 @@ resource scaleway_container api {
     cpu_limit = 768
     memory_limit = 1024
     min_scale = 1
-    max_scale = 20
+    max_scale = 1
     timeout = 60
     max_concurrency = 30
     privacy = "public"
@@ -121,9 +122,17 @@ resource scaleway_container api {
     }
 }
 
+resource scaleway_domain_record api {
+  dns_zone = local.dns_zone
+  name     = local.api_subdomain
+  type     = "CNAME"
+  data     = "${scaleway_container.api.domain_name}."
+  ttl      = 3600
+}
+
 resource scaleway_container_domain api {
   container_id = scaleway_container.api.id
-  hostname = local.api_domain
+  hostname = "${scaleway_domain_record.api.name}.${scaleway_domain_record.api.dns_zone}"
 }
 
 resource scaleway_container admin {
@@ -134,7 +143,7 @@ resource scaleway_container admin {
     cpu_limit = 256
     memory_limit = 256
     min_scale = 1
-    max_scale = 5
+    max_scale = 1
     timeout = 60
     max_concurrency = 80
     privacy = "public"
@@ -160,9 +169,17 @@ resource scaleway_container admin {
     }
 }
 
+resource scaleway_domain_record admin {
+  dns_zone = local.dns_zone
+  name     = local.admin_subdomain
+  type     = "CNAME"
+  data     = "${scaleway_container.admin.domain_name}."
+  ttl      = 3600
+}
+
 resource scaleway_container_domain admin {
   container_id = scaleway_container.admin.id
-  hostname = local.admin_domain
+  hostname = "${scaleway_domain_record.admin.name}.${scaleway_domain_record.admin.dns_zone}"
 }
 
 resource scaleway_container app {
@@ -173,7 +190,7 @@ resource scaleway_container app {
     cpu_limit = 256
     memory_limit = 256
     min_scale = 1
-    max_scale = 5
+    max_scale = 1
     timeout = 60
     max_concurrency = 80
     privacy = "public"
@@ -198,7 +215,15 @@ resource scaleway_container app {
     }
 }
 
+resource scaleway_domain_record app {
+  dns_zone = local.dns_zone
+  name     = local.app_subdomain
+  type     = "CNAME"
+  data     = "${scaleway_container.app.domain_name}."
+  ttl      = 3600
+}
+
 resource scaleway_container_domain app {
   container_id = scaleway_container.app.id
-  hostname = local.app_domain
+  hostname = "${scaleway_domain_record.app.name}.${scaleway_domain_record.app.dns_zone}"
 }
