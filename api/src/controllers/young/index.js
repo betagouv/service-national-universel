@@ -60,6 +60,7 @@ const {
   ROLES,
   YOUNG_STATUS_PHASE2,
   youngCanChangeSession,
+  youngCanDeleteAccount,
 } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
@@ -469,12 +470,9 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     if (!youngCanChangeSession(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // young can only update their own cohort.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
@@ -813,6 +811,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { se
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (youngCanDeleteAccount(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 

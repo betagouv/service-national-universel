@@ -2,6 +2,7 @@ import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants
 import translation from "./translation";
 import { ROLES } from "./roles";
 import sanitizeHtml from "sanitize-html";
+import { YOUNG_SOURCE } from "./constants";
 
 const isInRuralArea = (v) => {
   if (!v.populationDensity) return null;
@@ -125,8 +126,9 @@ function canUserUpdateYoungStatus(actor) {
 
 const SESSIONPHASE1ID_CANCHANGESESSION = ["627cd8b873254d073af93147", "6274e6359ea0ba074acf6557"];
 
-const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
+const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id, source }) => {
   //   console.log([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(status), "alorss?");
+  if((source === YOUNG_SOURCE.CLE)) return false;
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(status)) return true;
   if ([YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(statusPhase1) && status === YOUNG_STATUS.VALIDATED) {
     return true;
@@ -138,6 +140,10 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
   if (statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return true;
   return false;
 };
+
+const youngCanDeleteAccount = ({source}) => {
+  if((source === YOUNG_SOURCE.CLE)) return false;
+}
 
 const isYoungInReinscription = (young) => {
   return young.hasStartedReinscription || false;
@@ -180,6 +186,7 @@ export {
   canUpdateYoungStatus,
   canUserUpdateYoungStatus,
   youngCanChangeSession,
+  youngCanDeleteAccount,
   isYoungInReinscription,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
