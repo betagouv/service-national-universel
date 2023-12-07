@@ -7,31 +7,62 @@ on:
       - feat-1469
 
 jobs:
+
+  # build:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       app_name: [admin, api, app]
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+
+  #     - name: Docker Build & Publish
+  #       uses: ./.github/actions/docker
+  #       with:
+  #         username: nologin
+  #         password: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
+  #         # registry: ${{ steps.get_registry.outputs.stdout }}
+  #         registry: ${{ secrets.SCW_DEV_IMAGE_REGISTRY }}
+  #         image_name: ${{ matrix.app_name }}
+  #         dockerfile_path: ${{ matrix.app_name }}/Dockerfile
+
   deploy:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app_name: [admin, api, app]
+    # needs: build
+    env:
+      PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
+      PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
+      PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
+      custom_directory: ./terraform/environments/development/apps/custom
+      image_tag: "2023-12-07-128deba"
+      env_name: "feat-1469"
+      var_file: "main.tfvars"
 
     steps:
       - uses: actions/checkout@v2
       - uses: hashicorp/setup-terraform@v3
 
-      - id: get_registry
-        working-directory: ./terraform/environments/development/project
-        env:
-          PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
-          PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
-          PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
-        run: |
-          terraform init
-          terraform output --raw registry_endpoint
+      - name: Create custom env stack
+        working-directory: ${{ env.custom_directory }}
+        run: sed "s|###___ENV_NAME___###|${{ env.env_name }}|g" main.tf.template > main.tf
 
-      - name: Docker Build & Publish
-        uses: ./.github/actions/docker
-        with:
-          username: nologin
-          password: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
-          registry: ${{ steps.get_registry.outputs.stdout }}
-          image_name: ${{ matrix.app_name }}
-          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
+      - name: Create var files
+        working-directory: ${{ env.custom_directory }}
+        run: echo 'image_tag = "${{ env.image_tag }}"' >> ${{ env.var_file }}
+
+      - name: Init terraform
+        working-directory: ${{ env.custom_directory }}
+        run: terraform init
+
+      - name: Validate terraform
+        working-directory: ${{ env.custom_directory }}
+        run: terraform validate -no-color
+
+      - name: Terraform plan
+        working-directory: ${{ env.custom_directory }}
+        run: terraform plan -no-color -input=false -var-file="${{ env.var_file }}"
+
+      - name: Terraform plan
+        working-directory: ${{ env.custom_directory }}
+        run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"
