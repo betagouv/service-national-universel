@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Label, InputText, ModalConfirmation, Select } from "@snu/ds/admin";
-import ClasseIcon from "@/components/drawer/icons/Classe";
-import { useHistory } from "react-router-dom";
+import { HiOutlineOfficeBuilding } from 'react-icons/hi';
+import { Link, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
@@ -113,10 +113,10 @@ export default function create() {
   };
 
   const actions = [
-    <a key="cancel" href="/mes-classes" className="mr-2">
+    <Link key="cancel" to="/mes-classes" className="mr-2">
       <Button title="Annuler" type="secondary" />
-    </a>,
-    <Button key="create" leftIcon={<ClasseIcon />} title="Créer cette classe" onClick={() => validate()} />,
+    </Link>,
+    <Button key="create" leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer cette classe" onClick={() => validate()} />,
   ];
 
   if (!classe) return <Loader />;
@@ -125,7 +125,7 @@ export default function create() {
     <Page>
       <Header
         title="Création d’une classe engagée"
-        breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Créer une classe" }]}
+        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Créer une classe" }]}
         actions={actions}
       />
       <Container title="Informations générales">
@@ -212,7 +212,7 @@ export default function create() {
         isOpen={modalConfirmation}
         onClose={() => setModalConfirmation(false)}
         className="md:max-w-[700px]"
-        icon={<ProfilePic icon={({ size, className }) => <ClasseIcon size={size} className={className} />} />}
+        icon={<ProfilePic icon={({ size, className }) => <HiOutlineOfficeBuilding size={size} className={className} />} />}
         title="Confirmez-vous ces informations ?"
         text={
           <div className="text-left w-[636px] text-ds-gray-900">
@@ -220,18 +220,18 @@ export default function create() {
               <div className="text-lg mb-2">Informations générales</div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex-1">Numéro d’identification</div>
-                <div className="flex-1 font-bold text-right">{classe.uniqueKey + (classe?.uniqueId ?? "")}</div>
+                <div className="flex-1 font-medium text-right">{classe.uniqueKey + (classe?.uniqueId ?? "")}</div>
               </div>
             </div>
             <div className="my-6">
               <div className="text-lg mb-2">Référent de classe</div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex-1">Prénom et Nom</div>
-                <div className="flex-1 font-bold text-right">{referentClasse.firstName + " " + referentClasse.lastName}</div>
+                <div className="flex-1 font-medium text-right">{referentClasse.firstName + " " + referentClasse.lastName}</div>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <div className="flex-1">Adresse email</div>
-                <div className="flex-1 font-bold text-right">{referentClasse.email}</div>
+                <div className="flex-1 font-medium text-right">{referentClasse.email}</div>
               </div>
             </div>
           </div>

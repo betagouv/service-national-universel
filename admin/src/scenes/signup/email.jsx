@@ -41,7 +41,7 @@ export default function email({ user }) {
       <form onSubmit={submit}>
         <Container className="flex flex-col gap-8">
           <div className="flex items-start justify-between">
-            <h1 className="text-xl font-bold">Renseignez l'adresse email de votre etablissement</h1>
+            <h1 className="text-2xl font-bold">Renseignez l'adresse email de votre établissement</h1>
             <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
           </div>
           <hr className="p-1" />

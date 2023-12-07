@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import ClasseIcon from "@/components/drawer/icons/Classe";
 import StudentIcon from "@/components/drawer/icons/Student";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { translate } from "@/utils";
@@ -66,7 +65,7 @@ export default function list() {
         showTotalHits={true}
         selectedFilters={selectedFilters}
       />
-      <Container className="!p-3">
+      <Container className="!p-0">
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
           <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
             <Filters
@@ -177,7 +176,7 @@ const Hit = ({ hit }) => {
           title={<IoFlashOutline size={20} />}
           mode={"badge"}
           rightIcon={false}
-          buttonClassName={"rounded-[50%] !p-0 !w-10 !h-10 border-none hover:bg-white hover:text-blue-600"}
+          buttonClassName={"rounded-[50%] !p-0 !w-10 !h-10 border-none !bg-gray-100 hover:!bg-white hover:text-blue-600"}
           position="right"
           optionsGroup={[
             {
