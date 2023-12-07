@@ -242,7 +242,6 @@ function sectionsData(young) {
     }
     if (young.schooled === "true") {
       situation.push(
-        // { label: "Situation scolaire", value: translate(young.situation) },
         { label: "Pays de l'établissement", value: young.schoolCountry },
         { label: "Ville de l'établissement", value: young.schoolCity },
         { label: "Nom de l'établissement", value: young.schoolName },
