@@ -20,7 +20,7 @@ jobs:
       - id: get_registry
         working-directory: ./terraform/environments/development/project
         run: |
-          terrafomr init
+          terraform init
           terraform output --raw registry_endpoint
 
       - name: Docker Build & Publish
