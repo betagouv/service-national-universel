@@ -28,7 +28,7 @@ export async function resizeImage(file, config = {}) {
 }
 
 export async function convertImage(file, format = "PNG") {
-  const inputBuffer = await getFileBuffer(file);
+  const inputBuffer = await fs.buffer(file);
   const outputBuffer = await convert({
     buffer: inputBuffer,
     format,
@@ -36,12 +36,12 @@ export async function convertImage(file, format = "PNG") {
   return outputBuffer;
 }
 
-function getFileBuffer(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      resolve(event.target.result);
-    };
-    reader.readAsArrayBuffer(file);
-  });
-}
+// function getFileBuffer(file) {
+//   return new Promise((resolve, reject) => {
+//     const reader = new FileReader();
+//     reader.onload = function (event) {
+//       resolve(event.target.result);
+//     };
+//     reader.readAsArrayBuffer(file);
+//   });
+// }
