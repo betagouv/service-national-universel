@@ -1,3 +1,11 @@
+## [1.345.1](https://github.com/betagouv/service-national-universel/compare/v1.345.0...v1.345.1) (2023-12-07)
+
+
+### Bug Fixes
+
+* **api:** bug token ([314ad0a](https://github.com/betagouv/service-national-universel/commit/314ad0a26c49e0ded77f101ac016bfc06e135f1d))
+* **api:** trust token ([5d9ce12](https://github.com/betagouv/service-national-universel/commit/5d9ce1201be42463f5bc11497729b7ee5f60b270))
+
 # [1.345.0](https://github.com/betagouv/service-national-universel/compare/v1.344.0...v1.345.0) (2023-12-06)
 
 
