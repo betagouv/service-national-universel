@@ -1,0 +1,31 @@
+name: Custom environment - Build Docker image & Deploy Scaleway
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - feat-1469
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hashicorp/setup-terraform@v3
+
+      - id: get_registry
+        working-directory: ./terraform/environments/development/project
+        run: terraform output --raw registry_endpoint
+
+      - name: Docker Build & Publish
+        uses: ./.github/actions/docker
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_SECRET_KEY }}
+          registry: ${{ steps.get_registry.outputs.stdout }}
+          image_name: admin
+          dockerfile_path: admin/Dockerfile

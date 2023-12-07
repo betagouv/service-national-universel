@@ -11,7 +11,7 @@ name: ADMIN - Build Docker image & Deploy Scaleway
 on:
   push:
     branches:
-      - feat-1469
+      - feat-1469-disable
 
 jobs:
   lint:
