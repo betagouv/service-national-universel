@@ -91,6 +91,9 @@ output "iam_role" {
 output "project_id" {
   value = scaleway_account_project.main.id
 }
+output "domain" {
+  value = scaleway_domain_zone.main.domain
+}
 output "dns_zone_id" {
   value = scaleway_domain_zone.main.id
 }
