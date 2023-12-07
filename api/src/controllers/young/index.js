@@ -812,7 +812,6 @@ router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { se
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (youngCanDeleteAccount(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const fieldToKeep = [
