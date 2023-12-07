@@ -40,13 +40,13 @@ router.get("/token", async (req, res) => {
     if (!token) return res.status(401).send({ ok: false, user: { restriction: "public" } });
 
     const jwtPayload = await jwt.verify(token, config.secret);
-    const schema = Joi.object({
+    const { error, value } = Joi.object({
       __v: Joi.string().required(),
       _id: Joi.string().required(),
       passwordChangedAt: Joi.string(),
       lastLogoutAt: Joi.date(),
-    });
-    const { error, value } = schema.validate(jwtPayload);
+    }).validate(jwtPayload, { stripUnknown: true });
+
     if (error || !checkJwtSigninVersion(value)) return res.status(401).json({ ok: false, user: { restriction: "public" } });
     delete value.__v;
 

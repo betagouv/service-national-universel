@@ -34,9 +34,7 @@ router.get("/signin", async (req, res) => {
       _id: Joi.string().required(),
       passwordChangedAt: Joi.string(),
       lastLogoutAt: Joi.date(),
-    }).validate({
-      ...jwtPayload,
-    });
+    }).validate(jwtPayload, { stripUnknown: true });
     if (error_token || !checkJwtSigninVersion(value_token)) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
     delete value.__v;
 

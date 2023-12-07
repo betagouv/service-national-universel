@@ -32,12 +32,8 @@ async function validateUser(Model, jwtPayload, done, role) {
       _id: Joi.string().required(),
       passwordChangedAt: Joi.date().allow(null),
       lastLogoutAt: Joi.date().allow(null),
-    }).validate({
-      __v: jwtPayload.__v,
-      _id: jwtPayload._id,
-      passwordChangedAt: jwtPayload.passwordChangedAt,
-      lastLogoutAt: jwtPayload.lastLogoutAt,
-    });
+    }).validate(jwtPayload, { stripUnknown: true });
+
     if (error) return done(null, false);
     if (!checkJwtSigninVersion(value)) return done(null, false);
     delete value.__v;
