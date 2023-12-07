@@ -44,11 +44,12 @@ export default function Label({
             place="top"
             effect="solid"
             className="custom-tooltip-radius !opacity-100 !shadow-md"
+            tooltipRadius="6"
             {...(tooltipProps || {})}
           >
             <div
               className={
-                "w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600 " +
+                "w-[275px] list-outside !px-1 !py-2 text-left text-xs font-normal text-gray-600 " +
                 tooltipClassName
               }
             >

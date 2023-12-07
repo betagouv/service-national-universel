@@ -90,6 +90,6 @@ const getStyles = ({ status }: { status: TStatus }) => {
     case "secondary":
       return "text-[#30345B] bg-[#EEEFF5] border-[#B3B5CD]";
     default:
-      return "text-gray-500 bg-gray-50 border-gray-300";
+      return "text-gray-600 bg-gray-50 border-gray-200";
   }
 };

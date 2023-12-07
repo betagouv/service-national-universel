@@ -3,10 +3,9 @@ import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
-import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle } from "react-icons/hi";
-import { VscCopy } from "react-icons/vsc";
+import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding } from "react-icons/hi";
+import { MdOutlineContentCopy } from "react-icons/md";
 import InstitutionIcon from "@/components/drawer/icons/Institution";
-import ClasseIcon from "@/components/drawer/icons/Classe";
 import { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, translate } from "snu-lib";
 import api from "@/services/api";
 import { IoAdd } from "react-icons/io5";
@@ -214,7 +213,7 @@ export default function view() {
               key="modal-coordinator"
               className="ml-2"
               title="Ajouter un coordinateur"
-              leftIcon={<IoAdd size={24} className="mt-0.5" />}
+              leftIcon={<IoAdd size={20} className="mt-0.5" />}
               onClick={() => setModalAddCoordinator(true)}
             />
           ),
@@ -255,7 +254,7 @@ export default function view() {
                         setCopied([]);
                       }, 2000);
                     }}>
-                    {copied[index] ? <HiCheckCircle className="text-green-500 ml-2" /> : <VscCopy size={20} className="ml-2 text-gray-400 cursor-pointer" />}
+                    {copied[index] ? <HiCheckCircle className="text-green-500 ml-2" /> : <MdOutlineContentCopy size={20} className="ml-2 text-gray-400 cursor-pointer" />}
                   </div>
                 </div>
               </div>
@@ -332,9 +331,9 @@ export default function view() {
         className="md:max-w-[700px]"
         icon={<ProfilePic initials={`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`} />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
-        text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un coordinateur d'établissement."
+        text="Bienvenue sur votre compte Administrateur CLE en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un coordinateur d'établissement."
         actions={[
-          { title: "Créer une classe engagée", leftIcon: <ClasseIcon />, onClick: () => history.push("/mes-classes/create") },
+          { title: "Créer une classe engagée", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push("/mes-classes/create") },
           { title: "Ajouter un coordinateur", leftIcon: <HiPlus size={20} />, onClick: () => setModalAddCoordinator(true) },
         ]}
       />
@@ -348,10 +347,10 @@ export default function view() {
         className="md:max-w-[700px]"
         icon={<ProfilePic initials={`${user.firstName.charAt(0)}${user.lastName.charAt(0)}`} />}
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
-        text="Bienvenue sur votre compte SNU Responsable Classe engagée en tant que Coordinateur d’établissement. Vous pouvez créer une classe engagée, suivre l'évolution de celles déjà créées et consulter les inscriptions des élèves."
+        text="Bienvenue sur votre compte Administrateur CLE en tant que Coordinateur d’établissement. Vous pouvez créer une classe engagée, suivre l'évolution de celles déjà créées et consulter les inscriptions des élèves."
         actions={[
           { title: "Fermer", isCancel: true },
-          { title: "Voir mes classes", leftIcon: <ClasseIcon />, onClick: () => history.push("/mes-classes") },
+          { title: "Voir mes classes", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push("/mes-classes") },
         ]}
       />
       {/* First login REFERENT_CLASSE */}
@@ -367,7 +366,7 @@ export default function view() {
         text="Bienvenue sur votre compte SNU en tant que Référent de classe. Vous pouvez compléter la fiche de votre classe en renseignant toutes les informations."
         actions={[
           { title: "Fermer", isCancel: true },
-          { title: "Compléter les informations", leftIcon: <ClasseIcon />, onClick: () => history.push(`/mes-classes/${classeId}`) },
+          { title: "Compléter les informations", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push(`/mes-classes/${classeId}`) },
         ]}
       />
       {/* Invite COORDINATOR */}

@@ -1,11 +1,10 @@
-import ClasseIcon from "@/components/drawer/icons/Classe";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { translate } from "@/utils";
 import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { useEffect, useState } from "react";
-import { HiPlus, HiUsers } from "react-icons/hi";
+import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES } from "snu-lib";
@@ -54,10 +53,10 @@ export default function list() {
     <Page>
       <Header
         title="Liste de mes classes"
-        breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes" }]}
+        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes" }]}
         actions={[
           <Link key="list" to="/mes-classes/create" className="ml-2">
-            <Button leftIcon={<ClasseIcon />} title="Créer une classe" />
+            <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
           </Link>,
         ]}
       />
