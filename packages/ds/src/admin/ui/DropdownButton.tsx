@@ -95,7 +95,7 @@ export default function DropdownButton({
             mode={"editable"}
             leftIcon={icon}
             rightIcon={
-              rightIcon && <HiChevronDown size={20} className="mt-0.5" />
+              rightIcon && <HiChevronDown size={16} className="mt-0.5" />
             }
             className={buttonClassName}
             onClick={(e) => {
@@ -111,7 +111,7 @@ export default function DropdownButton({
             className={buttonClassName}
             leftIcon={icon}
             rightIcon={
-              rightIcon && <HiChevronDown size={20} className="mt-0.5" />
+              rightIcon && <HiChevronDown size={20} className={`mt-0.5 -mr-[7px]`} />
             }
             disabled={disabled || loading}
             onClick={(e) => {
