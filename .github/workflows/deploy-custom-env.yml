@@ -22,7 +22,6 @@ jobs:
   #       with:
   #         username: nologin
   #         password: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
-  #         # registry: ${{ steps.get_registry.outputs.stdout }}
   #         registry: ${{ secrets.SCW_DEV_IMAGE_REGISTRY }}
   #         image_name: ${{ matrix.app_name }}
   #         dockerfile_path: ${{ matrix.app_name }}/Dockerfile
@@ -37,9 +36,9 @@ jobs:
       PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
       custom_directory: ./terraform/environments/development/apps/custom
-      image_tag: "2023-12-07-128deba"
-      env_name: "feat-1469"
       var_file: "main.tfvars"
+      image_tag: "2023-12-07-128deba" # TODO
+      env_name: "feat-1469" # TODO
 
     steps:
       - uses: actions/checkout@v2
@@ -65,6 +64,6 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: terraform plan -no-color -input=false -var-file="${{ env.var_file }}"
 
-      - name: Terraform plan
+      - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
         run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"

@@ -68,7 +68,13 @@ resource "scaleway_iam_policy" "deploy" {
   application_id = scaleway_iam_application.main.id
   rule {
     project_ids          = [scaleway_account_project.main.id]
-    permission_set_names = ["ContainersFullAccess", "ContainerRegistryFullAccess"]
+    permission_set_names = [
+      "ContainersFullAccess",
+      "ContainerRegistryFullAccess",
+      "DomainsDNSFullAccess",
+      "SecretManagerReadOnly",
+      "SecretManagerSecretAccess",
+    ]
   }
 }
 
