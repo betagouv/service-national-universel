@@ -1,7 +1,6 @@
 import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
-import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS_PHASE1 } from "snu-lib";
 import Clock from "../../assets/icons/Clock";

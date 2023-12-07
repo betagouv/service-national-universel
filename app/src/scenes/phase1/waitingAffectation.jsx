@@ -31,8 +31,8 @@ export default function WaitingAffectation() {
         <section className="flex justify-between">
           <div className="mb-10 max-w-3xl">
             <header className="md:mt-12 mb-12">
-              <h1 className="text-4xl md:text-5xl mt-0 mb-3">Mon séjour de cohésion</h1>
-              <h2 className="text-4xl md:text-5xl mt-0 mb-3 font-bold">{isSejourDateAvailable ? getCohortPeriod(young.cohort) : "à venir"}</h2>
+              <h1 className="text-[44px] mt-0 mb-1">Mon séjour de cohésion</h1>
+              <h2 className="text-[44px] mt-0 mb-3 font-bold">{isSejourDateAvailable ? getCohortPeriod(young.cohort) : "à venir"}</h2>
               {shouldShowChangeStayLink && <ChangeStayLink />}
             </header>
             <div className="flex my-4 items-center gap-4 rounded-xl border-[1px] border-gray-200 bg-white p-3">
