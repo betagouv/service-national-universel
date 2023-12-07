@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]
+        app_name: [admin, api, app]
 
     steps:
       - uses: actions/checkout@v2
@@ -31,7 +31,7 @@ jobs:
         uses: ./.github/actions/docker
         with:
           username: nologin
-          password: ${{ secrets.SCW_SECRET_KEY }}
+          password: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
           registry: ${{ steps.get_registry.outputs.stdout }}
-          image_name: admin
-          dockerfile_path: admin/Dockerfile
+          image_name: ${{ matrix.app_name }}
+          dockerfile_path: ${{ matrix.app_name }}/Dockerfile

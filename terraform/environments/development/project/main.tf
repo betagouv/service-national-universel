@@ -72,12 +72,6 @@ resource "scaleway_iam_policy" "deploy" {
   }
 }
 
-# Api key
-resource "scaleway_iam_api_key" "main" {
-  application_id = scaleway_iam_application.main.id
-  description    = scaleway_iam_policy.deploy.description
-}
-
 # DNS zone
 resource "scaleway_domain_zone" "main" {
   domain     = local.domain
