@@ -28,20 +28,10 @@ export async function resizeImage(file, config = {}) {
 }
 
 export async function convertImage(file, format = "PNG") {
-  const inputBuffer = await fs.buffer(file);
+  const buffer = await Blob.arrayBuffer(file);
   const outputBuffer = await convert({
-    buffer: inputBuffer,
+    buffer: buffer,
     format,
   });
   return outputBuffer;
 }
-
-// function getFileBuffer(file) {
-//   return new Promise((resolve, reject) => {
-//     const reader = new FileReader();
-//     reader.onload = function (event) {
-//       resolve(event.target.result);
-//     };
-//     reader.readAsArrayBuffer(file);
-//   });
-// }
