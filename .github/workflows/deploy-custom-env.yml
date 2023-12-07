@@ -31,6 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     # needs: build
     env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_DEV_DEPLOY_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
       PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
       PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
