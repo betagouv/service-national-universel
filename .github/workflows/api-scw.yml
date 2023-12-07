@@ -38,7 +38,7 @@ jobs:
           username: nologin
           password: ${{ secrets.SCW_SECRET_KEY }}
           # registry: ${{ secrets.SCW_CONTAINER_REGISTRY_ENDPOINT }}
-          registry: rg.fr-par.scw.cloud/snu-production
+          registry: rg.fr-par.scw.cloud/snu-development
           image_name: api
           dockerfile_path: api/Dockerfile
 
