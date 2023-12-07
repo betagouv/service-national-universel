@@ -49,7 +49,7 @@ export default function ModalConfirmation({
         <div className="text-center">
           <div className="flex items-center justify-center">
             {title && (
-              <h3 className="text-xl font-bold text-ds-gray-900">{title}</h3>
+              <h3 className="text-xl font-medium text-ds-gray-900">{title}</h3>
             )}
             {tooltip && (
               <>
@@ -84,7 +84,7 @@ export default function ModalConfirmation({
         </div>
       }
       footer={
-        <div className="flex items-center justify-between gap-6">
+        <div className="flex items-center justify-between gap-3">
           {Array.isArray(actions)
             ? actions.map((action, index) => (
                 <Button

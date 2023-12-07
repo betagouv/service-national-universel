@@ -41,7 +41,7 @@ export default function ProfilePic({
     >
       {!image && !icon && initials && (
         <div
-          className="flex items-center justify-center text-ds-deep-blue-900 font-bold uppercase"
+          className="flex items-center justify-center text-ds-deep-blue-900 font-medium uppercase"
           style={{ fontSize: size / 2 + "px", lineHeight: size + "px" }}
         >
           {initials.substring(0, 2)}

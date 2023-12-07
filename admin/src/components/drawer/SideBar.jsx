@@ -24,8 +24,8 @@ import InviteHeader from "./components/invite";
 import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
 import InstitutionIcon from "./icons/Institution";
-import ClasseIcon from "./icons/Classe";
 import StudentIcon from "./icons/Student";
+import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, itemsDev, volontaireHeadCenterRegex } from "./utils";
 import useDevice from "../../hooks/useDevice";
@@ -183,7 +183,7 @@ const SideBar = (props) => {
     />
   );
   const Classe = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={ClasseIcon} title="Mes classes" link="/mes-classes" active={path.includes("mes-classes")} setCurrentOpen={setDropDownOpen} />
+    <SimpleNavItem sideBarOpen={open} Icon={HiOutlineOfficeBuilding} title="Mes classes" link="/mes-classes" active={path.includes("mes-classes")} setCurrentOpen={setDropDownOpen} />
   );
   const VolontaireCle = () => (
     <SimpleNavItem sideBarOpen={open} Icon={StudentIcon} title="Mes élèves" link="/mes-eleves" active={path.includes("mes-eleves")} setCurrentOpen={setDropDownOpen} />

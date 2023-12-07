@@ -32,7 +32,7 @@ export default function Button({
   return (
     <button
       type="button"
-      className={`flex w-fit gap-2 items-center rounded-md font-marianne px-[17px] font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+      className={`flex w-fit min-w-[100px] max-w-[325px] gap-2 items-center justify-center rounded-md font-marianne px-[17px] ${leftIcon && "pl-[15px]"} font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
         styles.native
       } ${disabled ? styles.disabled : styles.base} ${className}`}
       disabled={disabled}
@@ -62,12 +62,12 @@ const getStyles = ({ type }: { type: Ttype }) => {
     case "wired":
       return {
         native: "h-[38px] py-[9px] text-sm pr-3",
-        base: "text-blue-600 border !border-blue-300 hover:bg-blue-50",
-        disabled: "text-blue-600/60 !border border-blue-300/60",
+        base: "text-blue-600 border !border-blue-600 hover:bg-blue-50",
+        disabled: "text-blue-600/60 !border border-blue-600/60",
       };
     case "change":
       return {
-        native: "h-8 py-2 pl-2.5 text-xs",
+        native: "h-8 py-2 !pl-[12px] !gap-1 text-xs",
         base: "text-blue-600 bg-blue-100 hover:bg-blue-200",
         disabled: "text-blue-600/60 bg-blue-100/60",
       };

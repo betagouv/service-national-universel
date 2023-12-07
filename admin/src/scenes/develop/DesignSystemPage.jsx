@@ -79,8 +79,8 @@ export default function DesignSystemPage() {
   console.log(valueSelect);
 
   const [StatusTitle, setStatusTitle] = useState("Candidature approuvée");
-  const [StatusSelect, setStatusSelect] = useState("VALIDATED");
-  const [SelectClassName, setSelectClassName] = useState("hover:bg-green-200");
+  const [StatusSelect, setStatusSelect] = useState("WAITING_LIST");
+  const [SelectClassName, setSelectClassName] = useState("hover:bg-cyan-200");
 
   const selectTest = [
     {
@@ -144,14 +144,14 @@ export default function DesignSystemPage() {
           key: "1",
           action: () => {
             setStatusTitle("Candidature approuvée");
-            setStatusSelect("VALIDATED");
-            setSelectClassName("hover:bg-green-200");
+            setStatusSelect("WAITING_LIST");
+            setSelectClassName("hover:bg-cyan-200 hover:boder-cyan-500");
           },
           render: (
             <div className="flex items-center gap-4 p-2 px-3">
-              <div className="w-3 h-3 bg-green-500 rounded-[50%] mt-0.5" />
-              <div className={`${StatusSelect === "VALIDATED" && "font-bold"} text-sm`}>Candidature Approuvée</div>
-              {StatusSelect === "VALIDATED" && <BsCheck size={20} color="black" className="mt-0.5" />}
+              <div className="w-3 h-3 shrink-0 bg-cyan-600 rounded-[50%] mt-0.5" />
+              <div className={`${StatusSelect === "WAITING_LIST" && "font-bold"} text-sm`}>Candidature Approuvée</div>
+              {StatusSelect === "WAITING_LIST" && <BsCheck size={20} color="black" className="mt-0.5" />}
             </div>
           ),
         },
@@ -160,11 +160,11 @@ export default function DesignSystemPage() {
           action: () => {
             setStatusTitle("Candidature non Retenue");
             setStatusSelect("REFUSED");
-            setSelectClassName("hover:bg-red-200");
+            setSelectClassName("hover:bg-red-200 hover:boder-red-500");
           },
           render: (
             <div className="flex items-center gap-4 p-2 px-3">
-              <div className="w-3 h-3 bg-red-500 rounded-[50%] mt-0.5" />
+              <div className="w-3 h-3 shrink-0 bg-red-500 rounded-[50%] mt-0.5" />
               <div className={`${StatusSelect === "REFUSED" && "font-bold"} text-sm`}>Candidature non Retenue</div>
               {StatusSelect === "REFUSED" && <BsCheck size={20} color="black" className="mt-0.5" />}
             </div>
@@ -184,9 +184,11 @@ export default function DesignSystemPage() {
         title="Design System"
         breadcrumb={[
           { to: "/", title: <HiOutlineCommandLine size={20} /> },
-          { to: "/design-system", title: "Design System" },
+          { title: "Design System" },
         ]}
-        actions={[<Button key="header-action-1" title={"Click me"} />]}
+        actions={[
+          <Button key="header-action-1" title={"Click me"} />,
+        ]}
       />
       <Subheader title="Code, preview, test, build and ship." />
       <Container title="Champs simples (InputText)">
@@ -313,20 +315,20 @@ export default function DesignSystemPage() {
           <Badge title={"Phase 1"} />
           <Badge title={"Référent départemental"} />
           <Badge title={"Préparation militaire"} status={"secondary"} />
-          <Badge title={"Drome"} mode={"editable"} rightIcon={<TbExternalLink size={20} />} className={"hover:bg-gray-200"} />
-          <Badge title={"Avril 2023 - A"} leftIcon={<HiUsers color="#6366F1" size={20} />} />
+          <Badge title={"Drome"} mode={"editable"} rightIcon={<TbExternalLink size={16} />} className={"hover:bg-gray-200"} />
+          <Badge title={"Avril 2023 - A"} leftIcon={<HiUsers color="#6366F1" size={16} />} />
           <Badge
             title={"Avril 2023 - A"}
             status={"primary"}
             mode={"editable"}
-            leftIcon={<HiUsers size={20} />}
-            rightIcon={<HiPencil size={20} />}
+            leftIcon={<HiUsers size={16} />}
+            rightIcon={<HiPencil size={16} />}
             onClick={() => console.log("test")}
             optionsGroup={selectTest2}
           />
-          <Badge title={<HiPencil size={20} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
+          <Badge title={<HiPencil size={16} />} status={"primary"} mode={"editable"} onClick={() => console.log("test")} className={"rounded-[50%] !p-0 !w-8"} />
           <DropdownButton title={StatusTitle} status={StatusSelect} buttonClassName={SelectClassName} mode={"badge"} optionsGroup={selectTestStatus} />
-          <Badge title={"Désistée"} status={"CANCEL"} />
+          <Badge title={"Désisté"} status={"CANCEL"} />
           <Badge title={"Refusée"} status={"REFUSED"} />
           <Badge title={"En attente de validation"} status={"WAITING_VALIDATION"} />
           <Badge title={"En attente de correction"} status={"WAITING-CORRECTION"} />

@@ -78,7 +78,7 @@ export default function confirmation() {
       <form onSubmit={submit}>
         <Container className="flex flex-col gap-8">
           <div className="flex items-start justify-between">
-            <h1 className="text-xl font-bold">Validez vos informations</h1>
+            <h1 className="text-2xl font-bold">Validez vos informations</h1>
             <i className={fr.cx("fr-icon-question-fill", "text-[var(--background-action-high-blue-france)]")}></i>
           </div>
           <hr className="p-1" />
@@ -139,7 +139,7 @@ export default function confirmation() {
             options={[
               {
                 label: (
-                  <p className="p-0 m-0 !pl-8">
+                  <p className="p-0 m-0 !pl-8 text-sm">
                     J'ai lu et j'accepte les <a href="#">Conditions Générales d'Utilisation (CGU)</a> de la plateforme du Service National Universel.
                   </p>
                 ),
@@ -152,7 +152,7 @@ export default function confirmation() {
               },
               {
                 label: (
-                  <p className="p-0 m-0 !pl-8">
+                  <p className="p-0 m-0 !pl-8 text-sm">
                     J’ai pris connaissance des <a href="#">modalités de traitement de mes données personnelles</a>.
                   </p>
                 ),

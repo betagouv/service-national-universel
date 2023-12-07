@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Badge, Label, InputText, Modal, Select, ModalConfirmation } from "@snu/ds/admin";
-import { HiOutlinePencil } from "react-icons/hi";
+import { HiOutlinePencil, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { BsSend, BsTrash3 } from "react-icons/bs";
-import ClasseIcon from "@/components/drawer/icons/Classe";
 import { Link } from "react-router-dom";
 import { useParams, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
@@ -156,7 +155,7 @@ export default function view() {
       <Header
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translate(classe.status)} status={statusClassForBadge(classe.status)} />}
-        breadcrumb={[{ title: <ClasseIcon className="scale-[65%]" /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
+        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
         actions={
           classe.status !== STATUS_CLASSE.DRAFT && classe.status !== STATUS_CLASSE.WITHDRAWN && classe.status !== STATUS_CLASSE.VALIDATED
             ? [<Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />]

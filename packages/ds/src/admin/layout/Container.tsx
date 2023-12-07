@@ -18,7 +18,7 @@ export default function Container({
   children,
 }: OwnProps) {
   return (
-    <div
+    <section
       className={
         "mb-6 pt-6 pb-8 px-8 rounded-lg bg-white shadow-container " + className
       }
@@ -43,6 +43,6 @@ export default function Container({
 
       {/* Children */}
       {children}
-    </div>
+    </section>
   );
 }
