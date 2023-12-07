@@ -2,7 +2,7 @@ name: Custom environment - Build Docker image & Deploy Scaleway
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
     branches:
       - feat-1469
 
