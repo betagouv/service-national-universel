@@ -197,7 +197,7 @@ class Auth {
           if (!trustToken) return true;
 
           const jwtPayload = await jwt.verify(trustToken, config.secret);
-          const { error, value } = Joi.object({ __v: Joi.string().required() }).validate(jwtPayload);
+          const { error, value } = Joi.object({ __v: Joi.string().required() }).validate(jwtPayload, { stripUnknown: true });
           return error || !checkJwtTrustTokenVersion(value);
         } catch (e) {
           capture(e);
