@@ -12,7 +12,6 @@ import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 import { ID } from "../utils";
 import { supportURL } from "@/config";
 
-import Help from "../components/Help";
 import InscriptionStepper from "../components/InscriptionStepper";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import StepUploadMobile from "../components/StepUploadMobile";
@@ -178,7 +177,6 @@ export default function StepUpload() {
           />
         )}
       </DSFRContainer>
-      <Help supportLink={supportLink} />
     </>
   );
 }
