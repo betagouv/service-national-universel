@@ -420,41 +420,58 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
 
   async function validate() {
     try {
-      const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
-      if (!res.ok) throw new Error(res);
-      const fillingRate = res.data;
-      if (fillingRate >= 1.05) {
+      if (young.source === YOUNG_SOURCE.CLE) {
         return setConfirmModal({
           icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
           title: (
             <span>
-              L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-              <strong className="text-bold">validé sur liste complémentaire</strong>.
+              Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur liste principale</strong>.
             </span>
           ),
           message: `Souhaitez-vous confirmer l'action ?`,
-          type: "SESSION_FULL",
+          type: "VALIDATED",
+          infoLink: {
+            href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
+            text: "Des questions sur ce fonctionnement ?",
+          },
+        });
+      } else {
+        const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
+        if (!res.ok) throw new Error(res);
+        const fillingRate = res.data;
+        if (fillingRate >= 1.05) {
+          return setConfirmModal({
+            icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
+            title: (
+              <span>
+                L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+                <strong className="text-bold">validé sur liste complémentaire</strong>.
+              </span>
+            ),
+            message: `Souhaitez-vous confirmer l'action ?`,
+            type: "SESSION_FULL",
+            infoLink: {
+              href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
+              text: "Des questions sur ce fonctionnement ?",
+            },
+          });
+        }
+        return setConfirmModal({
+          icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
+          title: (
+            <span>
+              L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+              <strong className="text-bold">validé sur liste principale</strong>.
+            </span>
+          ),
+          message: `Souhaitez-vous confirmer l'action ?`,
+          type: "VALIDATED",
           infoLink: {
             href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
             text: "Des questions sur ce fonctionnement ?",
           },
         });
       }
-      return setConfirmModal({
-        icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-        title: (
-          <span>
-            L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-            <strong className="text-bold">validé sur liste principale</strong>.
-          </span>
-        ),
-        message: `Souhaitez-vous confirmer l'action ?`,
-        type: "VALIDATED",
-        infoLink: {
-          href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
-          text: "Des questions sur ce fonctionnement ?",
-        },
-      });
     } catch (e) {
       capture(e);
       toastr.error(e.message);
