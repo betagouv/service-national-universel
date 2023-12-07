@@ -19,6 +19,10 @@ jobs:
 
       - id: get_registry
         working-directory: ./terraform/environments/development/project
+        env:
+          PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
+          PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
+          PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
         run: |
           terraform init
           terraform output --raw registry_endpoint
