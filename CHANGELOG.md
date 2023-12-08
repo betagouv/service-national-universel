@@ -1,3 +1,10 @@
+## [1.345.2](https://github.com/betagouv/service-national-universel/compare/v1.345.1...v1.345.2) (2023-12-08)
+
+
+### Bug Fixes
+
+* **admin:** maintenance page association ([#3342](https://github.com/betagouv/service-national-universel/issues/3342)) ([44c9361](https://github.com/betagouv/service-national-universel/commit/44c9361a79546dbbd039d313f436073b56d87a06))
+
 ## [1.345.1](https://github.com/betagouv/service-national-universel/compare/v1.345.0...v1.345.1) (2023-12-07)
 
 
