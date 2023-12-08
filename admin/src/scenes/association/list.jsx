@@ -7,8 +7,20 @@ import { ES_NO_LIMIT, ROLES, getDepartmentNumber, translate } from "../../utils"
 import Association from "./components/Association";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { BsDownload } from "react-icons/bs";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function List() {
+  return (
+    <div className="p-4">
+      <div className={`flex items-center gap-4 rounded-xl bg-yellow-700 p-4 text-base leading-5 text-white`}>
+        <HiOutlineExclamationCircle className="h-10 w-10 text-white stroke-[1.5px]" />
+        <div>
+          <p>Cette page est actuellement en maintenance.</p>
+          <p>Veuillez réessayer plus tard.</p>
+        </div>
+      </div>
+    </div>
+  );
   const [associations, setAssociations] = useState([]);
   const [missionsInfo, setMissionsInfo] = useState({});
   const user = useSelector((state) => state.Auth.user);
