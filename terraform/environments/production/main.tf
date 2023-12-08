@@ -16,10 +16,9 @@ provider "scaleway" {
 
 locals {
   iam_role         = "production"
-  environment_keys = toset(["production", "staging"])
-  app_keys         = toset(["admin"])
-  environments     = { for k in local.environment_keys : k => var.environments[k] }
-  secrets          = { for k in local.environment_keys : k => jsondecode(base64decode(data.scaleway_secret_version.main[k].data)) }
+  env_keys = toset(["production", "staging"])
+  envs     = { for k in local.env_keys : k => var.environments[k] }
+  secrets          = { for k in local.env_keys : k => jsondecode(base64decode(data.scaleway_secret_version.main[k].data)) }
 }
 
 # Project
@@ -33,15 +32,14 @@ resource "scaleway_account_project" "main" {
 }
 
 # Secrets
-# Prod
 import {
   to = scaleway_secret.production
   id = var.environments.production.secret_id
 }
 resource "scaleway_secret" "production" {
-  name        = "snu-${var.environments.production.name}"
+  name        = "snu-production"
   project_id  = scaleway_account_project.main.id
-  description = "Secrets for environment '${var.environments.production.name}'"
+  description = "Secrets for environment 'production'"
 }
 
 import {
@@ -49,9 +47,9 @@ import {
   id = var.environments.staging.secret_id
 }
 resource "scaleway_secret" "staging" {
-  name        = "snu-${var.environments.staging.name}"
+  name        = "snu-staging"
   project_id  = scaleway_account_project.main.id
-  description = "Secrets for environment '${var.environments.staging.name}'"
+  description = "Secrets for environment 'staging'"
 }
 
 # Logs
@@ -80,36 +78,42 @@ resource "scaleway_iam_policy" "deploy" {
   application_id = scaleway_iam_application.main.id
   rule {
     project_ids          = [scaleway_account_project.main.id]
-    permission_set_names = ["ContainersFullAccess", "ContainerRegistryFullAccess"]
+    permission_set_names = [
+      "ContainersFullAccess",
+      "ContainerRegistryFullAccess",
+      "DomainsDNSFullAccess",
+      "SecretManagerReadOnly",
+      "SecretManagerSecretAccess",
+    ]
   }
 }
 
 # Containers namespace
 resource "scaleway_container_namespace" "main" {
-  for_each = local.environments
+  for_each = local.envs
 
   project_id  = var.project_id
-  name        = "snu-${each.value.name}"
-  description = "SNU container namespace for environment '${each.value.name}'"
+  name        = "snu-${each.key}"
+  description = "SNU container namespace for environment '${each.key}'"
 }
 
 # Containers
 data "scaleway_secret_version" "main" {
-  for_each = local.environments
+  for_each = local.envs
 
   secret_id = each.value.secret_id
   revision  = each.value.revision
 }
 
 resource "scaleway_container" "api" {
-  for_each = { for k in local.environment_keys : k => {
+  for_each = { for k in local.env_keys : k => {
     env    = var.environments[k]
     app    = var.environments[k].apps["api"]
     secret = local.secrets[k]
   } }
 
-  name            = "${each.value.env.name}-${each.value.app.name}"
-  namespace_id    = scaleway_container_namespace.main[each.value.env.name].id
+  name            = "${each.key}-${each.value.app.name}"
+  namespace_id    = scaleway_container_namespace.main[each.key].id
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/${each.value.app.name}:${each.value.env.image_tag}"
   port            = 8080
   cpu_limit       = each.value.app.cpu_limit
@@ -172,26 +176,26 @@ resource "scaleway_container" "api" {
 }
 
 resource "scaleway_container_domain" "api" {
-  for_each = { for k in local.environment_keys : k => {
+  for_each = { for k in local.env_keys : k => {
     env = var.environments[k]
     app = var.environments[k].apps["api"]
   } }
 
-  container_id = scaleway_container.api[each.value.env.name].id
+  container_id = scaleway_container.api[each.key].id
   hostname     = "${each.value.app.subdomain}.${each.value.env.dns_zone}"
 }
 
 
 
 resource "scaleway_container" "admin" {
-  for_each = { for k in local.environment_keys : k => {
+  for_each = { for k in local.env_keys : k => {
     env    = var.environments[k]
     app    = var.environments[k].apps["admin"]
     secret = local.secrets[k]
   } }
 
-  name            = "${each.value.env.name}-${each.value.app.name}"
-  namespace_id    = scaleway_container_namespace.main[each.value.env.name].id
+  name            = "${each.key}-${each.value.app.name}"
+  namespace_id    = scaleway_container_namespace.main[each.key].id
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/${each.value.app.name}:${each.value.env.image_tag}"
   port            = 8080
   cpu_limit       = each.value.app.cpu_limit
@@ -219,24 +223,24 @@ resource "scaleway_container" "admin" {
 }
 
 resource "scaleway_container_domain" "admin" {
-  for_each = { for k in local.environment_keys : k => {
+  for_each = { for k in local.env_keys : k => {
     env = var.environments[k]
     app = var.environments[k].apps["admin"]
   } }
 
-  container_id = scaleway_container.admin[each.value.env.name].id
+  container_id = scaleway_container.admin[each.key].id
   hostname     = "${each.value.app.subdomain}.${each.value.env.dns_zone}"
 }
 
 resource "scaleway_container" "app" {
-  for_each = { for k in local.environment_keys : k => {
+  for_each = { for k in local.env_keys : k => {
     env    = var.environments[k]
     app    = var.environments[k].apps["app"]
     secret = local.secrets[k]
   } }
 
-  name            = "${each.value.env.name}-${each.value.app.name}"
-  namespace_id    = scaleway_container_namespace.main[each.value.env.name].id
+  name            = "${each.key}-${each.value.app.name}"
+  namespace_id    = scaleway_container_namespace.main[each.key].id
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/${each.value.app.name}:${each.value.env.image_tag}"
   port            = 8080
   cpu_limit       = each.value.app.cpu_limit
@@ -264,11 +268,11 @@ resource "scaleway_container" "app" {
 }
 
 resource "scaleway_container_domain" "app" {
-  for_each = { for k in local.environment_keys : k => {
+  for_each = { for k in local.env_keys : k => {
     env = var.environments[k]
     app = var.environments[k].apps["app"]
   } }
 
-  container_id = scaleway_container.app[each.value.env.name].id
+  container_id = scaleway_container.app[each.key].id
   hostname     = "${each.value.app.subdomain}.${each.value.env.dns_zone}"
 }

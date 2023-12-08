@@ -4,6 +4,7 @@ variable "project_id" {
 }
 variable "environments" {
   type = map(object({
+    domain  = string
     dns_zone  = string
     secret_id = string
     revision  = number
