@@ -886,7 +886,7 @@ function canSearchStudent(actor) {
 }
 
 function canDeleteClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
 }
 
 export {

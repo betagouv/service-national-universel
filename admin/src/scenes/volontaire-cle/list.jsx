@@ -158,7 +158,7 @@ const Hit = ({ hit }) => {
       <td className="flex w-[20%] flex-col gap-2">
         <Badge title={hit.cohort} leftIcon={<HiUsers color="#EC4899" size={20} />} />
       </td>
-      <td className="flex w-[20%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mes-classes/${hit._id}`)}>
+      <td className="flex w-[20%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mes-classes/${hit.classeId}`)}>
         <div className="flex w-full flex-col justify-center">
           <div className="m-0 table w-full table-fixed border-collapse">
             <div className="table-cell truncate font-bold text-gray-900">{hit?.classe?.name}</div>

@@ -144,7 +144,7 @@ export default function view() {
           <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
         </div>,
       ]
-    : (user.role === ROLES.ADMINISTRATEUR_CLE || user.role === ROLES.REFERENT_CLASSE) && classe?.status !== STATUS_CLASSE.WITHDRAWN
+    : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN
     ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
     : null;
 
@@ -157,9 +157,9 @@ export default function view() {
         titleComponent={<Badge className="mx-4 mt-2" title={translate(classe.status)} status={statusClassForBadge(classe.status)} />}
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
         actions={
-          classe.status !== STATUS_CLASSE.DRAFT && classe.status !== STATUS_CLASSE.WITHDRAWN && classe.status !== STATUS_CLASSE.VALIDATED
-            ? [<Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />]
-            : null
+          ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [
+            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
+          ]
         }
       />
       <Container title="Informations générales" actions={actionList}>
