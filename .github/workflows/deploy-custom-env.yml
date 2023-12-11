@@ -85,12 +85,15 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         continue-on-error: true
         run: |
-          terraform state show 'scaleway_secret.custom'
-          echo "no_secret=$?" >> $GITHUB_OUTPUT
+          if terraform state show 'scaleway_secret.custom' ; then
+              echo "has_secret=1" >> $GITHUB_OUTPUT
+          else
+              echo "has_secret=0" >> $GITHUB_OUTPUT
+          fi
 
       - name: Get CI project & secret ID
         id: ci_outputs
-        if: ${{ steps.check_secret.outputs.no_secret == '1' }}
+        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: "${{ env.custom_directory }}/../"
         run: |
           terraform init
@@ -101,7 +104,7 @@ jobs:
           echo "Project ID: $project_id - Secret ID: $secret_id"
 
       - name: Create secret
-        if: ${{ steps.check_secret.outputs.no_secret == '1' }}
+        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: ${{ env.custom_directory }}
         run: |
           # Create secret for custom environment
