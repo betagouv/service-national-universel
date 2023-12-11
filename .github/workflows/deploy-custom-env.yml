@@ -84,31 +84,43 @@ jobs:
         id: secret_id
         working-directory: ${{ env.custom_directory }}
         run: |
-          echo "secret_id=$(terraform output -raw secret_id)" >> GITHUB_OUTPUT
-          echo "project_id=$(terraform output -raw project_id)" >> GITHUB_OUTPUT
+          secret_id=$(terraform output -raw secret_id)
+          echo "secret_id=$secret_id" >> GITHUB_OUTPUT
+          echo "Secret ID: $secret_id"
+
+      - name: Get CI project & secret ID
+        id: ci_outputs
+        if: ${{ steps.secret_id.outputs.secret_id == '' }}
+        working-directory: ${{ env.custom_directory/../ }}
+        run: |
+          secret_id=$(terraform output -raw secret_id)
+          project_id=$(terraform output -raw project_id)
+          echo "secret_id=$secret_id" >> GITHUB_OUTPUT
+          echo "project_id=$project_id" >> GITHUB_OUTPUT
+          echo "Project ID: $project_id - Secret ID: $secret_id"
 
       - name: Create secret
         if: ${{ steps.secret_id.outputs.secret_id == '' }}
         working-directory: ${{ env.custom_directory }}
         run: |
           # Create secret for custom environment
-          secret_id=$(curl -X POST \
+          secret_id=$(curl -s -X POST \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
             -H "Content-Type: application/json" \
             -d '{
               "name": "env-${{ needs.prepare.outputs.env_name }}",
-              "project_id": "${{ steps.secret_id.outputs.project_id }}",
+              "project_id": "${{ steps.ci_outputs.outputs.project_id }}",
             }' \
             "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets" | jq -r ".id" )
           # Retreive ci secret latest revision
-          data=$(curl -X GET \
+          data=$(curl -s -X GET \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
-            "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets/${{ steps.secret_id.outputs.secret_id }}/versions/latest_enabled/access" | jq -r ".data")
+            "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets/${{ steps.ci_outputs.outputs.secret_id }}/versions/latest_enabled/access" | jq -r ".data")
           # Create a new revision for custom environment
-          curl -X POST \
+          curl -s -X POST \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
             -H "Content-Type: application/json" \
-            -d "{\"data\":\"${data}\"}"" \
+            -d "{\"data\":\"${data}\"}" \
             "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets/${secret_id}/versions"
 
       - name: Validate terraform
