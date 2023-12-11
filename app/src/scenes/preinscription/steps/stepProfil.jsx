@@ -135,6 +135,7 @@ export default function StepProfil() {
       }
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED") {
+        if (isCLE) history.push("/je-suis-deja-inscrit");
         setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
       } else {
         capture(e);
