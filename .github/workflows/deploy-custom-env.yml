@@ -83,7 +83,7 @@ jobs:
       - name: Get secret ID
         id: secret_id
         working-directory: ${{ env.custom_directory }}
-        shell: bash
+        continue-on-error: true
         run: |
           secret_id=$(terraform output -raw secret_id)
           echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
@@ -93,7 +93,6 @@ jobs:
         id: ci_outputs
         if: ${{ steps.secret_id.outputs.secret_id == '' }}
         working-directory: "${{ env.custom_directory }}/../"
-        shell: bash
         run: |
           terraform init
           secret_id=$(terraform output -raw secret_id)
@@ -105,7 +104,6 @@ jobs:
       - name: Create secret
         if: ${{ steps.secret_id.outputs.secret_id == '' }}
         working-directory: ${{ env.custom_directory }}
-        shell: bash
         run: |
           # Create secret for custom environment
           secret_id=$(curl -s -X POST \
