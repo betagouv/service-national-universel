@@ -35,7 +35,7 @@ export default function Create(props) {
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
       setTypeList(typesReferent);
       setSubjectsList(subjectsReferent);
-    } else if ([ROLES.ADMIN].includes(user.role)) {
+    } else if ([ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) {
       setTypeList(typesAdmin);
       setSubjectsList(subjectsAdmin);
     } else if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
@@ -112,7 +112,7 @@ export default function Create(props) {
                 errors={errors}
                 touched={touched}
               />
-              {[ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
+              {[ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? (
                 <Item
                   name="messageSubject"
                   title="Ma demande"
@@ -132,7 +132,9 @@ export default function Create(props) {
                   souhaitez joindre des pièces envoyez votre demande à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
                 </p>
               ) : null}
-              {values.type?.id && !["OTHER", "QUESTION_SUPPORT"].includes(values.type?.id) && ![ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
+              {values.type?.id &&
+              !["OTHER", "QUESTION_SUPPORT"].includes(values.type?.id) &&
+              ![ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? (
                 <SelectTag
                   name="subject"
                   options={Object.values(subjectsList).filter((e) => e.parentId === values?.type?.id)}
