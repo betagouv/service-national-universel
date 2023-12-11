@@ -20,26 +20,30 @@ jobs:
       id: image_tag
       uses: ./.github/actions/get_image_tag
 
+    - name: Debug
+      run: echo "GITHUB_SHA:${{ GITHUB_SHA }}"
+      run: echo "GITHUB_REF:${{ GITHUB_REF }}"
+      run: echo "github.event.pull_request.head.sha:${{ github.event.pull_request.head.sha }}"
 
-  build:
-    needs: prepare
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app_name: [admin, api, app]
+  # build:
+  #   needs: prepare
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       app_name: [admin, api, app]
 
-    steps:
-      - uses: actions/checkout@v2
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Docker Build & Publish
-        uses: ./.github/actions/docker
-        with:
-          username: nologin
-          password: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
-          registry: ${{ secrets.SCW_DEV_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+  #     - name: Docker Build & Publish
+  #       uses: ./.github/actions/docker
+  #       with:
+  #         username: nologin
+  #         password: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
+  #         registry: ${{ secrets.SCW_DEV_IMAGE_REGISTRY }}
+  #         image_name: ${{ matrix.app_name }}
+  #         dockerfile_path: ${{ matrix.app_name }}/Dockerfile
+  #         image_tag: ${{ needs.prepare.outputs.image_tag }}
 
   # deploy:
   #   runs-on: ubuntu-latest
