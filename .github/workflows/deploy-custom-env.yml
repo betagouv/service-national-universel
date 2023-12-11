@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
+      env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
     - uses: actions/checkout@v2
@@ -20,12 +21,12 @@ jobs:
       id: image_tag
       uses: ./.github/actions/get_image_tag
 
-    - name: Debug
+    - name: Get environment name
+      id: env_name
       run: |
-        echo "GITHUB_SHA:${{ github.sha }}"
-        echo "GITHUB_REF:${{ github.ref }}"
-        echo "GITHUB_REF_NAME:${{ github.ref_name }}"
-        echo "github.event.pull_request.head.sha:${{ github.event.pull_request.head.sha }}"
+        env_name=$(echo ${{ github.ref_name }} | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-' | tr -s '-' | cut -c 1-25)
+        echo "Environment name: $env_name"
+        echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
   # build:
   #   needs: prepare

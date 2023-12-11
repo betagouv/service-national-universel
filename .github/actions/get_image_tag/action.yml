@@ -25,4 +25,4 @@ runs:
 
     - name: Print the Docker Image
       shell: bash
-      run: echo ${{ steps.image_tag.outputs.image_tag }}
+      run: echo "Image tag: ${{ steps.image_tag.outputs.image_tag }}"
