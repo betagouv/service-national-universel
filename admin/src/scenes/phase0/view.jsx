@@ -493,9 +493,12 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
     </option>,
   ];
 
+  const youngCleREfusedMessage =
+    "Votre inscription au SNU dans le cadre du dispositif Classe et Lycée Engagés a été refusée. Pour plus d'informations, merci de vous rapprocher de votre établissement.";
+
   function reject() {
-    setRejectionReason("");
-    setRejectionMessage("");
+    setRejectionReason(young.source === YOUNG_SOURCE.CLE ? "OTHER" : "");
+    setRejectionMessage(young.source === YOUNG_SOURCE.CLE ? youngCleREfusedMessage : "");
 
     setConfirmModal({
       icon: <XCircle className="h-[36px] w-[36px] text-[#D1D5DB]" />,
@@ -561,7 +564,11 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
               {confirmModal.type === "REFUSED" && (
                 <div className="mt-[24px]">
                   <div className="mb-[16px] flex w-[100%] items-center rounded-[6px] border-[1px] border-[#D1D5DB] bg-white pr-[15px]">
-                    <select value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="block grow appearance-none bg-[transparent] p-[15px]">
+                    <select
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      className="block grow appearance-none bg-[transparent] p-[15px]"
+                      disabled={young.source === YOUNG_SOURCE.CLE}>
                       {rejectionReasonOptions}
                     </select>
                     <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
