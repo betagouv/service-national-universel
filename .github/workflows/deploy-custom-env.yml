@@ -127,8 +127,8 @@ jobs:
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
             -H "Content-Type: application/json" \
             -d "{\"data\":\"${data}\"}" \
-            "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/${secret_id}/versions"
-          echo "secret_id=${{ steps.ci_outputs.outputs.region }}/${secret_id}" >> $GITHUB_OUTPUT
+            "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/$secret_id/versions"
+          echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
 
       - name: Import secret
         if: ${{ steps.check_secret.outputs.has_secret == '0' }}
