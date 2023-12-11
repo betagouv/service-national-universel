@@ -22,34 +22,29 @@ locals {
 }
 
 # Project
-import {
-  to = scaleway_account_project.main
-  id = var.project_id
-}
 resource "scaleway_account_project" "main" {
   name        = "snu-${local.iam_role}"
   description = "SNU project for '${local.iam_role}'"
 }
 
 # Secrets
-import {
-  to = scaleway_secret.production
-  id = var.environments.production.secret_id
-}
 resource "scaleway_secret" "production" {
   name        = "snu-production"
   project_id  = scaleway_account_project.main.id
   description = "Secrets for environment 'production'"
 }
 
-import {
-  to = scaleway_secret.staging
-  id = var.environments.staging.secret_id
-}
 resource "scaleway_secret" "staging" {
   name        = "snu-staging"
   project_id  = scaleway_account_project.main.id
   description = "Secrets for environment 'staging'"
+}
+
+data "scaleway_secret_version" "main" {
+  for_each = local.envs
+
+  secret_id = scaleway_secret[each.key].id
+  revision  = each.value.secret_revision
 }
 
 # Logs
@@ -92,19 +87,12 @@ resource "scaleway_iam_policy" "deploy" {
 resource "scaleway_container_namespace" "main" {
   for_each = local.envs
 
-  project_id  = var.project_id
+  project_id  = scaleway_account_project.main.id
   name        = "snu-${each.key}"
   description = "SNU container namespace for environment '${each.key}'"
 }
 
 # Containers
-data "scaleway_secret_version" "main" {
-  for_each = local.envs
-
-  secret_id = each.value.secret_id
-  revision  = each.value.revision
-}
-
 resource "scaleway_container" "api" {
   for_each = { for k in local.env_keys : k => {
     env    = var.environments[k]

@@ -32,7 +32,7 @@ jobs:
         run: rm -rf .git
 
       - name: Docker Build & Publish
-        uses: ./.github/actions/docker
+        uses: ./.github/actions/build_docker_image
         with:
           username: ${{ secrets.OVH_USERNAME }}
           password: ${{ secrets.OVH_PASSWORD }}

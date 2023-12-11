@@ -15,7 +15,7 @@ jobs:
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Get image tag
       id: image_tag
@@ -36,10 +36,10 @@ jobs:
   #       app_name: [admin, api, app]
 
   #   steps:
-  #     - uses: actions/checkout@v2
+  #     - uses: actions/checkout@v4
 
   #     - name: Docker Build & Publish
-  #       uses: ./.github/actions/docker
+  #       uses: ./.github/actions/build_docker_image
   #       with:
   #         username: nologin
   #         password: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
@@ -63,7 +63,7 @@ jobs:
       image_tag: "2023-12-11-1de70e4"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
 
       - name: Create custom env stack
@@ -78,6 +78,17 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: terraform init
 
+      - name: Get secret ID
+        id: secret_id
+        working-directory: ${{ env.custom_directory }}
+        run: echo "secret_id=$(terraform output -raw secret_id)" >> GITHUB_OUTPUT
+
+      - name: Create secret
+        if: ${{ !steps.secret_id.outputs.secret_id }}
+        working-directory: ${{ env.custom_directory }}
+        run: |
+          echo "Creating secret"
+
       - name: Validate terraform
         working-directory: ${{ env.custom_directory }}
         run: terraform validate -no-color
@@ -86,6 +97,6 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: terraform plan -no-color -input=false -var-file="${{ env.var_file }}"
 
-      - name: Terraform auto-apply
-        working-directory: ${{ env.custom_directory }}
-        run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"
+      # - name: Terraform auto-apply
+      #   working-directory: ${{ env.custom_directory }}
+      #   run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"

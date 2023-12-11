@@ -28,24 +28,20 @@ locals {
 }
 
 # Project
-import {
-  to = scaleway_account_project.main
-  id = var.project_id
-}
 resource "scaleway_account_project" "main" {
   name        = "snu-${local.iam_role}"
   description = "SNU project for '${local.iam_role}'"
 }
 
 # Secrets
-import {
-  to = scaleway_secret.ci
-  id = var.environments.ci.secret_id
-}
 resource "scaleway_secret" "ci" {
   name        = "snu-${local.env_key}"
   project_id  = scaleway_account_project.main.id
   description = "Secrets for environment '${local.env_key}'"
+}
+data "scaleway_secret_version" "main" {
+  secret_id = scaleway_secret.ci.id
+  revision  = local.env.secret_revision
 }
 
 # Logs
@@ -92,10 +88,6 @@ resource "scaleway_container_namespace" "main" {
 }
 
 # Containers
-data "scaleway_secret_version" "main" {
-  secret_id = local.env.secret_id
-  revision  = local.env.revision
-}
 
 # DNS zone
 resource "scaleway_domain_zone" "main" {

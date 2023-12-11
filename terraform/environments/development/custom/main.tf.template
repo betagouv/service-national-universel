@@ -61,9 +61,15 @@ resource "scaleway_domain_zone" "main" {
 }
 
 # Secrets
+resource "scaleway_secret" "custom" {
+  name        = "snu-${local.env_key}"
+  project_id  = local.project.project_id
+  description = "Secrets for environment '${local.env_key}'"
+}
+
 data "scaleway_secret_version" main {
-  secret_id = local.project.secret_id
-  revision = 1
+  secret_id = scaleway_secret.custom.id
+  revision  = scaleway_secret.custom.version_count
 }
 
 # Containers namespace
@@ -235,4 +241,8 @@ resource "scaleway_domain_record" "app" {
 resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
   hostname     = local.domain_app
+}
+
+output "secret_id" {
+  value = scaleway_secret.custom.id
 }

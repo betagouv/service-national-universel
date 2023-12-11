@@ -1,12 +1,7 @@
-variable "project_id" {
-  type     = string
-  nullable = false
-}
 variable "environments" {
   type = map(object({
     dns_zone  = string
-    secret_id = string
-    revision  = number
+    secret_revision  = number
     image_tag = string
     apps = map(object({
       name                  = string
