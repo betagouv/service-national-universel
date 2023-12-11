@@ -24,6 +24,10 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+
       - name: Remove git folder
         run: rm -rf .git
 
@@ -35,6 +39,7 @@ jobs:
           registry: ${{ secrets.OVH_REGISTRY_ENDPOINT }}
           image_name: api
           dockerfile_path: api/Dockerfile
+          image_tag: ${{ steps.image_tag.outputs.image_tag }}
 
       - name: OVH container deploy
         if: env.ACTIVE_HOSTING == 'ovh'

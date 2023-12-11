@@ -17,6 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+
       - name: Docker Build & Publish
         uses: ./.github/actions/docker
         with:
@@ -25,6 +29,7 @@ jobs:
           registry: ${{ secrets.SCW_DEV_IMAGE_REGISTRY }}
           image_name: ${{ matrix.app_name }}
           dockerfile_path: ${{ matrix.app_name }}/Dockerfile
+          image_tag: ${{ steps.image_tag.outputs.image_tag }}
 
   # deploy:
   #   runs-on: ubuntu-latest

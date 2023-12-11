@@ -14,6 +14,9 @@ inputs:
   image_name:
     description: "Name of the image"
     required: true
+  image_tag:
+    description: "Unique tag of the image"
+    required: true
   image_tag_stable:
     description: "Stable tag for the image"
     required: false
@@ -25,15 +28,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Get commit hash
-      id: commit
-      uses: prompt/actions-commit-hash@v3
-
-    - name: Get current date
-      id: date
-      shell: bash
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
     - name: Login to Docker Container Registry
       uses: docker/login-action@v2
       with:
@@ -43,10 +37,10 @@ runs:
 
     - name: Build the Docker image
       shell: bash
-      run: docker build -t ${{ inputs.registry }}/${{ inputs.image_name }}:${{ steps.date.outputs.date }}-${{ steps.commit.outputs.short }} -t ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag_stable }} -f ${{ inputs.dockerfile_path }} .
+      run: docker build -t ${{ inputs.registry }}/${{ inputs.image_name }}:${{ image_tag }} -t ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag_stable }} -f ${{ inputs.dockerfile_path }} .
 
     - name: Push the Docker Image
       shell: bash
       run: |
-        docker push ${{ inputs.registry }}/${{ inputs.image_name }}:${{ steps.date.outputs.date }}-${{ steps.commit.outputs.short }}
+        docker push ${{ inputs.registry }}/${{ inputs.image_name }}:${{ image_tag }}
         docker push ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag_stable }}

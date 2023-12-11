@@ -1,0 +1,28 @@
+name: "Get an unique image tag"
+description: "Get an unique image tag based on date and current commit"
+
+outputs:
+  image_tag:
+    description: "Image Tag"
+    value: ${{ steps.image_tag.outputs.image_tag }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get commit hash
+      id: commit
+      uses: prompt/actions-commit-hash@v3
+
+    - name: Get current date
+      id: date
+      shell: bash
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+    - name: Get image tag
+      id: image_tag
+      shell: bash
+      run: echo "::set-output name=image_tag::${{ steps.date.outputs.date }}-${{ steps.commit.outputs.short }}"
+
+    - name: Print the Docker Image
+      shell: bash
+      run: echo ${{ steps.image_tag.outputs.image_tag }}

@@ -52,6 +52,10 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+
       - name: Remove git folder
         run: rm -rf .git
 
@@ -60,10 +64,10 @@ jobs:
         with:
           username: nologin
           password: ${{ secrets.SCW_SECRET_KEY }}
-          # registry: ${{ secrets.SCW_CONTAINER_REGISTRY_ENDPOINT }}
-          registry: rg.fr-par.scw.cloud/snu-development
+          registry: ${{ secrets.SCW_DEV_IMAGE_REGISTRY }}
           image_name: app
           dockerfile_path: app/Dockerfile
+          image_tag: ${{ steps.image_tag.outputs.image_tag }}
 
       # - name: Scaleway container deploy
       #   if: env.ACTIVE_HOSTING == 'scaleway'
