@@ -86,46 +86,40 @@ jobs:
         shell: bash
         run: |
           secret_id=$(terraform output -raw secret_id)
-          echo "secret_id=$secret_id" >> GITHUB_OUTPUT
+          echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
           echo "Secret ID: $secret_id"
 
-      # - name: Get CI project & secret ID
-      #   id: ci_outputs
-      #   if: ${{ steps.secret_id.outputs.secret_id == '' }}
-      #   working-directory: "${{ env.custom_directory }}/../"
-      #   shell: bash
-      #   run: |
-      #     terraform init
-      #     secret_id=$(terraform output -raw secret_id)
-      #     project_id=$(terraform output -raw project_id)
-      #     echo "secret_id=$secret_id" >> GITHUB_OUTPUT
-      #     echo "project_id=$project_id" >> GITHUB_OUTPUT
-      #     echo "Project ID: $project_id - Secret ID: $secret_id"
+      - name: Get CI project & secret ID
+        id: ci_outputs
+        if: ${{ steps.secret_id.outputs.secret_id == '' }}
+        working-directory: "${{ env.custom_directory }}/../"
+        shell: bash
+        run: |
+          terraform init
+          secret_id=$(terraform output -raw secret_id)
+          project_id=$(terraform output -raw project_id)
+          echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
+          echo "project_id=$project_id" >> $GITHUB_OUTPUT
+          echo "Project ID: $project_id - Secret ID: $secret_id"
 
       - name: Create secret
         if: ${{ steps.secret_id.outputs.secret_id == '' }}
         working-directory: ${{ env.custom_directory }}
         shell: bash
         run: |
-          cd ..
-          terraform init
-          ci_secret_id=$(terraform output -raw secret_id)
-          ci_project_id=$(terraform output -raw project_id)
-          echo "Project ID: $ci_project_id - Secret ID: $ci_secret_id"
-          cd ./custom
           # Create secret for custom environment
           secret_id=$(curl -s -X POST \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
             -H "Content-Type: application/json" \
             -d '{
               "name": "env-${{ needs.prepare.outputs.env_name }}",
-              "project_id": "$ci_project_id",
+              "project_id": "${{ steps.ci_outputs.outputs.project_id }}",
             }' \
             "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets" | jq -r ".id" )
           # Retreive ci secret latest revision
           data=$(curl -s -X GET \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
-            "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets/$ci_secret_id/versions/latest_enabled/access" | jq -r ".data")
+            "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets/${{ steps.ci_outputs.outputs.secret_id }}/versions/latest_enabled/access" | jq -r ".data")
           # Create a new revision for custom environment
           curl -s -X POST \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
