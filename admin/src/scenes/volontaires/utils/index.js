@@ -18,6 +18,7 @@ import {
   translateInscriptionStatus,
   translatePhase1,
   translatePhase2,
+  translateYoungSource,
   translateStatusMilitaryPreparationFiles,
 } from "snu-lib";
 import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
@@ -29,6 +30,7 @@ export const getFilterArray = (user, bus, session) => {
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
     { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus, defaultValue: ["VALIDATED"] },
+    { title: "Source", name: "source", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateYoungSource },
     { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     { title: "Académie", name: "academy", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     {
