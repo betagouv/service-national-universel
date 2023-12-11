@@ -1,4 +1,5 @@
 import { region2department } from "./region-and-departments";
+import { YOUNG_SOURCE } from "./constants";
 
 const ROLES = {
   ADMIN: "admin",
@@ -101,7 +102,13 @@ function canInviteUser(actorRole, targetRole) {
 
 const canDeleteStructure = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target);
 
-const canDeleteYoung = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target) || actor._id.toString() === target._id.toString();
+const canDeleteYoung = (actor, target) => {
+  console.log(actor, target);
+  if(actor.id === target.id){
+    if(target.source === YOUNG_SOURCE.CLE) return false;
+  }
+  isAdmin(actor) || referentInSameGeography(actor, target) || actor._id.toString() === target._id.toString();
+}
 
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
