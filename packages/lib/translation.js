@@ -1102,6 +1102,18 @@ const translateColoration = (coloration) => {
   }
 };
 
+const translateYoungSource = (source) => {
+  switch (source) {
+    case "CLE":
+      return "CLE";
+    case "VOLONTAIRE":
+      return "Volontaire";
+
+    default:
+      return source;
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé pour traduire l'historique des plans de transport
 
@@ -1201,6 +1213,7 @@ export {
   translateCniExpired,
   translateEtbalissementSector,
   translateColoration,
+  translateYoungSource,
 };
 export default {
   translate,
@@ -1234,4 +1247,5 @@ export default {
   translateCniExpired,
   translateEtbalissementSector,
   translateColoration,
+  translateYoungSource,
 };

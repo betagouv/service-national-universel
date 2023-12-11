@@ -63,6 +63,7 @@ function getYoungsFilters(user) {
     "schoolDepartment.keyword",
     "parentAllowSNU.keyword",
     "sessionPhase1Id.keyword",
+    "source.keyword",
   ].filter(Boolean);
 }
 

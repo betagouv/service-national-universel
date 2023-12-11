@@ -338,7 +338,8 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               onChange={onSelectStatus}
               className={young.status === YOUNG_STATUS.DELETED ? "my-[15px]" : ""}
             />
-            {young.status !== YOUNG_STATUS.DELETED && (
+
+            {young.status !== YOUNG_STATUS.DELETED && ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
               <div className="my-[15px] flex items-center justify-between">
                 <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
                   Supprimer
