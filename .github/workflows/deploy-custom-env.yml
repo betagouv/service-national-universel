@@ -62,7 +62,7 @@ jobs:
       var_file: "vars/main.tfvars.json"
       image_tag: "2023-12-11-1de70e4"
       region: "fr-par"
-      scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1/"
+      scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1"
 
     steps:
       - uses: actions/checkout@v4
@@ -83,7 +83,6 @@ jobs:
       - name: Check if secret exists
         id: check_secret
         working-directory: ${{ env.custom_directory }}
-        continue-on-error: true
         run: |
           if terraform state show 'scaleway_secret.custom' ; then
               echo "has_secret=1" >> $GITHUB_OUTPUT
