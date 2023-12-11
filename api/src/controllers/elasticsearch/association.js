@@ -12,6 +12,7 @@ const apiEngagement = async ({ path = "/", body }) => {
   try {
     const myHeaders = new fetch.Headers();
     myHeaders.append("X-API-KEY", API_ENGAGEMENT_KEY);
+    myHeaders.append("Content-Type", "application/json");
     const requestOptions = {
       method: "POST",
       headers: myHeaders,
@@ -64,7 +65,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     hitsRequestBody.query.bool.should = should;
     aggsRequestBody.query.bool.should = should;
 
-    const response = await apiEngagement({ path: `/v0/association/snu`, body: buildNdJson({ index: "association", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+    const response = await apiEngagement({ path: `/v0/association/snu`, body: req.body });
     return res.status(200).send(response);
   } catch (error) {
     capture(error);
