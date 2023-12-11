@@ -93,6 +93,7 @@ jobs:
         if: ${{ steps.secret_id.outputs.secret_id == '' }}
         working-directory: "${{ env.custom_directory }}/../"
         run: |
+          terraform init
           secret_id=$(terraform output -raw secret_id)
           project_id=$(terraform output -raw project_id)
           echo "secret_id=$secret_id" >> GITHUB_OUTPUT
