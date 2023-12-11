@@ -91,7 +91,7 @@ jobs:
       - name: Get CI project & secret ID
         id: ci_outputs
         if: ${{ steps.secret_id.outputs.secret_id == '' }}
-        working-directory: ${{ env.custom_directory/../ }}
+        working-directory: "${{ env.custom_directory }}/../"
         run: |
           secret_id=$(terraform output -raw secret_id)
           project_id=$(terraform output -raw project_id)
