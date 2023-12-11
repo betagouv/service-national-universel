@@ -11,7 +11,7 @@ import { colors, translateState, urlWithScheme } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
-import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles, administrator_CLEArticles, referent_classeArticles } from "./articles";
+import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles, administrator_cleArticles, referent_classeArticles } from "./articles";
 import plausibleEvent from "../../services/plausible";
 import { ROLES } from "snu-lib";
 
