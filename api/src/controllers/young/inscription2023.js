@@ -415,6 +415,7 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
           cta: config.APP_URL,
+          SOURCE: young.source,
         },
       });
 
