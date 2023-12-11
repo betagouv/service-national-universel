@@ -105,6 +105,7 @@ jobs:
           echo "Project ID: $project_id - Secret ID: $secret_id"
 
       - name: Create secret
+        id: create_secret
         if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: ${{ env.custom_directory }}
         run: |
@@ -127,6 +128,12 @@ jobs:
             -H "Content-Type: application/json" \
             -d "{\"data\":\"${data}\"}" \
             "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/${secret_id}/versions"
+          echo "secret_id=${{ steps.ci_outputs.outputs.region }}/${secret_id}" >> $GITHUB_OUTPUT
+
+      - name: Import secret
+        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        working-directory: ${{ env.custom_directory }}
+        run: sed "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" imports.tf.template > imports.tf
 
       - name: Validate terraform
         working-directory: ${{ env.custom_directory }}
