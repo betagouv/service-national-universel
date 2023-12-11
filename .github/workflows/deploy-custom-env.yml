@@ -112,7 +112,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "name": "env-${{ needs.prepare.outputs.env_name }}",
-              "project_id": "${{ steps.ci_outputs.outputs.project_id }}",
+              "project_id": "${{ steps.ci_outputs.outputs.project_id }}"
             }' \
             "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets" | jq -r ".id" )
           # Retreive ci secret latest revision
