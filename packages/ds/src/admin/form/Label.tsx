@@ -43,8 +43,7 @@ export default function Label({
             type="light"
             place="top"
             effect="solid"
-            className="custom-tooltip-radius !opacity-100 !shadow-md"
-            tooltipRadius="6"
+            className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md"
             {...(tooltipProps || {})}
           >
             <div
