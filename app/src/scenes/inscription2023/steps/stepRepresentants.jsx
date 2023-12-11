@@ -14,7 +14,6 @@ import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
-import Help from "../components/Help";
 import Input from "../components/Input";
 import InscriptionStepper from "../components/InscriptionStepper";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
@@ -289,7 +288,6 @@ export default function StepRepresentants() {
           <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
         )}
       </DSFRContainer>
-      <Help supportLink={supportLink} />
     </>
   );
 }

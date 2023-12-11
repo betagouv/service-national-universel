@@ -11,7 +11,6 @@ import { RiArrowRightLine } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
-import Help from "../components/Help";
 import MyDocs from "../components/MyDocs";
 import InscriptionStepper from "../components/InscriptionStepper";
 import Info from "../../../components/info";
@@ -128,7 +127,6 @@ export default function StepDocuments() {
         </div>
         <SignupButtonContainer onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />
       </DSFRContainer>
-      <Help supportLink={supportLink} />
     </>
   );
 }
