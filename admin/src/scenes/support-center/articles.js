@@ -105,6 +105,6 @@ export const headCenterArticles = [
   },
 ];
 
-export const administrator_CLEArticles = [];
+export const administrator_cleArticles = [];
 
 export const referent_classeArticles = [];
