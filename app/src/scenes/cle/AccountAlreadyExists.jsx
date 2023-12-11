@@ -19,10 +19,8 @@ const AccountAlreadyExists = () => {
         <span>Si vous souhaitez participer au SNU dans le cadre des classes engagées, contactez le support pour mettre à jour votre compte et vous faire gagner du temps.</span>
         <hr className="my-4 h-px border-0 bg-gray-200" />
         <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
-          <PrimaryButton className="sm:w-full md:w-52 md:self-end">
-            <a href={`${supportURL}/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE`} target="_blank" rel="noreferrer">
-              Contacter le support
-            </a>
+          <PrimaryButton className="sm:w-full md:w-52 md:self-end" onClick={() => window.location.replace(`${supportURL}/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE`)}>
+            Contacter le support
           </PrimaryButton>
         </div>
       </DSFRContainer>
