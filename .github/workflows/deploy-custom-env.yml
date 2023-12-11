@@ -61,6 +61,8 @@ jobs:
       custom_directory: ./terraform/environments/development/custom
       var_file: "vars/main.tfvars.json"
       image_tag: "2023-12-11-1de70e4"
+      region: "fr-par"
+      scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1/"
 
     steps:
       - uses: actions/checkout@v4
@@ -81,13 +83,33 @@ jobs:
       - name: Get secret ID
         id: secret_id
         working-directory: ${{ env.custom_directory }}
-        run: echo "secret_id=$(terraform output -raw secret_id)" >> GITHUB_OUTPUT
+        run: |
+          echo "secret_id=$(terraform output -raw secret_id)" >> GITHUB_OUTPUT
+          echo "project_id=$(terraform output -raw project_id)" >> GITHUB_OUTPUT
 
       - name: Create secret
         if: ${{ steps.secret_id.outputs.secret_id == '' }}
         working-directory: ${{ env.custom_directory }}
         run: |
-          echo "Creating secret"
+          # Create secret for custom environment
+          secret_id=$(curl -X POST \
+            -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "env-${{ needs.prepare.outputs.env_name }}",
+              "project_id": "${{ steps.secret_id.outputs.project_id }}",
+            }' \
+            "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets" | jq -r ".id" )
+          # Retreive ci secret latest revision
+          data=$(curl -X GET \
+            -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets/${{ steps.secret_id.outputs.secret_id }}/versions/latest_enabled/access" | jq -r ".data")
+          # Create a new revision for custom environment
+          curl -X POST \
+            -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"data\":\"${data}\"}"" \
+            "${{ env.scw_endpoint }}/regions/${{ env.region }}/secrets/${secret_id}/versions"
 
       - name: Validate terraform
         working-directory: ${{ env.custom_directory }}

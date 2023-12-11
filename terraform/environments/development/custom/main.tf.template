@@ -69,7 +69,7 @@ resource "scaleway_secret" "custom" {
 
 data "scaleway_secret_version" main {
   secret_id = scaleway_secret.custom.id
-  revision  = scaleway_secret.custom.version_count
+  revision  = "latest_enabled"
 }
 
 # Containers namespace
@@ -243,6 +243,10 @@ resource "scaleway_container_domain" "app" {
   hostname     = local.domain_app
 }
 
+
+output "project_id" {
+  value = local.project.project_id
+}
 output "secret_id" {
   value = scaleway_secret.custom.id
 }
