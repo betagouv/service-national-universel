@@ -41,6 +41,7 @@ import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
 import ReInscription from "./scenes/reinscription";
 import OnBoarding from "./scenes/cle/OnBoarding";
+import AccountAlreadyExists from "./scenes/cle/AccountAlreadyExists";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import Thanks from "./scenes/contact/Thanks";
 import ViewMessage from "./scenes/echanges/View";
@@ -93,6 +94,7 @@ export default function App() {
                 <SentryRoute path="/validate-contract" component={Contract} />
                 <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
                 <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+                <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
                 {/* Authentification accessoire */}
                 <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci", "/preinscription"]} component={() => <OptionalLogIn />} />
                 {/* Authentification nécessaire */}
