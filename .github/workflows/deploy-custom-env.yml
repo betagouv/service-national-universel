@@ -60,7 +60,6 @@ jobs:
       PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
       custom_directory: ./terraform/environments/development/custom
       var_file: "vars/main.tfvars.json"
-      image_tag: "2023-12-11-1de70e4"
       scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1"
 
     steps:
@@ -143,6 +142,6 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: terraform plan -no-color -input=false -var-file="${{ env.var_file }}"
 
-      # - name: Terraform auto-apply
-      #   working-directory: ${{ env.custom_directory }}
-      #   run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"
+      - name: Terraform auto-apply
+        working-directory: ${{ env.custom_directory }}
+        run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"
