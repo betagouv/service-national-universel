@@ -13,12 +13,12 @@ jobs:
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
 
-      steps:
-      - uses: actions/checkout@v2
+    steps:
+    - uses: actions/checkout@v2
 
-      - name: Get image tag
-        id: image_tag
-        uses: ./.github/actions/get_image_tag
+    - name: Get image tag
+      id: image_tag
+      uses: ./.github/actions/get_image_tag
 
 
   build:
