@@ -93,14 +93,14 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-            foreignCountry: "",
-            foreignAddress: "",
-            foreignCity: "",
-            foreignZip: "",
-            hostFirstName: "",
-            hostLastName: "",
-            hostRelationship: "",
-          }
+          foreignCountry: "",
+          foreignAddress: "",
+          foreignCity: "",
+          foreignZip: "",
+          hostFirstName: "",
+          hostLastName: "",
+          hostRelationship: "",
+        }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
@@ -236,7 +236,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     let { error, value } = Joi.object(coordonneeSchema).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
 
     if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
     if (type === "next") {
