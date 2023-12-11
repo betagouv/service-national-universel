@@ -11,7 +11,7 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+      image_tag: "2023-12-11-1de70e4" # TODO ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
@@ -50,7 +50,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [prepare, build]
+    needs: [prepare]
+    # needs: [prepare, build]
     env:
       SCW_ACCESS_KEY: ${{ secrets.SCW_DEV_DEPLOY_ACCESS_KEY }}
       SCW_SECRET_KEY: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
@@ -71,7 +72,7 @@ jobs:
 
       - name: Create var files
         working-directory: ${{ env.custom_directory }}
-        run: jq ".environments.custom.image_tag=\"${{ env.image_tag }}\"" ${{ env.var_file }}.template > ${{ env.var_file }} #TODO: needs.prepare.outputs.image_tag
+        run: jq ".environments.custom.image_tag=\"${{ needs.prepare.outputs.image_tag }}\"" ${{ env.var_file }}.template > ${{ env.var_file }}
 
       - name: Init terraform
         working-directory: ${{ env.custom_directory }}
