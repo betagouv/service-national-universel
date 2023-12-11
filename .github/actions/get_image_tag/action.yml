@@ -21,8 +21,7 @@ runs:
     - name: Get image tag
       id: image_tag
       shell: bash
-      run: echo "image_tag=${{ steps.date.outputs.date }}-${{ steps.commit.outputs.short }}" >> $GITHUB_OUTPUT
-
-    - name: Print the Docker Image
-      shell: bash
-      run: echo "Image tag: ${{ steps.image_tag.outputs.image_tag }}"
+      run: |
+        image_tag="${{ steps.date.outputs.date }}-${{ steps.commit.outputs.short }}"
+        echo $image_tag
+        echo "image_tag=$image_tag" >> $GITHUB_OUTPUT
