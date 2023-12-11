@@ -21,8 +21,9 @@ jobs:
       uses: ./.github/actions/get_image_tag
 
     - name: Debug
-      run: echo "GITHUB_SHA:${{ GITHUB_SHA }}"
-      run: echo "GITHUB_REF:${{ GITHUB_REF }}"
+      run: echo "GITHUB_SHA:${{ github.sha }}"
+      run: echo "GITHUB_REF:${{ github.ref }}"
+      run: echo "GITHUB_REF_NAME:${{ github.ref_name }}"
       run: echo "github.event.pull_request.head.sha:${{ github.event.pull_request.head.sha }}"
 
   # build:
