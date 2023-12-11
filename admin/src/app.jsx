@@ -281,11 +281,11 @@ const limitedAccess = {
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {
-    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire"],
+    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
     default: "/mon-etablissement",
   },
   [ROLES.REFERENT_CLASSE]: {
-    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire"],
+    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
     default: "/mon-etablissement",
   },
 };

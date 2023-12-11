@@ -11,8 +11,9 @@ import { colors, translateState, urlWithScheme } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
-import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles } from "./articles";
+import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles, administrator_cleArticles, referent_classeArticles } from "./articles";
 import plausibleEvent from "../../services/plausible";
+import { ROLES } from "snu-lib";
 
 const Dashboard = (props) => {
   const [userTickets, setUserTickets] = useState(null);
@@ -23,18 +24,24 @@ const Dashboard = (props) => {
   const from = new URLSearchParams(props.location.search).get("from");
 
   useEffect(() => {
-    if (user.role === "responsible" || user.role === "supervisor") {
+    if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
       setArticles(structureArticles);
       setKbRole("structure");
-    } else if (user.role === "referent_department" || user.role === "referent_region") {
+    } else if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) {
       setArticles(referentArticles);
       setKbRole("referent");
-    } else if (user.role === "head_center") {
+    } else if (user.role === ROLES.HEAD_CENTER) {
       setArticles(headCenterArticles);
       setKbRole("head_center");
-    } else if (user.role === "visitor") {
+    } else if (user.role === ROLES.VISITOR) {
       setArticles(visitorArticles);
       setKbRole("visitor");
+    } else if (user.role === ROLES.ADMINISTRATEUR_CLE) {
+      setArticles(administrator_cleArticles);
+      setKbRole(`${user.role}_${user.subRole}`);
+    } else if (user.role === ROLES.REFERENT_CLASSE) {
+      setArticles(referent_classeArticles);
+      setKbRole("referent_classe");
     } else {
       setArticles(adminArticles);
       setKbRole("admin");
@@ -197,8 +204,12 @@ const Dashboard = (props) => {
           <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l'article ou le tutoriel pour vous aider. Pour faciliter vos recherches
           utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d'engagement …)
         </div>
-        <h4 className="my-4 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
-        <ArticlesBlock articles={articles} />
+        {articles?.length > 0 && (
+          <>
+            <h4 className="my-4 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
+            <ArticlesBlock articles={articles} />
+          </>
+        )}
         <hr style={{ margin: "2rem" }} />
         <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande?</h4>
 
