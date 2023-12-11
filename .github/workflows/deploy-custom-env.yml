@@ -93,7 +93,6 @@ jobs:
         id: ci_outputs
         if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: "${{ env.custom_directory }}/../"
-        shell: bash
         run: |
           terraform init
           long_secret_id=$(terraform output -raw secret_id)
@@ -108,7 +107,6 @@ jobs:
       - name: Create secret
         if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: ${{ env.custom_directory }}
-        shell: bash
         run: |
           # Create secret for custom environment
           secret_id=$(curl -s -X POST \
@@ -119,12 +117,10 @@ jobs:
               "project_id": "${{ steps.ci_outputs.outputs.project_id }}"
             }' \
             "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets" | jq -r ".id" )
-          echo $secret_id
           # Retreive ci secret latest revision
           data=$(curl -s -X GET \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
             "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/${{ steps.ci_outputs.outputs.secret_id }}/versions/latest_enabled/access" | jq -r ".data")
-          echo "plop"
           # Create a new revision for custom environment
           curl -s -X POST \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
