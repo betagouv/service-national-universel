@@ -93,6 +93,7 @@ jobs:
         id: ci_outputs
         if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: "${{ env.custom_directory }}/../"
+        shell: bash
         run: |
           terraform init
           long_secret_id=$(terraform output -raw secret_id)
@@ -107,6 +108,7 @@ jobs:
       - name: Create secret
         if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: ${{ env.custom_directory }}
+        shell: bash
         run: |
           # Create secret for custom environment
           secret_id=$(curl -s -X POST \
