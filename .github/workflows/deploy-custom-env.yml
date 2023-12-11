@@ -84,7 +84,7 @@ jobs:
         run: echo "secret_id=$(terraform output -raw secret_id)" >> GITHUB_OUTPUT
 
       - name: Create secret
-        if: ${{ !steps.secret_id.outputs.secret_id }}
+        if: ${{ steps.secret_id.outputs.secret_id == '' }}
         working-directory: ${{ env.custom_directory }}
         run: |
           echo "Creating secret"
