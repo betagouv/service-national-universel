@@ -3,6 +3,7 @@ import Input from "../../../../components/forms/inputs/Input";
 import Select from "../../../../components/forms/inputs/Select";
 import { getSchoolGradesOptions, getYoungSchooledSituationOptions } from "../../../../utils/school-situation.utils";
 import SectionTitle from "../../components/SectionTitle";
+import { translateGrade } from "snu-lib";
 import FormDescription from "../../components/FormDescription";
 import useAuth from "@/services/useAuth";
 import useClass from "@/services/useClass";
@@ -36,7 +37,7 @@ const AccountSchoolSituationPage = () => {
               </div>
               <div className="px-4 pt-6 pb-2 lg:col-span-2 lg:col-start-2">
                 <Input label="Nom de la classe" name="classeName" value={classe.name} disabled />
-                <Input label="Niveau scolaire" name="classegrade" value={classe.grade} disabled />
+                <Input label="Niveau scolaire" name="classegrade" value={translateGrade(classe.grade)} disabled />
                 <Input label="Coloration" name="schoolName" value={classe.coloration} disabled />
                 <Input label="Nom de l'établissement" name="schoolCity" value={classe.etablissement.name} disabled />
                 <Input label="Commune de l'établissement" name="schoolCity" value={classe.etablissement.city} disabled />
