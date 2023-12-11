@@ -333,7 +333,7 @@ export default function view() {
         title={`Bonjour ${user.firstName} ${user.lastName} !`}
         text="Bienvenue sur votre compte Administrateur CLE en tant que Chef d’établissement. Vous pouvez créer une classe engagée et ajouter un coordinateur d'établissement."
         actions={[
-          { title: "Créer une classe engagée", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push("/mes-classes/create") },
+          { title: "Créer une classe engagée", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push("/classes/create") },
           { title: "Ajouter un coordinateur", leftIcon: <HiPlus size={20} />, onClick: () => setModalAddCoordinator(true) },
         ]}
       />
@@ -350,7 +350,7 @@ export default function view() {
         text="Bienvenue sur votre compte Administrateur CLE en tant que Coordinateur d’établissement. Vous pouvez créer une classe engagée, suivre l'évolution de celles déjà créées et consulter les inscriptions des élèves."
         actions={[
           { title: "Fermer", isCancel: true },
-          { title: "Voir mes classes", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push("/mes-classes") },
+          { title: "Voir mes classes", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push("/classes") },
         ]}
       />
       {/* First login REFERENT_CLASSE */}
@@ -366,7 +366,7 @@ export default function view() {
         text="Bienvenue sur votre compte SNU en tant que Référent de classe. Vous pouvez compléter la fiche de votre classe en renseignant toutes les informations."
         actions={[
           { title: "Fermer", isCancel: true },
-          { title: "Compléter les informations", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push(`/mes-classes/${classeId}`) },
+          { title: "Compléter les informations", leftIcon: <HiOutlineOfficeBuilding size={20} />, onClick: () => history.push(`/classes/${classeId}`) },
         ]}
       />
       {/* Invite COORDINATOR */}

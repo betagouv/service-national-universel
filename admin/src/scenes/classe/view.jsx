@@ -129,7 +129,7 @@ export default function view() {
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
         return setIsLoading(false);
       }
-      history.push("/mes-classes");
+      history.push("/classes");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la suppression");
@@ -155,7 +155,7 @@ export default function view() {
       <Header
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translate(classe.status)} status={statusClassForBadge(classe.status)} />}
-        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
+        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
           ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [
             <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
@@ -251,7 +251,7 @@ export default function view() {
         <Container
           title="Suivi de la classe"
           actions={[
-            <Link key="list-students" to="/mes-eleves">
+            <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
               <Button type="tertiary" title="Voir les élèves" />
             </Link>,
           ]}>
