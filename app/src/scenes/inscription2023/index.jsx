@@ -19,9 +19,10 @@ import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIS
 import { YOUNG_STATUS, inscriptionCreationOpenForYoungs, inscriptionModificationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
-import { environment } from "../../config";
+import { environment, supportURL } from "../../config";
 import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
+import Help from "./components/Help";
 
 function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
@@ -59,7 +60,12 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
     return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  return <DSFRLayout title={title}>{renderStep(currentStep)}</DSFRLayout>;
+  return (
+    <DSFRLayout title={title}>
+      {renderStep(currentStep)}
+      <Help supportLink={supportURL + isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"} />
+    </DSFRLayout>
+  );
 };
 
 function renderStepCorrection(step) {
