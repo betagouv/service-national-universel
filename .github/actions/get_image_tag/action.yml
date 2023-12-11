@@ -16,12 +16,12 @@ runs:
     - name: Get current date
       id: date
       shell: bash
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
     - name: Get image tag
       id: image_tag
       shell: bash
-      run: echo "::set-output name=image_tag::${{ steps.date.outputs.date }}-${{ steps.commit.outputs.short }}"
+      run: echo "image_tag=${{ steps.date.outputs.date }}-${{ steps.commit.outputs.short }}" >> $GITHUB_OUTPUT
 
     - name: Print the Docker Image
       shell: bash
