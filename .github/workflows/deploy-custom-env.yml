@@ -22,10 +22,10 @@ jobs:
 
     - name: Debug
       run: |
-        - echo "GITHUB_SHA:${{ github.sha }}"
-        - echo "GITHUB_REF:${{ github.ref }}"
-        - echo "GITHUB_REF_NAME:${{ github.ref_name }}"
-        - echo "github.event.pull_request.head.sha:${{ github.event.pull_request.head.sha }}"
+        echo "GITHUB_SHA:${{ github.sha }}"
+        echo "GITHUB_REF:${{ github.ref }}"
+        echo "GITHUB_REF_NAME:${{ github.ref_name }}"
+        echo "github.event.pull_request.head.sha:${{ github.event.pull_request.head.sha }}"
 
   # build:
   #   needs: prepare
