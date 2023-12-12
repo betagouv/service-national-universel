@@ -3,7 +3,7 @@ import queryString from "query-string";
 import { BiLoaderAlt } from "react-icons/bi";
 import { Link, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { youngCanChangeSession } from "snu-lib";
+import { youngCanChangeSession, youngCanDeleteAccount } from "snu-lib";
 import { PHONE_ZONES } from "snu-lib/phone-number";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "@/redux/auth/actions";
@@ -21,7 +21,6 @@ import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
 import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
-import { YOUNG_SOURCE } from "snu-lib";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -37,7 +36,6 @@ const getInitialFormValues = (young) => ({
 
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
-  const isCle = YOUNG_SOURCE.CLE === young.source;
   const dispatch = useDispatch();
 
   const { search } = useLocation();
@@ -197,16 +195,14 @@ const AccountGeneralPage = () => {
           </div>
         </form>
       </div>
-      {!isCle ?? (
-        <div className="flex flex-col items-center gap-6 py-8 lg:flex-row">
-          {youngCanChangeSession(young) ? (
-            <Link to="/changer-de-sejour" className="flex items-center gap-2 text-sm text-blue-600">
-              Changer de séjour
-            </Link>
-          ) : null}
-          <Withdrawal young={young} />
-        </div>
-      )}
+      <div className="flex flex-col items-center gap-6 py-8 lg:flex-row">
+        {youngCanChangeSession(young) ? (
+          <Link to="/changer-de-sejour" className="flex items-center gap-2 text-sm text-blue-600">
+            Changer de séjour
+          </Link>
+        ) : null}
+        {youngCanDeleteAccount(young) ? <Withdrawal young={young} /> : null}
+      </div>
     </>
   );
 };
