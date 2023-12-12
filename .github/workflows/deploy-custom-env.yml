@@ -176,4 +176,4 @@ jobs:
             $URL \
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
-            --data "{ \"body\": \"Application endpoints :\n\n- $api_endpoint\n- $app_endpoint\n- $admin_endpoint" }\""
+            --data "{ \"body\": \"Application endpoints :\n\n- $api_endpoint\n- $app_endpoint\n- $admin_endpoint\" }\""
