@@ -34,10 +34,9 @@ jobs:
 
       - name: Debug
         run: |
-          echo "workflow_ref: ${{ github.workflow_ref }}"
-          echo "workflow_sha: ${{ github.workflow_sha }}"
           echo "SHA: ${{ github.sha }}"
           echo "HEAD_REF: ${{ github.head_ref }}"
+          echo "HEAD_SHA: ${{ github.event.pull_request.head.sha }}"
           echo "REF: ${{ github.ref }}"
 
       - uses: actions/github-script@v7
