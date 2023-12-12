@@ -32,9 +32,9 @@ jobs:
           URL: ${{ github.event.pull_request.url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          api_endpoint=$(terraform output -raw api_endpoint)
-          app_endpoint=$(terraform output -raw app_endpoint)
-          admin_endpoint=$(terraform output -raw admin_endpoint)
+          api_endpoint="https://api.ci.beta-snu.dev"
+          app_endpoint="https://app.ci.beta-snu.dev"
+          admin_endpoint="https://admin.ci.beta-snu.dev"
           body="${{ github.event.pull_request.body }}\n\nApplication endpoints :\n\n- $api_endpoint\n- $app_endpoint\n- $admin_endpoint"
           curl \
             -X PATCH \
