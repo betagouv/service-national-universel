@@ -161,7 +161,7 @@ jobs:
         run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"
 
       - name: Add comment to PR
-        # if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: ${{ env.custom_directory }}
         env:
           URL: ${{ github.event.pull_request.comments_url }}

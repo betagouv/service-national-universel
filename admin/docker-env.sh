@@ -6,7 +6,4 @@ do
     echo $key=$value
     # sed All files
     find /service-national-universel/admin/build -type f -exec sed -i "s|${key}|${value}|g" '{}' +
-
-    # sed JS and CSS only
-    # find /service-national-universel/admin/build -type f \( -name '*.js' -o -name '*.css' \) -exec sed -i "s|${key}|${value}|g" '{}' +
 done
