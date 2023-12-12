@@ -23,7 +23,6 @@ export default function list() {
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
-    //else fetch classes
     (async () => {
       try {
         if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) {
