@@ -26,14 +26,18 @@ export default function list() {
     //else fetch classes
     (async () => {
       try {
-        const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
-          filters: {},
-          exportFields: ["name", "uai"],
-        });
-        setEtablissements(etablissements);
-        if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return setClasses(true);
+        if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) {
+          const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
+            filters: {},
+            exportFields: ["name", "uai"],
+          });
+          setEtablissements(etablissements);
+          setClasses(true);
+          return;
+        }
         const res = await api.post(`/elasticsearch/cle/classe/search`, { filters: {} });
         setClasses(res.responses[0].hits.total.value > 0);
+        setEtablissements([]);
       } catch (e) {
         setClasses(false);
         capture(e);
@@ -45,7 +49,7 @@ export default function list() {
 
   const filterArray = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné" },
-    {
+    [ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && {
       title: "Établissement",
       name: "etablissementId",
       missingLabel: "Non renseigné",
@@ -56,6 +60,7 @@ export default function list() {
         return res?.name;
       },
     },
+
     { title: "Numéro d'identification", name: "uniqueKeyAndId", missingLabel: "Non renseigné" },
     { title: "Statut", name: "status", missingLabel: "Non renseigné" },
     { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné" },
