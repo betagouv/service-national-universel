@@ -48,6 +48,10 @@ jobs:
       var_file: "vars/main.tfvars.json"
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
       - uses: hashicorp/setup-terraform@v3
 
       - name: Create custom env stack
