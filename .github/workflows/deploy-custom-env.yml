@@ -5,8 +5,8 @@ on:
     branches:
       - main
 
-permissions:
-  pull-requests: write
+# permissions:
+#   pull-requests: write
 
 jobs:
 
