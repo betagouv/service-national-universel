@@ -101,7 +101,6 @@ export default function List() {
 }
 
 const Hit = ({ hit }) => {
-  console.log(hit);
   const history = useHistory();
   return (
     <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={() => history.push(`/etablissement/${hit._id}`)}>

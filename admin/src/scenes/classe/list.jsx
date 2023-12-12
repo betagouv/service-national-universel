@@ -30,7 +30,6 @@ export default function list() {
           filters: {},
           exportFields: ["name", "uai"],
         });
-        console.log(etablissements);
         setEtablissements(etablissements);
         if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return setClasses(true);
         const res = await api.post(`/elasticsearch/cle/classe/search`, { filters: {} });
