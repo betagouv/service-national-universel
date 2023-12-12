@@ -1,5 +1,6 @@
 const esClient = require("../../../es");
 
+//maybe refacto this
 const populateEtablissementWithNumber = async ({ etablissements, index }) => {
   const etablissementIds = [...new Set(etablissements.map((item) => item._id.toString()).filter((e) => e))];
   if (etablissementIds.length > 0) {
