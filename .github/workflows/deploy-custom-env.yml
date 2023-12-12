@@ -8,7 +8,7 @@ on:
 jobs:
 
   prepare:
-    if:  contains(github.head_ref, '-ci-')
+    if:  contains(github.head_ref, '-ci-') || startsWith(github.head_ref, 'ci-') || endsWith(github.head_ref, '-ci')
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
@@ -161,7 +161,7 @@ jobs:
         run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"
 
       - name: Add comment to PR
-        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        # if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: ${{ env.custom_directory }}
         env:
           URL: ${{ github.event.pull_request.comments_url }}
@@ -175,4 +175,4 @@ jobs:
             $URL \
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
-            --data "{ \"body\": \"Application endpoints :\n\n- $api_endpoint\n- $app_endpoint\n- $admin_endpoint\ }\""
+            --data "{ \"body\": \"Application endpoints :\n\n- $api_endpoint\n- $app_endpoint\n- $admin_endpoint\" }"

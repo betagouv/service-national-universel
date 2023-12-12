@@ -11,7 +11,7 @@ on:
 jobs:
 
   prepare:
-    if:  contains(github.head_ref, '-ci-')
+    if:  contains(github.head_ref, '-ci-') || startsWith(github.head_ref, 'ci-') || endsWith(github.head_ref, '-ci')
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
