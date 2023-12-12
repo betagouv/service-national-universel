@@ -1,5 +1,9 @@
 export const itemsSejourGod = [
   {
+    title: "Établissements",
+    link: "/etablissement",
+  },
+  {
     title: "Classes",
     link: "/classes",
   },
@@ -40,6 +44,10 @@ export const itemsSejourGod = [
 
 export const itemsSejourAdmin = [
   {
+    title: "Établissements",
+    link: "/etablissement",
+  },
+  {
     title: "Classes",
     link: "/classes",
   },
@@ -74,6 +82,10 @@ export const itemsSejourAdmin = [
 ];
 
 export const itemsSejourRef = [
+  {
+    title: "Établissements",
+    link: "/etablissement",
+  },
   {
     title: "Classes",
     link: "/classes",

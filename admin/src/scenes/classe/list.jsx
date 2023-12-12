@@ -15,14 +15,48 @@ export default function list() {
   const [data, setData] = useState([]);
   const pageId = "classe-list";
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [etablissements, setEtablissements] = useState(null);
   const [paramData, setParamData] = useState({
     page: 0,
   });
   const [size, setSize] = useState(10);
   const user = useSelector((state) => state.Auth.user);
 
+  useEffect(() => {
+    //else fetch classes
+    (async () => {
+      try {
+        const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
+          filters: {},
+          exportFields: ["name", "uai"],
+        });
+        console.log(etablissements);
+        setEtablissements(etablissements);
+        if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return setClasses(true);
+        const res = await api.post(`/elasticsearch/cle/classe/search`, { filters: {} });
+        setClasses(res.responses[0].hits.total.value > 0);
+      } catch (e) {
+        setClasses(false);
+        capture(e);
+      }
+    })();
+  }, []);
+
+  if (classes === null || !etablissements) return null;
+
   const filterArray = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné" },
+    {
+      title: "Établissement",
+      name: "etablissementId",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !etablissements.length) return item;
+        const res = etablissements.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.name;
+      },
+    },
     { title: "Numéro d'identification", name: "uniqueKeyAndId", missingLabel: "Non renseigné" },
     { title: "Statut", name: "status", missingLabel: "Non renseigné" },
     { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné" },
@@ -33,20 +67,6 @@ export default function list() {
     { title: "Niveau", name: "grade", missingLabel: "Non renseigné" },
   ].filter(Boolean);
 
-  useEffect(() => {
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return setClasses(true);
-    //else fetch classes
-    (async () => {
-      try {
-        const res = await api.post(`/elasticsearch/cle/classe/search`, { filters: {} });
-        setClasses(res.responses[0].hits.total.value > 0);
-      } catch (e) {
-        setClasses(false);
-        capture(e);
-      }
-    })();
-  }, []);
-
   if (classes === null) return null;
 
   return (
@@ -55,10 +75,12 @@ export default function list() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes" }]}
         actions={[
-          <Link key="list" to="/classes/create" className="ml-2">
-            <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
-          </Link>,
-        ]}
+          ![ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
+            <Link key="list" to="/classes/create" className="ml-2">
+              <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
+            </Link>
+          ),
+        ].filter(Boolean)}
       />
       {!classes && (
         <Container className="!p-8">

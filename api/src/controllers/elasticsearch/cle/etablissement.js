@@ -8,6 +8,7 @@ const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const EtablissementModel = require("../../../models/cle/etablissement");
+const { populateEtablissementWithNumber } = require("../populate/populateEtablissement");
 
 async function buildEtablisssementContext(user) {
   const contextFilters = [];
@@ -26,8 +27,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["name.keyword"];
-    const filterFields = [];
+    const searchFields = ["name.keyword", "zip.keyword", "address.keyword"];
+    const filterFields = ["uai.keyword", "name.keyword", "department.keyword", "region.keyword", "city.keyword", "type.keyword", "sector.keyword"];
 
     const sortFields = ["createdAt", "name.keyword"];
 
@@ -60,8 +61,14 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       const response = await allRecords("etablissement", hitsRequestBody.query, esClient, exportFields);
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "etablissement", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      const esResponse = await esClient.msearch({ index: "etablissement", body: buildNdJson({ index: "etablissement", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      let body = esResponse.body;
+      let etablissements = body.responses[0].hits.hits || [];
+      etablissements = await populateEtablissementWithNumber({ etablissements, index: "classe" });
+      etablissements = await populateEtablissementWithNumber({ etablissements, index: "young" });
+
+      body.responses[0].hits.hits = etablissements;
+      return res.status(200).send(body);
     }
   } catch (error) {
     capture(error);

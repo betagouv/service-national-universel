@@ -161,7 +161,7 @@ router.post("/confirm-signup", async (req, res) => {
       await EtablissementModel.create([body], { session });
     }
 
-    referent.set({ invitationToken: null, acceptCGU: true });
+    referent.set({ invitationToken: null, acceptCGU: true, region: ramsesSchool.region, department: ramsesSchool.departmentName });
     await referent.save({ fromUser: referent, session });
     return res.status(200).send({ ok: true });
   } catch (error) {

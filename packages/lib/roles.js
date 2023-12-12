@@ -870,7 +870,7 @@ function canCreateClasse(actor) {
 }
 
 function canUpdateClasse(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE;
+  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
 function canViewClasse(actor) {
@@ -878,7 +878,10 @@ function canViewClasse(actor) {
 }
 
 function canUpdateEtablissement(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
+  return (
+    (actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement) ||
+    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role)
+  );
 }
 
 function canViewEtablissement(actor) {

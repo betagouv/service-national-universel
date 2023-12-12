@@ -144,7 +144,8 @@ export default function view() {
           <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
         </div>,
       ]
-    : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN
+    : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+      classe?.status !== STATUS_CLASSE.WITHDRAWN
     ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
     : null;
 
@@ -236,6 +237,14 @@ export default function view() {
               }}
               error={errors.grade}
             />
+            {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+              <>
+                <InputText className="mb-3" value={classe.name} error={errors.name} readOnly={true} label="Établissement" />
+                <Link to={`/etablissement/${classe.etablissementId}`} className="w-full">
+                  <Button type="tertiary" title="Voir l'établissement" className="w-full" />
+                </Link>
+              </>
+            )}
             {edit && user.role === ROLES.ADMINISTRATEUR_CLE ? (
               <div className="flex items-center justify-end mt-6">
                 <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={() => setModalDelete(true)}>

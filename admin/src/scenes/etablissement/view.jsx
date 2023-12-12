@@ -15,9 +15,11 @@ import { copyToClipboard } from "@/utils";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
 import Loader from "@/components/Loader";
+import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 
 export default function view() {
   const user = useSelector((state) => state.Auth.user);
+  const { id } = useParams();
   const [edit, setEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -77,7 +79,8 @@ export default function view() {
 
   const getEtablissement = async () => {
     try {
-      const { ok, code, data: response } = await api.get("/cle/etablissement/from-user");
+      const url = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/cle/etablissement/from-user" : `/cle/etablissement/${id}`;
+      const { ok, code, data: response } = await api.get(url);
 
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
@@ -196,7 +199,7 @@ export default function view() {
           <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
         </div>,
       ]
-    : user.subRole === SUB_ROLES.referent_etablissement && [
+    : (user.subRole === SUB_ROLES.referent_etablissement || [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) && [
         <Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />,
       ];
 
@@ -222,9 +225,11 @@ export default function view() {
       <Container
         title="Contacts"
         actions={[
-          <Link key="list-users" to="/user">
-            <Button type="tertiary" title="Voir mes contacts" />
-          </Link>,
+          [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
+            <Link key="list-users" to="/user">
+              <Button type="tertiary" title="Voir mes contacts" />
+            </Link>
+          ),
         ]}>
         <div className="flex items-stretch justify-between overflow-y-auto">
           {contacts.map((contact, index) => (
@@ -289,6 +294,8 @@ export default function view() {
           </div>
           <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
           <div className="flex-1 shrink-0">
+            <Label title="UAI" />
+            <InputText className="mb-4" value={etablissement.uai} disabled />
             <Label title="Type d’établissement" />
             <Select
               className="mb-4"
@@ -317,6 +324,16 @@ export default function view() {
               }}
               error={errors.sector}
             />
+            {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+              <div className="flex items-center gap-4">
+                <Link key="list-eta" to={`/classes?etablissementId=${id}`} className="w-full">
+                  <Button title="Voir les classes" className="w-full" type="tertiary" />
+                </Link>
+                <Link key="list-young" to={`/inscription?etablissementId=${id}`} className="w-full">
+                  <Button title="Voir les élèves" className="w-full" type="tertiary" />
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </Container>
