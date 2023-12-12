@@ -1,12 +1,29 @@
 const passport = require("passport");
 const express = require("express");
+const fetch = require("node-fetch");
 const router = express.Router();
 const { canSearchAssociation } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
-const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
-const { API_ASSOCIATION_ES_ENDPOINT } = require("../../config");
+const { API_ENGAGEMENT_URL, API_ENGAGEMENT_KEY } = require("../../config");
+
+const apiEngagement = async ({ path = "/", body }) => {
+  try {
+    const myHeaders = new fetch.Headers();
+    myHeaders.append("X-API-KEY", API_ENGAGEMENT_KEY);
+    myHeaders.append("Content-Type", "application/json");
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(body),
+    };
+    const res = await fetch(`${API_ENGAGEMENT_URL}${path}`, requestOptions);
+    return await res.json();
+  } catch (e) {
+    capture(e, { extra: { path: path } });
+  }
+};
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -25,11 +42,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const sortFields = [];
 
     const { user, body } = req;
-
-    const options = {
-      node: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
-    };
-    const es = new (require("@elastic/elasticsearch").Client)(options);
 
     if (!canSearchAssociation(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -53,13 +65,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     hitsRequestBody.query.bool.should = should;
     aggsRequestBody.query.bool.should = should;
 
-    if (req.params.action === "export") {
-      const response = await allRecords("association", hitsRequestBody.query, es);
-      return res.status(200).send({ ok: true, data: response });
-    } else {
-      const response = await es.msearch({ index: "association", body: buildNdJson({ index: "association", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
-    }
+    const response = await apiEngagement({ path: `/v0/association/snu`, body: req.body });
+    return res.status(200).send(response);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
