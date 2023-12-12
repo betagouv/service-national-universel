@@ -34,6 +34,7 @@ jobs:
 
       - name: Debug
         run: |
+          echo "SHA: ${{ github.sha }}"
           echo "HEAD_REF: ${{ github.head_ref }}"
           echo "REF: ${{ github.ref }}"
 
