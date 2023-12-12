@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Redirect, useHistory, useParams } from "react-router-dom";
-import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import Error from "../../../components/error";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
@@ -20,6 +20,7 @@ import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import useAuth from "@/services/useAuth";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -38,7 +39,7 @@ export default function StepRepresentants() {
   const dispatch = useDispatch();
   const { step } = useParams();
   const corrections = young.status === YOUNG_STATUS.WAITING_CORRECTION ? getCorrectionByStep(young, step) : [];
-  const isCle = young.source === YOUNG_SOURCE.CLE;
+  const { isCLE } = useAuth();
 
   const [data, setData] = React.useState({
     parent1Status: young.parent1Status || "",
@@ -141,7 +142,7 @@ export default function StepRepresentants() {
           return;
         }
         dispatch(setYoung(responseData));
-        if (isCle) {
+        if (isCLE) {
           plausibleEvent("TBD");
           history.push("/inscription2023/confirm");
         } else {
@@ -255,7 +256,7 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
-  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`;
+  const supportLink = `${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-donne-mon-consentement" : "/base-de-connaissance/je-minscris-et-donne-mon-consentement"}`;
 
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
     return <Redirect to="/" />;
