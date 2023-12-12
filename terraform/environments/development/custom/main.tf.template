@@ -43,21 +43,14 @@ locals {
   env_key          = "###___ENV_NAME___###"
   env              = var.environments["custom"]
   app_api          = local.env.apps.api
-  domain_api       = "${local.app_api.subdomain}.${scaleway_domain_zone.main.id}"
+  domain_api       = "${local.app_api.subdomain}-${local.env_key}.${local.project.dns_zone}"
   app_admin        = local.env.apps.admin
-  domain_admin     = "${local.app_admin.subdomain}.${scaleway_domain_zone.main.id}"
+  domain_admin     = "${local.app_admin.subdomain}-${local.env_key}.${local.project.dns_zone}"
   app_app          = local.env.apps.app
-  domain_app       = "${local.app_app.subdomain}.${scaleway_domain_zone.main.id}"
+  domain_app       = "${local.app_app.subdomain}-${local.env_key}.${local.project.dns_zone}"
   secrets          = jsondecode(base64decode(data.scaleway_secret_version.main.data))
   project          = data.terraform_remote_state.project.outputs
   registry_endpoint = local.project.registry_endpoint
-}
-
-# DNS zone
-resource "scaleway_domain_zone" "main" {
-  project_id = local.project.project_id
-  domain     = local.project.domain
-  subdomain  = "${local.env_key}.${local.project.dns_zone}"
 }
 
 # Secrets
@@ -145,8 +138,8 @@ resource "scaleway_container" "api" {
 }
 
 resource "scaleway_domain_record" "api" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = local.app_api.subdomain
+  dns_zone = local.project.dns_zone
+  name     = "${local.app_api.subdomain}-${local.env_key}"
   type     = "CNAME"
   data     = "${scaleway_container.api.domain_name}."
   ttl      = 3600
@@ -189,8 +182,8 @@ resource "scaleway_container" "admin" {
 }
 
 resource "scaleway_domain_record" "admin" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = local.app_admin.subdomain
+  dns_zone = local.project.dns_zone
+  name     = "${local.app_admin.subdomain}-${local.env_key}"
   type     = "CNAME"
   data     = "${scaleway_container.admin.domain_name}."
   ttl      = 3600
@@ -231,8 +224,8 @@ resource "scaleway_container" "app" {
 }
 
 resource "scaleway_domain_record" "app" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = local.app_app.subdomain
+  dns_zone = local.project.dns_zone
+  name     = "${local.app_app.subdomain}-${local.env_key}"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
   ttl      = 3600
@@ -241,9 +234,4 @@ resource "scaleway_domain_record" "app" {
 resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
   hostname     = local.domain_app
-}
-
-
-output "secret_id" {
-  value = scaleway_secret.custom.id
 }

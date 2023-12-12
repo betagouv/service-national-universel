@@ -266,7 +266,7 @@ output "domain" {
   value = local.env.domain
 }
 output "dns_zone" {
-  value = local.env.dns_zone
+  value = scaleway_domain_zone.main.id
 }
 output "registry_endpoint" {
   value = scaleway_registry_namespace.main.endpoint

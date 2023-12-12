@@ -41,14 +41,19 @@ jobs:
       PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
       custom_directory: ./terraform/environments/development/custom
+      var_file: "vars/main.tfvars.json"
 
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Create empty stack
+      - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" destroy.tf.template > destroy.tf
+        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf.template > main.tf
+
+      - name: Create var files
+        working-directory: ${{ env.custom_directory }}
+        run: cp ${{ env.var_file }}.template ${{ env.var_file }}
 
       - name: Init terraform
         working-directory: ${{ env.custom_directory }}
@@ -58,6 +63,6 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: terraform validate -no-color
 
-      - name: Terraform auto-apply
+      - name: Terraform destroy
         working-directory: ${{ env.custom_directory }}
-        run: terraform apply -no-color -input=false -auto-approve"
+        run: terraform apply -no-color -input=false -auto-approve -destroy -var-file="${{ env.var_file }}"
