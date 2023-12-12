@@ -35,6 +35,7 @@ jobs:
           api_endpoint="https://api.ci.beta-snu.dev"
           app_endpoint="https://app.ci.beta-snu.dev"
           admin_endpoint="https://admin.ci.beta-snu.dev"
+          echo "${{ github.event.pull_request.body }}"
           body="${{ github.event.pull_request.body }}\n\nApplication endpoints :\n\n- $api_endpoint\n- $app_endpoint\n- $admin_endpoint"
           echo $body
           curl \
