@@ -9,7 +9,6 @@ const {
   ROLES,
   STATUS_CLASSE,
   STATUS_PHASE1_CLASSE,
-  YOUNG_STATUS,
   canCreateClasse,
   canUpdateClasse,
   canViewClasse,
@@ -22,8 +21,8 @@ const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
-const YoungModel = require("../../models/young");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
+const StateManager = require("../../states");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -118,13 +117,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
 
-    const status = classe.seatsTaken === 0 ? STATUS_CLASSE.CREATED : classe.status;
-
-    classe.set({
-      ...value,
-      status: status,
-    });
+    classe.set({ ...value });
     classe = await classe.save({ fromUser: req.user });
+    await StateManager.Classe.compute(classe._id, req.user);
 
     return res.status(200).send({ ok: true, data: classe });
   } catch (error) {
@@ -203,23 +198,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    classe.set({ status: STATUS_CLASSE.WITHDRAWN });
-    await classe.save({ fromUser: req.user });
-
-    const students = await YoungModel.find({ classeId: classe._id })?.lean();
-
-    const updateStatusStudent = async (youngId, user) => {
-      const young = await YoungModel.findById(youngId);
-      if (!young) return;
-      young.set({
-        status: YOUNG_STATUS.ABANDONED,
-        lastStatusAt: Date.now(),
-        withdrawnMessage: "classe désistée",
-        withdrawnReason: "other",
-      }); // we keep the classeId to keep the history
-      await young.save({ fromUser: user });
-    };
-    await Promise.all(students.map((student) => updateStatusStudent(student._id, req.user)));
+    await StateManager.Classe.withdraw(id, req.user);
 
     res.status(200).send({ ok: true });
   } catch (error) {

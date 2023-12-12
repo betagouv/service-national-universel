@@ -8,13 +8,13 @@ const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
 const { JWT_SIGNIN_MAX_AGE, JWT_TRUST_TOKEN_MAX_AGE, JWT_SIGNIN_VERSION, JWT_TRUST_TOKEN_VERSION, checkJwtTrustTokenVersion } = require("./jwt-options");
 const { COOKIE_SIGNIN_MAX_AGE, COOKIE_TRUST_TOKEN_JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
-const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME, YOUNG_SOURCE, YOUNG_SOURCE_LIST, STATUS_CLASSE, YOUNG_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME, YOUNG_SOURCE, YOUNG_SOURCE_LIST } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
 const ClasseEngagee = require("./models/cle/classe");
 const Etablissement = require("./models/cle/etablissement");
-const YoungModel = require("./models/young");
+
 class Auth {
   constructor(model) {
     this.model = model;
@@ -264,22 +264,6 @@ class Auth {
       const user = await this.model.create(userData);
       if (!user) {
         throw new Error("Error while creating user");
-      }
-
-      //get classe status
-      const students = await YoungModel.find({ classeId: classe._id })?.lean();
-      const studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION);
-      const studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION);
-      const studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
-
-      let classeStatus = STATUS_CLASSE.INSCRIPTION_IN_PROGRESS;
-      if (studentInProgress.length === 0 && studentWaiting.length > 0) classeStatus = STATUS_CLASSE.INSCRIPTION_TO_CHECK;
-      if (studentValidated.length === classe.totalSeats) classeStatus = STATUS_CLASSE.VALIDATED;
-
-      classe.set({ seatsTaken: classe.seatsTaken + 1, status: classeStatus });
-      const updatedClasse = await classe.save({ fromUser: user });
-      if (!updatedClasse) {
-        throw new Error("Error while updating classe");
       }
 
       if (isEmailValidationEnabled) {
