@@ -2,7 +2,7 @@ name: Custom environment - Build Docker image & Deploy Scaleway
 
 on:
   workflow_dispatch:
-  push:
+  pull_request:
     branches:
       - '*-ci-*'
       - feat-1469
@@ -18,22 +18,34 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Check branch name
-      run: |
-        if [[ ${{ github.ref_name }} == 'main' ]] || [[ ${{ github.ref_name }} == 'production' ]] ; then
-          echo "This action is not available on the branch ${{ github.ref_name }}"
-          exit 1
-        fi
-
-    - name: Get image tag
-      id: image_tag
-      uses: ./.github/actions/get_image_tag
-
-    - name: Get custom-env name
-      id: env_name
-      uses: ./.github/actions/get_custom_env_name
+    - uses: actions/github-script@v7
       with:
-        branch_name: ${{ github.ref_name }}
+        script: |
+          script: console.log(context)
+
+    # github.rest.issues.createComment({
+    #   issue_number: context.issue.number,
+    #   owner: context.repo.owner,
+    #   repo: context.repo.repo,
+    #   body: '👋 Thanks for reporting!'
+    # })
+
+    # - name: Check branch name
+    #   run: |
+    #     if [[ ${{ github.ref_name }} == 'main' ]] || [[ ${{ github.ref_name }} == 'production' ]] ; then
+    #       echo "This action is not available on the branch ${{ github.ref_name }}"
+    #       exit 1
+    #     fi
+
+    # - name: Get image tag
+    #   id: image_tag
+    #   uses: ./.github/actions/get_image_tag
+
+    # - name: Get custom-env name
+    #   id: env_name
+    #   uses: ./.github/actions/get_custom_env_name
+    #   with:
+    #     branch_name: ${{ github.ref_name }}
 
   # build:
   #   needs: prepare
@@ -55,35 +67,35 @@ jobs:
   #         dockerfile_path: ${{ matrix.app_name }}/Dockerfile
   #         image_tag: ${{ needs.prepare.outputs.image_tag }}
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: [prepare]
-    # needs: [prepare, build]
-    env:
-      SCW_ACCESS_KEY: ${{ secrets.SCW_DEV_DEPLOY_ACCESS_KEY }}
-      SCW_SECRET_KEY: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
-      PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
-      PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
-      PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
-      custom_directory: ./terraform/environments/development/custom
-      var_file: "vars/main.tfvars.json"
-      scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1"
+  # deploy:
+  #   runs-on: ubuntu-latest
+  #   needs: [prepare]
+  #   # needs: [prepare, build]
+  #   env:
+  #     SCW_ACCESS_KEY: ${{ secrets.SCW_DEV_DEPLOY_ACCESS_KEY }}
+  #     SCW_SECRET_KEY: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
+  #     PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
+  #     PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
+  #     PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
+  #     custom_directory: ./terraform/environments/development/custom
+  #     var_file: "vars/main.tfvars.json"
+  #     scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1"
 
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: hashicorp/setup-terraform@v3
 
-      - name: Create custom env stack
-        working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf.template > main.tf
+  #     - name: Create custom env stack
+  #       working-directory: ${{ env.custom_directory }}
+  #       run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf.template > main.tf
 
-      - name: Create var files
-        working-directory: ${{ env.custom_directory }}
-        run: jq ".environments.custom.image_tag=\"${{ needs.prepare.outputs.image_tag }}\"" ${{ env.var_file }}.template > ${{ env.var_file }}
+  #     - name: Create var files
+  #       working-directory: ${{ env.custom_directory }}
+  #       run: jq ".environments.custom.image_tag=\"${{ needs.prepare.outputs.image_tag }}\"" ${{ env.var_file }}.template > ${{ env.var_file }}
 
-      - name: Init terraform
-        working-directory: ${{ env.custom_directory }}
-        run: terraform init
+  #     - name: Init terraform
+  #       working-directory: ${{ env.custom_directory }}
+  #       run: terraform init
 
       # - name: Check if secret exists
       #   id: check_secret
@@ -144,18 +156,6 @@ jobs:
       # - name: Validate terraform
       #   working-directory: ${{ env.custom_directory }}
       #   run: terraform validate -no-color
-
-      - uses: actions/github-script@v7
-        with:
-          script: |
-            script: console.log(context)
-
-      # github.rest.issues.createComment({
-      #   issue_number: context.issue.number,
-      #   owner: context.repo.owner,
-      #   repo: context.repo.repo,
-      #   body: '👋 Thanks for reporting!'
-      # })
 
       # - name: Terraform plan
       #   working-directory: ${{ env.custom_directory }}
