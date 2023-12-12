@@ -20,7 +20,7 @@ jobs:
 
     - name: Check branch name
       run: |
-        if [[ ${{ github.ref_name }} == 'feat-1469' ]] || [[ ${{ github.ref_name }} == 'production' ]] ; then
+        if [[ ${{ github.ref_name }} == 'main' ]] || [[ ${{ github.ref_name }} == 'production' ]] ; then
           echo "This action is not available on the branch ${{ github.ref_name }}"
           exit 1
         fi
