@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Label, InputText, ModalConfirmation, Select } from "@snu/ds/admin";
-import { HiOutlineOfficeBuilding } from 'react-icons/hi';
+import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { Link, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
@@ -97,7 +97,7 @@ export default function create() {
         return toastr.error("Oups, une erreur est survenue lors de la création de la classe", translate(code));
       }
       toastr.success("La classe a bien été créée");
-      history.push("/mes-classes");
+      history.push("/classes");
     } catch (e) {
       capture(e);
       if (e.code === ERRORS.USER_ALREADY_REGISTERED)
@@ -113,7 +113,7 @@ export default function create() {
   };
 
   const actions = [
-    <Link key="cancel" to="/mes-classes" className="mr-2">
+    <Link key="cancel" to="/classes" className="mr-2">
       <Button title="Annuler" type="secondary" />
     </Link>,
     <Button key="create" leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer cette classe" onClick={() => validate()} />,
@@ -125,7 +125,7 @@ export default function create() {
     <Page>
       <Header
         title="Création d’une classe engagée"
-        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Créer une classe" }]}
+        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Créer une classe" }]}
         actions={actions}
       />
       <Container title="Informations générales">

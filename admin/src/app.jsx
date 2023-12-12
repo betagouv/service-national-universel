@@ -243,7 +243,7 @@ const Home = (props) => {
               <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
               {/* Institution */}
               <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
-              <RestrictedRoute path="/mes-classes" component={Classe} />
+              <RestrictedRoute path="/classes" component={Classe} />
               <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
               <RestrictedRoute path="/mes-contacts" component={Contact} />
               {/* Only for developper eyes... */}
@@ -281,11 +281,11 @@ const limitedAccess = {
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {
-    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
+    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
     default: "/mon-etablissement",
   },
   [ROLES.REFERENT_CLASSE]: {
-    authorised: ["/mon-etablissement", "/mes-classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
+    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
     default: "/mon-etablissement",
   },
 };

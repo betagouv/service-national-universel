@@ -183,8 +183,9 @@ const SideBar = (props) => {
     />
   );
   const Classe = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={HiOutlineOfficeBuilding} title="Mes classes" link="/mes-classes" active={path.includes("mes-classes")} setCurrentOpen={setDropDownOpen} />
+    <SimpleNavItem sideBarOpen={open} Icon={HiOutlineOfficeBuilding} title="Mes classes" link="/classes" active={path.includes("classes")} setCurrentOpen={setDropDownOpen} />
   );
+
   const VolontaireCle = () => (
     <SimpleNavItem sideBarOpen={open} Icon={StudentIcon} title="Mes élèves" link="/mes-eleves" active={path.includes("mes-eleves")} setCurrentOpen={setDropDownOpen} />
   );
