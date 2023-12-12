@@ -41,7 +41,7 @@ import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
 import ReInscription from "./scenes/reinscription";
 import OnBoarding from "./scenes/cle/OnBoarding";
-import AccountAlreadyExists from "./scenes/cle/AccountAlreadyExists";
+import AccountAlreadyExists from "./scenes/account/AccountAlreadyExists";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import Thanks from "./scenes/contact/Thanks";
 import ViewMessage from "./scenes/echanges/View";
