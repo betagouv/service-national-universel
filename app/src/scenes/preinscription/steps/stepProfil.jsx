@@ -36,7 +36,8 @@ export default function StepProfil() {
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
   const history = useHistory();
   const dispatch = useDispatch();
-  const isCLE = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase() === YOUNG_SOURCE.CLE;
+  const parcours = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase();
+  const isCLE = parcours === YOUNG_SOURCE.CLE;
   const classeId = new URLSearchParams(window.location.search).get("classeId");
 
   const trimmedPhone = data?.phone?.replace(/\s/g, "");
@@ -135,8 +136,7 @@ export default function StepProfil() {
       }
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED") {
-        if (isCLE) history.push(`/je-suis-deja-inscrit?classeId=${classeId}`);
-        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
+        history.push(`/je-suis-deja-inscrit?parcours=CLE&classeId=${classeId}`);
       } else {
         capture(e);
         toastr.error("Erreur", `Une erreur s'est produite : ${translate(e.code)}`);

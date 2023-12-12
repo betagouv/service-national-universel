@@ -13,7 +13,7 @@ export default function MyClass({ classe }) {
     },
     {
       label: "Établissement scolaire",
-      value: classe?.etablissement,
+      value: classe?.etablissement?.name,
     },
     {
       label: "Date de séjour",

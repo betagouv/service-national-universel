@@ -86,7 +86,7 @@ export default function StepConsentements() {
                 <>M&apos;inscris au séjour de cohésion </>
               ) : (
                 <>
-                  M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles{""}
+                  M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles{" "}
                 </>
               )}
               et m&apos;engage à en respecter le{" "}
