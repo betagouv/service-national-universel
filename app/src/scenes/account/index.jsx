@@ -13,33 +13,34 @@ import AccountSchoolSituationPage from "./scenes/school-situation";
 import AccountSpecialSituationsPage from "./scenes/special-situations";
 import Tabs from "../../components/nav/Tabs";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-
-const ACCOUNT_PAGES = {
-  general: {
-    title: "Informations générales",
-    key: "/account/general",
-  },
-  password: {
-    title: "Mot de passe",
-    key: "/account/password",
-  },
-  representants: {
-    title: "Représentants légaux",
-    key: "/account/representants",
-  },
-  "school-situation": {
-    title: "Situation scolaire",
-    key: "/account/school-situation",
-  },
-  "special-situations": {
-    title: "Situations particulières",
-    key: "/account/special-situations",
-  },
-};
+import useAuth from "@/services/useAuth";
 
 const Account = () => {
   useDocumentTitle("Mon profil");
+  const { isCLE } = useAuth();
 
+  const ACCOUNT_PAGES = {
+    general: {
+      title: "Informations générales",
+      key: "/account/general",
+    },
+    password: {
+      title: "Mot de passe",
+      key: "/account/password",
+    },
+    representants: {
+      title: "Représentants légaux",
+      key: "/account/representants",
+    },
+    "school-situation": {
+      title: isCLE ? "Classe engagée" : "Situation scolaire",
+      key: "/account/school-situation",
+    },
+    "special-situations": {
+      title: "Situations particulières",
+      key: "/account/special-situations",
+    },
+  };
   const device = useDevice();
   const { pathname } = useLocation();
   const [, pagePath] = pathname.split("/").filter((path) => path);

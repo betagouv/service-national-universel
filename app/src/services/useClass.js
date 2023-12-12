@@ -13,7 +13,7 @@ const useClass = (classeId) => {
   const { isPending, isError, data, error } = useQuery({ queryKey: [`class-${classeId}`], queryFn: getClass, enabled: !!classeId });
   if (!data) return { isPending, isError, error };
 
-  const { name, status, coloration, isFull, referents, etablissement, cohort } = data;
+  const { name, status, coloration, grade, isFull, referents, etablissement, cohort } = data;
   const [{ fullName: referent }] = referents;
   const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
   const classe = {
@@ -22,10 +22,11 @@ const useClass = (classeId) => {
     coloration: translateColoration(coloration),
     cohort,
     status,
+    grade,
     isFull,
     isInscriptionOpen,
     referent,
-    etablissement: etablissement.name,
+    etablissement,
     // TODO: update CLE cohort dates
     dateStart: "À venir",
   };
