@@ -32,7 +32,9 @@ export default function Button({
   return (
     <button
       type="button"
-      className={`flex w-fit min-w-[100px] max-w-[325px] gap-2 items-center justify-center rounded-md font-marianne px-[17px] ${leftIcon && "pl-[15px]"} font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
+      className={`flex w-fit min-w-[100px]  gap-2 items-center justify-center rounded-md font-marianne px-[17px] ${
+        leftIcon && "pl-[15px]"
+      } font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
         styles.native
       } ${disabled ? styles.disabled : styles.base} ${className}`}
       disabled={disabled}

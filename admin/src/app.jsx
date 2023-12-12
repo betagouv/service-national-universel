@@ -243,6 +243,8 @@ const Home = (props) => {
               <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
               {/* Institution */}
               <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
+              <RestrictedRoute path="/etablissement" component={Etablissement} />
+
               <RestrictedRoute path="/classes" component={Classe} />
               <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
               <RestrictedRoute path="/mes-contacts" component={Contact} />
