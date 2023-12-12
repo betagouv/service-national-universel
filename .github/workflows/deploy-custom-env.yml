@@ -20,7 +20,7 @@ jobs:
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
-      - uses: actions/checkout@v4
+      # - uses: actions/checkout@v4
 
       - name: Debug
         run: |
