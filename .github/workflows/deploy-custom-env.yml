@@ -7,6 +7,9 @@ on:
       - '*-ci-*'
       - feat-1469
 
+permissions:
+  pull-requests: write
+
 jobs:
 
   prepare:
