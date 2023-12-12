@@ -27,7 +27,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Add comment to PR
-        working-directory: ./terraform/environments/ci/custom
+        working-directory: ./terraform/environments/development/custom
         env:
           URL: ${{ github.event.pull_request.url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
