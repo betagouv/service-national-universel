@@ -50,7 +50,7 @@ jobs:
             $URL \
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
-            --data "{ \"body\": \"$body\" }\""
+            --data "{ \"body\": \"$body\" }"
 
       - name: Get image tag
         id: image_tag
