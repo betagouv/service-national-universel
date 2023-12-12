@@ -1,14 +1,9 @@
 name: Custom environment - Build Docker image & Deploy Scaleway
 
 on:
-  workflow_dispatch:
   pull_request:
     branches:
       - main
-    # types: [opened, reopened, edited, synchronize]
-    # branches:
-    #   - '*-ci-*'
-    #   - feat-1469
 
 permissions:
   pull-requests: write
@@ -23,8 +18,6 @@ jobs:
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
-      # - uses: actions/checkout@v4
-
       - name: Check branch name
         run: |
           if [[ ${{ github.head_ref }} == 'main' ]] || [[ ${{ github.head_ref }} == 'production' ]] ; then
@@ -32,156 +25,132 @@ jobs:
             exit 1
           fi
 
-      - name: Debug
-        run: |
-          echo "SHA: ${{ github.sha }}"
-          echo "HEAD_REF: ${{ github.head_ref }}"
-          echo "HEAD_SHA: ${{ github.event.pull_request.head.sha }}"
-          echo "REF: ${{ github.ref }}"
-
-      - uses: actions/github-script@v7
+      - uses: actions/checkout@v4
         with:
-          script: |
-            script: console.log(context)
+          ref: ${{ github.event.pull_request.head.sha }}
 
-    # github.rest.issues.createComment({
-    #   issue_number: context.issue.number,
-    #   owner: context.repo.owner,
-    #   repo: context.repo.repo,
-    #   body: '👋 Thanks for reporting!'
-    # })
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ github.event.pull_request.head.sha }}
 
-    # - name: Check branch name
-    #   run: |
-    #     if [[ ${{ github.head_ref }} == 'main' ]] || [[ ${{ github.head_ref }} == 'production' ]] ; then
-    #       echo "This action is not available on the branch ${{ github.head_ref }}"
-    #       exit 1
-    #     fi
+      - name: Get custom-env name
+        id: env_name
+        uses: ./.github/actions/get_custom_env_name
+        with:
+          branch_name: ${{ github.head_ref }}
 
-    # - name: Get image tag
-    #   id: image_tag
-    #   uses: ./.github/actions/get_image_tag
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app_name: [admin, api, app]
 
-    # - name: Get custom-env name
-    #   id: env_name
-    #   uses: ./.github/actions/get_custom_env_name
-    #   with:
-    #     branch_name: ${{ github.head_ref }}
+    steps:
+      - name: Docker Build & Publish
+        uses: ./.github/actions/build_docker_image
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
+          registry: ${{ secrets.SCW_DEV_IMAGE_REGISTRY }}
+          image_name: ${{ matrix.app_name }}
+          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
+          image_tag: ${{ needs.prepare.outputs.image_tag }}
 
-  # build:
-  #   needs: prepare
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       app_name: [admin, api, app]
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [prepare, build]
+    env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_DEV_DEPLOY_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
+      PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
+      PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
+      PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
+      custom_directory: ./terraform/environments/development/custom
+      var_file: "vars/main.tfvars.json"
+      scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1"
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: hashicorp/setup-terraform@v3
 
-  #     - name: Docker Build & Publish
-  #       uses: ./.github/actions/build_docker_image
-  #       with:
-  #         username: nologin
-  #         password: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
-  #         registry: ${{ secrets.SCW_DEV_IMAGE_REGISTRY }}
-  #         image_name: ${{ matrix.app_name }}
-  #         dockerfile_path: ${{ matrix.app_name }}/Dockerfile
-  #         image_tag: ${{ needs.prepare.outputs.image_tag }}
+      - name: Create custom env stack
+        working-directory: ${{ env.custom_directory }}
+        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf.template > main.tf
 
-  # deploy:
-  #   runs-on: ubuntu-latest
-  #   needs: [prepare]
-  #   # needs: [prepare, build]
-  #   env:
-  #     SCW_ACCESS_KEY: ${{ secrets.SCW_DEV_DEPLOY_ACCESS_KEY }}
-  #     SCW_SECRET_KEY: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
-  #     PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
-  #     PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
-  #     PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
-  #     custom_directory: ./terraform/environments/development/custom
-  #     var_file: "vars/main.tfvars.json"
-  #     scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1"
+      - name: Create var files
+        working-directory: ${{ env.custom_directory }}
+        run: jq ".environments.custom.image_tag=\"${{ needs.prepare.outputs.image_tag }}\"" ${{ env.var_file }}.template > ${{ env.var_file }}
 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: hashicorp/setup-terraform@v3
+      - name: Init terraform
+        working-directory: ${{ env.custom_directory }}
+        run: terraform init
 
-  #     - name: Create custom env stack
-  #       working-directory: ${{ env.custom_directory }}
-  #       run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf.template > main.tf
+      - name: Check if secret exists
+        id: check_secret
+        working-directory: ${{ env.custom_directory }}
+        run: |
+          if terraform state show 'scaleway_secret.custom' ; then
+              echo "has_secret=1" >> $GITHUB_OUTPUT
+          else
+              echo "has_secret=0" >> $GITHUB_OUTPUT
+          fi
 
-  #     - name: Create var files
-  #       working-directory: ${{ env.custom_directory }}
-  #       run: jq ".environments.custom.image_tag=\"${{ needs.prepare.outputs.image_tag }}\"" ${{ env.var_file }}.template > ${{ env.var_file }}
+      - name: Get CI project & secret ID
+        id: ci_outputs
+        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        working-directory: "${{ env.custom_directory }}/../"
+        run: |
+          terraform init
+          long_secret_id=$(terraform output -raw secret_id)
+          region=$(cut -d "/" -f 1 <<< $long_secret_id)
+          secret_id=$(cut -d "/" -f 2 <<< $long_secret_id)
+          project_id=$(terraform output -raw project_id)
+          echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
+          echo "project_id=$project_id" >> $GITHUB_OUTPUT
+          echo "region=$region" >> $GITHUB_OUTPUT
+          echo "Project ID: $project_id - Secret ID: $secret_id"
 
-  #     - name: Init terraform
-  #       working-directory: ${{ env.custom_directory }}
-  #       run: terraform init
+      - name: Create secret
+        id: create_secret
+        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        working-directory: ${{ env.custom_directory }}
+        run: |
+          # Create secret for custom environment
+          secret_id=$(curl -s -X POST \
+            -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "snu-${{ needs.prepare.outputs.env_name }}",
+              "project_id": "${{ steps.ci_outputs.outputs.project_id }}"
+            }' \
+            "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets" | jq -r ".id" )
+          # Retreive ci secret latest revision
+          data=$(curl -s -X GET \
+            -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/${{ steps.ci_outputs.outputs.secret_id }}/versions/latest_enabled/access" | jq -r ".data")
+          # Create a new revision for custom environment
+          curl -s -X POST \
+            -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"data\":\"${data}\"}" \
+            "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/$secret_id/versions"
+          echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
 
-      # - name: Check if secret exists
-      #   id: check_secret
-      #   working-directory: ${{ env.custom_directory }}
-      #   run: |
-      #     if terraform state show 'scaleway_secret.custom' ; then
-      #         echo "has_secret=1" >> $GITHUB_OUTPUT
-      #     else
-      #         echo "has_secret=0" >> $GITHUB_OUTPUT
-      #     fi
+      - name: Import secret
+        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        working-directory: ${{ env.custom_directory }}
+        run: sed "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" imports.tf.template > imports.tf
 
-      # - name: Get CI project & secret ID
-      #   id: ci_outputs
-      #   if: ${{ steps.check_secret.outputs.has_secret == '0' }}
-      #   working-directory: "${{ env.custom_directory }}/../"
-      #   run: |
-      #     terraform init
-      #     long_secret_id=$(terraform output -raw secret_id)
-      #     region=$(cut -d "/" -f 1 <<< $long_secret_id)
-      #     secret_id=$(cut -d "/" -f 2 <<< $long_secret_id)
-      #     project_id=$(terraform output -raw project_id)
-      #     echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
-      #     echo "project_id=$project_id" >> $GITHUB_OUTPUT
-      #     echo "region=$region" >> $GITHUB_OUTPUT
-      #     echo "Project ID: $project_id - Secret ID: $secret_id"
+      - name: Validate terraform
+        working-directory: ${{ env.custom_directory }}
+        run: terraform validate -no-color
 
-      # - name: Create secret
-      #   id: create_secret
-      #   if: ${{ steps.check_secret.outputs.has_secret == '0' }}
-      #   working-directory: ${{ env.custom_directory }}
-      #   run: |
-      #     # Create secret for custom environment
-      #     secret_id=$(curl -s -X POST \
-      #       -H "X-Auth-Token: $SCW_SECRET_KEY" \
-      #       -H "Content-Type: application/json" \
-      #       -d '{
-      #         "name": "snu-${{ needs.prepare.outputs.env_name }}",
-      #         "project_id": "${{ steps.ci_outputs.outputs.project_id }}"
-      #       }' \
-      #       "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets" | jq -r ".id" )
-      #     # Retreive ci secret latest revision
-      #     data=$(curl -s -X GET \
-      #       -H "X-Auth-Token: $SCW_SECRET_KEY" \
-      #       "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/${{ steps.ci_outputs.outputs.secret_id }}/versions/latest_enabled/access" | jq -r ".data")
-      #     # Create a new revision for custom environment
-      #     curl -s -X POST \
-      #       -H "X-Auth-Token: $SCW_SECRET_KEY" \
-      #       -H "Content-Type: application/json" \
-      #       -d "{\"data\":\"${data}\"}" \
-      #       "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/$secret_id/versions"
-      #     echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
+      - name: Terraform plan
+        working-directory: ${{ env.custom_directory }}
+        run: terraform plan -no-color -input=false -var-file="${{ env.var_file }}"
 
-      # - name: Import secret
-      #   if: ${{ steps.check_secret.outputs.has_secret == '0' }}
-      #   working-directory: ${{ env.custom_directory }}
-      #   run: sed "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" imports.tf.template > imports.tf
-
-      # - name: Validate terraform
-      #   working-directory: ${{ env.custom_directory }}
-      #   run: terraform validate -no-color
-
-      # - name: Terraform plan
-      #   working-directory: ${{ env.custom_directory }}
-      #   run: terraform plan -no-color -input=false -var-file="${{ env.var_file }}"
-
-      # - name: Terraform auto-apply
-      #   working-directory: ${{ env.custom_directory }}
-      #   run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"
+      - name: Terraform auto-apply
+        working-directory: ${{ env.custom_directory }}
+        run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"

@@ -32,6 +32,8 @@ jobs:
       - name: Get image tag
         id: image_tag
         uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ github.sha }}
 
       - name: Remove git folder
         run: rm -rf .git

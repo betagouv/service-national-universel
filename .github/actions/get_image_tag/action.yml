@@ -1,6 +1,11 @@
 name: "Get an unique image tag"
 description: "Get an unique image tag based on date and current commit"
 
+inputs:
+  sha:
+    description: "The sha of the commit"
+    required: true
+
 outputs:
   image_tag:
     description: "Image Tag"
@@ -11,7 +16,10 @@ runs:
   steps:
     - name: Get commit hash
       id: commit
-      uses: prompt/actions-commit-hash@v3
+      shell: bash
+      run: |
+        sha=$(cut -c"1-8" <<< ${{ inputs.sha }})
+        echo "sha=$sha" >> $GITHUB_OUTPUT
 
     - name: Get current date
       id: date
@@ -22,6 +30,6 @@ runs:
       id: image_tag
       shell: bash
       run: |
-        image_tag="${{ steps.date.outputs.date }}-${{ steps.commit.outputs.short }}"
+        image_tag="${{ steps.date.outputs.date }}-${{ steps.commit.outputs.sha }}"
         echo $image_tag
         echo "image_tag=$image_tag" >> $GITHUB_OUTPUT

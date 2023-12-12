@@ -1,35 +1,39 @@
 name: Custom environment - Build Docker image & Deploy Scaleway
 
 on:
-  workflow_dispatch:
-  delete:
+  pull_request:
+    types:
+      - closed
     branches:
-      - '*-ci-*'
-      - feat-1469
+      - main
+
 
 jobs:
 
   prepare:
+    if:  contains(github.head_ref, '-ci-') || github.head_ref == 'feat-1469'
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
-    - uses: actions/checkout@v4
-
     - name: Check branch name
       run: |
-        if [[ ${{ github.ref_name }} == 'main' ]] || [[ ${{ github.ref_name }} == 'production' ]] ; then
-          echo "This action is not available on the branch ${{ github.ref_name }}"
+        if [[ ${{ github.head_ref }} == 'main' ]] || [[ ${{ github.head_ref }} == 'production' ]] ; then
+          echo "This action is not available on the branch ${{ github.head_ref }}"
           exit 1
         fi
+
+    - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Get custom-env name
       id: env_name
       uses: ./.github/actions/get_custom_env_name
       with:
-        branch_name: ${{ github.ref_name }}
+        branch_name: ${{ github.head_ref }}
 
   destroy:
     runs-on: ubuntu-latest
@@ -44,7 +48,6 @@ jobs:
       var_file: "vars/main.tfvars.json"
 
     steps:
-      - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
 
       - name: Create custom env stack
