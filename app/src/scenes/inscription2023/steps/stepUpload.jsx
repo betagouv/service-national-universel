@@ -12,7 +12,6 @@ import { getCorrectionsForStepUpload } from "../../../utils/navigation";
 import { ID } from "../utils";
 import { supportURL } from "@/config";
 
-import InscriptionStepper from "../components/InscriptionStepper";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import StepUploadMobile from "../components/StepUploadMobile";
 import useDevice from "@/hooks/useDevice";
@@ -135,7 +134,6 @@ export default function StepUpload() {
 
   return (
     <>
-      <InscriptionStepper />
       <DSFRContainer title={ID[category].title} supportLink={supportLink} supportEvent="Phase0/aide inscription - CI">
         {device === "mobile" ? (
           <StepUploadMobile

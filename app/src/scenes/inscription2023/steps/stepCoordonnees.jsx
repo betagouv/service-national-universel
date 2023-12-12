@@ -12,7 +12,6 @@ import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import Input from "../components/Input";
 import Select from "../../../components/dsfr/forms/Select";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
-import InscriptionStepper from "../components/InscriptionStepper";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
@@ -459,50 +458,8 @@ export default function StepCoordonnees() {
     setLoading(false);
   };
 
-  const onSave = async () => {
-    setLoading(true);
-
-    const fieldToUpdate = [...commonFields];
-    if (!isFrenchResident) {
-      fieldToUpdate.push(...foreignAddressFields);
-    }
-
-    if (moreInformation) {
-      fieldToUpdate.push(...moreInformationFields);
-    }
-
-    if (moreInformation && specificAmenagment === "true") {
-      fieldToUpdate.push("specificAmenagmentType");
-    }
-
-    const updates = {};
-
-    fieldToUpdate.forEach((field) => {
-      updates[field] = data[field];
-    });
-
-    updates.country = FRANCE;
-    updates.moreInformation = moreInformation.toString();
-    updates.addressVerified = "true";
-
-    try {
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/save", updates);
-      if (!ok) {
-        setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
-      }
-      toastr.success("Vos modifications ont bien été enregistrees !", "");
-      dispatch(setYoung(responseData));
-    } catch (e) {
-      capture(e);
-      toastr.error("Une erreur s'est produite :", translate(e.code));
-    }
-  };
-
   return (
     <>
-      <InscriptionStepper onSave={onSave} />
       <DSFRContainer
         title={isCle ? "Mon profil élève" : "Mon profil volontaire"}
         supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}

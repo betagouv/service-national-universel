@@ -23,6 +23,7 @@ import { environment, supportURL } from "../../config";
 import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
+import InscriptionStepper from "./components/InscriptionStepper";
 
 function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
@@ -62,6 +63,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
 
   return (
     <DSFRLayout title={title}>
+      <InscriptionStepper />
       {renderStep(currentStep)}
       <Help supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"}`} />
     </DSFRLayout>

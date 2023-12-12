@@ -5,7 +5,7 @@ import useAuth from "@/services/useAuth";
 import { YOUNG_SOURCE } from "snu-lib";
 import Stepper from "@/components/dsfr/ui/Stepper";
 
-const InscriptionStepper = ({ onSave }) => {
+const InscriptionStepper = () => {
   const { young } = useAuth();
   const isCle = YOUNG_SOURCE.CLE === young?.source;
 
@@ -21,11 +21,11 @@ const InscriptionStepper = ({ onSave }) => {
   if (!isCle) {
     steps.push(
       { value: INSCRIPTION_STEPS.DOCUMENTS, label: "Justifier de mon identité", stepNumber: 4 },
-      { value: INSCRIPTION_STEPS.UPLOAD, label: "Justifier de mon identité", stepNumber: 4 }
+      { value: INSCRIPTION_STEPS.UPLOAD, label: "Justifier de mon identité", stepNumber: 4 },
     );
   }
 
-  return <Stepper steps={steps} stepValue={verifiedStep} onSave={onSave} />;
+  return <Stepper steps={steps} stepValue={verifiedStep} />;
 };
 
 export default InscriptionStepper;
