@@ -102,6 +102,7 @@ function canInviteUser(actorRole, targetRole) {
 const canDeleteStructure = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target);
 
 const canDeleteYoung = (actor, target) => {
+  // un référent peut supprimer un volontaire, mais un volontaire peut se supprimer uniquement si il est HTS
   if(actor._id.toString() === target._id.toString()){
     if(target.source === "CLE") return false;
     return true;
