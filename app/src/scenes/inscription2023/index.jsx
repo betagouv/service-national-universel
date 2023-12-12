@@ -63,7 +63,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
   return (
     <DSFRLayout title={title}>
       {renderStep(currentStep)}
-      <Help supportLink={supportURL + isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"} />
+      <Help supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"}`} />
     </DSFRLayout>
   );
 };

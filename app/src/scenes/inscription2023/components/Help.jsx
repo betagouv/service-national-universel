@@ -4,6 +4,7 @@ import humanCooperation from "../../../assets/humanCooperation.svg";
 import { supportURL } from "@/config";
 
 export default function Help({ supportLink = supportURL }) {
+  console.log("🚀 ~ file: Help.jsx:7 ~ Help ~ supportLink:", supportLink);
   return (
     <a href={supportLink} target="_blank" rel="noreferrer" className="hover:text-[#161616]">
       <div className="bg-[#F9F6F2] px-4 pt-4 pb-12 text-[#161616] md:hidden">

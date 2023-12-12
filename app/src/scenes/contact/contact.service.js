@@ -144,6 +144,13 @@ export const questions = [
   },
   {
     category: "TECHNICAL",
+    value: "HTS_TO_CLE",
+    label: "Inscription classe engagée : j’ai déjà un compte volontaire",
+    roles: ["public", "young"],
+    parcours: [YOUNG_SOURCE.CLE],
+  },
+  {
+    category: "TECHNICAL",
     value: "CONNECTION",
     label: "Pour me connecter",
     roles: ["public"],
@@ -170,7 +177,7 @@ export const questions = [
     value: "UPLOAD",
     label: "Je n'arrive pas à téléverser (déposer) un document",
     roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE],
   },
   {
     category: "TECHNICAL",
@@ -184,7 +191,7 @@ export const questions = [
     value: "DOWNLOAD",
     label: "Je n'arrive pas à télécharger un document depuis la plateforme",
     roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE],
   },
   {
     category: "TECHNICAL",
@@ -192,13 +199,6 @@ export const questions = [
     label: "J'ai un autre problème",
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
-  },
-  {
-    category: "TECHNICAL",
-    value: "HTS_TO_CLE",
-    label: "Inscription classe engagée : j’ai déjà un compte volontaire",
-    roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.CLE],
   },
 ];
 
