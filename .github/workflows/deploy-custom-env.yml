@@ -3,6 +3,8 @@ name: Custom environment - Build Docker image & Deploy Scaleway
 on:
   workflow_dispatch:
   pull_request:
+    branches:
+      - main
     # types: [opened, reopened, edited, synchronize]
     # branches:
     #   - '*-ci-*'
@@ -14,6 +16,7 @@ permissions:
 jobs:
 
   prepare:
+    if:  contains(github.head_ref, '-ci-')
     runs-on: ubuntu-latest
     outputs:
       image_tag: "2023-12-12-d0a45f2" # TODO : ${{ steps.image_tag.outputs.image_tag }}
@@ -21,6 +24,13 @@ jobs:
 
     steps:
       # - uses: actions/checkout@v4
+
+      - name: Check branch name
+        run: |
+          if [[ ${{ github.head_ref }} == 'main' ]] || [[ ${{ github.head_ref }} == 'production' ]] ; then
+            echo "This action is not available on the branch ${{ github.head_ref }}"
+            exit 1
+          fi
 
       - name: Debug
         run: |
@@ -41,8 +51,8 @@ jobs:
 
     # - name: Check branch name
     #   run: |
-    #     if [[ ${{ github.ref_name }} == 'main' ]] || [[ ${{ github.ref_name }} == 'production' ]] ; then
-    #       echo "This action is not available on the branch ${{ github.ref_name }}"
+    #     if [[ ${{ github.head_ref }} == 'main' ]] || [[ ${{ github.head_ref }} == 'production' ]] ; then
+    #       echo "This action is not available on the branch ${{ github.head_ref }}"
     #       exit 1
     #     fi
 
@@ -54,7 +64,7 @@ jobs:
     #   id: env_name
     #   uses: ./.github/actions/get_custom_env_name
     #   with:
-    #     branch_name: ${{ github.ref_name }}
+    #     branch_name: ${{ github.head_ref }}
 
   # build:
   #   needs: prepare
