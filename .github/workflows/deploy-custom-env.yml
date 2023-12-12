@@ -16,7 +16,7 @@ permissions:
 jobs:
 
   prepare:
-    if:  contains(github.head_ref, '-ci-')
+    if:  contains(github.head_ref, '-ci-') || github.head_ref == 'feat-1469'
     runs-on: ubuntu-latest
     outputs:
       image_tag: "2023-12-12-d0a45f2" # TODO : ${{ steps.image_tag.outputs.image_tag }}
