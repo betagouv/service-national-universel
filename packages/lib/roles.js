@@ -1,5 +1,4 @@
 import { region2department } from "./region-and-departments";
-import { YOUNG_SOURCE } from "./constants";
 
 const ROLES = {
   ADMIN: "admin",
@@ -103,12 +102,13 @@ function canInviteUser(actorRole, targetRole) {
 const canDeleteStructure = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target);
 
 const canDeleteYoung = (actor, target) => {
-  console.log(actor, target);
-  if(actor.id === target.id){
-    if(target.source === YOUNG_SOURCE.CLE) return false;
+  if(actor._id.toString() === target._id.toString()){
+    if(target.source === "CLE") return false;
+    return true;
   }
-  isAdmin(actor) || referentInSameGeography(actor, target) || actor._id.toString() === target._id.toString();
+  isAdmin(actor) || referentInSameGeography(actor, target);
 }
+
 
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
@@ -182,7 +182,9 @@ function canDeleteReferent({ actor, originalTarget, structure }) {
 }
 
 function canViewPatchesHistory(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(
+    actor.role,
+  );
   return isAdminOrReferent;
 }
 
@@ -193,12 +195,12 @@ function canDeletePatchesHistory(actor, target) {
 }
 
 function canViewEmailHistory(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
   return isAdminOrReferent;
 }
 
 function canViewNotes(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
   return isAdminOrReferent;
 }
 
