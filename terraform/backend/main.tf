@@ -55,5 +55,5 @@ module "dev" {
   source = "./scw_backend_rdb"
 
   rdb_instance_id = scaleway_rdb_instance.main.id
-  user_role       = "dev"
+  user_role       = "ci"
 }

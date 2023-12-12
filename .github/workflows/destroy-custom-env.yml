@@ -1,4 +1,4 @@
-name: Custom environment - Build Docker image & Deploy Scaleway
+name: Destroy custom environment
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ on:
 jobs:
 
   prepare:
-    if:  contains(github.head_ref, '-ci-') || github.head_ref == 'feat-1469'
+    if:  contains(github.head_ref, '-ci-')
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
@@ -26,8 +26,8 @@ jobs:
         fi
 
     - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Get custom-env name
       id: env_name
@@ -39,12 +39,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prepare]
     env:
-      SCW_ACCESS_KEY: ${{ secrets.SCW_DEV_DEPLOY_ACCESS_KEY }}
-      SCW_SECRET_KEY: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
-      PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
-      PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
-      PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
-      custom_directory: ./terraform/environments/development/custom
+      SCW_ACCESS_KEY: ${{ secrets.SCW_CI_DEPLOY_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+      PG_CONN_STR: ${{ secrets.SCW_CI_BACKEND_CONN_STR }}
+      PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
+      PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
+      custom_directory: ./terraform/environments/ci/custom
       var_file: "vars/main.tfvars.json"
 
     steps:

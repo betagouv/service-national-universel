@@ -6,9 +6,7 @@ terraform {
   }
   required_version = ">= 0.13"
 
-  backend "pg" {
-    schema_name = "apps_###___ENV_NAME___###"
-  }
+  backend "pg" {}
 }
 
 provider "scaleway" {
@@ -16,67 +14,88 @@ provider "scaleway" {
   region = "fr-par"
 }
 
-variable "environments" {
-  type = map(object({
-    image_tag = string
-    apps = map(object({
-      name                  = string
-      subdomain             = string
-      cpu_limit             = optional(number, 256)
-      memory_limit          = optional(number, 256)
-      min_scale             = optional(number, 1)
-      max_scale             = optional(number, 1)
-      timeout               = optional(number, 60)
-      max_concurrency       = optional(number, 50)
-      environment_variables = optional(map(string), {})
-    }))
-  }))
-  nullable = false
-}
-
-data "terraform_remote_state" "project" {
-  backend = "pg"
-}
-
 locals {
-  iam_role         = "development"
-  env_key          = "###___ENV_NAME___###"
-  env              = var.environments["custom"]
+  iam_role         = "ci"
+  env_key          = "ci"
+  env              = var.environments[local.env_key]
   app_api          = local.env.apps.api
-  domain_api       = "${local.app_api.subdomain}-${local.env_key}.${local.project.dns_zone}"
+  domain_api       = "${local.app_api.subdomain}.${local.env.dns_zone}.${local.env.domain}"
   app_admin        = local.env.apps.admin
-  domain_admin     = "${local.app_admin.subdomain}-${local.env_key}.${local.project.dns_zone}"
+  domain_admin     = "${local.app_admin.subdomain}.${local.env.dns_zone}.${local.env.domain}"
   app_app          = local.env.apps.app
-  domain_app       = "${local.app_app.subdomain}-${local.env_key}.${local.project.dns_zone}"
+  domain_app       = "${local.app_app.subdomain}.${local.env.dns_zone}.${local.env.domain}"
   secrets          = jsondecode(base64decode(data.scaleway_secret_version.main.data))
-  project          = data.terraform_remote_state.project.outputs
-  registry_endpoint = local.project.registry_endpoint
+}
+
+# Project
+resource "scaleway_account_project" "main" {
+  name        = "snu-${local.iam_role}"
+  description = "SNU project for '${local.iam_role}'"
 }
 
 # Secrets
-resource "scaleway_secret" "custom" {
+resource "scaleway_secret" "ci" {
   name        = "snu-${local.env_key}"
-  project_id  = local.project.project_id
+  project_id  = scaleway_account_project.main.id
   description = "Secrets for environment '${local.env_key}'"
 }
+data "scaleway_secret_version" "main" {
+  secret_id = scaleway_secret.ci.id
+  revision  = local.env.secret_revision
+}
 
-data "scaleway_secret_version" main {
-  secret_id = scaleway_secret.custom.id
-  revision  = "latest_enabled"
+# Logs
+resource "scaleway_cockpit" "main" {
+  project_id = scaleway_account_project.main.id
+}
+
+# Registry
+resource "scaleway_registry_namespace" "main" {
+  project_id  = scaleway_account_project.main.id
+  name        = "snu-${local.iam_role}"
+  description = "SNU registry for ${local.iam_role}"
+  is_public   = false
+}
+
+# Application user
+resource "scaleway_iam_application" "main" {
+  name        = "snu-deploy-${local.iam_role}"
+  description = "Application allowed to deploy apps in '${local.iam_role}'"
+}
+
+# Deploy policy
+resource "scaleway_iam_policy" "deploy" {
+  name           = "snu-deploy-${local.iam_role}-policy"
+  description    = "Allow to deploy apps in '${local.iam_role}'"
+  application_id = scaleway_iam_application.main.id
+  rule {
+    project_ids          = [scaleway_account_project.main.id]
+    permission_set_names = [
+      "AllProductsFullAccess",
+    ]
+  }
 }
 
 # Containers namespace
 resource "scaleway_container_namespace" "main" {
-  project_id  = local.project.project_id
+  project_id  = scaleway_account_project.main.id
   name        = "snu-${local.env_key}"
   description = "SNU container namespace for environment '${local.env_key}'"
 }
 
 # Containers
+
+# DNS zone
+resource "scaleway_domain_zone" "main" {
+  project_id = scaleway_account_project.main.id
+  domain     = local.env.domain
+  subdomain  = local.env.dns_zone
+}
+
 resource "scaleway_container" "api" {
   name            = "${local.env_key}-${local.app_api.name}"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${local.registry_endpoint}/${local.app_api.name}:${local.env.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/${local.app_api.name}:${local.env.image_tag}"
   port            = 8080
   cpu_limit       = local.app_api.cpu_limit
   memory_limit    = local.app_api.memory_limit
@@ -90,18 +109,15 @@ resource "scaleway_container" "api" {
 
   environment_variables = merge({
     "APP_NAME"                  = local.app_api.name
-    "DOCKER_ENV_VITE_ADMIN_URL" = "https://${local.domain_admin}"
-    "DOCKER_ENV_VITE_API_URL"   = "https://${local.domain_api}"
-    "DOCKER_ENV_VITE_APP_URL"   = "https://${local.domain_app}"
-    "FOLDER_APP"                = local.app_api.name
-  }, local.app_api.environment_variables)
-
-  secret_environment_variables = {
+    "ADMIN_URL" = "https://${local.domain_admin}"
+    "APP_URL"   = "https://${local.domain_app}"
+    "FOLDER_API"                = local.app_api.name
+    "SENTRY_PROFILE_SAMPLE_RATE": "0.8"
+    "SENTRY_TRACING_SAMPLE_RATE": "0.1"
     "API_ANALYTICS_ENDPOINT"                = local.secrets.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID"     = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"       = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"          = local.secrets.API_ASSOCIATION_CELLAR_KEYID
-    "API_ASSOCIATION_ES_ENDPOINT"           = local.secrets.API_ASSOCIATION_ES_ENDPOINT
     "API_PDF_ENDPOINT"                      = local.secrets.API_PDF_ENDPOINT
     "BUCKET_NAME"                           = local.secrets.BUCKET_NAME
     "CELLAR_ENDPOINT"                       = local.secrets.CELLAR_ENDPOINT
@@ -115,11 +131,14 @@ resource "scaleway_container" "api" {
     "PUBLIC_BUCKET_NAME"                    = local.secrets.PUBLIC_BUCKET_NAME
     "PUBLIC_BUCKET_NAME_SUPPORT"            = local.secrets.PUBLIC_BUCKET_NAME_SUPPORT
     "SENTRY_URL"                            = local.secrets.SENTRY_URL
-    "SUPPORT_APIKEY"                        = local.secrets.SUPPORT_APIKEY
     "SUPPORT_URL"                           = local.secrets.SUPPORT_URL
+  }, local.app_api.environment_variables)
+
+  secret_environment_variables = {
     "API_ANALYTICS_API_KEY"                 = local.secrets.API_ANALYTICS_API_KEY
     "API_ASSOCIATION_AWS_SECRET_ACCESS_KEY" = local.secrets.API_ASSOCIATION_AWS_SECRET_ACCESS_KEY
     "API_ASSOCIATION_CELLAR_KEYSECRET"      = local.secrets.API_ASSOCIATION_CELLAR_KEYSECRET
+    "API_ASSOCIATION_ES_ENDPOINT"           = local.secrets.API_ASSOCIATION_ES_ENDPOINT
     "CELLAR_KEYSECRET"                      = local.secrets.CELLAR_KEYSECRET
     "CELLAR_KEYSECRET_SUPPORT"              = local.secrets.CELLAR_KEYSECRET_SUPPORT
     "DIAGORIENTE_TOKEN"                     = local.secrets.DIAGORIENTE_TOKEN
@@ -131,6 +150,7 @@ resource "scaleway_container" "api" {
     "MONGO_URL"                             = local.secrets.MONGO_URL
     "SECRET"                                = local.secrets.SECRET
     "SENDINBLUEKEY"                         = local.secrets.SENDINBLUEKEY
+    "SUPPORT_APIKEY"                        = local.secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.secrets.PM2_SLACK_URL
     "TOKENLOADTEST"                         = local.secrets.TOKENLOADTEST
     "ZAMMAD_TOKEN"                          = local.secrets.ZAMMAD_TOKEN
@@ -138,8 +158,8 @@ resource "scaleway_container" "api" {
 }
 
 resource "scaleway_domain_record" "api" {
-  dns_zone = local.project.dns_zone
-  name     = "${local.app_api.subdomain}-${local.env_key}"
+  dns_zone = scaleway_domain_zone.main.id
+  name     = local.app_api.subdomain
   type     = "CNAME"
   data     = "${scaleway_container.api.domain_name}."
   ttl      = 3600
@@ -155,7 +175,7 @@ resource "scaleway_container_domain" "api" {
 resource "scaleway_container" "admin" {
   name            = "${local.env_key}-${local.app_admin.name}"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${local.registry_endpoint}/${local.app_admin.name}:${local.env.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/${local.app_admin.name}:${local.env.image_tag}"
   port            = 8080
   cpu_limit       = local.app_admin.cpu_limit
   memory_limit    = local.app_admin.memory_limit
@@ -172,6 +192,8 @@ resource "scaleway_container" "admin" {
     "DOCKER_ENV_VITE_ADMIN_URL" = "https://${local.domain_admin}"
     "DOCKER_ENV_VITE_API_URL"   = "https://${local.domain_api}"
     "DOCKER_ENV_VITE_APP_URL"   = "https://${local.domain_app}"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE": "0.1"
+    "DOCKER_ENV_VITE_SUPPORT_URL": "https://support.beta-snu.dev"
   }, local.app_admin.environment_variables)
 
   secret_environment_variables = {
@@ -182,8 +204,8 @@ resource "scaleway_container" "admin" {
 }
 
 resource "scaleway_domain_record" "admin" {
-  dns_zone = local.project.dns_zone
-  name     = "${local.app_admin.subdomain}-${local.env_key}"
+  dns_zone = scaleway_domain_zone.main.id
+  name     = local.app_admin.subdomain
   type     = "CNAME"
   data     = "${scaleway_container.admin.domain_name}."
   ttl      = 3600
@@ -197,7 +219,7 @@ resource "scaleway_container_domain" "admin" {
 resource "scaleway_container" "app" {
   name            = "${local.env_key}-${local.app_app.name}"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${local.registry_endpoint}/${local.app_app.name}:${local.env.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/${local.app_app.name}:${local.env.image_tag}"
   port            = 8080
   cpu_limit       = local.app_app.cpu_limit
   memory_limit    = local.app_app.memory_limit
@@ -214,6 +236,8 @@ resource "scaleway_container" "app" {
     "DOCKER_ENV_VITE_ADMIN_URL" = "https://${local.domain_admin}"
     "DOCKER_ENV_VITE_API_URL"   = "https://${local.domain_api}"
     "DOCKER_ENV_VITE_APP_URL"   = "https://${local.domain_app}"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE": "0.1"
+    "DOCKER_ENV_VITE_SUPPORT_URL": "https://support.beta-snu.dev"
     "FOLDER_APP"                = local.app_app.name
   }, local.app_app.environment_variables)
 
@@ -224,8 +248,8 @@ resource "scaleway_container" "app" {
 }
 
 resource "scaleway_domain_record" "app" {
-  dns_zone = local.project.dns_zone
-  name     = "${local.app_app.subdomain}-${local.env_key}"
+  dns_zone = scaleway_domain_zone.main.id
+  name     = local.app_app.subdomain
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
   ttl      = 3600
@@ -236,12 +260,25 @@ resource "scaleway_container_domain" "app" {
   hostname     = local.domain_app
 }
 
-output api_endpoint {
-  value = "https://${local.domain_api}"
+
+output "iam_role" {
+  value = local.iam_role
 }
-output app_endpoint {
-  value = "https://${local.domain_app}"
+output "project_id" {
+  value = scaleway_account_project.main.id
 }
-output admin_endpoint {
-  value = "https://${local.domain_admin}"
+output "domain" {
+  value = local.env.domain
+}
+output "dns_zone" {
+  value = scaleway_domain_zone.main.id
+}
+output "registry_endpoint" {
+  value = scaleway_registry_namespace.main.endpoint
+}
+output "container_namespace_id" {
+  value = scaleway_container_namespace.main.id
+}
+output "secret_id" {
+  value = scaleway_secret.ci.id
 }

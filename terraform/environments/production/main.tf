@@ -116,18 +116,15 @@ resource "scaleway_container" "api" {
 
   environment_variables = merge({
     "APP_NAME"                  = each.value.app.name
-    "DOCKER_ENV_VITE_ADMIN_URL" = "https://${each.value.env.apps.admin.subdomain}.${each.value.env.dns_zone}"
-    "DOCKER_ENV_VITE_API_URL"   = "https://${each.value.env.apps.api.subdomain}.${each.value.env.dns_zone}"
-    "DOCKER_ENV_VITE_APP_URL"   = "https://${each.value.env.apps.app.subdomain}.${each.value.env.dns_zone}"
-    "FOLDER_APP"                = each.value.app.name
-  }, each.value.app.environment_variables)
-
-  secret_environment_variables = {
+    "ADMIN_URL" = "https://${each.value.env.apps.admin.subdomain}.${each.value.env.dns_zone}"
+    "APP_URL"   = "https://${each.value.env.apps.app.subdomain}.${each.value.env.dns_zone}"
+    "FOLDER_API"                = each.value.app.name
+    "SENTRY_PROFILE_SAMPLE_RATE": "0.8"
+    "SENTRY_TRACING_SAMPLE_RATE": "0.1"
     "API_ANALYTICS_ENDPOINT"                = each.value.secret.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID"     = each.value.secret.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"       = each.value.secret.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"          = each.value.secret.API_ASSOCIATION_CELLAR_KEYID
-    "API_ASSOCIATION_ES_ENDPOINT"           = each.value.secret.API_ASSOCIATION_ES_ENDPOINT
     "API_PDF_ENDPOINT"                      = each.value.secret.API_PDF_ENDPOINT
     "BUCKET_NAME"                           = each.value.secret.BUCKET_NAME
     "CELLAR_ENDPOINT"                       = each.value.secret.CELLAR_ENDPOINT
@@ -141,11 +138,14 @@ resource "scaleway_container" "api" {
     "PUBLIC_BUCKET_NAME"                    = each.value.secret.PUBLIC_BUCKET_NAME
     "PUBLIC_BUCKET_NAME_SUPPORT"            = each.value.secret.PUBLIC_BUCKET_NAME_SUPPORT
     "SENTRY_URL"                            = each.value.secret.SENTRY_URL
-    "SUPPORT_APIKEY"                        = each.value.secret.SUPPORT_APIKEY
     "SUPPORT_URL"                           = each.value.secret.SUPPORT_URL
+  }, each.value.app.environment_variables)
+
+  secret_environment_variables = {
     "API_ANALYTICS_API_KEY"                 = each.value.secret.API_ANALYTICS_API_KEY
     "API_ASSOCIATION_AWS_SECRET_ACCESS_KEY" = each.value.secret.API_ASSOCIATION_AWS_SECRET_ACCESS_KEY
     "API_ASSOCIATION_CELLAR_KEYSECRET"      = each.value.secret.API_ASSOCIATION_CELLAR_KEYSECRET
+    "API_ASSOCIATION_ES_ENDPOINT"           = each.value.secret.API_ASSOCIATION_ES_ENDPOINT
     "CELLAR_KEYSECRET"                      = each.value.secret.CELLAR_KEYSECRET
     "CELLAR_KEYSECRET_SUPPORT"              = each.value.secret.CELLAR_KEYSECRET_SUPPORT
     "DIAGORIENTE_TOKEN"                     = each.value.secret.DIAGORIENTE_TOKEN
@@ -157,6 +157,7 @@ resource "scaleway_container" "api" {
     "MONGO_URL"                             = each.value.secret.MONGO_URL
     "SECRET"                                = each.value.secret.SECRET
     "SENDINBLUEKEY"                         = each.value.secret.SENDINBLUEKEY
+    "SUPPORT_APIKEY"                        = each.value.secret.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = each.value.secret.PM2_SLACK_URL
     "TOKENLOADTEST"                         = each.value.secret.TOKENLOADTEST
     "ZAMMAD_TOKEN"                          = each.value.secret.ZAMMAD_TOKEN
@@ -201,6 +202,8 @@ resource "scaleway_container" "admin" {
     "DOCKER_ENV_VITE_ADMIN_URL" = "https://${each.value.env.apps.admin.subdomain}.${each.value.env.dns_zone}"
     "DOCKER_ENV_VITE_API_URL"   = "https://${each.value.env.apps.api.subdomain}.${each.value.env.dns_zone}"
     "DOCKER_ENV_VITE_APP_URL"   = "https://${each.value.env.apps.app.subdomain}.${each.value.env.dns_zone}"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE": "0.1"
+    "DOCKER_ENV_VITE_SUPPORT_URL": "https://support.beta-snu.dev"
   }, each.value.app.environment_variables)
 
   secret_environment_variables = {
@@ -246,6 +249,8 @@ resource "scaleway_container" "app" {
     "DOCKER_ENV_VITE_ADMIN_URL" = "https://${each.value.env.apps.admin.subdomain}.${each.value.env.dns_zone}"
     "DOCKER_ENV_VITE_API_URL"   = "https://${each.value.env.apps.api.subdomain}.${each.value.env.dns_zone}"
     "DOCKER_ENV_VITE_APP_URL"   = "https://${each.value.env.apps.app.subdomain}.${each.value.env.dns_zone}"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE": "0.1"
+    "DOCKER_ENV_VITE_SUPPORT_URL": "https://support.beta-snu.dev"
     "FOLDER_APP"                = each.value.app.name
   }, each.value.app.environment_variables)
 

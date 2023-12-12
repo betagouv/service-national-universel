@@ -43,7 +43,7 @@ jobs:
         with:
           username: nologin
           password: ${{ secrets.SCW_SECRET_KEY }}
-          registry: ${{ secrets.SCW_DEV_IMAGE_REGISTRY }}
+          registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
           image_name: api
           dockerfile_path: api/Dockerfile
           image_tag: ${{ steps.image_tag.outputs.image_tag }}
