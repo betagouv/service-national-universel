@@ -55,7 +55,7 @@ export default function list() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes" }]}
         actions={[
-          <Link key="list" to="/mes-classes/create" className="ml-2">
+          <Link key="list" to="/classes/create" className="ml-2">
             <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
           </Link>,
         ]}
@@ -65,7 +65,7 @@ export default function list() {
           <div className="py-6 bg-gray-50">
             <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore créé de classe engagée</div>
             <div className="flex items-start justify-center h-[136px]">
-              <Link to="/mes-classes/create">
+              <Link to="/classes/create">
                 <Button type="wired" leftIcon={<HiPlus />} title="Créer une première classe engagée" />
               </Link>
             </div>
@@ -151,7 +151,7 @@ export default function list() {
 const Hit = ({ hit }) => {
   const history = useHistory();
   return (
-    <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={() => history.push(`/mes-classes/${hit._id}`)}>
+    <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={() => history.push(`/classes/${hit._id}`)}>
       <td className="flex w-[40%] cursor-pointer items-center gap-4">
         <div className="flex w-full flex-col justify-center">
           <div className="m-0 table w-full table-fixed border-collapse">

@@ -27,6 +27,8 @@ export default function VolontaireList() {
   const [volontaire, setVolontaire] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
+  const [classes, setClasses] = useState(null);
+  const [etablissements, setEtablissements] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [size, setSize] = useState(10);
 
@@ -39,7 +41,7 @@ export default function VolontaireList() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
 
-  const filterArray = getFilterArray(user, bus, sessionsPhase1);
+  const filterArray = getFilterArray(user, bus, sessionsPhase1, classes, etablissements);
 
   useEffect(() => {
     (async () => {
@@ -52,15 +54,25 @@ export default function VolontaireList() {
           filters: {},
           exportFields: ["busId"],
         });
+        const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
+          filters: {},
+          exportFields: ["name", "uniqueKeyAndId"],
+        });
+        const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
+          filters: {},
+          exportFields: ["name", "uai"],
+        });
         setSessionsPhase1(sessions);
         setBus(bus);
+        setClasses(classes);
+        setEtablissements(etablissements);
       } catch (e) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des données");
       }
     })();
   }, []);
 
-  if (!sessionsPhase1 || !bus) return <Loader />;
+  if (!sessionsPhase1 || !bus || !classes || !etablissements) return <Loader />;
 
   return (
     <>

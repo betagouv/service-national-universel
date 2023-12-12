@@ -16,6 +16,7 @@ export default function list() {
   const user = useSelector((state) => state.Auth.user);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
+  const [classes, setClasses] = useState(null);
   const [data, setData] = useState([]);
   const pageId = "youngCle-list";
   const [selectedFilters, setSelectedFilters] = useState({});
@@ -25,7 +26,7 @@ export default function list() {
   });
   const [size, setSize] = useState(10);
 
-  const filterArray = getFilterArray(sessionsPhase1, bus);
+  const filterArray = getFilterArray(sessionsPhase1, bus, classes);
 
   useEffect(() => {
     (async () => {
@@ -38,15 +39,21 @@ export default function list() {
           filters: {},
           exportFields: ["busId"],
         });
+        const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
+          filters: {},
+          exportFields: ["name", "uniqueKeyAndId"],
+        });
+
         setSessionsPhase1(sessions);
         setBus(bus);
+        setClasses(classes);
       } catch (e) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des données");
       }
     })();
   }, []);
 
-  if (!sessionsPhase1 || !bus) return null;
+  if (!sessionsPhase1 || !bus || !classes) return null;
 
   return (
     <Page>
@@ -158,7 +165,7 @@ const Hit = ({ hit }) => {
       <td className="flex w-[20%] flex-col gap-2">
         <Badge title={hit.cohort} leftIcon={<HiUsers color="#EC4899" size={20} />} />
       </td>
-      <td className="flex w-[20%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mes-classes/${hit.classeId}`)}>
+      <td className="flex w-[20%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/classes/${hit.classeId}`)}>
         <div className="flex w-full flex-col justify-center">
           <div className="m-0 table w-full table-fixed border-collapse">
             <div className="table-cell truncate font-bold text-gray-900">{hit?.classe?.name}</div>

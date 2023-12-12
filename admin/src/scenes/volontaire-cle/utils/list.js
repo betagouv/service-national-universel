@@ -14,8 +14,20 @@ import {
 import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
-export const getFilterArray = (bus, session) => {
+export const getFilterArray = (bus, session, classes) => {
   return [
+    {
+      title: "Classe Engagée ID",
+      name: "classeId",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !classes.length) return item;
+        const res = classes.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.uniqueKeyAndId;
+      },
+    },
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus },
     { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
