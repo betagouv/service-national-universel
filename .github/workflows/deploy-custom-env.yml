@@ -36,6 +36,7 @@ jobs:
           app_endpoint="https://app.ci.beta-snu.dev"
           admin_endpoint="https://admin.ci.beta-snu.dev"
           body="${{ github.event.pull_request.body }}\n\nApplication endpoints :\n\n- $api_endpoint\n- $app_endpoint\n- $admin_endpoint"
+          echo $body
           curl \
             -X PATCH \
             $URL \
