@@ -3,9 +3,13 @@ name: Custom environment - Build Docker image & Deploy Scaleway
 on:
   workflow_dispatch:
   pull_request:
+    types: [opened, reopened, edited, synchronize]
     branches:
       - '*-ci-*'
       - feat-1469
+    branches-ignore:
+      - main
+      - production
 
 permissions:
   pull-requests: write
