@@ -143,7 +143,7 @@ resource "scaleway_domain_record" "api" {
   name     = "${local.app_api.subdomain}-${local.env_key}"
   type     = "CNAME"
   data     = "${scaleway_container.api.domain_name}."
-  ttl      = 3600
+  ttl      = 300
 }
 
 resource "scaleway_container_domain" "api" {
@@ -189,7 +189,7 @@ resource "scaleway_domain_record" "admin" {
   name     = "${local.app_admin.subdomain}-${local.env_key}"
   type     = "CNAME"
   data     = "${scaleway_container.admin.domain_name}."
-  ttl      = 3600
+  ttl      = 300
 }
 
 resource "scaleway_container_domain" "admin" {
@@ -233,7 +233,7 @@ resource "scaleway_domain_record" "app" {
   name     = "${local.app_app.subdomain}-${local.env_key}"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
-  ttl      = 3600
+  ttl      = 300
 }
 
 resource "scaleway_container_domain" "app" {
