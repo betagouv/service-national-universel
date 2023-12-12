@@ -124,7 +124,6 @@ router.post("/confirm-email", async (req, res) => {
 });
 
 router.post("/confirm-signup", async (req, res) => {
-  let session;
   try {
     const { error, value } = Joi.object({
       invitationToken: Joi.string().required(),
@@ -158,11 +157,11 @@ router.post("/confirm-signup", async (req, res) => {
         country: ramsesSchool.country,
       };
 
-      await EtablissementModel.create([body], { session });
+      await EtablissementModel.create([body]);
     }
 
-    referent.set({ invitationToken: null, acceptCGU: true });
-    await referent.save({ fromUser: referent, session });
+    referent.set({ invitationToken: null, acceptCGU: true, region: ramsesSchool.region, department: ramsesSchool.departmentName });
+    await referent.save({ fromUser: referent });
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

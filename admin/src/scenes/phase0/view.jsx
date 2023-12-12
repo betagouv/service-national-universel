@@ -56,6 +56,8 @@ import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import PhoneField from "./components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import downloadPDF from "../../utils/download-pdf";
+import { Button } from "@snu/ds/admin";
+import { Link } from "react-router-dom";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -1481,7 +1483,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                 <>
                   <MiniTitle>Classe engagée</MiniTitle>
                   <Field name="classeName" label="Nom" value={data?.classe?.name} mode="readonly" className="mb-[16px]" young={young} />
-                  <div className="mb-[16px] flex items-center gap-4">
+                  <div className="flex items-center gap-4">
                     <Field name="uniqueKeyAndId" label="Numéro d'identification" value={data?.classe?.uniqueKeyAndId} mode="readonly" className="mb-[16px] w-1/2" young={young} />
                     <Field
                       name="coloration"
@@ -1493,6 +1495,9 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                       transformer={translateColoration}
                     />
                   </div>
+                  <Link to={`/classes/${young.classeId}`} className="w-full ">
+                    <Button type="tertiary" title="Voir la classe" className="w-full mb-[16px]" />
+                  </Link>
                   <MiniTitle>Situation scolaire</MiniTitle>
                   <Field
                     name="classeStatus"
