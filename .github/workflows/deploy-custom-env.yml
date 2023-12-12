@@ -8,7 +8,7 @@ on:
 jobs:
 
   prepare:
-    if:  contains(github.head_ref, '-ci-') || github.head_ref == 'feat-1469'
+    if:  contains(github.head_ref, '-ci-')
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
