@@ -235,3 +235,13 @@ resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
   hostname     = local.domain_app
 }
+
+output api_endpoint {
+  value = "https://${local.domain_api}"
+}
+output app_endpoint {
+  value = "https://${local.domain_app}"
+}
+output admin_endpoint {
+  value = "https://${local.domain_admin}"
+}
