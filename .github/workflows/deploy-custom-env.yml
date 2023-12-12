@@ -3,10 +3,10 @@ name: Custom environment - Build Docker image & Deploy Scaleway
 on:
   workflow_dispatch:
   pull_request:
-    types: [opened, reopened, edited, synchronize]
-    branches:
-      - '*-ci-*'
-      - feat-1469
+    # types: [opened, reopened, edited, synchronize]
+    # branches:
+    #   - '*-ci-*'
+    #   - feat-1469
 
 permissions:
   pull-requests: write
@@ -21,6 +21,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Debug
+      run: |
+        echo "HEAD_REF: ${{ github.head_ref }}"
+        echo "REF: ${{ github.ref }}"
 
     - uses: actions/github-script@v7
       with:
