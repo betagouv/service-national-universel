@@ -1,0 +1,63 @@
+name: Custom environment - Build Docker image & Deploy Scaleway
+
+on:
+  workflow_dispatch:
+  delete:
+    branches:
+      - '*-ci-*'
+      - feat-1469
+
+jobs:
+
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+      env_name: ${{ steps.env_name.outputs.env_name }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check branch name
+      run: |
+        if [[ ${{ github.ref_name }} == 'main' ]] || [[ ${{ github.ref_name }} == 'production' ]] ; then
+          echo "This action is not available on the branch ${{ github.ref_name }}"
+          exit 1
+        fi
+
+    - name: Get custom-env name
+      id: env_name
+      uses: ./.github/actions/get_custom_env_name
+        with:
+          branch_name: ${{ github.ref_name }}
+
+  destroy:
+    runs-on: ubuntu-latest
+    needs: [prepare]
+    env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_DEV_DEPLOY_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_DEV_DEPLOY_SECRET_KEY }}
+      PG_CONN_STR: ${{ secrets.SCW_DEV_BACKEND_CONN_STR }}
+      PGUSER: ${{ secrets.SCW_DEV_BACKEND_USER }}
+      PGPASSWORD: ${{ secrets.SCW_DEV_BACKEND_PASSWORD }}
+      custom_directory: ./terraform/environments/development/custom
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Create empty stack
+        working-directory: ${{ env.custom_directory }}
+        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" destroy.tf.template > destroy.tf
+
+      - name: Init terraform
+        working-directory: ${{ env.custom_directory }}
+        run: terraform init
+
+      - name: Validate terraform
+        working-directory: ${{ env.custom_directory }}
+        run: terraform validate -no-color
+
+      - name: Terraform auto-apply
+        working-directory: ${{ env.custom_directory }}
+        run: terraform apply -no-color -input=false -auto-approve"

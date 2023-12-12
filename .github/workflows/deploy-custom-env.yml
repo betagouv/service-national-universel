@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - '*-ci-*'
       - feat-1469
 
 jobs:
@@ -17,16 +18,22 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Check branch name
+      run: |
+        if [[ ${{ github.ref_name }} == 'feat-1469' ]] || [[ ${{ github.ref_name }} == 'production' ]] ; then
+          echo "This action is not available on the branch ${{ github.ref_name }}"
+          exit 1
+        fi
+
     - name: Get image tag
       id: image_tag
       uses: ./.github/actions/get_image_tag
 
-    - name: Get environment name
+    - name: Get custom-env name
       id: env_name
-      run: |
-        env_name=$(echo ${{ github.ref_name }} | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-' | tr -s '-' | cut -c 1-25)
-        echo "Environment name: $env_name"
-        echo "env_name=$env_name" >> $GITHUB_OUTPUT
+      uses: ./.github/actions/get_custom_env_name
+        with:
+          branch_name: ${{ github.ref_name }}
 
   build:
     needs: prepare
