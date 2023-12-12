@@ -36,7 +36,7 @@ jobs:
           app_endpoint="https://app.ci.beta-snu.dev"
           admin_endpoint="https://admin.ci.beta-snu.dev"
           echo "${{ github.event.pull_request.body }}" > data
-          cat > data <<EOF
+          cat >> data <<EOF
 
           Application endpoints :
           - $api_endpoint
