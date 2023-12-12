@@ -34,6 +34,8 @@ jobs:
 
       - name: Debug
         run: |
+          echo "workflow_ref: ${{ github.workflow_ref }}"
+          echo "workflow_sha: ${{ github.workflow_sha }}"
           echo "SHA: ${{ github.sha }}"
           echo "HEAD_REF: ${{ github.head_ref }}"
           echo "REF: ${{ github.ref }}"
