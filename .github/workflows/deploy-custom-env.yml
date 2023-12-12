@@ -19,18 +19,18 @@ jobs:
       image_tag: "2023-12-12-d0a45f2" # TODO : ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
 
-    # steps:
-    # - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-    - name: Debug
-      run: |
-        echo "HEAD_REF: ${{ github.head_ref }}"
-        echo "REF: ${{ github.ref }}"
+      - name: Debug
+        run: |
+          echo "HEAD_REF: ${{ github.head_ref }}"
+          echo "REF: ${{ github.ref }}"
 
-    - uses: actions/github-script@v7
-      with:
-        script: |
-          script: console.log(context)
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            script: console.log(context)
 
     # github.rest.issues.createComment({
     #   issue_number: context.issue.number,
