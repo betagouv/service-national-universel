@@ -9,6 +9,7 @@ const {
   ROLES,
   STATUS_CLASSE,
   STATUS_PHASE1_CLASSE,
+  SENDINBLUE_TEMPLATES,
   canCreateClasse,
   canUpdateClasse,
   canViewClasse,
@@ -23,6 +24,7 @@ const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 const StateManager = require("../../states");
+const emailsEmitter = require("../../emails");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -75,6 +77,8 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
 
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_CREATED, classe);
+
     return res.status(200).send({ ok: true, data: classe });
   } catch (error) {
     capture(error);
@@ -119,7 +123,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     classe.set({ ...value });
     classe = await classe.save({ fromUser: req.user });
-    await StateManager.Classe.compute(classe._id, req.user);
+    classe = await StateManager.Classe.compute(classe._id, req.user);
+
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
 
     return res.status(200).send({ ok: true, data: classe });
   } catch (error) {
