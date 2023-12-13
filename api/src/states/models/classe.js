@@ -1,14 +1,15 @@
 const Joi = require("joi");
-const { STATUS_CLASSE, YOUNG_STATUS, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST } = require('snu-lib')
+const { STATUS_CLASSE, YOUNG_STATUS, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, SENDINBLUE_TEMPLATES } = require('snu-lib')
 const ClasseModel = require("../../models/cle/classe");
 const YoungModel = require("../../models/young");
+const emailsEmitter = require("../../emails");
 
 const ClasseStateManager = {};
 
 ClasseStateManager.compute = async (_id, fromUser, { youngModel }) => {
   youngModel = youngModel || YoungModel; // Prevent circular dependency in YoungModel post save hook
 
-  const classe = await ClasseModel.findById(_id);
+  let classe = await ClasseModel.findById(_id);
   if (!classe) throw new Error('Classe not found');
   if (classe.status === STATUS_CLASSE.WITHDRAWN) return classe;
 
@@ -63,7 +64,10 @@ ClasseStateManager.compute = async (_id, fromUser, { youngModel }) => {
   const seatsValidated = studentValidated.length + studentNotAutorized.length + studentWithdrawn.length
   if (classe.status != STATUS_CLASSE.VALIDATED && classe.totalSeats <= seatsValidated) {
     classe.set({ seatsTaken: seatsValidated, status: STATUS_CLASSE.VALIDATED });
-    return await classe.save({ fromUser });
+    classe = await classe.save({ fromUser });
+
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VALIDATED, classe);
+    return classe;
   }
 
   return classe;
