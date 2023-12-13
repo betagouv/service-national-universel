@@ -107,7 +107,7 @@ const canDeleteYoung = (actor, target) => {
     if(target.source === "CLE") return false;
     return true;
   }
-  isAdmin(actor) || referentInSameGeography(actor, target);
+  return isAdmin(actor) || referentInSameGeography(actor, target);
 }
 
 
