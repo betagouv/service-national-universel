@@ -149,6 +149,7 @@ class Auth {
 
       return res.status(200).send({
         ok: true,
+
         token,
         user: serializeYoung(user, user),
       });
