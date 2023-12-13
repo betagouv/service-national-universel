@@ -6,8 +6,8 @@ const emailsEmitter = require("../../emails");
 
 const ClasseStateManager = {};
 
-ClasseStateManager.compute = async (_id, fromUser, { youngModel }) => {
-  youngModel = youngModel || YoungModel; // Prevent circular dependency in YoungModel post save hook
+ClasseStateManager.compute = async (_id, fromUser, options) => {
+  youngModel = options?.youngModel || YoungModel; // Prevent circular dependency in YoungModel post save hook
 
   let classe = await ClasseModel.findById(_id);
   if (!classe) throw new Error('Classe not found');
