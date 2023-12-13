@@ -14,14 +14,14 @@ import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import useAuth from "@/services/useAuth";
 import { RiInformationFill } from "react-icons/ri";
+import { getCohort } from "@/utils/cohorts";
 
 export default function WaitingAffectation() {
   const { young, isCLE } = useAuth();
   const shouldShowChangeStayLink = !isCLE && youngCanChangeSession(young);
 
-  const cohortDate = getCohortPeriod(young.cohort);
-  const isSejourDateAvailable = cohortDate !== young.cohort;
-
+  const cohort = getCohort(young.cohort);
+  const cohortDate = getCohortPeriod(cohort);
   return (
     <>
       <div className="relative z-[1] -mb-4 block bg-white md:hidden">
@@ -32,7 +32,7 @@ export default function WaitingAffectation() {
           <div className="mb-10 max-w-3xl">
             <header className="md:mt-12 mb-12">
               <h1 className="text-[44px] mt-0 mb-1">Mon séjour de cohésion</h1>
-              <h2 className="text-[44px] mt-0 mb-3 font-bold">{isSejourDateAvailable ? getCohortPeriod(young.cohort) : "à venir"}</h2>
+              <h2 className="text-[44px] mt-0 mb-3 font-bold">{young.cohort === "CLE 23-24" ? "à venir" : cohortDate}</h2>
               {shouldShowChangeStayLink && <ChangeStayLink />}
             </header>
             <div className="flex my-4 items-center gap-4 rounded-xl border-[1px] border-gray-200 bg-white p-3">

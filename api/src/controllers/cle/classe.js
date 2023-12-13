@@ -22,6 +22,7 @@ const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
+const YoungModel = require("../../models/young");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 const StateManager = require("../../states");
 const emailsEmitter = require("../../emails");
@@ -73,9 +74,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       referentClasseIds: [referent._id],
     });
 
-    await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user }, value.etablissement);
-
     if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
+
+    if (!value.referent?._id) {
+      await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user }, value.etablissement);
+    } else {
+      emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, classe);
+    }
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_CREATED, classe);
 
@@ -123,7 +128,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     classe.set({ ...value });
     classe = await classe.save({ fromUser: req.user });
-    classe = await StateManager.Classe.compute(classe._id, req.user);
+    classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
 
@@ -204,7 +209,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await StateManager.Classe.withdraw(id, req.user);
+    await StateManager.Classe.withdraw(id, req.user, { YoungModel });
 
     res.status(200).send({ ok: true });
   } catch (error) {

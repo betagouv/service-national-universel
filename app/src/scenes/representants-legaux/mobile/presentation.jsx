@@ -30,7 +30,7 @@ export default function Presentation({ step, parentId }) {
     if (status === "REFUSED") return "est refusé";
   };
 
-  const sejourDate = getCohortPeriod(young.cohort);
+  const sejourDate = young?.cohort.name === "CLE 23-24" ? "À venir" : getCohortPeriod(young.cohort);
   const title = parentId === 2 ? `${young.firstName} s'est inscrit(e) au SNU !` : `${young.firstName} souhaite s'inscrire au SNU !`;
 
   function onSubmit() {
