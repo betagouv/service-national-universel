@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES } = require("snu-lib");
 const mongoose = require("mongoose");
 
+const emailsEmitter = require("../../emails");
 const config = require("../../config");
 const { capture } = require("../../sentry");
 const { ERRORS, validatePassword } = require("../../utils");
@@ -167,34 +168,9 @@ router.post("/confirm-signup", async (req, res) => {
     referent.set({ invitationToken: null, acceptCGU: true, region: ramsesSchool?.region, department: ramsesSchool?.departmentName });
     await referent.save({ fromUser: referent });
 
-    let etablissement;
-    if (referent.subRole === SUB_ROLES.referent_etablissement) {
-      etablissement = await EtablissementModel.findOne({ referentEtablissementIds: referent._id });
-    }
-    if (referent.subRole === SUB_ROLES.coordinateur_cle) {
-      etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
-    }
-    if (referent.role === ROLES.REFERENT_CLASSE) {
-      const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      etablissement = await EtablissementModel.findById(classe.etablissementId);
-    }
-
-    let template;
-    if (referent.role === ROLES.ADMINISTRATEUR_CLE && referent.subRole === SUB_ROLES.coordinateur_cle) template = SENDINBLUE_TEMPLATES.referent.CLE_CONFIRM_SIGNUP_COORDINATEUR;
-    if (referent.role === ROLES.ADMINISTRATEUR_CLE && referent.subRole === SUB_ROLES.referent_etablissement)
-      template = SENDINBLUE_TEMPLATES.referent.CLE_CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT;
-    if (referent.role === ROLES.REFERENT_CLASSE) template = SENDINBLUE_TEMPLATES.referent.CLE_CONFIRM_SIGNUP_REFERENT_CLASSE;
-
-    if (template && etablissement) {
-      await sendTemplate(template, {
-        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-        params: {
-          toName: `${referent.firstName} ${referent.lastName}`,
-          schoolName: etablissement.name,
-        },
-      });
-    }
+    if (referent.subRole === SUB_ROLES.coordinateur_cle) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_COORDINATEUR, referent);
+    else if (referent.subRole === SUB_ROLES.referent_etablissement) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT, referent);
+    else if (referent.role === ROLES.REFERENT_CLASSE) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_CLASSE, referent);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
