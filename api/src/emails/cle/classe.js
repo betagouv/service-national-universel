@@ -102,8 +102,12 @@ module.exports = (emailsEmitter) => {
   });
 };
 
+//We want to send emails to the right referents department
+//manager_department -> if not assistant_manager_department -> if not secretariat -> if not manager_phase2
+//end case -> all referent_department
 const getReferentDep = async (department) => {
-  let toReferent = await ReferentModel.find({
+  let toReferent = [];
+  toReferent = await ReferentModel.find({
     subRole: SUB_ROLES.manager_department,
     role: ROLES.REFERENT_DEPARTMENT,
     department,
@@ -127,6 +131,14 @@ const getReferentDep = async (department) => {
 
   if (!toReferent.length) {
     toReferent = await ReferentModel.find({
+      subRole: SUB_ROLES.manager_phase2,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+
+  if (!toReferent.length) {
+    toReferent = await ReferentModel.find({
       role: ROLES.REFERENT_DEPARTMENT,
       department,
     });
@@ -134,15 +146,19 @@ const getReferentDep = async (department) => {
   return toReferent;
 };
 
+//We want to send emails to the right referents region
+//coordinator -> if not assistant_coordinator -> if not secretariat
+//end case -> all referent_region
 const getReferentReg = async (region) => {
-  let toReferent = await ReferentModel.find({
+  let toReferent = [];
+  toReferent = await ReferentModel.find({
     subRole: SUB_ROLES.coordinator,
     role: ROLES.REFERENT_REGION,
     region,
   });
 
   if (!toReferent.length) {
-    let toReferent = await ReferentModel.find({
+    toReferent = await ReferentModel.find({
       subRole: SUB_ROLES.assistant_coordinator,
       role: ROLES.REFERENT_REGION,
       region,
@@ -150,7 +166,7 @@ const getReferentReg = async (region) => {
   }
 
   if (!toReferent.length) {
-    let toReferent = await ReferentModel.find({
+    toReferent = await ReferentModel.find({
       subRole: SUB_ROLES.secretariat,
       role: ROLES.REFERENT_REGION,
       region,
@@ -158,7 +174,7 @@ const getReferentReg = async (region) => {
   }
 
   if (!toReferent.length) {
-    let toReferent = await ReferentModel.find({
+    toReferent = await ReferentModel.find({
       role: ROLES.REFERENT_REGION,
       region,
     });
