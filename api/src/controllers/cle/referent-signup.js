@@ -181,10 +181,10 @@ router.post("/confirm-signup", async (req, res) => {
     }
 
     let template;
-    if (referent.role === ROLES.ADMINISTRATEUR_CLE && referent.subRole === SUB_ROLES.coordinateur_cle) template = SENDINBLUE_TEMPLATES.CLE_CONFIRM_SIGNUP_COORDINATEUR;
+    if (referent.role === ROLES.ADMINISTRATEUR_CLE && referent.subRole === SUB_ROLES.coordinateur_cle) template = SENDINBLUE_TEMPLATES.referent.CLE_CONFIRM_SIGNUP_COORDINATEUR;
     if (referent.role === ROLES.ADMINISTRATEUR_CLE && referent.subRole === SUB_ROLES.referent_etablissement)
-      template = SENDINBLUE_TEMPLATES.CLE_CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT;
-    if (referent.role === ROLES.REFERENT_CLASSE) template = SENDINBLUE_TEMPLATES.CLE_CONFIRM_SIGNUP_REFERENT_CLASSE;
+      template = SENDINBLUE_TEMPLATES.referent.CLE_CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT;
+    if (referent.role === ROLES.REFERENT_CLASSE) template = SENDINBLUE_TEMPLATES.referent.CLE_CONFIRM_SIGNUP_REFERENT_CLASSE;
 
     if (template && etablissement) {
       await sendTemplate(template, {
