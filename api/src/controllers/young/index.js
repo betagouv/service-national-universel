@@ -76,14 +76,7 @@ router.post("/email", passport.authenticate("young", { session: false, failWithE
 router.post("/email-validation/new-email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmailUpdate(req, res));
 router.post("/email-validation", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmail(req, res));
 router.get("/email-validation/token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.requestNewEmailValidationToken(req, res));
-router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    await YoungAuth.logout(req, res);
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
