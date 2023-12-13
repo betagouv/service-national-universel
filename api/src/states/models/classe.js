@@ -1,13 +1,13 @@
 const Joi = require("joi");
 const { STATUS_CLASSE, YOUNG_STATUS, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, SENDINBLUE_TEMPLATES } = require('snu-lib')
 const ClasseModel = require("../../models/cle/classe");
-const YoungModel = require("../../models/young");
 const emailsEmitter = require("../../emails");
 
 const ClasseStateManager = {};
 
 ClasseStateManager.compute = async (_id, fromUser, options) => {
-  youngModel = options?.youngModel || YoungModel; // Prevent circular dependency in YoungModel post save hook
+  const YoungModel = options?.YoungModel; // Prevent circular dependency in YoungModel post save hook
+  if (!YoungModel) throw new Error('YoungModel is required');
 
   let classe = await ClasseModel.findById(_id);
   if (!classe) throw new Error('Classe not found');
@@ -33,7 +33,7 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   }
 
   // Get students
-  const students = await youngModel.find({ classeId: classe._id }).lean();
+  const students = await YoungModel.find({ classeId: classe._id }).lean();
   const studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION);
   const studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION);
   const studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
@@ -73,7 +73,10 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   return classe;
 };
 
-ClasseStateManager.withdraw = async (_id, fromUser) => {
+ClasseStateManager.withdraw = async (_id, fromUser, options) => {
+  const YoungModel = options?.YoungModel; // Prevent circular dependency in YoungModel post save hook
+  if (!YoungModel) throw new Error('YoungModel is required');
+
   let classe = await ClasseModel.findById(_id);
   if (!classe) throw new Error("Classe not found");
   if (classe.status === STATUS_CLASSE.WITHDRAWN) throw new Error("Classe already withdrawn");
