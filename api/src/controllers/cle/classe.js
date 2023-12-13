@@ -22,6 +22,7 @@ const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
+const YoungModel = require("../../models/young");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 const StateManager = require("../../states");
 const emailsEmitter = require("../../emails");
@@ -127,7 +128,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     classe.set({ ...value });
     classe = await classe.save({ fromUser: req.user });
-    classe = await StateManager.Classe.compute(classe._id, req.user);
+    classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
 
@@ -208,7 +209,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await StateManager.Classe.withdraw(id, req.user);
+    await StateManager.Classe.withdraw(id, req.user, { YoungModel });
 
     res.status(200).send({ ok: true });
   } catch (error) {

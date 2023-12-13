@@ -1,1 +1,5 @@
-module.exports = require("./StateManager");
+const StateManager = {};
+
+StateManager.Classe = require('./models/classe');
+
+module.exports = StateManager;
