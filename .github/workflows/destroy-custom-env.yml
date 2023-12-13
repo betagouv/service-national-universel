@@ -1,6 +1,7 @@
 name: Destroy custom environment
 
 on:
+  workflow_dispatch:
   pull_request:
     types:
       - closed
@@ -11,29 +12,47 @@ on:
 jobs:
 
   prepare:
-    if:  contains(github.head_ref, '-ci-') || startsWith(github.head_ref, 'ci-') || endsWith(github.head_ref, '-ci')
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+        (contains(github.head_ref, '-ci-') ||
+        startsWith(github.head_ref, 'ci-') ||
+        endsWith(github.head_ref, '-ci'))
+      )
     runs-on: ubuntu-latest
     outputs:
+      branch_name: ${{ steps.check.outputs.branch_name }}
+      commit_sha: ${{ steps.check.outputs.commit_sha }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
-    - name: Check branch name
-      run: |
-        if [[ ${{ github.head_ref }} == 'main' ]] || [[ ${{ github.head_ref }} == 'production' ]] ; then
-          echo "This action is not available on the branch ${{ github.head_ref }}"
-          exit 1
-        fi
+      - name: Check branch name
+        id: check
+        run: |
+          if [[ ${{ github.event_name }} == 'pull_request' ]] ; then
+            branch_name=${{ github.head_ref }}
+            commit_sha=${{ github.event.pull_request.head.sha }}
+          else
+            branch_name=${{ github.ref_name }}
+            commit_sha=${{ github.sha }}
+          fi
+          if [[ $branch_name == 'main' ]] || [[ $branch_name == 'production' ]] ; then
+            echo "This action is not available on the branch $branch_name"
+            exit 1
+          fi
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
 
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.check.outputs.commit_sha }}
 
-    - name: Get custom-env name
-      id: env_name
-      uses: ./.github/actions/get_custom_env_name
-      with:
-        branch_name: ${{ github.head_ref }}
+      - name: Get custom-env name
+        id: env_name
+        uses: ./.github/actions/get_custom_env_name
+        with:
+          branch_name: ${{ steps.check.outputs.branch_name }}
 
   destroy:
     runs-on: ubuntu-latest
@@ -49,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ needs.prepare.outputs.commit_sha }}
 
       - uses: hashicorp/setup-terraform@v3
 
