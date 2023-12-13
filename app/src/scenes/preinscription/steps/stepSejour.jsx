@@ -44,7 +44,9 @@ export default function StepSejour() {
           </a>
         </div>
         <div className="my-4 text-[#000091] underline underline-offset-4">
-          <Link to="/public-engagements">Consulter d’autres dispositifs d’engagement</Link>
+          <Link to="/public-engagements" target="_blank" rel="noopener noreferrer">
+            Consulter d’autres dispositifs d’engagement
+          </Link>
         </div>
         <SignupButtonContainer onClickPrevious={() => history.push(route)} />
       </DSFRContainer>
