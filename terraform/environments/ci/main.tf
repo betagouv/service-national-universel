@@ -41,7 +41,7 @@ resource "scaleway_secret" "ci" {
 }
 data "scaleway_secret_version" "main" {
   secret_id = scaleway_secret.ci.id
-  revision  = local.env.secret_revision
+  revision  = "latest_enabled"
 }
 
 # Logs
