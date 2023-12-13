@@ -61,7 +61,7 @@ export default function StepConsentements() {
       <InscriptionStepper />
       <DSFRContainer
         title="Apporter mon consentement"
-        supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`}
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-donne-mon-consentement" : "/base-de-connaissance/je-minscris-et-donne-mon-consentement"}`}
         supportEvent="Phase0/aide inscription - consentement">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
         <div className="mt-4 flex flex-col gap-4 pb-2">

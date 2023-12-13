@@ -152,7 +152,7 @@ export default function StepProfil() {
 
       <DSFRContainer
         title="Créez votre compte"
-        supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}`}
         supportEvent="Phase0/aide preinscription - infos persos">
         {isCLE && (
           <>
