@@ -79,12 +79,11 @@ ClasseStateManager.withdraw = async (_id, fromUser) => {
   classe = await classe.save({ fromUser });
 
   // Set all students in "Inscription abandonnée"
-  const students = await YoungModel.find({ classeId: classe._id });
+  const students = await YoungModel.find({
+    classeId: classe._id,
+    status: { $in: [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.VALIDATED] },
+  });
   await Promise.all(students.map(s => {
-    if (![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.VALIDATED].includes(s.status)) {
-      return Promise.resolve();
-    }
-
     s.set({
       status: YOUNG_STATUS.ABANDONED,
       lastStatusAt: Date.now(),
