@@ -31,13 +31,13 @@ The CI applications are supposed to reflect the most recent state of the **main*
 
 A test environment is supposed to reflect the state of a specific development (Most recent state of a pull request).
 
-It is dynamically generated when a pull request is open, and destroyed when the pull request is closed.
+It is dynamically generated when a pull request is opened, and destroyed when the pull request is closed.
 
-Every update to the PR, triggers updates on the test environments.
+Every update to the PR triggers updates on the test environments.
 
-Test environment are created only if the branch name of the PR includes on of these patterns:
+Test environment are created only if the branch name of the PR follows on of these patterns:
 
-- *-ci-*
+- \*-ci-\*
 - ci-*
 - *-ci
 

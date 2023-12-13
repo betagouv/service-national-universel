@@ -29,7 +29,7 @@ In the SNU case, backends are [Postgres databases](https://developer.hashicorp.c
 
 ## Credentials
 
-To use terraform to manage de SNU infrastructure, several access are required.
+To use terraform to manage the SNU infrastructure, several access are required.
 
 ### Backend/Postgres credentials
 
