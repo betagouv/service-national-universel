@@ -6,7 +6,6 @@ const { sendTemplate } = require("../../sendinblue");
 module.exports = (emailsEmitter) => {
   emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_COORDINATEUR, async (referent) => {
     try {
-      console.log("EMMMI");
       const etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
       if (!etablissement) throw new Error("Etablissement not found");
 
@@ -24,7 +23,6 @@ module.exports = (emailsEmitter) => {
 
   emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT, async (referent) => {
     try {
-      console.log("EMMMI");
       const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: referent._id });
       if (!etablissement) throw new Error("Etablissement not found");
 
@@ -42,7 +40,6 @@ module.exports = (emailsEmitter) => {
 
   emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_CLASSE, async (referent) => {
     try {
-      console.log("EMMMI");
       const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
       if (!classe) throw new Error("Classe not found");
       const etablissement = await EtablissementModel.findById(classe.etablissementId);
