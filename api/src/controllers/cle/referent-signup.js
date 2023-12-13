@@ -139,11 +139,11 @@ router.post("/confirm-signup", async (req, res) => {
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
+    let ramsesSchool;
     if (value.schoolId) {
       if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-      const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
+      ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
       const body = {
         schoolId: value.schoolId,
         uai: ramsesSchool.uai,
@@ -164,8 +164,38 @@ router.post("/confirm-signup", async (req, res) => {
       });
     }
 
-    referent.set({ invitationToken: null, acceptCGU: true });
+    referent.set({ invitationToken: null, acceptCGU: true, region: ramsesSchool?.region, department: ramsesSchool?.departmentName });
     await referent.save({ fromUser: referent });
+
+    let etablissement;
+    if (referent.subRole === SUB_ROLES.referent_etablissement) {
+      etablissement = await EtablissementModel.findOne({ referentEtablissementIds: referent._id });
+    }
+    if (referent.subRole === SUB_ROLES.coordinateur_cle) {
+      etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
+    }
+    if (referent.role === ROLES.REFERENT_CLASSE) {
+      const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      etablissement = await EtablissementModel.findById(classe.etablissementId);
+    }
+
+    let template;
+    if (referent.role === ROLES.ADMINISTRATEUR_CLE && referent.subRole === SUB_ROLES.coordinateur_cle) template = SENDINBLUE_TEMPLATES.CLE_CONFIRM_SIGNUP_COORDINATEUR;
+    if (referent.role === ROLES.ADMINISTRATEUR_CLE && referent.subRole === SUB_ROLES.referent_etablissement)
+      template = SENDINBLUE_TEMPLATES.CLE_CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT;
+    if (referent.role === ROLES.REFERENT_CLASSE) template = SENDINBLUE_TEMPLATES.CLE_CONFIRM_SIGNUP_REFERENT_CLASSE;
+
+    if (template && etablissement) {
+      await sendTemplate(template, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: {
+          toName: `${referent.firstName} ${referent.lastName}`,
+          schoolName: etablissement.name,
+        },
+      });
+    }
+
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
