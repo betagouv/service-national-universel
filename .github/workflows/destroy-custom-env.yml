@@ -56,7 +56,7 @@ jobs:
 
       - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf.template > main.tf
+        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" template.main.tf > main.tf
 
       - name: Create var files
         working-directory: ${{ env.custom_directory }}

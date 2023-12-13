@@ -82,7 +82,7 @@ jobs:
 
       - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf.template > main.tf
+        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" template.main.tf > main.tf
 
       - name: Create var files
         working-directory: ${{ env.custom_directory }}
@@ -146,7 +146,7 @@ jobs:
       - name: Import secret
         if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" imports.tf.template > imports.tf
+        run: sed "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" template.imports.tf > imports.tf
 
       - name: Validate terraform
         working-directory: ${{ env.custom_directory }}
