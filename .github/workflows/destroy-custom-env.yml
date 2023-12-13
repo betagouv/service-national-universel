@@ -56,11 +56,7 @@ jobs:
 
       - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" template.main.tf > main.tf
-
-      - name: Create var files
-        working-directory: ${{ env.custom_directory }}
-        run: cp ${{ env.var_file }}.template ${{ env.var_file }}
+        run: sed -i.bak "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf
 
       - name: Init terraform
         working-directory: ${{ env.custom_directory }}
@@ -72,4 +68,4 @@ jobs:
 
       - name: Terraform destroy
         working-directory: ${{ env.custom_directory }}
-        run: terraform apply -no-color -input=false -auto-approve -destroy -var-file="${{ env.var_file }}"
+        run: terraform apply -no-color -input=false -auto-approve -destroy

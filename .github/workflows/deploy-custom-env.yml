@@ -70,7 +70,6 @@ jobs:
       PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
       custom_directory: ./terraform/environments/ci/custom
-      var_file: "vars/main.tfvars.json"
       scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1"
 
     steps:
@@ -82,11 +81,7 @@ jobs:
 
       - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" template.main.tf > main.tf
-
-      - name: Create var files
-        working-directory: ${{ env.custom_directory }}
-        run: jq ".environments.custom.image_tag=\"${{ needs.prepare.outputs.image_tag }}\"" ${{ env.var_file }}.template > ${{ env.var_file }}
+        run: sed -i.bak "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf
 
       - name: Init terraform
         working-directory: ${{ env.custom_directory }}
@@ -146,7 +141,7 @@ jobs:
       - name: Import secret
         if: ${{ steps.check_secret.outputs.has_secret == '0' }}
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" template.imports.tf > imports.tf
+        run: sed -i.bak "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" imports.tf
 
       - name: Validate terraform
         working-directory: ${{ env.custom_directory }}
@@ -154,11 +149,11 @@ jobs:
 
       - name: Terraform plan
         working-directory: ${{ env.custom_directory }}
-        run: terraform plan -no-color -input=false -var-file="${{ env.var_file }}"
+        run: terraform plan -no-color -input=false -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
-        run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"
+        run: terraform apply -no-color -input=false -auto-approve -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Add comment to PR
         if: ${{ steps.check_secret.outputs.has_secret == '0' }}
