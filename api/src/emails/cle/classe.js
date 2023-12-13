@@ -104,7 +104,7 @@ module.exports = (emailsEmitter) => {
 
 //We want to send emails to the right referents department
 //manager_department -> if not assistant_manager_department -> if not secretariat -> if not manager_phase2
-//end case -> all referent_department
+//end case -> all referent_department (never happens)
 const getReferentDep = async (department) => {
   let toReferent = [];
   toReferent = await ReferentModel.find({
@@ -148,7 +148,7 @@ const getReferentDep = async (department) => {
 
 //We want to send emails to the right referents region
 //coordinator -> if not assistant_coordinator -> if not secretariat
-//end case -> all referent_region
+//end case -> all referent_region (never happens)
 const getReferentReg = async (region) => {
   let toReferent = [];
   toReferent = await ReferentModel.find({
