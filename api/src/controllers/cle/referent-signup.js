@@ -140,11 +140,10 @@ router.post("/confirm-signup", async (req, res) => {
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    let ramsesSchool;
     if (value.schoolId) {
       if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-      ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
+      const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
       const body = {
         schoolId: value.schoolId,
         uai: ramsesSchool.uai,
@@ -165,7 +164,7 @@ router.post("/confirm-signup", async (req, res) => {
       });
     }
 
-    referent.set({ invitationToken: null, acceptCGU: true, region: ramsesSchool?.region, department: ramsesSchool?.departmentName });
+    referent.set({ invitationToken: null, acceptCGU: true });
     await referent.save({ fromUser: referent });
 
     if (referent.subRole === SUB_ROLES.coordinateur_cle) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_COORDINATEUR, referent);
