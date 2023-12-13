@@ -36,7 +36,7 @@ import { apiAdress, getAddressOptions } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
-import { YOUNG_SOURCE } from "snu-lib";
+import useAuth from "@/services/useAuth";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -129,7 +129,7 @@ export default function StepCoordonnees() {
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
-  const isCle = YOUNG_SOURCE.CLE === young.source;
+  const { isCLE } = useAuth();
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
 
   const {
@@ -334,7 +334,7 @@ export default function StepCoordonnees() {
       requiredFields.push("specificAmenagmentType");
     }
 
-    if (!isCle) {
+    if (!isCLE) {
       fieldToUpdate.push("situation");
       requiredFields.push("situation");
     }
@@ -414,7 +414,7 @@ export default function StepCoordonnees() {
       requiredFields.push("specificAmenagmentType");
     }
 
-    if (!isCle) {
+    if (!isCLE) {
       fieldToUpdate.push("situation");
       requiredFields.push("situation");
     }
@@ -504,8 +504,8 @@ export default function StepCoordonnees() {
     <>
       <InscriptionStepper onSave={onSave} />
       <DSFRContainer
-        title={isCle ? "Mon profil élève" : "Mon profil volontaire"}
-        supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}
+        title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
         supportEvent="Phase0/aide inscription - coordonnees">
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
@@ -552,7 +552,7 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        {!isCle && (
+        {!isCLE && (
           <Select
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
             options={situationOptions}
