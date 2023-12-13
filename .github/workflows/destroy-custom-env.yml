@@ -45,7 +45,6 @@ jobs:
       PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
       custom_directory: ./terraform/environments/ci/custom
-      var_file: "vars/main.tfvars.json"
 
     steps:
       - uses: actions/checkout@v4
