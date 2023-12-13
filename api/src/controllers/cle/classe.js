@@ -75,7 +75,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!classe) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "Classe not created." });
 
-    if (!value.referent._id) {
+    if (!value.referent?._id) {
       await inviteReferent(referent, { role: ROLES.REFERENT_CLASSE, user: req.user }, value.etablissement);
     } else {
       emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.REFERENT_AFFECTED_TO_CLASSE, classe);
