@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../ElasticSearch");
 const patchHistory = require("mongoose-patch-history").default;
-const { generateAddress, starify } = require("../../../../utils/anonymise");
+const { generateAddress, starify } = require("../../../../Application/Utils/anonymise");
 
 const MODELNAME = "meetingpoint";
 

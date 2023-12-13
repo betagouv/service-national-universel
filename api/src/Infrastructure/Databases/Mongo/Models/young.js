@@ -5,9 +5,9 @@ const patchHistory = require("mongoose-patch-history").default;
 const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames } = require("snu-lib");
 const esClient = require("../../ElasticSearch");
 const sendinblue = require("../../../Services/sendinblue");
-const { ENVIRONMENT } = require("../../../config");
+const { ENVIRONMENT } = require("../../../Config/config");
 const MODELNAME = "young";
-const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../../../../utils/anonymise");
+const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../../../../Application/Utils/anonymise");
 
 const File = new mongoose.Schema({
   name: String,

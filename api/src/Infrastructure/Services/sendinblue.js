@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 const queryString = require("querystring");
 
-const { SENDINBLUEKEY, ENVIRONMENT } = require("../config");
+const { SENDINBLUEKEY, ENVIRONMENT } = require("../Config/config");
 const { capture, captureMessage } = require("./sentry");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 const { rateLimiterContactSIB } = require("./rateLimiters");

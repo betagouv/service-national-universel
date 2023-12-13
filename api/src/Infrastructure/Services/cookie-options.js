@@ -1,4 +1,4 @@
-const config = require("../config");
+const config = require("../Config/config");
 
 //!COOKIE need to be in milliseconds
 const COOKIE_SIGNIN_MAX_AGE = 60 * 60 * 2 * 1000; // 2h

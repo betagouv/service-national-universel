@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../../ElasticSearch");
 const MODELNAME = "contract";
-const { generateBirthdate, generateNewPhoneNumber, starify } = require("../../../../utils/anonymise");
+const { generateBirthdate, generateNewPhoneNumber, starify } = require("../../../../Application/Utils/anonymise");
 
 const Schema = new mongoose.Schema({
   youngId: { type: String },

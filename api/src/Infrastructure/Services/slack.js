@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const { SLACK_BOT_TOKEN, SLACK_BOT_CHANNEL, ENVIRONMENT } = require("../config");
+const { SLACK_BOT_TOKEN, SLACK_BOT_CHANNEL, ENVIRONMENT } = require("../Config/config");
 const { capture } = require("./sentry");
 
 const STATUS_PREFIX = {

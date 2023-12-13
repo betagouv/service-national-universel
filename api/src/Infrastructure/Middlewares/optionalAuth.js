@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const config = require("../config");
+const config = require("../Config/config");
 const ReferentObject = require("../Databases/Mongo/Models/referent");
 const YoungObject = require("../Databases/Mongo/Models/young");
 const { getToken } = require("../Services/passport");

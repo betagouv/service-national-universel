@@ -1,7 +1,7 @@
 const passport = require("passport");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
-const { secret, APP_URL, ADMIN_URL, KNOWLEDGEBASE_URL } = require("../config");
+const { secret, APP_URL, ADMIN_URL, KNOWLEDGEBASE_URL } = require("../Config/config");
 const { capture } = require("./sentry");
 const Joi = require("joi");
 

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../ElasticSearch");
-const { generateAddress, generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../../../../utils/anonymise");
+const { generateAddress, generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../../../../Application/Utils/anonymise");
 
 const MODELNAME = "departmentservice";
 

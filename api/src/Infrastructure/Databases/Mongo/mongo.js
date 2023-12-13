@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { MONGO_URL, ENVIRONMENT } = require("../../config.js");
+const { MONGO_URL, ENVIRONMENT } = require("../../Config/config.js");
 
 //Set up default mongoose connection
 

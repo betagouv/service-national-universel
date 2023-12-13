@@ -4,8 +4,8 @@ const patchHistory = require("mongoose-patch-history").default;
 const { getCohortNames } = require("snu-lib");
 const esClient = require("../../ElasticSearch");
 const MODELNAME = "sessionphase1";
-const { ENVIRONMENT } = require("../../../config");
-const { starify } = require("../../../../utils/anonymise");
+const { ENVIRONMENT } = require("../../../Config/config");
+const { starify } = require("../../../../Application/Utils/anonymise");
 
 const File = new mongoose.Schema({
   _id: String,

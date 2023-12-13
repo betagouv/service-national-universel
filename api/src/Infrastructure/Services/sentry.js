@@ -10,7 +10,7 @@ const {
 } = require("@sentry/node");
 const { ProfilingIntegration } = require("@sentry/profiling-node");
 
-const { ENVIRONMENT, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("../config");
+const { ENVIRONMENT, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("../Config/config");
 
 const regex = /[0-9a-fA-F]{24}/g;
 

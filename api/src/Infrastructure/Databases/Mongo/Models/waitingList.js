@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../ElasticSearch");
-const { generateRandomEmail, generateBirthdate } = require("../../../../utils/anonymise");
+const { generateRandomEmail, generateBirthdate } = require("../../../../Application/Utils/anonymise");
 
 const MODELNAME = "waitinglist";
 

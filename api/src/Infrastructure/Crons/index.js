@@ -1,29 +1,29 @@
 const cron = require("node-cron");
-const { ENVIRONMENT } = require("../config");
+const { ENVIRONMENT } = require("../Config/config");
 
-const apiEngagement = require("./syncApiEngagement");
-const missionOutdated = require("./missionOutdated");
-const computeGoalsInscription = require("./computeGoalsInscription");
-const noticePushMission = require("./noticePushMission");
-const contratRelance = require("./contratRelance");
-const applicationPending = require("./applicationPending");
-const jeVeuxAiderDaily = require("./JeVeuxAiderDaily");
-const loginAttempts = require("./loginAttempts");
-const syncReferentSupport = require("./syncReferentSupport");
-const syncContactSupport = require("./syncContactSupport");
-const applicationOutaded = require("./applicationWaitingAcceptationOutdated");
-const deleteInactiveRefs = require("./deleteInactiveRefs");
-const applicationPatches = require("./patch/application");
-const missionEquivalencePatches = require("./patch/missionEquivalence");
-const missionPatches = require("./patch/mission");
-const structurePatches = require("./patch/structure");
-const youngPatches = require("./patch/young");
-const refreshMaterializedViews = require("./patch/refresh-materialized-views");
-const parentConsentementReminder = require("./parentConsentementReminder");
-const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
-const dsnjExport = require("./dsnjExport");
-const clotureMissionReminder = require("./clotureInscriptionReminder");
-const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
+const apiEngagement = require("../../Application/Crons/syncApiEngagement");
+const missionOutdated = require("../../Application/Crons/missionOutdated");
+const computeGoalsInscription = require("../../Application/Crons/computeGoalsInscription");
+const noticePushMission = require("../../Application/Crons/noticePushMission");
+const contratRelance = require("../../Application/Crons/contratRelance");
+const applicationPending = require("../../Application/Crons/applicationPending");
+const jeVeuxAiderDaily = require("../../Application/Crons/JeVeuxAiderDaily");
+const loginAttempts = require("../../Application/Crons/loginAttempts");
+const syncReferentSupport = require("../../Application/Crons/syncReferentSupport");
+const syncContactSupport = require("../../Application/Crons/syncContactSupport");
+const applicationOutaded = require("../../Application/Crons/applicationWaitingAcceptationOutdated");
+const deleteInactiveRefs = require("../../Application/Crons/deleteInactiveRefs");
+const applicationPatches = require("../../Application/Crons/Patchs/application");
+const missionEquivalencePatches = require("../../Application/Crons/Patchs/missionEquivalence");
+const missionPatches = require("../../Application/Crons/Patchs/mission");
+const structurePatches = require("../../Application/Crons/Patchs/structure");
+const youngPatches = require("../../Application/Crons/Patchs/young");
+const refreshMaterializedViews = require("../../Application/Crons/Patchs/refresh-materialized-views");
+const parentConsentementReminder = require("../../Application/Crons/parentConsentementReminder");
+const reminderImageRightsParent2 = require("../../Application/Crons/reminderImageRightsParent2");
+const dsnjExport = require("../../Application/Crons/DSNJExport");
+const clotureMissionReminder = require("../../Application/Crons/clotureInscriptionReminder");
+const deleteCNIAdnSpecificAmenagementType = require("../../Application/Crons/deleteCNIAndSpecificAmenagementType");
 
 // doubt ? -> https://crontab.guru/
 

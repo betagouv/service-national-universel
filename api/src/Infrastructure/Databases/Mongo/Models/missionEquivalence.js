@@ -4,7 +4,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../../ElasticSearch");
 const MODELNAME = "missionequivalence";
 const { UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
-const { generateRandomName, generateRandomEmail, generateAddress, starify } = require("../../../../utils/anonymise");
+const { generateRandomName, generateRandomEmail, generateAddress, starify } = require("../../../../Application/Utils/anonymise");
 
 const Schema = new mongoose.Schema({
   youngId: {

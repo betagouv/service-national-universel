@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { generateAddress, generateRandomName, starify, generateRandomEmail, generateNewPhoneNumber } = require("../../../../utils/anonymise");
+const { generateAddress, generateRandomName, starify, generateRandomEmail, generateNewPhoneNumber } = require("../../../../Application/Utils/anonymise");
 
 const esClient = require("../../ElasticSearch");
 

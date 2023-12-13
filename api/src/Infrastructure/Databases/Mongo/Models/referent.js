@@ -4,7 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../../ElasticSearch");
 const sendinblue = require("../../../Services/sendinblue");
-const { generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../../../../utils/anonymise");
+const { generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../../../../Application/Utils/anonymise");
 
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
 

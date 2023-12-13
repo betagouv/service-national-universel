@@ -3,7 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../../ElasticSearch");
 const MODELNAME = "mission";
-const { generateAddress, generateRandomName, starify } = require("../../../../utils/anonymise");
+const { generateAddress, generateRandomName, starify } = require("../../../../Application/Utils/anonymise");
 
 const Schema = new mongoose.Schema({
   sqlId: {

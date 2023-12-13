@@ -1,6 +1,6 @@
 const { Client } = require("@elastic/elasticsearch");
 
-const { ES_ENDPOINT, LOCAL } = require("../../config");
+const { ES_ENDPOINT, LOCAL } = require("../../Config/config");
 
 let esClient;
 const ES_ADDRESS = LOCAL ? ES_ENDPOINT : `https://${ES_ENDPOINT}`;

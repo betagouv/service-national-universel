@@ -4,7 +4,7 @@ const esClient = require("../../../ElasticSearch");
 const patchHistory = require("mongoose-patch-history").default;
 const { getCohortNames } = require("snu-lib");
 const MODELNAME = "modificationbus";
-const { starify } = require("../../../../../utils/anonymise");
+const { starify } = require("../../../../../Application/Utils/anonymise");
 
 const Schema = new mongoose.Schema({
   cohort: {

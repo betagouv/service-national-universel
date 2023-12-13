@@ -4,7 +4,7 @@ const esClient = require("../../../ElasticSearch");
 const patchHistory = require("mongoose-patch-history").default;
 const { getCohortNames } = require("snu-lib");
 const MODELNAME = "lignebus";
-const { generateRandomName, generateBirthdate, generateRandomEmail, generateNewPhoneNumber } = require("../../../../../utils/anonymise");
+const { generateRandomName, generateBirthdate, generateRandomEmail, generateNewPhoneNumber } = require("../../../../../Application/Utils/anonymise");
 
 const BusTeam = new mongoose.Schema({
   role: {

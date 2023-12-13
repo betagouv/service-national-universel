@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 
-const { FILE_ENCRYPTION_SECRET } = require("../config");
+const { FILE_ENCRYPTION_SECRET } = require("../Config/config");
 
 const ALGO = "aes-256-ctr";
 
