@@ -88,7 +88,7 @@ function Menu({ open, menuRef, young, onClose, ticketsInfo }) {
   return (
     <nav
       className={`absolute left-4 bottom-20 z-10 flex w-64 flex-col justify-around overflow-hidden rounded-lg bg-white shadow transition-all duration-200 ease-in-out ${
-        open ? (permissionPhase2(young) ? "h-auto" : "h-20") : "h-0"
+        open ? permissionPhase2(young) && "h-auto" : "h-0"
       }`}
       ref={menuRef}>
       <Link to="/account" onClick={onClose} className="flex items-center gap-3 p-2 px-3 text-sm leading-5 text-gray-900 hover:bg-gray-100 hover:text-gray-900">
