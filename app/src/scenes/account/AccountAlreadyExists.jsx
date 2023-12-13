@@ -20,15 +20,15 @@ const AccountAlreadyExists = () => {
   const [title, callBack, text, additionalText] =
     parcours !== "CLE"
       ? [
-          "Attention ! Vous avez déjà un compte Volontaire.",
-          () => window.location.replace(`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`),
-          "Si vous souhaitez participer au SNU dans le cadre des classes engagées, contactez le support pour mettre à jour votre compte et vous faire gagner du temps.",
-        ]
-      : [
           "Attention ! Vous avez déjà un compte élève dans le cadre des classes engagées.",
-          () => history.push(`/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE&classeId=${classeId}`),
+          () => window.location.replace(`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`),
           "Si un séjour de cohésion est prévu dans le cadre de votre classe engagée, vous ne pourrez pas vous inscrire également à un séjour de cohésion à titre individuel.",
           "Vous ne pouvez plus participer au séjour de cohésion avec votre classe ? Veuillez contacter directement votre référent classe.",
+        ]
+      : [
+          "Attention ! Vous avez déjà un compte Volontaire.",
+          () => history.push(`/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE&classeId=${classeId}`),
+          "Si vous souhaitez participer au SNU dans le cadre des classes engagées, contactez le support pour mettre à jour votre compte et vous faire gagner du temps.",
         ];
   return (
     <DSFRLayout title="Inscription de l'élève">
