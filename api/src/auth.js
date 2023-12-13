@@ -285,9 +285,10 @@ class Auth {
         });
       }
 
-      const token = jwt.sign({ _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, { expiresIn: COOKIE_SIGNIN_MAX_AGE });
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, {
+        expiresIn: JWT_SIGNIN_MAX_AGE,
+      });
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
-
       return res.status(200).send({
         ok: true,
         token,
