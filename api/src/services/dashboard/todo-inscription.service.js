@@ -1,6 +1,6 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
-const esClient = require("../../es");
+const esClient = require("../../Infrastructure/Databases/ElasticSearch");
 const { queryFromFilter, withAggs, buildFilterContext } = require("./todo.helper");
 const service = {};
 

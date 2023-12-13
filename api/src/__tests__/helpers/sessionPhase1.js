@@ -1,4 +1,4 @@
-const SessionPhase1Object = require("../../models/sessionPhase1");
+const SessionPhase1Object = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
 
 async function createSessionPhase1(sessionPhase1) {
   return await SessionPhase1Object.create(sessionPhase1);

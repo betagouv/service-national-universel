@@ -3,8 +3,8 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
-const YoungObject = require("../../models/young");
-const { capture } = require("../../sentry");
+const YoungObject = require("../../Infrastructure/Databases/Mongo/Models/young");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS, STEPS2023 } = require("../../utils");
 const { canUpdateYoungStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1, getCohortNames, hasAccessToReinscription } = require("snu-lib");

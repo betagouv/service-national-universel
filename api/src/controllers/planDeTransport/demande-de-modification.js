@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
-const ReferentModel = require("../../models/referent");
-const CohortModel = require("../../models/cohort");
+const LigneBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const PlanTransportModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/planTransport");
+const ModificationBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/modificationBus");
+const ReferentModel = require("../../Infrastructure/Databases/Mongo/Models/referent");
+const CohortModel = require("../../Infrastructure/Databases/Mongo/Models/cohort");
 const { ERRORS } = require("../../utils");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const Joi = require("joi");
 const {
   ligneBusCanCreateDemandeDeModification,
@@ -21,8 +21,8 @@ const {
   isLigneBusDemandeDeModificationOpen,
 } = require("snu-lib");
 const { ObjectId } = require("mongoose").Types;
-const { sendTemplate } = require("../../sendinblue");
-const config = require("../../config");
+const { sendTemplate } = require("../../Infrastructure/Services/sendinblue");
+const config = require("../../Infrastructure/config");
 
 const updateModificationDependencies = async (modif, fromUser) => {
   const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });

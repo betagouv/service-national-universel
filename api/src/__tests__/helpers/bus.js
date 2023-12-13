@@ -1,4 +1,4 @@
-const BusObject = require("../../models/bus");
+const BusObject = require("../../Infrastructure/Databases/Mongo/Models/bus");
 
 async function getBusesHelper() {
   return await BusObject.find({});

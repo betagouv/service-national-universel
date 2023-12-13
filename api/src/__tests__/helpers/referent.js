@@ -1,4 +1,4 @@
-const ReferentObject = require("../../models/referent");
+const ReferentObject = require("../../Infrastructure/Databases/Mongo/Models/referent");
 
 async function getReferentsHelper() {
   return await ReferentObject.find({});

@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 
-const StructureObject = require("../models/structure");
-const MissionObject = require("../models/mission");
-const ReferentObject = require("../models/referent");
-const ApplicationObject = require("../models/application");
+const StructureObject = require("../Infrastructure/Databases/Mongo/Models/structure");
+const MissionObject = require("../Infrastructure/Databases/Mongo/Models/mission");
+const ReferentObject = require("../Infrastructure/Databases/Mongo/Models/referent");
+const ApplicationObject = require("../Infrastructure/Databases/Mongo/Models/application");
 const { ERRORS } = require("../utils");
 const {
   ROLES,
@@ -21,11 +21,11 @@ const {
   SENDINBLUE_TEMPLATES,
 } = require("snu-lib");
 const patches = require("./patches");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
 const { validateId, validateStructure, validateStructureManager } = require("../utils/validator");
 const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
 const { serializeMissions, serializeReferents } = require("../utils/es-serializer");
-const { allRecords } = require("../es/utils");
+const { allRecords } = require("../Infrastructure/Databases/ElasticSearch/utils");
 
 const setAndSave = async (data, keys, fromUser) => {
   data.set({ ...keys });

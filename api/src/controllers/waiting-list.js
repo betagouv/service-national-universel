@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const { capture } = require("../sentry");
-const WaitingListModel = require("../models/waitingList");
+const { capture } = require("../Infrastructure/Services/sentry");
+const WaitingListModel = require("../Infrastructure/Databases/Mongo/Models/waitingList");
 const { ERRORS } = require("../utils");
 const { validateWaitingList } = require("../utils/validator");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 router.post("/", async (req, res) => {

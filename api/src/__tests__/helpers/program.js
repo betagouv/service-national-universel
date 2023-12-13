@@ -1,4 +1,4 @@
-const ProgramObject = require("../../models/program");
+const ProgramObject = require("../../Infrastructure/Databases/Mongo/Models/program");
 
 async function getProgramsHelper() {
   return await ProgramObject.find({});

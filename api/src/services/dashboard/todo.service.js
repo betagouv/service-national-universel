@@ -1,5 +1,5 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
-const CohortModel = require("../../models/cohort");
+const CohortModel = require("../../Infrastructure/Databases/Mongo/Models/cohort");
 
 const services = {
   inscription: require("./todo-inscription.service"),

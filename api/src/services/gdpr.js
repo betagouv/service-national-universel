@@ -1,4 +1,4 @@
-const YoungModel = require("../models/young");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
 const { deleteFilesByList, listFiles } = require("../utils/index");
 
 async function deleteSensitiveData(youngId, mode = "save") {

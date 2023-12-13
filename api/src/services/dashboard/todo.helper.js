@@ -1,6 +1,6 @@
 const { ROLES } = require("snu-lib");
 const helpers = {};
-const sessionPhase1Model = require("../../models/sessionPhase1");
+const sessionPhase1Model = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
 
 helpers.queryFromFilter = (role, region, department, filter, { regionField = "region.keyword", departmentField = "department.keyword" } = {}) => {
   const body = {

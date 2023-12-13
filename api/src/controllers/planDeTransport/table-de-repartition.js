@@ -3,8 +3,8 @@ const router = express.Router();
 const passport = require("passport");
 const { region2department, canViewTableDeRepartition, canEditTableDeRepartitionDepartment, canEditTableDeRepartitionRegion } = require("snu-lib");
 const { ERRORS } = require("../../utils");
-const tableDeRepartition = require("../../models/PlanDeTransport/tableDeRepartition");
-const { capture } = require("../../sentry");
+const tableDeRepartition = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/tableDeRepartition");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const Joi = require("joi");
 
 router.post("/region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {

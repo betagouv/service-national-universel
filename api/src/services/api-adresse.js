@@ -1,4 +1,4 @@
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 
 const apiAdress = async (path, options = {}) => {
   try {

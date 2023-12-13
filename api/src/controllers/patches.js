@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 const { ERRORS } = require("../utils");
 const { canViewPatchesHistory, canDeletePatchesHistory } = require("snu-lib");
 const { validateId } = require("../utils/validator");

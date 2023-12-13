@@ -3,10 +3,10 @@ const express = require("express");
 const fetch = require("node-fetch");
 const router = express.Router();
 const { canSearchAssociation } = require("snu-lib");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { ERRORS } = require("../../utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
-const { API_ENGAGEMENT_URL, API_ENGAGEMENT_KEY } = require("../../config");
+const { API_ENGAGEMENT_URL, API_ENGAGEMENT_KEY } = require("../../Infrastructure/config");
 
 const apiEngagement = async ({ path = "/", body }) => {
   try {

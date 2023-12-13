@@ -1,4 +1,4 @@
-const MeetingPointObject = require("../../models/meetingPoint");
+const MeetingPointObject = require("../../Infrastructure/Databases/Mongo/Models/meetingPoint");
 
 async function createMeetingPointHelper(MeetingPoint) {
   return await MeetingPointObject.create(MeetingPoint);

@@ -15,11 +15,11 @@ const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createYoungHelper } = require("./helpers/young");
 
-const SchemaDeRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
-const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
-const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
-const YoungModel = require("../models/young");
+const SchemaDeRepartitionModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/schemaDeRepartition");
+const PointDeRassemblementModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const LigneToPointModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneToPoint");
+const LigneBusModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 
 const fetch = require("node-fetch");
 const { ERRORS } = require("../utils");

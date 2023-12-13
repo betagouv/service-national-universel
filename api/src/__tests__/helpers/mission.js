@@ -1,4 +1,4 @@
-const MissionObject = require("../../models/mission");
+const MissionObject = require("../../Infrastructure/Databases/Mongo/Models/mission");
 
 async function getMissionsHelper(params = {}) {
   return await MissionObject.find(params);

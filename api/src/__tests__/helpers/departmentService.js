@@ -1,4 +1,4 @@
-const DepartmentServiceObject = require("../../models/departmentService");
+const DepartmentServiceObject = require("../../Infrastructure/Databases/Mongo/Models/departmentService");
 
 async function getDepartmentServicesHelper() {
   return await DepartmentServiceObject.find({});

@@ -3,21 +3,21 @@ const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
 const sanitizeHtml = require("sanitize-html");
-const YoungModel = require("../models/young");
-const PlanTransportModel = require("../models/PlanDeTransport/planTransport");
-const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
-const MeetingPointModel = require("../models/meetingPoint");
-const ApplicationModel = require("../models/application");
-const ReferentModel = require("../models/referent");
-const ContractObject = require("../models/contract");
-const SessionPhase1 = require("../models/sessionPhase1");
-const CohortModel = require("../models/cohort");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
+const PlanTransportModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/planTransport");
+const LigneBusModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const MeetingPointModel = require("../Infrastructure/Databases/Mongo/Models/meetingPoint");
+const ApplicationModel = require("../Infrastructure/Databases/Mongo/Models/application");
+const ReferentModel = require("../Infrastructure/Databases/Mongo/Models/referent");
+const ContractObject = require("../Infrastructure/Databases/Mongo/Models/contract");
+const SessionPhase1 = require("../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const CohortModel = require("../Infrastructure/Databases/Mongo/Models/cohort");
 const { getDepartureDate } = require("snu-lib");
-const { sendEmail, sendTemplate } = require("../sendinblue");
+const { sendEmail, sendTemplate } = require("../Infrastructure/Services/sendinblue");
 const path = require("path");
 const fs = require("fs");
 const { addDays } = require("date-fns");
-const { APP_URL, ADMIN_URL } = require("../config");
+const { APP_URL, ADMIN_URL } = require("../Infrastructure/config");
 const {
   CELLAR_ENDPOINT,
   CELLAR_KEYID,
@@ -33,9 +33,9 @@ const {
   CELLAR_KEYSECRET_SUPPORT,
   PUBLIC_BUCKET_NAME_SUPPORT,
   translateFileStatusPhase1,
-} = require("../config");
+} = require("../Infrastructure/config");
 const { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 const { getCohortDateInfo } = require("./cohort");
 
 // Timeout a promise in ms

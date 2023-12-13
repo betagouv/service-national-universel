@@ -1,12 +1,12 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const esClient = require("../../Infrastructure/Databases/ElasticSearch");
 const { ERRORS } = require("../../utils");
 const { buildNdJson, joiElasticSearch, buildRequestBody } = require("./utils");
 const { ES_NO_LIMIT, canSearchLigneBus, canSearchInElasticSearch } = require("snu-lib");
-const { allRecords } = require("../../es/utils");
+const { allRecords } = require("../../Infrastructure/Databases/ElasticSearch/utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
 const { default: isBoolean } = require("validator/lib/isBoolean");
 const { Response } = require("aws-sdk");

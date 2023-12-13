@@ -1,13 +1,13 @@
 const express = require("express");
 const passport = require("passport");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
 const { ROLES, YOUNG_STATUS, MISSION_STATUS } = require("snu-lib");
 const router = express.Router();
-const YoungModel = require("../../models/young");
-const MissionModel = require("../../models/mission");
-const MissionEquivalenceModel = require("../../models/missionEquivalence");
+const YoungModel = require("../../Infrastructure/Databases/Mongo/Models/young");
+const MissionModel = require("../../Infrastructure/Databases/Mongo/Models/mission");
+const MissionEquivalenceModel = require("../../Infrastructure/Databases/Mongo/Models/missionEquivalence");
 
 const filtersJoi = Joi.object({
   status: Joi.array().items(Joi.string().valid(...Object.values(YOUNG_STATUS))),

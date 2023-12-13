@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 const { ERRORS } = require("../utils");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 const { validateId } = require("../utils/validator");
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
+const CohortModel = require("../Infrastructure/Databases/Mongo/Models/cohort");
 const passport = require("passport");
 const { ROLES } = require("snu-lib");
-const { ADMIN_URL } = require("../config");
+const { ADMIN_URL } = require("../Infrastructure/config");
 
 // Takes either a young ID in route parameter or young data in request body (for edition or signup pages).
 // Minimum data required: birthdateAt, zip || department and (if schooled) grade.

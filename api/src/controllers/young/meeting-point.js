@@ -4,10 +4,10 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const { canEditYoung } = require("snu-lib");
 
-const { capture } = require("../../sentry");
-const YoungModel = require("../../models/young");
-const MeetingPointModel = require("../../models/meetingPoint");
-const BusModel = require("../../models/bus");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const YoungModel = require("../../Infrastructure/Databases/Mongo/Models/young");
+const MeetingPointModel = require("../../Infrastructure/Databases/Mongo/Models/meetingPoint");
+const BusModel = require("../../Infrastructure/Databases/Mongo/Models/bus");
 const { ERRORS, updatePlacesBus, isYoung, isReferent } = require("../../utils");
 const { serializeMeetingPoint, serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");

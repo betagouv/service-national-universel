@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { ERRORS } = require("../utils");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 const Joi = require("joi");
 const passport = require("passport");
 
-const TagsModel = require("../models/tags");
+const TagsModel = require("../Infrastructure/Databases/Mongo/Models/tags");
 
 const { canCreateTags } = require("snu-lib");
 

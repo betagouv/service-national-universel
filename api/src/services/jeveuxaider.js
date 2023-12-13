@@ -3,17 +3,17 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 const Joi = require("joi");
 
-const { capture } = require("../sentry");
-const ReferentModel = require("../models/referent");
-const MissionModel = require("../models/mission");
-const ApplicationModel = require("../models/application");
-const StructureModel = require("../models/structure");
-const YoungModel = require("../models/young");
-const ContractModel = require("../models/contract");
-const config = require("../config");
+const { capture } = require("../Infrastructure/Services/sentry");
+const ReferentModel = require("../Infrastructure/Databases/Mongo/Models/referent");
+const MissionModel = require("../Infrastructure/Databases/Mongo/Models/mission");
+const ApplicationModel = require("../Infrastructure/Databases/Mongo/Models/application");
+const StructureModel = require("../Infrastructure/Databases/Mongo/Models/structure");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
+const ContractModel = require("../Infrastructure/Databases/Mongo/Models/contract");
+const config = require("../Infrastructure/config");
 const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib");
-const { JWT_SIGNIN_MAX_AGE, checkJwtSigninVersion, JWT_SIGNIN_VERSION } = require("../jwt-options");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../cookie-options");
+const { JWT_SIGNIN_MAX_AGE, checkJwtSigninVersion, JWT_SIGNIN_VERSION } = require("../Infrastructure/Services/jwt-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../Infrastructure/Services/cookie-options");
 const { ERRORS, checkStatusContract } = require("../utils");
 
 // ! Appelé par le front de JVA

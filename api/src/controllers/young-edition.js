@@ -18,9 +18,9 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const YoungModel = require("../models/young");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
 const { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } = require("../utils");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 const { validateFirstName } = require("../utils/validator");
 const { serializeYoung } = require("../utils/serializer");
 const passport = require("passport");
@@ -35,13 +35,13 @@ const {
   YOUNG_STATUS,
   canEditYoung,
 } = require("snu-lib");
-const { getDensity, getQPV } = require("../geo");
-const { sendTemplate } = require("../sendinblue");
+const { getDensity, getQPV } = require("../Infrastructure/Services/geo");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
 const { format } = require("date-fns");
-const config = require("../config");
-const YoungObject = require("../models/young");
-const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
-const SessionPhase1Model = require("../models/sessionPhase1");
+const config = require("../Infrastructure/config");
+const YoungObject = require("../Infrastructure/Databases/Mongo/Models/young");
+const LigneDeBusModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const SessionPhase1Model = require("../Infrastructure/Databases/Mongo/Models/sessionPhase1");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [

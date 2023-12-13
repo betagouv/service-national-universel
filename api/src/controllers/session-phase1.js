@@ -3,16 +3,16 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
-const { capture } = require("../sentry");
-const SessionPhase1Model = require("../models/sessionPhase1");
-const CohesionCenterModel = require("../models/cohesionCenter");
-const CohortModel = require("../models/cohort");
-const YoungModel = require("../models/young");
-const ReferentModel = require("../models/referent");
-const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
-const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
-const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
+const { capture } = require("../Infrastructure/Services/sentry");
+const SessionPhase1Model = require("../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const CohesionCenterModel = require("../Infrastructure/Databases/Mongo/Models/cohesionCenter");
+const CohortModel = require("../Infrastructure/Databases/Mongo/Models/cohort");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
+const ReferentModel = require("../Infrastructure/Databases/Mongo/Models/referent");
+const PointDeRassemblementModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const sessionPhase1TokenModel = require("../Infrastructure/Databases/Mongo/Models/sessionPhase1Token");
+const schemaRepartitionModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/schemaDeRepartition");
 const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter, timeout } = require("../utils");
 const Zip = require("adm-zip");
 const {
@@ -34,22 +34,22 @@ const {
 } = require("snu-lib");
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
-const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL } = require("../config");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
+const { ADMIN_URL } = require("../Infrastructure/config");
 
 const datefns = require("date-fns");
 const { fr } = require("date-fns/locale");
 const fileUpload = require("express-fileupload");
-const SessionPhase1 = require("../models/sessionPhase1");
+const SessionPhase1 = require("../Infrastructure/Databases/Mongo/Models/sessionPhase1");
 const FileType = require("file-type");
 const fs = require("fs");
-const config = require("../config");
+const config = require("../Infrastructure/config");
 const NodeClam = require("clamscan");
 const mongoose = require("mongoose");
-const { encrypt, decrypt } = require("../cryptoUtils");
-const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
+const { encrypt, decrypt } = require("../Infrastructure/Services/cryptoUtils");
+const { readTemplate, renderWithTemplate } = require("../Metier/Common/Templates/droitImage");
 const fetch = require("node-fetch");
-const { phase1 } = require("../../src/templates/certificate/index");
+const { phase1 } = require("../Metier/Common/Templates/certificate/index");
 
 const TIMEOUT_PDF_SERVICE = 15000;
 

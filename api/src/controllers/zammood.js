@@ -9,19 +9,19 @@ const { v4: uuid } = require("uuid");
 
 const { ROLES, SENDINBLUE_TEMPLATES } = require("snu-lib");
 
-const slack = require("../slack");
-const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE } = require("../cookie-options");
-const { capture } = require("../sentry");
-const zammood = require("../zammood");
+const slack = require("../Infrastructure/Services/slack");
+const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE } = require("../Infrastructure/Services/cookie-options");
+const { capture } = require("../Infrastructure/Services/sentry");
+const zammood = require("../Infrastructure/Services/zammood");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
-const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
-const { sendTemplate } = require("../sendinblue");
-const ReferentObject = require("../models/referent");
-const YoungObject = require("../models/young");
+const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../Infrastructure/config.js");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
+const ReferentObject = require("../Infrastructure/Databases/Mongo/Models/referent");
+const YoungObject = require("../Infrastructure/Databases/Mongo/Models/young");
 const { validateId } = require("../utils/validator");
-const { encrypt, decrypt } = require("../cryptoUtils");
+const { encrypt, decrypt } = require("../Infrastructure/Services/cryptoUtils");
 const { getUserAttributes } = require("../services/support");
-const optionalAuth = require("../middlewares/optionalAuth");
+const optionalAuth = require("../Infrastructure/Middlewares/optionalAuth");
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-const YoungObject = require("../../models/young");
+const YoungObject = require("../../Infrastructure/Databases/Mongo/Models/young");
 
 async function getYoungsHelper() {
   return await YoungObject.find({});

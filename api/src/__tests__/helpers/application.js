@@ -1,4 +1,4 @@
-const ApplicationObject = require("../../models/application");
+const ApplicationObject = require("../../Infrastructure/Databases/Mongo/Models/application");
 
 async function createApplication(application) {
   return await ApplicationObject.create(application);

@@ -12,18 +12,18 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
+const CohortModel = require("../Infrastructure/Databases/Mongo/Models/cohort");
 const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } = require("snu-lib");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 const { serializeYoung } = require("../utils/serializer");
 
 const { ERRORS } = require("../utils");
 
 const { validateFirstName, validateString } = require("../utils/validator");
-const { sendTemplate } = require("../sendinblue");
-const { APP_URL } = require("../config");
-const config = require("../config");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
+const { APP_URL } = require("../Infrastructure/config");
+const config = require("../Infrastructure/config");
 
 function tokenParentValidMiddleware(req, res, next) {
   const { error, value: token } = validateString(req.query.token);

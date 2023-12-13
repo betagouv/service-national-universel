@@ -2,12 +2,12 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch, department2region, departmentList, getCohortNames, ES_NO_LIMIT } = require("snu-lib");
-const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const esClient = require("../../Infrastructure/Databases/ElasticSearch");
 const { ERRORS } = require("../../utils");
-const { allRecords } = require("../../es/utils");
+const { allRecords } = require("../../Infrastructure/Databases/ElasticSearch/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
-const StructureObject = require("../../models/structure");
+const StructureObject = require("../../Infrastructure/Databases/Mongo/Models/structure");
 const Joi = require("joi");
 const { serializeReferents } = require("../../utils/es-serializer");
 

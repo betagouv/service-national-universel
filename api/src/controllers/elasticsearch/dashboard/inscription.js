@@ -1,12 +1,12 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { capture } = require("../../../sentry");
-const esClient = require("../../../es");
+const { capture } = require("../../../Infrastructure/Services/sentry");
+const esClient = require("../../../Infrastructure/Databases/ElasticSearch");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
 const { ES_NO_LIMIT, getCohortNames, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
-const SessionPhase1Model = require("../../../models/sessionPhase1");
+const SessionPhase1Model = require("../../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {

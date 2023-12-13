@@ -3,12 +3,12 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 
-const { capture } = require("../sentry");
-const MissionObject = require("../models/mission");
-const UserObject = require("../models/referent");
-const ApplicationObject = require("../models/application");
-const StructureObject = require("../models/structure");
-const ReferentObject = require("../models/referent");
+const { capture } = require("../Infrastructure/Services/sentry");
+const MissionObject = require("../Infrastructure/Databases/Mongo/Models/mission");
+const UserObject = require("../Infrastructure/Databases/Mongo/Models/referent");
+const ApplicationObject = require("../Infrastructure/Databases/Mongo/Models/application");
+const StructureObject = require("../Infrastructure/Databases/Mongo/Models/structure");
+const ReferentObject = require("../Infrastructure/Databases/Mongo/Models/referent");
 // eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung } = require("../utils/index.js");
 const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");
@@ -17,8 +17,8 @@ const { validateId, validateMission } = require("../utils/validator");
 const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
-const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL } = require("../config");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
+const { ADMIN_URL } = require("../Infrastructure/config");
 const { putLocation } = require("../services/api-adresse");
 
 //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)

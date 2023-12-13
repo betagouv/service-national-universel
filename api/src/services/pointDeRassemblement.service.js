@@ -1,4 +1,4 @@
-const CohortModel = require("../models/cohort");
+const CohortModel = require("../Infrastructure/Databases/Mongo/Models/cohort");
 
 async function isPDRChoiceOpenForYoung(young) {
   const date = new Date();

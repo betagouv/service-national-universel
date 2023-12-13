@@ -1,10 +1,10 @@
 const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
-const sessionPhase1Model = require("../../models/sessionPhase1");
-const YoungModel = require("../../models/young");
+const sessionPhase1Model = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const YoungModel = require("../../Infrastructure/Databases/Mongo/Models/young");
 const { serializeSessionPhase1 } = require("../../utils/serializer");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");
 

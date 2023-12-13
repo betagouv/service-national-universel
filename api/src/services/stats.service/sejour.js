@@ -1,5 +1,5 @@
 const { ES_NO_LIMIT, ROLES } = require("snu-lib");
-const esClient = require("../../es");
+const esClient = require("../../Infrastructure/Databases/ElasticSearch");
 
 async function getYoungNotesPhase1(startDate, endDate, user) {
   // ref dep only

@@ -1,4 +1,4 @@
-const InscriptionGoalObject = require("../../models/inscriptionGoal");
+const InscriptionGoalObject = require("../../Infrastructure/Databases/Mongo/Models/inscriptionGoal");
 
 async function createInscriptionGoal(e) {
   return await InscriptionGoalObject.create(e);

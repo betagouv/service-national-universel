@@ -2,14 +2,14 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { canSearchLigneBus } = require("snu-lib");
-const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const esClient = require("../../Infrastructure/Databases/ElasticSearch");
 const { ERRORS } = require("../../utils");
-const { allRecords } = require("../../es/utils");
+const { allRecords } = require("../../Infrastructure/Databases/ElasticSearch/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const { ROLES } = require("snu-lib");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const SessionPhase1Object = require("../../models/sessionPhase1");
+const LigneBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const SessionPhase1Object = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {

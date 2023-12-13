@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const Joi = require("joi");
 const { canViewLigneBus } = require("snu-lib");
 //const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const CohesionCenterModel = require("../../models/cohesionCenter");
+const PointDeRassemblementModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const CohesionCenterModel = require("../../Infrastructure/Databases/Mongo/Models/cohesionCenter");
 
-const YoungModel = require("../../models/young");
+const YoungModel = require("../../Infrastructure/Databases/Mongo/Models/young");
 
 const { ERRORS, updateSeatsTakenInBusLine } = require("../../utils");
 

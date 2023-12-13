@@ -1,18 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 
-const CohesionCenterModel = require("../models/cohesionCenter");
-const SessionPhase1 = require("../models/sessionPhase1");
-const YoungModel = require("../models/young");
-const MeetingPointObject = require("../models/meetingPoint");
-const BusObject = require("../models/bus");
-const CohortModel = require("../models/cohort");
+const CohesionCenterModel = require("../Infrastructure/Databases/Mongo/Models/cohesionCenter");
+const SessionPhase1 = require("../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
+const MeetingPointObject = require("../Infrastructure/Databases/Mongo/Models/meetingPoint");
+const BusObject = require("../Infrastructure/Databases/Mongo/Models/bus");
+const CohortModel = require("../Infrastructure/Databases/Mongo/Models/cohort");
 const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { SENDINBLUE_TEMPLATES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib");
-const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL, ENVIRONMENT } = require("../config");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
+const { ADMIN_URL, ENVIRONMENT } = require("../Infrastructure/config");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateId } = require("../utils/validator");

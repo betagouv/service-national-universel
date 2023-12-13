@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+const LigneToPointModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneToPoint");
+const PointDeRassemblementModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const PlanTransportModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/planTransport");
 const { canViewLigneBus } = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const Joi = require("joi");
 
 router.get("/meeting-point/:meetingPointId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {

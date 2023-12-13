@@ -1,4 +1,4 @@
-const ContractObject = require("../../models/contract");
+const ContractObject = require("../../Infrastructure/Databases/Mongo/Models/contract");
 
 async function getContractsHelper(params = {}) {
   return await ContractObject.find(params);

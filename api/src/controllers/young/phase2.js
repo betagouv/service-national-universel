@@ -2,17 +2,17 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const config = require("../../config");
+const config = require("../../Infrastructure/config");
 
-const { capture } = require("../../sentry");
-const YoungModel = require("../../models/young");
-const CohortModel = require("../../models/cohort");
-const ReferentModel = require("../../models/referent");
-const MissionEquivalenceModel = require("../../models/missionEquivalence");
-const ApplicationModel = require("../../models/application");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const YoungModel = require("../../Infrastructure/Databases/Mongo/Models/young");
+const CohortModel = require("../../Infrastructure/Databases/Mongo/Models/cohort");
+const ReferentModel = require("../../Infrastructure/Databases/Mongo/Models/referent");
+const MissionEquivalenceModel = require("../../Infrastructure/Databases/Mongo/Models/missionEquivalence");
+const ApplicationModel = require("../../Infrastructure/Databases/Mongo/Models/application");
 const { ERRORS, getCcOfYoung, cancelPendingApplications, updateYoungPhase2Hours, updateStatusPhase2 } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, APPLICATION_STATUS, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../Infrastructure/Services/sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
 
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {

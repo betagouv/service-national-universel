@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const SchemaDeRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const YoungModel = require("../../models/young");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-const CohortModel = require("../../models/cohort");
+const PointDeRassemblementModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const SchemaDeRepartitionModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/schemaDeRepartition");
+const LigneBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const YoungModel = require("../../Infrastructure/Databases/Mongo/Models/young");
+const LigneToPointModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneToPoint");
+const PlanTransportModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/planTransport");
+const CohortModel = require("../../Infrastructure/Databases/Mongo/Models/cohort");
 const {
   getCohortNames,
   SENDINBLUE_TEMPLATES,
@@ -19,14 +19,14 @@ const {
   isPdrEditionOpen,
 } = require("snu-lib");
 const { ERRORS, isYoung } = require("../../utils");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const Joi = require("joi");
 const { validateId } = require("../../utils/validator");
 const nanoid = require("nanoid");
 const { getCohesionCenterFromSession } = require("./commons");
 const { getTransporter } = require("../../utils");
-const { sendTemplate } = require("../../sendinblue");
-const { ADMIN_URL, ENVIRONMENT } = require("../../config");
+const { sendTemplate } = require("../../Infrastructure/Services/sendinblue");
+const { ADMIN_URL, ENVIRONMENT } = require("../../Infrastructure/config");
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.

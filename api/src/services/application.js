@@ -1,13 +1,13 @@
 const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib");
 const { deletePatches } = require("../controllers/patches");
-const ApplicationModel = require("../models/application");
-const YoungModel = require("../models/young");
-const ReferentModel = require("../models/referent");
-const { sendTemplate } = require("../sendinblue");
-const { APP_URL } = require("../config");
+const ApplicationModel = require("../Infrastructure/Databases/Mongo/Models/application");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
+const ReferentModel = require("../Infrastructure/Databases/Mongo/Models/referent");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
+const { APP_URL } = require("../Infrastructure/config");
 const { getCcOfYoung } = require("../utils");
 const { getTutorName } = require("./mission");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 
 const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymizedYoung = {} }) => {
   try {

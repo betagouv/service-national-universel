@@ -7,11 +7,11 @@
 const express = require("express");
 const router = express.Router();
 const { ERRORS } = require("../utils");
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 const Joi = require("joi");
 const passport = require("passport");
 
-const FilterModel = require("../models/filters");
+const FilterModel = require("../Infrastructure/Databases/Mongo/Models/filters");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

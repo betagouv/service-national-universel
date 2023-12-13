@@ -1,7 +1,7 @@
-const StructureObject = require("../models/structure");
-const ReferentObject = require("../models/referent");
+const StructureObject = require("../Infrastructure/Databases/Mongo/Models/structure");
+const ReferentObject = require("../Infrastructure/Databases/Mongo/Models/referent");
 const { ROLES } = require("snu-lib");
-const { ADMIN_URL } = require("../config.js");
+const { ADMIN_URL } = require("../Infrastructure/config.js");
 const { isYoung } = require("../utils");
 
 const getUserAttributes = async (user) => {

@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+const LigneBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const LigneToPointModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneToPoint");
+const PlanTransportModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/planTransport");
 // const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const cohesionCenterModel = require("../../models/cohesionCenter");
-const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const ReferentModel = require("../../models/referent");
-const CohortModel = require("../../models/cohort");
+const PointDeRassemblementModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const cohesionCenterModel = require("../../Infrastructure/Databases/Mongo/Models/cohesionCenter");
+const schemaRepartitionModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/schemaDeRepartition");
+const ReferentModel = require("../../Infrastructure/Databases/Mongo/Models/referent");
+const CohortModel = require("../../Infrastructure/Databases/Mongo/Models/cohort");
 const {
   canViewLigneBus,
   canEditLigneBusTeam,
@@ -27,12 +27,12 @@ const {
   SENDINBLUE_TEMPLATES,
 } = require("snu-lib");
 const { ERRORS } = require("../../utils");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const Joi = require("joi");
 const { ObjectId } = require("mongoose").Types;
 const mongoose = require("mongoose");
-const { sendTemplate } = require("../../sendinblue");
-const { ADMIN_URL } = require("../../config");
+const { sendTemplate } = require("../../Infrastructure/Services/sendinblue");
+const { ADMIN_URL } = require("../../Infrastructure/config");
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés

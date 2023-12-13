@@ -3,15 +3,15 @@ const router = express.Router();
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const { ROLES } = require("snu-lib");
-const { getToken } = require("../passport");
-const config = require("../config");
+const { getToken } = require("../Infrastructure/Services/passport");
+const config = require("../Infrastructure/config");
 const { serializeYoung, serializeReferent } = require("../utils/serializer");
 const { ERRORS } = require("../utils");
 
-const Young = require("../models/young");
-const Referent = require("../models/referent");
-const { capture } = require("../sentry");
-const { checkJwtSigninVersion } = require("../jwt-options");
+const Young = require("../Infrastructure/Databases/Mongo/Models/young");
+const Referent = require("../Infrastructure/Databases/Mongo/Models/referent");
+const { capture } = require("../Infrastructure/Services/sentry");
+const { checkJwtSigninVersion } = require("../Infrastructure/Services/jwt-options");
 
 const allowedRole = (user) => {
   switch (user?.role) {

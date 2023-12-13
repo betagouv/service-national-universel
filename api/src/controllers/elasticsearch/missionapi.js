@@ -1,8 +1,8 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const esClient = require("../../Infrastructure/Databases/ElasticSearch");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
 const { JVA_MISSION_DOMAINS } = require("snu-lib");

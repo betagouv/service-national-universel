@@ -23,9 +23,9 @@ const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { ERRORS } = require("../../utils");
-const { ADMIN_URL, ENVIRONMENT } = require("../../config");
+const { ADMIN_URL, ENVIRONMENT } = require("../../Infrastructure/config");
 const {
   canViewSchemaDeRepartition,
   YOUNG_STATUS,
@@ -38,16 +38,16 @@ const {
 } = require("snu-lib");
 const { filteredRegionList } = require("./commons");
 const Joi = require("joi");
-const sessionPhase1Model = require("../../models/sessionPhase1");
-const youngModel = require("../../models/young");
-const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const tableRepartitionModel = require("../../models/PlanDeTransport/tableDeRepartition");
-const pointRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const CohortModel = require("../../models/cohort");
-const cohesionCenterModel = require("../../models/cohesionCenter");
+const sessionPhase1Model = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const youngModel = require("../../Infrastructure/Databases/Mongo/Models/young");
+const schemaRepartitionModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/schemaDeRepartition");
+const tableRepartitionModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/tableDeRepartition");
+const pointRassemblementModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const CohortModel = require("../../Infrastructure/Databases/Mongo/Models/cohort");
+const cohesionCenterModel = require("../../Infrastructure/Databases/Mongo/Models/cohesionCenter");
 const { getTransporter } = require("../../utils");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../Infrastructure/Services/sendinblue");
 
 const schemaRepartitionBodySchema = Joi.object({
   cohort: Joi.string()

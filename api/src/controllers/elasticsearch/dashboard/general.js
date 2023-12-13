@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { capture } = require("../../../sentry");
+const { capture } = require("../../../Infrastructure/Services/sentry");
 const { ERRORS } = require("../../../utils");
 const Joi = require("joi");
 const todoService = require("../../../services/dashboard/todo.service");

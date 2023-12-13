@@ -3,9 +3,9 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const { canUpdateInscriptionGoals, canViewInscriptionGoals } = require("snu-lib");
-const { capture } = require("../sentry");
-const InscriptionGoalModel = require("../models/inscriptionGoal");
-const YoungModel = require("../models/young");
+const { capture } = require("../Infrastructure/Services/sentry");
+const InscriptionGoalModel = require("../Infrastructure/Databases/Mongo/Models/inscriptionGoal");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
 const { ERRORS } = require("../utils");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../services/inscription-goal");
 

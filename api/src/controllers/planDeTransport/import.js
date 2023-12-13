@@ -1,26 +1,26 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
 const { canSendPlanDeTransport, MIME_TYPES, PDT_IMPORT_ERRORS, departmentLookUp } = require("snu-lib");
 const FileType = require("file-type");
 const fs = require("fs");
-const config = require("../../config");
+const config = require("../../Infrastructure/config");
 const { parse: parseDate } = require("date-fns");
 const NodeClam = require("clamscan");
 const XLSX = require("xlsx");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
-const CohesionCenterModel = require("../../models/cohesionCenter");
-const PdrModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const SchemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPlanTransport");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+const CohesionCenterModel = require("../../Infrastructure/Databases/Mongo/Models/cohesionCenter");
+const PdrModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const SchemaRepartitionModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/schemaDeRepartition");
+const ImportPlanTransportModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/importPlanTransport");
+const LigneBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const SessionPhase1Model = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const LigneToPointModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneToPoint");
+const PlanTransportModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/planTransport");
 
 function isValidDate(date) {
   return date.match(/^[0-9]{2}\/[0-9]{2}\/202[0-9]$/);

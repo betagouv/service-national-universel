@@ -12,7 +12,7 @@ jest.mock("@elastic/elasticsearch", () => ({
     };
   }),
 }));
-const esClient = require("../es");
+const esClient = require("../Infrastructure/Databases/ElasticSearch");
 const { getNewApplicationFixture } = require("./fixtures/application");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");

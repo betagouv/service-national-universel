@@ -11,8 +11,8 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const passport = require("passport");
-const YoungModel = require("../../models/young");
-const { capture } = require("../../sentry");
+const YoungModel = require("../../Infrastructure/Databases/Mongo/Models/young");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { ERRORS } = require("../../utils");
 

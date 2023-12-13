@@ -1,7 +1,7 @@
 const { YOUNG_STATUS, region2zone, oldSessions, getRegionForEligibility, regionsListDROMS, START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib");
-const InscriptionGoalModel = require("../models/inscriptionGoal");
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
+const InscriptionGoalModel = require("../Infrastructure/Databases/Mongo/Models/inscriptionGoal");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
+const CohortModel = require("../Infrastructure/Databases/Mongo/Models/cohort");
 
 async function getFilteredSessions(young, timeZoneOffset = null) {
   const sessions2023 = await CohortModel.find({});

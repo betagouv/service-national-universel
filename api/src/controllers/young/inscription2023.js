@@ -4,9 +4,9 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const crypto = require("crypto");
 
-const YoungObject = require("../../models/young");
-const CohortObject = require("../../models/cohort");
-const { capture } = require("../../sentry");
+const YoungObject = require("../../Infrastructure/Databases/Mongo/Models/young");
+const CohortObject = require("../../Infrastructure/Databases/Mongo/Models/cohort");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName, validateParents, representantSchema } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
@@ -20,9 +20,9 @@ const {
   getCohortNames,
   isYoungInReinscription,
 } = require("snu-lib");
-const { sendTemplate } = require("./../../sendinblue");
-const config = require("../../config");
-const { getQPV, getDensity } = require("../../geo");
+const { sendTemplate } = require("../../Infrastructure/Services/sendinblue");
+const config = require("../../Infrastructure/config");
+const { getQPV, getDensity } = require("../../Infrastructure/Services/geo");
 const { getFilteredSessions } = require("../../utils/cohort");
 
 const youngSchooledSituationOptions = [

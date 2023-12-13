@@ -2,10 +2,10 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch, canViewEmailHistory } = require("snu-lib");
-const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const esClient = require("../../Infrastructure/Databases/ElasticSearch");
 const { ERRORS } = require("../../utils");
-const { allRecords } = require("../../es/utils");
+const { allRecords } = require("../../Infrastructure/Databases/ElasticSearch/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 
 router.post("/:email/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {

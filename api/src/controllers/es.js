@@ -13,13 +13,13 @@ const {
   region2department,
   department2region,
 } = require("snu-lib");
-const { capture } = require("../sentry");
-const esClient = require("../es");
+const { capture } = require("../Infrastructure/Services/sentry");
+const esClient = require("../Infrastructure/Databases/ElasticSearch");
 const { ERRORS, isYoung, getSignedUrlForApiAssociation, isReferent } = require("../utils");
-const StructureObject = require("../models/structure");
-const ApplicationObject = require("../models/application");
-const CohesionCenterObject = require("../models/cohesionCenter");
-const SessionPhase1Object = require("../models/sessionPhase1");
+const StructureObject = require("../Infrastructure/Databases/Mongo/Models/structure");
+const ApplicationObject = require("../Infrastructure/Databases/Mongo/Models/application");
+const CohesionCenterObject = require("../Infrastructure/Databases/Mongo/Models/cohesionCenter");
+const SessionPhase1Object = require("../Infrastructure/Databases/Mongo/Models/sessionPhase1");
 const {
   serializeMissions,
   serializeSchools,
@@ -30,8 +30,8 @@ const {
   serializeApplications,
   serializeHits,
 } = require("../utils/es-serializer");
-const { allRecords } = require("../es/utils");
-const { API_ASSOCIATION_ES_ENDPOINT } = require("../config");
+const { allRecords } = require("../Infrastructure/Databases/ElasticSearch/utils");
+const { API_ASSOCIATION_ES_ENDPOINT } = require("../Infrastructure/config");
 const Joi = require("joi");
 const datesub = require("date-fns/sub");
 const { getCohortNamesEndAfter } = require("../utils/cohort");

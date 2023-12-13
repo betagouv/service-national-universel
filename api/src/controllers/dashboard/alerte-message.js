@@ -3,9 +3,9 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const { ROLES, canReadAlerteMessage, canCreateAlerteMessage } = require("snu-lib");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { serializeAlerteMessage } = require("../../utils/serializer");
-const AlerteMessageModel = require("../../models/alerteMessage");
+const AlerteMessageModel = require("../../Infrastructure/Databases/Mongo/Models/alerteMessage");
 const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");
 

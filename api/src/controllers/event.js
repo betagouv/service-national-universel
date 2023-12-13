@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../sentry");
-const EventObject = require("../models/event");
+const { capture } = require("../Infrastructure/Services/sentry");
+const EventObject = require("../Infrastructure/Databases/Mongo/Models/event");
 const { ERRORS, isYoung } = require("../utils");
 const { validateEvent } = require("../utils/validator");
 const { canCreateEvent } = require("snu-lib");

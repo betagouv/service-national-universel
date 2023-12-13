@@ -19,18 +19,18 @@ const {
   REFERENT_DEPARTMENT_SUBROLE,
   getDepartmentByZip,
 } = require("snu-lib");
-const { ADMIN_URL, ENVIRONMENT } = require("../../config");
-const { capture } = require("../../sentry");
-const YoungModel = require("../../models/young");
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const CohortModel = require("../../models/cohort");
-const ReferentModel = require("../../models/referent");
-const DepartmentServiceModel = require("../../models/departmentService");
+const { ADMIN_URL, ENVIRONMENT } = require("../../Infrastructure/config");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const YoungModel = require("../../Infrastructure/Databases/Mongo/Models/young");
+const SessionPhase1Model = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const PointDeRassemblementModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const CohortModel = require("../../Infrastructure/Databases/Mongo/Models/cohort");
+const ReferentModel = require("../../Infrastructure/Databases/Mongo/Models/referent");
+const DepartmentServiceModel = require("../../Infrastructure/Databases/Mongo/Models/departmentService");
 const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } = require("../../utils");
 const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
-const { sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../Infrastructure/Services/sendinblue");
 
 router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

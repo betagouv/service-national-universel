@@ -1,4 +1,4 @@
-const StructureObject = require("../../models/structure");
+const StructureObject = require("../../Infrastructure/Databases/Mongo/Models/structure");
 
 async function getStructuresHelper() {
   return await StructureObject.find({});

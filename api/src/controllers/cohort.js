@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const passport = require("passport");
-const CohortModel = require("../models/cohort");
-const SessionPhase1Model = require("../models/sessionPhase1");
+const CohortModel = require("../Infrastructure/Databases/Mongo/Models/cohort");
+const SessionPhase1Model = require("../Infrastructure/Databases/Mongo/Models/sessionPhase1");
 
-const { capture } = require("../sentry");
+const { capture } = require("../Infrastructure/Services/sentry");
 const { ERRORS, getFile } = require("../utils");
-const { decrypt } = require("../cryptoUtils");
+const { decrypt } = require("../Infrastructure/Services/cryptoUtils");
 const { ROLES, isSuperAdmin } = require("snu-lib");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";

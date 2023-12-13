@@ -4,17 +4,17 @@ const Joi = require("joi");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch, YOUNG_STATUS_PHASE1, ES_NO_LIMIT, youngExportFields } = require("snu-lib");
 const datesub = require("date-fns/sub");
-const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const esClient = require("../../Infrastructure/Databases/ElasticSearch");
 const { ERRORS } = require("../../utils");
-const { allRecords } = require("../../es/utils");
+const { allRecords } = require("../../Infrastructure/Databases/ElasticSearch/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
-const StructureObject = require("../../models/structure");
-const ApplicationObject = require("../../models/application");
-const SessionPhase1Object = require("../../models/sessionPhase1");
-const CohesionCenterObject = require("../../models/cohesionCenter");
-const MissionObject = require("../../models/mission");
+const StructureObject = require("../../Infrastructure/Databases/Mongo/Models/structure");
+const ApplicationObject = require("../../Infrastructure/Databases/Mongo/Models/application");
+const SessionPhase1Object = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const CohesionCenterObject = require("../../Infrastructure/Databases/Mongo/Models/cohesionCenter");
+const MissionObject = require("../../Infrastructure/Databases/Mongo/Models/mission");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
 
 function getYoungsFilters(user) {

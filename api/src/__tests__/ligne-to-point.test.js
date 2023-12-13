@@ -9,8 +9,8 @@ const getNewPointDeRassemblementFixture = require("./fixtures/PlanDeTransport/po
 const { createMeetingPointHelper } = require("./helpers/meetingPoint");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
-const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
-const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
+const PointDeRassemblementModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const LigneToPointModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneToPoint");
 
 jest.setTimeout(10000);
 

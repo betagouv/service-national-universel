@@ -7,11 +7,11 @@ const Joi = require("joi");
 const Netmask = require("netmask").Netmask;
 
 const { ERRORS } = require("../utils");
-const { capture, captureMessage } = require("../sentry");
-const EmailObject = require("../models/email");
+const { capture, captureMessage } = require("../Infrastructure/Services/sentry");
+const EmailObject = require("../Infrastructure/Databases/Mongo/Models/email");
 const { canViewEmailHistory } = require("snu-lib");
 const { serializeEmail } = require("../utils/serializer");
-const { getEmailsList, getEmailContent } = require("../sendinblue");
+const { getEmailsList, getEmailContent } = require("../Infrastructure/Services/sendinblue");
 const { validateId } = require("../utils/validator");
 
 router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {

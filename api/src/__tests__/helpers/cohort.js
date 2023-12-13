@@ -1,4 +1,4 @@
-const CohortObject = require("../../models/cohort");
+const CohortObject = require("../../Infrastructure/Databases/Mongo/Models/cohort");
 
 async function createCohortHelper(cohort) {
   return await CohortObject.create(cohort);

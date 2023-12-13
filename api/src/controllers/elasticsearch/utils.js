@@ -1,8 +1,8 @@
 const Joi = require("joi");
 const { ROLES, canSearchInElasticSearch } = require("snu-lib");
-const { capture } = require("../../sentry");
+const { capture } = require("../../Infrastructure/Services/sentry");
 const { ERRORS, isYoung, isReferent } = require("../../utils");
-const StructureObject = require("../../models/structure");
+const StructureObject = require("../../Infrastructure/Databases/Mongo/Models/structure");
 
 const ES_NO_LIMIT = 10000;
 

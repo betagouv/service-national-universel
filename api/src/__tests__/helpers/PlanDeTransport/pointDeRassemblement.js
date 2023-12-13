@@ -1,7 +1,7 @@
-const PointDeRassemblementModel = require("../../../models/PlanDeTransport/pointDeRassemblement");
-const BusModel = require("../../../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../../../models/PlanDeTransport/ligneToPoint");
-const CohortModel = require("../../../models/cohort");
+const PointDeRassemblementModel = require("../../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/pointDeRassemblement");
+const BusModel = require("../../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
+const LigneToPointModel = require("../../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneToPoint");
+const CohortModel = require("../../../Infrastructure/Databases/Mongo/Models/cohort");
 
 const getNewLigneBusFixture = require("../../fixtures/PlanDeTransport/ligneBus");
 const getNewLigneToPointFixture = require("../../fixtures/PlanDeTransport/ligneToPoint");

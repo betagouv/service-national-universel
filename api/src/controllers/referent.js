@@ -10,24 +10,24 @@ const NodeClam = require("clamscan");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 
-const ReferentModel = require("../models/referent");
-const YoungModel = require("../models/young");
-const CohortModel = require("../models/cohort");
-const MissionModel = require("../models/mission");
-const ApplicationModel = require("../models/application");
-const SessionPhase1 = require("../models/sessionPhase1");
-const StructureModel = require("../models/structure");
-const AuthObject = require("../auth");
+const ReferentModel = require("../Infrastructure/Databases/Mongo/Models/referent");
+const YoungModel = require("../Infrastructure/Databases/Mongo/Models/young");
+const CohortModel = require("../Infrastructure/Databases/Mongo/Models/cohort");
+const MissionModel = require("../Infrastructure/Databases/Mongo/Models/mission");
+const ApplicationModel = require("../Infrastructure/Databases/Mongo/Models/application");
+const SessionPhase1 = require("../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const StructureModel = require("../Infrastructure/Databases/Mongo/Models/structure");
+const AuthObject = require("../Infrastructure/Services/auth");
 const ReferentAuth = new AuthObject(ReferentModel);
 const patches = require("./patches");
-const CohesionCenterModel = require("../models/cohesionCenter");
-const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
+const CohesionCenterModel = require("../Infrastructure/Databases/Mongo/Models/cohesionCenter");
+const LigneDeBusModel = require("../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
 
-const { getQPV, getDensity } = require("../geo");
-const config = require("../config");
-const { capture } = require("../sentry");
-const { decrypt, encrypt } = require("../cryptoUtils");
-const { sendTemplate } = require("../sendinblue");
+const { getQPV, getDensity } = require("../Infrastructure/Services/geo");
+const config = require("../Infrastructure/config");
+const { capture } = require("../Infrastructure/Services/sentry");
+const { decrypt, encrypt } = require("../Infrastructure/Services/cryptoUtils");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
 const {
   getFile,
   uploadFile,
@@ -46,8 +46,8 @@ const {
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } = require("../utils/serializer");
-const { JWT_SIGNIN_MAX_AGE, JWT_SIGNIN_VERSION } = require("../jwt-options");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../cookie-options");
+const { JWT_SIGNIN_MAX_AGE, JWT_SIGNIN_VERSION } = require("../Infrastructure/Services/jwt-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../Infrastructure/Services/cookie-options");
 const {
   ROLES_LIST,
   canInviteUser,

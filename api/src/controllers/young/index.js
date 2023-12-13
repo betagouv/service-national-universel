@@ -12,17 +12,17 @@ const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const redis = require("redis");
-const { decrypt, encrypt } = require("../../cryptoUtils");
-const config = require("../../config");
-const { capture } = require("../../sentry");
-const YoungObject = require("../../models/young");
-const ReferentModel = require("../../models/referent");
-const SessionPhase1 = require("../../models/sessionPhase1");
-const ApplicationModel = require("../../models/application");
-const MissionModel = require("../../models/mission");
-const CohortModel = require("../../models/cohort");
-const AuthObject = require("../../auth");
-const LigneDeBusModel = require("../../models/PlanDeTransport/ligneBus");
+const { decrypt, encrypt } = require("../../Infrastructure/Services/cryptoUtils");
+const config = require("../../Infrastructure/config");
+const { capture } = require("../../Infrastructure/Services/sentry");
+const YoungObject = require("../../Infrastructure/Databases/Mongo/Models/young");
+const ReferentModel = require("../../Infrastructure/Databases/Mongo/Models/referent");
+const SessionPhase1 = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
+const ApplicationModel = require("../../Infrastructure/Databases/Mongo/Models/application");
+const MissionModel = require("../../Infrastructure/Databases/Mongo/Models/mission");
+const CohortModel = require("../../Infrastructure/Databases/Mongo/Models/cohort");
+const AuthObject = require("../../Infrastructure/Services/auth");
+const LigneDeBusModel = require("../../Infrastructure/Databases/Mongo/Models/PlanDeTransport/ligneBus");
 const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
@@ -39,8 +39,8 @@ const {
   deleteFile,
   updateSeatsTakenInBusLine,
 } = require("../../utils");
-const { sendTemplate, unsync } = require("../../sendinblue");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../../cookie-options");
+const { sendTemplate, unsync } = require("../../Infrastructure/Services/sendinblue");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../../Infrastructure/Services/cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
@@ -65,7 +65,7 @@ const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
-const { JWT_SIGNIN_VERSION } = require("../../jwt-options");
+const { JWT_SIGNIN_VERSION } = require("../../Infrastructure/Services/jwt-options");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));

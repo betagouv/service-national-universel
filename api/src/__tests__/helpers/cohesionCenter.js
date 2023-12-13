@@ -1,5 +1,5 @@
-const CohesionCenterObject = require("../../models/cohesionCenter");
-const SessionPhase1 = require("../../models/sessionPhase1");
+const CohesionCenterObject = require("../../Infrastructure/Databases/Mongo/Models/cohesionCenter");
+const SessionPhase1 = require("../../Infrastructure/Databases/Mongo/Models/sessionPhase1");
 
 async function createCohesionCenter(cohesionCenter) {
   const center = await CohesionCenterObject.create(cohesionCenter);

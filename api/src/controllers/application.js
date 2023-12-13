@@ -4,22 +4,22 @@ const passport = require("passport");
 const Joi = require("joi");
 const { ObjectId } = require("mongoose").Types;
 
-const { capture, captureMessage } = require("../sentry");
-const ApplicationObject = require("../models/application");
-const ContractObject = require("../models/contract");
-const MissionObject = require("../models/mission");
-const StructureObject = require("../models/structure");
-const YoungObject = require("../models/young");
-const CohortObject = require("../models/cohort");
-const ReferentObject = require("../models/referent");
-const { decrypt, encrypt } = require("../cryptoUtils");
+const { capture, captureMessage } = require("../Infrastructure/Services/sentry");
+const ApplicationObject = require("../Infrastructure/Databases/Mongo/Models/application");
+const ContractObject = require("../Infrastructure/Databases/Mongo/Models/contract");
+const MissionObject = require("../Infrastructure/Databases/Mongo/Models/mission");
+const StructureObject = require("../Infrastructure/Databases/Mongo/Models/structure");
+const YoungObject = require("../Infrastructure/Databases/Mongo/Models/young");
+const CohortObject = require("../Infrastructure/Databases/Mongo/Models/cohort");
+const ReferentObject = require("../Infrastructure/Databases/Mongo/Models/referent");
+const { decrypt, encrypt } = require("../Infrastructure/Services/cryptoUtils");
 const NodeClam = require("clamscan");
 const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
-const { sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../Infrastructure/Services/sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
-const { ENVIRONMENT, ADMIN_URL, APP_URL } = require("../config");
+const { ENVIRONMENT, ADMIN_URL, APP_URL } = require("../Infrastructure/config");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
