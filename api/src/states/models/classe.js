@@ -39,7 +39,7 @@ ClasseStateManager.compute = async (_id, fromUser, { youngModel }) => {
   const studentAbandoned = students.filter((student) => student.status === YOUNG_STATUS.ABANDONED);
   const studentNotAutorized = students.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED);
   const studentWithdrawn = students.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN);
-  const seatsTaken = studentInProgress.length + studentWaiting.length + studentValidated.length + studentAbandoned.length + studentNotAutorized.length + studentWithdrawn.length;
+  const seatsTaken = studentInProgress.length + studentWaiting.length + studentValidated.length + studentNotAutorized.length + studentWithdrawn.length;
   
   // Created
   if (classe.status != STATUS_CLASSE.CREATED && students.length === 0) {
@@ -60,7 +60,7 @@ ClasseStateManager.compute = async (_id, fromUser, { youngModel }) => {
   }
 
   // Validated
-  const seatsValidated = studentValidated.length + studentAbandoned.length + studentNotAutorized.length + studentWithdrawn.length
+  const seatsValidated = studentValidated.length + studentNotAutorized.length + studentWithdrawn.length
   if (classe.status != STATUS_CLASSE.VALIDATED && classe.totalSeats <= seatsValidated) {
     classe.set({ seatsTaken: seatsValidated, status: STATUS_CLASSE.VALIDATED });
     return await classe.save({ fromUser });
