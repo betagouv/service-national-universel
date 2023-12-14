@@ -38,7 +38,8 @@ export default function StepConsentements() {
         return;
       }
       dispatch(setYoung(responseData));
-      plausibleEvent("Phase0/CTA inscription - consentement");
+      const eventName = isCLE ? "CLE/CTA inscription - consentement" : "Phase0/CTA inscription - consentement";
+      plausibleEvent(eventName);
       history.push("/inscription2023/representants");
     } catch (e) {
       capture(e);

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useHistory, Redirect, useLocation } from "react-router-dom";
-import { isCle, translate } from "snu-lib";
+import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
 

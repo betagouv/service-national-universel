@@ -143,7 +143,7 @@ export default function StepRepresentants() {
         }
         dispatch(setYoung(responseData));
         if (isCLE) {
-          plausibleEvent("TBD");
+          plausibleEvent("CLE/CTA inscription - representants legaux");
           history.push("/inscription2023/confirm");
         } else {
           plausibleEvent("Phase0/CTA inscription - representants legaux");
@@ -208,7 +208,8 @@ export default function StepRepresentants() {
           setLoading(false);
           return;
         }
-        plausibleEvent("Phase0/CTA demande correction - Corriger Representant");
+        const eventName = isCLE ? "CLE/CTA demande correction - Corriger Representant" : "Phase0/CTA demande correction - Corriger Representant";
+        plausibleEvent(eventName);
         dispatch(setYoung(responseData));
         toastr.success("Vos informations ont bien été enregistrées");
       } catch (e) {
@@ -275,7 +276,8 @@ export default function StepRepresentants() {
           <CheckBox
             checked={isParent2Visible}
             onChange={(e) => {
-              plausibleEvent("Phase0/CTA inscription - ajouter rep leg");
+              const eventName = isCLE ? "CLE/CTA inscription - ajouter rep leg" : "Phase0/CTA inscription - ajouter rep leg";
+              plausibleEvent(eventName);
               // Event mal nommé, pas un call to action. Ne pas confondre avec l'event envoyé lors du clic sur le bouton "Suivant".
               setIsParent2Visible(e);
             }}
