@@ -2092,7 +2092,7 @@ Schema.methods.anonymise = function () {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
-  if (doc.source === YOUNG_SOURCE_LIST.CLE) { // doc.previousStatus !== doc.status is not working in post save hook...
+  if (doc.source === YOUNG_SOURCE.CLE) { // doc.previousStatus !== doc.status is not working in post save hook...
     StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) })
       .catch((error) => capture(error));
   }
