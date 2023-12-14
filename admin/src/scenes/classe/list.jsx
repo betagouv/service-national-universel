@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES } from "snu-lib";
+import { ROLES, translateStatusClasse } from "snu-lib";
 import { statusClassForBadge } from "./utils";
 
 export default function list() {
@@ -196,7 +196,7 @@ const Hit = ({ hit }) => {
       </td>
       <td className="flex w-[20%] flex-col gap-2">{hit?.totalSeats ? <Badge title={hit.seatsTaken + "/" + hit.totalSeats} /> : <Badge title="À préciser" />}</td>
       <td className="w-[20%]">
-        <Badge title={translate(hit.status)} status={statusClassForBadge(hit.status)} />
+        <Badge title={translateStatusClasse(hit.status)} status={statusClassForBadge(hit.status)} />
       </td>
     </tr>
   );
