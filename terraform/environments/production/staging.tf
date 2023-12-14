@@ -115,14 +115,14 @@ resource "scaleway_container" "staging_admin" {
   deploy          = true
 
   environment_variables = {
-    "APP_NAME"                  = "admin"
-    "CLE"                       = "true"
-    "STAGING"                   = "true"
-    "DOCKER_ENV_VITE_ADMIN_URL" = "https://${local.staging_admin_hostname}"
-    "DOCKER_ENV_VITE_API_URL"   = "https://${local.staging_api_hostname}"
-    "DOCKER_ENV_VITE_APP_URL"   = "https://${local.staging_app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" : "0.1"
-    "DOCKER_ENV_VITE_SUPPORT_URL" : "https://support.beta-snu.dev"
+    "APP_NAME"                                   = "admin"
+    "CLE"                                        = "true"
+    "STAGING"                                    = "true"
+    "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.staging_admin_hostname}"
+    "DOCKER_ENV_VITE_API_URL"                    = "https://${local.staging_api_hostname}"
+    "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.staging_app_hostname}"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.1"
+    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
   }
 
   secret_environment_variables = {
@@ -153,15 +153,15 @@ resource "scaleway_container" "staging_app" {
   deploy          = true
 
   environment_variables = {
-    "APP_NAME"                  = "app"
-    "CLE"                       = "true"
-    "STAGING"                   = "true"
-    "DOCKER_ENV_VITE_ADMIN_URL" = "https://${local.staging_admin_hostname}"
-    "DOCKER_ENV_VITE_API_URL"   = "https://${local.staging_api_hostname}"
-    "DOCKER_ENV_VITE_APP_URL"   = "https://${local.staging_app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" : "0.1"
-    "DOCKER_ENV_VITE_SUPPORT_URL" : "https://support.beta-snu.dev"
-    "FOLDER_APP" = "app"
+    "APP_NAME"                                   = "app"
+    "CLE"                                        = "true"
+    "STAGING"                                    = "true"
+    "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.staging_admin_hostname}"
+    "DOCKER_ENV_VITE_API_URL"                    = "https://${local.staging_api_hostname}"
+    "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.staging_app_hostname}"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.1"
+    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
+    "FOLDER_APP"                                 = "app"
   }
 
   secret_environment_variables = {

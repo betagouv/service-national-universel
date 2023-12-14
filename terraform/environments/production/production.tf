@@ -125,7 +125,7 @@ resource "scaleway_container" "production_admin" {
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.prod_app_hostname}"
     "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.005"
     "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = "0.01"
-    "DOCKER_ENV_VITE_SUPPORT_URL" : "https://support.snu.gouv.fr"
+    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
   }
 
   secret_environment_variables = {
@@ -164,9 +164,9 @@ resource "scaleway_container" "production_app" {
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.prod_app_hostname}"
     "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.005"
     "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = "0.01"
-    "DOCKER_ENV_VITE_SUPPORT_URL" : "https://support.snu.gouv.fr"
-    "DOCKER_ENV_VITE_FRANCE_CONNECT_URL" : "https://app.franceconnect.gouv.fr/api/v1"
-    "FOLDER_APP" = "app"
+    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
+    "DOCKER_ENV_VITE_FRANCE_CONNECT_URL"         = "https://app.franceconnect.gouv.fr/api/v1"
+    "FOLDER_APP"                                 = "app"
   }
 
   secret_environment_variables = {
