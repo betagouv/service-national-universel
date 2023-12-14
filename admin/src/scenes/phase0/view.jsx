@@ -1502,7 +1502,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
                   <Field
                     name="classeStatus"
                     label="Statut"
-                    value={data?.classe?.sector}
+                    value={data?.etablissement?.sector}
                     mode="readonly"
                     className="mb-[16px]"
                     young={young}

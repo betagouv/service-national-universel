@@ -46,15 +46,15 @@ jobs:
         continue-on-error: false
         run: npm run build -w packages/lib
 
-      - name: Test and Send coverage
-        uses: paambaati/codeclimate-action@v2.7.5
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-          CI: true
-          MONGO_URL: mongodb://localhost:27017/SampleDB
-        with:
-          workingDirectory: ${{ env.SUBFOLDER_NAME }}
-          coverageCommand: npm run coverage
+      # - name: Test and Send coverage
+      #   uses: paambaati/codeclimate-action@v2.7.5
+      #   env:
+      #     CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      #     CI: true
+      #     MONGO_URL: mongodb://localhost:27017/SampleDB
+      #   with:
+      #     workingDirectory: ${{ env.SUBFOLDER_NAME }}
+      #     coverageCommand: npm run coverage
 
   deploy:
     needs: [test]

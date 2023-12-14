@@ -224,7 +224,7 @@ const SideBar = (props) => {
   const visitorItems = [Dashboard];
   const dsnjItems = [ExportDsnj];
   // FIXME [CLE]: remove dev mode
-  const institutionItems = [Institution, Classe, VolontaireCle, Contact, Dev];
+  const institutionItems = [Institution, Classe, VolontaireCle, Contact];
 
   const getItems = () => {
     switch (user?.role) {

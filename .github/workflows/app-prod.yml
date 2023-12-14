@@ -49,6 +49,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Build lib
+        continue-on-error: false
+        run: |
+          npm ci
+          npm run build -w packages/ds
+          rm packages/ds/.gitignore
+
       - name: Create SSH key
         run: |
           mkdir -p ~/.ssh/

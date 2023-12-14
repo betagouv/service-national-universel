@@ -1,3 +1,10 @@
+## [1.345.3](https://github.com/betagouv/service-national-universel/compare/v1.345.2...v1.345.3) (2023-12-12)
+
+
+### Bug Fixes
+
+* **admin,api:** api route association ([#3345](https://github.com/betagouv/service-national-universel/issues/3345)) ([1ebb372](https://github.com/betagouv/service-national-universel/commit/1ebb37237284409cbb192c11b74dc64dcfd9b96f))
+
 ## [1.345.2](https://github.com/betagouv/service-national-universel/compare/v1.345.1...v1.345.2) (2023-12-08)
 
 
