@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory, Redirect, useLocation } from "react-router-dom";
-import { translate } from "snu-lib";
+import { isCle, translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
 
@@ -43,7 +43,8 @@ export default function StepEmailValidation() {
       }
       if (token) api.setToken(token);
       if (user) dispatch(setYoung(user));
-      plausibleEvent("Phase0/CTA preinscription - validation email");
+      const eventName = isCle(young) ? "CLE/CTA preinscription - validation email" : "Phase0/CTA preinscription - validation email";
+      plausibleEvent(eventName);
       history.push("/preinscription/done");
     } catch (e) {
       capture(e);

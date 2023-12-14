@@ -16,7 +16,8 @@ export default function Done() {
   const isCle = YOUNG_SOURCE.CLE === young.source;
   async function handleClick() {
     try {
-      plausibleEvent("Phase0/CTA preinscription - finaliser");
+      const eventName = isCle ? "CLE/CTA preinscription - finaliser" : "Phase0/CTA preinscription - finaliser";
+      plausibleEvent(eventName);
       history.push("/inscription2023");
     } catch (e) {
       capture(e);
