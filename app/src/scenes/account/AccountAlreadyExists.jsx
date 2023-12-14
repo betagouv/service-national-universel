@@ -20,13 +20,13 @@ const AccountAlreadyExists = () => {
   const [title, callBack, text, additionalText] =
     parcours !== "CLE"
       ? [
-          "Attention ! Vous avez déjà un compte élève dans le cadre des classes engagées.",
+          "Attention ! Vous avez déjà un compte.",
           () => window.location.replace(`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`),
           "Si un séjour de cohésion est prévu dans le cadre de votre classe engagée, vous ne pourrez pas vous inscrire également à un séjour de cohésion à titre individuel.",
           "Vous ne pouvez plus participer au séjour de cohésion avec votre classe ? Veuillez contacter directement votre référent classe.",
         ]
       : [
-          "Attention ! Vous avez déjà un compte Volontaire.",
+          "Attention ! Vous avez déjà un compte.",
           () => history.push(`/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE&classeId=${classeId}`),
           "Si vous souhaitez participer au SNU dans le cadre des classes engagées, contactez le support pour mettre à jour votre compte et vous faire gagner du temps.",
         ];
