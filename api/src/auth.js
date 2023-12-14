@@ -694,7 +694,7 @@ class Auth {
       const token = isYoung(user) ? value.token_young : value.token_ref;
       if (!data || !token) {
         captureMessage("PB with signin_token", { extras: { data: data, token: token } });
-        return res.status(401).send("PB with signin_token");
+        return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
       res.send({ ok: true, token: token, user: data, data });
     } catch (error) {
