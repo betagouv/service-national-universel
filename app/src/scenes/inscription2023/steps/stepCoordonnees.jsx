@@ -381,7 +381,8 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
-        plausibleEvent("Phase0/CTA inscription - profil");
+        const eventName = isCLE ? "CLE/CTA inscription - profil" : "Phase0/CTA inscription - profil";
+        plausibleEvent(eventName);
         dispatch(setYoung(responseData));
         history.push("/inscription2023/consentement");
       } catch (e) {
@@ -446,7 +447,8 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
-        plausibleEvent("Phase0/CTA demande correction - Corriger Coordonnees");
+        const eventName = isCLE ? "CLE/CTA demande correction - Corriger Coordonnees" : "Phase0/CTA demande correction - Corriger Coordonnees";
+        plausibleEvent(eventName);
         dispatch(setYoung(responseData));
         history.push("/");
       } catch (e) {
