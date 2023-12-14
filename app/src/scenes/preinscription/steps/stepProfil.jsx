@@ -50,8 +50,8 @@ export default function StepProfil() {
     if (isCLE && !data?.frenchNationality) {
       errors.frenchNationality = "Ce champ est obligatoire";
     }
-    if (isCLE && !data?.birthDate) {
-      errors.birthDate = "Ce champ est obligatoire";
+    if (isCLE && (!data?.birthDate || !dayjs(data.birthDate).isValid())) {
+      errors.birthDate = "Vous devez saisir une date de naissance valide";
     }
     if (data?.phone && !isPhoneNumberWellFormated(trimmedPhone, data?.phoneZone)) {
       errors.phone = PHONE_ZONES[data?.phoneZone]?.errorMessage;
