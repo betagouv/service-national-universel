@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Joi = require("joi");
 
-const { capture } = require("./sentry");
+const { capture, captureMessage } = require("./sentry");
 const config = require("./config");
 const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
 const { JWT_SIGNIN_MAX_AGE, JWT_TRUST_TOKEN_MAX_AGE, JWT_SIGNIN_VERSION, JWT_TRUST_TOKEN_VERSION, checkJwtTrustTokenVersion } = require("./jwt-options");
@@ -692,7 +692,10 @@ class Auth {
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       const token = isYoung(user) ? value.token_young : value.token_ref;
-      if (!data || !token) throw Error("PB with signin_token");
+      if (!data || !token) {
+        captureMessage("PB with signin_token", { extras: { data: data, token: token } });
+        return res.status(401).send("PB with signin_token");
+      }
       res.send({ ok: true, token: token, user: data, data });
     } catch (error) {
       capture(error);
