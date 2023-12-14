@@ -31,8 +31,7 @@ const Subtitle = ({ refName }) => (
 const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
   const history = useHistory();
   const handleClick = (id) => {
-    // TODO: add correct plausible event
-    plausibleEvent("TBD");
+    plausibleEvent("CLE/CTA preinscription - contact support");
     history.push(`/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE&classeId=${id}`);
   };
 
@@ -73,10 +72,21 @@ const OnBoarding = () => {
           <hr className="my-4 h-px border-0 bg-gray-200" />
           {classe.isInscriptionOpen && (
             <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-              <InlineButton className="md:pr-4 pt-2 md:pr-2 pb-1" onClick={() => setShowContactSupport(true)}>
+              <InlineButton
+                className="md:pr-4 pt-2 md:pr-2 pb-1"
+                onClick={() => {
+                  plausibleEvent("CLE/CTA preinscription - compte HTS");
+                  setShowContactSupport(true);
+                }}>
                 J'ai déjà un compte volontaire
               </InlineButton>
-              <PrimaryButton onClick={() => history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`)}>Démarrer mon inscription</PrimaryButton>
+              <PrimaryButton
+                onClick={() => {
+                  plausibleEvent("CLE/CTA preinscription - demarrer");
+                  history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`);
+                }}>
+                Démarrer mon inscription
+              </PrimaryButton>
             </div>
           )}
 
