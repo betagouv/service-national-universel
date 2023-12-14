@@ -103,13 +103,12 @@ const canDeleteStructure = (actor, target) => isAdmin(actor) || referentInSameGe
 
 const canDeleteYoung = (actor, target) => {
   // un référent peut supprimer un volontaire, mais un volontaire peut se supprimer uniquement si il est HTS
-  if(actor._id.toString() === target._id.toString()){
-    if(target.source === "CLE") return false;
+  if (actor._id.toString() === target._id.toString()) {
+    if (target.source === "CLE") return false;
     return true;
   }
   return isAdmin(actor) || referentInSameGeography(actor, target);
-}
-
+};
 
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
@@ -119,8 +118,10 @@ function canEditYoung(actor, young) {
   const actorAndTargetInTheSameDepartment = actor.department.includes(young.department);
   const referentRegionFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && actorAndTargetInTheSameRegion;
   const referentDepartmentFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actorAndTargetInTheSameDepartment;
+  //TODO update this
+  const referentCLEAuthorized = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role) && young.source === "CLE";
 
-  const authorized = isAdmin || isHeadCenter || referentRegionFromTheSameRegion || referentDepartmentFromTheSameDepartment;
+  const authorized = isAdmin || isHeadCenter || referentRegionFromTheSameRegion || referentDepartmentFromTheSameDepartment || referentCLEAuthorized;
   return authorized;
 }
 
