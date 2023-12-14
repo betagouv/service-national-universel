@@ -1,0 +1,70 @@
+terraform {
+  required_providers {
+    scaleway = {
+      source = "scaleway/scaleway"
+    }
+  }
+  required_version = ">= 0.13"
+
+  backend "pg" {}
+}
+
+provider "scaleway" {
+  zone   = "fr-par-1"
+  region = "fr-par"
+}
+
+variable "image_tag" {
+  type    = string
+  default = "latest"
+}
+
+# Project
+resource "scaleway_account_project" "main" {
+  name        = "snu-production"
+  description = "SNU project for 'production'"
+}
+
+# Logs
+resource "scaleway_cockpit" "main" {
+  project_id = scaleway_account_project.main.id
+}
+
+# Registry
+resource "scaleway_registry_namespace" "main" {
+  project_id  = scaleway_account_project.main.id
+  name        = "snu-production"
+  description = "SNU registry for production"
+  is_public   = false
+}
+
+# Application user
+resource "scaleway_iam_application" "main" {
+  name        = "snu-deploy-production"
+  description = "Application allowed to deploy apps in 'production'"
+}
+
+# Deploy policy
+resource "scaleway_iam_policy" "deploy" {
+  name           = "snu-deploy-production-policy"
+  description    = "Allow to deploy apps in 'production'"
+  application_id = scaleway_iam_application.main.id
+  rule {
+    project_ids = [scaleway_account_project.main.id]
+    permission_set_names = [
+      "ContainersFullAccess",
+      "ContainerRegistryFullAccess",
+      "DomainsDNSFullAccess",
+      "SecretManagerReadOnly",
+      "SecretManagerSecretAccess",
+    ]
+  }
+}
+
+
+output "project_id" {
+  value = scaleway_account_project.main.id
+}
+output "registry_endpoint" {
+  value = scaleway_registry_namespace.main.endpoint
+}
