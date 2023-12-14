@@ -74,7 +74,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
     const res = await api.get(`/inscription-goal/${newCohort?.name}/department/${young.department}`);
     if (!res.ok) throw new Error(res);
     const fillingRate = res.data;
-    if (fillingRate >= 1.05) {
+    if (fillingRate >= 1) {
       setFillingRateMet(true);
     }
     setModalConfirmWithMessage(true);

@@ -327,7 +327,7 @@ export default function Create() {
     const res = await api.get(`/inscription-goal/${cohort?.name}/department/${values.department}`);
     if (!res.ok) throw new Error(res);
     const fillingRate = res.data;
-    if (fillingRate >= 1.05) {
+    if (fillingRate >= 1) {
       setComplememtaryListModalOpen(true);
     } else {
       sendData();
