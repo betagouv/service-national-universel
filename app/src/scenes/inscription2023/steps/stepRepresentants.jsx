@@ -257,7 +257,7 @@ export default function StepRepresentants() {
   };
 
   const supportLink = `${supportURL}${
-    isCLE ? "base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"
+    isCLE ? "/base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"
   }`;
 
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
