@@ -48,7 +48,6 @@ const inviteReferent = async (referent, { role, user }, etablissement) => {
 const ACADEMIQUE_DOMAINS = [
   "ac-clermont.fr",
   "ac-grenoble.fr",
-  "ac-grenoble.fr",
   "ac-besancon.fr",
   "ac-dijon.fr",
   "ac-rennes.fr",
@@ -79,6 +78,7 @@ const ACADEMIQUE_DOMAINS = [
   "ac-aix-marseille.fr",
   "ac-nice.fr",
   "ac-spm.fr",
+  "ac-lyon.fr",
 ];
 
 const validateEmailAcademique = (email) => {
