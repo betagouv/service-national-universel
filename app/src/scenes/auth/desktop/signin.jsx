@@ -96,7 +96,7 @@ export default function Signin() {
   }, []);
 
   return (
-    <div className="flex bg-[#F9F6F2] py-6">
+    <div className="flex bg-[#7F00FF] py-6">
       <div className="mx-auto w-full bg-white px-[1rem] py-[2rem] shadow-sm md:w-[56rem] md:px-[6rem] md:pt-[3rem]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
         <div className="mb-2 text-[32px] font-bold text-[#161616]">Me connecter</div>
