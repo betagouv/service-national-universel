@@ -1,6 +1,6 @@
-import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
-import translation from "./translation";
-import { ROLES } from "./roles";
+import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./src/constants";
+import translation from "./src/translation";
+import { ROLES } from "./src/roles";
 import sanitizeHtml from "sanitize-html";
 
 const isInRuralArea = (v) => {
@@ -186,19 +186,19 @@ export {
   htmlCleaner,
 };
 
-export * from "./academy";
-export * from "./colors";
-export * from "./constants";
-export * from "./date";
-export * from "./excelExports";
-export * from "./features";
-export * from "./file";
-export * from "./phone-number";
-export * from "./plan-de-transport";
-export * from "./region-and-departments";
-export * from "./roles";
-export * from "./sessions";
-export * from "./todo.constants";
-export * from "./translation";
-export * from "./zammood";
-export * from "./transport-info";
+export * from "./src/academy";
+export * from "./src/colors";
+export * from "./src/constants";
+export * from "./src/date";
+export * from "./src/excelExports";
+export * from "./src/features";
+export * from "./src/file";
+export * from "./src/phone-number";
+export * from "./src/plan-de-transport";
+export * from "./src/region-and-departments";
+export * from "./src/roles";
+export * from "./src/sessions";
+export * from "./src/todo.constants";
+export * from "./src/translation";
+export * from "./src/zammood";
+export * from "./src/transport-info";

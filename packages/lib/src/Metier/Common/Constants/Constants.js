@@ -1,4 +1,4 @@
-import { ROLES, SUB_ROLES } from "./roles";
+import { ROLES, SUB_ROLES } from "../Roles/Roles";
 
 const YOUNG_STATUS = {
   WAITING_VALIDATION: "WAITING_VALIDATION",

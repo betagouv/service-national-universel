@@ -1,4 +1,4 @@
-import { region2department } from "./region-and-departments";
+import { region2department } from "../Constants/RegionsAndDepartments";
 
 const ROLES = {
   ADMIN: "admin",
