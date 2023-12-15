@@ -14,6 +14,7 @@ const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
 const ClasseEngagee = require("./models/cle/classe");
 const Etablissement = require("./models/cle/etablissement");
+
 class Auth {
   constructor(model) {
     this.model = model;

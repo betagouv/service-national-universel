@@ -85,7 +85,7 @@ router.put("/request-confirmation-email", async (req, res) => {
     });
 
     return res.status(200).send({ ok: true, data: "2FA_REQUIRED" });
-  } catch (error) { }
+  } catch (error) {}
 });
 
 router.post("/confirm-email", async (req, res) => {
@@ -121,7 +121,7 @@ router.post("/confirm-email", async (req, res) => {
     await referent.save();
 
     return res.status(200).send({ ok: true, data: serializeReferent(referent) });
-  } catch (error) { }
+  } catch (error) {}
 });
 
 router.post("/confirm-signup", async (req, res) => {

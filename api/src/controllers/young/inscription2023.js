@@ -93,14 +93,14 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...value,
       ...(value.livesInFrance === "true"
         ? {
-          foreignCountry: "",
-          foreignAddress: "",
-          foreignCity: "",
-          foreignZip: "",
-          hostFirstName: "",
-          hostLastName: "",
-          hostRelationship: "",
-        }
+            foreignCountry: "",
+            foreignAddress: "",
+            foreignCity: "",
+            foreignZip: "",
+            hostFirstName: "",
+            hostLastName: "",
+            hostRelationship: "",
+          }
         : {}),
       ...validateCorrectionRequest(young, keyList),
     };
