@@ -15,7 +15,6 @@ import { translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 import Input from "../components/Input";
-import InscriptionStepper from "../components/InscriptionStepper";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -223,7 +222,9 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
-  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux`;
+  const supportLink = `${supportURL}${	
+    isCLE ? "/base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"	
+  }`;
 
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
     return <Redirect to="/" />;
