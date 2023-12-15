@@ -12,7 +12,6 @@ import useAuth from "@/services/useAuth";
 export default function Done() {
   const { young, isCLE } = useAuth();
   const history = useHistory();
-  const isCle = YOUNG_SOURCE.CLE === young.source;
   async function handleClick() {
     try {
       const eventName = isCLE ? "CLE/CTA preinscription - finaliser" : "Phase0/CTA preinscription - finaliser";
