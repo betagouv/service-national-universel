@@ -12,6 +12,7 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
+import InscriptionStepper from "../components/InscriptionStepper";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
@@ -37,7 +38,8 @@ export default function StepConsentements() {
         return;
       }
       dispatch(setYoung(responseData));
-      plausibleEvent("Phase0/CTA inscription - consentement");
+      const eventName = isCLE ? "CLE/CTA inscription - consentement" : "Phase0/CTA inscription - consentement";
+      plausibleEvent(eventName);
       history.push("/inscription2023/representants");
     } catch (e) {
       capture(e);
@@ -57,9 +59,10 @@ export default function StepConsentements() {
 
   return (
     <>
+      <InscriptionStepper />
       <DSFRContainer
         title="Apporter mon consentement"
-        supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`}
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-donne-mon-consentement" : "/base-de-connaissance/je-minscris-et-donne-mon-consentement"}`}
         supportEvent="Phase0/aide inscription - consentement">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
         <div className="mt-4 flex flex-col gap-4 pb-2">

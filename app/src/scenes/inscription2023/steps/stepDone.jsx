@@ -36,7 +36,8 @@ export default function StepWaitingConsent() {
         setDisabled(false);
         return;
       }
-      plausibleEvent("Phase0/CTA inscription - relancer rep leg");
+      const eventName = isCle ? "CLE/CTA inscription - relancer rep leg" : "Phase0/CTA inscription - relancer rep leg";
+      plausibleEvent(eventName);
       toastr.success("Succès", "Votre relance a bien été prise en compte.");
     } catch (e) {
       capture(e);

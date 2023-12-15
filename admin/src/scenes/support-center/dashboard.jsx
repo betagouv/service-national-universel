@@ -227,28 +227,31 @@ const Dashboard = (props) => {
           </div>
         </div>
       </Container>
-
-      <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations :</h4>
-      <List>
-        <section className="ticket titles">
-          <p>Nº demande</p>
-          <p>Sujet</p>
-          <p>Etat</p>
-          <p className="ticket-date">Dernière mise à jour</p>
-        </section>
-        {!userTickets ? <Loader /> : null}
-        {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
-        {userTickets
-          ?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-          ?.map((ticket) => (
-            <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
-              <p>{ticket.number}</p>
-              <p>{ticket.subject}</p>
-              <p>{displayState(ticket.status)}</p>
-              <div className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</div>
-            </NavLink>
-          ))}
-      </List>
+      {![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
+        <>
+          <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations :</h4>
+          <List>
+            <section className="ticket titles">
+              <p>Nº demande</p>
+              <p>Sujet</p>
+              <p>Etat</p>
+              <p className="ticket-date">Dernière mise à jour</p>
+            </section>
+            {!userTickets ? <Loader /> : null}
+            {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
+            {userTickets
+              ?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+              ?.map((ticket) => (
+                <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
+                  <p>{ticket.number}</p>
+                  <p>{ticket.subject}</p>
+                  <p>{displayState(ticket.status)}</p>
+                  <div className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</div>
+                </NavLink>
+              ))}
+          </List>
+        </>
+      )}
     </HeroContainer>
   );
 };

@@ -50,8 +50,8 @@ export default function StepProfil() {
     if (isCLE && !data?.frenchNationality) {
       errors.frenchNationality = "Ce champ est obligatoire";
     }
-    if (isCLE && !data?.birthDate) {
-      errors.birthDate = "Ce champ est obligatoire";
+    if (isCLE && (!data?.birthDate || !dayjs(data.birthDate).isValid())) {
+      errors.birthDate = "Vous devez saisir une date de naissance valide";
     }
     if (data?.phone && !isPhoneNumberWellFormated(trimmedPhone, data?.phoneZone)) {
       errors.phone = PHONE_ZONES[data?.phoneZone]?.errorMessage;
@@ -129,7 +129,7 @@ export default function StepProfil() {
         setLoading(false);
       }
       if (user) {
-        // plausibleEvent(); Event name TBD
+        plausibleEvent("CLE/CTA preinscription - infos persos");
         if (token) API.setToken(token);
         dispatch(setYoung(user));
         history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
@@ -152,7 +152,7 @@ export default function StepProfil() {
 
       <DSFRContainer
         title="Créez votre compte"
-        supportLink={supportURL + "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-cree-mon-compte-eleve" : "/base-de-connaissance/je-me-preinscris-et-cree-mon-compte-volontaire"}`}
         supportEvent="Phase0/aide preinscription - infos persos">
         {isCLE && (
           <>

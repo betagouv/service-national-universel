@@ -16,19 +16,9 @@ function cookieOptions(maxAge) {
     return { maxAge, httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
   }
 }
-function logoutCookieOptions() {
-  if (config.ENVIRONMENT === "development") {
-    return { httpOnly: true, secure: false };
-  } else if (config.ENVIRONMENT === "staging") {
-    return { httpOnly: true, secure: true, sameSite: "none" };
-  } else {
-    return { httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
-  }
-}
 
 module.exports = {
   cookieOptions,
-  logoutCookieOptions,
   COOKIE_SIGNIN_MAX_AGE,
   COOKIE_SNUPPORT_MAX_AGE,
   COOKIE_TRUST_TOKEN_JWT_MAX_AGE,

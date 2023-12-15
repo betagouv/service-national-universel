@@ -1,5 +1,13 @@
 export const itemsSejourGod = [
   {
+    title: "Établissements",
+    link: "/etablissement",
+  },
+  {
+    title: "Classes",
+    link: "/classes",
+  },
+  {
     title: "Centres",
     link: "/centre",
   },
@@ -36,6 +44,14 @@ export const itemsSejourGod = [
 
 export const itemsSejourAdmin = [
   {
+    title: "Établissements",
+    link: "/etablissement",
+  },
+  {
+    title: "Classes",
+    link: "/classes",
+  },
+  {
     title: "Centres",
     link: "/centre",
   },
@@ -66,6 +82,14 @@ export const itemsSejourAdmin = [
 ];
 
 export const itemsSejourRef = [
+  {
+    title: "Établissements",
+    link: "/etablissement",
+  },
+  {
+    title: "Classes",
+    link: "/classes",
+  },
   {
     title: "Centres",
     link: "/centre",

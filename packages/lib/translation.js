@@ -1114,6 +1114,25 @@ const translateYoungSource = (source) => {
   }
 };
 
+const translateStatusClasse = (status) => {
+  switch (status) {
+    case "WITHDRAWN":
+      return "Désistée";
+    case "DRAFT":
+      return "Brouillon";
+    case "CREATED":
+      return "Créée";
+    case "INSCRIPTION_IN_PROGRESS":
+      return "Inscription en cours";
+    case "INSCRIPTION_TO_CHECK":
+      return "Inscription à valider";
+    case "VALIDATED":
+      return "Classe validée";
+    default:
+      return status;
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé pour traduire l'historique des plans de transport
 
@@ -1214,6 +1233,7 @@ export {
   translateEtbalissementSector,
   translateColoration,
   translateYoungSource,
+  translateStatusClasse,
 };
 export default {
   translate,
@@ -1248,4 +1268,5 @@ export default {
   translateEtbalissementSector,
   translateColoration,
   translateYoungSource,
+  translateStatusClasse,
 };

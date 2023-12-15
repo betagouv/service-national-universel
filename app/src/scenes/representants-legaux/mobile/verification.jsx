@@ -293,7 +293,7 @@ function sectionsData(young) {
     },
     {
       title: "Séjour de cohésion",
-      subtitle: getCohortPeriod(young.cohort),
+      subtitle: young.cohort.name === "CLE 23-24" ? "À venir" : getCohortPeriod(young.cohort),
     },
     {
       title: "Son profil",

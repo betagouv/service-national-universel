@@ -60,6 +60,7 @@ const {
   ROLES,
   YOUNG_STATUS_PHASE2,
   youngCanChangeSession,
+  youngCanDeleteAccount,
 } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
@@ -75,14 +76,7 @@ router.post("/email", passport.authenticate("young", { session: false, failWithE
 router.post("/email-validation/new-email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmailUpdate(req, res));
 router.post("/email-validation", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmail(req, res));
 router.get("/email-validation/token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.requestNewEmailValidationToken(req, res));
-router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    await YoungAuth.logout(req, res);
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
@@ -469,12 +463,9 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     if (!youngCanChangeSession(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // young can only update their own cohort.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
@@ -813,7 +804,6 @@ router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { se
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const fieldToKeep = [
@@ -901,6 +891,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!youngCanDeleteAccount(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
     const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
@@ -949,6 +940,7 @@ router.put("/abandon", passport.authenticate("young", { session: false, failWith
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!youngCanDeleteAccount(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
     const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);

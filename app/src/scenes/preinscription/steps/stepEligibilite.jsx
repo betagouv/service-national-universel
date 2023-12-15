@@ -192,18 +192,17 @@ export default function StepEligibilite() {
       <ProgressBar isReinscription={isLoggedIn} />
       {!isLoggedIn && (
         <PaddedContainer className="flex py-4 sm:flex-row-reverse md:flex-row">
-          <div className="md:pr-4 sm:w-52 md:w-40">
+          <div className="pt-3 md:pr-4 sm:w-80 md:w-40">
             <img src={School} alt="" />
           </div>
           <div>
-            <p className="mb-2 text-lg font-bold">Classes engagées</p>
-            <p className="text-sm">
+            <p className="mb-2 text-xl font-bold">Classes engagées</p>
+            <p className="text-sm sm:mr-4 md:mr-0">
               Si vous envisagez une participation au SNU dans le cadre des classes engagées, vous ne pouvez pas vous inscrire ici. Veuillez attendre que votre référent classe vous
               indique la procédure à suivre.
             </p>
-            <InlineButton className="md:pr-4 pt-2 md:pr-2 pb-1">
-              {/* TODO: Waiting for URL from MARGAUX  */}
-              <a rel="noreferrer noopener" target="blank" href="#">
+            <InlineButton className="text-sm md:pr-4 pt-2 md:pr-2 pb-1">
+              <a rel="noreferrer noopener" target="blank" href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
                 En savoir plus →
               </a>
             </InlineButton>

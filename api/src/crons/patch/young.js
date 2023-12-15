@@ -62,6 +62,9 @@ async function processPatch(patch, count, total) {
             case "phase2NumberHoursDone":
               eventName = "HEURE_PHASE2_CHANGE";
               break;
+            case "source":
+              eventName = "SOURCE_CHANGE";
+              break;
           }
         }
 

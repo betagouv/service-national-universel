@@ -49,6 +49,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "statusPhase1.keyword",
       "type.keyword",
       "uniqueKeyAndId.keyword",
+      "etablissementId.keyword",
     ];
 
     const sortFields = ["createdAt", "name.keyword"];
@@ -80,7 +81,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     });
     if (req.params.action === "export") {
       const response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data });
+      return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);

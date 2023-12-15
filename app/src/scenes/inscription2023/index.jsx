@@ -31,7 +31,6 @@ import { environment, supportURL } from "../../config";
 import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
-import Stepper from "@/components/dsfr/ui/Stepper";
 
 function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;

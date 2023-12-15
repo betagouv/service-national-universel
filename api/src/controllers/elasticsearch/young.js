@@ -64,6 +64,8 @@ function getYoungsFilters(user) {
     "parentAllowSNU.keyword",
     "sessionPhase1Id.keyword",
     "source.keyword",
+    "classeId.keyword",
+    "etablissementId.keyword",
   ].filter(Boolean);
 }
 

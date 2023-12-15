@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES } = require("snu-lib");
 const mongoose = require("mongoose");
 
+const emailsEmitter = require("../../emails");
 const config = require("../../config");
 const { capture } = require("../../sentry");
 const { ERRORS, validatePassword } = require("../../utils");
@@ -66,7 +67,7 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (value.email !== value.confirmEmail)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
-    if (config.ENVIRONMENT !== "production" && !validateEmailAcademique(value.email))
+    if (config.ENVIRONMENT === "production" && !validateEmailAcademique(value.email))
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
@@ -84,7 +85,7 @@ router.put("/request-confirmation-email", async (req, res) => {
     });
 
     return res.status(200).send({ ok: true, data: "2FA_REQUIRED" });
-  } catch (error) {}
+  } catch (error) { }
 });
 
 router.post("/confirm-email", async (req, res) => {
@@ -120,11 +121,10 @@ router.post("/confirm-email", async (req, res) => {
     await referent.save();
 
     return res.status(200).send({ ok: true, data: serializeReferent(referent) });
-  } catch (error) {}
+  } catch (error) { }
 });
 
 router.post("/confirm-signup", async (req, res) => {
-  let session;
   try {
     const { error, value } = Joi.object({
       invitationToken: Joi.string().required(),
@@ -140,7 +140,6 @@ router.post("/confirm-signup", async (req, res) => {
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     if (value.schoolId) {
       if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -158,11 +157,20 @@ router.post("/confirm-signup", async (req, res) => {
         country: ramsesSchool.country,
       };
 
-      await EtablissementModel.create([body], { session });
+      await EtablissementModel.create([body]);
+      referent.set({
+        region: ramsesSchool.region,
+        department: ramsesSchool.departmentName,
+      });
     }
 
     referent.set({ invitationToken: null, acceptCGU: true });
-    await referent.save({ fromUser: referent, session });
+    await referent.save({ fromUser: referent });
+
+    if (referent.subRole === SUB_ROLES.coordinateur_cle) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_COORDINATEUR, referent);
+    else if (referent.subRole === SUB_ROLES.referent_etablissement) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT, referent);
+    else if (referent.role === ROLES.REFERENT_CLASSE) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_CLASSE, referent);
+
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

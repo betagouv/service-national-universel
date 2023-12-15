@@ -23,7 +23,7 @@ const AccountSchoolSituationPage = () => {
     schoolCity: young.schoolCity || "",
   };
 
-  if (isPending) {
+  if (isPending && isCLE) {
     return <Loader />;
   }
   return (

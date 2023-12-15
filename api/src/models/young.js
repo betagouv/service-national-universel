@@ -6,8 +6,10 @@ const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YO
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
+const { capture } = require("../sentry");
 const MODELNAME = "young";
 const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
+const StateManager = require("../states");
 
 const File = new mongoose.Schema({
   name: String,
@@ -2090,6 +2092,11 @@ Schema.methods.anonymise = function () {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
+  if (doc.source === YOUNG_SOURCE.CLE) { // doc.previousStatus !== doc.status is not working in post save hook...
+    StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) })
+      .catch((error) => capture(error));
+  }
+
   if (ENVIRONMENT === "testing") return;
   sendinblue.sync(doc, MODELNAME);
 });
@@ -2110,6 +2117,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
   this.updatedAt = Date.now();
+  this.previousStatus = this.status; // Used to compute classe if a young CLE has a change in status (see post save hook)
   next();
 });
 

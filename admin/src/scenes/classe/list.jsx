@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES } from "snu-lib";
+import { ROLES, translateStatusClasse } from "snu-lib";
 import { statusClassForBadge } from "./utils";
 
 export default function list() {
@@ -15,14 +15,51 @@ export default function list() {
   const [data, setData] = useState([]);
   const pageId = "classe-list";
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [etablissements, setEtablissements] = useState(null);
   const [paramData, setParamData] = useState({
     page: 0,
   });
   const [size, setSize] = useState(10);
   const user = useSelector((state) => state.Auth.user);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) {
+          const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
+            filters: {},
+            exportFields: ["name", "uai"],
+          });
+          setEtablissements(etablissements);
+          setClasses(true);
+          return;
+        }
+        const res = await api.post(`/elasticsearch/cle/classe/search`, { filters: {} });
+        setClasses(res.responses[0].hits.total.value > 0);
+        setEtablissements([]);
+      } catch (e) {
+        setClasses(false);
+        capture(e);
+      }
+    })();
+  }, []);
+
+  if (classes === null || !etablissements) return null;
+
   const filterArray = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné" },
+    [ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && {
+      title: "Établissement",
+      name: "etablissementId",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !etablissements.length) return item;
+        const res = etablissements.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.name;
+      },
+    },
+
     { title: "Numéro d'identification", name: "uniqueKeyAndId", missingLabel: "Non renseigné" },
     { title: "Statut", name: "status", missingLabel: "Non renseigné" },
     { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné" },
@@ -33,20 +70,6 @@ export default function list() {
     { title: "Niveau", name: "grade", missingLabel: "Non renseigné" },
   ].filter(Boolean);
 
-  useEffect(() => {
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return setClasses(true);
-    //else fetch classes
-    (async () => {
-      try {
-        const res = await api.post(`/elasticsearch/cle/classe/search`, { filters: {} });
-        setClasses(res.responses[0].hits.total.value > 0);
-      } catch (e) {
-        setClasses(false);
-        capture(e);
-      }
-    })();
-  }, []);
-
   if (classes === null) return null;
 
   return (
@@ -55,17 +78,19 @@ export default function list() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes" }]}
         actions={[
-          <Link key="list" to="/mes-classes/create" className="ml-2">
-            <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
-          </Link>,
-        ]}
+          ![ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
+            <Link key="list" to="/classes/create" className="ml-2">
+              <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
+            </Link>
+          ),
+        ].filter(Boolean)}
       />
       {!classes && (
         <Container className="!p-8">
           <div className="py-6 bg-gray-50">
             <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore créé de classe engagée</div>
             <div className="flex items-start justify-center h-[136px]">
-              <Link to="/mes-classes/create">
+              <Link to="/classes/create">
                 <Button type="wired" leftIcon={<HiPlus />} title="Créer une première classe engagée" />
               </Link>
             </div>
@@ -151,7 +176,7 @@ export default function list() {
 const Hit = ({ hit }) => {
   const history = useHistory();
   return (
-    <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={() => history.push(`/mes-classes/${hit._id}`)}>
+    <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={() => history.push(`/classes/${hit._id}`)}>
       <td className="flex w-[40%] cursor-pointer items-center gap-4">
         <div className="flex w-full flex-col justify-center">
           <div className="m-0 table w-full table-fixed border-collapse">
@@ -171,7 +196,7 @@ const Hit = ({ hit }) => {
       </td>
       <td className="flex w-[20%] flex-col gap-2">{hit?.totalSeats ? <Badge title={hit.seatsTaken + "/" + hit.totalSeats} /> : <Badge title="À préciser" />}</td>
       <td className="w-[20%]">
-        <Badge title={translate(hit.status)} status={statusClassForBadge(hit.status)} />
+        <Badge title={translateStatusClasse(hit.status)} status={statusClassForBadge(hit.status)} />
       </td>
     </tr>
   );

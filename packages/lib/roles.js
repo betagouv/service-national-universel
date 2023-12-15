@@ -101,7 +101,14 @@ function canInviteUser(actorRole, targetRole) {
 
 const canDeleteStructure = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target);
 
-const canDeleteYoung = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target) || actor._id.toString() === target._id.toString();
+const canDeleteYoung = (actor, target) => {
+  // un référent peut supprimer un volontaire, mais un volontaire peut se supprimer uniquement si il est HTS
+  if (actor._id.toString() === target._id.toString()) {
+    if (target.source === "CLE") return false;
+    return true;
+  }
+  return isAdmin(actor) || referentInSameGeography(actor, target);
+};
 
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
@@ -111,8 +118,10 @@ function canEditYoung(actor, young) {
   const actorAndTargetInTheSameDepartment = actor.department.includes(young.department);
   const referentRegionFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && actorAndTargetInTheSameRegion;
   const referentDepartmentFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actorAndTargetInTheSameDepartment;
+  //TODO update this
+  const referentCLEAuthorized = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role) && young.source === "CLE";
 
-  const authorized = isAdmin || isHeadCenter || referentRegionFromTheSameRegion || referentDepartmentFromTheSameDepartment;
+  const authorized = isAdmin || isHeadCenter || referentRegionFromTheSameRegion || referentDepartmentFromTheSameDepartment || referentCLEAuthorized;
   return authorized;
 }
 
@@ -270,7 +279,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
       ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
-        (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
+      (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
       : true);
   return authorized;
 }
@@ -691,6 +700,8 @@ function canSearchInElasticSearch(actor, index) {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
   } else if (index === "youngCle") {
     return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+  } else if (index === "etablissement") {
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   }
   return false;
 }
@@ -868,7 +879,7 @@ function canCreateClasse(actor) {
 }
 
 function canUpdateClasse(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE;
+  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
 function canViewClasse(actor) {
@@ -876,7 +887,10 @@ function canViewClasse(actor) {
 }
 
 function canUpdateEtablissement(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
+  return (
+    (actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement) ||
+    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role)
+  );
 }
 
 function canViewEtablissement(actor) {

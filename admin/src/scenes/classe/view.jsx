@@ -8,7 +8,18 @@ import { useParams, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, YOUNG_STATUS, translateGrade, translateColoration, STATUS_CLASSE } from "snu-lib";
+import {
+  translate,
+  CLE_COLORATION_LIST,
+  CLE_GRADE_LIST,
+  CLE_FILIERE_LIST,
+  ROLES,
+  YOUNG_STATUS,
+  translateGrade,
+  translateColoration,
+  STATUS_CLASSE,
+  translateStatusClasse,
+} from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
@@ -129,7 +140,7 @@ export default function view() {
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
         return setIsLoading(false);
       }
-      history.push("/mes-classes");
+      history.push("/classes");
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la suppression");
@@ -144,7 +155,8 @@ export default function view() {
           <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
         </div>,
       ]
-    : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN
+    : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+      classe?.status !== STATUS_CLASSE.WITHDRAWN
     ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
     : null;
 
@@ -154,8 +166,8 @@ export default function view() {
     <Page>
       <Header
         title={classe.name || "Informations nécessaires"}
-        titleComponent={<Badge className="mx-4 mt-2" title={translate(classe.status)} status={statusClassForBadge(classe.status)} />}
-        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/mes-classes" }, { title: "Fiche de la classe" }]}
+        titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status)} />}
+        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
           ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [
             <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
@@ -236,6 +248,14 @@ export default function view() {
               }}
               error={errors.grade}
             />
+            {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+              <>
+                <InputText className="mb-3" value={classe.name} error={errors.name} readOnly={true} label="Établissement" />
+                <Link to={`/etablissement/${classe.etablissementId}`} className="w-full">
+                  <Button type="tertiary" title="Voir l'établissement" className="w-full" />
+                </Link>
+              </>
+            )}
             {edit && user.role === ROLES.ADMINISTRATEUR_CLE ? (
               <div className="flex items-center justify-end mt-6">
                 <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={() => setModalDelete(true)}>
@@ -251,7 +271,7 @@ export default function view() {
         <Container
           title="Suivi de la classe"
           actions={[
-            <Link key="list-students" to="/mes-eleves">
+            <Link key="list-students" to={`${[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "/mes-eleves" : "/inscription"}?classeId=${classe._id}`}>
               <Button type="tertiary" title="Voir les élèves" />
             </Link>,
           ]}>

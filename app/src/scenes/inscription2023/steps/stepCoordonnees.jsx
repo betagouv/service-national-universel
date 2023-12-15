@@ -35,7 +35,7 @@ import { apiAdress, getAddressOptions } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
-import { YOUNG_SOURCE } from "snu-lib";
+import useAuth from "@/services/useAuth";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -128,7 +128,7 @@ export default function StepCoordonnees() {
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
-  const isCle = YOUNG_SOURCE.CLE === young.source;
+  const { isCLE } = useAuth();
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
 
   const {
@@ -333,7 +333,7 @@ export default function StepCoordonnees() {
       requiredFields.push("specificAmenagmentType");
     }
 
-    if (!isCle) {
+    if (!isCLE) {
       fieldToUpdate.push("situation");
       requiredFields.push("situation");
     }
@@ -380,7 +380,8 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
-        plausibleEvent("Phase0/CTA inscription - profil");
+        const eventName = isCLE ? "CLE/CTA inscription - profil" : "Phase0/CTA inscription - profil";
+        plausibleEvent(eventName);
         dispatch(setYoung(responseData));
         history.push("/inscription2023/consentement");
       } catch (e) {
@@ -413,7 +414,7 @@ export default function StepCoordonnees() {
       requiredFields.push("specificAmenagmentType");
     }
 
-    if (!isCle) {
+    if (!isCLE) {
       fieldToUpdate.push("situation");
       requiredFields.push("situation");
     }
@@ -445,7 +446,8 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
-        plausibleEvent("Phase0/CTA demande correction - Corriger Coordonnees");
+        const eventName = isCLE ? "CLE/CTA demande correction - Corriger Coordonnees" : "Phase0/CTA demande correction - Corriger Coordonnees";
+        plausibleEvent(eventName);
         dispatch(setYoung(responseData));
         history.push("/");
       } catch (e) {
@@ -509,7 +511,7 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        {!isCle && (
+        {!isCLE && (
           <Select
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
             options={situationOptions}

@@ -176,7 +176,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const { error, value } = Joi.object({
       subject: Joi.string().required(),
       message: Joi.string().required(),
-      parcours: Joi.string().required(),
+      parcours: Joi.string(),
       fromPage: Joi.string().allow(null),
       author: Joi.string(),
       formSubjectStep1: Joi.string(),
@@ -265,7 +265,7 @@ router.post("/ticket/form", async (req, res) => {
       message: Joi.string().required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
-      parcours: Joi.string().required(),
+      parcours: Joi.string(),
       classeId: Joi.string().allow(null),
       department: Joi.string().required(),
       region: Joi.string().required(),
