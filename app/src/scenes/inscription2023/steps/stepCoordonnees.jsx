@@ -463,7 +463,7 @@ export default function StepCoordonnees() {
   return (
     <>
       <DSFRContainer
-        title={isCle ? "Mon profil élève" : "Mon profil volontaire"}
+        title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
         supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`}
         supportEvent="Phase0/aide inscription - coordonnees">
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />

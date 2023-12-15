@@ -183,7 +183,7 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       moreInformation: Joi.string().trim().valid("true", "false").required(),
       specificAmenagment: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: Joi.string().trim().valid("true", "false").isrequired(),
+        then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
       specificAmenagmentType: Joi.alternatives().conditional("specificAmenagment", {
@@ -193,12 +193,12 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       }),
       reducedMobilityAccess: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: Joi.string().trim().valid("true", "false").isrequired(),
+        then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
       handicapInSameDepartment: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: Joi.string().trim().valid("true", "false").isrequired(),
+        then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
     };
@@ -209,11 +209,11 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
         then: Joi.string()
           .trim()
           .valid(...youngSchooledSituationOptions)
-          .isrequired(),
+          .required(),
         otherwise: Joi.string()
           .trim()
           .valid(...youngActiveSituationOptions)
-          .isrequired(),
+          .required(),
       });
     }
 

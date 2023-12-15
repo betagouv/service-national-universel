@@ -21,7 +21,6 @@ import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
 import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
-import { YOUNG_SOURCE } from "snu-lib";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -37,7 +36,6 @@ const getInitialFormValues = (young) => ({
 
 const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
-  const isCle = YOUNG_SOURCE.CLE === young.source;
   const dispatch = useDispatch();
 
   const { search } = useLocation();
