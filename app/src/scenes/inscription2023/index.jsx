@@ -74,7 +74,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
 
   return (
     <DSFRLayout title={title}>
-      <Stepper steps={steps} currentStep={currentStep} />
+      <Stepper steps={steps} stepValue={currentStep} />
       {renderStep(currentStep)}
       <Help supportLink={supportLink} />
     </DSFRLayout>
