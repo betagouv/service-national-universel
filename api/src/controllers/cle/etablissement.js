@@ -9,6 +9,7 @@ const { ERRORS } = require("../../utils");
 const { validateId } = require("../../utils/validator");
 const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
+const ReferentModel = require("../../models/referent");
 
 router.get("/from-user", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -23,8 +24,19 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
       valueField = classe.etablissementId;
     }
     query[searchField] = valueField;
-    const etablissement = await EtablissementModel.findOne(query);
+    const etablissement = await EtablissementModel.findOne(query)?.lean();
     if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const coordinateurs = await ReferentModel.find({ _id: { $in: etablissement.coordinateurIds } }).lean();
+    etablissement.coordinateurs = coordinateurs.map((c) => ({
+      _id: c._id,
+      firstName: c.firstName,
+      lastName: c.lastName,
+      role: c.role,
+      email: c.email,
+      phone: c.phone,
+    }));
+
     return res.status(200).send({ ok: true, data: etablissement });
   } catch (error) {
     capture(error);
