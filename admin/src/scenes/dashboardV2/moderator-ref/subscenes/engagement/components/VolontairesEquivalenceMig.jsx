@@ -13,7 +13,7 @@ export default function VolontairesEquivalenceMig({ filters }) {
   const [statuses, setStatuses] = useState(null);
   const [types, setTypes] = useState(null);
   const [selected, setSelected] = useState("ALL");
-  const [filtered, setFiltered] = useState(null);
+  const filtered = getFiltered();
 
   const filterBase = {
     status: filters?.status?.join("~") || [],
@@ -62,11 +62,11 @@ export default function VolontairesEquivalenceMig({ filters }) {
     loadData();
   }, [filters]);
 
-  useEffect(() => {
-    if (!statuses || !types) return;
+  function getFiltered() {
+    if (!statuses || !types) return null;
     const status = statuses.find((s) => s.status === selected);
 
-    setFiltered({
+    return {
       options: [{ label: "Tous", value: "ALL" }, ...statuses.map((s) => ({ label: s.label, value: s.status }))],
       types:
         selected === "ALL"
@@ -85,8 +85,8 @@ export default function VolontairesEquivalenceMig({ filters }) {
                     percentage: st.statuses[selected] / status.nb,
                   })),
               })),
-    });
-  }, [filters, selected, statuses, types]);
+    };
+  }
 
   const getInfo = (type) => {
     if (!type.subTypes?.length) return null;
@@ -127,7 +127,7 @@ export default function VolontairesEquivalenceMig({ filters }) {
         </div>
       )}
       {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>}
-      {!loading && !error && (
+      {!loading && !error && filtered && (
         <div className="flex items-stretch justify-stretch">
           <StatusTable className="grow" statuses={statuses.map((s) => ({ ...s, status: s.label }))} loading={loading} nocols colWidth="w-100" />
           <div className="mx-12 shrink-0 flex items-stretch">
@@ -143,7 +143,7 @@ export default function VolontairesEquivalenceMig({ filters }) {
               legendUrls={filtered.types.map((type) => type.url)}
               tooltips={filtered.types.map((type) => type.value)}
               className="justify-center"
-              legendInfoPanels={filtered.types.map(getInfo)}
+              legendInfoPanels={filtered?.types.map(getInfo)}
             />
           </div>
         </div>
