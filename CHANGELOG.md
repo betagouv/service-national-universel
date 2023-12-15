@@ -1,3 +1,19 @@
+## [1.346.1](https://github.com/betagouv/service-national-universel/compare/v1.346.0...v1.346.1) (2023-12-15)
+
+
+### Bug Fixes
+
+* **admin:** DSFR css ([5185344](https://github.com/betagouv/service-national-universel/commit/5185344126947299f3a4f32af80dedb6733651e8))
+* **admin:** Only display demandes d'equiv when data is available ([3c10e62](https://github.com/betagouv/service-national-universel/commit/3c10e62b904d93d0cf63850650d2213e2606b528))
+* **api:** Remove ds on deploy ([9d01311](https://github.com/betagouv/service-national-universel/commit/9d013110050b548a9140c786cb86a50616efb5dc))
+* **app:** improve logout ([bcb43c6](https://github.com/betagouv/service-national-universel/commit/bcb43c659409d6df10b4383b7d88f843cea05c83))
+
+
+### Reverts
+
+* Revert "fix(ds): docker build for custom env" ([c4f402b](https://github.com/betagouv/service-national-universel/commit/c4f402bed93a32c33c6164405772bf36859c0e99))
+* **github:** Put back tests on api prod ([62ccdd0](https://github.com/betagouv/service-national-universel/commit/62ccdd002fee757ab8ec60c69b925e7e989e91b6))
+
 # [1.346.0](https://github.com/betagouv/service-national-universel/compare/v1.345.3...v1.346.0) (2023-12-14)
 
 
