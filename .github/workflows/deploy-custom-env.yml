@@ -101,6 +101,7 @@ jobs:
       - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
         run: sed -i.bak "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf
+        # the -i option replaces main.tf in-place creating a .bak backup file
 
       - name: Init terraform
         working-directory: ${{ env.custom_directory }}

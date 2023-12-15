@@ -75,6 +75,7 @@ jobs:
       - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
         run: sed -i.bak "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf
+        # the -i option replaces main.tf in-place creating a .bak backup file
 
       - name: Init terraform
         working-directory: ${{ env.custom_directory }}
@@ -88,6 +89,7 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: |
           terraform apply -no-color -input=false -auto-approve -destroy
-          # handle deletion of DNS zone not properly handled by destroy (scaleway bug ?)
-          terraform state rm scaleway_domain_zone.main
-          terraform apply -no-color -input=false -auto-approve -destroy
+          # Handle deletion of DNS zone not properly handled by destroy (scaleway bug ?) avoiding action failure
+          # Remove the next lines when the bug will be fixed
+          terraform state rm scaleway_domain_zone.main # Clean state (DNS zone are actually destroyed)
+          terraform apply -no-color -input=false -auto-approve -destroy # Clean backend
