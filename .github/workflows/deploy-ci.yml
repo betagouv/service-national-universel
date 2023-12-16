@@ -1,0 +1,98 @@
+name: Build and deploy custom environment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - stack-tf-prod
+
+env:
+  TARGET_BRANCH: main
+
+jobs:
+
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+      env_name: ${{ steps.env_name.outputs.env_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+
+      - name: Get TARGET_BRANCH last commit sha
+        id: commit_sha
+        run: |
+          commit_sha=$(git rev-parse HEAD)
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
+
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+
+      - name: Get custom-env name
+        id: env_name
+        uses: ./.github/actions/get_custom_env_name
+        with:
+          branch_name: ${{ env.TARGET_BRANCH }}
+
+  build:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app_name: [admin, api, app]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+
+      - name: Docker Build & Publish
+        uses: ./.github/actions/build_docker_image
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+          registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
+          image_name: ${{ matrix.app_name }}
+          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
+          image_tag: ${{ needs.prepare.outputs.image_tag }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [prepare, build]
+    env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_CI_DEPLOY_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+      PG_CONN_STR: ${{ secrets.SCW_CI_BACKEND_CONN_STR }}
+      PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
+      PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
+      ci_directory: ./terraform/environments/ci
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Init terraform
+        working-directory: ${{ env.ci_directory }}
+        run: terraform init
+
+      - name: Validate terraform
+        working-directory: ${{ env.ci_directory }}
+        run: terraform validate -no-color
+
+      - name: Terraform plan
+        working-directory: ${{ env.ci_directory }}
+        run: terraform plan -no-color -input=false -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+
+      - name: Terraform auto-apply
+        working-directory: ${{ env.ci_directory }}
+        run: terraform apply -no-color -input=false -auto-approve -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
