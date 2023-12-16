@@ -3,12 +3,16 @@ import React from "react";
 import { RiSearchLine } from "react-icons/ri";
 import { HiCheckCircle } from "react-icons/hi";
 import plausibleEvent from "@/services/plausible";
+import useAuth from "@/services/useAuth";
 
 export default function AddressDisplay({ data, updateData, error, correction }) {
   const userIsInInscription = window.location.pathname.includes("inscription");
+  const { isCLE } = useAuth();
+
   function handleClick() {
     if (userIsInInscription) {
-      plausibleEvent("Phase0/CTA inscription - rechercher nouvelle adresse");
+      const eventName = isCLE ? "CLE/CTA inscription - rechercher nouvelle adresse" : "Phase0/CTA inscription - rechercher nouvelle adresse";
+      plausibleEvent(eventName);
     }
     updateData({ address: "", addressVerified: "false", zip: "", city: "", department: "", region: "", location: null, coordinatesAccuracyLevel: null });
   }

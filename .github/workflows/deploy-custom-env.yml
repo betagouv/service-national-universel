@@ -1,6 +1,7 @@
 name: Build and deploy custom environment
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
@@ -8,35 +9,53 @@ on:
 jobs:
 
   prepare:
-    if:  contains(github.head_ref, '-ci-') || startsWith(github.head_ref, 'ci-') || endsWith(github.head_ref, '-ci')
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+        (contains(github.head_ref, '-ci-') ||
+        startsWith(github.head_ref, 'ci-') ||
+        endsWith(github.head_ref, '-ci'))
+      )
     runs-on: ubuntu-latest
     outputs:
+      branch_name: ${{ steps.check.outputs.branch_name }}
+      commit_sha: ${{ steps.check.outputs.commit_sha }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
       - name: Check branch name
+        id: check
         run: |
-          if [[ ${{ github.head_ref }} == 'main' ]] || [[ ${{ github.head_ref }} == 'production' ]] ; then
-            echo "This action is not available on the branch ${{ github.head_ref }}"
+          if [[ ${{ github.event_name }} == 'pull_request' ]] ; then
+            branch_name=${{ github.head_ref }}
+            commit_sha=${{ github.event.pull_request.head.sha }}
+          else
+            branch_name=${{ github.ref_name }}
+            commit_sha=${{ github.sha }}
+          fi
+          if [[ $branch_name == 'main' ]] || [[ $branch_name == 'production' ]] ; then
+            echo "This action is not available on the branch $branch_name"
             exit 1
           fi
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ steps.check.outputs.commit_sha }}
 
       - name: Get image tag
         id: image_tag
         uses: ./.github/actions/get_image_tag
         with:
-          sha: ${{ github.event.pull_request.head.sha }}
+          sha: ${{ steps.check.outputs.commit_sha }}
 
       - name: Get custom-env name
         id: env_name
         uses: ./.github/actions/get_custom_env_name
         with:
-          branch_name: ${{ github.head_ref }}
+          branch_name: ${{ steps.check.outputs.branch_name }}
 
   build:
     needs: prepare
@@ -48,7 +67,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ needs.prepare.outputs.commit_sha }}
 
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
@@ -70,23 +89,19 @@ jobs:
       PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
       custom_directory: ./terraform/environments/ci/custom
-      var_file: "vars/main.tfvars.json"
       scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1"
 
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ needs.prepare.outputs.commit_sha }}
 
       - uses: hashicorp/setup-terraform@v3
 
       - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf.template > main.tf
-
-      - name: Create var files
-        working-directory: ${{ env.custom_directory }}
-        run: jq ".environments.custom.image_tag=\"${{ needs.prepare.outputs.image_tag }}\"" ${{ env.var_file }}.template > ${{ env.var_file }}
+        run: sed -i.bak "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf
+        # the -i option replaces main.tf in-place creating a .bak backup file
 
       - name: Init terraform
         working-directory: ${{ env.custom_directory }}
@@ -104,7 +119,7 @@ jobs:
 
       - name: Get CI project & secret ID
         id: ci_outputs
-        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        if: steps.check_secret.outputs.has_secret == '0'
         working-directory: "${{ env.custom_directory }}/../"
         run: |
           terraform init
@@ -119,7 +134,7 @@ jobs:
 
       - name: Create secret
         id: create_secret
-        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        if: steps.check_secret.outputs.has_secret == '0'
         working-directory: ${{ env.custom_directory }}
         run: |
           # Create secret for custom environment
@@ -144,9 +159,9 @@ jobs:
           echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
 
       - name: Import secret
-        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        if: steps.check_secret.outputs.has_secret == '0'
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" imports.tf.template > imports.tf
+        run: sed -i.bak "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" imports.tf
 
       - name: Validate terraform
         working-directory: ${{ env.custom_directory }}
@@ -154,14 +169,14 @@ jobs:
 
       - name: Terraform plan
         working-directory: ${{ env.custom_directory }}
-        run: terraform plan -no-color -input=false -var-file="${{ env.var_file }}"
+        run: terraform plan -no-color -input=false -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
-        run: terraform apply -no-color -input=false -auto-approve -var-file="${{ env.var_file }}"
+        run: terraform apply -no-color -input=false -auto-approve -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Add comment to PR
-        if: ${{ steps.check_secret.outputs.has_secret == '0' }}
+        if: github.event_name == 'pull_request' && steps.check_secret.outputs.has_secret == '0'
         working-directory: ${{ env.custom_directory }}
         env:
           URL: ${{ github.event.pull_request.comments_url }}

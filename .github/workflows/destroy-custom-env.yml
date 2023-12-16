@@ -1,6 +1,7 @@
 name: Destroy custom environment
 
 on:
+  workflow_dispatch:
   pull_request:
     types:
       - closed
@@ -11,29 +12,47 @@ on:
 jobs:
 
   prepare:
-    if:  contains(github.head_ref, '-ci-') || startsWith(github.head_ref, 'ci-') || endsWith(github.head_ref, '-ci')
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+        (contains(github.head_ref, '-ci-') ||
+        startsWith(github.head_ref, 'ci-') ||
+        endsWith(github.head_ref, '-ci'))
+      )
     runs-on: ubuntu-latest
     outputs:
+      branch_name: ${{ steps.check.outputs.branch_name }}
+      commit_sha: ${{ steps.check.outputs.commit_sha }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
-    - name: Check branch name
-      run: |
-        if [[ ${{ github.head_ref }} == 'main' ]] || [[ ${{ github.head_ref }} == 'production' ]] ; then
-          echo "This action is not available on the branch ${{ github.head_ref }}"
-          exit 1
-        fi
+      - name: Check branch name
+        id: check
+        run: |
+          if [[ ${{ github.event_name }} == 'pull_request' ]] ; then
+            branch_name=${{ github.head_ref }}
+            commit_sha=${{ github.event.pull_request.head.sha }}
+          else
+            branch_name=${{ github.ref_name }}
+            commit_sha=${{ github.sha }}
+          fi
+          if [[ $branch_name == 'main' ]] || [[ $branch_name == 'production' ]] ; then
+            echo "This action is not available on the branch $branch_name"
+            exit 1
+          fi
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
 
-    - uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.check.outputs.commit_sha }}
 
-    - name: Get custom-env name
-      id: env_name
-      uses: ./.github/actions/get_custom_env_name
-      with:
-        branch_name: ${{ github.head_ref }}
+      - name: Get custom-env name
+        id: env_name
+        uses: ./.github/actions/get_custom_env_name
+        with:
+          branch_name: ${{ steps.check.outputs.branch_name }}
 
   destroy:
     runs-on: ubuntu-latest
@@ -45,22 +64,18 @@ jobs:
       PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
       custom_directory: ./terraform/environments/ci/custom
-      var_file: "vars/main.tfvars.json"
 
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ needs.prepare.outputs.commit_sha }}
 
       - uses: hashicorp/setup-terraform@v3
 
       - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
-        run: sed "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf.template > main.tf
-
-      - name: Create var files
-        working-directory: ${{ env.custom_directory }}
-        run: cp ${{ env.var_file }}.template ${{ env.var_file }}
+        run: sed -i.bak "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf
+        # the -i option replaces main.tf in-place creating a .bak backup file
 
       - name: Init terraform
         working-directory: ${{ env.custom_directory }}
@@ -72,4 +87,9 @@ jobs:
 
       - name: Terraform destroy
         working-directory: ${{ env.custom_directory }}
-        run: terraform apply -no-color -input=false -auto-approve -destroy -var-file="${{ env.var_file }}"
+        run: |
+          terraform apply -no-color -input=false -auto-approve -destroy
+          # Handle deletion of DNS zone not properly handled by destroy (scaleway bug ?) avoiding action failure
+          # Remove the next lines when the bug will be fixed
+          terraform state rm scaleway_domain_zone.main # Clean state (DNS zone are actually destroyed)
+          terraform apply -no-color -input=false -auto-approve -destroy # Clean backend

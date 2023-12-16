@@ -45,7 +45,8 @@ export default function StepConfirm() {
         return;
       }
       dispatch(setYoung(responseData));
-      plausibleEvent(isCLE ? "" : "Phase0/CTA inscription - valider inscription");
+      const eventName = isCLE ? "CLE/CTA inscription - valider inscription" : "Phase0/CTA inscription - valider inscription";
+      plausibleEvent(eventName);
       history.push("/inscription2023/done");
     } catch (e) {
       capture(e);
@@ -90,7 +91,12 @@ export default function StepConfirm() {
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mon profil</h1>
             <Link to="/inscription2023/coordonnee">
-              <EditPen onClick={() => plausibleEvent("Phase0/CTA inscription - modifier profil")} />
+              <EditPen
+                onClick={() => {
+                  const eventName = isCLE ? "CLE/CTA inscription - modifier profil" : "Phase0/CTA inscription - modifier profil";
+                  plausibleEvent(eventName);
+                }}
+              />
             </Link>
           </div>
           <Details title="Pays de naissance" value={young.birthCountry} />
@@ -132,7 +138,12 @@ export default function StepConfirm() {
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mes représentants légaux</h1>
             <Link to="/inscription2023/representants">
-              <EditPen onClick={() => plausibleEvent("Phase0/CTA inscription - modifier rl")} />
+              <EditPen
+                onClick={() => {
+                  const eventName = isCLE ? "CLE/CTA inscription - modifier rl" : "Phase0/CTA inscription - modifier rl";
+                  plausibleEvent(eventName);
+                }}
+              />
             </Link>
           </div>
           <Details title="Votre lien" value={translate(young.parent1Status)} />

@@ -6,12 +6,18 @@ terraform {
   }
   required_version = ">= 0.13"
 
-  backend "pg" {}
+  backend "pg" {
+    schema_name = "apps_###___ENV_NAME___###"
+  }
 }
 
 provider "scaleway" {
   zone   = "fr-par-1"
   region = "fr-par"
+}
+
+data "terraform_remote_state" "project" {
+  backend = "pg"
 }
 
 variable "image_tag" {
@@ -20,83 +26,46 @@ variable "image_tag" {
 }
 
 locals {
-  env            = "ci"
-  domain         = "beta-snu.dev"
-  api_hostname   = "api.${local.env}.${local.domain}"
-  admin_hostname = "admin.${local.env}.${local.domain}"
-  app_hostname   = "app.${local.env}.${local.domain}"
+  env            = "###___ENV_NAME___###"
+  api_hostname   = "api.${scaleway_domain_zone.main.id}"
+  admin_hostname = "admin.${scaleway_domain_zone.main.id}"
+  app_hostname   = "app.${scaleway_domain_zone.main.id}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
+  project        = data.terraform_remote_state.project.outputs
 }
 
-# Project
-resource "scaleway_account_project" "main" {
-  name        = "snu-${local.env}"
-  description = "SNU project for '${local.env}'"
+# DNS zone
+resource "scaleway_domain_zone" "main" {
+  project_id = local.project.project_id
+  domain     = local.project.domain
+  subdomain  = "${local.env}.${local.project.dns_zone}"
 }
+
 
 # Secrets
-resource "scaleway_secret" "ci" {
+resource "scaleway_secret" "custom" {
   name        = "snu-${local.env}"
-  project_id  = scaleway_account_project.main.id
+  project_id  = local.project.project_id
   description = "Secrets for environment '${local.env}'"
 }
+
 data "scaleway_secret_version" "main" {
-  secret_id = scaleway_secret.ci.id
+  secret_id = scaleway_secret.custom.id
   revision  = "latest_enabled"
-}
-
-# Logs
-resource "scaleway_cockpit" "main" {
-  project_id = scaleway_account_project.main.id
-}
-
-# Registry
-resource "scaleway_registry_namespace" "main" {
-  project_id  = scaleway_account_project.main.id
-  name        = "snu-${local.env}"
-  description = "SNU registry for ${local.env}"
-  is_public   = false
-}
-
-# Application user
-resource "scaleway_iam_application" "main" {
-  name        = "snu-deploy-${local.env}"
-  description = "Application allowed to deploy apps in '${local.env}'"
-}
-
-# Deploy policy
-resource "scaleway_iam_policy" "deploy" {
-  name           = "snu-deploy-${local.env}-policy"
-  description    = "Allow to deploy apps in '${local.env}'"
-  application_id = scaleway_iam_application.main.id
-  rule {
-    project_ids = [scaleway_account_project.main.id]
-    permission_set_names = [
-      "AllProductsFullAccess",
-    ]
-  }
 }
 
 # Containers namespace
 resource "scaleway_container_namespace" "main" {
-  project_id  = scaleway_account_project.main.id
+  project_id  = local.project.project_id
   name        = "snu-${local.env}"
   description = "SNU container namespace for environment '${local.env}'"
 }
 
 # Containers
-
-# DNS zone
-resource "scaleway_domain_zone" "main" {
-  project_id = scaleway_account_project.main.id
-  domain     = local.domain
-  subdomain  = local.env
-}
-
 resource "scaleway_container" "api" {
   name            = "${local.env}-api"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
+  registry_image  = "${local.project.registry_endpoint}/api:${var.image_tag}"
   port            = 8080
   cpu_limit       = 768
   memory_limit    = 1024
@@ -165,7 +134,7 @@ resource "scaleway_domain_record" "api" {
   name     = "api"
   type     = "CNAME"
   data     = "${scaleway_container.api.domain_name}."
-  ttl      = 3600
+  ttl      = 300
 }
 
 resource "scaleway_container_domain" "api" {
@@ -178,7 +147,7 @@ resource "scaleway_container_domain" "api" {
 resource "scaleway_container" "admin" {
   name            = "${local.env}-admin"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.image_tag}"
+  registry_image  = "${local.project.registry_endpoint}/admin:${var.image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -213,7 +182,7 @@ resource "scaleway_domain_record" "admin" {
   name     = "admin"
   type     = "CNAME"
   data     = "${scaleway_container.admin.domain_name}."
-  ttl      = 3600
+  ttl      = 300
 }
 
 resource "scaleway_container_domain" "admin" {
@@ -224,7 +193,7 @@ resource "scaleway_container_domain" "admin" {
 resource "scaleway_container" "app" {
   name            = "${local.env}-app"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.image_tag}"
+  registry_image  = "${local.project.registry_endpoint}/app:${var.image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -259,7 +228,7 @@ resource "scaleway_domain_record" "app" {
   name     = "app"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
-  ttl      = 3600
+  ttl      = 300
 }
 
 resource "scaleway_container_domain" "app" {
@@ -267,19 +236,12 @@ resource "scaleway_container_domain" "app" {
   hostname     = local.app_hostname
 }
 
-
-output "project_id" {
-  value = scaleway_account_project.main.id
+output "api_endpoint" {
+  value = "https://${local.api_hostname}"
 }
-output "domain" {
-  value = local.domain
+output "app_endpoint" {
+  value = "https://${local.app_hostname}"
 }
-output "dns_zone" {
-  value = local.env
-}
-output "registry_endpoint" {
-  value = scaleway_registry_namespace.main.endpoint
-}
-output "secret_id" {
-  value = scaleway_secret.ci.id
+output "admin_endpoint" {
+  value = "https://${local.admin_hostname}"
 }

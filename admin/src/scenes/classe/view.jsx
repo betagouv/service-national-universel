@@ -8,7 +8,18 @@ import { useParams, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES, YOUNG_STATUS, translateGrade, translateColoration, STATUS_CLASSE } from "snu-lib";
+import {
+  translate,
+  CLE_COLORATION_LIST,
+  CLE_GRADE_LIST,
+  CLE_FILIERE_LIST,
+  ROLES,
+  YOUNG_STATUS,
+  translateGrade,
+  translateColoration,
+  STATUS_CLASSE,
+  translateStatusClasse,
+} from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
@@ -155,7 +166,7 @@ export default function view() {
     <Page>
       <Header
         title={classe.name || "Informations nécessaires"}
-        titleComponent={<Badge className="mx-4 mt-2" title={translate(classe.status)} status={statusClassForBadge(classe.status)} />}
+        titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status)} />}
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
           ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [

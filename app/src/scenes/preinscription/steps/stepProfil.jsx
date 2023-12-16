@@ -129,7 +129,7 @@ export default function StepProfil() {
         setLoading(false);
       }
       if (user) {
-        // plausibleEvent(); Event name TBD
+        plausibleEvent("CLE/CTA preinscription - infos persos");
         if (token) API.setToken(token);
         dispatch(setYoung(user));
         history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
