@@ -20,9 +20,7 @@ jobs:
       - name: Get target_branch
         id: target_branch
         run: |
-          base64 --help
           echo "target_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          exit 1
 
       - uses: actions/checkout@v4
         with:
@@ -124,7 +122,7 @@ jobs:
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
             -var="prod_image_tag=${{ steps.prod_outputs.outputs.previous_image_tag }}"
           echo 'tf_plan<<EOF' >> $GITHUB_OUTPUT
-          echo "$(base64 -i staging.tfplan)" >> $GITHUB_OUTPUT
+          echo "$(base64 staging.tfplan)" >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
   deploy_staging:
@@ -156,7 +154,7 @@ jobs:
         env:
           TF_PLAN: ${{ needs.plan.outputs.tf_plan }}
         run: |
-          base64 -d -o staging.tfplan <<< $TF_PLAN
+          base64 -d > staging.tfplan <<< $TF_PLAN
           terraform apply -no-color -input=false -auto-approve staging.tfplan
 
       - name: Staging - Healthchecks
@@ -177,7 +175,7 @@ jobs:
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
             -var="prod_image_tag=${{ needs.plan.outputs.previous_image_tag }}"
           echo 'tf_plan<<EOF' >> $GITHUB_OUTPUT
-          echo "$(base64 -i prod.tfplan)" >> $GITHUB_OUTPUT
+          echo "$(base64 prod.tfplan)" >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
   deploy_production:
@@ -207,7 +205,7 @@ jobs:
         env:
           TF_PLAN: ${{ needs.deploy_staging.outputs.tf_plan }}
         run: |
-          base64 -d -o prod.tfplan <<< $TF_PLAN
+          base64 -d > prod.tfplan <<< $TF_PLAN
           terraform apply -no-color -input=false -auto-approve prod.tfplan
 
       - name: Production - Healthchecks
