@@ -405,7 +405,7 @@ export default function Create() {
         isOpen={isComplememtaryListModalOpen}
         title={
           <span>
-            L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {values.firstName} {values.lastName} va être{" "}
+            L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {values.firstName} {values.lastName} va être{" "}
             <strong className="text-bold">validé sur liste complémentaire</strong>.
           </span>
         }

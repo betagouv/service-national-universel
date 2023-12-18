@@ -173,7 +173,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
                   <IoWarningOutline className="h-6 w-6" />
                   <p className="font-bold">Objectif d&apos;inscription départementale atteint</p>
                 </div>
-                <p className="text-l">L&apos;objectif d&apos;inscription de votre département a été atteint à 105%.</p>
+                <p className="text-l">L&apos;objectif d&apos;inscription de votre département a été atteint à 100%.</p>
               </div>
             )}
             {fillingRateMet && young.status === YOUNG_STATUS.VALIDATED && (
@@ -183,7 +183,7 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
                   <p className="font-bold">Objectif d&apos;inscription départementale atteint</p>
                 </div>
                 <p className="text-l">
-                  L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier de {young.firstName} {young.lastName} va être{" "}
+                  L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier de {young.firstName} {young.lastName} va être{" "}
                   <strong className="text-bold uppercase">validé sur liste complémentaire</strong>.
                 </p>
               </div>
