@@ -1,14 +1,14 @@
 # Project
 import {
   to = scaleway_account_project.main
-  id = "57c5d867-7cb3-4bc7-8ce4-b855abccadb6"
+  id = "a0c93450-f68c-4768-8fe8-6e07a1644530"
 }
 # Secrets
 import {
   to = scaleway_secret.production
-  id = "fr-par/d56fb8b5-5b80-4524-b094-13263acd2194"
+  id = "fr-par/87d1df33-5dce-498e-9930-37f892c56776"
 }
 import {
   to = scaleway_secret.staging
-  id = "fr-par/04b5ab29-06b5-4b85-9eb8-79990dbd5180"
+  id = "fr-par/f050e65a-b996-402d-ad16-389b52172927"
 }
