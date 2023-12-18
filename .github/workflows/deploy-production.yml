@@ -153,12 +153,18 @@ jobs:
             curl -I ${{ steps.prod_outputs.outputs.prod_admin_endpoint }} &&
             curl -I ${{ steps.prod_outputs.outputs.prod_app_endpoint }}
 
-      - name: Merge in production branch
-        env:
-          production_branch: "test2-production" # TODO "production"
-        run: |
-          git remote
-          git fetch origin ${{ env.production_branch }} &&
-            git switch ${{ env.production_branch }} &&
-            git merge --ff-only ${{ needs.prepare.outputs.target_branch }} &&
-            git push origin ${{ env.production_branch }}
+  merge_branch:
+    runs-on: ubuntu-latest
+    needs: [prepare, deploy]
+    env:
+      production_branch: "test2-production" # TODO "production"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.production_branch }}
+
+      - name: Pull & merge RC into production
+        run: git pull origin ${{ needs.prepare.outputs.target_branch }} --ff-only
+
+      - name: Push production
+        run: git push origin ${{ env.production_branch }}
