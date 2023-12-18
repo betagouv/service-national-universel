@@ -9,7 +9,7 @@ const getFillingRate = async (department, cohort) => {
 };
 
 //@TODO: move to snu-lib and use it in the admin as well
-const FILLING_RATE_LIMIT = 1.05;
+const FILLING_RATE_LIMIT = 1;
 
 module.exports = {
   getFillingRate,
