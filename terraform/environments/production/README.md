@@ -12,23 +12,23 @@ The production environment manages several resources:
 
 All Common resources are described in [main.tf](main.tf). The most important are :
 
-- The [project](https://www.scaleway.com/en/docs/identity-and-access-management/iam/concepts/#project) that owns all resources of the ci environment
-- The [application user](https://www.scaleway.com/en/docs/identity-and-access-management/iam/concepts/#application) scoped on this project
-- The [registry](https://www.scaleway.com/en/docs/containers/container-registry/concepts/#container-registry)
+- The [project](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/account_project) that owns all resources of the ci environment
+- The [application user](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/iam_application) scoped on this project
+- The [registry](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/registry_namespace)
 
 ## Production resources
 
 All production resources are described in [production.tf](production.tf). The most important are :
 
-- The [secrets](https://www.scaleway.com/en/docs/identity-and-access-management/secret-manager/concepts/)
-- The [serverless containers](https://www.scaleway.com/en/docs/serverless/containers/concepts/#container) that serve the different applications
+- The [secrets](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/secret)
+- The [serverless containers](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/container) that serve the different applications
 
 ## Staging resources
 
 All staging resources are described in [staging.tf](staging.tf). The most important are :
 
-- The [secrets](https://www.scaleway.com/en/docs/identity-and-access-management/secret-manager/concepts/)
-- The [serverless containers](https://www.scaleway.com/en/docs/serverless/containers/concepts/#container) that serve the different applications
+- The [secrets](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/secret)
+- The [serverless containers](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/container) that serve the different applications
 
 ## Applications endpoints
 

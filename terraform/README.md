@@ -59,8 +59,8 @@ The SNU infrastructure is divided in two separate environments, **production** a
 Each environment has :
 
 - its own backend
-- its own [project](https://www.scaleway.com/en/docs/console/project/concepts/#project), that owns all resources of that environment
-- its own [application user](https://www.scaleway.com/en/docs/identity-and-access-management/iam/concepts/#application), with restricted [policy](https://www.scaleway.com/en/docs/identity-and-access-management/iam/concepts/#policy) [scoped](https://www.scaleway.com/en/docs/identity-and-access-management/iam/concepts/#scope) on the project
+- its own [project](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/account_project), that owns all resources of that environment
+- its own [application user](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/iam_application), with restricted [policy](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/iam_policy) [scoped](https://www.scaleway.com/en/docs/identity-and-access-management/iam/concepts/#scope) on the project
 
 This way, the application user of the ci environment cant interfere with any of the resources of the production environment.
 
