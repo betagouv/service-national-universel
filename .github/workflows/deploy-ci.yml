@@ -14,7 +14,7 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == env.TARGET_BRANCH || github.ref_name == 'stack-tf-prod' # TODO : remove
+    if: github.ref_name == 'main' || github.ref_name == 'stack-tf-prod' # TODO : remove
     outputs:
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
