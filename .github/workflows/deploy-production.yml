@@ -53,15 +53,15 @@ jobs:
           password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
           registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
 
-    - name: Check if image already exists
-      id: check_image
-      shell: bash
-      run: |
-        if docker pull ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} ; then
-          echo "image_exists=1" >> $GITHUB_OUTPUT
-        else
-          echo "image_exists=0" >> $GITHUB_OUTPUT
-        fi
+      - name: Check if image already exists
+        id: check_image
+        shell: bash
+        run: |
+          if docker pull ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} ; then
+            echo "image_exists=1" >> $GITHUB_OUTPUT
+          else
+            echo "image_exists=0" >> $GITHUB_OUTPUT
+          fi
 
       - name: Pull CI image
         if: steps.check_image.outputs.image_exists == '0'
