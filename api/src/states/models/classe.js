@@ -40,10 +40,9 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   const studentAbandoned = students.filter((student) => student.status === YOUNG_STATUS.ABANDONED);
   const studentNotAutorized = students.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED);
   const studentWithdrawn = students.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN);
-  const seatsTaken = studentInProgress.length + studentWaiting.length + studentValidated.length + studentNotAutorized.length + studentWithdrawn.length;
 
+  const seatsTaken = studentInProgress.length + studentWaiting.length + studentValidated.length + studentNotAutorized.length + studentWithdrawn.length;
   classe.set({ seatsTaken });
-  await classe.save({ fromUser });
 
   // Created
   if (classe.status != STATUS_CLASSE.CREATED && students.length === 0) {
@@ -72,6 +71,8 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_VALIDATED, classe);
     return classe;
   }
+
+  await classe.save({ fromUser });
 
   return classe;
 };
