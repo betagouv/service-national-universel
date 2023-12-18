@@ -121,7 +121,7 @@ jobs:
           terraform plan -no-color -input=false -out=staging.tfplan \
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
             -var="prod_image_tag=${{ steps.prod_outputs.outputs.previous_image_tag }}"
-          echo "tf_plan=$(cat staging.tfplan)" >> $GITHUB_OUTPUT
+          echo "tf_plan=$(base64 -i staging.tfplan)" >> $GITHUB_OUTPUT
 
   deploy_staging:
     runs-on: ubuntu-latest
@@ -152,7 +152,7 @@ jobs:
         env:
           TF_PLAN: ${{ needs.plan.outputs.tf_plan }}
         run: |
-          cat <<< $TF_PLAN > staging.tfplan
+          base64 -d -o staging.tfplan <<< $TF_PLAN
           terraform apply -no-color -input=false -auto-approve staging.tfplan
 
       - name: Staging - Healthchecks
@@ -172,7 +172,7 @@ jobs:
           terraform plan -no-color -input=false -out=prod.tfplan \
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
             -var="prod_image_tag=${{ needs.plan.outputs.previous_image_tag }}"
-          echo "tf_plan=$(cat prod.tfplan)" >> $GITHUB_OUTPUT
+          echo "tf_plan=$(base64 -i prod.tfplan)" >> $GITHUB_OUTPUT
 
   deploy_production:
     runs-on: ubuntu-latest
@@ -201,7 +201,7 @@ jobs:
         env:
           TF_PLAN: ${{ needs.deploy_staging.outputs.tf_plan }}
         run: |
-          cat <<< $TF_PLAN > prod.tfplan
+          base64 -d -o prod.tfplan <<< $TF_PLAN
           terraform apply -no-color -input=false -auto-approve prod.tfplan
 
       - name: Production - Healthchecks
