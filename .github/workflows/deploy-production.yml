@@ -113,8 +113,8 @@ jobs:
           echo "staging_admin_endpoint=$(terraform output -raw staging_admin_endpoint)" >> $GITHUB_OUTPUT
           echo "staging_api_endpoint=$(terraform output -raw staging_api_endpoint)" >> $GITHUB_OUTPUT
           echo "staging_app_endpoint=$(terraform output -raw staging_app_endpoint)" >> $GITHUB_OUTPUT
-          echo "prod_app_endpoint=$(terraform output -raw prod_app_endpoint)" >> $GITHUB_OUTPUT
-          echo "prod_app_endpoint=$(terraform output -raw prod_app_endpoint)" >> $GITHUB_OUTPUT
+          echo "prod_admin_endpoint=$(terraform output -raw prod_admin_endpoint)" >> $GITHUB_OUTPUT
+          echo "prod_api_endpoint=$(terraform output -raw prod_api_endpoint)" >> $GITHUB_OUTPUT
           echo "prod_app_endpoint=$(terraform output -raw prod_app_endpoint)" >> $GITHUB_OUTPUT
 
       - name: Staging - Terraform plan
