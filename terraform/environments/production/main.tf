@@ -57,6 +57,7 @@ resource "scaleway_iam_policy" "deploy" {
       "DomainsDNSFullAccess",
       "SecretManagerReadOnly",
       "SecretManagerSecretAccess",
+      "ObservabilityReadOnly",
     ]
   }
   rule {
