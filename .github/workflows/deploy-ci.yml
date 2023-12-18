@@ -5,17 +5,15 @@ on:
   push:
     branches:
       - main
-      - stack-tf-prod # TODO : remove
 
 jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'main' || github.ref_name == 'stack-tf-prod' # TODO : remove
+    if: github.ref_name == 'main'
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
-      env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
       - name: Get target_branch
@@ -38,12 +36,6 @@ jobs:
         uses: ./.github/actions/get_image_tag
         with:
           sha: ${{ steps.commit_sha.outputs.commit_sha }}
-
-      - name: Get custom-env name
-        id: env_name
-        uses: ./.github/actions/get_custom_env_name
-        with:
-          branch_name: ${{ steps.target_branch.outputs.target_branch }}
 
   run_tests_api:
     needs: prepare

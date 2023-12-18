@@ -1,0 +1,75 @@
+name: Build and deploy Production
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - release_candidate
+      - stack-tf-prod # TODO : remove
+
+jobs:
+
+  prepare:
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'release_candidate' || github.ref_name == 'stack-tf-prod' # TODO : remove
+    outputs:
+      target_branch: ${{ steps.target_branch.outputs.target_branch }}
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+
+    steps:
+      - name: Get target_branch
+        id: target_branch
+        run: |
+          echo "target_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.target_branch.outputs.target_branch }}
+
+      - name: Get last commit sha
+        id: commit_sha
+        run: |
+          commit_sha=$(git rev-parse HEAD)
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
+
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+
+  copy_image:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app_name: [admin, api, app]
+
+    steps:
+      - name: Login to CI registry
+        uses: docker/login-action@v2
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+          registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
+
+      - name: Login to Production registry
+        uses: docker/login-action@v2
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+          registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
+
+      - name: Pull CI image
+        run: docker pull ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
+
+      - name: Tag Production image (commit sha)
+        run: docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
+          ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
+
+      - name: Tag Production image (latest)
+        run: docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
+          ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:latest
+
+      - name: Push Production image
+        run: docker push --all-tags ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}
