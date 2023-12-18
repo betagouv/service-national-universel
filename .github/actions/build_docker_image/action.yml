@@ -58,7 +58,7 @@ runs:
         docker build \
           -t ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag }} \
           -t ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag_stable }} \
-          --label "created_at=${{ steps.date.outputs.date }}""
+          --label "created_at=${{ steps.date.outputs.date }}"
           -f ${{ inputs.dockerfile_path }} .
 
     - name: Push the Docker Image
