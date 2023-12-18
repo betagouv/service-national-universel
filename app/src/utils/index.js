@@ -145,7 +145,8 @@ export const debounce = (fn, delay) => {
 };
 
 export const validateId = (id) => {
-  return id.match(/^[0-9a-fA-F]{24}$/);
+  const idRegex = /^[0-9a-fA-F]{24}$/;
+  return idRegex.test(id);
 };
 
 export const desktopBreakpoint = 768;
