@@ -42,8 +42,15 @@ jobs:
         with:
           branch_name: ${{ env.TARGET_BRANCH }}
 
-  build:
+  run_tests_api:
     needs: prepare
+    uses: ./.github/workflows/run-tests-api.yml
+    with:
+      branch_name: ${{ env.TARGET_BRANCH }}
+    secrets: inherit
+
+  build:
+    needs: run_tests_api
     runs-on: ubuntu-latest
     strategy:
       matrix:
