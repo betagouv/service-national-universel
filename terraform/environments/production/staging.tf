@@ -1,8 +1,13 @@
+variable "staging_image_tag" {
+  type    = string
+  default = "latest"
+}
+
 locals {
   staging_domain         = "beta-snu.dev"
-  staging_api_hostname   = "api.${local.staging_domain}"
-  staging_admin_hostname = "admin.${local.staging_domain}"
-  staging_app_hostname   = "moncompte.${local.staging_domain}"
+  staging_api_hostname   = "staging-api.${local.staging_domain}"
+  staging_admin_hostname = "staging-admin.${local.staging_domain}"
+  staging_app_hostname   = "staging-moncompte.${local.staging_domain}"
   staging_secrets        = jsondecode(base64decode(data.scaleway_secret_version.staging.data))
 }
 
@@ -28,7 +33,7 @@ resource "scaleway_container_namespace" "staging" {
 resource "scaleway_container" "staging_api" {
   name            = "staging-api"
   namespace_id    = scaleway_container_namespace.staging.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.staging_image_tag}"
   port            = 8080
   cpu_limit       = 768
   memory_limit    = 1024
@@ -102,7 +107,7 @@ resource "scaleway_container_domain" "staging_api" {
 resource "scaleway_container" "staging_admin" {
   name            = "staging-admin"
   namespace_id    = scaleway_container_namespace.staging.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.staging_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -140,7 +145,7 @@ resource "scaleway_container_domain" "staging_admin" {
 resource "scaleway_container" "staging_app" {
   name            = "staging-app"
   namespace_id    = scaleway_container_namespace.staging.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.staging_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -173,4 +178,17 @@ resource "scaleway_container" "staging_app" {
 resource "scaleway_container_domain" "staging_app" {
   container_id = scaleway_container.staging_app.id
   hostname     = local.staging_app_hostname
+}
+
+output "staging_image_tag" {
+  value = split(":", scaleway_container.staging_api.registry_image)[1]
+}
+output "staging_api_endpoint" {
+  value = "https://${local.staging_api_hostname}"
+}
+output "staging_app_endpoint" {
+  value = "https://${local.staging_app_hostname}"
+}
+output "staging_admin_endpoint" {
+  value = "https://${local.staging_admin_hostname}"
 }

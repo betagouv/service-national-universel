@@ -1,10 +1,14 @@
 
+variable "prod_image_tag" {
+  type    = string
+  default = "latest"
+}
 
 locals {
-  prod_domain         = "snu.gouv.fr"
-  prod_api_hostname   = "api.${local.prod_domain}"
-  prod_admin_hostname = "admin.${local.prod_domain}"
-  prod_app_hostname   = "moncompte.${local.prod_domain}"
+  prod_domain         = "beta-snu.dev" # TODO "snu.gouv.fr"
+  prod_api_hostname   = "prod-api.${local.prod_domain}"
+  prod_admin_hostname = "prod-admin.${local.prod_domain}"
+  prod_app_hostname   = "prod-moncompte.${local.prod_domain}"
   prod_secrets        = jsondecode(base64decode(data.scaleway_secret_version.production.data))
 }
 
@@ -30,7 +34,7 @@ resource "scaleway_container_namespace" "production" {
 resource "scaleway_container" "production_api" {
   name            = "production-api"
   namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.prod_image_tag}"
   port            = 8080
   cpu_limit       = 768
   memory_limit    = 1024
@@ -104,7 +108,7 @@ resource "scaleway_container_domain" "production_api" {
 resource "scaleway_container" "production_admin" {
   name            = "production-admin"
   namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.prod_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -143,7 +147,7 @@ resource "scaleway_container_domain" "production_admin" {
 resource "scaleway_container" "production_app" {
   name            = "production-app"
   namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.prod_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -178,4 +182,17 @@ resource "scaleway_container" "production_app" {
 resource "scaleway_container_domain" "production_app" {
   container_id = scaleway_container.production_app.id
   hostname     = local.prod_app_hostname
+}
+
+output "prod_image_tag" {
+  value = split(":", scaleway_container.production_api.registry_image)[1]
+}
+output "prod_api_endpoint" {
+  value = "https://${local.prod_api_hostname}"
+}
+output "prod_app_endpoint" {
+  value = "https://${local.prod_app_hostname}"
+}
+output "prod_admin_endpoint" {
+  value = "https://${local.prod_admin_hostname}"
 }

@@ -291,3 +291,12 @@ output "registry_endpoint" {
 output "secret_id" {
   value = scaleway_secret.ci.id
 }
+output "api_endpoint" {
+  value = "https://${local.api_hostname}"
+}
+output "app_endpoint" {
+  value = "https://${local.app_hostname}"
+}
+output "admin_endpoint" {
+  value = "https://${local.admin_hostname}"
+}
