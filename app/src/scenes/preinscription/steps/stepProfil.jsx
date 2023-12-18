@@ -135,7 +135,9 @@ export default function StepProfil() {
         history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
       }
     } catch (e) {
-      if (e.code === "USER_ALREADY_REGISTERED") {
+      if (e.code === "USER_ALREADY_REGISTERED")
+        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
+      else if (e.code === "USER_ALREADY_REGISTERED_HTS") {
         history.push(`/je-suis-deja-inscrit?parcours=CLE&classeId=${classeId}`);
       } else {
         capture(e);
