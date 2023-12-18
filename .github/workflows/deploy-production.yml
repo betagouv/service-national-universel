@@ -20,7 +20,9 @@ jobs:
       - name: Get target_branch
         id: target_branch
         run: |
+          base64 --help
           echo "target_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          exit 1
 
       - uses: actions/checkout@v4
         with:
