@@ -594,6 +594,7 @@ const ENGAGEMENT_TYPES = [
   "Certification Union Nationale du Sport scolaire (UNSS)",
   "Engagements lycéens",
   "Préparation militaire hors offre MIG des armées",
+  "Escadrilles Air Jeunesse (EAJ)",
 ];
 
 const UNSS_TYPE = [
