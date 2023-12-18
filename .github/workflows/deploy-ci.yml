@@ -7,24 +7,27 @@ on:
       - main
       - stack-tf-prod # TODO : remove
 
-env:
-  TARGET_BRANCH: main
-
 jobs:
 
   prepare:
     runs-on: ubuntu-latest
     if: github.ref_name == 'main' || github.ref_name == 'stack-tf-prod' # TODO : remove
     outputs:
+      target_branch: ${{ steps.target_branch.outputs.target_branch }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
+      - name: Get target_branch
+        id: target_branch
+        run: |
+          echo "target_branch=main" >> $GITHUB_OUTPUT
+
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TARGET_BRANCH }}
+          ref: ${{ steps.target_branch.outputs.target_branch }}
 
-      - name: Get TARGET_BRANCH last commit sha
+      - name: Get last commit sha
         id: commit_sha
         run: |
           commit_sha=$(git rev-parse HEAD)
@@ -40,13 +43,13 @@ jobs:
         id: env_name
         uses: ./.github/actions/get_custom_env_name
         with:
-          branch_name: ${{ env.TARGET_BRANCH }}
+          branch_name: ${{ steps.target_branch.outputs.target_branch }}
 
   run_tests_api:
     needs: prepare
     uses: ./.github/workflows/run-tests-api.yml
     with:
-      branch_name: ${{ env.TARGET_BRANCH }}
+      branch_name: ${{ needs.prepare.outputs.target_branch }}
     secrets: inherit
 
   build:
@@ -59,7 +62,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TARGET_BRANCH }}
+          ref: ${{ needs.prepare.outputs.target_branch }}
 
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
@@ -85,7 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.TARGET_BRANCH }}
+          ref: ${{ needs.prepare.outputs.target_branch }}
 
       - uses: hashicorp/setup-terraform@v3
 
