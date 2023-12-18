@@ -157,7 +157,8 @@ jobs:
         env:
           production_branch: "test2-production" # TODO "production"
         run: |
+          git remote
           git fetch origin ${{ env.production_branch }} &&
             git switch ${{ env.production_branch }} &&
-            git merge ${{ needs.prepare.outputs.target_branch }} &&
+            git merge --ff-only ${{ needs.prepare.outputs.target_branch }} &&
             git push origin ${{ env.production_branch }}
