@@ -3,6 +3,11 @@ import { STATUS_CLASSE, translateColoration } from "snu-lib";
 import { useQuery } from "@tanstack/react-query";
 
 const useClass = (classeId) => {
+  const validateClasseId = (classeId) => {
+    if (!classeId || !classeId.match(/^[0-9a-fA-F]{24}$/)) return false;
+    return true;
+  };
+
   const getClass = () =>
     fetch(`${apiURL}/cle/classe/${classeId}`)
       .then((res) => res.json())
@@ -10,7 +15,7 @@ const useClass = (classeId) => {
         if (!res.ok) throw new Error(res.code);
         return res.data;
       });
-  const { isPending, isError, data, error } = useQuery({ queryKey: [`class-${classeId}`], queryFn: getClass, enabled: !!classeId });
+  const { isPending, isError, data, error } = useQuery({ queryKey: [`class-${classeId}`], queryFn: getClass, enabled: validateClasseId(classeId) });
   if (!data) return { isPending, isError, error };
 
   const { name, status, coloration, grade, isFull, referents, etablissement, cohort } = data;
