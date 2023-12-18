@@ -121,7 +121,9 @@ jobs:
           terraform plan -no-color -input=false -out=staging.tfplan \
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
             -var="prod_image_tag=${{ steps.prod_outputs.outputs.previous_image_tag }}"
-          echo "tf_plan=$(base64 -i staging.tfplan)" >> $GITHUB_OUTPUT
+          echo 'tf_plan<<EOF' >> $GITHUB_OUTPUT
+          echo "$(base64 -i staging.tfplan)" >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
   deploy_staging:
     runs-on: ubuntu-latest
@@ -172,7 +174,9 @@ jobs:
           terraform plan -no-color -input=false -out=prod.tfplan \
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
             -var="prod_image_tag=${{ needs.plan.outputs.previous_image_tag }}"
-          echo "tf_plan=$(base64 -i prod.tfplan)" >> $GITHUB_OUTPUT
+          echo 'tf_plan<<EOF' >> $GITHUB_OUTPUT
+          echo "$(base64 -i prod.tfplan)" >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
   deploy_production:
     runs-on: ubuntu-latest
