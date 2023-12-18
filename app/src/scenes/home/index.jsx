@@ -22,6 +22,7 @@ import WaitingCorrectionV2 from "./waitingCorrectionV2";
 import WaitingValidation from "./waitingValidation";
 import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
+import DelaiDepasse from "./DelaiDepasse";
 
 export default function Home() {
   useDocumentTitle("Accueil");
@@ -51,6 +52,8 @@ export default function Home() {
 
   const renderStep = () => {
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
+
+    if (["2019", "2020"].includes(young.cohort)) return <DelaiDepasse />;
 
     if (isReinscriptionOpen === false) {
       if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
