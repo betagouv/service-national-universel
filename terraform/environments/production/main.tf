@@ -19,6 +19,10 @@ variable "image_tag" {
   default = "latest"
 }
 
+locals {
+  organization_id = "db949d19-5fe0-4def-a89b-f801aad2d050" # Selego
+}
+
 # Project
 resource "scaleway_account_project" "main" {
   name        = "snu-production"
@@ -57,6 +61,13 @@ resource "scaleway_iam_policy" "deploy" {
       "DomainsDNSFullAccess",
       "SecretManagerReadOnly",
       "SecretManagerSecretAccess",
+    ]
+  }
+  rule {
+    organization_id = local.organization_id
+    permission_set_names = [
+      "ProjectReadOnly",
+      "IAMReadOnly"
     ]
   }
 }

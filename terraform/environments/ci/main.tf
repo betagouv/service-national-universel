@@ -20,12 +20,13 @@ variable "image_tag" {
 }
 
 locals {
-  env            = "ci"
-  domain         = "beta-snu.dev"
-  api_hostname   = "api.${local.env}.${local.domain}"
-  admin_hostname = "admin.${local.env}.${local.domain}"
-  app_hostname   = "app.${local.env}.${local.domain}"
-  secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
+  organization_id = "db949d19-5fe0-4def-a89b-f801aad2d050" # Selego
+  env             = "ci"
+  domain          = "beta-snu.dev"
+  api_hostname    = "api.${local.env}.${local.domain}"
+  admin_hostname  = "admin.${local.env}.${local.domain}"
+  app_hostname    = "app.${local.env}.${local.domain}"
+  secrets         = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
 # Project
@@ -73,6 +74,13 @@ resource "scaleway_iam_policy" "deploy" {
     project_ids = [scaleway_account_project.main.id]
     permission_set_names = [
       "AllProductsFullAccess",
+    ]
+  }
+  rule {
+    organization_id = local.organization_id
+    permission_set_names = [
+      "ProjectReadOnly",
+      "IAMReadOnly"
     ]
   }
 }
