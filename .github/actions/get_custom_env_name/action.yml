@@ -19,6 +19,6 @@ runs:
       shell: bash
       run: |
         # slugify and crop to 25 characters
-        env_name=$(echo ${{ inputs.branch_name }} | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]-' | tr -s '-' | cut -c 1-25)
+        env_name=$(echo ${{ inputs.branch_name }} | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]_-' | tr -s '_-' | cut -c 1-25)
         echo "Environment name: $env_name"
         echo "env_name=$env_name" >> $GITHUB_OUTPUT

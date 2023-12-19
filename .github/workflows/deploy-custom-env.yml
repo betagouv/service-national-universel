@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.check.outputs.branch_name }}
-      commit_sha: ${{ steps.check.outputs.commit_sha }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
 
@@ -43,7 +42,7 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          ref: ${{ steps.check.outputs.commit_sha }}
+          ref: ${{ steps.check.outputs.branch_name }}
 
       - name: Get image tag
         id: image_tag
@@ -67,7 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.commit_sha }}
+          ref: ${{ needs.prepare.outputs.branch_name }}
 
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
@@ -94,7 +93,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.commit_sha }}
+          ref: ${{ needs.prepare.outputs.branch_name }}
 
       - uses: hashicorp/setup-terraform@v3
 
@@ -169,11 +168,13 @@ jobs:
 
       - name: Terraform plan
         working-directory: ${{ env.custom_directory }}
-        run: terraform plan -no-color -input=false -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+        run: |
+          terraform plan -no-color -input=false -out=custom.tfplan \
+            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
-        run: terraform apply -no-color -input=false -auto-approve -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+        run: terraform apply -no-color -input=false -auto-approve custom.tfplan
 
       - name: Add comment to PR
         if: github.event_name == 'pull_request' && steps.check_secret.outputs.has_secret == '0'

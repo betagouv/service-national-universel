@@ -11,12 +11,12 @@ The CI environment manages several resources:
 
 All CI resources are described in [main.tf](main.tf). The most important are :
 
-- The [project](https://www.scaleway.com/en/docs/identity-and-access-management/iam/concepts/#project) that owns all resources of the ci environment
-- The [application user](https://www.scaleway.com/en/docs/identity-and-access-management/iam/concepts/#application) scoped on this project
-- The root [DNS zone](https://www.scaleway.com/en/docs/network/domains-and-dns/concepts/#dns-zone): **ci.beta-snu.dev**
-- The [registry](https://www.scaleway.com/en/docs/containers/container-registry/concepts/#container-registry)
-- The [secrets](https://www.scaleway.com/en/docs/identity-and-access-management/secret-manager/concepts/)
-- The [serverless containers](https://www.scaleway.com/en/docs/serverless/containers/concepts/#container) that serve the different applications
+- The [project](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/account_project) that owns all resources of the ci environment
+- The [application user](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/iam_application) scoped on this project
+- The root [DNS zone](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/domain_zone): **ci.beta-snu.dev**
+- The [registry](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/registry_namespace)
+- The [secrets](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/secret)
+- The [serverless containers](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/container) that serve the different applications
 
 ### CI applications
 
@@ -50,9 +50,9 @@ Associated github workflows :
 
 All test environments resources are described in [custom/main.tf](custom/main.tf). The most important are :
 
-- The child [DNS zone](https://www.scaleway.com/en/docs/network/domains-and-dns/concepts/#dns-zone): A nested DNS zone inside **ci.beta-snu.dev**
-- The [secrets](https://www.scaleway.com/en/docs/identity-and-access-management/secret-manager/concepts/) specific to this test environment. (Copied from ci at creation)
-- The [serverless containers](https://www.scaleway.com/en/docs/serverless/containers/concepts/#container) that serve the different applications
+- The child [DNS zone](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/domain_zone): A nested DNS zone inside **ci.beta-snu.dev**
+- The [secrets](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/secret) specific to this test environment. (Copied from ci at creation)
+- The [serverless containers](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/container) that serve the different applications
 
 Test environments have their own DNS zone inside the CI DNS zone. The name varies depending on the branch name.
 

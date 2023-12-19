@@ -21,15 +21,10 @@ runs:
         sha=$(cut -c"1-8" <<< ${{ inputs.sha }})
         echo "sha=$sha" >> $GITHUB_OUTPUT
 
-    - name: Get current date
-      id: date
-      shell: bash
-      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-
     - name: Get image tag
       id: image_tag
       shell: bash
       run: |
-        image_tag="${{ steps.date.outputs.date }}-${{ steps.commit.outputs.sha }}"
+        image_tag="${{ steps.commit.outputs.sha }}"
         echo $image_tag
         echo "image_tag=$image_tag" >> $GITHUB_OUTPUT
