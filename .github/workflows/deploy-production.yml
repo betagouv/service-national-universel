@@ -124,7 +124,6 @@ jobs:
 
   deploy_staging:
     runs-on: ubuntu-latest
-    environment: production
     needs: [prepare, plan]
     env:
       SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
@@ -174,7 +173,7 @@ jobs:
         run: | # TODO store plan in secrets
           terraform plan -no-color -input=false \
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
-            -var="prod_image_tag=${{ needs.plan.outputs.previous_image_tag }}"
+            -var="prod_image_tag=${{ needs.prepare.outputs.image_tag }}"
           echo 'tf_plan=WIP' >> $GITHUB_OUTPUT
 
   deploy_production:
