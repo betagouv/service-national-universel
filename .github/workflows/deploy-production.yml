@@ -158,12 +158,15 @@ jobs:
             -var="prod_image_tag=${{ needs.plan.outputs.previous_image_tag }}"
 
       - name: Staging - Healthcheck API
+        working-directory: ${{ env.prod_directory }}
         run: curl -I "$(terraform output -raw staging_api_endpoint)"
 
       - name: Staging - Healthcheck Admin
+        working-directory: ${{ env.prod_directory }}
         run: curl -I "$(terraform output -raw staging_admin_endpoint)"
 
       - name: Staging - Healthcheck App
+        working-directory: ${{ env.prod_directory }}
         run: curl -I "$(terraform output -raw staging_app_endpoint)"
 
       - name: Production - Terraform plan
@@ -208,12 +211,15 @@ jobs:
             -var="prod_image_tag=${{ needs.plan.outputs.previous_image_tag }}"
 
       - name: Production - Healthcheck API
+        working-directory: ${{ env.prod_directory }}
         run: curl -I "$(terraform output -raw prod_api_endpoint)"
 
       - name: Production - Healthcheck Admin
+        working-directory: ${{ env.prod_directory }}
         run: curl -I "$(terraform output -raw prod_admin_endpoint)"
 
       - name: Production - Healthcheck App
+        working-directory: ${{ env.prod_directory }}
         run: curl -I "$(terraform output -raw prod_app_endpoint)"
 
   merge_branch:
