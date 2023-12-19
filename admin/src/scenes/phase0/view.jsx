@@ -444,12 +444,12 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
         const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
         if (!res.ok) throw new Error(res);
         const fillingRate = res.data;
-        if (fillingRate >= 1.05) {
+        if (fillingRate >= 1) {
           return setConfirmModal({
             icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
             title: (
               <span>
-                L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+                L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
                 <strong className="text-bold">validé sur liste complémentaire</strong>.
               </span>
             ),
@@ -465,7 +465,7 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
           icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
           title: (
             <span>
-              L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+              L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
               <strong className="text-bold">validé sur liste principale</strong>.
             </span>
           ),

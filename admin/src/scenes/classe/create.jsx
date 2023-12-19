@@ -30,21 +30,24 @@ export default function create() {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
       }
       setClasse({ ...classe, uniqueKey: response.uai, etablissementId: response._id, etablissement: response });
-      getReferents(response._id);
+      getReferents({
+        etablissementId: response._id,
+        coordinateurs: response.coordinateurs.map((referent) => ({ ...referent, value: referent._id, label: `${referent.firstName} ${referent.lastName}` })),
+      });
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement");
     }
   };
 
-  const getReferents = async (id) => {
+  const getReferents = async ({ etablissementId, coordinateurs }) => {
     try {
-      const { ok, code, data: classes } = await api.get(`/cle/classe/from-etablissement/${id}`);
-
+      const { ok, code, data: classes } = await api.get(`/cle/classe/from-etablissement/${etablissementId}`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des referents", translate(code));
       }
-      const referentsList = classes.flatMap((classe) =>
+
+      const refList = classes.flatMap((classe) =>
         classe.referent.map((referent) => ({
           ...referent,
           value: referent._id,
@@ -53,7 +56,7 @@ export default function create() {
       );
       const uniqueIds = new Set();
 
-      const uniqueArray = referentsList.filter((item) => {
+      const uniqueArray = [...(coordinateurs ?? []), ...refList].filter((item) => {
         if (!uniqueIds.has(item._id)) {
           uniqueIds.add(item._id);
           return true;

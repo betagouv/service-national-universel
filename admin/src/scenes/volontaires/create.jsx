@@ -327,7 +327,7 @@ export default function Create() {
     const res = await api.get(`/inscription-goal/${cohort?.name}/department/${values.department}`);
     if (!res.ok) throw new Error(res);
     const fillingRate = res.data;
-    if (fillingRate >= 1.05) {
+    if (fillingRate >= 1) {
       setComplememtaryListModalOpen(true);
     } else {
       sendData();
@@ -405,7 +405,7 @@ export default function Create() {
         isOpen={isComplememtaryListModalOpen}
         title={
           <span>
-            L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {values.firstName} {values.lastName} va être{" "}
+            L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {values.firstName} {values.lastName} va être{" "}
             <strong className="text-bold">validé sur liste complémentaire</strong>.
           </span>
         }
