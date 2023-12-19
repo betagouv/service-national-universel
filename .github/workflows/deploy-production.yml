@@ -151,7 +151,7 @@ jobs:
         working-directory: ${{ env.prod_directory }}
         env:
           TF_PLAN: ${{ needs.plan.outputs.tf_plan }}
-        run: | # TODO : retreive plan with secret
+        run: | # TODO : retrieve plan with secret
           terraform apply -no-color -input=false -auto-approve \
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
             -var="prod_image_tag=${{ needs.plan.outputs.previous_image_tag }}"
@@ -204,10 +204,10 @@ jobs:
         working-directory: ${{ env.prod_directory }}
         env:
           TF_PLAN: ${{ needs.deploy_staging.outputs.tf_plan }}
-        run: | # TODO : retreive plan with secret
+        run: | # TODO : retrieve plan with secret
           terraform apply -no-color -input=false -auto-approve \
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
-            -var="prod_image_tag=${{ needs.plan.outputs.previous_image_tag }}"
+            -var="prod_image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Production - Healthcheck API
         working-directory: ${{ env.prod_directory }}
