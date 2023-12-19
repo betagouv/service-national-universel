@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES, patternEmailAcademy } = require("snu-lib");
 const mongoose = require("mongoose");
 
 const emailsEmitter = require("../../emails");
@@ -53,8 +53,8 @@ router.get("/token/:token", async (req, res) => {
 router.put("/request-confirmation-email", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      email: Joi.string().email().required(),
-      confirmEmail: Joi.string().email().required(),
+      email: Joi.string().email().pattern(new RegExp(patternEmailAcademy)).required(),
+      confirmEmail: Joi.string().email().pattern(new RegExp(patternEmailAcademy)).required(),
       invitationToken: Joi.string().required(),
     })
       .unknown()
@@ -85,7 +85,10 @@ router.put("/request-confirmation-email", async (req, res) => {
     });
 
     return res.status(200).send({ ok: true, data: "2FA_REQUIRED" });
-  } catch (error) {}
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
 });
 
 router.post("/confirm-email", async (req, res) => {
@@ -121,7 +124,10 @@ router.post("/confirm-email", async (req, res) => {
     await referent.save();
 
     return res.status(200).send({ ok: true, data: serializeReferent(referent) });
-  } catch (error) {}
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
 });
 
 router.post("/confirm-signup", async (req, res) => {
