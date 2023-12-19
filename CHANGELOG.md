@@ -1,3 +1,19 @@
+# [1.348.0](https://github.com/betagouv/service-national-universel/compare/v1.347.0...v1.348.0) (2023-12-19)
+
+
+### Bug Fixes
+
+* **api:** oublie d'import de model ([#3386](https://github.com/betagouv/service-national-universel/issues/3386)) ([1677159](https://github.com/betagouv/service-national-universel/commit/1677159cfaae11da752a207746af97328b821a27))
+* **app:** better handle no match in birth city search ([b74a9b2](https://github.com/betagouv/service-national-universel/commit/b74a9b2fe33f1ac8520ce78a5dc726177a0ae319))
+
+
+### Features
+
+* **api/analytics:** ajout champs log youngs ([#3389](https://github.com/betagouv/service-national-universel/issues/3389)) ([f487aa3](https://github.com/betagouv/service-national-universel/commit/f487aa322be2dc2216828011e829c1202723545a))
+* **app:** 1591 - Home : Ecran si délai dépassé pour MIG ([#3385](https://github.com/betagouv/service-national-universel/issues/3385)) ([11d2c85](https://github.com/betagouv/service-national-universel/commit/11d2c85d60033d519592328c8332790767432fb4))
+* **misc:** Changing staging domain on terraform ([#3390](https://github.com/betagouv/service-national-universel/issues/3390)) ([cb6ca40](https://github.com/betagouv/service-national-universel/commit/cb6ca4077472f7bb7739a0d8983e7b7c7a7dc830))
+* **terraform:** Terraform - Stack Preprod & Prod ([#3375](https://github.com/betagouv/service-national-universel/issues/3375)) ([203938f](https://github.com/betagouv/service-national-universel/commit/203938fb592f564cef26a4207b78f75fc9c1a389))
+
 # [1.347.0](https://github.com/betagouv/service-national-universel/compare/v1.346.1...v1.347.0) (2023-12-18)
 
 
