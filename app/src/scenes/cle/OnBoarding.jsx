@@ -62,7 +62,6 @@ const OnBoarding = () => {
   const history = useHistory();
   const [showContactSupport, setShowContactSupport] = useState(false);
   const { id } = queryString.parse(location.search);
-  console.log("🚀 ~ file: OnBoarding.jsx:65 ~ OnBoarding ~ id:", id);
 
   const {
     isPending,
