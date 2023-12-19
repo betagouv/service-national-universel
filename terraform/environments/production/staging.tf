@@ -5,9 +5,9 @@ variable "staging_image_tag" {
 
 locals {
   staging_domain         = "beta-snu.dev"
-  staging_api_hostname   = "staging-api.${local.staging_domain}"
-  staging_admin_hostname = "staging-admin.${local.staging_domain}"
-  staging_app_hostname   = "staging-moncompte.${local.staging_domain}"
+  staging_api_hostname   = "api.${local.staging_domain}"
+  staging_admin_hostname = "admin.${local.staging_domain}"
+  staging_app_hostname   = "moncompte.${local.staging_domain}"
   staging_secrets        = jsondecode(base64decode(data.scaleway_secret_version.staging.data))
 }
 
