@@ -13,6 +13,8 @@ import {
   CLE_COLORATION_LIST,
   CLE_GRADE_LIST,
   CLE_FILIERE_LIST,
+  CLE_COHORTS,
+  CLE_COHORTS_DATES,
   ROLES,
   YOUNG_STATUS,
   translateGrade,
@@ -40,6 +42,7 @@ export default function view() {
   const user = useSelector((state) => state.Auth.user);
   const [edit, setEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [canEditCohort, setCanEditCohort] = useState(false);
   const history = useHistory();
 
   const colorOptions = Object.keys(CLE_COLORATION_LIST).map((value) => ({
@@ -53,6 +56,10 @@ export default function view() {
   const gradeOptions = Object.keys(CLE_GRADE_LIST).map((value) => ({
     value: CLE_GRADE_LIST[value],
     label: translateGrade(CLE_GRADE_LIST[value]),
+  }));
+  const cohortOptions = Object.keys(CLE_COHORTS).map((value) => ({
+    value: CLE_COHORTS[value],
+    label: CLE_COHORTS[value],
   }));
 
   const getClasse = async () => {
@@ -90,6 +97,11 @@ export default function view() {
   useEffect(() => {
     getClasse();
   }, [edit]);
+
+  useEffect(() => {
+    if (!user) return;
+    setCanEditCohort([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role));
+  }, [user]);
 
   const sendInfo = async () => {
     try {
@@ -156,9 +168,9 @@ export default function view() {
         </div>,
       ]
     : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-      classe?.status !== STATUS_CLASSE.WITHDRAWN
-    ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
-    : null;
+        classe?.status !== STATUS_CLASSE.WITHDRAWN
+      ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
+      : null;
 
   if (!classe) return <Loader />;
 
@@ -178,7 +190,23 @@ export default function view() {
         <div className="flex items-stretch justify-stretch">
           <div className="flex-1">
             <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la validation des dates d'affectation." />
-            <InputText className="mb-3" value={classe.cohort} disabled />
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <Select
+                className="flex-1"
+                isActive={edit && canEditCohort}
+                readOnly={!edit || !canEditCohort}
+                disabled={!canEditCohort}
+                placeholder={"Choisissez une cohorte"}
+                options={cohortOptions}
+                closeMenuOnSelect={true}
+                value={classe?.cohort ? { value: classe?.cohort, label: translate(classe?.cohort) } : null}
+                onChange={(options) => {
+                  setClasse({ ...classe, cohort: options.value });
+                }}
+                error={errors.cohort}
+              />
+              <InputText className="flex-1" value={CLE_COHORTS_DATES[classe.cohort]} disabled />
+            </div>
             <Label title="Numéro d’identification" />
             <div className="flex items-center justify-between gap-3 mb-3">
               <InputText className="flex-1" value={classe.uniqueKey} disabled />
