@@ -1,5 +1,6 @@
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const EtablissementModel = require("../../models/cle/etablissement");
+const ClasseModel = require("../../models/cle/classe");
 const { capture } = require("../../sentry");
 const { sendTemplate } = require("../../sendinblue");
 
