@@ -176,7 +176,7 @@ jobs:
           terraform plan -no-color -input=false \
             -var="staging_image_tag=${{ needs.prepare.outputs.image_tag }}" \
             -var="prod_image_tag=${{ needs.plan.outputs.previous_image_tag }}"
-          echo 'tf_plan<<WIP' >> $GITHUB_OUTPUT
+          echo 'tf_plan=WIP' >> $GITHUB_OUTPUT
 
   deploy_production:
     runs-on: ubuntu-latest
