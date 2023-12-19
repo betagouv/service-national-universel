@@ -5,16 +5,15 @@ on:
   push:
     branches:
       - release_candidate
-      - stack-tf-prod # TODO : remove
 
 jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'release_candidate' || github.ref_name == 'stack-tf-prod' # TODO : remove
+    if: github.ref_name == 'release_candidate'
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
-      image_tag: 'cfeb8db4' # ${{ steps.image_tag.outputs.image_tag }}
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
 
     steps:
       - name: Get target_branch
