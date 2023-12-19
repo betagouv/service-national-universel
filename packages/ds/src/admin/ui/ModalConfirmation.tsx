@@ -10,6 +10,8 @@ type TAction = {
   rightIcon?: React.ReactNode;
   isCancel?: boolean;
   isDestructive?: boolean;
+  disabled?: boolean;
+  loading?: boolean;
   onClick?: () => void;
 };
 
@@ -84,12 +86,20 @@ export default function ModalConfirmation({
         </div>
       }
       footer={
-        <div className="flex items-center justify-between gap-3">
+        <div
+          className={`flex items-center ${
+            Array.isArray(actions) && actions.length > 1
+              ? "justify-between"
+              : "justify-center"
+          } gap-3`}
+        >
           {Array.isArray(actions)
             ? actions.map((action, index) => (
                 <Button
                   key={action.title + index}
                   type={action.isCancel ? "secondary" : "primary"}
+                  disabled={action.disabled ?? false}
+                  loading={action.loading ?? false}
                   leftIcon={action.leftIcon}
                   title={action.title}
                   rightIcon={action.rightIcon}
