@@ -23,6 +23,7 @@ import { CiPalette } from "react-icons/ci";
 const hasAccessToPhase3 = (cohort) => {
   if (!cohort) return false;
   if (cohort.indexOf("2024") !== -1) return false;
+  if (cohort.indexOf("CLE") !== -1) return false;
   if (cohort.indexOf("à venir") !== -1) return false;
   return true;
 };
