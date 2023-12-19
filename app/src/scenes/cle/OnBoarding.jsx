@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 import queryString from "query-string";
-import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
@@ -13,7 +12,11 @@ import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
-import useClass from "@/services/useClass";
+import { fetchClass } from "@/services/classe.service";
+import { validateId } from "@/utils";
+import { useQuery } from "@tanstack/react-query";
+import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import Loader from "@/components/Loader";
 
 const Title = () => (
   <div>
@@ -59,11 +62,22 @@ const OnBoarding = () => {
   const history = useHistory();
   const [showContactSupport, setShowContactSupport] = useState(false);
   const { id } = queryString.parse(location.search);
+  console.log("🚀 ~ file: OnBoarding.jsx:65 ~ OnBoarding ~ id:", id);
 
+  const {
+    isPending,
+    isError,
+    data: classe,
+  } = useQuery({
+    queryKey: ["class", id],
+    queryFn: () => fetchClass(id),
+    enabled: validateId(id),
+  });
+
+  if (!id) return <Redirect to="/" />;
   if (isLoggedIn) logout({ redirect: false });
-  const { classe, isError } = useClass(id);
-  if (isError) toastr.error("Impossible de joindre le service.");
-
+  if (isError) return <ErrorMessage>Une erreur est survenue lors de la récupération de la classe. Veuillez réessayer plus tard.</ErrorMessage>;
+  if (isPending) return <Loader />;
   return (
     <DSFRLayout title="Inscription de l'élève">
       {classe && (
