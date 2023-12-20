@@ -49,6 +49,12 @@ async function getAllSessions(young) {
   return sessionsWithPlaces;
 }
 
+//TODO : refacto pour cohorte définitive
+async function getFilteredSessionsForCLE() {
+  const sessionsCLE = await CohortModel.find({ name: "CLE 23-24" });
+  return sessionsCLE;
+}
+
 async function getPlaces(sessions, region) {
   const sessions2023 = await CohortModel.find({});
   const sessionNames = sessions.map(({ name }) => name);
@@ -178,4 +184,5 @@ module.exports = {
   getCohortValidationDate,
   getDepartureDateSession,
   getReturnDateSession,
+  getFilteredSessionsForCLE,
 };
