@@ -49,6 +49,9 @@ jobs:
         app_name: [admin, api, app]
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.target_branch }}
 
       - name: Check if image exists
         id: check

@@ -52,6 +52,9 @@ jobs:
         app_name: [admin, api, app]
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.target_branch }}
 
       - name: Check if image exists
         id: check
@@ -62,11 +65,6 @@ jobs:
           image_name: ${{ matrix.app_name }}
           image_tag: ${{ needs.prepare.outputs.image_tag }}
           secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-
-      - uses: actions/checkout@v4
-        if: steps.check.output.tag_id == ''
-        with:
-          ref: ${{ needs.prepare.outputs.target_branch }}
 
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
