@@ -78,6 +78,9 @@ jobs:
           image_tag: ${{ needs.prepare.outputs.image_tag }}
           secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
 
+      - name: Debug output
+        run: echo ${{ steps.check.outputs.tag_id }}
+
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
         if: ${{ ! steps.check.outputs.tag_id }}
