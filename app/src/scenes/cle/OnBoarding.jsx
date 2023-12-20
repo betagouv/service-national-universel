@@ -64,7 +64,7 @@ const OnBoarding = () => {
   const { id } = queryString.parse(window.location.search);
 
   if (!validateId(id)) {
-    plausibleEvent("CLE preinscription - id invalide");
+    plausibleEvent("CLE preinscription - id invalide dans l'url");
     return <OnboardingError message="Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis." />;
   }
   return <OnboardingContent id={id} />;
