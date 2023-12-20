@@ -175,6 +175,7 @@ router.post("/confirm-signup", async (req, res) => {
       await referent.save({ fromUser: referent });
     } else {
       //Check if user is already linked to an etablissement
+      let etablissement;
       if (referent.role === ROLES.ADMINISTRATEUR_CLE) {
         etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
       }
