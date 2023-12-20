@@ -916,22 +916,6 @@ const CLE_FILIERE = {
   MIXED: "Mixte",
 };
 
-const CLE_COHORTS = {
-  "CLE 23-24": "CLE 23-24",
-  "CLE mars #1": "CLE mars #1",
-  "CLE mars #2": "CLE mars #2",
-  "CLE mai": "CLE mai",
-  "CLE juin": "CLE juin",
-};
-
-const CLE_COHORTS_DATES = {
-  "CLE 23-24": "",
-  "CLE mars #1": "du 11 au 23 mars 2024",
-  "CLE mars #2": "du 25 mars au 6 avril 2024",
-  "CLE mai": "du 13 au 25 mai 2024",
-  "CLE juin": "du 3 au 14 juin 2024",
-};
-
 const YOUNG_SOURCE = {
   VOLONTAIRE: "VOLONTAIRE",
   CLE: "CLE",
@@ -1018,8 +1002,6 @@ export {
   CLE_COLORATION,
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
-  CLE_COHORTS,
-  CLE_COHORTS_DATES,
 };
 export default {
   YOUNG_STATUS,
