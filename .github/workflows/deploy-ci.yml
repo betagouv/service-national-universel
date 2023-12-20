@@ -68,7 +68,7 @@ jobs:
 
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
-        if: ${{ ! steps.check.outputs.tag_id }}
+        if: steps.check.outputs.tag_id == null
         with:
           username: nologin
           password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}

@@ -65,30 +65,30 @@ jobs:
 
       - name: Login to Production registry
         uses: docker/login-action@v2
-        if: ${{ ! steps.check.outputs.tag_id }}
+        if: steps.check.outputs.tag_id == null
         with:
           username: nologin
           password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
           registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
 
       - name: Pull CI image
-        if: ${{ ! steps.check.outputs.tag_id }}
+        if: steps.check.outputs.tag_id == null
         run: docker pull ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
 
       - name: Tag Production image (commit sha)
-        if: ${{ ! steps.check.outputs.tag_id }}
+        if: steps.check.outputs.tag_id == null
         run: |
           docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
             ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
 
       - name: Tag Production image (latest)
-        if: ${{ ! steps.check.outputs.tag_id }}
+        if: steps.check.outputs.tag_id == null
         run: |
           docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
             ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:latest
 
       - name: Push Production image
-        if: ${{ ! steps.check.outputs.tag_id }}
+        if: steps.check.outputs.tag_id == null
         run: docker push --all-tags ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}
 
   plan:
