@@ -84,7 +84,8 @@ const OnboardingContent = ({ id }) => {
   });
 
   if (isPending) return <Loader />;
-  if (isError) return <OnboardingError message="Impossible de joindre le service. Veuillez réessayer plus tard." />;
+  if (isError)
+    return <OnboardingError message="Impossible de joindre le service. Essayez de vérifier le lien d'inscription qui vous a été transmis. Sinon, veuillez réessayer plus tard." />;
   return (
     <DSFRLayout title="Inscription de l'élève">
       {classe && (
