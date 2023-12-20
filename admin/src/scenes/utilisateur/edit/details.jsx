@@ -328,7 +328,7 @@ export default function Details({ user, setUser, currentUser }) {
     originalTarget: user,
     structure,
   })
-    ? mode
+    ? MODE_EDITION
     : MODE_DEFAULT;
 
   return (

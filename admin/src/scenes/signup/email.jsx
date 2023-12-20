@@ -9,7 +9,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 
 import { Section, Container } from "@snu/ds/dsfr";
 import api from "@/services/api";
-import { translate } from "snu-lib";
+import { patternEmailAcademy, translate } from "snu-lib";
 
 export default function email({ user }) {
   const history = useHistory();
@@ -55,6 +55,7 @@ export default function email({ user }) {
                   placeholder: "exemple@mail.com",
                   type: "email",
                   value: email,
+                  pattern: patternEmailAcademy,
                   onChange: (e) => setEmail(e.target.value),
                   required: true,
                 }}
@@ -69,6 +70,7 @@ export default function email({ user }) {
                   placeholder: "exemple@mail.com",
                   type: "email",
                   value: confirmEmail,
+                  pattern: patternEmailAcademy,
                   onChange: (e) => setConfirmEmail(e.target.value),
                   required: true,
                 }}
