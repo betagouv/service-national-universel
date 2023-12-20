@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
 
   prepare:
@@ -136,7 +140,7 @@ jobs:
         if: steps.check_secret.outputs.has_secret == '0'
         working-directory: ${{ env.custom_directory }}
         run: |
-          # Create secret for custom environment
+          echo "Create secret for custom environment"
           secret_id=$(curl -s -X POST \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
             -H "Content-Type: application/json" \
@@ -145,17 +149,18 @@ jobs:
               "project_id": "${{ steps.ci_outputs.outputs.project_id }}"
             }' \
             "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets" | jq -r ".id" )
-          # Retreive ci secret latest revision
+          echo "$secret_id"
+          echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
+          echo "Retreive ci secret latest revision"
           data=$(curl -s -X GET \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
             "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/${{ steps.ci_outputs.outputs.secret_id }}/versions/latest_enabled/access" | jq -r ".data")
-          # Create a new revision for custom environment
+          echo "Create a new revision for custom environment"
           curl -s -X POST \
             -H "X-Auth-Token: $SCW_SECRET_KEY" \
             -H "Content-Type: application/json" \
             -d "{\"data\":\"${data}\"}" \
             "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/$secret_id/versions"
-          echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
 
       - name: Import secret
         if: steps.check_secret.outputs.has_secret == '0'

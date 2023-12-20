@@ -29,7 +29,7 @@ locals {
   env            = "###___ENV_NAME___###"
   api_hostname   = "api.${scaleway_domain_zone.main.id}"
   admin_hostname = "admin.${scaleway_domain_zone.main.id}"
-  app_hostname   = "app.${scaleway_domain_zone.main.id}"
+  app_hostname   = "moncompte.${scaleway_domain_zone.main.id}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
   project        = data.terraform_remote_state.project.outputs
 }
@@ -225,7 +225,7 @@ resource "scaleway_container" "app" {
 
 resource "scaleway_domain_record" "app" {
   dns_zone = scaleway_domain_zone.main.id
-  name     = "app"
+  name     = "moncompte"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
   ttl      = 300
