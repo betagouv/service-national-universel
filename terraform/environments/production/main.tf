@@ -37,6 +37,23 @@ resource "scaleway_registry_namespace" "main" {
   description = "SNU registry for production"
   is_public   = false
 }
+data "scaleway_registry_image" "api" {
+  name = "api"
+  namespace_id = scaleway_registry_namespace.main.id
+  project_id = scaleway_account_project.main.id
+}
+
+data "scaleway_registry_image" "admin" {
+  name = "admin"
+  namespace_id = scaleway_registry_namespace.main.id
+  project_id = scaleway_account_project.main.id
+}
+
+data "scaleway_registry_image" "app" {
+  name = "app"
+  namespace_id = scaleway_registry_namespace.main.id
+  project_id = scaleway_account_project.main.id
+}
 
 # Application user
 resource "scaleway_iam_application" "main" {
@@ -81,4 +98,13 @@ output "project_id" {
 }
 output "registry_endpoint" {
   value = scaleway_registry_namespace.main.endpoint
+}
+output "api_image_tags" {
+  value = data.scaleway_registry_image.api.tags
+}
+output "admin_image_tags" {
+  value = data.scaleway_registry_image.admin.tags
+}
+output "app_image_tags" {
+  value = data.scaleway_registry_image.app.tags
 }
