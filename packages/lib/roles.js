@@ -530,7 +530,7 @@ function canUpdateInscriptionGoals(actor) {
 }
 
 function canViewInscriptionGoals(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.VISITOR].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
 function canViewTicketTags(actor) {
@@ -595,7 +595,7 @@ function canDownloadYoungDocuments(actor, target, type = null) {
 }
 
 function canInviteYoung(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
 function canSendTemplateToYoung(actor, young) {

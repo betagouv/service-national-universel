@@ -3,7 +3,7 @@ const router = express.Router();
 const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
-const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
+const { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } = require("../utils/cohort");
 const { validateId } = require("../utils/validator");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
@@ -52,7 +52,11 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
 
       const bypassFilter =
         (user?.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
-      const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
+      const sessions = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user?.role)
+        ? await getFilteredSessionsForCLE()
+        : bypassFilter
+          ? await getAllSessions(young)
+          : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
       if (sessions.length === 0) return res.send({ ok: true, data: [], message: "no_session_found" });
       return res.send({ ok: true, data: sessions });
     } catch (error) {
