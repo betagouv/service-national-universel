@@ -63,7 +63,10 @@ const OnBoarding = () => {
   if (isLoggedIn) logout({ redirect: false });
   const { id } = queryString.parse(window.location.search);
 
-  if (!validateId(id)) return <OnboardingError />;
+  if (!validateId(id)) {
+    plausibleEvent("CLE preinscription - id invalide");
+    return <OnboardingError />;
+  }
   return <OnboardingContent id={id} />;
 };
 
