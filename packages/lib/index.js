@@ -162,6 +162,8 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
+const patternEmailAcademy = "^[a-zA-Z0-9._+-]+@ac-[a-zA-Z]{1,}.fr$"
+
 const htmlCleaner = (text) => {
   return sanitizeHtml(text, {
     allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
@@ -191,6 +193,7 @@ export {
   isYoungInReinscription,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
+  patternEmailAcademy,
   htmlCleaner,
 };
 

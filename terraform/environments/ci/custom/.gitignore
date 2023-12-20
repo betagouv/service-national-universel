@@ -1,6 +1,1 @@
 .terraform.lock.hcl
-*.tf
-*.tfvars
-*.tfvars.json
-vars/*.tfvars
-vars/*.json

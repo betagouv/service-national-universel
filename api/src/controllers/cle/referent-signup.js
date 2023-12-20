@@ -67,8 +67,7 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (value.email !== value.confirmEmail)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
-    if (config.ENVIRONMENT === "production" && !validateEmailAcademique(value.email))
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
+    if (!validateEmailAcademique(value.email)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -85,7 +84,10 @@ router.put("/request-confirmation-email", async (req, res) => {
     });
 
     return res.status(200).send({ ok: true, data: "2FA_REQUIRED" });
-  } catch (error) {}
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
 });
 
 router.post("/confirm-email", async (req, res) => {
@@ -121,7 +123,10 @@ router.post("/confirm-email", async (req, res) => {
     await referent.save();
 
     return res.status(200).send({ ok: true, data: serializeReferent(referent) });
-  } catch (error) {}
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
 });
 
 router.post("/confirm-signup", async (req, res) => {

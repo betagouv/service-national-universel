@@ -288,6 +288,7 @@ export default function StepCoordonnees() {
     debounce(async (value) => {
       try {
         const response = await apiAdress(value, { type: "municipality" });
+        if (!response || !response.features) return;
         const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
         setBirthCityZipSuggestions(suggestions);
       } catch (error) {

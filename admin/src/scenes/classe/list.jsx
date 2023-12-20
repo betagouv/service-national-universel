@@ -61,7 +61,7 @@ export default function list() {
     },
 
     { title: "Numéro d'identification", name: "uniqueKeyAndId", missingLabel: "Non renseigné" },
-    { title: "Statut", name: "status", missingLabel: "Non renseigné" },
+    { title: "Statut", name: "status", missingLabel: "Non renseigné", translate: translateStatusClasse },
     { title: "Statut phase 1", name: "statusPhase1", missingLabel: "Non renseigné" },
     { title: "Nom", name: "name", missingLabel: "Non renseigné" },
     { title: "Couleur", name: "coloration", missingLabel: "Non renseigné" },

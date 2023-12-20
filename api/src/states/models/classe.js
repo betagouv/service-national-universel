@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { STATUS_CLASSE, YOUNG_STATUS, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, SENDINBLUE_TEMPLATES } = require('snu-lib')
+const { STATUS_CLASSE, YOUNG_STATUS, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const ClasseModel = require("../../models/cle/classe");
 const emailsEmitter = require("../../emails");
 
@@ -7,10 +7,10 @@ const ClasseStateManager = {};
 
 ClasseStateManager.compute = async (_id, fromUser, options) => {
   const YoungModel = options?.YoungModel; // Prevent circular dependency in YoungModel post save hook
-  if (!YoungModel) throw new Error('YoungModel is required');
+  if (!YoungModel) throw new Error("YoungModel is required");
 
   let classe = await ClasseModel.findById(_id);
-  if (!classe) throw new Error('Classe not found');
+  if (!classe) throw new Error("Classe not found");
   if (classe.status === STATUS_CLASSE.WITHDRAWN) return classe;
 
   // Draft
@@ -40,8 +40,10 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   const studentAbandoned = students.filter((student) => student.status === YOUNG_STATUS.ABANDONED);
   const studentNotAutorized = students.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED);
   const studentWithdrawn = students.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN);
+
   const seatsTaken = studentInProgress.length + studentWaiting.length + studentValidated.length + studentNotAutorized.length + studentWithdrawn.length;
-  
+  classe.set({ seatsTaken });
+
   // Created
   if (classe.status != STATUS_CLASSE.CREATED && students.length === 0) {
     classe.set({ seatsTaken: 0, status: STATUS_CLASSE.CREATED });
@@ -49,19 +51,19 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   }
 
   // Inscription in progress
-  if (classe.status != STATUS_CLASSE.INSCRIPTION_IN_PROGRESS && classe.totalSeats > seatsTaken && studentInProgress.length > 0) {
-    classe.set({ seatsTaken, status: STATUS_CLASSE.INSCRIPTION_IN_PROGRESS });
+  if (classe.status != STATUS_CLASSE.INSCRIPTION_IN_PROGRESS && classe.totalSeats > seatsTaken) {
+    classe.set({ status: STATUS_CLASSE.INSCRIPTION_IN_PROGRESS });
     return await classe.save({ fromUser });
   }
 
   // Inscription to check
   if (classe.status != STATUS_CLASSE.INSCRIPTION_TO_CHECK && classe.totalSeats <= seatsTaken && (studentInProgress.length > 0 || studentWaiting.length > 0)) {
-    classe.set({ seatsTaken, status: STATUS_CLASSE.INSCRIPTION_TO_CHECK });
+    classe.set({ status: STATUS_CLASSE.INSCRIPTION_TO_CHECK });
     return await classe.save({ fromUser });
   }
 
   // Validated
-  const seatsValidated = studentValidated.length + studentNotAutorized.length + studentWithdrawn.length
+  const seatsValidated = studentValidated.length + studentNotAutorized.length + studentWithdrawn.length;
   if (classe.status != STATUS_CLASSE.VALIDATED && classe.totalSeats <= seatsValidated) {
     classe.set({ seatsTaken: seatsValidated, status: STATUS_CLASSE.VALIDATED });
     classe = await classe.save({ fromUser });
@@ -70,12 +72,14 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
     return classe;
   }
 
+  await classe.save({ fromUser });
+
   return classe;
 };
 
 ClasseStateManager.withdraw = async (_id, fromUser, options) => {
   const YoungModel = options?.YoungModel; // Prevent circular dependency in YoungModel post save hook
-  if (!YoungModel) throw new Error('YoungModel is required');
+  if (!YoungModel) throw new Error("YoungModel is required");
 
   let classe = await ClasseModel.findById(_id);
   if (!classe) throw new Error("Classe not found");
@@ -90,15 +94,17 @@ ClasseStateManager.withdraw = async (_id, fromUser, options) => {
     classeId: classe._id,
     status: { $in: [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.VALIDATED] },
   });
-  await Promise.all(students.map(s => {
-    s.set({
-      status: YOUNG_STATUS.ABANDONED,
-      lastStatusAt: Date.now(),
-      withdrawnMessage: "classe désistée",
-      withdrawnReason: "other",
-    });
-    return s.save({ fromUser })
-  }))
+  await Promise.all(
+    students.map((s) => {
+      s.set({
+        status: YOUNG_STATUS.ABANDONED,
+        lastStatusAt: Date.now(),
+        withdrawnMessage: "classe désistée",
+        withdrawnReason: "other",
+      });
+      return s.save({ fromUser });
+    }),
+  );
 
   return classe;
 };

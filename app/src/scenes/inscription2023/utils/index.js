@@ -12,6 +12,7 @@ import passport from "../../../assets/IDProof/passport.jpg";
 import passportDate from "../../../assets/IDProof/passportDate.jpg";
 import API from "@/services/api";
 import { capture } from "@/sentry";
+import dayjs from "dayjs";
 
 countries.registerLocale(fr);
 const countriesList = countries.getNames("fr", { select: "official" });
@@ -120,4 +121,12 @@ export async function getSchools(city) {
   } catch (e) {
     capture(e);
   }
+}
+
+export function validateBirthDate(date) {
+  const d = dayjs(date);
+  if (!d.isValid()) return false;
+  if (d.isBefore(dayjs(new Date(2000, 0, 1)))) return false;
+  if (d.isAfter(dayjs())) return false;
+  return true;
 }

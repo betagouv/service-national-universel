@@ -1,3 +1,54 @@
+# [1.348.0](https://github.com/betagouv/service-national-universel/compare/v1.347.0...v1.348.0) (2023-12-19)
+
+
+### Bug Fixes
+
+* **api:** oublie d'import de model ([#3386](https://github.com/betagouv/service-national-universel/issues/3386)) ([1677159](https://github.com/betagouv/service-national-universel/commit/1677159cfaae11da752a207746af97328b821a27))
+* **app:** better handle no match in birth city search ([b74a9b2](https://github.com/betagouv/service-national-universel/commit/b74a9b2fe33f1ac8520ce78a5dc726177a0ae319))
+
+
+### Features
+
+* **api/analytics:** ajout champs log youngs ([#3389](https://github.com/betagouv/service-national-universel/issues/3389)) ([f487aa3](https://github.com/betagouv/service-national-universel/commit/f487aa322be2dc2216828011e829c1202723545a))
+* **app:** 1591 - Home : Ecran si délai dépassé pour MIG ([#3385](https://github.com/betagouv/service-national-universel/issues/3385)) ([11d2c85](https://github.com/betagouv/service-national-universel/commit/11d2c85d60033d519592328c8332790767432fb4))
+* **misc:** Changing staging domain on terraform ([#3390](https://github.com/betagouv/service-national-universel/issues/3390)) ([cb6ca40](https://github.com/betagouv/service-national-universel/commit/cb6ca4077472f7bb7739a0d8983e7b7c7a7dc830))
+* **terraform:** Terraform - Stack Preprod & Prod ([#3375](https://github.com/betagouv/service-national-universel/issues/3375)) ([203938f](https://github.com/betagouv/service-national-universel/commit/203938fb592f564cef26a4207b78f75fc9c1a389))
+
+# [1.347.0](https://github.com/betagouv/service-national-universel/compare/v1.346.1...v1.347.0) (2023-12-18)
+
+
+### Bug Fixes
+
+* **admin:** add contact convocation ui ([215b592](https://github.com/betagouv/service-national-universel/commit/215b592437601bb499979128af524a9309521a19))
+* **admin:** status classe translation ([357f367](https://github.com/betagouv/service-national-universel/commit/357f367ef0041f1a4b663b07aadd573792fe088d))
+* **admin:** table de repartition gestion des droits edition ([316edf8](https://github.com/betagouv/service-national-universel/commit/316edf8472fbfe87833b7abb13cf2b124e52de2a))
+* **admin/api:** Add coordinateur as referent de classe ([#3376](https://github.com/betagouv/service-national-universel/issues/3376)) ([2b23ee5](https://github.com/betagouv/service-national-universel/commit/2b23ee59142d164ed5ee8d2ae720946fe3e63d30))
+* **all apps:** update eslint, prettier and eslint-plugin-prettier [#3379](https://github.com/betagouv/service-national-universel/issues/3379) ([958d8e1](https://github.com/betagouv/service-national-universel/commit/958d8e1770bcec651bd40573d4fd16fc24949c6e))
+* **api:** 441 - bug ticket counter ([#3384](https://github.com/betagouv/service-national-universel/issues/3384)) ([d2dc988](https://github.com/betagouv/service-national-universel/commit/d2dc988e00a8717d52bebea59368b52ec65e14d7))
+* **api:** 465 - classes seatsTaken ([#3380](https://github.com/betagouv/service-national-universel/issues/3380)) ([895eb42](https://github.com/betagouv/service-national-universel/commit/895eb42287a93ad9a9eed36c1d07c032b0b3f6e9))
+
+
+### Features
+
+* **admin/api:** 1538 - Inscription - ramener la cible à 100% ([#3374](https://github.com/betagouv/service-national-universel/issues/3374)) ([2053abe](https://github.com/betagouv/service-national-universel/commit/2053abedcda03b2258945e035b0ead8fa4cb0812))
+* **app:** 1536 - update Phase 2 and Phase 3 Name (HTS/CLE) ([#3378](https://github.com/betagouv/service-national-universel/issues/3378)) ([208cbe2](https://github.com/betagouv/service-national-universel/commit/208cbe2f271fa88938e2932c772282521d86e827))
+
+## [1.346.1](https://github.com/betagouv/service-national-universel/compare/v1.346.0...v1.346.1) (2023-12-15)
+
+
+### Bug Fixes
+
+* **admin:** DSFR css ([5185344](https://github.com/betagouv/service-national-universel/commit/5185344126947299f3a4f32af80dedb6733651e8))
+* **admin:** Only display demandes d'equiv when data is available ([3c10e62](https://github.com/betagouv/service-national-universel/commit/3c10e62b904d93d0cf63850650d2213e2606b528))
+* **api:** Remove ds on deploy ([9d01311](https://github.com/betagouv/service-national-universel/commit/9d013110050b548a9140c786cb86a50616efb5dc))
+* **app:** improve logout ([bcb43c6](https://github.com/betagouv/service-national-universel/commit/bcb43c659409d6df10b4383b7d88f843cea05c83))
+
+
+### Reverts
+
+* Revert "fix(ds): docker build for custom env" ([c4f402b](https://github.com/betagouv/service-national-universel/commit/c4f402bed93a32c33c6164405772bf36859c0e99))
+* **github:** Put back tests on api prod ([62ccdd0](https://github.com/betagouv/service-national-universel/commit/62ccdd002fee757ab8ec60c69b925e7e989e91b6))
+
 # [1.346.0](https://github.com/betagouv/service-national-universel/compare/v1.345.3...v1.346.0) (2023-12-14)
 
 

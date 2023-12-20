@@ -7,7 +7,7 @@ const config = require("./config");
 const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
 const { JWT_SIGNIN_MAX_AGE, JWT_TRUST_TOKEN_MAX_AGE, JWT_SIGNIN_VERSION, JWT_TRUST_TOKEN_VERSION, checkJwtTrustTokenVersion } = require("./jwt-options");
 const { COOKIE_SIGNIN_MAX_AGE, COOKIE_TRUST_TOKEN_JWT_MAX_AGE, cookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent } = require("./utils");
+const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate } = require("./utils");
 const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME, YOUNG_SOURCE, YOUNG_SOURCE_LIST } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
@@ -92,6 +92,7 @@ class Auth {
 
       const formatedDate = birthdateAt;
       formatedDate.setUTCHours(11, 0, 0);
+      if (!validateBirthDate(formatedDate)) return res.status(400).send({ ok: false, user: null, code: ERRORS.INVALID_PARAMS });
 
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
@@ -206,6 +207,7 @@ class Auth {
 
       const formatedDate = birthdateAt;
       formatedDate.setUTCHours(11, 0, 0);
+      if (!validateBirthDate(formatedDate)) return res.status(400).send({ ok: false, user: null, code: ERRORS.INVALID_PARAMS });
 
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });

@@ -12,7 +12,7 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
 
   const { initSentry, capture } = require("./sentry");
 
-  require("events").EventEmitter.defaultMaxListeners = 30; // Fix warning node (Caused by ElasticMongoose-plugin)
+  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
   const bodyParser = require("body-parser");
   const cors = require("cors");
