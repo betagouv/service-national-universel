@@ -92,6 +92,7 @@ class Auth {
 
       const formatedDate = birthdateAt;
       formatedDate.setUTCHours(11, 0, 0);
+      if (!validateBirthDate(formatedDate)) return res.status(400).send({ ok: false, user: null, code: ERRORS.INVALID_PARAMS });
 
       let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
       if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
