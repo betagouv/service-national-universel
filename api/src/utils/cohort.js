@@ -1,4 +1,4 @@
-const { YOUNG_STATUS, region2zone, oldSessions, getRegionForEligibility, regionsListDROMS, START_DATE_PHASE1, END_DATE_PHASE1 } = require("snu-lib");
+const { YOUNG_STATUS, region2zone, oldSessions, getRegionForEligibility, regionsListDROMS, START_DATE_PHASE1, END_DATE_PHASE1, COHORT_TYPE } = require("snu-lib");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
@@ -49,10 +49,16 @@ async function getAllSessions(young) {
   return sessionsWithPlaces;
 }
 
-//TODO : refacto pour cohorte définitive
 async function getFilteredSessionsForCLE() {
-  const sessionsCLE = await CohortModel.find({ name: "CLE 23-24" });
-  return sessionsCLE;
+  const sessionsCLE = await CohortModel.find({ type: COHORT_TYPE.CLE });
+  let now = Date.now();
+  const sessions = sessionsCLE.filter(
+    (session) =>
+      !!session.inscriptionStartDate &&
+      session.inscriptionStartDate <= now &&
+      ((session.inscriptionEndDate && session.inscriptionEndDate > now) || (session.instructionEndDate && session.instructionEndDate > now)),
+  );
+  return sessions;
 }
 
 async function getPlaces(sessions, region) {

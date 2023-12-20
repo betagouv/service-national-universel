@@ -358,7 +358,9 @@ export default function Create() {
           console.log(res);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
-            setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
+            [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)
+              ? setEgibilityError("Il n'y a malheureusement plus de séjours disponibles.")
+              : setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
           } else {
             setEgibilityError("");
           }
@@ -375,7 +377,7 @@ export default function Create() {
       setEgibilityError("");
       setCohorts([]);
     }
-  }, [values.schoolDepartment, values.department, values.schoolRegion, values.region, values.grade, values.birthdateAt, values.firstName]);
+  }, [values.schoolDepartment, values.department, values.schoolRegion, values.region, values.grade, values.birthdateAt]);
 
   return (
     <div className="py-4 px-8">
