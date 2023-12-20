@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES, patternEmailAcademy } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES } = require("snu-lib");
 const mongoose = require("mongoose");
 
 const emailsEmitter = require("../../emails");
@@ -53,8 +53,8 @@ router.get("/token/:token", async (req, res) => {
 router.put("/request-confirmation-email", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      email: Joi.string().email().pattern(new RegExp(patternEmailAcademy)).required(),
-      confirmEmail: Joi.string().email().pattern(new RegExp(patternEmailAcademy)).required(),
+      email: Joi.string().email().required(),
+      confirmEmail: Joi.string().email().required(),
       invitationToken: Joi.string().required(),
     })
       .unknown()
@@ -67,8 +67,7 @@ router.put("/request-confirmation-email", async (req, res) => {
     if (value.email !== value.confirmEmail)
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email de confirmation n'est pas identique à l'email." });
 
-    if (config.ENVIRONMENT === "production" && !validateEmailAcademique(value.email))
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
+    if (!validateEmailAcademique(value.email)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "L'email doit être une adresse académique." });
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
