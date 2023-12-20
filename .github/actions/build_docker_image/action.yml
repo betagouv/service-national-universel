@@ -35,24 +35,12 @@ runs:
         password: ${{ inputs.password }}
         registry: ${{ inputs.registry }}
 
-    - name: Check if image already exists
-      id: check_image
-      shell: bash
-      run: |
-        if docker pull ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag }} ; then
-          echo "image_exists=1" >> $GITHUB_OUTPUT
-        else
-          echo "image_exists=0" >> $GITHUB_OUTPUT
-        fi
-
     - name: Get current date
       id: date
-      if: steps.check_image.outputs.image_exists == '0'
       shell: bash
       run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
     - name: Build the Docker image
-      if: steps.check_image.outputs.image_exists == '0'
       shell: bash
       run: |
         docker build \
@@ -62,7 +50,6 @@ runs:
           -f ${{ inputs.dockerfile_path }} .
 
     - name: Push the Docker Image
-      if: steps.check_image.outputs.image_exists == '0'
       shell: bash
       run: |
         docker push ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag }}
