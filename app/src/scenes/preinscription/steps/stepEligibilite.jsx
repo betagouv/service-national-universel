@@ -29,6 +29,7 @@ import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
+import { validateBirthDate } from "@/scenes/inscription2023/utils";
 
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -70,7 +71,7 @@ export default function StepEligibilite() {
       errors.scolarity = "Choisissez un niveau de scolarité";
     }
     // Birthdate
-    if (!data?.birthDate || !dayjs(data.birthDate).isValid()) {
+    if (!data?.birthDate || !validateBirthDate(data?.birthDate)) {
       errors.birthDate = "Vous devez saisir une date de naissance valide";
     }
 
