@@ -59,9 +59,11 @@ const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
 
 const OnBoarding = () => {
   const { isLoggedIn, logout } = useAuth();
+  if (isLoggedIn) logout({ redirect: false });
   const history = useHistory();
   const [showContactSupport, setShowContactSupport] = useState(false);
-  const { id } = queryString.parse(location.search);
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
 
   const {
     isPending,
@@ -73,12 +75,11 @@ const OnBoarding = () => {
     enabled: validateId(id),
   });
 
-  if (!id) return <Redirect to="/" />;
-  if (isLoggedIn) logout({ redirect: false });
-  if (isError) return <ErrorMessage>Une erreur est survenue lors de la récupération de la classe. Veuillez réessayer plus tard.</ErrorMessage>;
-  if (isPending) return <Loader />;
   return (
     <DSFRLayout title="Inscription de l'élève">
+      {!id && <ErrorMessage>Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis.</ErrorMessage>}
+      {isPending && <Loader />}
+      {isError && <ErrorMessage>Une erreur est survenue lors de la récupération de la classe. Veuillez réessayer plus tard.</ErrorMessage>}
       {classe && (
         <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
           <MyClass classe={classe} />
