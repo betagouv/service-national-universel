@@ -25,7 +25,7 @@ locals {
   domain          = "beta-snu.dev"
   api_hostname    = "api.${local.env}.${local.domain}"
   admin_hostname  = "admin.${local.env}.${local.domain}"
-  app_hostname    = "app.${local.env}.${local.domain}"
+  app_hostname    = "moncompte.${local.env}.${local.domain}"
   secrets         = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -299,4 +299,7 @@ output "app_endpoint" {
 }
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
+}
+output "image_tag" {
+  value = split(":", scaleway_container.api.registry_image)[1]
 }
