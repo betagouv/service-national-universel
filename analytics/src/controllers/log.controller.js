@@ -190,7 +190,7 @@ router.post(
     evenement_valeur: Joi.string().allow(null, ""),
     etablissement_id: Joi.string().trim().required(),
     etablissement_name: Joi.string().allow(null, ""),
-    etablissement_departement: Joi.string().allow(null, ""),
+    etablissement_department: Joi.string().allow(null, ""),
     etablissement_region: Joi.string().allow(null, ""),
     date: Joi.string(),
     raw_data: Joi.object(),
