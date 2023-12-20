@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Redirect, useHistory } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -17,6 +17,7 @@ import { validateId } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
+import { RiArrowLeftLine } from "react-icons/ri";
 
 const Title = () => (
   <div>
@@ -60,11 +61,31 @@ const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
 const OnBoarding = () => {
   const { isLoggedIn, logout } = useAuth();
   if (isLoggedIn) logout({ redirect: false });
+  const { id } = queryString.parse(window.location.search);
+
+  if (!validateId(id)) return <OnboardingError />;
+  return <OnboardingContent id={id} />;
+};
+
+function OnboardingError() {
+  return (
+    <DSFRLayout title="Inscription de l'élève">
+      <DSFRContainer title="Une erreur est survenue">
+        <ErrorMessage>Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis.</ErrorMessage>
+        <Link to="/">
+          <div className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover underline underline-offset-4 my-4 flex gap-2 items-center">
+            <RiArrowLeftLine />
+            <p className="text-sm">Retour à l'accueil</p>
+          </div>
+        </Link>
+      </DSFRContainer>
+    </DSFRLayout>
+  );
+}
+
+function OnboardingContent({ id }) {
   const history = useHistory();
   const [showContactSupport, setShowContactSupport] = useState(false);
-  const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
-
   const {
     isPending,
     isError,
@@ -77,46 +98,47 @@ const OnBoarding = () => {
 
   return (
     <DSFRLayout title="Inscription de l'élève">
-      {!id && <ErrorMessage>Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis.</ErrorMessage>}
-      {isPending && <Loader />}
-      {isError && <ErrorMessage>Une erreur est survenue lors de la récupération de la classe. Veuillez réessayer plus tard.</ErrorMessage>}
-      {classe && (
-        <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
-          <MyClass classe={classe} />
-          <hr className="my-4 h-px border-0 bg-gray-200" />
-          {classe.isInscriptionOpen && (
-            <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-              <InlineButton
-                className="md:pr-4 pt-2 md:pr-2 pb-1"
-                onClick={() => {
-                  plausibleEvent("CLE/CTA preinscription - compte HTS");
-                  setShowContactSupport(true);
-                }}>
-                J'ai déjà un compte volontaire
-              </InlineButton>
-              <PrimaryButton
-                onClick={() => {
-                  plausibleEvent("CLE/CTA preinscription - demarrer");
-                  history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`);
-                }}>
-                Démarrer mon inscription
-              </PrimaryButton>
-            </div>
-          )}
+      <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe?.referent} />}>
+        {isPending && <Loader />}
+        {isError && <ErrorMessage>Une erreur est survenue lors de la récupération de la classe. Veuillez réessayer plus tard.</ErrorMessage>}
+        {classe && (
+          <>
+            <MyClass classe={classe} />
+            <hr className="my-4 h-px border-0 bg-gray-200" />
+            {classe.isInscriptionOpen && (
+              <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
+                <InlineButton
+                  className="md:pr-4 pt-2 md:pr-2 pb-1"
+                  onClick={() => {
+                    plausibleEvent("CLE/CTA preinscription - compte HTS");
+                    setShowContactSupport(true);
+                  }}>
+                  J'ai déjà un compte volontaire
+                </InlineButton>
+                <PrimaryButton
+                  onClick={() => {
+                    plausibleEvent("CLE/CTA preinscription - demarrer");
+                    history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`);
+                  }}>
+                  Démarrer mon inscription
+                </PrimaryButton>
+              </div>
+            )}
 
-          {!classe.isInscriptionOpen && (
-            <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
-              <PrimaryButton className="sm:w-full md:w-52 md:self-end" disabled>
-                {classe.isFull ? "☹ Classe complète" : "Inscriptions désactivées"}
-              </PrimaryButton>
-              <span className="text-[13px] md:self-end">Pour plus d'informations contactez votre référent.</span>
-            </div>
-          )}
-          <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={id}></ModalInfo>
-        </DSFRContainer>
-      )}
+            {!classe.isInscriptionOpen && (
+              <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
+                <PrimaryButton className="sm:w-full md:w-52 md:self-end" disabled>
+                  {classe.isFull ? "☹ Classe complète" : "Inscriptions désactivées"}
+                </PrimaryButton>
+                <span className="text-[13px] md:self-end">Pour plus d'informations contactez votre référent.</span>
+              </div>
+            )}
+            <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={id}></ModalInfo>
+          </>
+        )}
+      </DSFRContainer>
     </DSFRLayout>
   );
-};
+}
 
 export default OnBoarding;
