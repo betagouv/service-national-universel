@@ -51,7 +51,7 @@ ClasseStateManager.compute = async (_id, fromUser, options) => {
   }
 
   // Inscription in progress
-  if (classe.status != STATUS_CLASSE.INSCRIPTION_IN_PROGRESS && classe.totalSeats > seatsTaken && studentInProgress.length > 0) {
+  if (classe.status != STATUS_CLASSE.INSCRIPTION_IN_PROGRESS && classe.totalSeats > seatsTaken) {
     classe.set({ status: STATUS_CLASSE.INSCRIPTION_IN_PROGRESS });
     return await classe.save({ fromUser });
   }
