@@ -225,7 +225,7 @@ resource "scaleway_container" "app" {
 
 resource "scaleway_domain_record" "app" {
   dns_zone = scaleway_domain_zone.main.id
-  name     = "app"
+  name     = "moncompte"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
   ttl      = 300
