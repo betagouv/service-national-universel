@@ -46,8 +46,8 @@ runs:
         SCW_SECRET_KEY: ${{ inputs.secret_key }}
       run: |
         registry_id=$(
-          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY"
-            "${{ inputs.api_endpoint }}/${{ inputs.region }}/namespaces?name=${{ steps.registry_name.outputs.registry_name }}"
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/namespaces?name=${{ steps.registry_name.outputs.registry_name }}" \
           | jq -r ".namespaces[0].id"
         )
         echo $registry_id
@@ -60,8 +60,8 @@ runs:
         SCW_SECRET_KEY: ${{ inputs.secret_key }}
       run: |
         image_id=$(
-          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY"
-            "${{ inputs.api_endpoint }}/${{ inputs.region }}/images?namespace_id=${{ steps.registry_id.outputs.registry_id }}&name=${{ inputs.image_name }}"
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/images?namespace_id=${{ steps.registry_id.outputs.registry_id }}&name=${{ inputs.image_name }}" \
           | jq -r ".images[0].id"
         )
         echo $image_id
@@ -74,8 +74,8 @@ runs:
         SCW_SECRET_KEY: ${{ inputs.secret_key }}
       run: |
         tag_id=$(
-          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY"
-            "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?name=${{ inputs.image_tag }}"
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?name=${{ inputs.image_tag }}" \
           | jq -r ".tags[0].id"
         )
         echo $tag_id
