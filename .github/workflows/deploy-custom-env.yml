@@ -174,12 +174,12 @@ jobs:
       - name: Terraform plan
         working-directory: ${{ env.custom_directory }}
         run: |
-          terraform plan -no-color -input=false -out=custom.tfplan \
+          terraform plan -no-color -input=false -lock=false -out=custom.tfplan \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
-        run: terraform apply -no-color -input=false -auto-approve custom.tfplan
+        run: terraform apply -no-color -input=false -lock=false -auto-approve custom.tfplan
 
       - name: Add comment to PR
         if: github.event_name == 'pull_request' && steps.check_secret.outputs.has_secret == '0'
