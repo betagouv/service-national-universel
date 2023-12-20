@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import queryString from "query-string";
-import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
@@ -13,7 +12,12 @@ import { ModalContainer, Content } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
-import useClass from "@/services/useClass";
+import { fetchClass } from "@/services/classe.service";
+import { validateId } from "@/utils";
+import { useQuery } from "@tanstack/react-query";
+import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import Loader from "@/components/Loader";
+import { RiArrowLeftLine } from "react-icons/ri";
 
 const Title = () => (
   <div>
@@ -56,14 +60,32 @@ const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
 
 const OnBoarding = () => {
   const { isLoggedIn, logout } = useAuth();
+  if (isLoggedIn) logout({ redirect: false });
+  const { id } = queryString.parse(window.location.search);
+
+  if (!validateId(id)) {
+    plausibleEvent("CLE preinscription - id invalide dans l'url");
+    return <OnboardingError message="Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis." />;
+  }
+  return <OnboardingContent id={id} />;
+};
+
+const OnboardingContent = ({ id }) => {
   const history = useHistory();
   const [showContactSupport, setShowContactSupport] = useState(false);
-  const { id } = queryString.parse(location.search);
+  const {
+    isError,
+    isPending,
+    data: classe,
+  } = useQuery({
+    queryKey: ["class", id],
+    queryFn: () => fetchClass(id),
+    enabled: validateId(id),
+  });
 
-  if (isLoggedIn) logout({ redirect: false });
-  const { classe, isError } = useClass(id);
-  if (isError) toastr.error("Impossible de joindre le service.");
-
+  if (isPending) return <Loader />;
+  if (isError)
+    return <OnboardingError message="Impossible de joindre le service. Essayez de vérifier le lien d'inscription qui vous a été transmis. Sinon, veuillez réessayer plus tard." />;
   return (
     <DSFRLayout title="Inscription de l'élève">
       {classe && (
@@ -101,6 +123,22 @@ const OnBoarding = () => {
           <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={id}></ModalInfo>
         </DSFRContainer>
       )}
+    </DSFRLayout>
+  );
+};
+
+const OnboardingError = ({ message }) => {
+  return (
+    <DSFRLayout title="Inscription de l'élève">
+      <DSFRContainer title="Une erreur est survenue">
+        <ErrorMessage>{message}</ErrorMessage>
+        <Link to="/">
+          <div className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover underline underline-offset-4 my-4 flex gap-2 items-center">
+            <RiArrowLeftLine />
+            <p className="text-sm">Retour à l'accueil</p>
+          </div>
+        </Link>
+      </DSFRContainer>
     </DSFRLayout>
   );
 };
