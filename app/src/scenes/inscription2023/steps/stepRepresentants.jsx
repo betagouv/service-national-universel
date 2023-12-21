@@ -15,7 +15,6 @@ import { translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
 import Input from "../components/Input";
-import InscriptionStepper from "../components/InscriptionStepper";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -223,42 +222,8 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
-  const onSave = async () => {
-    setLoading(true);
-    try {
-      const value = data;
-      if (!isParent2Visible) {
-        value.parent2 = false;
-        delete value.parent2Status;
-        delete value.parent2FirstName;
-        delete value.parent2LastName;
-        delete value.parent2Email;
-        delete value.parent2Phone;
-        delete value.parent2PhoneZone;
-      } else {
-        value.parent2 = true;
-      }
-
-      const { ok, code, data: responseData } = await api.put(`/young/inscription2023/representants/save`, value);
-      if (!ok) {
-        setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
-      }
-      dispatch(setYoung(responseData));
-      toastr.success("Vos informations ont bien été enregistrées");
-    } catch (e) {
-      capture(e);
-      setErrors({
-        text: `Une erreur s'est produite`,
-        subText: e?.code ? translate(e.code) : "",
-      });
-    }
-    setLoading(false);
-  };
-
-  const supportLink = `${supportURL}${
-    isCLE ? "/base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"
+  const supportLink = `${supportURL}${	
+    isCLE ? "/base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"	
   }`;
 
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
@@ -267,7 +232,6 @@ export default function StepRepresentants() {
 
   return (
     <>
-      <InscriptionStepper onSave={onSave} />
       <DSFRContainer title="Mes représentants légaux" supportLink={supportLink} supportEvent="Phase0/aide inscription - rep leg">
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
