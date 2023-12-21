@@ -169,6 +169,7 @@ const Schema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
+    lowercase: true,
     documentation: {
       description: "E-mail du volontaire",
     },
@@ -1072,6 +1073,7 @@ const Schema = new mongoose.Schema({
   },
   parent1Email: {
     type: String,
+    lowercase: true,
     documentation: {
       description: "E-mail du parent 1",
     },
@@ -1223,6 +1225,7 @@ const Schema = new mongoose.Schema({
   },
   parent2Email: {
     type: String,
+    lowercase: true,
     documentation: {
       description: "E-mail du parent 2",
     },

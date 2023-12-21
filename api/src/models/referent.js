@@ -36,6 +36,7 @@ const Schema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
+    lowercase: true,
     documentation: {
       description: "Email de l'utilisateur",
     },
