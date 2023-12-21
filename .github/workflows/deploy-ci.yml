@@ -59,7 +59,6 @@ jobs:
       - name: Check if image exists
         id: check
         uses: ./.github/actions/check_docker_image_tag
-        continue-on-error: true
         with:
           registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
           image_name: ${{ matrix.app_name }}
@@ -68,7 +67,7 @@ jobs:
 
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
-        if: ${{ ! steps.check.outputs.tag_id }}
+        if: ${{ ! steps.check.outputs.tag_exists }}
         with:
           username: nologin
           password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
