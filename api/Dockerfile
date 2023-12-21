@@ -28,4 +28,4 @@ LABEL org.opencontainers.image.description="This image provides a consistent and
 
 EXPOSE $PORT
 
-CMD node ./api/src/index.js --max-old-space-size=4096
+CMD npm start
