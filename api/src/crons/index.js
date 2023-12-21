@@ -18,7 +18,6 @@ const missionEquivalencePatches = require("./patch/missionEquivalence");
 const missionPatches = require("./patch/mission");
 const structurePatches = require("./patch/structure");
 const youngPatches = require("./patch/young");
-const etablissementPatches = require("./patch/etablissement");
 const classePatches = require("./patch/classe");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const parentConsentementReminder = require("./parentConsentementReminder");
@@ -51,7 +50,6 @@ const everyHours = (x) => `0 */${x} * * *`;
 // missionPatches.handler() : tous les jours à 2h00
 // applicationPatches.handler() : tous les jours à 2h30
 // youngPatches.handler() : tous les jours à 3h00
-// etablissementPatches.handler() : tous les jours à 3h10
 // classePatches.handler() : tous les jours à 3h20
 // dsnjExport.handler() : tous les jours à 3h30
 // refreshMaterializedViews.handler() : tous les jours à 5h00
@@ -148,10 +146,6 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("0 3 * * *", () => {
     youngPatches.handler();
-  });
-
-  cron.schedule("10 3 * * *", () => {
-    etablissementPatches.handler();
   });
 
   cron.schedule("20 3 * * *", () => {
