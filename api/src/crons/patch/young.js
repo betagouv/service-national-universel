@@ -26,46 +26,42 @@ async function processPatch(patch, count, total) {
 
         let eventName = null;
 
-        if (["gender", "birthdateAt", "grade", "situation", "qpv", "department", "region", "handicap", "populationDensity"].includes(operation)) {
-          eventName = "JEUNE_CHANGE";
-        } else {
-          switch (operation) {
-            //Inscription step
-            case "inscriptionStep2023":
-              eventName = "STEP_INSCRIPTION_CHANGE";
-              break;
-            case "reinscriptionStep2023":
-              eventName = "STEP_REINSCRIPTION_CHANGE";
-              break;
-            //General status
-            case "status":
-              eventName = "STATUS_CHANGE";
-              break;
-            //SEJOUR status
-            case "statusPhase1":
-              eventName = "STATUS_PHASE1_CHANGE";
-              break;
-            //MIG status
-            case "statusPhase2":
-              eventName = "STATUS_PHASE2_CHANGE";
-              break;
-            case "statusPhase3":
-              eventName = "STATUS_PHASE3_CHANGE";
-              break;
-            //Presence sejour
-            case "cohesionStayPresence":
-              eventName = "PRESENCE_ARRIVEE";
-              break;
-            case "cohort":
-              eventName = "COHORT_CHANGE";
-              break;
-            case "phase2NumberHoursDone":
-              eventName = "HEURE_PHASE2_CHANGE";
-              break;
-            case "source":
-              eventName = "SOURCE_CHANGE";
-              break;
-          }
+        switch (operation) {
+          //Inscription step
+          case "inscriptionStep2023":
+            eventName = "STEP_INSCRIPTION_CHANGE";
+            break;
+          case "reinscriptionStep2023":
+            eventName = "STEP_REINSCRIPTION_CHANGE";
+            break;
+          //General status
+          case "status":
+            eventName = "STATUS_CHANGE";
+            break;
+          //SEJOUR status
+          case "statusPhase1":
+            eventName = "STATUS_PHASE1_CHANGE";
+            break;
+          //MIG status
+          case "statusPhase2":
+            eventName = "STATUS_PHASE2_CHANGE";
+            break;
+          case "statusPhase3":
+            eventName = "STATUS_PHASE3_CHANGE";
+            break;
+          //Presence sejour
+          case "cohesionStayPresence":
+            eventName = "PRESENCE_ARRIVEE";
+            break;
+          case "cohort":
+            eventName = "COHORT_CHANGE";
+            break;
+          case "phase2NumberHoursDone":
+            eventName = "HEURE_PHASE2_CHANGE";
+            break;
+          case "source":
+            eventName = "SOURCE_CHANGE";
+            break;
         }
 
         if (eventName) {
