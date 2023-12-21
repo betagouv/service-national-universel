@@ -5,10 +5,10 @@ variable "prod_image_tag" {
 }
 
 locals {
-  prod_domain         = "beta-snu.dev" # TODO "snu.gouv.fr"
-  prod_api_hostname   = "prod-api.${local.prod_domain}"
-  prod_admin_hostname = "prod-admin.${local.prod_domain}"
-  prod_app_hostname   = "prod-moncompte.${local.prod_domain}"
+  prod_domain         = "snu.gouv.fr"
+  prod_api_hostname   = "api.${local.prod_domain}"
+  prod_admin_hostname = "admin.${local.prod_domain}"
+  prod_app_hostname   = "moncompte.${local.prod_domain}"
   prod_secrets        = jsondecode(base64decode(data.scaleway_secret_version.production.data))
 }
 
