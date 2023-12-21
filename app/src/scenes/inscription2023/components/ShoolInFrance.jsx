@@ -5,7 +5,6 @@ import Input from "./Input";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
-import {  } from "react-icons/ri";
 import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
 import { toastr } from "react-redux-toastr";
