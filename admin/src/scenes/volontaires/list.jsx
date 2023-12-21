@@ -23,6 +23,8 @@ import { getFilterArray, transformVolontaires, transformVolontairesSchool } from
 
 export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
+  if (user?.role === ROLES.ADMINISTRATEUR_CLE) return history.push("/mes-eleves");
 
   const [volontaire, setVolontaire] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
