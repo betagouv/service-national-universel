@@ -93,7 +93,6 @@ resource "scaleway_container" "staging_api" {
     "SUPPORT_APIKEY"                        = local.staging_secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.staging_secrets.PM2_SLACK_URL
     "TOKENLOADTEST"                         = local.staging_secrets.TOKENLOADTEST
-    "ZAMMAD_TOKEN"                          = local.staging_secrets.ZAMMAD_TOKEN
   }
 }
 
@@ -170,8 +169,8 @@ resource "scaleway_container" "staging_app" {
   }
 
   secret_environment_variables = {
-    "DOCKER_ENV_VITE_SENTRY_URL"        = local.staging_secrets.SENTRY_URL
-    "DOCKER_ENV_VITE_SENTRY_AUTH_TOKEN" = local.staging_secrets.SENTRY_AUTH_TOKEN
+    "DOCKER_ENV_VITE_SENTRY_URL" = local.staging_secrets.SENTRY_URL
+    "SENTRY_AUTH_TOKEN"          = local.staging_secrets.SENTRY_AUTH_TOKEN
   }
 }
 
