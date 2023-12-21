@@ -84,7 +84,7 @@ export default function Index() {
   }, [JSON.stringify(selectedFilters)]);
 
   useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts);
+    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
     setSelectedFilters({ ...selectedFilters, cohorts: cohortsFilters });
   }, []);
 

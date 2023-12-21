@@ -32,11 +32,9 @@ export function ChangeCohortPen({ young, onChange }) {
         // }
         const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
         if (Array.isArray(data)) {
-          const cohorts = data
-            .map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible }))
-            .filter((c) => c.name !== young.cohort)
-            //todo rajouter un flag hidden pour les cohort non visible
-            .filter((c) => !["Juin 2024 - 1", "Mars 2024 - La Réunion"].includes(c.name));
+          const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
+          //todo rajouter un flag hidden pour les cohort non visible
+
           // cohorts.push(cohortToCome);
           if (!unmounted) setOptions(cohorts);
         } else if (!unmounted) setOptions([]);
