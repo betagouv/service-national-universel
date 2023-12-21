@@ -104,7 +104,6 @@ export default function view() {
     (async () => {
       try {
         const responseCohorts = await api.get(`/cohort`);
-        console.log("✌️  responseCohorts.data", responseCohorts.data);
         setCohorts(responseCohorts.data);
       } catch (e) {
         capture(e);
