@@ -5,9 +5,11 @@ import Input from "./Input";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
+import {  } from "react-icons/ri";
 import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
 import { toastr } from "react-redux-toastr";
+import Select from "@/components/dsfr/forms/Select";
 
 export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
   const [loading, setLoading] = useState(false);
@@ -60,6 +62,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
 
   return manualFilling ? (
     <>
+      <hr></hr>
       <Input
         value={manualSchool.fullName}
         label="Nom de l'établissement"
@@ -89,13 +92,22 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         }
         onClick={() => {
           setManualFilling(false);
+          onSelectSchool(null);
         }}
       />
     </>
   ) : (
     <>
-      <AsyncCombobox label="Rechercher une commune" hint="Aucune commune trouvée." getOptions={getCities} value={city} onChange={handleChangeCity} error={errors.city} />
-      <CreatableSelect
+      <hr></hr>
+      <AsyncCombobox
+        label="Rechercher la commune de l'établissement"
+        hint="Aucune commune trouvée."
+        getOptions={getCities}
+        value={city}
+        onChange={handleChangeCity}
+        error={errors.city}
+      />
+      {/* <CreatableSelect
         label="Nom de l'établissement"
         value={formatSchoolName(school)}
         options={schoolOptions
@@ -113,7 +125,30 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         }}
         error={errors?.school}
         correction={corrections?.schoolName}
+      /> */}
+      <Select
+        label="Nom de l'établissement"
+        value={formatSchoolName(school)}
+        options={schoolOptions
+          .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
+          .sort()
+          .map((c) => ({ value: c, label: c }))}
+        onChange={(value) => {
+          onSelectSchool(schoolOptions.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
+        }}
+        placeholder="Sélectionnez un établissement"
+        error={errors?.school}
+        correction={corrections?.schoolName}
       />
+      <p
+        className="text-[#000091] cursor-pointer underline"
+        onClick={() => {
+          setManualFilling(true);
+          onSelectSchool(null);
+          handleChangeCity();
+        }}>
+        Je n'ai pas trouvé mon établissement
+      </p>
     </>
   );
 }
