@@ -146,7 +146,7 @@ export default function Create() {
       "frenchNationality",
     ];
 
-    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)) values.classeId = classeId;
+    if (classeId) values.classeId = classeId;
 
     for (const key of required) {
       if (values[key] === null || !values[key] || validator.isEmpty(values[key], { ignore_whitespace: true })) {
@@ -355,12 +355,9 @@ export default function Create() {
             };
           }
           const res = await api.post(`/cohort-session/eligibility/2023`, body);
-          console.log(res);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
-            [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)
-              ? setEgibilityError("Il n'y a malheureusement plus de séjours disponibles.")
-              : setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
+            setEgibilityError("Il n'y a malheureusement plus de séjour disponible.");
           } else {
             setEgibilityError("");
           }
