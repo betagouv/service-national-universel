@@ -5,7 +5,6 @@ const Joi = require("joi");
 const { capture } = require("../sentry");
 const LogYoungModel = require("../models/log-youngs.model");
 const LogStructureModel = require("../models/log-structures.model");
-const LogEtablissementModel = require("../models/log-etablissements.model");
 const LogClasseModel = require("../models/log-classes.model");
 const LogMissionModel = require("../models/log-missions.model");
 const LogApplicationModel = require("../models/log-applications.model");
@@ -178,31 +177,6 @@ router.post(
       return res.status(200).send({ ok: true, data: log });
     } catch (error) {
       console.log("Error ", error);
-      capture(error);
-    }
-  },
-);
-
-router.post(
-  "/etablissement",
-  authMiddleware,
-  validationMiddleware({
-    evenement_type: Joi.string().trim().required(),
-    evenement_valeur: Joi.string().allow(null, ""),
-    etablissement_id: Joi.string().trim().required(),
-    etablissement_name: Joi.string().allow(null, ""),
-    etablissement_department: Joi.string().allow(null, ""),
-    etablissement_region: Joi.string().allow(null, ""),
-    date: Joi.string(),
-    raw_data: Joi.object(),
-  }),
-  async ({ body }, res) => {
-    try {
-      body.date = new Date(body.date);
-      const log = await LogEtablissementModel.create(body);
-
-      return res.status(200).send({ ok: true, data: log });
-    } catch (error) {
       capture(error);
     }
   },
