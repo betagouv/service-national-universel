@@ -31,4 +31,4 @@ LABEL org.opencontainers.image.description="This image provides a consistent and
 
 EXPOSE $PORT
 
-CMD ./app/docker-env.sh && npm start
+CMD ./app/docker-env.sh && node ./app/server/index.js
