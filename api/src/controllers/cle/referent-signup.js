@@ -186,7 +186,7 @@ router.post("/confirm-signup", async (req, res) => {
       }
       if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Vous n'êtes lié à aucun établissement" });
 
-      referent.set({ invitationToken: null, acceptCGU: true, region: etablissement.region, department: etablissement.departmentName });
+      referent.set({ invitationToken: null, acceptCGU: true, region: etablissement.region, department: etablissement.department });
       await referent.save({ fromUser: referent });
     }
 
