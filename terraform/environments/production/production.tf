@@ -53,8 +53,8 @@ resource "scaleway_container" "production_api" {
     "CLE"        = "true"
     "PRODUCTION" = "true"
     "FOLDER_API" = "api"
-    "SENTRY_PROFILE_SAMPLE_RATE" : "0.8"
-    "SENTRY_TRACING_SAMPLE_RATE" : "0.1"
+    "SENTRY_PROFILE_SAMPLE_RATE" : "0.2"
+    "SENTRY_TRACING_SAMPLE_RATE" : "0.01"
     "API_ANALYTICS_ENDPOINT"            = local.prod_secrets.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.prod_secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.prod_secrets.API_ASSOCIATION_CELLAR_ENDPOINT
@@ -72,6 +72,7 @@ resource "scaleway_container" "production_api" {
     "PUBLIC_BUCKET_NAME"                = local.prod_secrets.PUBLIC_BUCKET_NAME
     "PUBLIC_BUCKET_NAME_SUPPORT"        = local.prod_secrets.PUBLIC_BUCKET_NAME_SUPPORT
     "SENTRY_URL"                        = local.prod_secrets.SENTRY_URL
+    "SLACK_BOT_CHANNEL"                 = local.prod_secrets.SLACK_BOT_CHANNEL
     "SUPPORT_URL"                       = local.prod_secrets.SUPPORT_URL
   }
 
@@ -80,6 +81,7 @@ resource "scaleway_container" "production_api" {
     "API_ASSOCIATION_AWS_SECRET_ACCESS_KEY" = local.prod_secrets.API_ASSOCIATION_AWS_SECRET_ACCESS_KEY
     "API_ASSOCIATION_CELLAR_KEYSECRET"      = local.prod_secrets.API_ASSOCIATION_CELLAR_KEYSECRET
     "API_ASSOCIATION_ES_ENDPOINT"           = local.prod_secrets.API_ASSOCIATION_ES_ENDPOINT
+    "API_ENGAGEMENT_KEY"                    = local.prod_secrets.API_ENGAGEMENT_KEY
     "CELLAR_KEYSECRET"                      = local.prod_secrets.CELLAR_KEYSECRET
     "CELLAR_KEYSECRET_SUPPORT"              = local.prod_secrets.CELLAR_KEYSECRET_SUPPORT
     "DIAGORIENTE_TOKEN"                     = local.prod_secrets.DIAGORIENTE_TOKEN
@@ -87,14 +89,17 @@ resource "scaleway_container" "production_api" {
     "FILE_ENCRYPTION_SECRET"                = local.prod_secrets.FILE_ENCRYPTION_SECRET
     "FILE_ENCRYPTION_SECRET_SUPPORT"        = local.prod_secrets.FILE_ENCRYPTION_SECRET_SUPPORT
     "FRANCE_CONNECT_CLIENT_SECRET"          = local.prod_secrets.FRANCE_CONNECT_CLIENT_SECRET
+    "JVA_API_KEY"                           = local.prod_secrets.JVA_API_KEY
     "JVA_TOKEN"                             = local.prod_secrets.JVA_TOKEN
     "MONGO_URL"                             = local.prod_secrets.MONGO_URL
+    "QPV_PASSWORD"                          = local.prod_secrets.QPV_PASSWORD
+    "QPV_USERNAME"                          = local.prod_secrets.QPV_USERNAME
     "SECRET"                                = local.prod_secrets.SECRET
     "SENDINBLUEKEY"                         = local.prod_secrets.SENDINBLUEKEY
+    "SLACK_BOT_TOKEN"                       = local.prod_secrets.SLACK_BOT_TOKEN
     "SUPPORT_APIKEY"                        = local.prod_secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.prod_secrets.PM2_SLACK_URL
     "TOKENLOADTEST"                         = local.prod_secrets.TOKENLOADTEST
-    "ZAMMAD_TOKEN"                          = local.prod_secrets.ZAMMAD_TOKEN
   }
 }
 
@@ -174,8 +179,8 @@ resource "scaleway_container" "production_app" {
   }
 
   secret_environment_variables = {
-    "DOCKER_ENV_VITE_SENTRY_URL"        = local.prod_secrets.SENTRY_URL
-    "SENTRY_AUTH_TOKEN" = local.prod_secrets.SENTRY_AUTH_TOKEN
+    "DOCKER_ENV_VITE_SENTRY_URL" = local.prod_secrets.SENTRY_URL
+    "SENTRY_AUTH_TOKEN"          = local.prod_secrets.SENTRY_AUTH_TOKEN
   }
 }
 

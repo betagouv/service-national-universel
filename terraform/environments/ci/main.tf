@@ -164,7 +164,6 @@ resource "scaleway_container" "api" {
     "SUPPORT_APIKEY"                        = local.secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.secrets.PM2_SLACK_URL
     "TOKENLOADTEST"                         = local.secrets.TOKENLOADTEST
-    "ZAMMAD_TOKEN"                          = local.secrets.ZAMMAD_TOKEN
   }
 }
 
@@ -257,8 +256,8 @@ resource "scaleway_container" "app" {
   }
 
   secret_environment_variables = {
-    "DOCKER_ENV_VITE_SENTRY_URL"        = local.secrets.SENTRY_URL
-    "SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
+    "DOCKER_ENV_VITE_SENTRY_URL" = local.secrets.SENTRY_URL
+    "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
   }
 }
 
