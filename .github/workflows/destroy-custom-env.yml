@@ -90,6 +90,7 @@ jobs:
 
       - name: Terraform destroy
         working-directory: ${{ env.custom_directory }}
+        continue-on-error: true
         run: |
           terraform apply -no-color -input=false -auto-approve -destroy
           # Handle deletion of DNS zone not properly handled by destroy (scaleway bug ?) avoiding action failure

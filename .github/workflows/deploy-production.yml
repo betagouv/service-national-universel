@@ -49,41 +49,45 @@ jobs:
         app_name: [admin, api, app]
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.target_branch }}
+
+      - name: Check if image exists
+        id: check
+        uses: ./.github/actions/check_docker_image_tag
+        with:
+          registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
+          image_name: ${{ matrix.app_name }}
+          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          secret_key: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+
       - name: Login to Production registry
         uses: docker/login-action@v2
+        if: steps.check.outputs.tag_exists == 0
         with:
           username: nologin
           password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
           registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
 
-      - name: Check if image already exists
-        id: check_image
-        shell: bash
-        run: |
-          if docker pull ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} ; then
-            echo "image_exists=1" >> $GITHUB_OUTPUT
-          else
-            echo "image_exists=0" >> $GITHUB_OUTPUT
-          fi
-
       - name: Pull CI image
-        if: steps.check_image.outputs.image_exists == '0'
+        if: steps.check.outputs.tag_exists == 0
         run: docker pull ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
 
       - name: Tag Production image (commit sha)
-        if: steps.check_image.outputs.image_exists == '0'
+        if: steps.check.outputs.tag_exists == 0
         run: |
           docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
             ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
 
       - name: Tag Production image (latest)
-        if: steps.check_image.outputs.image_exists == '0'
+        if: steps.check.outputs.tag_exists == 0
         run: |
           docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
             ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:latest
 
       - name: Push Production image
-        if: steps.check_image.outputs.image_exists == '0'
+        if: steps.check.outputs.tag_exists == 0
         run: docker push --all-tags ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}
 
   plan:
