@@ -171,7 +171,7 @@ resource "scaleway_container" "staging_app" {
 
   secret_environment_variables = {
     "DOCKER_ENV_VITE_SENTRY_URL"        = local.staging_secrets.SENTRY_URL
-    "DOCKER_ENV_VITE_SENTRY_AUTH_TOKEN" = local.staging_secrets.SENTRY_AUTH_TOKEN
+    "SENTRY_AUTH_TOKEN" = local.staging_secrets.SENTRY_AUTH_TOKEN
   }
 }
 

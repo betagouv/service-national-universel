@@ -175,7 +175,7 @@ resource "scaleway_container" "production_app" {
 
   secret_environment_variables = {
     "DOCKER_ENV_VITE_SENTRY_URL"        = local.prod_secrets.SENTRY_URL
-    "DOCKER_ENV_VITE_SENTRY_AUTH_TOKEN" = local.prod_secrets.SENTRY_AUTH_TOKEN
+    "SENTRY_AUTH_TOKEN" = local.prod_secrets.SENTRY_AUTH_TOKEN
   }
 }
 
