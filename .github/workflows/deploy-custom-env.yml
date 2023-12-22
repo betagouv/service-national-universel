@@ -183,13 +183,13 @@ jobs:
       - name: Terraform plan
         working-directory: ${{ env.custom_directory }}
         run: |
-          terraform plan -no-color -input=false -lock=false \
+          terraform plan -no-color -input=false \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
         run: |
-          terraform apply -no-color -input=false -lock=false -auto-approve \
+          terraform apply -no-color -input=false -auto-approve \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Add comment to PR
