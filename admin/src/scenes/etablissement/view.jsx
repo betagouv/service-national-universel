@@ -102,7 +102,7 @@ export default function view() {
         const { ok, code, data: response } = await api.get(`/referent/${referentId}`);
 
         if (!ok) {
-          return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
+          return toastr.error("Oups, une erreur est survenue lors de la récupération des contacts", translate(code));
         }
 
         return response;

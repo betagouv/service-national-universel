@@ -20,6 +20,7 @@ import plausibleEvent from "../../services/plausible";
 import { ROLES, canDeleteReferent, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
+import { ModalConfirmation } from "@snu/ds/admin";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -274,6 +275,7 @@ const Action = ({ hit, structure }) => {
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
+  const [modalCLE, setModalCLE] = useState({ isOpen: false });
 
   const handleImpersonate = async () => {
     try {
@@ -318,12 +320,22 @@ const Action = ({ hit, structure }) => {
     });
   };
 
+  const onUniqueCLE = (target, type) => {
+    setModalCLE({
+      isOpen: true,
+      referent: target,
+      type: type,
+    });
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${hit._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(user);
+      if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(hit);
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(hit);
+      if (!ok && code === "LINKED_ETABLISSEMENT") return onUniqueCLE(hit, "etablissement");
+      if (!ok && code === "LINKED_CLASSE") return onUniqueCLE(hit, "classe");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       return onReferentDeleted();
     } catch (e) {
@@ -386,6 +398,17 @@ const Action = ({ hit, structure }) => {
         onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
       />
       <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.go(0)} />
+      <ModalConfirmation
+        isOpen={modalCLE?.isOpen}
+        title={"Le compte ne peut pas être supprimé"}
+        text={`${modalCLE?.referent?.firstName} ${modalCLE?.referent?.lastName} est le seul ${
+          modalCLE?.type === "etablissement" ? "chef de son établissement." : "référent de sa classe."
+        } Par conséquent, son compte ne peut pas être supprimé.`}
+        onClose={() => {
+          setModalCLE({ isOpen: false });
+        }}
+        actions={[{ title: "Fermer", isCancel: true }]}
+      />
     </>
   );
 };

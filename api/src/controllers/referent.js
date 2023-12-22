@@ -1210,6 +1210,29 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
     if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
 
+    if (referent.role === ROLES.ADMINISTRATEUR_CLE) {
+      if (referent.subRole === SUB_ROLES.referent_etablissement) {
+        const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: referent._id } });
+        if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (etablissement.referentEtablissementIds.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+
+        etablissement.set({ referentEtablissementIds: etablissement.referentEtablissementIds.filter((id) => id !== referent._id) });
+      } else {
+        const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: referent._id } });
+        if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        etablissement.set({ coordinateurIds: etablissement.coordinateurIds.filter((id) => id !== referent._id) });
+      }
+      await etablissement.save({ fromUser: req.user });
+    }
+    if (referent.role === ROLES.REFERENT_CLASSE) {
+      const classe = await ClasseModel.findOne({ referentClasseIds: { $in: referent._id } });
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (classe.referentClasseIds.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSE });
+
+      classe.set({ referentClasseIds: classe.referentClasseIds.filter((id) => id !== referent._id) });
+      await classe.save({ fromUser: req.user });
+    }
+
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
