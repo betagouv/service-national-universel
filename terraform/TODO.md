@@ -14,7 +14,7 @@ PM2 is used for api to automatically restart a node process when the previous on
 Ideally, a docker container should only start the node process, and let the cloud provider orchestrator restart a new container when the previous one has crashed.
 Alert based on the container log should the be sent on slack to report the crash.
 
-In pratice, a api container takes about 1 minute to spawn without PM2, whereas PM2 restart a process in a few seconds, so at the moment we prefer to keep PM2
+In practice, a api container takes about 1 minute to spawn without PM2, whereas PM2 restart a process in a few seconds, so at the moment we prefer to keep PM2
 
 Note that PM2 add about one more minute for a container to start (cf. measurements):
 
@@ -39,7 +39,7 @@ Without PM2
 
 ## Generate a plan then apply it during deploy actions
 
-Ideally, we should [generate a plan file](https://developer.hashicorp.com/terraform/cli/commands/plan#out-filename) during the [Plan](https://developer.hashicorp.com/terraform/cli/commands/plan) step, and use it in the [Apply](https://developer.hashicorp.com/terraform/cli/commands/apply) step, ensuring the infrastrcuture state hasn't changed beetween the 2 steps.
+Ideally, we should [generate a plan file](https://developer.hashicorp.com/terraform/cli/commands/plan#out-filename) during the [Plan](https://developer.hashicorp.com/terraform/cli/commands/plan) step, and use it in the [Apply](https://developer.hashicorp.com/terraform/cli/commands/apply) step, ensuring the infrastructure state hasn't changed beetween the 2 steps.
 
 But a plan file can be a sensitive data and must be treated as [encrypted](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#storing-large-secrets) [artifact](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts)
 

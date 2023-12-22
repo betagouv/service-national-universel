@@ -13,11 +13,11 @@ It can also be [triggered manually](https://github.com/betagouv/service-national
 
 The environment urls are provided in a PR comment, when the environment is created
 
-The [destroy-custom-env] workflow is triggered when a pull request is closed, or can also be [triggered manually](https://github.com/betagouv/service-national-universel/actions/workflows/destroy-custom-env.yml)
+The [destroy-custom-env](../.github/workflows/destroy-custom-env.yml) workflow is triggered when a pull request is closed, or can also be [triggered manually](https://github.com/betagouv/service-national-universel/actions/workflows/destroy-custom-env.yml)
 
 ## Deploy in production
 
-The [deploy-production] workflow is triggered when the branch **release_candidate** is created from **main**.
+The [deploy-production](../.github/workflows/deploy-production.yml) workflow is triggered when the branch **release_candidate** is created from **main**.
 
 It doesn't build docker images, but instead reuses images built in CI.
 
@@ -32,7 +32,7 @@ When the deployment is successfull, the branch **release_candidate** is merged (
 
 Locally, with proper [credentials](README.md) set up :
 
-Get the **image_tag** you want to rollback to. This tag must be present in the [production registry](https://console.scaleway.com/registry/namespaces/fr-par/15d7461d-a478-4c89-a655-dfb6f67a54b1/images) (rg.fr-par.scw.cloud/snu-production)
+Get the **image_tag** you want to rollback to. This tag must be present in the production [registry](https://console.scaleway.com/registry/namespaces/fr-par/15d7461d-a478-4c89-a655-dfb6f67a54b1/images) (rg.fr-par.scw.cloud/snu-production)
 
 ```shell
 cd terraform/environments/production
