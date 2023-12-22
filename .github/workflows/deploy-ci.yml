@@ -108,9 +108,11 @@ jobs:
       - name: Terraform plan
         working-directory: ${{ env.ci_directory }}
         run: |
-          terraform plan -no-color -input=false -out=ci.tfplan \
+          terraform plan -no-color -input=false \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.ci_directory }}
-        run: terraform apply -no-color -input=false -auto-approve ci.tfplan
+        run: |
+          terraform apply -no-color -input=false -auto-approve \
+            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
