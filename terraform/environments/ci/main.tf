@@ -278,17 +278,11 @@ resource "scaleway_container_domain" "app" {
 output "project_id" {
   value = scaleway_account_project.main.id
 }
-output "domain" {
-  value = local.domain
-}
-output "dns_zone" {
-  value = local.env
+output "secret_id" {
+  value = scaleway_secret.ci.id
 }
 output "registry_endpoint" {
   value = scaleway_registry_namespace.main.endpoint
-}
-output "secret_id" {
-  value = scaleway_secret.ci.id
 }
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
@@ -298,7 +292,4 @@ output "app_endpoint" {
 }
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
-}
-output "image_tag" {
-  value = split(":", scaleway_container.api.registry_image)[1]
 }

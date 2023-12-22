@@ -208,9 +208,6 @@ resource "scaleway_container_domain" "app" {
   hostname     = local.app_hostname
 }
 
-output "image_tag" {
-  value = split(":", scaleway_container.api.registry_image)[1]
-}
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
 }
