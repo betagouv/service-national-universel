@@ -29,7 +29,7 @@ type OwnProps = {
   noOptionsMessage?: string;
   loadOptions?: (
     inputValue: string,
-    callback: (options: GroupBase<string>[]) => void
+    callback: (options: GroupBase<string>[]) => void,
   ) => void | Promise<GroupBase<string>[]>;
 };
 
@@ -91,10 +91,18 @@ export default function SelectButton({
     control: (styles, state) => ({
       ...styles,
       backgroundColor: disabled ? "#F9FAFB" : "white",
-      border: error ? "1px solid #EF4444" : isActive ? "1px solid #3B82F6" : "1px solid #E5E7EB",
+      border: error
+        ? "1px solid #EF4444"
+        : isActive
+          ? "1px solid #3B82F6"
+          : "1px solid #E5E7EB",
       boxShadow: "none",
       "&:hover": {
-        border: error ? "1px solid #EF4444" : isActive ? "1px solid #3B82F6" : "1px solid #E5E7EB",
+        border: error
+          ? "1px solid #EF4444"
+          : isActive
+            ? "1px solid #3B82F6"
+            : "1px solid #E5E7EB",
       },
       ...(state.isFocused && {
         outline: "solid",
@@ -207,6 +215,7 @@ export default function SelectButton({
           <Select
             placeholder={placeholder}
             options={options}
+            noOptionsMessage={() => noOptionsMessage}
             defaultValue={defaultValue}
             maxMenuHeight={maxMenuHeight}
             isMulti={isMulti}

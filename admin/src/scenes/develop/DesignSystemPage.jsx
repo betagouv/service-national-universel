@@ -338,6 +338,7 @@ export default function DesignSystemPage() {
       <Container title="Boutons">
         <div className="grid grid-cols-3 gap-3">
           <Button title={"Primary base"} />
+          <Button title={"Primary base"} loading />
           <Button title={"Primary base change"} className={"bg-red-500 !w-[100px] hover:bg-red-700"} />
           <Button title={"Primary base disabled"} disabled={true} />
           <Button title={"Primary base + Icon"} leftIcon={<HiOutlineCommandLine size={20} />} />

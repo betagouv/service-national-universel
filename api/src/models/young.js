@@ -103,7 +103,7 @@ const Note = new mongoose.Schema({
     type: String,
     enum: ["INSCRIPTION", "PHASE_1", "PHASE_2", "PHASE_3", ""],
   },
-  note: { type: String, required: true, maxLength: 500 },
+  note: { type: String, required: true },
   referent: new mongoose.Schema({
     _id: { type: mongoose.Types.ObjectId, required: true },
     firstName: { type: String, required: true },
@@ -2092,9 +2092,9 @@ Schema.methods.anonymise = function () {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
-  if (doc.source === YOUNG_SOURCE.CLE) { // doc.previousStatus !== doc.status is not working in post save hook...
-    StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) })
-      .catch((error) => capture(error));
+  if (doc.source === YOUNG_SOURCE.CLE) {
+    // doc.previousStatus !== doc.status is not working in post save hook...
+    StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) }).catch((error) => capture(error));
   }
 
   if (ENVIRONMENT === "testing") return;
