@@ -97,6 +97,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     }
     let query = {};
     if (value.type) query.type = value.type;
+    // TODO: fix this
     // else query = { $or: [{ type: COHORT_TYPE.VOLONTAIRE }, { type: { $exists: false } }, { type: null }] };
     const cohorts = await CohortModel.find(query);
     return res.status(200).send({ ok: true, data: cohorts });
