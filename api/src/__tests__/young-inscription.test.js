@@ -160,13 +160,6 @@ describe("Young", () => {
       expect(res.status).toBe(400);
     });
 
-    it("Should return 200 when no body is sent when type url param is 'save'", async () => {
-      const typeUrlParam = "save";
-
-      let res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`);
-      expect(res.status).toBe(200);
-    });
-
     it("Should return 400 when body sent is invalid when type url param is 'next' or 'correction'", async () => {
       let typeUrlParam = "next";
 
@@ -325,33 +318,6 @@ describe("Young", () => {
 
       typeUrlParam = "correction";
       res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`);
-      expect(res.status).toBe(400);
-    });
-
-    it("Should return 200 when no body is sent when type url param is 'save'", async () => {
-      const typeUrlParam = "save";
-
-      let res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`);
-      expect(res.status).toBe(200);
-    });
-
-    it("Should return 400 when body sent is invalid when type url param is 'next' or 'correction'", async () => {
-      let typeUrlParam = "next";
-
-      const representantObj = {
-        parent1Status: "",
-        parent1FirstName: "",
-        parent1LastName: "",
-        parent1Email: "",
-        parent1Phone: "",
-        parent2: null,
-      };
-
-      let res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`).send(representantObj);
-      expect(res.status).toBe(400);
-
-      typeUrlParam = "correction";
-      res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`).send(representantObj);
       expect(res.status).toBe(400);
     });
 

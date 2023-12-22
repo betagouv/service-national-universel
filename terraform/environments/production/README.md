@@ -25,10 +25,12 @@ All production resources are described in [production.tf](production.tf). The mo
 
 ## Staging resources
 
-All staging resources are described in [staging.tf](staging.tf). The most important are :
+All staging resources are described in [staging/main.tf](staging/main.tf). The most important are :
 
 - The [secrets](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/secret)
 - The [serverless containers](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/container) that serve the different applications
+
+The staging environment has its own terraform state, separated from the state of production (different **schema_name** in the Postgres backend), to allow staging apps to be deployed separatly from production apps.
 
 ## Applications endpoints
 

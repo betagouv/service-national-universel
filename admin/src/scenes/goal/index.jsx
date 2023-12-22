@@ -65,11 +65,9 @@ export default function Goal() {
               { key: "Février 2024 - C", label: "Février 2024 - C" },
               { key: "Février 2024 - A", label: "Février 2024 - A" },
               { key: "Février 2024 - B", label: "Février 2024 - B" },
-              { key: "Mars 2024 - La Réunion", label: "Mars 2024 - La Réunion" },
               { key: "Avril 2024 - C", label: "Avril 2024 - C" },
               { key: "Avril 2024 - A", label: "Avril 2024 - A" },
               { key: "Avril 2024 - B", label: "Avril 2024 - B" },
-              { key: "Juin 2024 - 1", label: "Juin 2024 - 1" },
               { key: "Juin 2024 - 2", label: "Juin 2024 - 2" },
               { key: "Juillet 2024", label: "Juillet 2024" },
             ]}

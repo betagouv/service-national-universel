@@ -16,7 +16,7 @@ provider "scaleway" {
 
 locals {
   organization_id = "db949d19-5fe0-4def-a89b-f801aad2d050" # Selego
-  ci_project_id = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
+  ci_project_id   = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
 }
 
 # Project

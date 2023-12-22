@@ -1,3 +1,15 @@
+## [1.349.1](https://github.com/betagouv/service-national-universel/compare/v1.349.0...v1.349.1) (2023-12-21)
+
+
+### Bug Fixes
+
+* **admin:** 482 - Admin CLE volontaire redirect ([#3416](https://github.com/betagouv/service-national-universel/issues/3416)) ([dcf007d](https://github.com/betagouv/service-national-universel/commit/dcf007df25c453a6137d423cef6d384c4939dd65))
+* **admin:** cohort dashboard ([#3415](https://github.com/betagouv/service-national-universel/issues/3415)) ([e72884b](https://github.com/betagouv/service-national-universel/commit/e72884b86a21a8823f188bfc247ac669431c334e))
+* **api:** bug mongoose error mail uppercase ([#3413](https://github.com/betagouv/service-national-universel/issues/3413)) ([a2e36dd](https://github.com/betagouv/service-national-universel/commit/a2e36dd6f4dffe7709731afaf7cce5f0b6b0c1f6))
+* **api:** prevent etablissement to be empty on signup user CLE ([#3406](https://github.com/betagouv/service-national-universel/issues/3406)) ([1fb90ec](https://github.com/betagouv/service-national-universel/commit/1fb90ec630b268b1f9a66fc9d07b665f19e556fc))
+* **api/analytics:** remove crons log etablissement ([#3412](https://github.com/betagouv/service-national-universel/issues/3412)) ([0026e0a](https://github.com/betagouv/service-national-universel/commit/0026e0a74e8501c51753d28c87460b9d59648e61))
+* **terraform:** Tf stack production ([#3420](https://github.com/betagouv/service-national-universel/issues/3420)) ([0a4d4fc](https://github.com/betagouv/service-national-universel/commit/0a4d4fc3c11a02ae7a7a366f427629e241d75004))
+
 # [1.349.0](https://github.com/betagouv/service-national-universel/compare/v1.348.0...v1.349.0) (2023-12-20)
 
 

@@ -68,7 +68,6 @@ import Roundleftsvg_6 from "../../assets/roundLeft.svg";
 import Roundrightsvg_6 from "../../assets/roundRight.svg";
 import Rubberstampnotvalidedsvg_6 from "../../assets/rubberStampNotValided.svg";
 import Rubberstampvalidedsvg_6 from "../../assets/rubberStampValided.svg";
-import Savesvg_6 from "../../assets/save.svg";
 import Smalllogosvg_6 from "../../assets/small-logo.svg";
 import Tabrulesyoungpng_6 from "../../assets/tabRulesYoung.png";
 import Toolspng_7 from "../../assets/tools.png";
@@ -398,10 +397,6 @@ export default function AssetsPresentationPage() {
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="rubberstampvalided.svg">
             <img src={Rubberstampvalidedsvg_6} alt="rubberStampValided.svg" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">rubberStampValided.svg</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="save.svg">
-            <img src={Savesvg_6} alt="save.svg" crossOrigin="anonymous" className="" />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">save.svg</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="small-logo.svg">
             <img src={Smalllogosvg_6} alt="small-logo.svg" crossOrigin="anonymous" className="" />

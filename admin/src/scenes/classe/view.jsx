@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Badge, Label, InputText, Modal, Select, ModalConfirmation } from "@snu/ds/admin";
 import { HiOutlinePencil, HiOutlineOfficeBuilding } from "react-icons/hi";
+import { AiOutlinePlus } from "react-icons/ai";
 import { BsSend, BsTrash3 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { useParams, useHistory } from "react-router-dom";
@@ -28,6 +29,7 @@ import { MdContentCopy } from "react-icons/md";
 import Loader from "@/components/Loader";
 import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDangerous } from "react-icons/md";
+import plausibleEvent from "@/services/plausible";
 
 export default function view() {
   const [classe, setClasse] = useState({});
@@ -148,6 +150,11 @@ export default function view() {
     }
   };
 
+  const handleClick = () => {
+    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
+    history.push(`/volontaire/create?classeId=${classe._id}`);
+  };
+
   const actionList = edit
     ? [
         <div className="flex items-center justify-end ml-6">
@@ -156,9 +163,9 @@ export default function view() {
         </div>,
       ]
     : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-      classe?.status !== STATUS_CLASSE.WITHDRAWN
-    ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
-    : null;
+        classe?.status !== STATUS_CLASSE.WITHDRAWN
+      ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
+      : null;
 
   if (!classe) return <Loader />;
 
@@ -170,6 +177,7 @@ export default function view() {
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
           ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [
+            <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
             <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
           ]
         }
