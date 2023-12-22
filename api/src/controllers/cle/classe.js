@@ -137,7 +137,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         young.set({ cohort: classe.cohort });
         await young.save({ fromUser: req.user });
       }
-      // emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
+      emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
     }
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);

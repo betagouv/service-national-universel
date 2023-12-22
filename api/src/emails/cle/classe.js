@@ -43,6 +43,7 @@ module.exports = (emailsEmitter) => {
           class_name: classe.name,
           class_code: classe.uniqueKeyAndId,
           cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
+          cohorte: classe.cohort,
         },
       });
     } catch (error) {
