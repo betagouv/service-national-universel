@@ -29,12 +29,12 @@ Possible future improvements are :
 from containers cockpit logs :
 
 With PM2
-11h08:09 -> 11h10:07
-11h33:24 -> 11h35:08
+11h08:09 -> 11h10:07 : 1min58
+11h33:24 -> 11h35:08 : 1min44
 
 Without PM2
-12:11:50 -> 12:12:40
-12:08:54 -> 12:09:31
+12:11:50 -> 12:12:40 : ~50s
+12:08:54 -> 12:09:31 : ~37s
 
 
 ## Generate a plan then apply it during deploy actions

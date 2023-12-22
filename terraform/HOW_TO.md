@@ -9,7 +9,7 @@ It builds docker images and deploy only if the unit test are successfull.
 ## Create a custom environment
 
 The [deploy-custom-env](../.github/workflows/deploy-custom-env.yml) workflow is triggered when a pull request is opened or modified if the corresponding branch name contains **ci-\***, **\*-ci**, or **\*-ci-\***
-It can also be [triggered manually](https://github.com/betagouv/service-national-universel/actions/workflows/deploy-custom-env.yml)
+It can also be [triggered manually](https://github.com/betagouv/service-national-universel/actions/workflows/deploy-custom-env.yml), but you will have to retrigger manually on every new commit if you choose this way.
 
 The environment urls are provided in a PR comment, when the environment is created
 
@@ -23,7 +23,7 @@ It doesn't build docker images, but instead reuses images built in CI.
 
 Production deployment is performed only if staging deployment is successfull.
 
-Production deployment needs manual approval before deploying in prod. The terraform plan is viewable at the **plan_production** step.
+Production deployment needs manual approval before deploying in prod (accessible from a slack notification). The terraform plan is viewable at the **plan_production** step.
 
 When the deployment is successfull, the branch **release_candidate** is merged (--ff-only) in **production** then destroyed
 
