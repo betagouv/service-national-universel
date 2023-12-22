@@ -31,7 +31,7 @@ locals {
 }
 
 # Project
-data scaleway_account_project "main" {
+data "scaleway_account_project" "main" {
   project_id = local.project_id
 }
 
