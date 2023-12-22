@@ -1,3 +1,20 @@
+# [1.350.0](https://github.com/betagouv/service-national-universel/compare/v1.349.1...v1.350.0) (2023-12-22)
+
+
+### Bug Fixes
+
+* **api:** fix fetching of all cohorts ([#3427](https://github.com/betagouv/service-national-universel/issues/3427)) ([bf27ad6](https://github.com/betagouv/service-national-universel/commit/bf27ad609d60567b86200266fa51840b58e8f5cc))
+* 1576-cohorte-classe ([#3392](https://github.com/betagouv/service-national-universel/issues/3392)) ([830a130](https://github.com/betagouv/service-national-universel/commit/830a130adfab1c4e94210fc0068a32e77395a653))
+* **api:** retirer les youngs CLE des TODO des ref dep ([#3422](https://github.com/betagouv/service-national-universel/issues/3422)) ([bbf7eaa](https://github.com/betagouv/service-national-universel/commit/bbf7eaad60886ef64214fca2eda32dd88dce17e9))
+
+
+### Features
+
+* **admin/api:** 1559 - Donner la possibilité au ref de classe d'inscrire des élèves directement ([#3411](https://github.com/betagouv/service-national-universel/issues/3411)) ([11f89c3](https://github.com/betagouv/service-national-universel/commit/11f89c38fffd244cc0c783c990ed8421cb6345ec))
+* **admin/api/ds:** 1621 - Etablissement change referents ([#3423](https://github.com/betagouv/service-national-universel/issues/3423)) ([feb459a](https://github.com/betagouv/service-national-universel/commit/feb459a07bd84d0f3a93fc2f896de7ad85afa41c))
+* **api:** 1559 - 1576 - ajout type cohort ([#3417](https://github.com/betagouv/service-national-universel/issues/3417)) ([6f988e0](https://github.com/betagouv/service-national-universel/commit/6f988e0e04531b42c335d6b4a6f3372d36990d4e))
+* **api/admin:** 1545 - Modal Young change cohorte CLE x HTS ([#3393](https://github.com/betagouv/service-national-universel/issues/3393)) ([bf63ff8](https://github.com/betagouv/service-national-universel/commit/bf63ff8ca3abcfd6116a5b15b514f58af8107256))
+
 ## [1.349.1](https://github.com/betagouv/service-national-universel/compare/v1.349.0...v1.349.1) (2023-12-21)
 
 
