@@ -10,7 +10,7 @@ helpers.queryFromFilter = (role, region, department, filter, { regionField = "re
   };
   if (role === ROLES.REFERENT_REGION) body.query.bool.filter.push({ term: { [regionField]: region } });
   if (role === ROLES.REFERENT_DEPARTMENT) body.query.bool.filter.push({ terms: { [departmentField]: department } });
-  if (![ROLES.ADMIN, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(role)) body.query.bool.filter.push({ bool: { must_not: { term: { "source.keyword": "CLE" } } } });
+  if (role === ROLES.REFERENT_DEPARTMENT) body.query.bool.filter.push({ bool: { must_not: { term: { "source.keyword": "CLE" } } } });
   return body;
 };
 
