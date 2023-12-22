@@ -932,9 +932,9 @@ const CLE_GRADE_LIST = Object.values(CLE_GRADE);
 const STATUS_CLASSE_LIST = Object.values(STATUS_CLASSE);
 const STATUS_PHASE1_CLASSE_LIST = Object.values(STATUS_PHASE1_CLASSE);
 const YOUNG_SOURCE_LIST = Object.values(YOUNG_SOURCE);
+const COHORT_TYPE_LIST = Object.values(COHORT_TYPE);
 const CLE_COLORATION_LIST = Object.values(CLE_COLORATION);
 const CLE_FILIERE_LIST = Object.values(CLE_FILIERE);
-const COHORT_TYPE_LIST = Object.values(COHORT_TYPE);
 
 export {
   YOUNG_STATUS,
