@@ -23,6 +23,7 @@ const MissionModel = require("../../models/mission");
 const CohortModel = require("../../models/cohort");
 const AuthObject = require("../../auth");
 const LigneDeBusModel = require("../../models/PlanDeTransport/ligneBus");
+const ClasseModel = require("../../models/cle/classe");
 const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
@@ -59,6 +60,7 @@ const {
   YOUNG_STATUS,
   ROLES,
   YOUNG_STATUS_PHASE2,
+  YOUNG_SOURCE,
   youngCanChangeSession,
   youngCanDeleteAccount,
 } = require("snu-lib");
@@ -116,7 +118,6 @@ router.post("/signup_invite", async (req, res) => {
     }
 
     const { email, password, invitationToken } = value;
-
     const young = await YoungObject.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
@@ -257,10 +258,16 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
     if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     obj.inscriptionDoneDate = new Date();
+    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(req.user.role)) {
+      obj.source = YOUNG_SOURCE.CLE;
+      const classe = await ClasseModel.findById(obj.classeId);
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      obj.etablissementId = classe.etablissementId;
+    }
     const young = await YoungObject.create({ ...obj, fromUser: req.user });
 
     const toName = `${young.firstName} ${young.lastName}`;
-    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}?utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
+    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}&utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
     const fromName = `${req.user.firstName} ${req.user.lastName}`;
     await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_YOUNG, {
       emailTo: [{ name: toName, email: young.email }],
