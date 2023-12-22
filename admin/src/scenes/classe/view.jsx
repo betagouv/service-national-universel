@@ -30,6 +30,7 @@ import { MdContentCopy } from "react-icons/md";
 import Loader from "@/components/Loader";
 import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDangerous } from "react-icons/md";
+import plausibleEvent from "@/services/plausible";
 import dayjs from "dayjs";
 
 export default function view() {
