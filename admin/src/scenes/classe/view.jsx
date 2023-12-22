@@ -20,6 +20,7 @@ import {
   translateColoration,
   STATUS_CLASSE,
   translateStatusClasse,
+  COHORT_TYPE,
 } from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
@@ -104,7 +105,7 @@ export default function view() {
   useEffect(() => {
     (async () => {
       try {
-        const responseCohorts = await api.get(`/cohort`);
+        const responseCohorts = await api.get(`/cohort?type=${COHORT_TYPE.CLE}`);
         setCohorts(responseCohorts.data);
       } catch (e) {
         capture(e);

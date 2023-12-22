@@ -14,6 +14,22 @@ const sessions2024CohortNames = [
   "Juin 2024 - 2",
   "Juillet 2024",
   "CLE 23-24",
+  "CLE mars 1",
+  "CLE mars 2",
+  "CLE mai",
+  "CLE juin",
+  "CLE mai Martinique",
+  "CLE juin Martinique",
+  "CLE mars Guadeloupe",
+  "CLE mai Guadeloupe",
+  "CLE mars Guyane",
+  "CLE avril Guyane",
+  "CLE mai Guyane",
+  "CLE février Réunion",
+  "CLE mars Réunion",
+  "CLE avril Réunion",
+  "CLE mai Mayotte",
+  "CLE juin Mayotte",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
