@@ -70,3 +70,12 @@ Each environment has its corresponding directory :
 
 - [production](environments/production/README.md)
 - [ci](environments/ci/README.md)
+
+
+## HOW TO
+
+See [HOW_TO.md](HOW_TO.md)
+
+## TODO
+
+See [TODO.md](TODO.md)
