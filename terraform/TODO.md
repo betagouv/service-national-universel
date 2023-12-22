@@ -21,7 +21,7 @@ Note that PM2 add about one more minute for a container to start (cf. measuremen
 Possible future improvements are :
 
 - Use the [PM2 docker integration](https://pm2.keymetrics.io/docs/usage/docker-pm2-nodejs/)
-- Speed up the api container spawboot time & run only the node process : At the moment the docker run : npm -> turbo -> pm2
+- Speed up the api container boot time & run only the node process : At the moment the docker run : npm -> turbo -> pm2
 
 
 ### Measurements
