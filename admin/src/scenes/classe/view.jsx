@@ -20,6 +20,7 @@ import {
   translateColoration,
   STATUS_CLASSE,
   translateStatusClasse,
+  COHORT_TYPE,
 } from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
@@ -30,6 +31,7 @@ import Loader from "@/components/Loader";
 import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDangerous } from "react-icons/md";
 import plausibleEvent from "@/services/plausible";
+import dayjs from "dayjs";
 
 export default function view() {
   const [classe, setClasse] = useState({});
@@ -42,6 +44,9 @@ export default function view() {
   const user = useSelector((state) => state.Auth.user);
   const [edit, setEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [canEditCohort, setCanEditCohort] = useState(false);
+  const [cohorts, setCohorts] = useState([]);
+
   const history = useHistory();
 
   const colorOptions = Object.keys(CLE_COLORATION_LIST).map((value) => ({
@@ -92,6 +97,23 @@ export default function view() {
   useEffect(() => {
     getClasse();
   }, [edit]);
+
+  useEffect(() => {
+    if (!user) return;
+    setCanEditCohort([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role));
+  }, [user]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const responseCohorts = await api.get(`/cohort?type=${COHORT_TYPE.CLE}`);
+        setCohorts(responseCohorts.data);
+      } catch (e) {
+        capture(e);
+        setCohorts([]);
+      }
+    })();
+  }, []);
 
   const sendInfo = async () => {
     try {
@@ -186,7 +208,31 @@ export default function view() {
         <div className="flex items-stretch justify-stretch">
           <div className="flex-1">
             <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la validation des dates d'affectation." />
-            <InputText className="mb-3" value={classe.cohort} disabled />
+            <Select
+              className="mb-3"
+              isActive={edit && canEditCohort}
+              readOnly={!edit || !canEditCohort}
+              disabled={!canEditCohort}
+              placeholder={"Choisissez une cohorte"}
+              options={cohorts?.map((c) => ({ value: c.name, label: c.name }))}
+              closeMenuOnSelect={true}
+              value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
+              onChange={(options) => {
+                setClasse({ ...classe, cohort: options.value });
+              }}
+              error={errors.cohort}
+            />
+            <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2 mb-3">
+              <p className="text-left text-sm  text-gray-800">Dates</p>
+              <div className="flex items-center">
+                <p className="text-left text-xs text-gray-500 flex-1">
+                  Début : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateStart).format("DD/MM/YYYY") : ""}</strong>
+                </p>
+                <p className="text-left text-xs text-gray-500 flex-1">
+                  Fin : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateEnd).format("DD/MM/YYYY") : ""}</strong>
+                </p>
+              </div>
+            </div>
             <Label title="Numéro d’identification" />
             <div className="flex items-center justify-between gap-3 mb-3">
               <InputText className="flex-1" value={classe.uniqueKey} disabled />

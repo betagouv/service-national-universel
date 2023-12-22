@@ -97,6 +97,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       id: Joi.string().required(),
       name: Joi.string().required(),
       totalSeats: Joi.number().required(),
+      cohort: Joi.string().required(),
       coloration: Joi.string()
         .valid(...CLE_COLORATION_LIST)
         .required(),
@@ -125,10 +126,21 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
-
+    const oldCohort = classe.cohort;
     classe.set({ ...value });
     classe = await classe.save({ fromUser: req.user });
     classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
+
+    if (oldCohort !== classe.cohort) {
+      const youngs = await YoungModel.find({ classeId: classe._id });
+      await Promise.all(
+        youngs.map((y) => {
+          y.set({ cohort: classe.cohort });
+          return y.save({ fromUser: req.user });
+        }),
+      );
+      emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
+    }
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
 
