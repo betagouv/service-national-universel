@@ -133,10 +133,12 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (oldCohort !== classe.cohort) {
       const youngs = await YoungModel.find({ classeId: classe._id });
-await Promise.all(youngs.map((y) => {
-  y.set({ cohort: classe.cohort });
-  return y.save({ fromUser: req.user });
-}));
+      await Promise.all(
+        youngs.map((y) => {
+          y.set({ cohort: classe.cohort });
+          return y.save({ fromUser: req.user });
+        }),
+      );
       emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
     }
 
