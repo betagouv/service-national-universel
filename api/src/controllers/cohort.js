@@ -6,7 +6,7 @@ const CohortModel = require("../models/cohort");
 const SessionPhase1Model = require("../models/sessionPhase1");
 
 const { capture } = require("../sentry");
-const { ERRORS, getFile } = require("../utils");
+const { ERRORS, getFile, isReferent } = require("../utils");
 const { decrypt } = require("../cryptoUtils");
 const { ROLES, isSuperAdmin, COHORT_TYPE } = require("snu-lib");
 
@@ -99,6 +99,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     if (value.type) query.type = value.type;
     // TODO: fix this
     // else query = { $or: [{ type: COHORT_TYPE.VOLONTAIRE }, { type: { $exists: false } }, { type: null }] };
+    else if (isReferent(req.user)) query = { $or: [{ type: COHORT_TYPE.VOLONTAIRE }, { type: { $exists: false } }, { type: null }] };
     const cohorts = await CohortModel.find(query);
     return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
