@@ -1,3 +1,11 @@
+## [1.350.1](https://github.com/betagouv/service-national-universel/compare/v1.350.0...v1.350.1) (2023-12-23)
+
+
+### Bug Fixes
+
+* **api:** get cohort ([d4b0a0b](https://github.com/betagouv/service-national-universel/commit/d4b0a0be13ae8178ade5fb95943c763954a985d0))
+* **lib:** update names cohorts CLE 2024 ([d0b6eef](https://github.com/betagouv/service-national-universel/commit/d0b6eefe12d7dafd13c1aa8f91064243e4dad714))
+
 # [1.350.0](https://github.com/betagouv/service-national-universel/compare/v1.349.1...v1.350.0) (2023-12-22)
 
 
