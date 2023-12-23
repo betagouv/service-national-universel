@@ -24,9 +24,10 @@ variable "image_tag" {
 locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
-  api_hostname   = "api.${scaleway_domain_zone.main.id}"
-  admin_hostname = "admin.${scaleway_domain_zone.main.id}"
-  app_hostname   = "moncompte.${scaleway_domain_zone.main.id}"
+  domain         = "ci.beta-snu.dev"
+  api_hostname   = "api.${local.env}.${local.domain}"
+  admin_hostname = "admin.${local.env}.${local.domain}"
+  app_hostname   = "moncompte.${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -43,8 +44,8 @@ data "scaleway_registry_namespace" "main" {
 # DNS zone
 resource "scaleway_domain_zone" "main" {
   project_id = data.scaleway_account_project.main.id
-  domain     = "beta-snu.dev"
-  subdomain  = "${local.env}.ci"
+  domain     = "ci.beta-snu.dev"
+  subdomain  = "${local.env}"
 }
 
 
