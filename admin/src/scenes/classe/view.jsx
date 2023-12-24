@@ -33,7 +33,7 @@ import { MdOutlineDangerous } from "react-icons/md";
 import plausibleEvent from "@/services/plausible";
 import dayjs from "dayjs";
 
-export default function view() {
+export default function View() {
   const [classe, setClasse] = useState({});
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState([]);
@@ -44,8 +44,8 @@ export default function view() {
   const user = useSelector((state) => state.Auth.user);
   const [edit, setEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [canEditCohort, setCanEditCohort] = useState(false);
-  const [cohorts, setCohorts] = useState([]);
+  const canEditCohort = useState([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role));
+  const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
 
   const history = useHistory();
 
@@ -97,23 +97,6 @@ export default function view() {
   useEffect(() => {
     getClasse();
   }, [edit]);
-
-  useEffect(() => {
-    if (!user) return;
-    setCanEditCohort([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role));
-  }, [user]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const responseCohorts = await api.get(`/cohort?type=${COHORT_TYPE.CLE}`);
-        setCohorts(responseCohorts.data);
-      } catch (e) {
-        capture(e);
-        setCohorts([]);
-      }
-    })();
-  }, []);
 
   const sendInfo = async () => {
     try {
