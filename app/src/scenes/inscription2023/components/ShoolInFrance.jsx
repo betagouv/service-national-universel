@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
-import CreatableSelect from "../../../components/CreatableSelect";
 import Input from "./Input";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
-import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
-import { FiChevronLeft } from "react-icons/fi";
+import { HiArrowRight } from "react-icons/hi";
+import { RiArrowGoBackLine } from "react-icons/ri";
 import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
 import { toastr } from "react-redux-toastr";
@@ -62,6 +61,18 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   return manualFilling ? (
     <>
       <hr></hr>
+      <div className="flex items-center py-4">
+        <RiArrowGoBackLine className="font-bold mt-1 mr-2 text-[#000091]" />
+        <button
+          className="text-[#000091] cursor-pointer"
+          onClick={() => {
+            setManualFilling(false);
+            onSelectSchool(null);
+            handleChangeCity();
+          }}>
+          Revenir à la liste des établissements
+        </button>
+      </div>
       <Input
         value={manualSchool.fullName}
         label="Nom de l'établissement"
@@ -82,18 +93,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         error={errors?.school}
         correction={corrections?.schoolAddress}
       />
-      <GhostButton
-        name={
-          <div className="flex items-center justify-center gap-1 text-center">
-            <FiChevronLeft className="font-bold text-[#000091]" />
-            Revenir à la liste des établissements
-          </div>
-        }
-        onClick={() => {
-          setManualFilling(false);
-          onSelectSchool(null);
-        }}
-      />
     </>
   ) : (
     <>
@@ -106,25 +105,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         onChange={handleChangeCity}
         error={errors.city}
       />
-      {/* <CreatableSelect
-        label="Nom de l'établissement"
-        value={formatSchoolName(school)}
-        options={schoolOptions
-          .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
-          .sort()
-          .map((c) => ({ value: c, label: c }))}
-        onChange={(value) => {
-          onSelectSchool(schoolOptions.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
-        }}
-        placeholder="Sélectionnez un établissement"
-        onCreateOption={(value) => {
-          setManualSchool({ fullName: value });
-          onSelectSchool(null);
-          setManualFilling(true);
-        }}
-        error={errors?.school}
-        correction={corrections?.schoolName}
-      /> */}
       <Select
         label="Nom de l'établissement"
         value={formatSchoolName(school)}
@@ -139,15 +119,18 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         error={errors?.school}
         correction={corrections?.schoolName}
       />
-      <p
-        className="text-[#000091] cursor-pointer underline"
-        onClick={() => {
-          setManualFilling(true);
-          onSelectSchool(null);
-          handleChangeCity();
-        }}>
-        Je n'ai pas trouvé mon établissement
-      </p>
+      <div className="flex items-center">
+        <button
+          className="text-[#000091] cursor-pointer"
+          onClick={() => {
+            setManualFilling(true);
+            onSelectSchool(null);
+            handleChangeCity();
+          }}>
+          Je n'ai pas trouvé mon établissement
+        </button>
+        <HiArrowRight className="text-[#000091] mt-1 ml-2" />
+      </div>
     </>
   );
 }
