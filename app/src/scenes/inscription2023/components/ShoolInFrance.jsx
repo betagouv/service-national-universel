@@ -75,7 +75,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       </div>
       <Input
         value={manualSchool.fullName}
-        label="Nom de l'établissement"
+        label="Saisir le nom de l'établissement"
         onChange={(value) => {
           setManualSchool({ ...manualSchool, fullName: value });
           onSelectSchool(null);
