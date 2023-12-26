@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
   const cohorts = useSelector((state) => state.Cohorts);
-  const availableCohorts = cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name);
+  const availableCohorts = isOpen ? cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name) : [];
 
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
