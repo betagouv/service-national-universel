@@ -64,7 +64,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <div className="flex items-center py-4">
         <RiArrowGoBackLine className="font-bold mt-1 mr-2 text-[#000091]" />
         <button
-          className="text-[#000091] cursor-pointer"
+          className="text-[#000091] cursor-pointer underline underline-offset-2"
           onClick={() => {
             setManualFilling(false);
             onSelectSchool(null);
@@ -108,20 +108,26 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <Select
         label="Nom de l'établissement"
         value={formatSchoolName(school)}
+        placeholder="Sélectionnez un établissement"
         options={schoolOptions
-          .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
-          .sort()
-          .map((c) => ({ value: c, label: c }))}
+          .map((e) => ({
+            value: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
+            label: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label))}
+        // .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
+        // .sort()
+        // .map((c) => ({ value: c, label: c }))}
+
         onChange={(value) => {
           onSelectSchool(schoolOptions.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
         }}
-        placeholder="Sélectionnez un établissement"
         error={errors?.school}
         correction={corrections?.schoolName}
       />
       <div className="flex items-center">
         <button
-          className="text-[#000091] cursor-pointer"
+          className="text-[#000091] cursor-pointer underline underline-offset-2"
           onClick={() => {
             setManualFilling(true);
             onSelectSchool(null);

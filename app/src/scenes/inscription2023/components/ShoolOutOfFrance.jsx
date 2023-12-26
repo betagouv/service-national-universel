@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from "react";
 import CreatableSelect from "../../../components/CreatableSelect";
+import Select from "@/components/dsfr/forms/Select";
+import { HiArrowRight } from "react-icons/hi";
+import Input from "./Input";
+import { RiArrowGoBackLine } from "react-icons/ri";
 import api from "../../../services/api";
 
 export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify, corrections = null }) {
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState(school?.country);
   const [schools, setSchools] = useState([]);
+  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
+  const [manualSchool, setManualSchool] = useState(school ?? {});
 
   const [errors, setErrors] = useState({});
 
@@ -19,7 +25,6 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
           .sort(),
       );
     }
-
     getCountries();
   }, []);
 
@@ -54,9 +59,36 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
     return school.fullName + " - " + school.city;
   }
 
-  return (
+  return manualFilling ? (
     <>
-      <CreatableSelect
+      <hr></hr>
+      <div className="flex items-center py-4">
+        <RiArrowGoBackLine className="font-bold mt-1 mr-2 text-[#000091]" />
+        <button
+          className="text-[#000091] cursor-pointer underline underline-offset-2"
+          onClick={() => {
+            setManualFilling(false);
+            onSelectSchool(null);
+            setCountry(null);
+          }}>
+          Revenir à la liste des établissements
+        </button>
+      </div>
+      <Input
+        value={manualSchool.fullName}
+        label="Saisir le nom de l'établissement"
+        onChange={(value) => {
+          setManualSchool({ ...manualSchool, fullName: value });
+          onSelectSchool(null);
+        }}
+        error={errors?.manualFullName}
+        correction={corrections?.schoolName}
+      />
+    </>
+  ) : (
+    <>
+      <hr></hr>
+      <Select
         label="Pays de l'établissement"
         value={country}
         options={countries.map((c) => ({ value: c, label: c }))}
@@ -67,7 +99,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
         error={errors.country}
         corrections={corrections?.country}
       />
-      <CreatableSelect
+      <Select
         label="Nom de l'établissement"
         value={formatSchoolName(school)}
         options={schools
@@ -78,13 +110,21 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
           const selectedSchool = schools.find((e) => `${e.fullName} - ${e.city}` === value);
           onSelectSchool(selectedSchool ?? { fullName: value, country });
         }}
-        onCreateOption={(value) => {
-          onSelectSchool({ fullName: value, country });
-        }}
         placeholder="Sélectionnez un établissement"
         error={errors.fullName}
         correction={corrections?.schoolName}
       />
+      <div className="flex items-center">
+        <button
+          className="text-[#000091] cursor-pointer underline underline-offset-2"
+          onClick={() => {
+            setManualFilling(true);
+            onSelectSchool(null);
+          }}>
+          Je n'ai pas trouvé mon établissement
+        </button>
+        <HiArrowRight className="text-[#000091] mt-1 ml-2" />
+      </div>
     </>
   );
 }
