@@ -7,27 +7,12 @@ import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Field from "./Field";
+import { useSelector } from "react-redux";
 
 export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
-  const [availableCohorts, setAvailableCohorts] = React.useState([]);
-
-  useEffect(() => {
-    if (isOpen && !availableCohorts.length) {
-      (async () => {
-        try {
-          const { data, ok, code } = await api.get("/cohort");
-          if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des séjours", translate(code));
-          const filteredCohorts = data.filter((cohort) => isSessionEditionOpen(user, cohort) === true);
-          const availableCohorts = filteredCohorts.map((cohort) => cohort.name);
-          setAvailableCohorts(availableCohorts);
-        } catch (err) {
-          capture(err);
-          toastr.error("Erreur", translate("Une erreur est survenue"));
-        }
-      })();
-    }
-  }, [isOpen]);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const availableCohorts = cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name);
 
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
