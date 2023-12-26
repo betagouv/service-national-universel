@@ -1,3 +1,10 @@
+## [1.350.2](https://github.com/betagouv/service-national-universel/compare/v1.350.1...v1.350.2) (2023-12-26)
+
+
+### Bug Fixes
+
+* **app:** Allow access to Waiting List home page ([b8e6adf](https://github.com/betagouv/service-national-universel/commit/b8e6adf7e4eeac82573bc2f16bdbaab8d34a2aa1))
+
 ## [1.350.1](https://github.com/betagouv/service-national-universel/compare/v1.350.0...v1.350.1) (2023-12-23)
 
 
