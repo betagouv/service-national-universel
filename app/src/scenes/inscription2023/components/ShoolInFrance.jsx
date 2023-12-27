@@ -68,7 +68,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           onClick={() => {
             setManualFilling(false);
             onSelectSchool(null);
-            handleChangeCity();
           }}>
           Revenir à la liste des établissements
         </button>
@@ -131,7 +130,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           onClick={() => {
             setManualFilling(true);
             onSelectSchool(null);
-            handleChangeCity();
           }}>
           Je n'ai pas trouvé mon établissement
         </button>

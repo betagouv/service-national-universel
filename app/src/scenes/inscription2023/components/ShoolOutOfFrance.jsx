@@ -69,17 +69,15 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
           onClick={() => {
             setManualFilling(false);
             onSelectSchool(null);
-            setCountry(null);
           }}>
           Revenir à la liste des établissements
         </button>
       </div>
       <Input
-        value={manualSchool.fullName}
+        value={formatSchoolName(school)}
         label="Saisir le nom de l'établissement"
         onChange={(value) => {
-          setManualSchool({ ...manualSchool, fullName: value });
-          onSelectSchool(null);
+          onSelectSchool({ fullName: value, country });
         }}
         error={errors?.manualFullName}
         correction={corrections?.schoolName}
