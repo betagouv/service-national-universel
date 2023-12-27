@@ -1,3 +1,71 @@
+## [1.350.2](https://github.com/betagouv/service-national-universel/compare/v1.350.1...v1.350.2) (2023-12-26)
+
+
+### Bug Fixes
+
+* **app:** Allow access to Waiting List home page ([b8e6adf](https://github.com/betagouv/service-national-universel/commit/b8e6adf7e4eeac82573bc2f16bdbaab8d34a2aa1))
+
+## [1.350.1](https://github.com/betagouv/service-national-universel/compare/v1.350.0...v1.350.1) (2023-12-23)
+
+
+### Bug Fixes
+
+* **api:** get cohort ([d4b0a0b](https://github.com/betagouv/service-national-universel/commit/d4b0a0be13ae8178ade5fb95943c763954a985d0))
+* **lib:** update names cohorts CLE 2024 ([d0b6eef](https://github.com/betagouv/service-national-universel/commit/d0b6eefe12d7dafd13c1aa8f91064243e4dad714))
+
+# [1.350.0](https://github.com/betagouv/service-national-universel/compare/v1.349.1...v1.350.0) (2023-12-22)
+
+
+### Bug Fixes
+
+* **api:** fix fetching of all cohorts ([#3427](https://github.com/betagouv/service-national-universel/issues/3427)) ([bf27ad6](https://github.com/betagouv/service-national-universel/commit/bf27ad609d60567b86200266fa51840b58e8f5cc))
+* 1576-cohorte-classe ([#3392](https://github.com/betagouv/service-national-universel/issues/3392)) ([830a130](https://github.com/betagouv/service-national-universel/commit/830a130adfab1c4e94210fc0068a32e77395a653))
+* **api:** retirer les youngs CLE des TODO des ref dep ([#3422](https://github.com/betagouv/service-national-universel/issues/3422)) ([bbf7eaa](https://github.com/betagouv/service-national-universel/commit/bbf7eaad60886ef64214fca2eda32dd88dce17e9))
+
+
+### Features
+
+* **admin/api:** 1559 - Donner la possibilité au ref de classe d'inscrire des élèves directement ([#3411](https://github.com/betagouv/service-national-universel/issues/3411)) ([11f89c3](https://github.com/betagouv/service-national-universel/commit/11f89c38fffd244cc0c783c990ed8421cb6345ec))
+* **admin/api/ds:** 1621 - Etablissement change referents ([#3423](https://github.com/betagouv/service-national-universel/issues/3423)) ([feb459a](https://github.com/betagouv/service-national-universel/commit/feb459a07bd84d0f3a93fc2f896de7ad85afa41c))
+* **api:** 1559 - 1576 - ajout type cohort ([#3417](https://github.com/betagouv/service-national-universel/issues/3417)) ([6f988e0](https://github.com/betagouv/service-national-universel/commit/6f988e0e04531b42c335d6b4a6f3372d36990d4e))
+* **api/admin:** 1545 - Modal Young change cohorte CLE x HTS ([#3393](https://github.com/betagouv/service-national-universel/issues/3393)) ([bf63ff8](https://github.com/betagouv/service-national-universel/commit/bf63ff8ca3abcfd6116a5b15b514f58af8107256))
+
+## [1.349.1](https://github.com/betagouv/service-national-universel/compare/v1.349.0...v1.349.1) (2023-12-21)
+
+
+### Bug Fixes
+
+* **admin:** 482 - Admin CLE volontaire redirect ([#3416](https://github.com/betagouv/service-national-universel/issues/3416)) ([dcf007d](https://github.com/betagouv/service-national-universel/commit/dcf007df25c453a6137d423cef6d384c4939dd65))
+* **admin:** cohort dashboard ([#3415](https://github.com/betagouv/service-national-universel/issues/3415)) ([e72884b](https://github.com/betagouv/service-national-universel/commit/e72884b86a21a8823f188bfc247ac669431c334e))
+* **api:** bug mongoose error mail uppercase ([#3413](https://github.com/betagouv/service-national-universel/issues/3413)) ([a2e36dd](https://github.com/betagouv/service-national-universel/commit/a2e36dd6f4dffe7709731afaf7cce5f0b6b0c1f6))
+* **api:** prevent etablissement to be empty on signup user CLE ([#3406](https://github.com/betagouv/service-national-universel/issues/3406)) ([1fb90ec](https://github.com/betagouv/service-national-universel/commit/1fb90ec630b268b1f9a66fc9d07b665f19e556fc))
+* **api/analytics:** remove crons log etablissement ([#3412](https://github.com/betagouv/service-national-universel/issues/3412)) ([0026e0a](https://github.com/betagouv/service-national-universel/commit/0026e0a74e8501c51753d28c87460b9d59648e61))
+* **terraform:** Tf stack production ([#3420](https://github.com/betagouv/service-national-universel/issues/3420)) ([0a4d4fc](https://github.com/betagouv/service-national-universel/commit/0a4d4fc3c11a02ae7a7a366f427629e241d75004))
+
+# [1.349.0](https://github.com/betagouv/service-national-universel/compare/v1.348.0...v1.349.0) (2023-12-20)
+
+
+### Bug Fixes
+
+* **admin/api/lib:** 475 - Admin CLE email academy forced + fix edit user account ([#3394](https://github.com/betagouv/service-national-universel/issues/3394)) ([941a73e](https://github.com/betagouv/service-national-universel/commit/941a73ee6e9aeb63df2578032d16f3b7f73bcb5c))
+* **analytics:** wrong field name log etablissement model ([#3403](https://github.com/betagouv/service-national-universel/issues/3403)) ([656812e](https://github.com/betagouv/service-national-universel/commit/656812e72b0607d3e7577f7fd597fac891dc61cf))
+* **analytics:** wrong name ([b67d173](https://github.com/betagouv/service-national-universel/commit/b67d1734ba992c76e9513c83d4565ab16407e589))
+* **api:** 478 - Classe status INSCRIPTION_IN_PROGRESS ([#3395](https://github.com/betagouv/service-national-universel/issues/3395)) ([76dcda7](https://github.com/betagouv/service-national-universel/commit/76dcda7599101ac9ba0e047264d33b6053c7ff46))
+* **api/analytics:** name fields log youngs ([#3401](https://github.com/betagouv/service-national-universel/issues/3401)) ([87ca5c9](https://github.com/betagouv/service-national-universel/commit/87ca5c900a67d00ec14d2bd00efdc5badeafa509))
+* **app:** Improve and simplify class fetching ([#3381](https://github.com/betagouv/service-national-universel/issues/3381)) ([5ff730c](https://github.com/betagouv/service-national-universel/commit/5ff730c731e50e96c71ea262a8f68a9957f9a83b))
+* **app:** Let users from legacy cohorts access phase 2 home if validated ([6971829](https://github.com/betagouv/service-national-universel/commit/69718291d718d8b3eb8582870d8d0fda89cd4ba7))
+* **terraform:** Disable lock from custom env to not interfere with ci ([#3402](https://github.com/betagouv/service-national-universel/issues/3402)) ([e419eb8](https://github.com/betagouv/service-national-universel/commit/e419eb8c7b76f67cdc010d7fd70f296e4e52b5b5))
+
+
+### Features
+
+* **admin:** 1603 - Design System Color palette ([#3409](https://github.com/betagouv/service-national-universel/issues/3409)) ([528d733](https://github.com/betagouv/service-national-universel/commit/528d7336dc672615a6dd22aae66f10f8f27b7920))
+* **analytics:** 1601 - création de log_etablissements ([#3400](https://github.com/betagouv/service-national-universel/issues/3400)) ([2681784](https://github.com/betagouv/service-national-universel/commit/2681784bcce7c68e437814909b87737fe6808234))
+* **analytics:** 1601 - creation log classes ([#3407](https://github.com/betagouv/service-national-universel/issues/3407)) ([08c4be4](https://github.com/betagouv/service-national-universel/commit/08c4be435531177df9890c260953ccda18e29880))
+* **api:** 1601 -création crons log etablissement/classe ([#3408](https://github.com/betagouv/service-national-universel/issues/3408)) ([b27b6e0](https://github.com/betagouv/service-national-universel/commit/b27b6e0a835eb10143d0b898bca05c46347243ce))
+* **api, app:** 477 - Add birthdate validation to young signup ([#3396](https://github.com/betagouv/service-national-universel/issues/3396)) ([245ba85](https://github.com/betagouv/service-national-universel/commit/245ba85f841462a883fc56a87198ae873cdeca86))
+* **terraform:** TF : Image_tags output & CI concurrency improved ([#3404](https://github.com/betagouv/service-national-universel/issues/3404)) ([1215104](https://github.com/betagouv/service-national-universel/commit/12151040ad6fd7886a0b76533eb135ec70291e23))
+
 # [1.348.0](https://github.com/betagouv/service-national-universel/compare/v1.347.0...v1.348.0) (2023-12-19)
 
 

@@ -68,5 +68,14 @@ This separation provides a complete isolation beetween production and ci.
 
 Each environment has its corresponding directory :
 
-- production (Coming soon)
+- [production](environments/production/README.md)
 - [ci](environments/ci/README.md)
+
+
+## HOW TO
+
+See [HOW_TO.md](HOW_TO.md)
+
+## TODO
+
+See [TODO.md](TODO.md)

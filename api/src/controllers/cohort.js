@@ -6,9 +6,9 @@ const CohortModel = require("../models/cohort");
 const SessionPhase1Model = require("../models/sessionPhase1");
 
 const { capture } = require("../sentry");
-const { ERRORS, getFile } = require("../utils");
+const { ERRORS, getFile, isReferent } = require("../utils");
 const { decrypt } = require("../cryptoUtils");
-const { ROLES, isSuperAdmin } = require("snu-lib");
+const { ROLES, isSuperAdmin, COHORT_TYPE } = require("snu-lib");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
@@ -84,9 +84,23 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
   }
 });
 
-router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (_, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const cohorts = await CohortModel.find({});
+    const { error, value } = Joi.object({
+      type: Joi.string(),
+    })
+      .unknown()
+      .validate(req.query, { stripUnknown: true });
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    let query = {};
+    if (value.type) query.type = value.type;
+    // TODO: fix this
+    // else query = { $or: [{ type: COHORT_TYPE.VOLONTAIRE }, { type: { $exists: false } }, { type: null }] };
+    else if (isReferent(req.user)) query = { $or: [{ type: COHORT_TYPE.VOLONTAIRE }, { type: { $exists: false } }, { type: null }] };
+    const cohorts = await CohortModel.find(query);
     return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);

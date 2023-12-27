@@ -28,6 +28,29 @@ module.exports = (emailsEmitter) => {
     }
   });
 
+  // Cohort updated
+  emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, async (classe) => {
+    try {
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (!etablissement) throw new Error("Etablissement not found");
+
+      const referents = await ReferentModel.find({ _id: { $in: [...classe.referentClasseIds, ...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds] } });
+      if (!referents?.length) throw new Error("Referents not found");
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, {
+        emailTo: referents.map((referent) => ({ email: referent.email, name: `${referent.firstName} ${referent.lastName}` })),
+        params: {
+          class_name: classe.name,
+          class_code: classe.uniqueKeyAndId,
+          cta: `${config.ADMIN_URL}/classes/${classe._id.toString()}`,
+          cohorte: classe.cohort,
+        },
+      });
+    } catch (error) {
+      capture(error);
+    }
+  });
+
   // Classe infos completed
   emailsEmitter.on(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, async (classe) => {
     try {

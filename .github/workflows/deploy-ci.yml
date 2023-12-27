@@ -56,8 +56,18 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.target_branch }}
 
+      - name: Check if image exists
+        id: check
+        uses: ./.github/actions/check_docker_image_tag
+        with:
+          registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
+          image_name: ${{ matrix.app_name }}
+          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
+        if: steps.check.outputs.tag_exists == 0
         with:
           username: nologin
           password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
@@ -98,9 +108,11 @@ jobs:
       - name: Terraform plan
         working-directory: ${{ env.ci_directory }}
         run: |
-          terraform plan -no-color -input=false -out=ci.tfplan \
+          terraform plan -no-color -input=false \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.ci_directory }}
-        run: terraform apply -no-color -input=false -auto-approve ci.tfplan
+        run: |
+          terraform apply -no-color -input=false -auto-approve \
+            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"

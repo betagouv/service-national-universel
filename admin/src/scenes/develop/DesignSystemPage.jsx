@@ -8,6 +8,7 @@ import { InputPhone } from "@snu/ds/admin";
 import { PHONE_ZONES } from "snu-lib";
 import ModalExamples from "./components/Modal";
 import ProfilePicExamples from "./components/ProfilePic";
+import Colors from "./components/Colors";
 import api from "@/services/api";
 
 export default function DesignSystemPage() {
@@ -182,13 +183,8 @@ export default function DesignSystemPage() {
     <Page>
       <Header
         title="Design System"
-        breadcrumb={[
-          { to: "/", title: <HiOutlineCommandLine size={20} /> },
-          { title: "Design System" },
-        ]}
-        actions={[
-          <Button key="header-action-1" title={"Click me"} />,
-        ]}
+        breadcrumb={[{ to: "/", title: <HiOutlineCommandLine size={20} /> }, { title: "Design System" }]}
+        actions={[<Button key="header-action-1" title={"Click me"} />]}
       />
       <Subheader title="Code, preview, test, build and ship." />
       <Container title="Champs simples (InputText)">
@@ -342,6 +338,7 @@ export default function DesignSystemPage() {
       <Container title="Boutons">
         <div className="grid grid-cols-3 gap-3">
           <Button title={"Primary base"} />
+          <Button title={"Primary base"} loading />
           <Button title={"Primary base change"} className={"bg-red-500 !w-[100px] hover:bg-red-700"} />
           <Button title={"Primary base disabled"} disabled={true} />
           <Button title={"Primary base + Icon"} leftIcon={<HiOutlineCommandLine size={20} />} />
@@ -491,6 +488,7 @@ export default function DesignSystemPage() {
       </Container>
       <ModalExamples />
       <ProfilePicExamples />
+      <Colors />
       <div className="grid grid-rows-2 grid-flow-col gap-4">
         <Container className="row-span-2" title="Contacts administrateurs CLE" />
         <Container className="mb-0" title="Contacts référents de classe (6)" />

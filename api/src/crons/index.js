@@ -18,6 +18,7 @@ const missionEquivalencePatches = require("./patch/missionEquivalence");
 const missionPatches = require("./patch/mission");
 const structurePatches = require("./patch/structure");
 const youngPatches = require("./patch/young");
+const classePatches = require("./patch/classe");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const parentConsentementReminder = require("./parentConsentementReminder");
 const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
@@ -49,6 +50,7 @@ const everyHours = (x) => `0 */${x} * * *`;
 // missionPatches.handler() : tous les jours à 2h00
 // applicationPatches.handler() : tous les jours à 2h30
 // youngPatches.handler() : tous les jours à 3h00
+// classePatches.handler() : tous les jours à 3h20
 // dsnjExport.handler() : tous les jours à 3h30
 // refreshMaterializedViews.handler() : tous les jours à 5h00
 
@@ -71,12 +73,12 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   cron.schedule("0 9 * * 1", function () {
     applicationPending.handler();
   });
-  
-// Une fois par mois, le 1er du mois à 9h30
+
+  // Une fois par mois, le 1er du mois à 9h30
   cron.schedule("30 9 1 * *", () => {
     deleteCNIAdnSpecificAmenagementType.handler();
   });
-  
+
   cron.schedule("0 9 * * 1", function () {
     noticePushMission.handler();
   });
@@ -144,6 +146,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("0 3 * * *", () => {
     youngPatches.handler();
+  });
+
+  cron.schedule("20 3 * * *", () => {
+    classePatches.handler();
   });
 
   cron.schedule("15 04 * * *", () => {

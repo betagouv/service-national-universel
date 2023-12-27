@@ -16,16 +16,16 @@ provider "scaleway" {
 
 variable "image_tag" {
   type    = string
-  default = "latest"
+  nullable = false
 }
 
 locals {
   organization_id = "db949d19-5fe0-4def-a89b-f801aad2d050" # Selego
   env             = "ci"
-  domain          = "beta-snu.dev"
-  api_hostname    = "api.${local.env}.${local.domain}"
-  admin_hostname  = "admin.${local.env}.${local.domain}"
-  app_hostname    = "moncompte.${local.env}.${local.domain}"
+  domain          = "ci.beta-snu.dev"
+  api_hostname    = "api.${local.domain}"
+  admin_hostname  = "admin.${local.domain}"
+  app_hostname    = "moncompte.${local.domain}"
   secrets         = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -57,24 +57,6 @@ resource "scaleway_registry_namespace" "main" {
   name        = "snu-${local.env}"
   description = "SNU registry for ${local.env}"
   is_public   = false
-}
-
-data "scaleway_registry_image" "api" {
-  name = "api"
-  namespace_id = scaleway_registry_namespace.main.id
-  project_id = scaleway_account_project.main.id
-}
-
-data "scaleway_registry_image" "admin" {
-  name = "admin"
-  namespace_id = scaleway_registry_namespace.main.id
-  project_id = scaleway_account_project.main.id
-}
-
-data "scaleway_registry_image" "app" {
-  name = "app"
-  namespace_id = scaleway_registry_namespace.main.id
-  project_id = scaleway_account_project.main.id
 }
 
 # Application user
@@ -116,7 +98,7 @@ resource "scaleway_container_namespace" "main" {
 resource "scaleway_domain_zone" "main" {
   project_id = scaleway_account_project.main.id
   domain     = local.domain
-  subdomain  = local.env
+  subdomain  = ""
 }
 
 resource "scaleway_container" "api" {
@@ -182,7 +164,6 @@ resource "scaleway_container" "api" {
     "SUPPORT_APIKEY"                        = local.secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.secrets.PM2_SLACK_URL
     "TOKENLOADTEST"                         = local.secrets.TOKENLOADTEST
-    "ZAMMAD_TOKEN"                          = local.secrets.ZAMMAD_TOKEN
   }
 }
 
@@ -275,8 +256,8 @@ resource "scaleway_container" "app" {
   }
 
   secret_environment_variables = {
-    "DOCKER_ENV_VITE_SENTRY_URL"        = local.secrets.SENTRY_URL
-    "DOCKER_ENV_VITE_SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
+    "DOCKER_ENV_VITE_SENTRY_URL" = local.secrets.SENTRY_URL
+    "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
   }
 }
 
@@ -297,17 +278,11 @@ resource "scaleway_container_domain" "app" {
 output "project_id" {
   value = scaleway_account_project.main.id
 }
-output "domain" {
-  value = local.domain
-}
-output "dns_zone" {
-  value = local.env
+output "secret_id" {
+  value = scaleway_secret.ci.id
 }
 output "registry_endpoint" {
   value = scaleway_registry_namespace.main.endpoint
-}
-output "secret_id" {
-  value = scaleway_secret.ci.id
 }
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
@@ -317,16 +292,4 @@ output "app_endpoint" {
 }
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
-}
-output "image_tag" {
-  value = split(":", scaleway_container.api.registry_image)[1]
-}
-output "api_image_tags" {
-  value = data.scaleway_registry_image.api.tags
-}
-output "admin_image_tags" {
-  value = data.scaleway_registry_image.admin.tags
-}
-output "app_image_tags" {
-  value = data.scaleway_registry_image.app.tags
 }

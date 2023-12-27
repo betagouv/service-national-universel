@@ -1,3 +1,20 @@
+terraform {
+  required_providers {
+    scaleway = {
+      source = "scaleway/scaleway"
+    }
+  }
+  required_version = ">= 0.13"
+
+  backend "pg" {
+    schema_name = "apps_staging"
+  }
+}
+
+provider "scaleway" {
+  zone   = "fr-par-1"
+  region = "fr-par"
+}
 
 variable "image_tag" {
   type    = string
@@ -5,41 +22,52 @@ variable "image_tag" {
 }
 
 locals {
-  domain         = "snu.gouv.fr"
+  project_id     = "a0c93450-f68c-4768-8fe8-6e07a1644530"
+  domain         = "beta-snu.dev"
   api_hostname   = "api.${local.domain}"
   admin_hostname = "admin.${local.domain}"
   app_hostname   = "moncompte.${local.domain}"
-  secrets        = jsondecode(base64decode(data.scaleway_secret_version.production.data))
+  secrets        = jsondecode(base64decode(data.scaleway_secret_version.staging.data))
+}
+
+# Project
+data "scaleway_account_project" "main" {
+  project_id = local.project_id
+}
+
+# Registry
+data "scaleway_registry_namespace" "main" {
+  name = "snu-production"
 }
 
 # Secrets
-resource "scaleway_secret" "production" {
-  name        = "snu-production"
-  project_id  = scaleway_account_project.main.id
-  description = "Secrets for environment 'production'"
+resource "scaleway_secret" "staging" {
+  name        = "snu-staging"
+  project_id  = data.scaleway_account_project.main.id
+  description = "Secrets for environment 'staging'"
 }
-data "scaleway_secret_version" "production" {
-  secret_id = scaleway_secret.production.id
+data "scaleway_secret_version" "staging" {
+  secret_id = scaleway_secret.staging.id
   revision  = "latest_enabled"
 }
 
 # Containers namespace
-resource "scaleway_container_namespace" "production" {
-  project_id  = scaleway_account_project.main.id
-  name        = "snu-production"
-  description = "SNU container namespace for environment 'production'"
+resource "scaleway_container_namespace" "staging" {
+  project_id  = data.scaleway_account_project.main.id
+  name        = "snu-staging"
+  description = "SNU container namespace for environment 'staging'"
 }
 
 # Containers
 resource "scaleway_container" "api" {
-  name            = "production-api"
-  namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
+  name            = "staging-api"
+  namespace_id    = scaleway_container_namespace.staging.id
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
   port            = 8080
   cpu_limit       = 768
   memory_limit    = 1024
   min_scale       = 1
-  max_scale       = 20
+  max_scale       = 1
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"
@@ -51,10 +79,10 @@ resource "scaleway_container" "api" {
     "ADMIN_URL"  = "https://${local.admin_hostname}"
     "APP_URL"    = "https://${local.app_hostname}"
     "CLE"        = "true"
-    "PRODUCTION" = "true"
+    "STAGING"    = "true"
     "FOLDER_API" = "api"
-    "SENTRY_PROFILE_SAMPLE_RATE" : "0.2"
-    "SENTRY_TRACING_SAMPLE_RATE" : "0.01"
+    "SENTRY_PROFILE_SAMPLE_RATE" : "0.8"
+    "SENTRY_TRACING_SAMPLE_RATE" : "0.1"
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
@@ -72,7 +100,6 @@ resource "scaleway_container" "api" {
     "PUBLIC_BUCKET_NAME"                = local.secrets.PUBLIC_BUCKET_NAME
     "PUBLIC_BUCKET_NAME_SUPPORT"        = local.secrets.PUBLIC_BUCKET_NAME_SUPPORT
     "SENTRY_URL"                        = local.secrets.SENTRY_URL
-    "SLACK_BOT_CHANNEL"                 = local.secrets.SLACK_BOT_CHANNEL
     "SUPPORT_URL"                       = local.secrets.SUPPORT_URL
   }
 
@@ -81,7 +108,6 @@ resource "scaleway_container" "api" {
     "API_ASSOCIATION_AWS_SECRET_ACCESS_KEY" = local.secrets.API_ASSOCIATION_AWS_SECRET_ACCESS_KEY
     "API_ASSOCIATION_CELLAR_KEYSECRET"      = local.secrets.API_ASSOCIATION_CELLAR_KEYSECRET
     "API_ASSOCIATION_ES_ENDPOINT"           = local.secrets.API_ASSOCIATION_ES_ENDPOINT
-    "API_ENGAGEMENT_KEY"                    = local.secrets.API_ENGAGEMENT_KEY
     "CELLAR_KEYSECRET"                      = local.secrets.CELLAR_KEYSECRET
     "CELLAR_KEYSECRET_SUPPORT"              = local.secrets.CELLAR_KEYSECRET_SUPPORT
     "DIAGORIENTE_TOKEN"                     = local.secrets.DIAGORIENTE_TOKEN
@@ -89,32 +115,27 @@ resource "scaleway_container" "api" {
     "FILE_ENCRYPTION_SECRET"                = local.secrets.FILE_ENCRYPTION_SECRET
     "FILE_ENCRYPTION_SECRET_SUPPORT"        = local.secrets.FILE_ENCRYPTION_SECRET_SUPPORT
     "FRANCE_CONNECT_CLIENT_SECRET"          = local.secrets.FRANCE_CONNECT_CLIENT_SECRET
-    "JVA_API_KEY"                           = local.secrets.JVA_API_KEY
     "JVA_TOKEN"                             = local.secrets.JVA_TOKEN
     "MONGO_URL"                             = local.secrets.MONGO_URL
-    "QPV_PASSWORD"                          = local.secrets.QPV_PASSWORD
-    "QPV_USERNAME"                          = local.secrets.QPV_USERNAME
     "SECRET"                                = local.secrets.SECRET
     "SENDINBLUEKEY"                         = local.secrets.SENDINBLUEKEY
-    "SLACK_BOT_TOKEN"                       = local.secrets.SLACK_BOT_TOKEN
     "SUPPORT_APIKEY"                        = local.secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.secrets.PM2_SLACK_URL
     "TOKENLOADTEST"                         = local.secrets.TOKENLOADTEST
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "api" {
-#  container_id = scaleway_container.api.id
-#  hostname     = local.api_hostname
-#}
+resource "scaleway_container_domain" "api" {
+  container_id = scaleway_container.api.id
+  hostname     = local.api_hostname
+}
 
 
 
 resource "scaleway_container" "admin" {
-  name            = "production-admin"
-  namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.image_tag}"
+  name            = "staging-admin"
+  namespace_id    = scaleway_container_namespace.staging.id
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/admin:${var.image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -129,13 +150,12 @@ resource "scaleway_container" "admin" {
   environment_variables = {
     "APP_NAME"                                   = "admin"
     "CLE"                                        = "true"
-    "PROD"                                       = "true"
+    "STAGING"                                    = "true"
     "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.005"
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = "0.01"
-    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.1"
+    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
   }
 
   secret_environment_variables = {
@@ -145,16 +165,15 @@ resource "scaleway_container" "admin" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "admin" {
-#  container_id = scaleway_container.admin.id
-#  hostname     = local.admin_hostname
-#}
+resource "scaleway_container_domain" "admin" {
+  container_id = scaleway_container.admin.id
+  hostname     = local.admin_hostname
+}
 
 resource "scaleway_container" "app" {
-  name            = "production-app"
-  namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.image_tag}"
+  name            = "staging-app"
+  namespace_id    = scaleway_container_namespace.staging.id
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -169,14 +188,12 @@ resource "scaleway_container" "app" {
   environment_variables = {
     "APP_NAME"                                   = "app"
     "CLE"                                        = "true"
-    "PROD"                                       = "true"
+    "STAGING"                                    = "true"
     "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.005"
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = "0.01"
-    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
-    "DOCKER_ENV_VITE_FRANCE_CONNECT_URL"         = "https://app.franceconnect.gouv.fr/api/v1"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.1"
+    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
     "FOLDER_APP"                                 = "app"
   }
 
@@ -186,11 +203,10 @@ resource "scaleway_container" "app" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "app" {
-#  container_id = scaleway_container.app.id
-#  hostname     = local.app_hostname
-#}
+resource "scaleway_container_domain" "app" {
+  container_id = scaleway_container.app.id
+  hostname     = local.app_hostname
+}
 
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
