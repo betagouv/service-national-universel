@@ -84,9 +84,6 @@ export default function AdminMenu() {
             <div className="flex flex-col gap-4 rounded-md border border-gray-300 bg-white px-4 py-3">
               {roles
                 .filter((role) => {
-                  console.log("User role: ", user.role);
-                  console.log("Checking role: ", role);
-                  console.log("Accessible roles for user: ", categoryAccessibleReferent[user.role]);
                   return user.role === "admin" ? true : categoryAccessibleReferent[user.role]?.includes(role);
                 })
                 .map((role) => (
