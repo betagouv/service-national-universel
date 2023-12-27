@@ -193,8 +193,10 @@ const getCohortPeriodTemp = (young) => {
 };
 
 function inscriptionModificationOpenForYoungs(cohort) {
-  if (!cohort?.inscriptionModificationEndDate) return false;
-  return new Date() < new Date(cohort.inscriptionModificationEndDate);
+  // FIXME: remove this when all cohorts have inscriptionModificationEndDate
+  const date = cohort?.type === "CLE" ? cohort?.inscriptionEndDate : cohort?.inscriptionModificationEndDate;
+  if (!date) return false;
+  return new Date() < new Date(date);
 }
 
 function inscriptionCreationOpenForYoungs(cohort) {
