@@ -57,15 +57,6 @@ export default function View(props) {
     })();
   }, [currentCohort]);
 
-  const shouldModifyPdr = () => {
-    const availableCohort = "Février 2024";
-    if (data.cohorts.some((c) => c.includes(availableCohort))) {
-      return true;
-    } else {
-      return pdrInSchema;
-    }
-  };
-
   const setYoungsFromES = async (id) => {
     const { responses } = await api.post("/elasticsearch/young/by-point-de-rassemblement/aggs", { filters: { meetingPointIds: [id], cohort: [] } });
     setNbYoung(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
@@ -301,7 +292,7 @@ export default function View(props) {
               <>
                 {!editInfo ? (
                   <div data-tip="" data-for="tooltip-edit-disabled">
-                    {!shouldModifyPdr() && user.role !== ROLES.ADMIN && (
+                    {pdrInSchema && user.role !== ROLES.ADMIN && (
                       <ReactTooltip id="tooltip-edit-disabled" className="rounded-xl bg-white shadow-xl drop-shadow-sm" arrowColor="white" disable={false}>
                         <div className="text-center text-gray-700">
                           Action impossible : point de rassemblement utilisé dans un schéma de répartition. <br />
@@ -312,7 +303,7 @@ export default function View(props) {
                     <button
                       className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={() => setEditInfo(true)}
-                      disabled={isLoading || (!shouldModifyPdr() && user.role !== ROLES.ADMIN)}>
+                      disabled={isLoading || (pdrInSchema && user.role !== ROLES.ADMIN)}>
                       <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                       Modifier
                     </button>
