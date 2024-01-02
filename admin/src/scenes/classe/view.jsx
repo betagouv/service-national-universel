@@ -160,17 +160,15 @@ export default function View() {
     history.push(`/volontaire/create?classeId=${classe._id}`);
   };
 
-  const actionList = edit
-    ? [
-        <div className="flex items-center justify-end ml-6">
-          <Button key="cancel" type="cancel" title="Annuler" onClick={onCancel} disabled={isLoading} />
-          <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
-        </div>,
-      ]
-    : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-        classe?.status !== STATUS_CLASSE.WITHDRAWN
-      ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
-      : null;
+  const actionList = edit ? (
+    <div className="flex items-center justify-end ml-6">
+      <Button key="cancel" type="cancel" title="Annuler" onClick={onCancel} disabled={isLoading} />
+      <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
+    </div>
+  ) : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+    classe?.status !== STATUS_CLASSE.WITHDRAWN ? (
+    [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
+  ) : null;
 
   if (!classe) return <Loader />;
 
