@@ -1,3 +1,10 @@
+## [1.350.5](https://github.com/betagouv/service-national-universel/compare/v1.350.4...v1.350.5) (2024-01-02)
+
+
+### Bug Fixes
+
+* **api:** Force to use api.snu.gouv.fr ([52fa460](https://github.com/betagouv/service-national-universel/commit/52fa46054c22c6e667ad4bd217603a78abc6669a))
+
 ## [1.350.4](https://github.com/betagouv/service-national-universel/compare/v1.350.3...v1.350.4) (2023-12-29)
 
 
