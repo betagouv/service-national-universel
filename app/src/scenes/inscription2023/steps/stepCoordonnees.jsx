@@ -31,7 +31,7 @@ import { capture } from "../../../sentry";
 import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { apiAdress, getAddressOptions } from "../../../services/api-adresse";
+import { apiAdress } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -465,7 +465,8 @@ export default function StepCoordonnees() {
     <>
       <DSFRContainer
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
-        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}        supportEvent="Phase0/aide inscription - coordonnees">
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
+        supportEvent="Phase0/aide inscription - coordonnees">
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect
@@ -534,7 +535,7 @@ export default function StepCoordonnees() {
           correction={corrections?.livesInFrance}
         />
         {isFrenchResident ? (
-          <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} correction={corrections} />
+          <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections} />
         ) : (
           <>
             <SearchableSelect
@@ -585,13 +586,7 @@ export default function StepCoordonnees() {
               error={errors.hostRelationship}
               correction={corrections?.hostRelationship}
             />
-            <AddressForm
-              data={data}
-              updateData={(newData) => setData({ ...data, ...newData })}
-              getOptions={getAddressOptions}
-              error={errors.address}
-              correction={corrections?.address}
-            />
+            <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections?.address} />
           </>
         )}
 

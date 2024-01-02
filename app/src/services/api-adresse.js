@@ -32,6 +32,17 @@ const apiAdress = async (query, filters = {}, options = {}) => {
   }
 };
 
+const simpleApiAdress = async (query, filters = {}) => {
+  let url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}`;
+  for (const [key, value] of Object.entries(filters)) {
+    url += `&${key}=${encodeURIComponent(value)}`;
+  }
+  const res = await fetch(url);
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  return json;
+};
+
 const putLocation = async (query, postcode, signal) => {
   if (!postcode) {
     capture(new Error("No postcode"), { extra: { query: query } });
@@ -108,6 +119,21 @@ function formatOption(option) {
   };
 }
 
+function sortOptions(options) {
+  const housenumbers = options.filter((option) => option.coordinatesAccuracyLevel === "housenumber");
+  const streets = options.filter((option) => option.coordinatesAccuracyLevel === "street");
+  const localities = options.filter((option) => option.coordinatesAccuracyLevel === "locality");
+  const municipalities = options.filter((option) => option.coordinatesAccuracyLevel === "municipality");
+
+  const sortedOptions = [];
+  if (housenumbers.length > 0) sortedOptions.push({ label: "Numéro", options: housenumbers });
+  if (streets.length > 0) sortedOptions.push({ label: "Voie", options: streets });
+  if (localities.length > 0) sortedOptions.push({ label: "Lieu-dit", options: localities });
+  if (municipalities.length > 0) sortedOptions.push({ label: "Commune", options: municipalities });
+
+  return sortedOptions;
+}
+
 function getDepartmentAndRegionFromContext(context) {
   // Context has the department number as first element, department name as an optional second element and region as the last element.
   // Examples:
@@ -120,28 +146,4 @@ function getDepartmentAndRegionFromContext(context) {
   return { department, region };
 }
 
-async function getAddressOptions(query, signal) {
-  // Call BAN API
-  const res = await apiAdress(query, { limit: 10 }, { signal });
-  if (!res) return [[], null];
-  if (res.error) return [null, res.error];
-  if (!res.features?.length) return [[], null];
-
-  // Format and group options
-  const formattedOptions = res.features.map((option) => formatOption(option));
-
-  const housenumbers = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "housenumber");
-  const streets = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "street");
-  const localities = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "locality");
-  const municipalities = formattedOptions.filter((option) => option.coordinatesAccuracyLevel === "municipality");
-
-  const options = [];
-  if (housenumbers.length > 0) options.push({ label: "Numéro", options: housenumbers });
-  if (streets.length > 0) options.push({ label: "Voie", options: streets });
-  if (localities.length > 0) options.push({ label: "Lieu-dit", options: localities });
-  if (municipalities.length > 0) options.push({ label: "Commune", options: municipalities });
-
-  return [options, null];
-}
-
-export { apiAdress, putLocation, getSuggestions, formatResult, getAddressOptions };
+export { apiAdress, simpleApiAdress, putLocation, getSuggestions, formatResult, formatOption, sortOptions };

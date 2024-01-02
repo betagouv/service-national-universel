@@ -5,7 +5,6 @@ import Input from "./Input";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
 import { FiChevronLeft } from "react-icons/fi";
-import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
 import { toastr } from "react-redux-toastr";
 
@@ -76,7 +75,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           setManualSchool({ ...manualSchool, ...newData });
           onSelectSchool({ ...newData, fullName: manualSchool.fullName });
         }}
-        getOptions={getAddressOptions}
         error={errors?.school}
         correction={corrections?.schoolAddress}
       />
