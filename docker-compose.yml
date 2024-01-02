@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    networks:
+      - snu
+    volumes:
+      - mongo:/data/snu
+    ports:
+      - 27017:27017
+
+  redis:
+    image: redis
+    container_name: redis
+    networks:
+      - snu
+    volumes:
+      - redis:/data/snu
+    ports:
+      - 6379:6379
+
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch
+    networks:
+      - snu
+    ulimits:
+      memlock:
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
+    volumes:
+      - opensearch:/usr/share/opensearch/data
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch
+      - discovery.seed_hosts=opensearch
+      - cluster.initial_cluster_manager_nodes=opensearch
+      - bootstrap.memory_lock=true
+      - 'OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m'
+    ports:
+      - 9200:9200
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+    networks:
+      - snu
+    environment:
+      OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
+    ports:
+      - 5601:5601
+
+volumes:
+  mongo:
+  redis:
+  opensearch:
+
+networks:
+  snu:
+ 
