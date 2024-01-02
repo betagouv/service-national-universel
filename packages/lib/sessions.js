@@ -12,7 +12,9 @@ const sessions2024CohortNames = [
   "Avril 2024 - A",
   "Avril 2024 - B",
   "Juin 2024 - 2",
+  "Juin 2024 - Martinique",
   "Juillet 2024",
+  "Juillet 2024 - Martinique",
   "CLE 23-24",
   "CLE mars 2024 1",
   "CLE mars 2024 2",
@@ -191,8 +193,10 @@ const getCohortPeriodTemp = (young) => {
 };
 
 function inscriptionModificationOpenForYoungs(cohort) {
-  if (!cohort?.inscriptionModificationEndDate) return false;
-  return new Date() < new Date(cohort.inscriptionModificationEndDate);
+  // FIXME: remove this when all cohorts have inscriptionModificationEndDate
+  const date = cohort?.type === "CLE" ? cohort?.inscriptionEndDate : cohort?.inscriptionModificationEndDate;
+  if (!date) return false;
+  return new Date() < new Date(date);
 }
 
 function inscriptionCreationOpenForYoungs(cohort) {

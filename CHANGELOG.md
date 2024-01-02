@@ -1,3 +1,26 @@
+## [1.350.4](https://github.com/betagouv/service-national-universel/compare/v1.350.3...v1.350.4) (2023-12-29)
+
+
+### Bug Fixes
+
+* **admin:** revert override edit fev PDR ([1056253](https://github.com/betagouv/service-national-universel/commit/105625330e2f49840108cd3c3cbd4f9f1eaa7bb2))
+* **admin:** support for transporter ([6ebc7da](https://github.com/betagouv/service-national-universel/commit/6ebc7dac212e88330419c7ac28379f8da4c8d1f3))
+
+## [1.350.3](https://github.com/betagouv/service-national-universel/compare/v1.350.2...v1.350.3) (2023-12-27)
+
+
+### Bug Fixes
+
+* **api:** remove enum in originalCohort field ([4932925](https://github.com/betagouv/service-national-universel/commit/493292568abc118a2d5dde4e7c4f2b954a5e1a61))
+* **app:** handle new CLE that do not have modification end date ([36078e5](https://github.com/betagouv/service-national-universel/commit/36078e519a1045d3acb54e1095cb56a16eb791be))
+
+## [1.350.2](https://github.com/betagouv/service-national-universel/compare/v1.350.1...v1.350.2) (2023-12-26)
+
+
+### Bug Fixes
+
+* **app:** Allow access to Waiting List home page ([b8e6adf](https://github.com/betagouv/service-national-universel/commit/b8e6adf7e4eeac82573bc2f16bdbaab8d34a2aa1))
+
 ## [1.350.1](https://github.com/betagouv/service-national-universel/compare/v1.350.0...v1.350.1) (2023-12-23)
 
 

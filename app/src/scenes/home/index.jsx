@@ -58,8 +58,9 @@ export default function Home() {
     if (isReinscriptionOpen === false) {
       if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
       if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
-      if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
     }
+
+    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
 
     if (hasAccessToReinscription(young)) {
       if (isReinscriptionOpenLoading) return <Loader />;
