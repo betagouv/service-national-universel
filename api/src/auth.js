@@ -168,7 +168,13 @@ class Auth {
       });
     } catch (error) {
       console.log("Error ", error);
-      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      if (error.code === 11000) {
+        const [field] = error.message.match(/(?<=index: )([a-z]*)(?=_| dup key)/);
+        const [value] = error.message.match(/(?<={ : ")(.*)(?=" })/);
+        const alreadyRegisteredUser = await this.model.findOne({ [field]: value });
+        if (alreadyRegisteredUser && alreadyRegisteredUser.classeId) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED_CLE });
+        return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      }
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
@@ -301,8 +307,13 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
-      console.log("Error ", error);
-      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      if (error.code === 11000) {
+        const [field] = error.message.match(/(?<=index: )([a-z]*)(?=_| dup key)/);
+        const [value] = error.message.match(/(?<={ : ")(.*)(?=" })/);
+        const alreadyRegisteredUser = await this.model.findOne({ [field]: value });
+        if (alreadyRegisteredUser && alreadyRegisteredUser.classeId) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED_CLE });
+        return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      }
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
