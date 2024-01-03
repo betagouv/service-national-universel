@@ -2,13 +2,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
+import { Redirect, Link, Router, Switch, useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
 
 import { setYoung } from "./redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import * as Sentry from "@sentry/react";
+
+import useDocumentCss from "@/hooks/useDocumentCss";
+import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
@@ -58,8 +61,7 @@ import {
   FEATURES_NAME,
 } from "snu-lib";
 import { capture, history, initSentry, SentryRoute } from "./sentry";
-import { getAvailableSessions } from "./services/cohort.service";
-import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
+import { cohortsInit, getCohort } from "./utils/cohorts";
 
 initSentry();
 initApi();
@@ -87,16 +89,24 @@ export default function App() {
               </Switch>
             ) : (
               <Switch>
-                {/* Aucune authentification nécessaire */}
-                <SentryRoute path="/noneligible" component={NonEligible} />
-                <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-                <SentryRoute path="/validate-contract/done" component={ContractDone} />
-                <SentryRoute path="/validate-contract" component={Contract} />
-                <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-                <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
-                <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
-                {/* Authentification accessoire */}
-                <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci", "/preinscription"]} component={() => <OptionalLogIn />} />
+                <SentryRoute
+                  path={[
+                    "/validate-contract/done",
+                    "/validate-contract",
+                    "/conditions-generales-utilisation",
+                    "/noneligible",
+                    "/representants-legaux",
+                    "/je-rejoins-ma-classe-engagee",
+                    "/je-suis-deja-inscrit",
+                    "/public-besoin-d-aide",
+                    "/auth",
+                    "/public-engagements",
+                    "/besoin-d-aide",
+                    "/merci",
+                    "/preinscription",
+                  ]}
+                  component={() => <OptionalLogIn />}
+                />
                 {/* Authentification nécessaire */}
                 <SentryRoute path="/" component={() => <MandatoryLogIn />} />
               </Switch>
@@ -109,6 +119,9 @@ export default function App() {
 }
 
 const OptionalLogIn = () => {
+  //DSFR CSS is only loaded on public routes.
+  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+  startReactDsfr({ defaultColorScheme: "light", Link });
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
@@ -143,6 +156,13 @@ const OptionalLogIn = () => {
 
   return (
     <Switch>
+      <SentryRoute path="/validate-contract/done" component={ContractDone} />
+      <SentryRoute path="/validate-contract" component={Contract} />
+      <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+      <SentryRoute path="/noneligible" component={NonEligible} />
+      <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
+      <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+      <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
       <SentryRoute path="/public-besoin-d-aide" component={Contact} />
       <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
       <SentryRoute path="/besoin-d-aide" component={Contact} />
