@@ -1,11 +1,8 @@
 import React from "react";
 import SNU from "@/assets/logo-snu.png";
-// import Menu from "../nav/Menu";
 import useAuth from "../../../services/useAuth";
-
 import { fr } from "@codegouvfr/react-dsfr";
 import { Header as DSFRHeader } from "@codegouvfr/react-dsfr/Header";
-
 import { supportURL } from "@/config";
 
 const Header = ({ title }) => {
