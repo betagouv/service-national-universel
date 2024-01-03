@@ -15,7 +15,6 @@ const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const PdrModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const SchemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPlanTransport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../../models/sessionPhase1");
@@ -367,26 +366,13 @@ router.post(
         }
       }
 
-      // Volume errors.
-      // Check if the sum of "CAPACITÉ VOLONTAIRE TOTALE" group by "ID CENTRE" is superior or equal to SchemaRepartitionModel sum for a cohort and a center
+      // Count total unique centers
       const centers = lines.reduce((acc, line) => {
         if (line["ID CENTRE"]) {
           acc[line["ID CENTRE"]] = (acc[line["ID CENTRE"]] || 0) + parseInt(line["CAPACITÉ VOLONTAIRE TOTALE"]);
         }
         return acc;
       }, {});
-      for (const [centerId, total] of Object.entries(centers)) {
-        const groups = await SchemaRepartitionModel.find({ cohort, center: centerId });
-        const sum = groups.reduce((acc, group) => acc + group.youngsVolume, 0);
-        if (total < sum) {
-          for (const [i, line] of lines.entries()) {
-            const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
-            if (line["ID CENTRE"] === centerId) {
-              errors["CAPACITÉ VOLONTAIRE TOTALE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_VOLUME });
-            }
-          }
-        }
-      }
 
       const hasError = Object.values(errors).some((error) => error.length > 0);
 
