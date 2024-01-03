@@ -1,6 +1,7 @@
 import Img2 from "../../../assets/infoSquared.svg";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useQuery } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
@@ -26,12 +27,11 @@ import api from "../../../services/api";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { debounce, translate } from "../../../utils";
+import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { apiAdress } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
@@ -284,28 +284,20 @@ export default function StepCoordonnees() {
     }
   };
 
-  const debouncedSuggestionsRequest = useCallback(
-    debounce(async (value) => {
-      try {
-        const response = await apiAdress(value, { type: "municipality" });
-        if (!response || !response.features) return;
-        const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
-        setBirthCityZipSuggestions(suggestions);
-      } catch (error) {
-        capture(error);
-      }
-    }, 100),
-    [],
-  );
+  useQuery({
+    queryKey: ["cityOfBirth", birthCity],
+    queryFn: async ({ signal }) => {
+      const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(birthCity)}&type=municipality`, { signal });
+      if (!res.ok) throw new Error(res.statusText);
+      const response = await res.json();
+      const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
+      setBirthCityZipSuggestions(suggestions);
+    },
+    enabled: birthCity.trim().length > 2,
+  });
 
   const updateBirthCity = async (value) => {
     setData({ ...data, birthCity: value });
-    const trimmedValue = value.trim();
-    if (trimmedValue && trimmedValue.length > 2) {
-      debouncedSuggestionsRequest(trimmedValue);
-    } else {
-      setBirthCityZipSuggestions([]);
-    }
   };
 
   const onClickBirthCitySuggestion = (birthCity, birthCityZip) => {

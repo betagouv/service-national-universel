@@ -3,9 +3,9 @@ import AddressDropdown from "./AddressDropdown";
 import { RiSearchLine } from "react-icons/ri";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { useQuery } from "@tanstack/react-query";
-import { formatOption, sortOptions } from "@/services/api-adresse";
+import { sortOptions } from "@/services/api-adresse";
 
-export default function AddressSearch({ filters, updateData, error }) {
+export default function AddressSearch({ updateData, error }) {
   const [query, setQuery] = useState("");
   const dropdownRef = useRef(null);
   const controllerRef = useRef(null);
@@ -23,8 +23,7 @@ export default function AddressSearch({ filters, updateData, error }) {
   });
 
   // Derived from the data returned by useQuery: format and group results to use in our dropdown
-  const formattedOptions = data?.features.map((option) => formatOption(option)) || [];
-  const sortedOptions = sortOptions(formattedOptions);
+  const sortedOptions = sortOptions(data?.features || []);
 
   useEffect(() => {
     return () => {
@@ -52,11 +51,6 @@ export default function AddressSearch({ filters, updateData, error }) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleChangeQuery = (e) => {
-    // queryClient.cancelQueries("address");
-    setQuery(e.target.value);
-  };
-
   const handleSelect = (option) => {
     updateData(option);
     setQuery("");
@@ -68,7 +62,12 @@ export default function AddressSearch({ filters, updateData, error }) {
         Rechercher une adresse
         <span className="text-[#666666] text-xs mb-1">Si l'adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
         <div className="relative">
-          <input type="text" value={query} onChange={handleChangeQuery} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5"
+          />
           <span className="material-icons absolute right-5 mt-[12px] text-lg">
             <RiSearchLine />
           </span>
