@@ -32,12 +32,12 @@ const apiAdress = async (query, filters = {}, options = {}) => {
   }
 };
 
-const simpleApiAdress = async (query, filters = {}) => {
+const simpleApiAdress = async (query, signal, filters = {}) => {
   let url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}`;
   for (const [key, value] of Object.entries(filters)) {
     url += `&${key}=${encodeURIComponent(value)}`;
   }
-  const res = await fetch(url);
+  const res = await fetch(url, { signal });
   const json = await res.json();
   if (json.error) throw new Error(json.error);
   return json;

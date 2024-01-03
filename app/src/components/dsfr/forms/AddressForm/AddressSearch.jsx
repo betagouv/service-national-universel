@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import AddressDropdown from "./AddressDropdown";
 import { RiSearchLine } from "react-icons/ri";
-import { toastr } from "react-redux-toastr";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { useQuery } from "@tanstack/react-query";
-import { formatOption, simpleApiAdress, sortOptions } from "@/services/api-adresse";
+import { formatOption, sortOptions } from "@/services/api-adresse";
 
 export default function AddressSearch({ filters, updateData, error }) {
   const [query, setQuery] = useState("");
@@ -13,13 +12,14 @@ export default function AddressSearch({ filters, updateData, error }) {
 
   // Will execute on every change to the query state variable
   // TODO: debounce
-  const { data } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: ["address", query],
-    queryFn: () => simpleApiAdress(query, filters),
-    enabled: query.trim().length > 2,
-    config: {
-      onError: () => toastr.error("Erreur", `Une erreur est survenue lors de la recherche d'adresse.`, { timeOut: 10_000 }),
+    queryFn: async ({ signal }) => {
+      const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}`, { signal });
+      if (!res.ok) throw new Error(res.statusText);
+      return res.json();
     },
+    enabled: query.trim().length > 2,
   });
 
   // Derived from the data returned by useQuery: format and group results to use in our dropdown
@@ -52,6 +52,11 @@ export default function AddressSearch({ filters, updateData, error }) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const handleChangeQuery = (e) => {
+    // queryClient.cancelQueries("address");
+    setQuery(e.target.value);
+  };
+
   const handleSelect = (option) => {
     updateData(option);
     setQuery("");
@@ -63,12 +68,7 @@ export default function AddressSearch({ filters, updateData, error }) {
         Rechercher une adresse
         <span className="text-[#666666] text-xs mb-1">Si l'adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
         <div className="relative">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5"
-          />
+          <input type="text" value={query} onChange={handleChangeQuery} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />
           <span className="material-icons absolute right-5 mt-[12px] text-lg">
             <RiSearchLine />
           </span>
@@ -78,7 +78,9 @@ export default function AddressSearch({ filters, updateData, error }) {
       <div className="relative">
         {query?.trim().length > 2 && (
           <div className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
-            {sortedOptions.length ? (
+            {isPending ? (
+              <p className="animate-pulse p-3 text-gray-800 text-center">Chargement</p>
+            ) : sortedOptions.length ? (
               <AddressDropdown optionGroups={sortedOptions} handleSelect={handleSelect} />
             ) : (
               <p className="p-3 text-gray-800 text-center">
