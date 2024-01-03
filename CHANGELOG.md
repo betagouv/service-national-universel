@@ -1,3 +1,16 @@
+# [1.351.0](https://github.com/betagouv/service-national-universel/compare/v1.350.5...v1.351.0) (2024-01-03)
+
+
+### Bug Fixes
+
+* **api:** get cohort route - return all cohorts by default [#3436](https://github.com/betagouv/service-national-universel/issues/3436) ([01a5947](https://github.com/betagouv/service-national-universel/commit/01a594703e16825354a9e157be36e115e7ce86dc))
+* **api:** Put mobile in referent model ([#3440](https://github.com/betagouv/service-national-universel/issues/3440)) ([5deafbb](https://github.com/betagouv/service-national-universel/commit/5deafbb5cf44b64eb111b53a037017fea16bc3e5))
+
+
+### Features
+
+* **api:** 1605- retirer le check de cohérence a l'import du pdt [#3434](https://github.com/betagouv/service-national-universel/issues/3434) ([48b15fc](https://github.com/betagouv/service-national-universel/commit/48b15fca3ee339a7ce1c9928436a91d36a796741))
+
 ## [1.350.5](https://github.com/betagouv/service-national-universel/compare/v1.350.4...v1.350.5) (2024-01-02)
 
 
