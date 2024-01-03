@@ -101,6 +101,20 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  cohesionCenterId: {
+    type: String,
+    documentation: {
+      description: "ID du centre de cohésion",
+    },
+  },
+
+  pointDeRassemblementId: {
+    type: String,
+    documentation: {
+      description: "ID du point de rassemblement",
+    },
+  },
+
   status: {
     type: String,
     required: true,
@@ -135,6 +149,20 @@ Schema.virtual("referents", {
   ref: "referent",
   localField: "referentClasseIds",
   foreignField: "_id",
+});
+
+Schema.virtual("cohesionCenter", {
+  ref: "cohesioncenter",
+  localField: "cohesionCenterId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+Schema.virtual("pointDeRassemblement", {
+  ref: "pointderassemblement",
+  localField: "pointDeRassemblementId",
+  foreignField: "_id",
+  justOne: true,
 });
 
 Schema.virtual("isFull").get(function () {

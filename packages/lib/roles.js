@@ -882,6 +882,10 @@ function canUpdateClasse(actor) {
   return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
+function canUpdateClasseStay(actor) {
+  return [ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
 function canViewClasse(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
@@ -1033,6 +1037,7 @@ export {
   canInviteCoordinateur,
   canCreateClasse,
   canUpdateClasse,
+  canUpdateClasseStay,
   canViewClasse,
   canUpdateEtablissement,
   canViewEtablissement,
