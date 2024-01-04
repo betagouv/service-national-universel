@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import queryString from "query-string";
-import { Link } from "react-router-dom/cjs/react-router-dom.min";
+import { Link } from "react-router-dom";
 import { APPLICATION_STATUS, ROLES, getNewLink } from "@/utils";
 import DashboardContainer from "../../../components/DashboardContainer";
 import InformationCircle from "@/assets/icons/InformationCircle";
