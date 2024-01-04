@@ -1,5 +1,7 @@
 const { Media } = require("reactstrap");
 const colors = require("tailwindcss/colors");
+const plugin = require("tailwindcss/plugin");
+
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
   presets: [require("@snu/ds/tailwind.config")],
@@ -109,5 +111,9 @@ module.exports = {
   variants: {
     extend: {},
   },
-  plugins: [],
+  plugins: [
+    plugin(function ({ addVariant }) {
+      addVariant("third", "&:nth-child(3)");
+    }),
+  ],
 };
