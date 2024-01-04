@@ -82,7 +82,7 @@ export default function App() {
       <QueryClientProvider client={queryClient}>
         <Router history={history}>
           <ScrollToTop />
-          <div className="flex h-screen flex-col justify-between">
+          <div className="flex min-h-screen flex-col justify-between">
             {maintenance ? (
               <Switch>
                 <SentryRoute path="/" component={Maintenance} />
