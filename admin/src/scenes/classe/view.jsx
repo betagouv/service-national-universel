@@ -301,6 +301,7 @@ export default function View() {
           </div>
         </div>
       </Container>
+
       {classe?.referents?.length && (
         <Container title="Référent de classe" actions={[]}>
           <div className="flex items-stretch justify-stretch">

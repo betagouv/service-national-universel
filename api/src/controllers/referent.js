@@ -1045,6 +1045,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     let referent = await ReferentModel.findById(checkedId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     referent = serializeReferent(referent, req.user);
 
     const populateWithCLE = async (referent) => {
@@ -1068,7 +1069,6 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
       referent = await populateWithCLE(referent);
     }
 
-    if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);

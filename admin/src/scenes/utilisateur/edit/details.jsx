@@ -528,6 +528,7 @@ export default function Details({ user, setUser, currentUser }) {
             </div>
           </div>
         </Box>
+
         {data?.etablissement && (
           <Container title="Détails" actions={[]}>
             <div className="flex items-stretch justify-stretch">
@@ -570,6 +571,7 @@ export default function Details({ user, setUser, currentUser }) {
             </div>
           </Container>
         )}
+
         {canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && (
           <div className="flex items-center justify-center">
             <BorderButton mode="red" className="mt-3" onClick={onClickDelete}>
