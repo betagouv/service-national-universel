@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 const mime = require("mime-types");
 const FileType = require("file-type");
 const Joi = require("joi");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 
@@ -656,14 +655,10 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const date = new Date();
     const newNote = {
       note: `
-        Changement de cohorte de ${previousYoung.cohort} (${previousYoung.source || YOUNG_SOURCE.VOLONTAIRE}) à ${young.cohort} (${young.source})${
-          cohortChangeReason && ` pour la raison suivante : ${cohortChangeReason}`
-        }.\n${previousEtablissement ? `Etablissement précédent : ${previousEtablissement.name}.` : ""}\n${
-          previousClasse ? `Classe précédente : ${previousClasse.uniqueKeyAndId} ${previousClasse.name}.` : ""
-        }\n${previousYoung.cohesionCenterId ? `Centre précédent : ${previousYoung.cohesionCenterId}.` : ""}\n${
-          previousYoung.sessionPhase1Id ? `Session précédente : ${previousYoung.sessionPhase1Id}.` : ""
-        }\n${previousYoung.meetingPointId ? `Point de rendez-vous précédent : ${previousYoung.meetingPointId}.` : ""}\n${
-          Object.prototype.hasOwnProperty.call(previousYoung, "presenceJDM") ? `Présence JDM précédente : ${previousYoung.presenceJDM}.` : ""
+        Changement de cohorte de ${previousYoung.cohort} (${previousYoung.source || YOUNG_SOURCE.VOLONTAIRE}) à ${young.cohort} (${young.source})${cohortChangeReason && ` pour la raison suivante : ${cohortChangeReason}`
+        }.\n${previousEtablissement ? `Etablissement précédent : ${previousEtablissement.name}.` : ""}\n${previousClasse ? `Classe précédente : ${previousClasse.uniqueKeyAndId} ${previousClasse.name}.` : ""
+        }\n${previousYoung.cohesionCenterId ? `Centre précédent : ${previousYoung.cohesionCenterId}.` : ""}\n${previousYoung.sessionPhase1Id ? `Session précédente : ${previousYoung.sessionPhase1Id}.` : ""
+        }\n${previousYoung.meetingPointId ? `Point de rendez-vous précédent : ${previousYoung.meetingPointId}.` : ""}\n${Object.prototype.hasOwnProperty.call(previousYoung, "presenceJDM") ? `Présence JDM précédente : ${previousYoung.presenceJDM}.` : ""
         }
         `.trim(),
       phase: "PHASE_1",
@@ -960,21 +955,6 @@ router.post(
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
-        }
-
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          try {
-            const clamscan = await new NodeClam().init({
-              removeInfected: true,
-            });
-            const { isInfected } = await clamscan.isInfected(tempFilePath);
-            if (isInfected) {
-              capture(`File ${name} of user(${req.user.id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-            }
-          } catch {
-            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
-          }
         }
 
         const data = fs.readFileSync(tempFilePath);
