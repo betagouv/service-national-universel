@@ -64,7 +64,7 @@ export default function Home() {
       if (young.status === YOUNG_STATUS.WITHDRAWN && ["DONE", "EXEMPTED"].includes(young.statusPhase1)) {
         return <Withdrawn />;
       }
-      return <WaitingReinscription ReinscriptionOpen={isReinscriptionOpen} />;
+      return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
     }
 
     if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;

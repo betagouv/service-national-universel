@@ -6,13 +6,13 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
-export default function WaitingReinscription({ ReinscriptionOpen }) {
+export default function WaitingReinscription({ reinscriptionOpen }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   let textPrecision;
   let textSecond;
 
-  if (ReinscriptionOpen) {
+  if (reinscriptionOpen) {
     textPrecision = "Vérifiez dès maintenant votre éligibilité !";
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
       textPrecision = "Votre Phase 1 n'a pas été validée.";
@@ -45,7 +45,7 @@ export default function WaitingReinscription({ ReinscriptionOpen }) {
               </div>
               <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
               {textSecond && <div className="left-7 mt-3 text-[#738297] pr-16">{textSecond}</div>}
-              {ReinscriptionOpen && (
+              {reinscriptionOpen && (
                 <>
                   <div className="flex w-fit flex-col items-stretch">
                     <button
@@ -70,7 +70,7 @@ export default function WaitingReinscription({ ReinscriptionOpen }) {
             </div>
             <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
             {textSecond && <div className="left-7 mt-3 text-[#738297]">{textSecond}</div>}
-            {ReinscriptionOpen && (
+            {reinscriptionOpen && (
               <>
                 <button
                   className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
