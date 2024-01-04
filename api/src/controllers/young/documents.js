@@ -12,7 +12,6 @@ const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFi
 const { sendTemplate } = require("../../sendinblue");
 const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const config = require("../../config");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
@@ -276,22 +275,6 @@ router.post(
           capture(`File ${name} of user(${req.user.id})is not a valid type: ${mimetype} ${mimeFromMagicNumbers}`);
           fs.unlinkSync(tempFilePath);
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
-        }
-
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          try {
-            const clamscan = await new NodeClam().init({
-              removeInfected: true,
-            });
-            const { isInfected } = await clamscan.isInfected(tempFilePath);
-            if (isInfected) {
-              capture(`File ${name} of user(${req.user.id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-            }
-          } catch (e) {
-            capture(e);
-            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
-          }
         }
 
         // align date

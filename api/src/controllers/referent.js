@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 const mime = require("mime-types");
 const FileType = require("file-type");
 const Joi = require("joi");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 
@@ -960,21 +959,6 @@ router.post(
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
-        }
-
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          try {
-            const clamscan = await new NodeClam().init({
-              removeInfected: true,
-            });
-            const { isInfected } = await clamscan.isInfected(tempFilePath);
-            if (isInfected) {
-              capture(`File ${name} of user(${req.user.id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-            }
-          } catch {
-            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
-          }
         }
 
         const data = fs.readFileSync(tempFilePath);
