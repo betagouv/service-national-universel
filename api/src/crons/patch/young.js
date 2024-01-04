@@ -117,7 +117,7 @@ async function createLog(patch, actualYoung, event, value) {
       user_age: age !== "?" ? age : undefined,
       date: patch.date,
       raw_data: anonymisedYoung,
-      evenement_valeur_original: value?.originalValue || null,
+      evenement_valeur_originelle: value?.originalValue || null,
       modifier_user_id: patch?.user?._id || null,
       modifier_user_role: patch?.user?.role || null,
       modifier_user_first_name: patch?.user?.firstName || null,
