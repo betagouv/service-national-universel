@@ -165,11 +165,13 @@ export default function List() {
         track_total_hits: true,
         size: ES_NO_LIMIT,
       };
+      // const queryApplication = await api.post("/elasticsearch/application/applicationByMission", { missionIds });
       if (selectedFilters?.applicationStatus?.filter?.length) {
         queryApplication.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.applicationStatus.filter } });
       }
+      console.log(queryApplication);
 
-      const resultApplications = await api.post(`/es/application/export`, {
+      const resultApplications = await api.post(`/elasticsearch/application/application/export`, {
         ...queryApplication,
         fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
@@ -334,7 +336,6 @@ export default function List() {
     });
     return result;
   }
-  console.log(data);
   //Filters
   const filterArray = [
     { title: "Région", name: "region", parentGroup: "Général", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
