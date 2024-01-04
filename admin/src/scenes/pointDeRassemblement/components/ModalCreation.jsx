@@ -68,7 +68,7 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
   React.useEffect(() => {
     if (selectedCohort) {
       (async () => {
-        const { ok, data } = await api.post("/elasticsearch/pointderassemblement/export", { filters: { cohorts: [selectedCohort], searchbar: [search] } });
+        const { ok, data } = await api.post("/elasticsearch/pointderassemblement/export", { filters: { searchbar: [search] } });
         if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des points de rassemblement");
         setListPDR(data);
       })();
