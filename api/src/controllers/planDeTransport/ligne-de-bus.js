@@ -609,16 +609,6 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
     }
     result.youngsCountBus = youngsCountBus;
 
-    //Get young volume need for the destination center in schema
-    const dataSchema = await schemaRepartitionModel.find({ sessionId: ligneBus.sessionId, intradepartmental: "false" });
-
-    let schemaVolume = 0;
-    for (let data of dataSchema) {
-      schemaVolume += data.youngsVolume;
-    }
-
-    result.schemaVolume = schemaVolume;
-
     //Get young volume need for the destination center in bus
     const dataBus = await LigneBusModel.find({ sessionId: ligneBus.sessionId, _id: { $ne: ligneBus._id } });
 
