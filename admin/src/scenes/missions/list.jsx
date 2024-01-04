@@ -163,15 +163,13 @@ export default function List() {
       const queryApplication = {
         query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }] } },
         track_total_hits: true,
-        size: ES_NO_LIMIT,
+        size: 100,
       };
-      // const queryApplication = await api.post("/elasticsearch/application/applicationByMission", { missionIds });
       if (selectedFilters?.applicationStatus?.filter?.length) {
         queryApplication.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.applicationStatus.filter } });
       }
-      console.log(queryApplication);
 
-      const resultApplications = await api.post(`/elasticsearch/application/application/export`, {
+      const resultApplications = await api.post(`/elasticsearch/application/application2/export`, {
         ...queryApplication,
         fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
