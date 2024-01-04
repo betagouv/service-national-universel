@@ -106,7 +106,7 @@ export default function Signin() {
         </div>
         <div className="mb-1 flex flex-col gap-1 py-1">
           <label className="text-base text-[#161616]">E-mail</label>
-          <Input value={email} onChange={(e) => setEmail(e)} />
+          <Input value={email} onChange={setEmail} />
         </div>
         <div className="flex flex-col gap-1 pb-4">
           <label className="text-base text-[#161616]">Mot de passe</label>
