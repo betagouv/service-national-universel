@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
 import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding, HiOutlineX } from "react-icons/hi";
@@ -15,7 +15,6 @@ import { classNames, copyToClipboard } from "@/utils";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
 import Loader from "@/components/Loader";
-import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 
 export default function view() {
   const user = useSelector((state) => state.Auth.user);
