@@ -208,7 +208,6 @@ router.post(
 
       return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
     } catch (error) {
-      console.error("🚀 ~ file: index.js:227 ~ error:", error);
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
