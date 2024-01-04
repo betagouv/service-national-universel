@@ -34,7 +34,7 @@ const EngagementsProgramMobile = () => {
     };
     getProgram();
   }, []);
- 
+
   return isLoading ? (
     <Loader />
   ) : (
@@ -73,7 +73,7 @@ const EngagementsProgramMobile = () => {
               );
             })}
           </div>
-          <hr className="my-5 h-px border-0 bg-gray-200" />
+          <hr className="my-5" />
           <div className="flex justify-end space-x-4">
             <button
               className="flex cursor-pointer items-center justify-center border-[1px] bg-[#000091] py-2 px-4 text-white hover:border-[#000091] hover:bg-white hover:!text-[#000091]"

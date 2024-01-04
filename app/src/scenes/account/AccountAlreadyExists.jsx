@@ -43,7 +43,7 @@ const AccountAlreadyExists = () => {
             </>
           )}
         </span>
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+        <hr className="my-4" />
         <div className="fixed md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
           <PrimaryButton className="sm:w-full md:w-52 md:self-end" onClick={callBack}>
             Contacter le support

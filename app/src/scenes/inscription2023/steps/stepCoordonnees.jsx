@@ -465,7 +465,8 @@ export default function StepCoordonnees() {
     <>
       <DSFRContainer
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
-        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}        supportEvent="Phase0/aide inscription - coordonnees">
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
+        supportEvent="Phase0/aide inscription - coordonnees">
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect
@@ -521,7 +522,7 @@ export default function StepCoordonnees() {
             correction={corrections?.situation}
           />
         )}
-        <hr className="my-2 h-px border-0 bg-gray-200" />
+        <hr className="my-2" />
         <div className="flex mt-4 items-center gap-3 mb-6">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Adresse de résidence</h2>
         </div>
@@ -595,7 +596,7 @@ export default function StepCoordonnees() {
           </>
         )}
 
-        <hr className="my-2 h-px border-0 bg-gray-200" />
+        <hr className="my-2" />
         <div className="flex mt-4 items-center gap-3 mb-4">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
           <a
@@ -686,7 +687,7 @@ export default function StepCoordonnees() {
             <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
             {moreInformation && (
               <>
-                <hr className="my-4 h-px border-0 bg-gray-200" />
+                <hr className="my-4" />
                 <RadioButton
                   label="Avez-vous besoin d’aménagements spécifiques ?"
                   description="(accompagnant professionnel, participation de jour, activités adaptées... )"

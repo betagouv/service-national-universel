@@ -202,11 +202,13 @@ export default function StepEligibilite() {
               Si vous envisagez une participation au SNU dans le cadre des classes engagées, vous ne pouvez pas vous inscrire ici. Veuillez attendre que votre référent classe vous
               indique la procédure à suivre.
             </p>
-            <InlineButton className="text-sm md:pr-4 pt-2 md:pr-2 pb-1">
-              <a rel="noreferrer noopener" target="blank" href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
-                En savoir plus →
-              </a>
-            </InlineButton>
+            <a
+              className="text-sm text-[#000091]"
+              rel="noreferrer noopener"
+              target="blank"
+              href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
+              En savoir plus →
+            </a>
           </div>
         </PaddedContainer>
       )}
@@ -240,7 +242,12 @@ export default function StepEligibilite() {
             </div>
             <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
               Date de naissance
-              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} disabled={isBirthdayModificationDisabled} />
+              <DatePicker
+                value={new Date(data.birthDate)}
+                onChange={(date) => setData({ ...data, birthDate: date })}
+                disabled={isBirthdayModificationDisabled}
+                state={error.birthDate ? "error" : "default"}
+              />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           </div>

@@ -91,7 +91,7 @@ const OnboardingContent = ({ id }) => {
       {classe && (
         <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
           <MyClass classe={classe} />
-          <hr className="my-4 h-px border-0 bg-gray-200" />
+          <hr className="my-4" />
           {classe.isInscriptionOpen && (
             <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
               <InlineButton
