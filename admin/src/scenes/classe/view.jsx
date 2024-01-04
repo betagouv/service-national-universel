@@ -41,19 +41,20 @@ export default function View() {
   const [modalDelete, setModalDelete] = useState(false);
   const { id } = useParams();
   const [errors, setErrors] = useState({});
-  const user = useSelector((state) => state.Auth.user);
   const [edit, setEdit] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const canEdit = useState(
-    [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-      classe?.status !== STATUS_CLASSE.WITHDRAWN,
-  );
-  const canEditCohort = useState([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role));
-  const canEditStay = useState([ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user?.role));
+
+  const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
 
   const history = useHistory();
+
+  const canEdit =
+    [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+    classe?.status !== STATUS_CLASSE.WITHDRAWN;
+  const canEditCohort = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role);
+  const canEditStay = [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user?.role);
 
   const colorOptions = Object.keys(CLE_COLORATION_LIST).map((value) => ({
     value: CLE_COLORATION_LIST[value],
@@ -335,27 +336,35 @@ export default function View() {
               isAsync
               className="mb-3"
               placeholder={"Choisissez un centre existant"}
-              loadOptions={(q) => searchCohesionCenters({ q, cohort: classe.cohort })}
+              loadOptions={(q) => searchSessions({ q, cohort: classe.cohort })}
               noOptionsMessage={"Aucun centre ne correspond à cette recherche"}
               isClearable={true}
               closeMenuOnSelect={true}
               value={classe.cohesionCenter?.name ? { label: classe.cohesionCenter.name } : null}
-              onChange={(option) => setClasse({ ...classe, cohesionCenter: option?.cohesionCenter, cohesionCenterId: option?._id })}
-              error={errors.cohesionCenter}
+              onChange={(option) =>
+                setClasse({
+                  ...classe,
+                  session: option?.session,
+                  sessionId: option?._id,
+                  cohesionCenter: option?.session.cohesionCenter,
+                  cohesionCenterId: option?.session.cohesionCenter._id,
+                })
+              }
+              error={errors.session}
               isActive={editStay && canEditStay}
               readOnly={!editStay || !canEditStay}
               disabled={!canEditStay || classe?.cohort === "CLE 23-24"}
             />
             {classe.cohesionCenter && (
               <>
-                <InputText className="mb-3" label="Numéro et nom de la voie" value={classe.cohesionCenter?.address} disabled />
+                <InputText className="mb-3" label="Numéro et nom de la voie" value={classe.cohesionCenter.address} disabled />
                 <div className="flex items-center justify-between gap-3 mb-3">
-                  <InputText className="flex-1" label="Code Postal" value={classe.cohesionCenter?.zip} disabled />
-                  <InputText className="flex-1" label="Ville" value={classe.cohesionCenter?.city} disabled />
+                  <InputText className="flex-1" label="Code Postal" value={classe.cohesionCenter.zip} disabled />
+                  <InputText className="flex-1" label="Ville" value={classe.cohesionCenter.city} disabled />
                 </div>
                 <div className="flex items-center justify-between gap-3 mb-3">
-                  <InputText className="flex-1" label="Département" value={classe.cohesionCenter?.department} disabled />
-                  <InputText className="flex-1" label="Région" value={classe.cohesionCenter?.region} disabled />
+                  <InputText className="flex-1" label="Département" value={classe.cohesionCenter.department} disabled />
+                  <InputText className="flex-1" label="Région" value={classe.cohesionCenter.region} disabled />
                 </div>
                 <Link to={`/centre/` + classe.cohesionCenter._id} className="w-full">
                   <Button type="tertiary" title="Voir le centre" className="w-full max-w-none" />
@@ -529,26 +538,21 @@ export default function View() {
   );
 }
 
-const searchCohesionCenters = async ({ q, cohort }) => {
+const searchSessions = async ({ q, cohort }) => {
   if (!cohort || cohort === "CLE 23-24") return [];
 
   const query = {
     filters: {
-      cohorts: [],
-      code2022: [],
-      department: [],
-      domain: [],
-      region: [],
-      typology: [],
+      cohort: [cohort],
     },
     page: 0,
     size: 10,
   };
   if (q) query.filters.searchbar = [q];
 
-  const { responses } = await api.post(`/elasticsearch/cohesioncenter/search?needSessionPhase1Info=true`, query);
+  const { responses } = await api.post(`/elasticsearch/sessionphase1/search?needCohesionCenterInfo=true`, query);
   return responses[0].hits.hits.map((hit) => {
-    return { value: hit._source, _id: hit._id, label: hit._source.name, cohesionCenter: { ...hit._source, _id: hit._id } };
+    return { value: hit._source, _id: hit._id, label: hit._source.cohesionCenter.name, session: { ...hit._source, _id: hit._id } };
   });
 };
 
@@ -557,9 +561,7 @@ const searchPointDeRassemblements = async ({ q, cohort }) => {
 
   const query = {
     filters: {
-      cohorts: [],
-      department: [],
-      region: [],
+      cohorts: [cohort],
     },
     page: 0,
     size: 10,

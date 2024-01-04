@@ -199,7 +199,7 @@ export default function SelectButton({
             noOptionsMessage={() => noOptionsMessage}
             maxMenuHeight={maxMenuHeight}
             isMulti={isMulti}
-            isDisabled={disabled}
+            isDisabled={disabled || readOnly}
             closeMenuOnSelect={closeMenuOnSelect}
             hideSelectedOptions={hideSelectedOptions}
             isClearable={isClearable}

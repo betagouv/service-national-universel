@@ -108,6 +108,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  sessionId: {
+    type: String,
+    documentation: {
+      description: "ID de la session",
+    },
+  },
+
   pointDeRassemblementId: {
     type: String,
     documentation: {
@@ -154,6 +161,13 @@ Schema.virtual("referents", {
 Schema.virtual("cohesionCenter", {
   ref: "cohesioncenter",
   localField: "cohesionCenterId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+Schema.virtual("session", {
+  ref: "sessionphase1",
+  localField: "sessionId",
   foreignField: "_id",
   justOne: true,
 });

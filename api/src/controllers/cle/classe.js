@@ -9,6 +9,7 @@ const {
   ROLES,
   STATUS_CLASSE,
   STATUS_PHASE1_CLASSE,
+  YOUNG_STATUS_PHASE1,
   SENDINBLUE_TEMPLATES,
   canCreateClasse,
   canUpdateClasse,
@@ -108,8 +109,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       grade: Joi.string()
         .valid(...CLE_GRADE_LIST)
         .required(),
-      cohesionCenterId: Joi.string(),
-      pointDeRassemblementId: Joi.string(),
+      sessionId: Joi.string().allow(null),
+      cohesionCenterId: Joi.string().allow(null),
+      pointDeRassemblementId: Joi.string().allow(null),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
@@ -130,13 +132,27 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       }
     }
     const oldCohort = classe.cohort;
-    classe.set({ ...value, cohesionCenterId: classe.cohesionCenterId || null });
+    classe.set({ ...value, sessionId: classe.sessionId || null });
 
-    if (canUpdateClasseStay(req.user) && (value.cohesionCenterId != classe.cohesionCenterId || value.pointDeRassemblementId != classe.pointDeRassemblementId)) {
+    if (canUpdateClasseStay(req.user)) {
       classe.set({
-        cohesionCenterId: value.cohesionCenterId || classe.cohesionCenterId,
-        pointDeRassemblementId: value.pointDeRassemblementId || classe.pointDeRassemblementId,
+        sessionId: value.sessionId,
+        cohesionCenterId: value.cohesionCenterId,
+        pointDeRassemblementId: value.pointDeRassemblementId,
       });
+
+      const youngs = await YoungModel.find({ classeId: classe._id });
+      await Promise.all(
+        youngs.map((y) => {
+          y.set({
+            sessionPhase1Id: value.sessionId,
+            cohesionCenterId: value.cohesionCenterId,
+            meetingPointId: value.pointDeRassemblementId,
+            statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+          });
+          return y.save({ fromUser: req.user });
+        }),
+      );
     }
 
     classe = await classe.save({ fromUser: req.user });
@@ -175,6 +191,7 @@ router.get("/:id", async (req, res) => {
       .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
       .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })
       .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
+      .populate({ path: "session", options: { select: { _id: 1 } } })
       .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } });
     if (!data) {
       captureMessage("Error finding classe with id : " + JSON.stringify(value));
