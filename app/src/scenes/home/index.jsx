@@ -14,7 +14,6 @@ import FutureCohort from "./FutureCohort";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
 import WaitingReinscription from "./WaitingReinscription";
-import WaitingReinscriptionInscriptionClosed from "./WaitingReinscriptionOld";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
 import ValidatedV2 from "./validatedV2";
@@ -60,16 +59,16 @@ export default function Home() {
       if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
     }
 
-    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
-
     if (hasAccessToReinscription(young)) {
       if (isReinscriptionOpenLoading) return <Loader />;
-      // @todo: WaitingReinscriptionInscriptionClosed should be deleted and WaitingReinscription updated to handle both cases
       if (young.status === YOUNG_STATUS.WITHDRAWN && ["DONE", "EXEMPTED"].includes(young.statusPhase1)) {
         return <Withdrawn />;
       }
-      return isReinscriptionOpen ? <WaitingReinscription /> : <WaitingReinscriptionInscriptionClosed />;
+      return <WaitingReinscription ReinscriptionOpen={isReinscriptionOpen} />;
     }
+
+    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
+
     if (
       young.status === YOUNG_STATUS.VALIDATED &&
       [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) &&
