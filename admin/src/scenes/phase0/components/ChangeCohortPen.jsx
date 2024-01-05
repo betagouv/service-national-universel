@@ -460,7 +460,7 @@ const getClasses = async (etablissementId) => {
 
   const { responses } = await api.post(`/elasticsearch/cle/classe/search`, query);
   return responses[0].hits.hits
-    .filter((hit) => hit._source.status !== STATUS_CLASSE.DRAFT)
+    .filter((hit) => ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN].includes(hit._source.status))
     .map((hit) => {
       const label = `${hit._source.uniqueKeyAndId} - ${hit._source.name ?? "(Nom à renseigner)"}`;
       return { value: hit._source, _id: hit._id, label, classe: { ...hit._source, _id: hit._id, label } };
