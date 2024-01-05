@@ -200,6 +200,41 @@ function buildDashboardUserRoleContext(user) {
   return { dashboardUserRoleContextFilters: contextFilters };
 }
 
+function withFilterForMSearch(body, filter) {
+  const lines = body.split(`\n`).filter((e) => e);
+  if (lines.length % 2 === 1) throw new Error("Invalid body");
+  if (lines.length > 100) throw new Error("Too many lines");
+  return (
+    lines
+      .map((item, key) => {
+        // Declaration line are skipped.
+        if (key % 2 === 0) return item;
+
+        const q = JSON.parse(item);
+        q.query = applyFilterOnQuery(q.query, filter);
+
+        return JSON.stringify(q);
+      })
+      .join(`\n`) + `\n`
+  );
+}
+
+function applyFilterOnQuery(query, filter) {
+  if (!query.bool) {
+    if (query.match_all) {
+      query = { bool: { must: { match_all: {} } } };
+    } else {
+      const tq = { ...query };
+      query = { bool: { must: tq } };
+    }
+  }
+
+  if (query.bool.filter && query.bool.filter.length < 100) query.bool.filter = [...query.bool.filter, ...filter];
+  else query.bool.filter = filter;
+
+  return query;
+}
+
 module.exports = {
   buildNdJson,
   buildArbitratyNdJson,
@@ -208,4 +243,6 @@ module.exports = {
   buildMissionContext,
   buildApplicationContext,
   buildDashboardUserRoleContext,
+  withFilterForMSearch,
+  applyFilterOnQuery,
 };

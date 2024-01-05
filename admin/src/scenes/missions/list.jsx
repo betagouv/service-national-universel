@@ -169,7 +169,7 @@ export default function List() {
         queryApplication.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.applicationStatus.filter } });
       }
 
-      const resultApplications = await api.post(`/elasticsearch/application/application2/export`, {
+      const resultApplications = await api.post(`/elasticsearch/application/mission/export`, {
         ...queryApplication,
         fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
@@ -193,7 +193,7 @@ export default function List() {
         size: ES_NO_LIMIT,
       };
 
-      const resultYoungs = await api.post(`/es/young/export`, {
+      const resultYoungs = await api.post(`/elasticsearch/young/mission/export`, {
         ...queryYoung,
         fieldsToExports: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
       });

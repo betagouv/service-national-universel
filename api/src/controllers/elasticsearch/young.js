@@ -8,7 +8,7 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
-const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
+const { buildNdJson, buildRequestBody, joiElasticSearch, applyFilterOnQuery, withFilterForMSearch } = require("./utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
 const StructureObject = require("../../models/structure");
 const ApplicationObject = require("../../models/application");
@@ -489,6 +489,29 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
+    }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/mission/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+  // uses for listing youngs for bus lines and assembling points (referents need to access to youngs assinged to their region or department)
+  const { showAffectedToRegionOrDep } = req.query;
+  try {
+    const { user, body } = req;
+
+    const { youngContextFilters, youngContextError } = await buildYoungContext(user, showAffectedToRegionOrDep);
+    if (youngContextError) {
+      return res.status(youngContextError.status).send(youngContextError.body);
+    }
+    if (req.params.action === "export") {
+      const response = await allRecords("young", applyFilterOnQuery(body.query, youngContextFilters));
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+    } else {
+      const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, youngContextFilters) });
+      return res.status(200).send(serializeYoungs(response.body));
     }
   } catch (error) {
     capture(error);
