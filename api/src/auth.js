@@ -261,6 +261,9 @@ class Auth {
         etablissementId: etablissement._id,
         cohort: classe.cohort,
         grade: classe.grade,
+        cohesionCenterId: classe.cohesionCenterId,
+        sessionPhase1Id: classe.sessionId,
+        meetingPointId: classe.pointDeRassemblementId,
       };
 
       const user = await this.model.create(userData);
