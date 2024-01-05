@@ -1,7 +1,6 @@
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate } from "@/utils";
 import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { useEffect, useState } from "react";
 import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";

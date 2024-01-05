@@ -18,6 +18,7 @@ export default function list() {
   const [bus, setBus] = useState(null);
   const [classes, setClasses] = useState(null);
   const [data, setData] = useState([]);
+  const [students, setStudents] = useState(null);
   const pageId = "youngCle-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -43,10 +44,12 @@ export default function list() {
           filters: {},
           exportFields: ["name", "uniqueKeyAndId"],
         });
+        const res = await api.post(`/elasticsearch/cle/young/search`, { filters: {} });
 
         setSessionsPhase1(sessions);
         setBus(bus);
         setClasses(classes);
+        setStudents(res.responses[0].hits.total.value > 0);
       } catch (e) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des données");
       }
@@ -54,7 +57,6 @@ export default function list() {
   }, []);
 
   if (!sessionsPhase1 || !bus || !classes) return null;
-  console.log(data.length);
 
   return (
     <Page>
@@ -62,7 +64,7 @@ export default function list() {
         title="Liste de mes élèves"
         breadcrumb={[{ title: <StudentIcon className="scale-[65%]" /> }, { title: "Mes élèves" }]}
         actions={
-          data?.length
+          students
             ? [<Button key="export" title="Exporter" type="primary" onClick={() => setIsExportOpen(true)} />]
             : [
                 <Link key="list" to="/classes/create" className="ml-2">
@@ -71,7 +73,7 @@ export default function list() {
               ]
         }
       />
-      {!data && (
+      {!students && (
         <Container className="!p-8">
           <div className="py-6 bg-gray-50">
             <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore créé de classe engagée</div>
@@ -83,7 +85,7 @@ export default function list() {
           </div>
         </Container>
       )}
-      {data && (
+      {students && (
         <>
           <ModalExport
             isOpen={isExportOpen}
@@ -101,7 +103,7 @@ export default function list() {
                 <Filters
                   pageId={pageId}
                   route="/elasticsearch/cle/young/search?needClasseInfo=true"
-                  //setData={(value) => setData(value)}
+                  setData={(value) => setData(value)}
                   filters={filterArray}
                   searchPlaceholder="Rechercher par mots clés, ville, code postal..."
                   selectedFilters={selectedFilters}
