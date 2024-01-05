@@ -97,8 +97,6 @@ export default function View() {
     getClasse();
   }, [edit]);
 
-  console.log(classe);
-
   const sendInfo = async () => {
     try {
       setIsLoading(true);
