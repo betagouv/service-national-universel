@@ -1,3 +1,17 @@
+# [1.353.0](https://github.com/betagouv/service-national-universel/compare/v1.352.0...v1.353.0) (2024-01-05)
+
+
+### Bug Fixes
+
+* **admin:** 501 - Modal change cohort class list without draft and withdrawn ([#3450](https://github.com/betagouv/service-national-universel/issues/3450)) ([7d5a8e1](https://github.com/betagouv/service-national-universel/commit/7d5a8e130e37b758d1fd36ab71769e2eb681f615))
+* **admin:** head center team phone + mobile ([f0baba0](https://github.com/betagouv/service-national-universel/commit/f0baba0597ca09896388413d1d979630da110022))
+
+
+### Features
+
+* **admin/api:** 485-Donner la possibilité aux ref reg/dep de prendre la place de leur ref CLE [#3452](https://github.com/betagouv/service-national-universel/issues/3452) ([bb4ce61](https://github.com/betagouv/service-national-universel/commit/bb4ce61c5270d529a820888402a57e33c49a9bc6))
+* **api/admin:** 1574-Retour CLE non prio ([#3442](https://github.com/betagouv/service-national-universel/issues/3442)) ([b1b4533](https://github.com/betagouv/service-national-universel/commit/b1b45334a65e90f8b10cf3cd92c835dc81b65779))
+
 # [1.352.0](https://github.com/betagouv/service-national-universel/compare/v1.351.0...v1.352.0) (2024-01-04)
 
 
