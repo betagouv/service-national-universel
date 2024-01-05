@@ -3,7 +3,7 @@ import StudentIcon from "@/components/drawer/icons/Student";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { translate } from "@/utils";
 import { Badge, Button, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
-import { HiPlus, HiUsers } from "react-icons/hi";
+import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { IoFlashOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
@@ -17,7 +17,7 @@ export default function list() {
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
   const [classes, setClasses] = useState(null);
-  const [data, setData] = useState(null);
+  const [data, setData] = useState([]);
   const pageId = "youngCle-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -54,13 +54,22 @@ export default function list() {
   }, []);
 
   if (!sessionsPhase1 || !bus || !classes) return null;
+  console.log(data.length);
 
   return (
     <Page>
       <Header
         title="Liste de mes élèves"
         breadcrumb={[{ title: <StudentIcon className="scale-[65%]" /> }, { title: "Mes élèves" }]}
-        actions={data && [<Button title="Exporter" type="primary" onClick={() => setIsExportOpen(true)} />]}
+        actions={
+          data?.length
+            ? [<Button key="export" title="Exporter" type="primary" onClick={() => setIsExportOpen(true)} />]
+            : [
+                <Link key="list" to="/classes/create" className="ml-2">
+                  <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
+                </Link>,
+              ]
+        }
       />
       {!data && (
         <Container className="!p-8">
@@ -92,7 +101,7 @@ export default function list() {
                 <Filters
                   pageId={pageId}
                   route="/elasticsearch/cle/young/search?needClasseInfo=true"
-                  setData={(value) => setData(value)}
+                  //setData={(value) => setData(value)}
                   filters={filterArray}
                   searchPlaceholder="Rechercher par mots clés, ville, code postal..."
                   selectedFilters={selectedFilters}
