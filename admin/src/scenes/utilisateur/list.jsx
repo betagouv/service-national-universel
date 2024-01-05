@@ -318,6 +318,13 @@ const Action = ({ hit, structure }) => {
     });
   };
 
+  const canTakePlace = () => {
+    if (user.role === ROLES.ADMIN) return true;
+    if (user.role === ROLES.REFERENT_DEPARTMENT && user.department.includes(hit.department) && [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(hit.role)) return true;
+    if (user.role === ROLES.REFERENT_REGION && user.region === hit.region && [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(hit.role)) return true;
+    return false;
+  };
+
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${hit._id}`);
@@ -352,7 +359,7 @@ const Action = ({ hit, structure }) => {
                   </Link>
                 ),
               },
-              user.role === ROLES.ADMIN ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
+              canTakePlace() ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
               canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? { key: "delete", render: <p>Supprimer le profil</p>, action: onClickDelete } : null,
             ].filter(Boolean),
           },
