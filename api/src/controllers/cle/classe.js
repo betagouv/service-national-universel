@@ -162,7 +162,7 @@ router.get("/:id", async (req, res) => {
     // We need to populate the model with the 2 virtuals etablissement and referents
     const data = await ClasseModel.findById(value)
       .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
-      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1 } } });
+      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } });
     if (!data) {
       captureMessage("Error finding classe with id : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

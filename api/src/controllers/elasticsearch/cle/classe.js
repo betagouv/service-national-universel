@@ -8,6 +8,7 @@ const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const EtablissementModel = require("../../../models/cle/etablissement");
+const { serializeReferents } = require("../../../utils/es-serializer");
 
 async function buildClasseContext(user) {
   const contextFilters = [];
@@ -79,11 +80,32 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       contextFilters,
       size,
     });
+
+    const populateWithReferentInfo = async (classe) => {
+      const refIds = [...new Set(classe.map((item) => item._source.referentClasseIds).filter(Boolean))];
+      const referents = await allRecords("referent", {
+        ids: {
+          values: refIds.flat(),
+        },
+      });
+      const referentsData = serializeReferents(referents);
+      classe = classe.map((item) => {
+        item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+        return item;
+      });
+      return classe;
+    };
+
     if (req.params.action === "export") {
       const response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      let response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+
+      if (req.query?.needRefInfo) {
+        response.body.responses[0].hits.hits = await populateWithReferentInfo(response.body.responses[0].hits.hits);
+      }
+
       return res.status(200).send(response.body);
     }
   } catch (error) {

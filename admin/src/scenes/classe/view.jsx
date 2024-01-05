@@ -65,7 +65,6 @@ export default function View() {
   const getClasse = async () => {
     try {
       const { ok, code, data: response } = await api.get(`/cle/classe/${id}`);
-
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
@@ -287,7 +286,7 @@ export default function View() {
               <>
                 <InputText className="mb-3" value={classe.name} error={errors.name} readOnly={true} label="Établissement" />
                 <Link to={`/etablissement/${classe.etablissementId}`} className="w-full">
-                  <Button type="tertiary" title="Voir l'établissement" className="w-full" />
+                  <Button type="tertiary" title="Voir l'établissement" className="w-full max-w-full" />
                 </Link>
               </>
             )}
@@ -302,6 +301,22 @@ export default function View() {
           </div>
         </div>
       </Container>
+
+      {classe?.referents?.length && (
+        <Container title="Référent de classe" actions={[]}>
+          <div className="flex items-stretch justify-stretch">
+            <div className="flex-1">
+              <InputText className="mb-3" value={classe?.referents[0]?.lastName} label={"Nom"} disabled={true} />
+              <InputText className="mb-3" value={classe?.referents[0]?.firstName} label={"Prénom"} disabled={true} />
+            </div>
+            <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
+            <div className="flex-1">
+              <InputText className="mb-3" label={"Adresse Email"} value={classe.referents[0].email} disabled={true} />
+            </div>
+          </div>
+        </Container>
+      )}
+
       {classe?.status !== STATUS_CLASSE.DRAFT ? (
         <Container
           title="Suivi de la classe"

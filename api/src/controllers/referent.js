@@ -1027,11 +1027,33 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const referent = await ReferentModel.findById(checkedId);
+    let referent = await ReferentModel.findById(checkedId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    return res.status(200).send({ ok: true, data: serializeReferent(referent, req.user) });
+    referent = serializeReferent(referent, req.user);
+
+    const populateWithCLE = async (referent) => {
+      const searchField = referent.role === ROLES.REFERENT_CLASSE ? "_id" : referent.subRole === SUB_ROLES.referent_etablissement ? "referentEtablissementIds" : "coordinateurIds";
+      const query = {};
+      let valueField = { $in: [referent._id] };
+      if (referent.role === ROLES.REFERENT_CLASSE) {
+        const classe = await ClasseModel.find({ referentClasseIds: { $in: referent._id } });
+        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        valueField = classe[0].etablissementId;
+        referent.classe = classe;
+      }
+      query[searchField] = valueField;
+      const etablissement = await EtablissementModel.findOne(query)?.lean();
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      referent.etablissement = etablissement;
+      return referent;
+    };
+
+    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role)) {
+      referent = await populateWithCLE(referent);
+    }
+
+    return res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
