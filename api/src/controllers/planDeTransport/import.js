@@ -538,7 +538,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
   }
 });
 
-// Add one hour to departure hour
+// Remove 30 mins to departure hour
 function getPDRMeetingHour(departureHour) {
   const [hour, minute] = departureHour.split(":");
   const date = new Date();
@@ -546,7 +546,7 @@ function getPDRMeetingHour(departureHour) {
   date.setMinutes(minute);
   date.setSeconds(0);
   date.setMilliseconds(0);
-  date.setHours(date.getHours() - 1);
+  date.setMinutes(date.getMinutes() - 30); // Subtract 30 minutes
   let meetingHour = date.toTimeString().split(" ")[0];
   meetingHour = meetingHour.substring(0, meetingHour.length - 3);
   return meetingHour;
