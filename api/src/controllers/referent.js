@@ -641,7 +641,22 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     });
 
     if (value.source === YOUNG_SOURCE.CLE) {
-      young.set({ source: YOUNG_SOURCE.CLE, etablissementId: value.etablissementId, classeId: value.classeId, cniFiles: [] });
+      young.set({
+        source: YOUNG_SOURCE.CLE,
+        etablissementId: value.etablissementId,
+        classeId: value.classeId,
+        cniFiles: [],
+        "files.cniFiles": [],
+        cohesionCenterId: classe.cohesionCenterId,
+        sessionPhase1Id: classe.sessionId,
+        meetingPointId: classe.pointDeRassemblementId,
+      });
+      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
+        young.set({
+          hasMeetingInformation: "true",
+          statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+        });
+      }
     } else {
       young.set({
         // Init if young was previously CLE
@@ -649,6 +664,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         etablissementId: undefined,
         classeId: undefined,
         cniFiles: [],
+        "files.cniFiles": [],
       });
     }
 
