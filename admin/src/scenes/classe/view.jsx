@@ -284,7 +284,7 @@ export default function View() {
             />
             {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
               <>
-                <InputText className="mb-3" value={classe.etablissement.name} readOnly={true} label="Établissement" />
+                <InputText className="mb-3" value={classe.etablissement?.name} readOnly={true} label="Établissement" />
                 <Link to={`/etablissement/${classe.etablissementId}`} className="w-full">
                   <Button type="tertiary" title="Voir l'établissement" className="w-full max-w-full" />
                 </Link>
