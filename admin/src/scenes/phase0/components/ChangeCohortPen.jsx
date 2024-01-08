@@ -443,7 +443,8 @@ const searchEtablissement = async (user, q) => {
 
   const { responses } = await api.post(`/elasticsearch/cle/etablissement/search`, query);
   return responses[0].hits.hits.map((hit) => {
-    return { value: hit._source, _id: hit._id, label: hit._source.name, etablissement: { ...hit._source, _id: hit._id } };
+    const label = hit._source.name + (hit._source.city ? ` (${hit._source.city})` : "");
+    return { value: hit._source, _id: hit._id, label, etablissement: { ...hit._source, _id: hit._id } };
   });
 };
 

@@ -631,7 +631,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     }
 
     young.set({
-      status: YOUNG_STATUS.WAITING_VALIDATION,
+      status: getYoungStatus(young),
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
       cohort,
       originalCohort: previousYoung.cohort,
@@ -724,6 +724,19 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+const getYoungStatus = (young) => {
+  switch (young.status) {
+    case YOUNG_STATUS.IN_PROGRESS:
+      return YOUNG_STATUS.IN_PROGRESS;
+    case YOUNG_STATUS.WAITING_VALIDATION:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    case YOUNG_STATUS.WAITING_CORRECTION:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    default:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+  }
+};
 
 router.post("/:tutorId/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
