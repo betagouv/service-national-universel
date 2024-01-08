@@ -59,6 +59,12 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
     return school.fullName + " - " + school.city;
   }
 
+  const manualEntryOption = {
+    value: "MANUAL_ENTRY",
+    label: "Je n'ai pas trouvé mon établissement",
+    isSpecialOption: true,
+  };
+
   return manualFilling ? (
     <>
       <hr></hr>
@@ -100,16 +106,25 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
       <Select
         label="Nom de l'établissement"
         value={formatSchoolName(school)}
-        options={schools
-          .map((e) => `${e.fullName} - ${e.city}`)
-          .sort()
-          .map((c) => ({ value: c, label: c }))}
-        onChange={(value) => {
-          const selectedSchool = schools.find((e) => `${e.fullName} - ${e.city}` === value);
-          onSelectSchool(selectedSchool ?? { fullName: value, country });
-        }}
         placeholder="Sélectionnez un établissement"
-        error={errors.fullName}
+        options={[
+          ...schools
+            .map((e) => ({
+              value: `${e.fullName} - ${e.city}`,
+              label: `${e.fullName} - ${e.city}`,
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label)),
+          manualEntryOption,
+        ]}
+        onChange={(value) => {
+          if (value === manualEntryOption.value) {
+            setManualFilling(true);
+            onSelectSchool(null);
+          } else {
+            onSelectSchool(schools.find((e) => `${e.fullName} - ${e.city}` === value));
+          }
+        }}
+        error={errors?.school}
         correction={corrections?.schoolName}
       />
       <div className="flex items-center">

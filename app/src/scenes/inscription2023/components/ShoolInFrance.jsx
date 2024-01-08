@@ -58,6 +58,12 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
     return school.fullName + " - " + school.adresse;
   }
 
+  const manualEntryOption = {
+    value: "MANUAL_ENTRY",
+    label: "Je n'ai pas trouvé mon établissement",
+    isSpecialOption: true,
+  };
+
   return manualFilling ? (
     <>
       <hr></hr>
@@ -108,23 +114,27 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         label="Nom de l'établissement"
         value={formatSchoolName(school)}
         placeholder="Sélectionnez un établissement"
-        options={schoolOptions
-          .map((e) => ({
-            value: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
-            label: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
-          }))
-          .sort((a, b) => a.label.localeCompare(b.label))}
-        // .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
-        // .sort()
-        // .map((c) => ({ value: c, label: c }))}
-
+        options={[
+          ...schoolOptions
+            .map((e) => ({
+              value: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
+              label: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label)),
+          manualEntryOption,
+        ]}
         onChange={(value) => {
-          onSelectSchool(schoolOptions.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
+          if (value === manualEntryOption.value) {
+            setManualFilling(true);
+            onSelectSchool(null);
+          } else {
+            onSelectSchool(schoolOptions.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
+          }
         }}
         error={errors?.school}
         correction={corrections?.schoolName}
       />
-      <div className="flex items-center">
+      {/* <div className="flex items-center">
         <button
           className="text-[#000091] cursor-pointer underline underline-offset-2"
           onClick={() => {
@@ -134,7 +144,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           Je n'ai pas trouvé mon établissement
         </button>
         <HiArrowRight className="text-[#000091] mt-1 ml-2" />
-      </div>
+      </div> */}
     </>
   );
 }
