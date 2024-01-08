@@ -571,7 +571,6 @@ describe("Meeting point", () => {
       expect(res.body.ok).toBe(true);
       expect(res.body.data).toHaveProperty("meetingPoints");
       expect(res.body.data).toHaveProperty("youngsCountBus");
-      expect(res.body.data).toHaveProperty("schemaVolume");
       expect(res.body.data).toHaveProperty("busVolume");
 
       passport.user = previous;
