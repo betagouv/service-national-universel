@@ -117,8 +117,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     ];
     const sortFields = [];
 
-    if (!canSearchInElasticSearch(user, "application")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     // Body params validation
     const { queryFilters, exportFields, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
