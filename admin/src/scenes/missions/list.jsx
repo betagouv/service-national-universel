@@ -159,20 +159,27 @@ export default function List() {
     //If we want to export young info or application
     if ([...youngCategorie, "application"].some((e) => selectedFields.includes(e))) {
       // Add applications info
-      const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
-      const queryApplication = {
-        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }] } },
-        track_total_hits: true,
-        size: 100,
-      };
-      if (selectedFilters?.applicationStatus?.filter?.length) {
-        queryApplication.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.applicationStatus.filter } });
-      }
+      // const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
+      // const queryApplication = {
+      //   query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }] } },
+      //   track_total_hits: true,
+      //   size: 100,
+      // };
+      // if (selectedFilters?.applicationStatus?.filter?.length) {
+      //   queryApplication.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.applicationStatus.filter } });
+      // }
 
+      // const resultApplications = await api.post(`/es/application/export`, {
+      //   ...queryApplication,
+      //   fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
+      // });
+
+      const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
       const resultApplications = await api.post(`/elasticsearch/application/mission/export`, {
-        ...queryApplication,
-        fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
+        filters: { missionId: missionIds, status: selectedFilters.applicationStatus.filter },
+        exportFields: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
+
       if (resultApplications?.data?.length) {
         all = all.map((item) => ({ ...item, candidatures: resultApplications?.data?.filter((e) => e.missionId === item._id.toString()) }));
       } else {
@@ -187,16 +194,22 @@ export default function List() {
       });
       youngIds = [...new Set(youngIds.filter((e) => e))];
 
-      const queryYoung = {
-        query: { ids: { type: "_doc", values: youngIds } },
-        track_total_hits: true,
-        size: ES_NO_LIMIT,
-      };
+      // const queryYoung = {
+      //   query: { ids: { type: "_doc", values: youngIds } },
+      //   track_total_hits: true,
+      //   size: ES_NO_LIMIT,
+      // };
+
+      // const resultYoungs = await api.post(`/es/young/export`, {
+      //   ...queryYoung,
+      //   fieldsToExports: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
+      // });
 
       const resultYoungs = await api.post(`/elasticsearch/young/mission/export`, {
-        ...queryYoung,
-        fieldsToExports: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
+        ids: { values: youngIds },
+        exportFields: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
       });
+
       if (resultYoungs?.data?.length) {
         all = all.map((item) => {
           if (item.candidatures?.length) {

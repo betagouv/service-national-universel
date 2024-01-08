@@ -8,8 +8,9 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
-const { buildNdJson, buildRequestBody, joiElasticSearch, applyFilterOnQuery, withFilterForMSearch } = require("./utils");
-const { serializeYoungs } = require("../../utils/es-serializer");
+const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
+
+const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
 const StructureObject = require("../../models/structure");
 const ApplicationObject = require("../../models/application");
 const SessionPhase1Object = require("../../models/sessionPhase1");
@@ -501,17 +502,38 @@ router.post("/mission/:action(search|export)", passport.authenticate(["referent"
   const { showAffectedToRegionOrDep } = req.query;
   try {
     const { user, body } = req;
+    const filterFields = ["youngId.keyword"];
+    const searchFields = [];
+    const sortFields = [];
+    // Body params validation
+    const { queryFilters, exportFields, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { youngContextFilters, youngContextError } = await buildYoungContext(user, showAffectedToRegionOrDep);
-    if (youngContextError) {
-      return res.status(youngContextError.status).send(youngContextError.body);
+    const { applicationContextFilters, applicationContextError } = await buildYoungContext(user, showAffectedToRegionOrDep);
+    if (applicationContextError) {
+      return res.status(applicationContextError.status).send(applicationContextError.body);
     }
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      exportFields,
+      searchFields,
+      filterFields,
+      queryFilters,
+      page,
+      sort,
+      applicationContextFilters,
+      size,
+    });
+
     if (req.params.action === "export") {
-      const response = await allRecords("young", applyFilterOnQuery(body.query, youngContextFilters));
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      const response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
+      let data = serializeApplications(response);
+      data = await populateYoungExport(data, exportFields);
+      return res.status(200).send({ ok: true, data });
     } else {
-      const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, youngContextFilters) });
-      return res.status(200).send(serializeYoungs(response.body));
+      const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      return res.status(200).send(serializeApplications(response.body));
     }
   } catch (error) {
     capture(error);
