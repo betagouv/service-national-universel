@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 const mime = require("mime-types");
 const FileType = require("file-type");
 const Joi = require("joi");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 
@@ -642,7 +641,22 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     });
 
     if (value.source === YOUNG_SOURCE.CLE) {
-      young.set({ source: YOUNG_SOURCE.CLE, etablissementId: value.etablissementId, classeId: value.classeId, cniFiles: [] });
+      young.set({
+        source: YOUNG_SOURCE.CLE,
+        etablissementId: value.etablissementId,
+        classeId: value.classeId,
+        cniFiles: [],
+        "files.cniFiles": [],
+        cohesionCenterId: classe.cohesionCenterId,
+        sessionPhase1Id: classe.sessionId,
+        meetingPointId: classe.pointDeRassemblementId,
+      });
+      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
+        young.set({
+          hasMeetingInformation: "true",
+          statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+        });
+      }
     } else {
       young.set({
         // Init if young was previously CLE
@@ -650,6 +664,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         etablissementId: undefined,
         classeId: undefined,
         cniFiles: [],
+        "files.cniFiles": [],
       });
     }
 
@@ -962,21 +977,6 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          try {
-            const clamscan = await new NodeClam().init({
-              removeInfected: true,
-            });
-            const { isInfected } = await clamscan.isInfected(tempFilePath);
-            if (isInfected) {
-              capture(`File ${name} of user(${req.user.id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-            }
-          } catch {
-            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
-          }
-        }
-
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: mimeFromMagicNumbers, encoding: "7bit", data: encryptedBuffer };
@@ -1043,11 +1043,33 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const referent = await ReferentModel.findById(checkedId);
+    let referent = await ReferentModel.findById(checkedId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    return res.status(200).send({ ok: true, data: serializeReferent(referent, req.user) });
+    referent = serializeReferent(referent, req.user);
+
+    const populateWithCLE = async (referent) => {
+      const searchField = referent.role === ROLES.REFERENT_CLASSE ? "_id" : referent.subRole === SUB_ROLES.referent_etablissement ? "referentEtablissementIds" : "coordinateurIds";
+      const query = {};
+      let valueField = { $in: [referent._id] };
+      if (referent.role === ROLES.REFERENT_CLASSE) {
+        const classe = await ClasseModel.find({ referentClasseIds: { $in: referent._id } });
+        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        valueField = classe[0].etablissementId;
+        referent.classe = classe;
+      }
+      query[searchField] = valueField;
+      const etablissement = await EtablissementModel.findOne(query)?.lean();
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      referent.etablissement = etablissement;
+      return referent;
+    };
+
+    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role)) {
+      referent = await populateWithCLE(referent);
+    }
+
+    return res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

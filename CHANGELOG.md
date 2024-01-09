@@ -1,3 +1,80 @@
+# [1.354.0](https://github.com/betagouv/service-national-universel/compare/v1.353.0...v1.354.0) (2024-01-08)
+
+
+### Bug Fixes
+
+* **admin:** class etablissement name ([7186d9f](https://github.com/betagouv/service-national-universel/commit/7186d9f15c29262388be5eddfc7ad0ae7a890722))
+
+
+### Features
+
+* **admin:** 1609 - Modification du temps de convocation à 30 min avant le départ du transport ([#3457](https://github.com/betagouv/service-national-universel/issues/3457)) ([611e921](https://github.com/betagouv/service-national-universel/commit/611e9214c08c4f8e949516a14c43b20741cb83e4))
+* **api/admin:** 1620 - Classe set center & pdr ([#3439](https://github.com/betagouv/service-national-universel/issues/3439)) ([d41cad3](https://github.com/betagouv/service-national-universel/commit/d41cad3746512ebe46bb3f7e6198053ed0eed927))
+* **api/admin:** 1638 - deconnecter le SR du PDT : Route ligne-de-bus/:id/data-for-check ([#3449](https://github.com/betagouv/service-national-universel/issues/3449)) ([1582477](https://github.com/betagouv/service-national-universel/commit/158247743fcb40aa0ce16f29690408d6fa6b91a5))
+
+# [1.353.0](https://github.com/betagouv/service-national-universel/compare/v1.352.0...v1.353.0) (2024-01-05)
+
+
+### Bug Fixes
+
+* **admin:** 501 - Modal change cohort class list without draft and withdrawn ([#3450](https://github.com/betagouv/service-national-universel/issues/3450)) ([7d5a8e1](https://github.com/betagouv/service-national-universel/commit/7d5a8e130e37b758d1fd36ab71769e2eb681f615))
+* **admin:** head center team phone + mobile ([f0baba0](https://github.com/betagouv/service-national-universel/commit/f0baba0597ca09896388413d1d979630da110022))
+
+
+### Features
+
+* **admin/api:** 485-Donner la possibilité aux ref reg/dep de prendre la place de leur ref CLE [#3452](https://github.com/betagouv/service-national-universel/issues/3452) ([bb4ce61](https://github.com/betagouv/service-national-universel/commit/bb4ce61c5270d529a820888402a57e33c49a9bc6))
+* **api/admin:** 1574-Retour CLE non prio ([#3442](https://github.com/betagouv/service-national-universel/issues/3442)) ([b1b4533](https://github.com/betagouv/service-national-universel/commit/b1b45334a65e90f8b10cf3cd92c835dc81b65779))
+
+# [1.352.0](https://github.com/betagouv/service-national-universel/compare/v1.351.0...v1.352.0) (2024-01-04)
+
+
+### Bug Fixes
+
+* **admin:** 491 - Sidebar env status dev/test/prod ([#3448](https://github.com/betagouv/service-national-universel/issues/3448)) ([d7e5057](https://github.com/betagouv/service-national-universel/commit/d7e50572ab6f6d0d22790fc50ffcc3e9c5d6bf67))
+* **admin:** modal change cohort CNI alert ([#3446](https://github.com/betagouv/service-national-universel/issues/3446)) ([a09aa59](https://github.com/betagouv/service-national-universel/commit/a09aa59b69997f78080bc4cc7b7392937c178894))
+
+
+### Features
+
+* **admin:** 1575 - Supprimer l’onglet “phase 3” dans les profils des élèves ([#3447](https://github.com/betagouv/service-national-universel/issues/3447)) ([af49b70](https://github.com/betagouv/service-national-universel/commit/af49b708d68199bed772da90e4b318ecffc1e564))
+
+# [1.351.0](https://github.com/betagouv/service-national-universel/compare/v1.350.5...v1.351.0) (2024-01-03)
+
+
+### Bug Fixes
+
+* **api:** get cohort route - return all cohorts by default [#3436](https://github.com/betagouv/service-national-universel/issues/3436) ([01a5947](https://github.com/betagouv/service-national-universel/commit/01a594703e16825354a9e157be36e115e7ce86dc))
+* **api:** Put mobile in referent model ([#3440](https://github.com/betagouv/service-national-universel/issues/3440)) ([5deafbb](https://github.com/betagouv/service-national-universel/commit/5deafbb5cf44b64eb111b53a037017fea16bc3e5))
+
+
+### Features
+
+* **api:** 1605- retirer le check de cohérence a l'import du pdt [#3434](https://github.com/betagouv/service-national-universel/issues/3434) ([48b15fc](https://github.com/betagouv/service-national-universel/commit/48b15fca3ee339a7ce1c9928436a91d36a796741))
+
+## [1.350.5](https://github.com/betagouv/service-national-universel/compare/v1.350.4...v1.350.5) (2024-01-02)
+
+
+### Bug Fixes
+
+* **api:** Force to use api.snu.gouv.fr ([52fa460](https://github.com/betagouv/service-national-universel/commit/52fa46054c22c6e667ad4bd217603a78abc6669a))
+
+## [1.350.4](https://github.com/betagouv/service-national-universel/compare/v1.350.3...v1.350.4) (2023-12-29)
+
+
+### Bug Fixes
+
+* **admin:** revert override edit fev PDR ([1056253](https://github.com/betagouv/service-national-universel/commit/105625330e2f49840108cd3c3cbd4f9f1eaa7bb2))
+* **admin:** support for transporter ([6ebc7da](https://github.com/betagouv/service-national-universel/commit/6ebc7dac212e88330419c7ac28379f8da4c8d1f3))
+
+## [1.350.3](https://github.com/betagouv/service-national-universel/compare/v1.350.2...v1.350.3) (2023-12-27)
+
+
+### Bug Fixes
+
+* **api:** remove enum in originalCohort field ([4932925](https://github.com/betagouv/service-national-universel/commit/493292568abc118a2d5dde4e7c4f2b954a5e1a61))
+* **app:** handle new CLE that do not have modification end date ([36078e5](https://github.com/betagouv/service-national-universel/commit/36078e519a1045d3acb54e1095cb56a16eb791be))
+
 ## [1.350.2](https://github.com/betagouv/service-national-universel/compare/v1.350.1...v1.350.2) (2023-12-26)
 
 

@@ -1,7 +1,6 @@
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate } from "@/utils";
 import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { useEffect, useState } from "react";
 import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
@@ -103,7 +102,7 @@ export default function list() {
             <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
               <Filters
                 pageId={pageId}
-                route="/elasticsearch/cle/classe/search"
+                route="/elasticsearch/cle/classe/search?needRefInfo=true"
                 setData={(value) => setData(value)}
                 filters={filterArray}
                 searchPlaceholder="Rechercher par mots clés, ville, code postal..."
@@ -187,8 +186,15 @@ const Hit = ({ hit }) => {
             )}
           </div>
           <div className="m-0 mt-1 table w-full table-fixed border-collapse">
-            <div className="table-cel truncate text-xs leading-5 text-gray-500 ">id: {hit.uniqueKeyAndId}</div>
+            <div className="table-cell truncate text-xs leading-5 text-gray-500 ">id: {hit.uniqueKeyAndId}</div>
           </div>
+          {hit?.referentClasse && (
+            <div className="m-0 mt-1 table w-full table-fixed border-collapse">
+              <div className="table-cell truncate text-xs leading-5 text-gray-900 ">
+                {hit.referentClasse[0]?.firstName} {hit.referentClasse[0]?.lastName}
+              </div>
+            </div>
+          )}
         </div>
       </td>
       <td className="flex w-[20%] flex-col gap-2">

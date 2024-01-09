@@ -1,4 +1,5 @@
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
+const { forceDomain } = require("forcedomain");
 
 (async () => {
   await require("./env-manager")();
@@ -39,6 +40,24 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   const app = express();
   const registerSentryErrorHandler = initSentry(app);
   app.use(helmet());
+
+  if (process.env.PRODUCTION) {
+    app.use(
+      forceDomain({
+        hostname: "api.snu.gouv.fr",
+        protocol: "https",
+      }),
+    );
+  }
+
+  if (process.env.STAGING && !process.env.CLE) {
+    app.use(
+      forceDomain({
+        hostname: "api.beta-snu.dev",
+        protocol: "https",
+      }),
+    );
+  }
 
   // if (ENVIRONMENT === "development") {
   app.use(logger("dev"));
