@@ -1,7 +1,7 @@
 import React from "react";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 
-export default function Input({ value, placeholder = "", label, onChange, type = "text", error = "", className = "", correction = "", list = "" }) {
+export default function Input({ value, placeholder = "", label, onChange, type = "text", error = "", className = "", correction = "", list = "", onBlur = () => {} }) {
   return (
     <div className={`mt-2 mb-4 ${className}`}>
       <label className={`my-2 whitespace-nowrap ${correction || error ? "text-[#CE0500]" : "text-[#3A3A3A]"}`}>{label}</label>
@@ -14,6 +14,7 @@ export default function Input({ value, placeholder = "", label, onChange, type =
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
       />
       <ErrorMessage>{error}</ErrorMessage>
       <ErrorMessage>{correction}</ErrorMessage>
