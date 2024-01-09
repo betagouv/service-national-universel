@@ -47,6 +47,10 @@ router.post(
     user_age: Joi.number(),
     date: Joi.string(),
     raw_data: Joi.object(),
+    evenement_valeur_originelle: Joi.string().allow(null),
+    modifier_user_id: Joi.string().allow(null),
+    modifier_user_role: Joi.string().allow(null),
+    modifier_user_first_name: Joi.string().allow(null),
   }),
   async ({ body }, res) => {
     try {
