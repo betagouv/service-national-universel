@@ -1,12 +1,15 @@
+import React, { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
-import { useEffect, useState } from "react";
-import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiPlus, HiUsers, HiOutlineOfficeBuilding, HiChevronDown } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES, translateStatusClasse } from "snu-lib";
+import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
 
 export default function list() {
@@ -42,6 +45,21 @@ export default function list() {
       }
     })();
   }, []);
+
+  const exportData = async ({ type }) => {
+    try {
+      const res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
+        filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
+          return { ...e, [key]: value.filter };
+        }, {}),
+      });
+      const result = await exportExcelSheet({ data: res.data, type });
+      const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
+      FileSaver.saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" }), result.fileName);
+    } catch (error) {
+      capture(error);
+    }
+  };
 
   if (classes === null || !etablissements) return null;
 
@@ -82,6 +100,7 @@ export default function list() {
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
           ),
+          [ROLES.ADMIN].includes(user.role) && <Button rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} />,
         ].filter(Boolean)}
       />
       {!classes && (
@@ -207,3 +226,74 @@ const Hit = ({ hit }) => {
     </tr>
   );
 };
+
+function exportExcelSheet({ data: classes, type }) {
+  let sheetData = classes.map((c) => ({
+    id: c._id.toString(),
+    uniqueKeyAndId: c.uniqueKeyAndId,
+    name: c.name,
+    cohort: c.cohort,
+    students: (c.seatsTaken ?? 0) + "/" + (c.totalSeats ?? 0),
+    coloration: c.coloration,
+    status: translateStatusClasse(c.status),
+    updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
+    createdAt: dayjs(c.createdAt).format("DD/MM/YYYY HH:mm"),
+  }));
+  let headers = ["ID", "Identifiant", "Nom", "Cohorte", "Élèves", "Coloration", "Statut", "Date de dernière modification", "Date de création"];
+
+  if (type === "schema-de-repartition") {
+    sheetData = classes.map((c) => ({
+      cohort: c.cohort,
+      id: c._id.toString(),
+      updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
+      region: c.etablissement?.region,
+      department: c.etablissement?.department,
+      youngsVolume: c.totalSeats ?? 0,
+      centerId: c.cohesionCenterId,
+      centerName: c.cohesionCenter ? `${c.cohesionCenter?.name}, ${c.cohesionCenter?.address}, ${c.cohesionCenter?.zip} ${c.cohesionCenter?.city}` : "",
+      centerDepartment: c.cohesionCenter?.department,
+      centerRegion: c.cohesionCenter?.region,
+      pointDeRassemblementId: c.pointDeRassemblementId,
+      pointDeRassemblementName: c.pointDeRassemblement?.name,
+    }));
+
+    // tri par centre
+    sheetData.sort((a, b) => {
+      const aname = a.centerName;
+      const bname = b.centerName;
+
+      if (aname) {
+        if (bname) return aname.localeCompare(bname);
+        return -1;
+      } else {
+        if (bname) return 1;
+        return 0;
+      }
+    });
+
+    // --- fix header names
+    headers = [
+      "Cohorte",
+      "ID de la classe",
+      "Date de dernière modification",
+      "Région des volontaires",
+      "Département des volontaires",
+      "Nombre d'élèves",
+      "ID centre",
+      "Désignation du centre",
+      "Département du centre",
+      "Région du centre",
+      "ID du point de rassemblement",
+      "Désignation du point de rassemblement",
+    ];
+  }
+
+  let sheet = XLSX.utils.json_to_sheet(sheetData);
+  XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
+
+  // --- create workbook
+  let workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, sheet, `Liste des classes${type === "schema-de-repartition" ? " - schéma de répartition" : ""}`);
+  const fileName = "classes-schema-repartition.xlsx";
+  return { workbook, fileName };
+}
