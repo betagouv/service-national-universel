@@ -82,7 +82,6 @@ const Schema = new mongoose.Schema({
 
   address: {
     type: String,
-    required: true,
     documentation: {
       description: "Adresse de l'établissement",
     },
