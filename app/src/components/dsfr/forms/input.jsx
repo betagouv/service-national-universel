@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Input({ value, placeholder = null, onChange, disabled = false, type = "text", name = null, autocomplete = "off" }) {
+export default function Input({ value, placeholder = null, onChange, disabled = false, type = "text", name = null, autocomplete = "off", onBlur = () => {} }) {
   return (
     <input
       disabled={disabled}
@@ -12,6 +12,7 @@ export default function Input({ value, placeholder = null, onChange, disabled = 
       name={name}
       id={name}
       autoComplete={autocomplete}
+      onBlur={onBlur}
     />
   );
 }
