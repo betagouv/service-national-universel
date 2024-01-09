@@ -57,13 +57,17 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     });
 
     if (req.params.action === "export") {
-      // Export is only available for admin for now
-      if (![ROLES.ADMIN].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
-      response = await populateWithEtablissementInfo(response);
-      response = await populateWithCohesionCenterInfo(response);
-      response = await populateWithPdrInfo(response);
+
+      if (req.query?.type === "schema-de-repartition") {
+        // Export is only available for admin for now
+        if (![ROLES.ADMIN].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+        response = await populateWithEtablissementInfo(response);
+        response = await populateWithCohesionCenterInfo(response);
+        response = await populateWithPdrInfo(response);
+      }
+
       return res.status(200).send({ ok: true, data: response });
     } else {
       let response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
