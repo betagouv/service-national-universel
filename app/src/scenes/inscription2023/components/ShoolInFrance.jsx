@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
 import Input from "./Input";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
-import { HiArrowRight } from "react-icons/hi";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
@@ -134,17 +133,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         error={errors?.school}
         correction={corrections?.schoolName}
       />
-      {/* <div className="flex items-center">
-        <button
-          className="text-[#000091] cursor-pointer underline underline-offset-2"
-          onClick={() => {
-            setManualFilling(true);
-            onSelectSchool(null);
-          }}>
-          Je n'ai pas trouvé mon établissement
-        </button>
-        <HiArrowRight className="text-[#000091] mt-1 ml-2" />
-      </div> */}
     </>
   );
 }

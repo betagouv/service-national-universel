@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import CreatableSelect from "../../../components/CreatableSelect";
 import Select from "@/components/dsfr/forms/Select";
 import { HiArrowRight } from "react-icons/hi";
 import Input from "./Input";
@@ -11,7 +10,6 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
   const [country, setCountry] = useState(school?.country);
   const [schools, setSchools] = useState([]);
   const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
-  const [manualSchool, setManualSchool] = useState(school ?? {});
 
   const [errors, setErrors] = useState({});
 
