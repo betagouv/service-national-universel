@@ -56,11 +56,9 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
     if (!school?.adresse) return school.fullName;
     return school.fullName + " - " + school.adresse;
   }
-
   const manualEntryOption = {
     value: "MANUAL_ENTRY",
-    label: "Je n'ai pas trouvé mon établissement",
-    isSpecialOption: true,
+    label: <strong>Je n'ai pas trouvé mon établissement</strong>,
   };
 
   return manualFilling ? (

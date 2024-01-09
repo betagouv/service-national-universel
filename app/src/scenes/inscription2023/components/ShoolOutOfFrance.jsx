@@ -59,8 +59,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
 
   const manualEntryOption = {
     value: "MANUAL_ENTRY",
-    label: "Je n'ai pas trouvé mon établissement",
-    isSpecialOption: true,
+    label: <strong>Je n'ai pas trouvé mon établissement</strong>,
   };
 
   return manualFilling ? (
@@ -125,17 +124,6 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
         error={errors?.school}
         correction={corrections?.schoolName}
       />
-      <div className="flex items-center">
-        <button
-          className="text-[#000091] cursor-pointer underline underline-offset-2"
-          onClick={() => {
-            setManualFilling(true);
-            onSelectSchool(null);
-          }}>
-          Je n'ai pas trouvé mon établissement
-        </button>
-        <HiArrowRight className="text-[#000091] mt-1 ml-2" />
-      </div>
     </>
   );
 }
