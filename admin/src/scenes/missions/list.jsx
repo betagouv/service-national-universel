@@ -175,7 +175,7 @@ export default function List() {
       // });
 
       const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
-      const resultApplications = await api.post(`/elasticsearch/application/mission/export`, {
+      const resultApplications = await api.post(`/elasticsearch/application/export`, {
         filters: { missionId: missionIds, status: selectedFilters.applicationStatus.filter },
         exportFields: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
@@ -194,21 +194,21 @@ export default function List() {
       });
       youngIds = [...new Set(youngIds.filter((e) => e))];
 
-      // const queryYoung = {
-      //   query: { ids: { type: "_doc", values: youngIds } },
-      //   track_total_hits: true,
-      //   size: ES_NO_LIMIT,
-      // };
+      const queryYoung = {
+        query: { ids: { type: "_doc", values: youngIds } },
+        track_total_hits: true,
+        size: ES_NO_LIMIT,
+      };
 
-      // const resultYoungs = await api.post(`/es/young/export`, {
-      //   ...queryYoung,
-      //   fieldsToExports: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
-      // });
-
-      const resultYoungs = await api.post(`/elasticsearch/young/mission/export`, {
-        ids: { values: youngIds },
-        exportFields: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
+      const resultYoungs = await api.post(`/es/young/export`, {
+        ...queryYoung,
+        fieldsToExports: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
       });
+
+      // const resultYoungs = await api.post(`/elasticsearch/mission/export`, {
+      //   filters: { youngId: youngIds },
+      //   exportFields: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
+      // });
 
       if (resultYoungs?.data?.length) {
         all = all.map((item) => {
