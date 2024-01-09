@@ -159,7 +159,7 @@ export default function StepProfil() {
             label="Nom de famille du volontaire"
             error={error.lastName}
             correction={corrections.lastName}
-            onBlur={(e) => setData({ ...data, lastName: e.toUpperCase() })}
+            onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })}
           />
           {isCLE && (
             <label className="w-full">
