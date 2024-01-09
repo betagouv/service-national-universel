@@ -1,3 +1,16 @@
+# [1.355.0](https://github.com/betagouv/service-national-universel/compare/v1.354.0...v1.355.0) (2024-01-09)
+
+
+### Bug Fixes
+
+* **admin/api:** 492 - Switch HTS <> CLE status ([#3455](https://github.com/betagouv/service-national-universel/issues/3455)) ([f869d1a](https://github.com/betagouv/service-national-universel/commit/f869d1ac3379bc225acd0583dc608faac02d6c46))
+
+
+### Features
+
+* **api/admin:** Export classes list ([#3459](https://github.com/betagouv/service-national-universel/issues/3459)) ([d478bdc](https://github.com/betagouv/service-national-universel/commit/d478bdccf26492cd6670202dd130a3dd099bd0f8))
+* **api/analytics:** 738: data events log youngs ([#3443](https://github.com/betagouv/service-national-universel/issues/3443)) ([e1551a5](https://github.com/betagouv/service-national-universel/commit/e1551a5537f54f4bd4b88b64f4033a8d43aa51a8))
+
 # [1.354.0](https://github.com/betagouv/service-national-universel/compare/v1.353.0...v1.354.0) (2024-01-08)
 
 
