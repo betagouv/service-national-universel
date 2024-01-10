@@ -1067,13 +1067,13 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
       let valueField = { $in: [referent._id] };
       if (referent.role === ROLES.REFERENT_CLASSE) {
         const classe = await ClasseModel.find({ referentClasseIds: { $in: referent._id } });
-        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (!classe) return referent;
         valueField = classe[0].etablissementId;
         referent.classe = classe;
       }
       query[searchField] = valueField;
       const etablissement = await EtablissementModel.findOne(query)?.lean();
-      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!etablissement) return referent;
       referent.etablissement = etablissement;
       return referent;
     };
