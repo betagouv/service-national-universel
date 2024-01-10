@@ -8,7 +8,7 @@ const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 const Joi = require("joi");
 const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
-const { buildApplicationContext, applyFilterOnQuery, withFilterForMSearch } = require("./utils");
+const { buildApplicationContext } = require("./utils");
 
 async function populateApplications(applications, exportFields) {
   if (!applications || !applications.length) return applications;
