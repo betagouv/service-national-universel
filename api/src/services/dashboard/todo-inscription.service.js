@@ -15,6 +15,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.BASIC] = async (user, { notFinishe
         { terms: { "cohort.keyword": cohorts } },
         { terms: { "status.keyword": ["WAITING_VALIDATION"] } },
         { bool: { must_not: { exists: { field: "correctionRequests.keyword" } } } },
+        { bool: { must_not: { term: { "source.keyword": "CLE" } } } },
       ]),
       // Dossier (À instruire) X dossiers d’inscription corrigés sont à instruire de nouveau.
       // inscription_corrigé_à_instruire_de_nouveau
@@ -23,11 +24,16 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.BASIC] = async (user, { notFinishe
         { terms: { "cohort.keyword": cohorts } },
         { terms: { "status.keyword": ["WAITING_VALIDATION"] } },
         { bool: { must: { exists: { field: "correctionRequests.keyword" } } } },
+        { bool: { must_not: { term: { "source.keyword": "CLE" } } } },
       ]),
       // Dossier (À relancer) X dossiers d’inscription en attente de correction
       // inscription_en_attente_de_correction
       { index: "young", type: "_doc" },
-      queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "status.keyword": ["WAITING_CORRECTION"] } }]),
+      queryFromFilter(user.role, user.region, user.department, [
+        { terms: { "cohort.keyword": cohorts } },
+        { terms: { "status.keyword": ["WAITING_CORRECTION"] } },
+        { bool: { must_not: { term: { "source.keyword": "CLE" } } } },
+      ]),
     ),
   });
   const results = response.body.responses;
@@ -46,7 +52,11 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT] = as
     body: buildArbitratyNdJson(
       { index: "young", type: "_doc" },
       withAggs(
-        queryFromFilter(user.role, user.region, user.department, [{ terms: { "cohort.keyword": cohorts } }, { terms: { "status.keyword": ["WAITING_VALIDATION"] } }]),
+        queryFromFilter(user.role, user.region, user.department, [
+          { terms: { "cohort.keyword": cohorts } },
+          { terms: { "status.keyword": ["WAITING_VALIDATION"] } },
+          { bool: { must_not: { term: { "source.keyword": "CLE" } } } },
+        ]),
         "cohort.keyword",
       ),
     ),
