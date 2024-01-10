@@ -1,3 +1,20 @@
+# [1.356.0](https://github.com/betagouv/service-national-universel/compare/v1.355.0...v1.356.0) (2024-01-10)
+
+
+### Bug Fixes
+
+* **admin:** 542 - Hide create class for non ADMINISTRATEUR_CLE ([#3465](https://github.com/betagouv/service-national-universel/issues/3465)) ([82881c7](https://github.com/betagouv/service-national-universel/commit/82881c739bd810775b9a716c24f85d10df48367c))
+* **admin:** xlsx sheet name length ([11e970f](https://github.com/betagouv/service-national-universel/commit/11e970fb856e981d2123f8e901e0efe3736eea85))
+* **api:** bug oublie return ([86ed457](https://github.com/betagouv/service-national-universel/commit/86ed457688fa5b47fda665f03703d5b3b8fec86a))
+* **api:** GET referent - avoid crashing when resource to populate is not found ([#3466](https://github.com/betagouv/service-national-universel/issues/3466)) ([2e14fb1](https://github.com/betagouv/service-national-universel/commit/2e14fb1a3b6f07e3684e55980677a2a941813757))
+* **api/admin:** 1598 - Dynamic settings required fields ([#3461](https://github.com/betagouv/service-national-universel/issues/3461)) ([0c1d42d](https://github.com/betagouv/service-national-universel/commit/0c1d42d550f64ad3d8ed04d2dfd44874597da0a5))
+
+
+### Features
+
+* **admin:** 1622 - Transporter can contact the support ([#3462](https://github.com/betagouv/service-national-universel/issues/3462)) ([3a2a4e0](https://github.com/betagouv/service-national-universel/commit/3a2a4e026dd61fc3adb3eae43ef5557a1376a56a))
+* **admin:** 1664 - Add cohort name ([#3463](https://github.com/betagouv/service-national-universel/issues/3463)) ([81fd893](https://github.com/betagouv/service-national-universel/commit/81fd893859c613e831840e938193f5cc01ff2064))
+
 # [1.355.0](https://github.com/betagouv/service-national-universel/compare/v1.354.0...v1.355.0) (2024-01-09)
 
 
