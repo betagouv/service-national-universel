@@ -293,7 +293,8 @@ function exportExcelSheet({ data: classes, type }) {
 
   // --- create workbook
   let workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, sheet, `Liste des classes${type === "schema-de-repartition" ? " - schéma de répartition" : ""}`);
+  // ⚠️ Becareful, sheet name length is limited to 31 characters
+  XLSX.utils.book_append_sheet(workbook, sheet, type === "schema-de-repartition" ? "Répartition des classes" : "Liste des classes");
   const fileName = "classes-schema-repartition.xlsx";
   return { workbook, fileName };
 }
