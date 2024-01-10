@@ -112,7 +112,7 @@ export default function Create(props) {
                 errors={errors}
                 touched={touched}
               />
-              {[ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? (
+              {[ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(user.role) ? (
                 <Item
                   name="messageSubject"
                   title="Ma demande"
@@ -134,7 +134,7 @@ export default function Create(props) {
               ) : null}
               {values.type?.id &&
               !["OTHER", "QUESTION_SUPPORT"].includes(values.type?.id) &&
-              ![ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? (
+              ![ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(user.role) ? (
                 <SelectTag
                   name="subject"
                   options={Object.values(subjectsList).filter((e) => e.parentId === values?.type?.id)}
