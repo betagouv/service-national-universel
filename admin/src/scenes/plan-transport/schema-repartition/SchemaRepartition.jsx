@@ -158,7 +158,7 @@ export default function SchemaRepartition({ region, department }) {
         from = start.format("Do MMMM YYYY");
       }
       const to = end.format("Do MMMM YYYY");
-      return `Séjour du ${from} au ${to}`;
+      return `${cohort.name} (du ${from} au ${to})`;
     } else {
       return "";
     }
