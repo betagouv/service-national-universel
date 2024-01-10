@@ -1061,25 +1061,33 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     referent = serializeReferent(referent, req.user);
 
-    const populateWithCLE = async (referent) => {
-      const searchField = referent.role === ROLES.REFERENT_CLASSE ? "_id" : referent.subRole === SUB_ROLES.referent_etablissement ? "referentEtablissementIds" : "coordinateurIds";
-      const query = {};
-      let valueField = { $in: [referent._id] };
-      if (referent.role === ROLES.REFERENT_CLASSE) {
-        const classe = await ClasseModel.find({ referentClasseIds: { $in: referent._id } });
-        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        valueField = classe[0].etablissementId;
-        referent.classe = classe;
-      }
-      query[searchField] = valueField;
-      const etablissement = await EtablissementModel.findOne(query)?.lean();
+    // Populate les chefs d'établissement avec leur établissement
+    if (referent.subRole === SUB_ROLES.referent_etablissement) {
+      const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: referent._id }).lean();
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // Do not return res() in a helper function, only at the root of the route handler.
+      referent.etablissement = etablissement;
+    }
+
+    // Populate les coordos avec leur établissement et leurs classes le cas échéant
+    if (referent.subRole === SUB_ROLES.coordinateur_cle) {
+      const etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id }).lean();
       if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       referent.etablissement = etablissement;
-      return referent;
-    };
 
-    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role)) {
-      referent = await populateWithCLE(referent);
+      const classes = await ClasseModel.find({ referentClasseIds: referent._id }).lean();
+      referent.classe = classes;
+    }
+
+    // Populate les référents de classe avec leur établissement et leurs classes
+    if (referent.role === ROLES.REFERENT_CLASSE) {
+      const classes = await ClasseModel.find({ referentClasseIds: referent._id }).lean();
+      if (!classes) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      referent.classe = classes;
+
+      const etablissement = await EtablissementModel.findById(classes[0].etablissementId).lean();
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      referent.etablissement = etablissement;
     }
 
     return res.status(200).send({ ok: true, data: referent });
