@@ -497,50 +497,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   }
 });
 
-router.post("/mission/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  // uses for listing youngs for bus lines and assembling points (referents need to access to youngs assinged to their region or department)
-  const { showAffectedToRegionOrDep } = req.query;
-  try {
-    const { user, body } = req;
-    const filterFields = ["youngId.keyword"];
-    const searchFields = [];
-    const sortFields = [];
-    // Body params validation
-    const { queryFilters, exportFields, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const { applicationContextFilters, applicationContextError } = await buildYoungContext(user, showAffectedToRegionOrDep);
-    if (applicationContextError) {
-      return res.status(applicationContextError.status).send(applicationContextError.body);
-    }
-
-    // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      exportFields,
-      searchFields,
-      filterFields,
-      queryFilters,
-      page,
-      sort,
-      applicationContextFilters,
-      size,
-    });
-
-    if (req.params.action === "export") {
-      const response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
-      let data = serializeApplications(response);
-      data = await populateYoungExport(data, exportFields);
-      return res.status(200).send({ ok: true, data });
-    } else {
-      const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(serializeApplications(response.body));
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;

@@ -42,9 +42,9 @@ async function populateApplications(applications, exportFields) {
 
   if (exportFields.includes("youngId")) {
     const youngIds = [...new Set(applications.map((item) => item.youngId))].filter(Boolean);
-    const youngs = await allRecords("structure", { bool: { must: { ids: { values: youngIds } } } });
+    const youngs = await allRecords("young", { bool: { must: { ids: { values: youngIds } } } });
     const serializedYoungs = youngs.length ? serializeYoungs(youngs) : [];
-    applications = applications.map((item) => ({ ...item, structure: serializedYoungs.find((e) => e._id === item.structureId) || {} }));
+    applications = applications.map((item) => ({ ...item, young: serializedYoungs.find((e) => e._id === item.youngId) || {} }));
   }
 
   return applications;
@@ -153,49 +153,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       page,
       sort,
       contextFilters,
-      size,
-    });
-
-    if (req.params.action === "export") {
-      const response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
-      let data = serializeApplications(response);
-      data = await populateApplications(data, exportFields);
-      return res.status(200).send({ ok: true, data });
-    } else {
-      const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(serializeApplications(response.body));
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/mission/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { user, body } = req;
-    const filterFields = ["missionId.keyword", "status.keyword"];
-    const searchFields = [];
-    const sortFields = [];
-    // Body params validation
-    const { queryFilters, exportFields, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    console.log(queryFilters, exportFields);
-    const { applicationContextFilters, applicationContextError } = await buildApplicationContext(user);
-    if (applicationContextError) {
-      return res.status(applicationContextError.status).send(applicationContextError.body);
-    }
-
-    // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      exportFields,
-      searchFields,
-      filterFields,
-      queryFilters,
-      page,
-      sort,
-      applicationContextFilters,
       size,
     });
 
