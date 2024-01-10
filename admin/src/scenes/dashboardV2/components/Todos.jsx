@@ -29,8 +29,6 @@ export default function Todos({ user }) {
   const sessionId = sessionPhase1?._id;
   const centerId = sessionPhase1?.cohesionCenterId;
 
-  // console.log(cohortsNotFinishedAndNotCLE);
-
   const updateStats = async () => {
     const response = await api.post("/elasticsearch/dashboard/general/todo");
     const s = response.data;
