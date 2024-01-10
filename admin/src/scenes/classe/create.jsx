@@ -6,12 +6,14 @@ import { Link, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
+import { translate, canCreateClasse } from "snu-lib";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
 import Loader from "@/components/Loader";
+import { useSelector } from "react-redux";
 
 export default function create() {
+  const user = useSelector((state) => state.Auth.user);
   const [classe, setClasse] = useState({
     cohort: "CLE 23-24",
     uniqueId: "",
@@ -21,6 +23,10 @@ export default function create() {
   const [referentList, setReferentList] = useState([]);
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const history = useHistory();
+
+  useEffect(() => {
+    if (!canCreateClasse(user)) history.push("/classes");
+  }, [user]);
 
   const getEtablissement = async () => {
     try {
