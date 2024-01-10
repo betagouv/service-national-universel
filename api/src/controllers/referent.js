@@ -1048,6 +1048,34 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ReferentModel));
 
+async function populateReferent(ref) {
+  if (ref.subRole === SUB_ROLES.referent_etablissement) {
+    const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: ref._id }).lean();
+    if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
+    // Do not return res.status(404).send() in a helper function, only at the root of the route handler.
+    ref.etablissement = etablissement;
+  }
+
+  if (ref.subRole === SUB_ROLES.coordinateur_cle) {
+    const etablissement = await EtablissementModel.findOne({ coordinateurIds: ref._id }).lean();
+    if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
+    ref.etablissement = etablissement;
+
+    const classes = await ClasseModel.find({ referentClasseIds: ref._id }).lean();
+    ref.classe = classes;
+  }
+
+  if (ref.role === ROLES.REFERENT_CLASSE) {
+    const classes = await ClasseModel.find({ referentClasseIds: ref._id }).lean();
+    if (!classes) throw new Error(ERRORS.NOT_FOUND);
+    ref.classe = classes;
+
+    const etablissement = await EtablissementModel.findById(classes[0].etablissementId).lean();
+    if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
+    ref.etablissement = etablissement;
+  }
+}
+
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
@@ -1061,38 +1089,14 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     referent = serializeReferent(referent, req.user);
 
-    // Populate les chefs d'établissement avec leur établissement
-    if (referent.subRole === SUB_ROLES.referent_etablissement) {
-      const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: referent._id }).lean();
-      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      // Do not return res() in a helper function, only at the root of the route handler.
-      referent.etablissement = etablissement;
-    }
-
-    // Populate les coordos avec leur établissement et leurs classes le cas échéant
-    if (referent.subRole === SUB_ROLES.coordinateur_cle) {
-      const etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id }).lean();
-      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      referent.etablissement = etablissement;
-
-      const classes = await ClasseModel.find({ referentClasseIds: referent._id }).lean();
-      referent.classe = classes;
-    }
-
-    // Populate les référents de classe avec leur établissement et leurs classes
-    if (referent.role === ROLES.REFERENT_CLASSE) {
-      const classes = await ClasseModel.find({ referentClasseIds: referent._id }).lean();
-      if (!classes) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      referent.classe = classes;
-
-      const etablissement = await EtablissementModel.findById(classes[0].etablissementId).lean();
-      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      referent.etablissement = etablissement;
-    }
+    await populateReferent(referent);
 
     return res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
+    if (error === ERRORS.NOT_FOUND) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
