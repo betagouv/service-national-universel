@@ -67,7 +67,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <div className="flex items-center py-4">
         <RiArrowGoBackLine className="font-bold mt-1 mr-2 text-[#000091]" />
         <button
-          className="text-[#000091] cursor-pointer underline underline-offset-2"
+          className="text-[#000091] cursor-pointer"
           onClick={() => {
             setManualFilling(false);
             onSelectSchool(null);
@@ -92,6 +92,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           onSelectSchool({ ...newData, fullName: manualSchool.fullName });
         }}
         getOptions={getAddressOptions}
+        label="Rechercher l'adresse de l'établissement"
         error={errors?.school}
         correction={corrections?.schoolAddress}
       />

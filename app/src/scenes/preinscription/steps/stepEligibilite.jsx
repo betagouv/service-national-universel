@@ -45,6 +45,8 @@ export default function StepEligibilite() {
   const dispatch = useDispatch();
   const history = useHistory();
 
+  console.log(isLoggedIn);
+
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
     { value: "4eme", label: "4ème" },
@@ -90,7 +92,6 @@ export default function StepEligibilite() {
         }
       }
     }
-
     function validateSchool(data) {
       if (data.isAbroad) {
         if (!data?.school?.fullName) return false;

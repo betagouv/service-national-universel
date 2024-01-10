@@ -68,7 +68,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
       <div className="flex items-center py-4">
         <RiArrowGoBackLine className="font-bold mt-1 mr-2 text-[#000091]" />
         <button
-          className="text-[#000091] cursor-pointer underline underline-offset-2"
+          className="text-[#000091] cursor-pointer"
           onClick={() => {
             setManualFilling(false);
             onSelectSchool(null);
