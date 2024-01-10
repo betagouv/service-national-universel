@@ -13,6 +13,7 @@ const sessions2024CohortNames = [
   "Avril 2024 - B",
   "Juin 2024 - 2",
   "Juin 2024 - Martinique",
+  "Juin 2024 - NC",
   "Juillet 2024",
   "Juillet 2024 - Martinique",
   "CLE 23-24",
