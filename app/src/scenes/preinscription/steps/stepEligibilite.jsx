@@ -45,8 +45,6 @@ export default function StepEligibilite() {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  console.log(isLoggedIn);
-
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
     { value: "4eme", label: "4ème" },
