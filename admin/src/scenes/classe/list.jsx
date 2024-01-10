@@ -95,7 +95,7 @@ export default function list() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes" }]}
         actions={[
-          ![ROLES.REFERENT_DEPARTMENT, ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
+          [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
             <Link key="list" to="/classes/create" className="ml-2">
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
