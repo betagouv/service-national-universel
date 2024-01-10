@@ -1080,6 +1080,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role)) {
       referent = await populateWithCLE(referent);
+      if (!referent.etablissement || !referent.classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
     return res.status(200).send({ ok: true, data: referent });
