@@ -280,7 +280,7 @@ const Home = (props) => {
 
 const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
-  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
+  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {
     authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],

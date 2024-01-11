@@ -1,7 +1,7 @@
 import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { useHistory } from "react-router-dom";
 import { setSessionPhase1 } from "../../../redux/auth/actions";
 import Check from "../icons/Check";
 import Selector from "../icons/Selector";

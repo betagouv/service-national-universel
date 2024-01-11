@@ -223,39 +223,48 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { error: bodyError, value: body } = Joi.object({
+      // Informations générales
       dateStart: Joi.date().required(),
       dateEnd: Joi.date().required(),
-      pdrChoiceLimitDate: Joi.date().required(),
-      validationDate: Joi.date().allow(null, ""),
-      validationDateForTerminaleGrade: Joi.date().allow(null, ""),
-      manualAffectionOpenForAdmin: Joi.boolean().required(),
-      manualAffectionOpenForReferentRegion: Joi.boolean().required(),
-      manualAffectionOpenForReferentDepartment: Joi.boolean().required(),
-      isAssignmentAnnouncementsOpenForYoung: Joi.boolean().required(),
-      youngCheckinForAdmin: Joi.boolean().required(),
-      youngCheckinForHeadOfCenter: Joi.boolean().required(),
-      youngCheckinForRegionReferent: Joi.boolean().required(),
-      youngCheckinForDepartmentReferent: Joi.boolean().required(),
-      busListAvailability: Joi.boolean().required(),
+      // Inscriptions (phase 0)
+      inscriptionStartDate: Joi.date().required(),
+      inscriptionEndDate: Joi.date().required(),
+      // --
+      inscriptionModificationEndDate: Joi.date(),
+      instructionEndDate: Joi.date().required(),
+      // Préparation des affectations et des transports (phase 1)
       sessionEditionOpenForReferentRegion: Joi.boolean(),
       sessionEditionOpenForReferentDepartment: Joi.boolean(),
       sessionEditionOpenForTransporter: Joi.boolean(),
+      repartitionSchemaCreateAndEditGroupAvailability: Joi.boolean().default(false),
       pdrEditionOpenForReferentRegion: Joi.boolean(),
       pdrEditionOpenForReferentDepartment: Joi.boolean(),
       pdrEditionOpenForTransporter: Joi.boolean(),
-      repartitionSchemaCreateAndEditGroupAvailability: Joi.boolean().required(),
-      repartitionSchemaDownloadAvailability: Joi.boolean(),
-      isTransportPlanCorrectionRequestOpen: Joi.boolean(),
+      // --
       schemaAccessForReferentRegion: Joi.boolean(),
       schemaAccessForReferentDepartment: Joi.boolean(),
+      repartitionSchemaDownloadAvailability: Joi.boolean(),
       busEditionOpenForTransporter: Joi.boolean(),
-      uselessInformation: Joi.object().allow(null),
+      isTransportPlanCorrectionRequestOpen: Joi.boolean(),
+      // Affectation et pointage (phase 1)
+      isAssignmentAnnouncementsOpenForYoung: Joi.boolean().default(false),
+      manualAffectionOpenForAdmin: Joi.boolean().default(false),
+      manualAffectionOpenForReferentRegion: Joi.boolean().default(false),
+      manualAffectionOpenForReferentDepartment: Joi.boolean().default(false),
+      pdrChoiceLimitDate: Joi.date(),
+      // --
+      busListAvailability: Joi.boolean().default(false),
+      youngCheckinForHeadOfCenter: Joi.boolean().default(false),
+      youngCheckinForAdmin: Joi.boolean().default(false),
+      youngCheckinForRegionReferent: Joi.boolean().default(false),
+      youngCheckinForDepartmentReferent: Joi.boolean().default(false),
       daysToValidate: Joi.number().allow(null, ""),
+      // Autres variables ?!
+      uselessInformation: Joi.object().allow(null),
+      // Non utilisées dans le formulaire
+      validationDate: Joi.date().allow(null, ""),
+      validationDateForTerminaleGrade: Joi.date().allow(null, ""),
       daysToValidateForTerminalGrade: Joi.number().allow(null, ""),
-      inscriptionStartDate: Joi.date().required(),
-      inscriptionEndDate: Joi.date().required(),
-      instructionEndDate: Joi.date().required(),
-      inscriptionModificationEndDate: Joi.date(),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {
       capture(bodyError);

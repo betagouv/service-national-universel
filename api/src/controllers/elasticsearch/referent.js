@@ -40,7 +40,19 @@ async function buildReferentContext(user) {
     contextFilters.push({
       bool: {
         should: [
-          { terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.REFERENT_REGION] } },
+          {
+            terms: {
+              "role.keyword": [
+                ROLES.REFERENT_DEPARTMENT,
+                ROLES.SUPERVISOR,
+                ROLES.RESPONSIBLE,
+                ROLES.HEAD_CENTER,
+                ROLES.REFERENT_REGION,
+                ROLES.REFERENT_CLASSE,
+                ROLES.ADMINISTRATEUR_CLE,
+              ],
+            },
+          },
           { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "department.keyword": user.department } }] } },
         ],
       },
@@ -50,7 +62,7 @@ async function buildReferentContext(user) {
     contextFilters.push({
       bool: {
         should: [
-          { terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER] } },
+          { terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE] } },
           { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "region.keyword": user.region } }] } },
           { bool: { must: [{ term: { "role.keyword": ROLES.VISITOR } }, { term: { "region.keyword": user.region } }] } },
         ],

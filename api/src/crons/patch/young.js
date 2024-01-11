@@ -62,11 +62,14 @@ async function processPatch(patch, count, total) {
           case "source":
             eventName = "SOURCE_CHANGE";
             break;
+          case "departSejourAt":
+            eventName = "DEPART_SEJOUR_AT";
+            break;
         }
 
         if (eventName) {
           result.event[eventName] = result.event[eventName] + 1 || 1;
-          await createLog(patch, actualYoung, eventName, op.value);
+          await createLog(patch, actualYoung, eventName, op);
         }
       }
     }
@@ -96,7 +99,7 @@ async function createLog(patch, actualYoung, event, value) {
     body: JSON.stringify({
       evenement_nom: event,
       evenement_type: "young",
-      evenement_valeur: value || "",
+      evenement_valeur: value.value || "",
       user_id: patch.ref.toString(),
       user_genre: young?.gender || actualYoung?.gender,
       user_date_de_naissance: young?.birthdateAt || actualYoung?.birthdateAt?.toString(),
@@ -114,6 +117,10 @@ async function createLog(patch, actualYoung, event, value) {
       user_age: age !== "?" ? age : undefined,
       date: patch.date,
       raw_data: anonymisedYoung,
+      evenement_valeur_originelle: value?.originalValue || null,
+      modifier_user_id: patch?.user?._id || null,
+      modifier_user_role: patch?.user?.role || null,
+      modifier_user_first_name: patch?.user?.firstName || null,
     }),
   });
 
@@ -148,7 +155,7 @@ exports.handler = async () => {
 };
 
 // Script de rattrapage manuel
-// commande terminal : node -e "require('./young').manualHandler('2023-08-17', '2023-08-18')"
+// commande terminal : node -e "require('./young').manualHandler('2023-08-10', '2023-08-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
     token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);

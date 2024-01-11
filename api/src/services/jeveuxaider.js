@@ -12,8 +12,8 @@ const YoungModel = require("../models/young");
 const ContractModel = require("../models/contract");
 const config = require("../config");
 const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib");
-const { JWT_SIGNIN_MAX_AGE, checkJwtSigninVersion, JWT_SIGNIN_VERSION } = require("../jwt-options");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../cookie-options");
+const { JWT_SIGNIN_MAX_AGE_S, checkJwtSigninVersion, JWT_SIGNIN_VERSION } = require("../jwt-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../cookie-options");
 const { ERRORS, checkStatusContract } = require("../utils");
 
 // ! Appelé par le front de JVA
@@ -52,9 +52,9 @@ router.get("/signin", async (req, res) => {
       await user.save();
 
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
-        expiresIn: JWT_SIGNIN_MAX_AGE,
+        expiresIn: JWT_SIGNIN_MAX_AGE_S,
       });
-      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
       return res.redirect(config.ADMIN_URL);
     }
@@ -85,7 +85,7 @@ router.get("/getToken", async (req, res) => {
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
 
     const token_jva = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user._id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
-      expiresIn: JWT_SIGNIN_MAX_AGE,
+      expiresIn: JWT_SIGNIN_MAX_AGE_S,
     });
 
     return res.status(200).send({ ok: true, data: { token_jva } });

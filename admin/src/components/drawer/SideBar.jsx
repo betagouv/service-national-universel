@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { connect, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
+import { useLocation } from "react-router-dom";
 import { FEATURES_NAME, ROLES, isFeatureEnabled, totalClosedTickets, totalNewTickets, totalOpenedTickets } from "snu-lib";
 import Header from "./components/Header";
 import MultiNavItem from "./components/MultiNavItem";

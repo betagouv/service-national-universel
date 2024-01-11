@@ -3,7 +3,7 @@ import StudentIcon from "@/components/drawer/icons/Student";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { translate } from "@/utils";
 import { Badge, Button, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
-import { HiPlus, HiUsers } from "react-icons/hi";
+import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { IoFlashOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
@@ -18,6 +18,7 @@ export default function list() {
   const [bus, setBus] = useState(null);
   const [classes, setClasses] = useState(null);
   const [data, setData] = useState([]);
+  const [students, setStudents] = useState(null);
   const pageId = "youngCle-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -43,10 +44,12 @@ export default function list() {
           filters: {},
           exportFields: ["name", "uniqueKeyAndId"],
         });
+        const res = await api.post(`/elasticsearch/cle/young/search`, { filters: {} });
 
         setSessionsPhase1(sessions);
         setBus(bus);
         setClasses(classes);
+        setStudents(res.responses[0].hits.total.value > 0);
       } catch (e) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des données");
       }
@@ -60,92 +63,116 @@ export default function list() {
       <Header
         title="Liste de mes élèves"
         breadcrumb={[{ title: <StudentIcon className="scale-[65%]" /> }, { title: "Mes élèves" }]}
-        actions={[<Button title="Exporter" type="primary" onClick={() => setIsExportOpen(true)} />]}
+        actions={
+          students
+            ? [<Button key="export" title="Exporter" type="primary" onClick={() => setIsExportOpen(true)} />]
+            : [
+                <Link key="list" to="/classes/create" className="ml-2">
+                  <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
+                </Link>,
+              ]
+        }
       />
-      <ModalExport
-        isOpen={isExportOpen}
-        setIsOpen={setIsExportOpen}
-        route="/elasticsearch/cle/young/export"
-        transform={(data, values) => transformVolontairesCLE(data, values)}
-        exportFields={youngCleExportFields}
-        exportTitle="volontaires"
-        showTotalHits={true}
-        selectedFilters={selectedFilters}
-      />
-      <Container className="!p-0">
-        <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
-          <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
-            <Filters
-              pageId={pageId}
-              route="/elasticsearch/cle/young/search?needClasseInfo=true"
-              setData={(value) => setData(value)}
-              filters={filterArray}
-              searchPlaceholder="Rechercher par mots clés, ville, code postal..."
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
-              size={size}
-            />
-            <SortOption
-              sortOptions={[
-                { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
-                { label: "Nom (Z > A)", field: "lastName.keyword", order: "desc" },
-                { label: "Prénom (A > Z)", field: "firstName.keyword", order: "asc" },
-                { label: "Prénom (Z > A)", field: "firstName.keyword", order: "desc" },
-                { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
-                { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
-              ]}
-              selectedFilters={selectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
-            />
+      {!students && (
+        <Container className="!p-8">
+          <div className="py-6 bg-gray-50">
+            <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore créé de classe engagée</div>
+            <div className="flex items-start justify-center h-[136px]">
+              <Link to="/classes/create">
+                <Button type="wired" leftIcon={<HiPlus />} title="Créer une première classe engagée" />
+              </Link>
+            </div>
           </div>
-          <div className="mt-2 flex flex-row flex-wrap items-center px-4">
-            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
-            <SelectedFilters
-              filterArray={filterArray}
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
-            />
-          </div>
-
-          <ResultTable
-            paramData={paramData}
-            setParamData={setParamData}
-            currentEntryOnPage={data?.length}
-            size={size}
-            setSize={setSize}
-            render={
-              <table className="mt-6 mb-2 flex w-full flex-col divide-y table-auto divide-gray-100 border-gray-100">
-                <thead>
-                  <tr className="flex items-center py-3 px-4 text-xs font-[500] leading-5 uppercase text-gray-500 bg-gray-50 cursor-default">
-                    <span className="w-[35%]">Élèves</span>
-                    <span className="w-[20%]">Cohortes</span>
-                    <span className="w-[20%]">Classes</span>
-                    <span className="w-[20%]">Statuts</span>
-                    <span className="w-[5%]">Actions</span>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.map((hit) => (
-                    <Hit key={hit._id} hit={hit} />
-                  ))}
-                </tbody>
-                <tr className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 bg-gray-50">
-                  <span className="w-[35%]">Élèves</span>
-                  <span className="w-[20%]">Cohortes</span>
-                  <span className="w-[20%]">Classes</span>
-                  <span className="w-[20%]">Statuts</span>
-                  <span className="w-[5%]">Actions</span>
-                </tr>
-              </table>
-            }
+        </Container>
+      )}
+      {students && (
+        <>
+          <ModalExport
+            isOpen={isExportOpen}
+            setIsOpen={setIsExportOpen}
+            route="/elasticsearch/cle/young/export"
+            transform={(data, values) => transformVolontairesCLE(data, values)}
+            exportFields={youngCleExportFields}
+            exportTitle="volontaires"
+            showTotalHits={true}
+            selectedFilters={selectedFilters}
           />
-        </div>
-      </Container>
+          <Container className="!p-0">
+            <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+              <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
+                <Filters
+                  pageId={pageId}
+                  route="/elasticsearch/cle/young/search?needClasseInfo=true"
+                  setData={(value) => setData(value)}
+                  filters={filterArray}
+                  searchPlaceholder="Rechercher par mots clés, ville, code postal..."
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                  paramData={paramData}
+                  setParamData={setParamData}
+                  size={size}
+                />
+                <SortOption
+                  sortOptions={[
+                    { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+                    { label: "Nom (Z > A)", field: "lastName.keyword", order: "desc" },
+                    { label: "Prénom (A > Z)", field: "firstName.keyword", order: "asc" },
+                    { label: "Prénom (Z > A)", field: "firstName.keyword", order: "desc" },
+                    { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
+                    { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
+                  ]}
+                  selectedFilters={selectedFilters}
+                  paramData={paramData}
+                  setParamData={setParamData}
+                />
+              </div>
+              <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+                <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+                <SelectedFilters
+                  filterArray={filterArray}
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                  paramData={paramData}
+                  setParamData={setParamData}
+                />
+              </div>
+
+              <ResultTable
+                paramData={paramData}
+                setParamData={setParamData}
+                currentEntryOnPage={data?.length}
+                size={size}
+                setSize={setSize}
+                render={
+                  <table className="mt-6 mb-2 flex w-full flex-col divide-y table-auto divide-gray-100 border-gray-100">
+                    <thead>
+                      <tr className="flex items-center py-3 px-4 text-xs font-[500] leading-5 uppercase text-gray-500 bg-gray-50 cursor-default">
+                        <span className="w-[35%]">Élèves</span>
+                        <span className="w-[20%]">Cohortes</span>
+                        <span className="w-[20%]">Classes</span>
+                        <span className="w-[20%]">Statuts</span>
+                        <span className="w-[5%]">Actions</span>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.map((hit) => (
+                        <Hit key={hit._id} hit={hit} />
+                      ))}
+                    </tbody>
+                    <tr className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 bg-gray-50">
+                      <span className="w-[35%]">Élèves</span>
+                      <span className="w-[20%]">Cohortes</span>
+                      <span className="w-[20%]">Classes</span>
+                      <span className="w-[20%]">Statuts</span>
+                      <span className="w-[5%]">Actions</span>
+                    </tr>
+                  </table>
+                }
+              />
+            </div>
+          </Container>
+        </>
+      )}
     </Page>
   );
 }
