@@ -1082,7 +1082,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     // Populate les référents de classe avec leur établissement et leurs classes
     if (referent.role === ROLES.REFERENT_CLASSE) {
       const classes = await ClasseModel.find({ referentClasseIds: referent._id }).lean();
-      if (!classes) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!classes?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       referent.classe = classes;
 
       const etablissement = await EtablissementModel.findById(classes[0].etablissementId).lean();
