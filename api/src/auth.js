@@ -155,7 +155,7 @@ class Auth {
       }
 
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, {
-        expiresIn: JWT_SIGNIN_MAX_AGE_S_MS,
+        expiresIn: JWT_SIGNIN_MAX_AGE_S,
       });
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
