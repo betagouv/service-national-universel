@@ -40,6 +40,13 @@ async function populateApplications(applications, exportFields) {
     applications = applications.map((item) => ({ ...item, structure: serializedStructures.find((e) => e._id === item.structureId) || {} }));
   }
 
+  if (exportFields.includes("youngId")) {
+    const youngIds = [...new Set(applications.map((item) => item.youngId))].filter(Boolean);
+    const youngs = await allRecords("young", { bool: { must: { ids: { values: youngIds } } } });
+    const serializedYoungs = youngs.length ? serializeYoungs(youngs) : [];
+    applications = applications.map((item) => ({ ...item, young: serializedYoungs.find((e) => e._id === item.youngId) || {} }));
+  }
+
   return applications;
 }
 
