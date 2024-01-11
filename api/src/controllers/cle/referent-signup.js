@@ -93,7 +93,7 @@ router.put("/request-confirmation-email", async (req, res) => {
 router.post("/confirm-email", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      code: Joi.string().required(),
+      code: Joi.string().required().trim(),
       invitationToken: Joi.string().required(),
     })
       .unknown()
