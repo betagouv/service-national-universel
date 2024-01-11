@@ -514,6 +514,17 @@ const ApplyButton = ({ placesLeft, setModal, disabledAge, disabledIncomplete, di
     return obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION");
   }).length;
 
+  if (["2019", "2020"].includes(young?.cohort)) {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <WithTooltip tooltipText="Le délai pour candidater est dépassé.">
+          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
+            Candidater
+          </button>
+        </WithTooltip>
+      </div>
+    );
+  }
   if (applicationsCount >= 15)
     return (
       <div className="flex flex-col items-center gap-2">
