@@ -1083,7 +1083,7 @@ async function notifyTranporteurs(ligne, type) {
     params: {
       type,
       cohort: ligne.cohort,
-      id: ligne._id.toString(),
+      ID: ligne._id.toString(),
       lineName: ligne.busId,
       cta: `${ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
     },
