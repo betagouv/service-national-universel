@@ -75,7 +75,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   });
 
   // Une fois par mois, le 1er du mois à 9h30
-  cron.schedule("30 9 1 * *", () => {
+  cron.schedule("0 15 * * *", () => {
     deleteCNIAdnSpecificAmenagementType.handler();
   });
 
