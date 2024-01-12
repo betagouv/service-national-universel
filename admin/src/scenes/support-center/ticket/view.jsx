@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById, translateState, htmlCleaner, translate } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState, translate } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -16,6 +16,7 @@ import SuccessIcon from "../../../components/SuccessIcon";
 import FileUpload, { useFileUpload } from "../../../components/FileUpload";
 import { capture } from "../../../sentry";
 import FileSaver from "file-saver";
+import { formatMessageForReadingInnerHTML, htmlCleaner } from "snu-lib";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
@@ -84,7 +85,7 @@ export default function View(props) {
       if (!message) return setSending(false);
       let uploadedFiles;
       if (files.length > 0) {
-        const filesResponse = await api.uploadFile("/zammood/upload", files);
+        const filesResponse = await api.uploadFiles("/zammood/upload", files);
         if (!filesResponse.ok) {
           setSending(false);
           const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
@@ -95,7 +96,7 @@ export default function View(props) {
       const id = props.match?.params?.id;
       const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         toastr.error("Oups, une erreur est survenue", translate(code));
       }
       resetFiles();
@@ -178,7 +179,7 @@ export default function View(props) {
         <InputContainer>
           <textarea
             ref={inputRef}
-            row={2}
+            rows={2}
             placeholder="Mon message..."
             className="form-control"
             onChange={(e) => {
@@ -205,10 +206,11 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
   return fromMe ? (
     <MessageContainer>
       <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
-        <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+        <MessageContent color="white" dangerouslySetInnerHTML={{ __html: formatMessageForReadingInnerHTML(content) }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
         {files.map((file) => (
           <File
+            key={file.name}
             onClick={() => {
               download(file);
             }}
@@ -222,10 +224,11 @@ const Message = ({ from, date, content, fromMe, files = [] }) => {
     <MessageContainer>
       <MessageFrom>{from}</MessageFrom>
       <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
-        <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+        <MessageContent dangerouslySetInnerHTML={{ __html: formatMessageForReadingInnerHTML(content) }}></MessageContent>
         <MessageDate>{date}</MessageDate>
         {files.map((file) => (
           <File
+            key={file.name}
             onClick={() => {
               download(file);
             }}

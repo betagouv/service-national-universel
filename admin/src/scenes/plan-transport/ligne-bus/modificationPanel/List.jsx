@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -97,7 +97,7 @@ export default function List({ open, setOpen, busId }) {
                       {getInitials(modification?.requestUserName)}
                     </div>
                     <div className="text-xs text-gray-800">
-                      {modification?.requestUserName}, {dayjs(modification.createdAt).locale("fr").format("DD/MM/YYYY • HH:mm")}
+                      {modification?.requestUserName}, {dayjs(modification.createdAt).format("DD/MM/YYYY • HH:mm")}
                     </div>
                   </div>
                 </div>

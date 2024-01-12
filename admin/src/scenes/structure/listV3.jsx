@@ -13,6 +13,7 @@ import { BsDownload } from "react-icons/bs";
 import { corpsEnUniforme } from "../../utils";
 import Badge from "../../components/Badge";
 import { structureExportFields } from "snu-lib/excelExports";
+import { transformExistingField } from "@/components/filters-system-v2/components/filters/utils";
 
 export default function ListV3() {
   const user = useSelector((state) => state.Auth.user);
@@ -50,6 +51,7 @@ const ListStructure = () => {
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({ page: 0 });
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [size, setSize] = useState(10);
 
   const filterArray = [
     {
@@ -69,6 +71,7 @@ const ListStructure = () => {
       title: "Statut juridique",
       name: "legalStatus",
       missingLabel: "Non renseignée",
+      translate,
     },
     {
       title: "Type",
@@ -82,6 +85,13 @@ const ListStructure = () => {
     },
     {
       title: "Affiliation à un réseau national",
+      name: "networkExist",
+      missingLabel: "Non renseignée",
+      transformData: transformExistingField,
+      translate,
+    },
+    {
+      title: "Réseau national d'affiliation",
       name: "networkName",
       missingLabel: "Non renseignée",
     },
@@ -100,7 +110,7 @@ const ListStructure = () => {
   ];
 
   return (
-    <div className="flex-column flex-1 flex-wrap bg-white">
+    <div className="flex-column flex-1 flex-wrap bg-white mb-4 rounded-xl">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
@@ -113,6 +123,7 @@ const ListStructure = () => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <button className="ml-auto flex items-center gap-2 rounded-lg border-[1px] border-gray-300 px-3 text-sm hover:bg-gray-100" onClick={() => setIsExportOpen(true)}>
             <BsDownload className="text-gray-400" />
@@ -129,6 +140,8 @@ const ListStructure = () => {
         paramData={paramData}
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="mt-6 mb-2 flex w-full flex-col gap-1">
             <hr />

@@ -1,29 +1,33 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BsChevronDown } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { ROLES } from "snu-lib";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import { SubTitle, Title } from "../components/commons";
+import { Loading, SubTitle, Title } from "../components/commons";
 import Select from "../components/Select";
 import { InTable } from "./components/InTable";
 import { OutTable } from "./components/OutTable";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function Regional() {
+  const [cohortList, setCohortList] = useState([]);
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
   const region = urlParams.get("region");
   useDocumentTitle(`Table de répartition - ${region}`);
   const [cohort, setCohort] = React.useState(urlParams.get("cohort"));
-  const cohortList = [
-    { label: "Séjour du <b>19 Février au 3 Mars 2023</b>", value: "Février 2023 - C" },
-    { label: "Séjour du <b>9 au 21 Avril 2023</b>", value: "Avril 2023 - A" },
-    { label: "Séjour du <b>16 au 28 Avril 2023</b>", value: "Avril 2023 - B" },
-    { label: "Séjour du <b>11 au 23 Juin 2023</b>", value: "Juin 2023" },
-    { label: "Séjour du <b>4 au 16 Juillet 2023</b>", value: "Juillet 2023" },
-  ];
 
-  const [openReverseView, setOpenReverseView] = React.useState(false);
+  const [openReverseView, setOpenReverseView] = useState(false);
+
+  useEffect(() => {
+    const cohortList = getCohortSelectOptions(cohorts);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[0].value);
+  }, []);
+
+  if (!cohort) return <Loading />;
 
   return (
     <>

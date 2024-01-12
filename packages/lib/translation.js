@@ -2,6 +2,8 @@ import { regionsListDROMS } from "./region-and-departments";
 
 const translate = (value) => {
   switch (value) {
+    case "WAITING_REALISATION":
+      return "En attente de réalisation";
     case "NONE":
       return "Aucun";
     case "AFFECTED":
@@ -29,6 +31,8 @@ const translate = (value) => {
     case "VALIDATED":
       return "Validée";
     case "DELETED":
+      return "Supprimée";
+    case "deleted":
       return "Supprimée";
     case "WAITING_LIST":
       return "Sur liste complémentaire";
@@ -122,6 +126,10 @@ const translate = (value) => {
       return "Responsable";
     case "head_center":
       return "Chef de centre";
+    case "administrateur_cle":
+      return "Administrateur CLE";
+    case "referent_classe":
+      return "Référent de classe";
     case "visitor":
       return "Visiteur";
     case "supervisor":
@@ -154,6 +162,10 @@ const translate = (value) => {
       return "Secrétaire général d'académie (SGA)";
     case "drajes":
       return "Délégué régional académique à la jeunesse, à l'engagement et aux sports (DRAJES)";
+    case "referent_etablissement":
+      return "Chef d'établissement";
+    case "coordinateur_cle":
+      return "Coordinateur d'établissement";
     case "INSCRIPTION":
       return "Inscription";
     case "COHESION_STAY":
@@ -234,6 +246,8 @@ const translate = (value) => {
       return "Ressource introuvable";
     case "PASSWORD_TOKEN_EXPIRED_OR_INVALID":
       return "Lien expiré ou token invalide";
+    case "EMAIL_VALIDATION_TOKEN_EXPIRED_OR_INVALID":
+      return "Le code d'activation saisi n'est pas valide ou a expiré";
     case "USER_ALREADY_REGISTERED":
       return "Utilisateur déjà inscrit";
     case "PASSWORD_NOT_VALIDATED":
@@ -266,8 +280,6 @@ const translate = (value) => {
       return "Motorisé";
     case "CARPOOLING":
       return "Covoiturage";
-    case "WAITING_REALISATION":
-      return "En attente de réalisation";
     case "PUBLIC_TRANSPORT":
       return "Transport en commun";
     case "IN_COMING":
@@ -293,11 +305,13 @@ const translate = (value) => {
     case "EMAIL_OR_PASSWORD_INVALID":
       return "Email ou mot de passe invalide";
     case "PASSWORD_INVALID":
-      return "Mot de passe invalide";
+      return "Le mot de passe est incorrect";
     case "EMAIL_INVALID":
       return "Email invalide";
     case "EMAIL_ALREADY_USED":
       return "Cette adresse e-mail est déjà utilisée";
+    case "EMAIL_UNCHANGED":
+      return "L'adresse e-mail est indentique à l'actuelle";
     case "EMAIL_AND_PASSWORD_REQUIRED":
       return "Email et mot de passe requis";
     case "PASSWORD_NOT_MATCH":
@@ -320,8 +334,12 @@ const translate = (value) => {
       return "Votre demande n'a pas pu être prise en compte";
     case "COPIED_TO_CLIPBOARD":
       return "Copié dans le presse-papiers";
+    case "EMAIL_WAITING_VALIDATION":
+      return "Email en attente de validation";
     case "COORDONNEES":
       return "Coordonnées";
+    case "CONSENTEMENTS":
+      return "Consentements";
     case "REPRESENTANTS":
       return "Représentants";
     case "DOCUMENTS":
@@ -332,6 +350,14 @@ const translate = (value) => {
       return "De leur établissement";
     case "mobilityNearRelative":
       return "De l'hébergement d'un proche";
+    case "N/A":
+      return "Non renseigné";
+    case "INSCRIPTION_IN_PROGRESS":
+      return "Inscription en cours";
+    case "INSCRIPTION_TO_CHECK":
+      return "Inscription à vérifier";
+    case "CREATED":
+      return "Créée";
     default:
       return value;
   }
@@ -401,57 +427,6 @@ const translateState = (state) => {
       return "en attente";
     default:
       return state;
-  }
-};
-
-const translateCohort = (cohort) => {
-  switch (cohort) {
-    case "Février 2022":
-      return "du 13 au 25 Février 2022";
-    case "Juin 2022":
-      return "du 12 au 24 Juin 2022";
-    case "Juillet 2022":
-      return "du 3 au 15 Juillet 2022";
-    case "Février 2023 - C":
-      return "du 19 Février au 3 Mars 2023";
-    case "Avril 2023 - B":
-      return "du 16 au 28 Avril 2023";
-    case "Avril 2023 - A":
-      return "du 9 au 21 Avril 2023";
-    case "Juin 2023":
-      return "du 11 au 23 Juin 2023";
-    case "Juillet 2023":
-      return "du 4 au 16 Juillet 2023";
-    default:
-      return cohort;
-  }
-};
-
-const translateCohortTemp = (young) => {
-  const { cohort } = young;
-
-  switch (cohort) {
-    case "Février 2022":
-      return "du 13 au 25 Février 2022";
-    case "Juin 2022":
-      return "du 12 au 24 Juin 2022";
-    case "Juillet 2022":
-      return "du 3 au 15 Juillet 2022";
-    case "Février 2023 - C":
-      return "du 19 Février au 3 Mars 2023";
-    case "Avril 2023 - B":
-      return "du 16 au 28 Avril 2023";
-    case "Avril 2023 - A":
-      return "du 9 au 21 Avril 2023";
-    case "Juin 2023":
-      return "du 11 au 23 Juin 2023";
-    case "Juillet 2023":
-      if ([...regionsListDROMS, "Polynésie française"].includes(young.region)) {
-        return "du 4 au 16 Juillet 2023";
-      }
-      return "du 5 au 17 Juillet 2023";
-    default:
-      return cohort;
   }
 };
 
@@ -858,6 +833,8 @@ const translateField = (field) => {
       return "Email";
     case "phone":
       return "Téléphone";
+    case "frenchNationality":
+      return "Nationalité";
     case "birthdateAt":
       return "Date de naissance";
     case "birthCountry":
@@ -994,6 +971,9 @@ const translateField = (field) => {
       return "Pièce d'identité";
     case "latestCNIFileExpirationDate":
       return "Date d'expiration de la pièce d'identité";
+    case "latestCNIFileCategory":
+      return "Type de pièce d'identité";
+
     default:
       return field;
   }
@@ -1096,6 +1076,63 @@ const translateCniExpired = (cniExpired) => {
   }
 };
 
+const translateEtbalissementSector = (sector) => {
+  switch (sector) {
+    case "pro":
+      return "Professionnel";
+    case "gen":
+      return "Général";
+    default:
+      return sector;
+  }
+};
+
+const translateColoration = (coloration) => {
+  switch (coloration) {
+    case "SPORT":
+      return "Sport";
+    case "ENVIRONMENT":
+      return "Environnement";
+    case "DEFENSE":
+      return "Défense";
+    case "RESILIENCE":
+      return "Résilience";
+    default:
+      return coloration;
+  }
+};
+
+const translateYoungSource = (source) => {
+  switch (source) {
+    case "CLE":
+      return "CLE";
+    case "VOLONTAIRE":
+      return "Volontaire";
+
+    default:
+      return source;
+  }
+};
+
+const translateStatusClasse = (status) => {
+  switch (status) {
+    case "WITHDRAWN":
+      return "Désistée";
+    case "DRAFT":
+      return "Brouillon";
+    case "CREATED":
+      return "Créée";
+    case "INSCRIPTION_IN_PROGRESS":
+      return "Inscription en cours";
+    case "INSCRIPTION_TO_CHECK":
+      return "Inscription à valider";
+    case "VALIDATED":
+      return "Classe validée";
+    default:
+      return status;
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé pour traduire l'historique des plans de transport
 
@@ -1166,8 +1203,6 @@ function translateBusPatchesField(path) {
 export {
   translate,
   translateState,
-  translateCohort,
-  translateCohortTemp,
   translateSessionStatus,
   translatePhase1,
   translateContractStatus,
@@ -1195,12 +1230,14 @@ export {
   translateBusPatchesField,
   translateInscriptionStatus,
   translateCniExpired,
+  translateEtbalissementSector,
+  translateColoration,
+  translateYoungSource,
+  translateStatusClasse,
 };
 export default {
   translate,
   translateState,
-  translateCohort,
-  translateCohortTemp,
   translateSessionStatus,
   translatePhase1,
   translateContractStatus,
@@ -1228,4 +1265,8 @@ export default {
   translateBusPatchesField,
   translateInscriptionStatus,
   translateCniExpired,
+  translateEtbalissementSector,
+  translateColoration,
+  translateYoungSource,
+  translateStatusClasse,
 };

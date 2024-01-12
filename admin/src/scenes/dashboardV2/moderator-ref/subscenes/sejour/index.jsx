@@ -1,43 +1,44 @@
+import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
+import api from "@/services/api";
+import plausibleEvent from "@/services/plausible";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
-  academyList,
-  COHORTS,
-  departmentToAcademy,
-  ES_NO_LIMIT,
-  region2department,
-  regionList,
+  getCohortNames,
   ROLES,
-  translateInscriptionStatus,
-  translatePhase1,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
+  academyList,
+  departmentToAcademy,
+  region2department,
+  regionList,
+  translateInscriptionStatus,
+  translatePhase1,
 } from "snu-lib";
-import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
-import api from "../../../../../services/api";
-import plausibleEvent from "../../../../../services/plausible";
-import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
-import BoxWithPercentage from "./components/BoxWithPercentage";
+import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
+import BoxWithPercentage from "../../../components/sejour/BoxWithPercentage";
 import CardCenterCapacity from "./components/CardCenterCapacity";
 import MoreInfo from "./components/MoreInfo";
 import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
-import Presences from "./components/Presences";
-import StatusPhase1 from "./components/StatusPhase1";
+import Presences from "../../../components/sejour/Presences";
+import StatusPhase1 from "../../../components/sejour/StatusPhase1";
 import TabSession from "./components/TabSession";
-import { getLink as getOldLink } from "../../../../../utils";
-import { getNewLink } from "../../../../../utils";
-import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
+import { getCohortNameList } from "@/services/cohort.service";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
 
   //useStates
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
     statusPhase1: [YOUNG_STATUS_PHASE1.AFFECTED],
-    cohorts: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
+    cohort: [],
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     department: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
     academy: [],
@@ -45,13 +46,14 @@ export default function Index() {
   const [filterArray, setFilterArray] = useState([]);
   const [data, setData] = useState({});
   const [dataCenter, setDataCenter] = useState({});
-  const [sessionList, setSessionList] = useState(null);
+  const [sessionByCenter, setSessionByCenter] = useState(null);
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
     user.role === ROLES.REFERENT_REGION
       ? [...new Set(region2department[user.region].map((d) => departmentToAcademy[d]))].map((a) => ({ key: a, label: a }))
       : academyList.map((a) => ({ key: a, label: a }));
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let filters = [
@@ -72,19 +74,19 @@ export default function Index() {
       },
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
-          id: "region",
-          name: "Région",
-          fullValue: "Toutes",
-          options: regionOptions,
-        }
+            id: "region",
+            name: "Région",
+            fullValue: "Toutes",
+            options: regionOptions,
+          }
         : null,
       ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? {
-          id: "academy",
-          name: "Académie",
-          fullValue: "Toutes",
-          options: academyOptions,
-        }
+            id: "academy",
+            name: "Académie",
+            fullValue: "Toutes",
+            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
+          }
         : null,
       {
         id: "department",
@@ -93,96 +95,45 @@ export default function Index() {
         options: departmentOptions,
       },
       {
-        id: "cohorts",
+        id: "cohort",
         name: "Cohorte",
         fullValue: "Toutes",
-        options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
+        options: getCohortNames().map((cohort) => ({ key: cohort, label: cohort })),
         sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);
   }, [departmentOptions]);
 
-  const queryYoung = async () => {
-    const { responses } = await api.post("/elasticsearch/young/moderator/sejour/", {
+  const queryCenter = async () => {
+    const { resultCenter, sessionByCenter, resultYoung } = await api.post("/elasticsearch/dashboard/sejour/moderator", {
       filters: Object.fromEntries(Object.entries(selectedFilters)),
     });
-    if (responses?.length) {
-      let result = {};
-      result.statusPhase1 = responses[0].aggregations.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.statusPhase1Total = responses[0].hits.total.value;
-      result.pdrTotal = responses[0].aggregations.pdr.doc_count;
-      result.participation = responses[0].aggregations.participation.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.participationTotal = responses[0].aggregations.participation.doc_count;
-      result.presence = responses[0].aggregations.precense.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.JDM = responses[0].aggregations.JDM.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.depart = responses[0].aggregations.depart.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      result.departTotal = responses[0].aggregations.depart.doc_count;
-      result.departMotif = responses[0].aggregations.departMotif.names.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-      setData(result);
-    }
-  };
-
-  const queryCenter = async () => {
-    const bodyCohesion = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        typology: { terms: { field: "typology.keyword", size: ES_NO_LIMIT } },
-        domains: { terms: { field: "domain.keyword", size: ES_NO_LIMIT } },
-        capacity: { sum: { field: "placesTotal" } },
-      },
-      size: ES_NO_LIMIT,
-    };
-
-    if (selectedFilters.region?.length) bodyCohesion.query.bool.filter.push({ terms: { "region.keyword": selectedFilters.region } });
-    if (selectedFilters.department?.length) bodyCohesion.query.bool.filter.push({ terms: { "department.keyword": selectedFilters.department } });
-    if (selectedFilters.academy?.length) bodyCohesion.query.bool.filter.push({ terms: { "academy.keyword": selectedFilters.academy } });
-    if (selectedFilters.cohorts?.length) bodyCohesion.query.bool.filter.push({ terms: { "cohorts.keyword": selectedFilters.cohorts } });
-
-    const { responses: responsesCohesion } = await api.esQuery("cohesioncenter", bodyCohesion);
-
-    if (!responsesCohesion.length) return;
-    let resultCenter = {};
-    resultCenter.typology = responsesCohesion[0].aggregations.typology.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-    resultCenter.domains = responsesCohesion[0].aggregations.domains.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
-    resultCenter.capacity = responsesCohesion[0].aggregations.capacity.value;
-    resultCenter.totalCenter = responsesCohesion[0].hits.total.value;
-
-    const cohesionCenterId = responsesCohesion[0].hits.hits.map((e) => e._id);
-    const bodySession = {
-      query: { bool: { must: { match_all: {} }, filter: [{ terms: { cohesionCenterId } }] } },
-      aggs: {
-        placesTotal: { sum: { field: "placesTotal" } },
-        placesLeft: { sum: { field: "placesLeft" } },
-        status: { terms: { field: "status.keyword" } },
-        timeSchedule: { terms: { field: "hasTimeSchedule.keyword" } },
-      },
-      size: ES_NO_LIMIT,
-    };
-
-    if (selectedFilters.cohorts?.length) bodySession.query.bool.filter.push({ terms: { "cohort.keyword": selectedFilters.cohorts } });
-    const { responses: responsesSession } = await api.esQuery("sessionphase1", bodySession);
-    if (responsesSession.length) {
-      setSessionList(responsesSession[0].hits.hits.map((e) => ({ ...e._source, _id: e._id })));
-      resultCenter.placesTotalSession = responsesSession[0].aggregations.placesTotal.value;
-      resultCenter.placesLeftSession = responsesSession[0].aggregations.placesLeft.value;
-      resultCenter.status = responsesSession[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
-      resultCenter.timeSchedule = responsesSession[0].aggregations.timeSchedule.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {});
-      resultCenter.totalSession = responsesSession[0].hits.total.value;
-    }
     setDataCenter(resultCenter);
+    setSessionByCenter(sessionByCenter);
+    setData(resultYoung);
   };
 
   useEffect(() => {
-    queryYoung();
+    if (isLoading) return;
     queryCenter();
     if (user.role === ROLES.REFERENT_DEPARTMENT) getDepartmentOptions(user, setDepartmentOptions);
     else getFilteredDepartment(setSelectedFilters, selectedFilters, setDepartmentOptions, user);
   }, [JSON.stringify(selectedFilters)]);
+
+  useEffect(() => {
+    //regex to get all cohort 2024
+    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
+    setSelectedFilters({ ...selectedFilters, cohort: cohortsFilters });
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) return null;
+
   return (
     <DashboardContainer
       active="sejour"
-      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
+      availableTab={["general", "engagement", "sejour", "inscription"]}
       navChildren={
         <div className="flex items-center gap-2">
           <ButtonPrimary
@@ -205,14 +156,14 @@ export default function Index() {
               number={data?.pdr?.NR + data?.pdr?.false || 0}
               title="Point de rassemblement"
               subLabel="restants à confirmer"
-              redirect={getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['MEETING_INFO=%5B"false"%5D'] })}
+              redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ hasMeetingInformation: "false" })] })}
             />
             <BoxWithPercentage
               total={data?.participationTotal || 0}
               number={data?.participation?.false || 0}
               title="Participation"
               subLabel="restants à confirmer"
-              redirect={getOldLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: ['COHESION_PARTICIPATION=%5B"false"%5D'] })}
+              redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ youngPhase1Agreement: "false" })] })}
             />
           </div>
           <StatusPhase1 statusPhase1={data?.statusPhase1} total={data?.statusPhase1Total} filter={selectedFilters} />
@@ -236,7 +187,7 @@ export default function Index() {
         </div>
         <div className="flex gap-4">
           <MoreInfo typology={dataCenter?.typology} domains={dataCenter?.domains} filter={selectedFilters} />
-          <TabSession sessionList={sessionList} filters={selectedFilters} />
+          <TabSession sessionByCenter={sessionByCenter} filters={selectedFilters} />
         </div>
       </div>
     </DashboardContainer>

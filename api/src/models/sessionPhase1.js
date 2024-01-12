@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
+const { getCohortNames } = require("snu-lib");
 const esClient = require("../es");
 const MODELNAME = "sessionphase1";
 const { ENVIRONMENT } = require("../config");
+const { starify } = require("../utils/anonymise");
 
 const File = new mongoose.Schema({
   _id: String,
@@ -22,7 +24,7 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021", "2020", "2019", "Juillet 2023", "Juin 2023", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A"],
+    enum: getCohortNames(true, false, true),
     documentation: {
       description: "Cohorte",
     },
@@ -133,6 +135,21 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  pedagoProjectFiles: {
+    type: [File],
+    documentation: {
+      description: "Fichiers du projet pédagogique",
+    },
+  },
+  hasPedagoProject: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La session possède au moins 1 fichier de projet pédagogique.",
+    },
+  },
+
   dateStart: {
     type: Date,
     documentation: {
@@ -160,6 +177,30 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.methods.anonymise = function () {
+  this.zipCenter && (this.zipCenter = starify(this.zipCenter));
+  this.codeCenter && (this.codeCenter = starify(this.codeCenter));
+  this.centerName && (this.centerName = starify(this.centerName));
+  this.cityCenter && (this.cityCenter = starify(this.cityCenter));
+  if (!["VALIDATED", "WAITING_VALIDATION"].includes(this.status)) this.status = "WAITING_VALIDATION";
+  this.team &&
+    (this.team = this.team.map((member) => {
+      member.firstName && (member.firstName = starify(member.firstName));
+      member.lastName && (member.lastName = starify(member.lastName));
+      member.email && (member.email = starify(member.email));
+      member.phone && (member.phone = starify(member.phone));
+      return member;
+    }));
+  return this;
+};
+
+Schema.virtual("cohesionCenter", {
+  ref: "cohesioncenter",
+  localField: "cohesionCenterId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
@@ -170,6 +211,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
   this.updatedAt = Date.now();
+
   next();
 });
 

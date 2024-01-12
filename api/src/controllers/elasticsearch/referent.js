@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch, department2region, departmentList, COHORTS, ES_NO_LIMIT } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, department2region, departmentList, getCohortNames, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
@@ -10,6 +10,8 @@ const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const StructureObject = require("../../models/structure");
 const Joi = require("joi");
 const { serializeReferents } = require("../../utils/es-serializer");
+const EtablissementModel = require("../../models/cle/etablissement");
+const ClasseModel = require("../../models/cle/classe");
 
 async function buildReferentContext(user) {
   const contextFilters = [];
@@ -38,7 +40,19 @@ async function buildReferentContext(user) {
     contextFilters.push({
       bool: {
         should: [
-          { terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.REFERENT_REGION] } },
+          {
+            terms: {
+              "role.keyword": [
+                ROLES.REFERENT_DEPARTMENT,
+                ROLES.SUPERVISOR,
+                ROLES.RESPONSIBLE,
+                ROLES.HEAD_CENTER,
+                ROLES.REFERENT_REGION,
+                ROLES.REFERENT_CLASSE,
+                ROLES.ADMINISTRATEUR_CLE,
+              ],
+            },
+          },
           { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "department.keyword": user.department } }] } },
         ],
       },
@@ -48,7 +62,7 @@ async function buildReferentContext(user) {
     contextFilters.push({
       bool: {
         should: [
-          { terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER] } },
+          { terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE] } },
           { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "region.keyword": user.region } }] } },
           { bool: { must: [{ term: { "role.keyword": ROLES.VISITOR } }, { term: { "region.keyword": user.region } }] } },
         ],
@@ -63,6 +77,48 @@ async function buildReferentContext(user) {
     });
   }
 
+  if (user.role === ROLES.ADMINISTRATEUR_CLE) {
+    /*
+      Can see:
+      - all referents dep of the department of his etablissement
+      - all ref ADMIN CLE of his etablissement
+      - all ref Classe of his etablissement
+    */
+    const refIds = [];
+    const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
+    if (!etablissement) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id });
+    refIds.push(...classes.flatMap((c) => c.referentClasseIds), ...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds);
+    contextFilters.push({
+      bool: {
+        should: [
+          { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "department.keyword": etablissement.department } }] } },
+          { bool: { must: { ids: { values: refIds } } } },
+        ],
+      },
+    });
+  }
+
+  if (user.role === ROLES.REFERENT_CLASSE) {
+    /*
+      Can see:
+      - all referents dep of the department of his etablissement
+      - all ref ADMIN CLE of his etablissement
+      - all ref Classe of his etablissement and all ref of hiis departement
+    */
+    const classes = await ClasseModel.findOne({ referentClasseIds: user._id });
+    if (!classes) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const etablissement = await EtablissementModel.findOne({ _id: classes.etablissementId });
+    const refIds = [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds];
+    contextFilters.push({
+      bool: {
+        should: [
+          { bool: { must: [{ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE] } }, { term: { "department.keyword": etablissement.department } }] } },
+          { bool: { must: { ids: { values: refIds } } } },
+        ],
+      },
+    });
+  }
   return { referentContextFilters: contextFilters };
 }
 
@@ -73,9 +129,9 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
     const searchFields = ["email", "firstName", "lastName"];
     const filterFields = ["role.keyword", "subRole.keyword", "region.keyword", "department.keyword"];
     const sortFields = [];
-
+    const size = body.syze;
     // Authorization
-    if (!canSearchInElasticSearch(user, "referent")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
@@ -104,7 +160,7 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
       }
     }
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     if (req.params.action === "export") {
       const response = await allRecords("referent", hitsRequestBody.query);
@@ -124,14 +180,14 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     const { user, body } = req;
     // Configuration
     const searchFields = ["email.keyword", "firstName.folded", "lastName.folded"];
-    const filterFields = ["role.keyword", "subRole.keyword", "region.keyword", "department.keyword", "cohorts.keyword"];
+    const filterFields = ["role.keyword", "subRole.keyword", "region.keyword", "department.keyword", "cohorts.keyword", "structureId.keyword"];
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt", "lastLoginAt"];
 
     // Authorization
-    if (!canSearchInElasticSearch(user, "referent")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     //Query params validation
@@ -139,7 +195,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       cohort: Joi.string()
         .trim()
         .allow(null)
-        .valid(...COHORTS),
+        .valid(...getCohortNames()),
     }).validate(req.query, { stripUnknown: true });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -163,7 +219,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         : null,
     ].filter(Boolean);
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
 
     if (req.params.action === "export") {
       const response = await allRecords("referent", hitsRequestBody.query);
@@ -180,7 +236,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
 router.post("/structure/:structure", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    if (!canSearchInElasticSearch(req.user, "referent")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const response = await esClient.msearch({
       index: "referent",

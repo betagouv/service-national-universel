@@ -7,15 +7,12 @@ const Joi = require("joi");
 const { canSendPlanDeTransport, MIME_TYPES, PDT_IMPORT_ERRORS, departmentLookUp } = require("snu-lib");
 const FileType = require("file-type");
 const fs = require("fs");
-const config = require("../../config");
 const { parse: parseDate } = require("date-fns");
-const NodeClam = require("clamscan");
 const XLSX = require("xlsx");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const PdrModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const SchemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPlanTransport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../../models/sessionPhase1");
@@ -69,31 +66,16 @@ router.post(
       const file = files[0];
 
       if (!canSendPlanDeTransport(req.user)) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      const { name, tempFilePath, mimetype } = file;
+      const { tempFilePath, mimetype } = file;
       const filetype = await FileType.fromFile(tempFilePath);
       const mimeFromMagicNumbers = filetype ? filetype.mime : MIME_TYPES.EXCEL;
       const validTypes = [MIME_TYPES.EXCEL];
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
-      }
-
-      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-        try {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            capture(`File ${name} of user(${req.user.id})is infected`);
-            return res.status(418).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          }
-        } catch {
-          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
-        }
       }
 
       const workbook = XLSX.readFile(tempFilePath);
@@ -367,26 +349,13 @@ router.post(
         }
       }
 
-      // Volume errors.
-      // Check if the sum of "CAPACITÉ VOLONTAIRE TOTALE" group by "ID CENTRE" is superior or equal to SchemaRepartitionModel sum for a cohort and a center
+      // Count total unique centers
       const centers = lines.reduce((acc, line) => {
         if (line["ID CENTRE"]) {
           acc[line["ID CENTRE"]] = (acc[line["ID CENTRE"]] || 0) + parseInt(line["CAPACITÉ VOLONTAIRE TOTALE"]);
         }
         return acc;
       }, {});
-      for (const [centerId, total] of Object.entries(centers)) {
-        const groups = await SchemaRepartitionModel.find({ cohort, center: centerId });
-        const sum = groups.reduce((acc, group) => acc + group.youngsVolume, 0);
-        if (total < sum) {
-          for (const [i, line] of lines.entries()) {
-            const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
-            if (line["ID CENTRE"] === centerId) {
-              errors["CAPACITÉ VOLONTAIRE TOTALE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_VOLUME });
-            }
-          }
-        }
-      }
 
       const hasError = Object.values(errors).some((error) => error.length > 0);
 
@@ -432,7 +401,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     }
 
     if (!canSendPlanDeTransport(req.user)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const lines = importData.lines;
@@ -569,7 +538,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
   }
 });
 
-// Add one hour to departure hour
+// Remove 30 mins to departure hour
 function getPDRMeetingHour(departureHour) {
   const [hour, minute] = departureHour.split(":");
   const date = new Date();
@@ -577,7 +546,7 @@ function getPDRMeetingHour(departureHour) {
   date.setMinutes(minute);
   date.setSeconds(0);
   date.setMilliseconds(0);
-  date.setHours(date.getHours() - 1);
+  date.setMinutes(date.getMinutes() - 30); // Subtract 30 minutes
   let meetingHour = date.toTimeString().split(" ")[0];
   meetingHour = meetingHour.substring(0, meetingHour.length - 3);
   return meetingHour;

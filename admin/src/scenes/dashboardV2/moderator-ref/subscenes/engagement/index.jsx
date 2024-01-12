@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
-import { COHORTS, departmentList, regionList, ROLES, translateInscriptionStatus } from "snu-lib";
+import { getCohortNames, departmentList, regionList, ROLES, translateInscriptionStatus } from "snu-lib";
 import { YOUNG_STATUS } from "snu-lib/constants";
 import { useSelector } from "react-redux";
 import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib/academy";
@@ -15,17 +15,21 @@ import SectionMissions from "./components/SectionMissions";
 import plausibleEvent from "../../../../../services/plausible";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import ExportEngagementReport from "./components/ExportEngagementReport";
+import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
+import { getCohortNameList } from "@/services/cohort.service";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
 
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
     region: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     academy: [],
     department: user.role === ROLES.REFERENT_DEPARTMENT ? [...user.department] : [],
-    cohorts: ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023"],
+    cohorts: [],
   });
+
   const [filterArray, setFilterArray] = useState([]);
   const [departmentOptions, setDepartmentOptions] = useState([]);
 
@@ -50,7 +54,7 @@ export default function Index() {
             id: "academy",
             name: "Académie",
             fullValue: "Toutes",
-            options: academyOptions,
+            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
           }
         : null,
       {
@@ -63,8 +67,8 @@ export default function Index() {
         id: "cohorts",
         name: "Cohorte",
         fullValue: "Toutes",
-        options: COHORTS.map((cohort) => ({ key: cohort, label: cohort })),
-        sort: (e)=> orderCohort(e),
+        options: getCohortNames().map((cohort) => ({ key: cohort, label: cohort })),
+        sort: (e) => orderCohort(e),
       },
     ].filter((e) => e);
     setFilterArray(filters);
@@ -78,6 +82,11 @@ export default function Index() {
       computeFilteredDepartment();
     }
   }, [JSON.stringify(selectedFilters)]);
+
+  useEffect(() => {
+    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
+    setSelectedFilters({ ...selectedFilters, cohorts: cohortsFilters });
+  }, []);
 
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList.map((r) => ({ key: r, label: r }));
   const academyOptions =
@@ -107,7 +116,7 @@ export default function Index() {
 
   return (
     <DashboardContainer
-      availableTab={["general", "engagement", "sejour", "inscription", "analytics"]}
+      availableTab={["general", "engagement", "sejour", "inscription"]}
       active="engagement"
       navChildren={
         <div className="flex items-center gap-2">
@@ -128,6 +137,7 @@ export default function Index() {
           <VolontairesStatutsDePhase filters={selectedFilters} className="mr-4 flex-[0_0_332px]" />
           <VolontairesStatutsDivers filters={selectedFilters} className="grow" />
         </div>
+        <VolontairesEquivalenceMig filters={selectedFilters} />
       </Section>
       <SectionStructures filters={selectedFilters} />
       <SectionMissions filters={selectedFilters} />

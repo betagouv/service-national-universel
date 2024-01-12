@@ -1,20 +1,21 @@
+import plausibleEvent from "@/services/plausible";
 import queryString from "query-string";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib/date";
+import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
-import Input from "../../../components/inscription/input";
-import { setYoung } from "../../../redux/auth/actions";
-import api from "../../../services/api";
+import Input from "../../../components/dsfr/forms/input";
 import Error from "../../../components/error";
-import Footer from "../../../components/footerV2";
-import { cohortsInit } from "../../../utils/cohorts";
 import { environment } from "../../../config";
-import { Link } from "react-router-dom";
+import { setYoung } from "../../../redux/auth/actions";
+import { capture, captureMessage } from "../../../sentry";
+import api from "../../../services/api";
+import { cohortsInit } from "../../../utils/cohorts";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -23,6 +24,7 @@ export default function Signin() {
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
+  const [isInscriptionOpen, setInscriptionOpen] = React.useState(false);
   const history = useHistory();
 
   const dispatch = useDispatch();
@@ -45,10 +47,17 @@ export default function Signin() {
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
       if (young) {
-        if (redirect?.startsWith("http")) return (window.location.href = redirect);
+        plausibleEvent("Connexion réussie");
         if (token) api.setToken(token);
         dispatch(setYoung(young));
         await cohortsInit();
+        const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
+        if (!redirectionApproved) {
+          captureMessage("Invalid redirect url", { extra: { redirect } });
+          toastr.error("Url de redirection invalide : " + redirect);
+          return history.push("/");
+        }
+        return (window.location.href = redirect);
       }
     } catch (e) {
       setPassword("");
@@ -68,6 +77,22 @@ export default function Signin() {
     if (email && password) setDisabled(false);
     else setDisabled(true);
   }, [email, password]);
+
+  React.useEffect(() => {
+    const fetchInscriptionOpen = async () => {
+      try {
+        const { ok, data, code } = await api.get(`/cohort-session/isInscriptionOpen`);
+        if (!ok) {
+          capture(new Error(code));
+          return toastr.error("Oups, une erreur est survenue", code);
+        }
+        setInscriptionOpen(data);
+      } catch (e) {
+        setInscriptionOpen(false);
+      }
+    };
+    fetchInscriptionOpen();
+  }, []);
 
   return (
     <>
@@ -100,25 +125,23 @@ export default function Signin() {
         <hr className="mt-4 border-b-1 text-[#E5E5E5]" />
         <div className="mt-4 text-[#E5E5E5]">
           <div className="mt-4 mb-3 text-center text-[17px] font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
-          <p className="text-center text-base text-[#161616] mb-4">
-            Les inscriptions sont clôturées pour le premier semestre 2023. Soyez informé(e) lors de l’ouverture des prochaines inscriptions.
-          </p>
-          <a
-            className="plausible-event-name=Clic+LP+Inscription flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] p-2 text-[#000091] hover:bg-[#000091] hover:text-white"
-            href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
-            Recevoir une alerte par email
-          </a>
-
-          {environment !== "production" && (
-            <Link to="/preinscription">
-              <p className="text-blue-france-sun-113 text-center hover:underline hover:text-blue-france-sun-113 mt-4 decoration-2 underline-offset-4">
-                Pré-inscription - accès staging
-              </p>
+          {/* <p className="text-center text-base text-[#161616] mb-4">Les inscriptions sont actuellement fermées.</p> */}
+          {isInscriptionOpen ? (
+            <Link onClick={() => plausibleEvent("Connexion/Lien vers preinscription")} to="/preinscription">
+              <p className="w-full my-4 text-center p-2 text-blue-france-sun-113 border-[1px] border-blue-france-sun-113 hover:bg-blue-france-sun-113">Commencer mon inscription</p>
             </Link>
+          ) : (
+            <>
+              <p className="text-center text-base text-[#161616] mb-4">Soyez informé(e) lors de l'ouverture des prochaines inscriptions.</p>
+              <a
+                className="plausible-event-name=Clic+LP+Inscription flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] p-2 text-[#000091] hover:bg-[#000091] hover:text-white"
+                href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
+                Recevoir une alerte par email
+              </a>
+            </>
           )}
         </div>
       </div>
-      <Footer />
     </>
   );
 }

@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { COHORTS, ROLES, academyList, departmentToAcademy, getDepartmentNumber, region2department } from "snu-lib";
+import { getCohortNames, ROLES, academyList, departmentToAcademy, getDepartmentNumber, region2department } from "snu-lib";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { BsDownload } from "react-icons/bs";
 import { Title } from "../centersV2/components/commons";
@@ -12,6 +12,7 @@ export default function List() {
   const pageId = "etablissementYoung";
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
 
   const filterArray = [
     ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
@@ -31,7 +32,7 @@ export default function List() {
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       parentGroup: "Établissement",
     },
-    { title: "Cohorte", name: "cohort", parentGroup: "Volontaire", disabledBaseQuery: true, options: COHORTS.map((e) => ({ key: e })) },
+    { title: "Cohorte", name: "cohort", parentGroup: "Volontaire", disabledBaseQuery: true, options: getCohortNames().map((e) => ({ key: e })) },
     ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
       ? {
           title: "Académie",
@@ -62,6 +63,7 @@ export default function List() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
             <div>
               <ExportComponent
@@ -111,6 +113,8 @@ export default function List() {
           paramData={paramData}
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
+          size={size}
+          setSize={setSize}
           render={
             <div className="mt-6 mb-2 flex w-full flex-col border-y-[1px] border-gray-100">
               <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">

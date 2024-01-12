@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
-import { COHESION_STAY_START, COHORTS, ROLES, START_DATE_SESSION_PHASE1, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
+import { useHistory, useParams, useLocation } from "react-router-dom";
+import { COHESION_STAY_START, getCohortNames, ROLES, START_DATE_SESSION_PHASE1, canCreateMeetingPoint, getDepartmentNumber } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
 import Calendar from "../../assets/icons/Calendar";
 import ExternalLink from "../../assets/icons/ExternalLink";
@@ -22,13 +22,19 @@ export default function List() {
   const [firstSession, setFirstSession] = React.useState(null);
   const history = useHistory();
   const { currentTab } = useParams();
+  const { search } = useLocation();
+  const query = new URLSearchParams(search);
 
   const getFirstCohortAvailable = () => {
-    for (const session of COHORTS) {
+    let firstSession = null;
+    for (const session of getCohortNames()) {
       if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        return setFirstSession(session);
+        firstSession = session;
+        break;
       }
     }
+    if (!firstSession) firstSession = "Juillet 2023";
+    setFirstSession(firstSession);
   };
 
   React.useEffect(() => {
@@ -38,6 +44,11 @@ export default function List() {
 
   React.useEffect(() => {
     getFirstCohortAvailable();
+  }, []);
+
+  React.useEffect(() => {
+    const modalCreationOpen = query.get("modal_creation_open");
+    setModal({ isOpen: !!modalCreationOpen });
   }, []);
 
   if (!firstSession || !user) return <div></div>;
@@ -82,7 +93,14 @@ export default function List() {
           </div>
         </div>
       </div>
-      <ModalCreation isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
+      <ModalCreation
+        isOpen={modal.isOpen}
+        onCancel={() => {
+          setModal({ isOpen: false });
+          query.delete("modal_creation_open");
+          history.replace({ search: query.toString() });
+        }}
+      />
     </>
   );
 }
@@ -92,6 +110,7 @@ const ListPoints = ({ user }) => {
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrList";
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
@@ -105,7 +124,7 @@ const ListPoints = ({ user }) => {
   ];
 
   return (
-    <div className="flex flex-col rounded-lg bg-white">
+    <div className="flex flex-col rounded-lg bg-white mb-4">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
@@ -118,6 +137,7 @@ const ListPoints = ({ user }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <ExportComponent
             title="Exporter"
@@ -163,6 +183,8 @@ const ListPoints = ({ user }) => {
         paramData={paramData}
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="mt-6 mb-2 flex w-full flex-col">
             <hr />
@@ -223,6 +245,7 @@ const ListSessions = ({ user, firstSession }) => {
   const [selectedFilters, setSelectedFilters] = React.useState({});
   const pageId = "pdrListSession";
   const [paramData, setParamData] = React.useState({ page: 0 });
+  const [size, setSize] = useState(10);
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", isSingle: true, defaultValue: [firstSession], allowEmpty: false, sort: (e) => orderCohort(e) },
     {
@@ -278,7 +301,7 @@ const ListSessions = ({ user, firstSession }) => {
   }, [data]);
 
   return (
-    <div className="flex flex-col rounded-lg bg-white">
+    <div className="flex flex-col rounded-lg bg-white mb-4">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
@@ -291,6 +314,7 @@ const ListSessions = ({ user, firstSession }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <ExportComponent
             title="Exporter"
@@ -338,6 +362,8 @@ const ListSessions = ({ user, firstSession }) => {
         paramData={paramData}
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="mt-6 mb-2 flex w-full flex-col">
             <hr />

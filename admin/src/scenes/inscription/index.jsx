@@ -1,7 +1,5 @@
 import dayjs from "dayjs";
-import "dayjs/locale/fr";
-import relativeTime from "dayjs/plugin/relativeTime";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -10,7 +8,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { getDepartmentNumber, translateCniExpired } from "snu-lib";
+import { getDepartmentNumber, translateCniExpired, translateYoungSource } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -24,11 +22,15 @@ import { Title } from "../pointDeRassemblement/components/common";
 import { transformInscription, transformVolontairesSchool } from "../volontaires/utils";
 import DeletedInscriptionPanel from "./deletedPanel";
 import Panel from "./panel";
+import { toastr } from "react-redux-toastr";
+import Loader from "@/components/Loader";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState(null);
+  const [classes, setClasses] = useState(null);
+  const [etablissements, setEtablissements] = useState(null);
 
   //List state
   const [data, setData] = useState([]);
@@ -38,11 +40,59 @@ export default function Inscription() {
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
-  //parentAllowSNU
+  const [size, setSize] = useState(10);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
+          filters: {},
+          exportFields: ["name", "uniqueKeyAndId"],
+        });
+        const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
+          filters: {},
+          exportFields: ["name", "uai"],
+        });
+
+        setClasses(classes);
+        setEtablissements(etablissements);
+      } catch (e) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+      }
+    })();
+  }, []);
+
+  if (!classes || !etablissements) return <Loader />;
+
   const filterArray = [
-    { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
+    { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
     { title: "Autorisation de participation", name: "parentAllowSNU", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus },
+    { title: "Source", name: "source", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateYoungSource },
+    {
+      title: "Classe Engagée ID",
+      name: "classeId",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !classes.length) return item;
+        const res = classes.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.uniqueKeyAndId;
+      },
+    },
+    {
+      title: "Etablissement CLE",
+      name: "etablissementId",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !etablissements.length) return item;
+        const res = etablissements.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.name;
+      },
+    },
     { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     { title: "Académie", name: "academy", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     {
@@ -231,6 +281,7 @@ export default function Inscription() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
             <SortOption
               sortOptions={[
@@ -241,6 +292,7 @@ export default function Inscription() {
                 { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
                 { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
               ]}
+              selectedFilters={selectedFilters}
               paramData={paramData}
               setParamData={setParamData}
             />
@@ -260,6 +312,8 @@ export default function Inscription() {
             paramData={paramData}
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
+            size={size}
+            setSize={setSize}
             render={
               <table className="mt-4 mb-2 w-full table-auto font-marianne">
                 <thead>
@@ -279,7 +333,7 @@ export default function Inscription() {
                 </thead>
                 <tbody>
                   {data.map((hit, i) => (
-                    <Hit key={hit._id} hit={hit} index={i + paramData.page * 20} onClick={() => setYoung(hit)} selected={young?._id === hit._id} />
+                    <Hit key={hit._id} hit={hit} index={i + paramData.page * size} onClick={() => setYoung(hit)} selected={young?._id === hit._id} />
                   ))}
                 </tbody>
               </table>
@@ -297,15 +351,19 @@ export default function Inscription() {
 }
 
 const Hit = ({ hit, index, onClick }) => {
-  dayjs.extend(relativeTime).locale("fr");
-  const diff = dayjs(new Date(hit.updatedAt)).fromNow();
+  const diffMaj = dayjs(new Date(hit.updatedAt)).fromNow();
+  const diffCreate = dayjs(new Date(hit.createdAt)).fromNow();
 
   return (
     <tr onClick={onClick} className="border-b-[1px] border-y-gray-100 hover:bg-gray-50">
       <td className="pl-4 py-3 w-[5%] tesxt-gray-900 text-base">{index + 1}</td>
       <td className="py-3 w-[35%]">
         <span className="font-bold text-gray-900 leading-6">{hit.status !== "DELETED" ? `${hit.firstName} ${hit.lastName}` : "Compte supprimé"}</span>
-        <p className="text-sm text-gray-600 leading-5">{`Mis à jour ${diff} • ${formatStringLongDate(hit.updatedAt)}`}</p>
+        {hit.updatedAt ? (
+          <p className="text-sm text-gray-600 leading-5">{`Mis à jour ${diffMaj} • ${formatStringLongDate(hit.updatedAt)}`}</p>
+        ) : hit.createdAt ? (
+          <p className="text-sm text-gray-600 leading-5">{`Créée ${diffCreate} • ${formatStringLongDate(hit.createdAt)}`}</p>
+        ) : null}
       </td>
       <td className="text-center">
         <Badge color="#3B82F6" backgroundColor="#EFF6FF" text={hit.cohort} className={hit.status === "DELETED" ? "opacity-50" : ""} />
@@ -325,6 +383,14 @@ function classNames(...classes) {
 
 const Action = ({ hit }) => {
   const user = useSelector((state) => state.Auth.user);
+
+  const onPrendreLaPlace = async (young_id) => {
+    if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
+
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+  };
 
   return (
     <Listbox>
@@ -353,17 +419,14 @@ const Action = ({ hit }) => {
                   </Listbox.Option>
                 </Link>
                 {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
-                  <a
-                    className="!cursor-pointer"
-                    href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                    <Listbox.Option
-                      className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}>
-                      <div className={"block truncate font-normal text-xs"}>Prendre sa place</div>
-                    </Listbox.Option>
-                  </a>
+                  <Listbox.Option
+                    className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}
+                    onClick={() => {
+                      window.open(appURL, "_blank");
+                      onPrendreLaPlace(hit._id);
+                    }}>
+                    Prendre sa place
+                  </Listbox.Option>
                 ) : null}
               </Listbox.Options>
             </Transition>

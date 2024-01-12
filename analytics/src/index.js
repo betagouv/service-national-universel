@@ -1,48 +1,52 @@
-require("dotenv").config("../.env");
-const helmet = require("helmet");
-const bodyParser = require("body-parser");
-const express = require("express");
-const cors = require("cors");
-const { initSentry, capture } = require("./sentry");
+(async () => {
+  await require("./env-manager")();
 
-const { PORT } = require("./config.js");
+  const helmet = require("helmet");
+  const bodyParser = require("body-parser");
+  const express = require("express");
+  const cors = require("cors");
+  const { initSentry, capture } = require("./sentry");
+  const { PORT } = require("./config.js");
 
-const app = express();
+  const app = express();
 
-const registerSentryErrorHandler = initSentry(app);
+  const registerSentryErrorHandler = initSentry(app);
 
-app.use(helmet());
-app.use(helmet.hsts({ maxAge: 5184000 }));
+  app.use(helmet());
+  app.use(helmet.hsts({ maxAge: 5184000 }));
 
-// @todo: can it be removed?
-const origin = ["http://localhost:8085"];
-app.use(cors({ credentials: true, origin }));
-app.use(bodyParser.json({ limit: "50mb" }));
-app.use(bodyParser.text({ type: "application/x-ndjson" }));
-app.use(bodyParser.urlencoded({ extended: true }));
+  require("./crons");
+  require("./services/databases/redis.service");
 
-app.use("/log", require("./controllers/log"));
-app.use("/stats", require("./controllers/stats"));
-app.use("/auth", require("./controllers/auth"));
+  // @todo: can it be removed?
+  const origin = ["http://localhost:8085"];
+  app.use(cors({ credentials: true, origin }));
+  app.use(bodyParser.json({ limit: "50mb" }));
+  app.use(bodyParser.text({ type: "application/x-ndjson" }));
+  app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get("/", async (req, res) => {
-  try {
-    res.status(200).send("OK");
-  } catch (error) {
-    console.log("Error ", error);
-    capture(error);
-  }
-});
+  app.use("/", require("./controllers/health.controller"));
+  app.use("/auth", require("./controllers/auth.controller"));
+  app.use("/log", require("./controllers/log.controller"));
+  app.use("/stats", require("./controllers/stats.controller"));
 
-app.get("/testsentry", async (req, res) => {
-  try {
-    throw new Error("Intentional error");
-  } catch (error) {
-    console.log("Error ");
-    capture(error);
-  }
-});
+  app.get("/", async (req, res) => {
+    try {
+      res.status(200).send("OK");
+    } catch (error) {
+      capture(error);
+    }
+  });
 
-registerSentryErrorHandler();
+  app.get("/testsentry", async () => {
+    try {
+      throw new Error("Intentional error");
+    } catch (error) {
+      capture(error);
+    }
+  });
 
-app.listen(PORT, () => console.log("Listening on port " + PORT));
+  registerSentryErrorHandler();
+
+  app.listen(PORT, () => console.info("Listening on port " + PORT));
+})();

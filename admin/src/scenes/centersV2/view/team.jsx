@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory, Link, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
-import { useParams } from "react-router";
 import validator from "validator";
 
 import { CENTER_ROLES, ROLES, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
@@ -167,7 +166,7 @@ const ChefCenterBlock = ({ headCenterId }) => {
     (async () => {
       const { ok, data, code } = await api.get(`/referent/${headCenterId}`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       setChefCenter(data);
@@ -183,8 +182,18 @@ const ChefCenterBlock = ({ headCenterId }) => {
       <Wrapper gridTemplateColumns="120px auto" style={{ marginBlock: "1rem" }}>
         <b>E-mail :</b>
         <p style={{ margin: 0 }}>{chefCenter?.email}</p>
-        <b>Téléphone :</b>
-        <p style={{ margin: 0 }}>{chefCenter?.phone}</p>
+        {chefCenter?.phone && (
+          <>
+            <b>Téléphone fixe :</b>
+            <p style={{ margin: 0 }}>{chefCenter.phone}</p>
+          </>
+        )}
+        {chefCenter?.mobile && (
+          <>
+            <b>Mobile :</b>
+            <p style={{ margin: 0 }}>{chefCenter.mobile}</p>
+          </>
+        )}
       </Wrapper>
     </div>
   );

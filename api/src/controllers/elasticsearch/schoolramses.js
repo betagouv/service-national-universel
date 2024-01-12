@@ -11,37 +11,6 @@ const { serializeRamsesSchools } = require("../../utils/es-serializer");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    // Configuration
-    const searchFields = ["fullName", "city", "zip", "code2022", "typology", "domain"];
-    const filterFields = ["region.keyword", "departmentName.keyword", "cohort", "academy"];
-    const sortFields = [];
-
-    // Authorization
-    if (!canSearchInElasticSearch(req.user, "schoolramses")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    // Context filters
-    let contextFilters = [];
-    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
-
-    // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      searchFields,
-      filterFields,
-      queryFilters: {
-        region: queryFilters["region"],
-        departmentName: queryFilters["departmentName"],
-        searchbar: queryFilters["searchbar"],
-      },
-      page,
-      sort,
-      contextFilters,
-    });
-
     async function getYoungsFromSchoolIds(schoolsIds) {
       const body = {
         query: {
@@ -50,7 +19,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
             filter: [
               { terms: { "schoolId.keyword": schoolsIds } },
               req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
-              req.user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": req.user.region } } : null,
+              [ROLES.REFERENT_REGION, ROLES.VISITOR].includes(req.user.role) ? { term: { "region.keyword": req.user.region } } : null,
               queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
               queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             ].filter(Boolean),
@@ -86,6 +55,39 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       return reducedSchool;
     }
 
+    // Configuration
+    const { user, body } = req;
+    const searchFields = ["fullName", "city", "zip", "code2022", "typology", "domain"];
+    const filterFields = ["region.keyword", "departmentName.keyword", "cohort", "academy"];
+    const sortFields = [];
+
+    // Authorization
+    if (!canSearchInElasticSearch(req.user, "schoolramses")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Body params validation
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // Context filters
+    let contextFilters = [];
+    if ([ROLES.REFERENT_REGION, ROLES.VISITOR].includes(req.user.role)) contextFilters.push({ term: { "region.keyword": req.user.region } });
+    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "departmentName.keyword": req.user.department } });
+
+    // Build request body
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields,
+      queryFilters: {
+        region: queryFilters["region"],
+        departmentName: queryFilters["departmentName"],
+        searchbar: queryFilters["searchbar"],
+      },
+      page,
+      sort,
+      contextFilters,
+      size,
+    });
+
     if (req.params.action === "export") {
       let response = serializeRamsesSchools(await allRecords("schoolramses", hitsRequestBody.query));
       const reducedSchool = await getYoungsFromSchoolIds(response.map((h) => h._id));
@@ -107,6 +109,98 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       });
       return res.status(200).send(response.body);
     }
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/public/search", async (req, res) => {
+  try {
+    const { body } = req;
+
+    const filterFields = ["country.keyword", "departmentName.keyword", "city.keyword"];
+    const { queryFilters } = joiElasticSearch({ filterFields, body });
+
+    let query = {};
+
+    if (req.query.searchCity) {
+      query = {
+        query: {
+          match_bool_prefix: {
+            "city.folded": req.query.searchCity,
+          },
+        },
+      };
+    } else {
+      query = {
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: [],
+          },
+        },
+        size: ES_NO_LIMIT,
+      };
+    }
+
+    if (queryFilters?.country) {
+      query.query.bool.filter.push({
+        terms: {
+          "country.keyword": queryFilters.country,
+        },
+      });
+    }
+
+    if (queryFilters?.departmentName) {
+      query.query.bool.filter.push({
+        terms: {
+          "departmentName.keyword": queryFilters.departmentName,
+        },
+      });
+    }
+
+    if (queryFilters?.city) {
+      query.query.bool.filter.push({
+        terms: {
+          "city.keyword": queryFilters.city,
+        },
+      });
+    }
+
+    if (req.query.aggsByCountries) {
+      query.size = 0;
+      query.aggs = {
+        countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
+      };
+    }
+
+    if (req.query.aggsByCities) {
+      query.size = 0;
+      query.aggs = {
+        cities: { terms: { field: "city.keyword", size: ES_NO_LIMIT } },
+      };
+    }
+
+    if (req.query.aggsByCitiesAndDepartments) {
+      query.size = 0;
+      query.aggs = {
+        cities: {
+          multi_terms: {
+            terms: [{ field: "city.keyword" }, { field: "departmentName.keyword" }],
+            order: { avg_score: "desc" },
+          },
+          aggs: {
+            avg_score: {
+              avg: { script: "_score" },
+            },
+          },
+        },
+      };
+    }
+
+    const response = await esClient.msearch({ index: "schoolramses", body: buildNdJson({ index: "schoolramses", type: "_doc" }, query) });
+    return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -1,28 +1,40 @@
-import Img2 from "../../../assets/observe.svg";
+import Img4 from "../../../assets/observe.svg";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Row, Col } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 import { toastr } from "react-redux-toastr";
 
 import ProgramCard from "../../../components/programCard";
 import MissionCard from "../components/missionCard";
 import api from "../../../services/api";
-import { apiURL } from "../../../config";
 import { HeroContainer, Hero } from "../../../components/Content";
 const images = import.meta.globEager("../../../assets/programmes-engagement/*");
 
 export default function WaitingRealisation() {
   const young = useSelector((state) => state.Auth.young) || {};
   const [programs, setPrograms] = useState([]);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     (async () => {
       const { data, ok } = await api.get("/program");
       if (!ok) return toastr.error("Une erreur est survenue.");
       setPrograms(data);
+    })();
+    (async () => {
+      if (!young.location?.lat) return;
+      const filters = {
+        location: {
+          lat: young.location.lat,
+          lon: young.location.lon,
+        },
+        distance: 0,
+      };
+      const res = await api.post("/elasticsearch/missionapi/search", { filters, page: 0, size: 3, sort: "geo" });
+      if (!res?.data) return toastr.error("Oups, une erreur est survenue lors de la recherche des missions");
+      setData(res.data);
     })();
   }, []);
 
@@ -48,7 +60,7 @@ export default function WaitingRealisation() {
         <Row>
           {programs.slice(0, 3).map((p, i) => (
             <Col key={i}>
-              <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../assets/programmes-engagement/${p.imageString}`]?.default} />
+              <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../../assets/programmes-engagement/${p.imageString}`]?.default} />
             </Col>
           ))}
         </Row>
@@ -61,21 +73,7 @@ export default function WaitingRealisation() {
           <p>Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
         </Heading>
         <Missions>
-          <ReactiveBase url={`${apiURL}/es`} app="missionapi" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-            <ReactiveList
-              componentId="result"
-              pagination={true}
-              size={3}
-              showLoader={true}
-              loader="Chargement..."
-              innerClass={{ pagination: "pagination" }}
-              dataField="created_at"
-              renderResultStats={() => <div />}
-              render={({ data }) => {
-                return data.map((e, i) => <MissionCard mission={e} key={i} image={Img2} />);
-              }}
-            />
-          </ReactiveBase>
+          {data?.total ? data?.hits.map((e) => <MissionCard mission={e._source} key={e._id} image={Img4} />) : null}
           <SeeMore to="/phase3/mission">Toutes les missions →</SeeMore>
         </Missions>
       </TransparentHero>

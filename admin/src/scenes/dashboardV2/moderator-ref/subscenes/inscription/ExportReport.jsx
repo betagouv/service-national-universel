@@ -71,26 +71,15 @@ export default function ExportReport({ filter }) {
       // get all the department if there is no filter specified, else get only the department filtered
       ?.filter((number) => !filter?.department?.length || filter?.department?.includes(departmentLookUp[number]))
       ?.sort((a, b) => a - b);
-    console.log(keys);
     for (let i = 0; i < keys.length; i++) {
       const dptCode = keys[i];
       const dptName = departmentLookUp[dptCode];
       const region = department2region[dptName];
       const academy = departmentToAcademy[dptName];
 
-      const body = {
-        query: {
-          bool: {
-            must: { match_all: {} },
-            filter: [{ terms: { "cohort.keyword": filter?.cohort } }, { term: { "department.keyword": dptName } }],
-          },
-        },
-        aggs: { status: { terms: { field: "status.keyword" } } },
-        size: 0,
-      };
-      const { responses } = await api.esQuery("young", body);
-      if (responses.length) {
-        const status = api.getAggregations(responses[0]);
+      const responses = await api.post("/elasticsearch/dashboard/inscription/youngsReport", { filters: filter, department: dptName });
+      if (responses) {
+        const status = api.getAggregations(responses);
         const goal = inscriptionGoals.filter((g) => g.department === dptName)?.reduce((p, c) => p + (c.max || 0), 0);
         const line = [academy, region, dptCode, dptName, goal, ...Object.values(YOUNG_STATUS).map((filterStatus) => status[filterStatus] || 0)];
         lines.push(line);

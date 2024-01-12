@@ -1,8 +1,8 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import "dayjs/locale/fr";
-import { COHESION_STAY_LIMIT_DATE, getDepartmentByZip, translate, translateGrade } from "snu-lib";
+import { getDepartmentByZip, translate, translateGrade, getCohortPeriod } from "snu-lib";
 import api from "../../../services/api";
 import { API_VERIFICATION, isReturningParent } from "../commons";
 
@@ -10,9 +10,11 @@ import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
 import dayjs from "dayjs";
 import Check from "../components/Check";
-import StickyButton from "../../../components/inscription/stickyButton";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import { supportURL } from "../../../config";
-import Footer from "../../../components/footerV2";
+import plausibleEvent from "@/services/plausible";
+import { YOUNG_SOURCE } from "snu-lib";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
@@ -28,7 +30,6 @@ export default function Verification({ step, parentId }) {
     history.push(`/representants-legaux/${route}?token=${token}`);
   }
 
-
   const sections = sectionsData(young).map(Section);
 
   async function onNext() {
@@ -37,6 +38,7 @@ export default function Verification({ step, parentId }) {
       setError(null);
       if (certified) {
         if (await saveParentCertified()) {
+          plausibleEvent("Phase0/CTA representant legal - continuer etape 2");
           history.push(`/representants-legaux/consentement?token=${token}`);
         }
       } else {
@@ -71,9 +73,7 @@ export default function Verification({ step, parentId }) {
   return (
     <>
       <Navbar step={step} />
-      <div className="bg-white p-3 text-[#161616]">
-        <h1 className="leading-40 mb-2 text-[24px] font-bold leading-[32px] text-[#21213F]">Voici les informations transmises par {young.firstName}</h1>
-
+      <DSFRContainer title={`Voici les informations transmises par ${young.firstName}`}>
         <div className="mb-[32px] mt-2 space-y-2 text-[14px] leading-[20px] text-[#666666]">
           {parentId === 2 ? (
             <p>
@@ -101,7 +101,7 @@ export default function Verification({ step, parentId }) {
 
         {parentId === 1 && (
           <>
-            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px]">
+            <div className="border-t-solid flex items-center border-t-[1px] border-t-[#E5E5E5] pt-[32px] mb-8">
               <Check checked={certified} onChange={(e) => setCertified(e)}>
                 Je certifie l’exactitude de ces renseignements. Si ces informations ne sont pas exactes, consultez{" "}
                 <a
@@ -117,9 +117,8 @@ export default function Verification({ step, parentId }) {
             {error && <div className="my-2 ml-[40px] text-[14px] leading-[19px] text-[#CE0500]">{error}</div>}
           </>
         )}
-      </div>
-      <Footer marginBottom={"mb-[88px]"} />
-      <StickyButton text={"Suivant"} onClick={() => onNext()} onClickPrevious={onPrevious} disabled={saving} />
+        <SignupButtonContainer onClickNext={onNext} onClickPrevious={onPrevious} disabled={saving} />
+      </DSFRContainer>
     </>
   );
 }
@@ -160,7 +159,7 @@ function SectionField(field, idx) {
     content = (
       <div className="flex w-full justify-between">
         <p className="font-400 text-[16px] text-[#666666]">{field.label}&nbsp;:</p>
-        <p className="font-400 text-right text-[16px] text-[#161616]">{field.value ? field.value : "-"}</p>
+        <p className="font-400 text-right text-[16px] text-[#161616] break-all">{field.value ? field.value : "-"}</p>
       </div>
     );
   }
@@ -208,6 +207,7 @@ function specialSituations(young) {
 }
 
 function sectionsData(young) {
+  const isCLE = YOUNG_SOURCE.CLE === young?.source;
   // --- foreign address
   let foreignAddress = [];
   let titleAddress = [];
@@ -237,14 +237,18 @@ function sectionsData(young) {
       situation.push({ label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
     }
   } else {
-    situation.push({ separator: true, subtitle: "Situation" });
+    if (!isCLE) {
+      situation.push({ separator: true, subtitle: "Situation" });
+    }
     if (young.schooled === "true") {
       situation.push(
-        { label: "Situation scolaire", value: translate(young.situation) },
         { label: "Pays de l'établissement", value: young.schoolCountry },
         { label: "Ville de l'établissement", value: young.schoolCity },
         { label: "Nom de l'établissement", value: young.schoolName },
       );
+      if (!isCLE) {
+        situation.push({ label: "Situation scolaire", value: translate(young.situation) });
+      }
     } else {
       situation.push({ label: "Situation", value: translate(young.situation) }, { label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
     }
@@ -271,20 +275,25 @@ function sectionsData(young) {
       { label: "Son téléphone", value: young.parent2Phone },
     );
   }
+
+  let personalInfoFields = [
+    { label: "Prénom", value: young.firstName },
+    { label: "Nom", value: young.lastName },
+    { label: "Email", value: young.email },
+    { label: "Date de naissance", value: dayjs(young.birthdateAt).locale("fr").format("DD/MM/YYYY") },
+  ];
+  if (!isCLE) {
+    personalInfoFields.push({ label: "Niveau de scolarité", value: translateGrade(young.grade) });
+  }
+
   return [
     {
       title: "Ses informations personnelles",
-      fields: [
-        { label: "Prénom", value: young.firstName },
-        { label: "Nom", value: young.lastName },
-        { label: "Email", value: young.email },
-        { label: "Niveau de scolarité", value: translateGrade(young.grade) },
-        { label: "Date de naissance", value: dayjs(young.birthdateAt).locale("fr").format("DD/MM/YYYY") },
-      ],
+      fields: personalInfoFields,
     },
     {
       title: "Séjour de cohésion",
-      subtitle: COHESION_STAY_LIMIT_DATE[young.cohort],
+      subtitle: young.cohort.name === "CLE 23-24" ? "À venir" : getCohortPeriod(young.cohort),
     },
     {
       title: "Son profil",
@@ -292,18 +301,18 @@ function sectionsData(young) {
         young.status === "REINSCRIPTION"
           ? situation
           : [
-            { label: "Pays de naissance", value: young.birthCountry },
-            { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
-            { label: "Ville de naissance", value: young.birthCity },
-            { label: "Sexe", value: translate(young.gender) },
-            { label: "Téléphone", value: young.phone },
-            ...titleAddress,
-            { label: "Adresse de résidence", value: young.address ? young.address + (young.complementAddress ? "<br/>" + young.complementAddress : "") : undefined },
-            { label: "Code postal", value: young.zip },
-            { label: "Ville", value: young.city },
-            ...foreignAddress,
-            ...situation,
-          ],
+              { label: "Pays de naissance", value: young.birthCountry },
+              { label: "Département de naissance", value: getDepartmentByZip(young.birthCityZip) },
+              { label: "Ville de naissance", value: young.birthCity },
+              { label: "Sexe", value: translate(young.gender) },
+              { label: "Téléphone", value: young.phone },
+              ...titleAddress,
+              { label: "Adresse de résidence", value: young.address ? young.address + (young.complementAddress ? "<br/>" + young.complementAddress : "") : undefined },
+              { label: "Code postal", value: young.zip },
+              { label: "Ville", value: young.city },
+              ...foreignAddress,
+              ...situation,
+            ],
     },
     {
       title: young.firstName + " " + young.lastName + " a déclaré les représentants légaux suivants détenteurs de l'autorité parentale\u00A0:",

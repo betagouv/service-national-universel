@@ -3,9 +3,10 @@ import { GrClose } from "react-icons/gr";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
-import { formatStringDate } from "snu-lib";
+import { getCohortPeriod, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import Error from "../../../components/error";
+import Alert from "../../../components/dsfr/ui/Alert";
 import Loader from "../../../components/Loader";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
@@ -20,6 +21,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
   const [cohorts, setCohorts] = React.useState([]);
   const [error, setError] = React.useState({});
   const dispatch = useDispatch();
+  const { grade } = young;
 
   React.useEffect(() => {
     (async () => {
@@ -61,14 +63,16 @@ export default function ModalSejour({ isOpen, onCancel }) {
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">
-      <div className="flex w-full flex-col px-3 py-4">
-        {!loading ? (
-          <div className="flex items-center justify-end gap-2 pb-2 text-sm text-[#000091]" onClick={onCancel}>
-            <GrClose />
-            Fermer
-          </div>
-        ) : null}
-        <div className="mt-2 text-lg font-bold text-[#161616]">Choisissez la date de votre séjour</div>
+      <div className="p-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-[#161616] m-0">Choisissez la date de votre séjour</h2>
+          {!loading ? (
+            <button className="flex items-center justify-end gap-2 pb-2 text-sm text-[#000091]" onClick={onCancel}>
+              <GrClose />
+              Fermer
+            </button>
+          ) : null}
+        </div>
         <hr className="my-4 h-px border-0 bg-gray-200" />
         {error?.text && <Error {...error} onClose={() => setError({})} />}
 
@@ -78,9 +82,16 @@ export default function ModalSejour({ isOpen, onCancel }) {
           <>
             {cohorts.length !== 0 ? (
               <>
-                <div className="my-2 font-semibold">Séjours de cohésion disponibles</div>
+                <div className="mb-2 font-semibold">Séjours de cohésion disponibles</div>
                 <div className="text-sm text-gray-500">Veuillez vous assurer d’être disponible sur l’ensemble de la période.</div>
-                <div className="my-4">{cohorts?.map((e) => SessionButton(e))}</div>
+                {grade == GRADES["1ereGT"] && (
+                  <Alert className="my-4">En cas de convocation après le 2 juillet aux épreuves du baccalauréat, vous pourrez rejoindre le centre SNU de votre département.</Alert>
+                )}
+                <div className="my-4">
+                  {cohorts?.map((e) => (
+                    <SessionButton key={e.name} session={e} onSubmit={onSubmit} />
+                  ))}
+                </div>
               </>
             ) : (
               <div className="my-2 text-sm text-gray-500">Aucun séjour de cohésion n’est disponible pour le moment.</div>
@@ -101,21 +112,21 @@ export default function ModalSejour({ isOpen, onCancel }) {
       </div>
     </Modal>
   );
+}
 
-  function SessionButton(session) {
-    return (
-      <div
-        key={session.id}
-        className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
-        onClick={() => {
-          plausibleEvent(session.event);
-          onSubmit(session.name);
-        }}>
-        <div>
-          Séjour du <strong>{formatStringDate(session.dateStart).slice(0, -5)}</strong> au <strong>{formatStringDate(session.dateEnd).slice(0, -5)}</strong> 2023
-        </div>
-        <ArrowRightBlueSquare />
+function SessionButton({ session, onSubmit }) {
+  return (
+    <div
+      key={session.id}
+      className="my-3 flex cursor-pointer items-center justify-between border p-4 hover:bg-gray-50"
+      onClick={() => {
+        plausibleEvent(session.event);
+        onSubmit(session.name);
+      }}>
+      <div>
+        Séjour <strong>{getCohortPeriod(session)}</strong>
       </div>
-    );
-  }
+      <ArrowRightBlueSquare />
+    </div>
+  );
 }

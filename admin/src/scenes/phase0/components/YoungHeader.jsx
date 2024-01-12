@@ -5,6 +5,7 @@ import { useHistory } from "react-router-dom";
 import {
   canViewEmailHistory,
   canViewNotes,
+  isCle,
   ROLES,
   SENDINBLUE_TEMPLATES,
   translate,
@@ -13,18 +14,19 @@ import {
   YOUNG_PHASE,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE3,
 } from "snu-lib";
-import Bin from "../../../assets/Bin";
-import ChevronDown from "../../../assets/icons/ChevronDown";
-import History from "../../../assets/icons/History";
-import TakePlace from "../../../assets/icons/TakePlace";
-import Warning from "../../../assets/icons/Warning";
-import Badge from "../../../components/Badge";
-import TabList from "../../../components/views/TabList";
-import Title from "../../../components/views/Title";
-import { appURL } from "../../../config";
-import api from "../../../services/api";
-import plausibleEvent from "../../../services/plausible";
+import Bin from "@/assets/Bin";
+import ChevronDown from "@/assets/icons/ChevronDown";
+import History from "@/assets/icons/History";
+import Warning from "@/assets/icons/Warning";
+import Badge from "@/components/Badge";
+import TabList from "@/components/views/TabList";
+import Title from "@/components/views/Title";
+import { appURL } from "@/config";
+import api from "@/services/api";
+import plausibleEvent from "@/services/plausible";
 import { Button } from "./Buttons";
 import { ChangeCohortPen } from "./ChangeCohortPen";
 import ConfirmationModal from "./ConfirmationModal";
@@ -34,7 +36,12 @@ import PhaseStatusSelector from "./PhaseStatusSelector";
 import NoteIcon from "../../volontaires/view/notes/components/NoteIcon";
 import { PHASE_1, PHASE_2, PHASE_3, PHASE_INSCRIPTION } from "../../volontaires/view/notes/utils";
 import NoteDisplayModal from "../../volontaires/view/notes/components/NoteDisplayModal";
-import ModalConfirmDeleteYoung from "../../../components/modals/young/ModalConfirmDeleteYoung";
+import ModalConfirmDeleteYoung from "@/components/modals/young/ModalConfirmDeleteYoung";
+import PanelActionButton from "@/components/buttons/PanelActionButton";
+import SelectAction from "@/components/SelectAction";
+import downloadPDF from "@/utils/download-pdf";
+import ModalConfirm from "@/components/modals/ModalConfirm";
+import { capture } from "@/sentry";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
@@ -53,7 +60,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     if (young) {
       let options = [];
       if (user.role === ROLES.ADMIN) {
-        options = Object.keys(YOUNG_STATUS).filter((status) => status !== young.status && status !== YOUNG_STATUS.DELETED);
+        options = Object.keys(YOUNG_STATUS).filter((status) => status !== young.status && ![YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.DELETED].includes(status));
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
@@ -179,9 +186,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
+      const validationTemplate = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED;
+
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
         if (prevStatus === "WITHDRAWN") await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED}`);
-        else await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
+        else await api.post(`/young/${young._id}/email/${validationTemplate}`);
       }
       if (status === YOUNG_STATUS.WAITING_LIST) {
         await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
@@ -210,26 +219,38 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     return true;
   };
 
+  const onPrendreLaPlace = async (young_id) => {
+    if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
+
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+  };
+
   return (
     <div className="flex items-end justify-end border-b-[1px] border-b-[#E5E7EB] px-[30px] pt-[15px]">
       <NoteDisplayModal notes={viewedNotes} isOpen={viewedNotes.length > 0} onClose={() => setVieweNotes([])} user={user} />
-      <div className={`flex w-full flex-row flex-wrap-reverse items-end justify-end ${user.role === ROLES.HEAD_CENTER ? "pt-[57px]" : ""}`}>
+      <div className={`flex w-full flex-row flex-wrap-reverse items-end justify-end gap-2 ${user.role === ROLES.HEAD_CENTER ? "pt-[57px]" : ""}`}>
         <div className="grow self-start">
-          <Title>
-            <div className="mr-[15px]">
-              <div className="flex items-center">
-                {user.role !== ROLES.HEAD_CENTER && getNotesByPhase("").length > 0 && <NoteIcon className="mr-1" onClick={setViewedNoteParPhase("")} />}
-                {young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : young.firstName + " " + young.lastName}
+          <div className=" flex flex-row w-full justify-between items-center">
+            <Title>
+              <div className="mr-[15px]">
+                <div className="flex items-center">
+                  {user.role !== ROLES.HEAD_CENTER && getNotesByPhase("").length > 0 && <NoteIcon className="mr-1" onClick={setViewedNoteParPhase("")} />}
+                  {young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : young.firstName + " " + young.lastName}
+                </div>
               </div>
-            </div>
-            <Badge {...(young.status === YOUNG_STATUS.DELETED ? greyBadge : blueBadge)} text={young.cohort} />
-            {canYoungChangeCohort() && (
-              <>
-                <ChangeCohortPen young={young} onChange={onChange} />
-                {young.originalCohort && <Badge {...greyBadge} text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />}
-              </>
-            )}
-          </Title>
+              <Badge {...(young.status === YOUNG_STATUS.DELETED ? greyBadge : blueBadge)} text={young.cohort} />
+              {canYoungChangeCohort() && (
+                <>
+                  <ChangeCohortPen young={young} onChange={onChange} />
+                  {young.originalCohort && <Badge {...greyBadge} text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />}
+                </>
+              )}
+            </Title>
+            <AttestationDownloadButton young={young} />
+          </div>
+
           {isStructure ? (
             <TabList className="mt-[30px]">
               {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && user.role !== ROLES.HEAD_CENTER && (
@@ -258,7 +279,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                   )}
                 </div>
               </Tab>
-              {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && (
+              {![YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS].includes(young.status) && (
                 <>
                   <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
                     <div className="flex items-center">
@@ -272,11 +293,13 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                           Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_2)} />}
                         </div>
                       </Tab>
-                      <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
-                        <div className="flex items-center">
-                          Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_3)} />}
-                        </div>
-                      </Tab>
+                      {[YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED].includes(young.statusPhase3) && (
+                        <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
+                          <div className="flex items-center">
+                            Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_3)} />}
+                          </div>
+                        </Tab>
+                      )}
                     </>
                   )}
                 </>
@@ -320,18 +343,19 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               onChange={onSelectStatus}
               className={young.status === YOUNG_STATUS.DELETED ? "my-[15px]" : ""}
             />
-            {young.status !== YOUNG_STATUS.DELETED && (
+
+            {young.status !== YOUNG_STATUS.DELETED && ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
               <div className="my-[15px] flex items-center justify-between">
                 <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
                   Supprimer
                 </Button>
-                <Button
-                  className="ml-[8px]"
-                  icon={<TakePlace className="text-[#6B7280]" />}
-                  href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}
-                  onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                  Prendre sa place
-                </Button>
+                <button
+                  onClick={() => {
+                    window.open(appURL, "_blank");
+                    onPrendreLaPlace(young._id);
+                  }}>
+                  <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+                </button>
               </div>
             )}
           </div>
@@ -380,3 +404,126 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     </div>
   );
 }
+
+const AttestationDownloadButton = ({ young }) => {
+  const [modal, setModal] = useState({ isOpen: false });
+  const handleSendAttestationByEmail = async (phase) => {
+    try {
+      const { ok, code } = await api.post(`/young/${young._id}/documents/certificate/${phase}/send-email`, {
+        fileName: `${young.firstName} ${young.lastName} - certificate ${phase}.pdf`,
+      });
+      setModal({ isOpen: false });
+      if (!ok) throw new Error(translate(code));
+      toastr.success(`Document envoyé à ${young.email}`);
+    } catch (e) {
+      capture(e);
+      toastr.error("Erreur lors de l'envoi du document", e.message);
+    }
+  };
+
+  const handleDownloadAttestationPdfFile = async (phase) => {
+    await downloadPDF({
+      url: `/young/${young._id}/documents/certificate/${phase}`,
+      fileName: `${young.firstName} ${young.lastName} - attestation ${phase}.pdf`,
+    });
+  };
+  if (young.statusPhase1 !== YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED && young.statusPhase3 !== YOUNG_STATUS_PHASE3.VALIDATED) return null;
+  return (
+    <>
+      <ModalConfirm isOpen={modal?.isOpen} title={modal?.title} message={modal?.message} onCancel={() => setModal({ isOpen: false })} onConfirm={modal?.onConfirm} />
+      <SelectAction
+        title="Attestations"
+        alignItems="right"
+        buttonClassNames="bg-blue-600"
+        textClassNames="text-white font-medium text-sm"
+        rightIconClassNames="text-blue-300"
+        optionsGroup={[
+          {
+            key: "export",
+            title: "Télécharger",
+            items: [
+              young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && {
+                key: "phase1Download",
+                action: async () => handleDownloadAttestationPdfFile(1),
+                render: (
+                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                    <div className="text-sm text-gray-700">Phase 1</div>
+                  </div>
+                ),
+              },
+              young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED && {
+                key: "phase2Download",
+                action: async () => handleDownloadAttestationPdfFile(2),
+                render: (
+                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                    <div className="text-sm text-gray-700">Phase 2</div>
+                  </div>
+                ),
+              },
+              young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED && {
+                key: "phase3Download",
+                action: async () => handleDownloadAttestationPdfFile(3),
+                render: (
+                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                    <div className="text-sm text-gray-700">Phase 3</div>
+                  </div>
+                ),
+              },
+            ],
+          },
+          {
+            key: "exportMail",
+            title: "Envoyer par mail",
+            items: [
+              young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && {
+                key: "phase1Mail",
+                action: async () =>
+                  setModal({
+                    isOpen: true,
+                    title: "Envoi de document par mail",
+                    message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 1 par mail à ${young.email} ?`,
+                    onConfirm: () => handleSendAttestationByEmail(1),
+                  }),
+                render: (
+                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                    <div className="text-sm text-gray-700">Phase 1</div>
+                  </div>
+                ),
+              },
+              young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED && {
+                key: "phase2Mail",
+                action: async () =>
+                  setModal({
+                    isOpen: true,
+                    title: "Envoi de document par mail",
+                    message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 2 par mail à ${young.email} ?`,
+                    onConfirm: () => handleSendAttestationByEmail(2),
+                  }),
+                render: (
+                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                    <div className="text-sm text-gray-700">Phase 2</div>
+                  </div>
+                ),
+              },
+              young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED && {
+                key: "phase3Mail",
+                action: async () =>
+                  setModal({
+                    isOpen: true,
+                    title: "Envoi de document par mail",
+                    message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 3 par mail à ${young.email} ?`,
+                    onConfirm: () => handleSendAttestationByEmail(3),
+                  }),
+                render: (
+                  <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
+                    <div className="text-sm text-gray-700">Phase 3</div>
+                  </div>
+                ),
+              },
+            ],
+          },
+        ]}
+      />
+    </>
+  );
+};

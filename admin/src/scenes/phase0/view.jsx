@@ -5,12 +5,12 @@ import Pencil from "../../assets/icons/Pencil";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import { MiniTitle } from "./components/commons";
 import { FieldsGroup } from "./components/FieldsGroup";
+import { MdInfoOutline } from "react-icons/md";
+import ReactTooltip from "react-tooltip";
 import Field from "./components/Field";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import {
-  COHESION_STAY_LIMIT_DATE,
-  COHESION_STAY_START,
-  START_DATE_SESSION_PHASE1,
+  getCohortStartDate,
   translate,
   translateGrade,
   YOUNG_STATUS,
@@ -18,6 +18,12 @@ import {
   getAge,
   ROLES,
   SENDINBLUE_TEMPLATES,
+  getCohortPeriod,
+  getCohortYear,
+  YOUNG_SOURCE,
+  translateEtbalissementSector,
+  translateColoration,
+  isCle,
 } from "snu-lib";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
@@ -50,6 +56,8 @@ import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import PhoneField from "./components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import downloadPDF from "../../utils/download-pdf";
+import { Button } from "@snu/ds/admin";
+import { Link } from "react-router-dom";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -72,31 +80,57 @@ const PENDING_ACCORD = "en attente";
 
 export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
   const [requests, setRequests] = useState([]);
   const [processing, setProcessing] = useState(false);
+  const [cohort, setCohort] = useState(undefined);
+  const [oldCohort, setOldCohort] = useState(true);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
-  const [oldCohort, setOldCohort] = useState(false);
+  const [footerClass, setFooterClass] = useState("");
+
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      const open = event.detail.open;
+      if (open === true) {
+        setFooterClass("left-[220px]");
+      } else {
+        setFooterClass("left-[88px]");
+      }
+    };
+    window.addEventListener("sideBar", handleStorageChange);
+    return () => {
+      window.removeEventListener("sideBar", handleStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (localStorage?.getItem("sideBarOpen") === "false") setFooterClass("left-[88px]");
+    else setFooterClass("left-[220px]");
+  }, []);
 
   useEffect(() => {
     if (young) {
       setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
-      setOldCohort(dayjs(COHESION_STAY_START[young.cohort]).year() < 2023);
+      const currentCohort = cohorts.find((c) => c.name === young.cohort);
+      setCohort(currentCohort);
+      setOldCohort(!currentCohort);
     } else {
       setRequests([]);
-      setOldCohort(false);
+      setCohort(undefined);
+      setOldCohort(true);
     }
   }, [young]);
 
   useEffect(() => {
-    if (requests.find((r) => r.status === "PENDING")) {
+    if (requests.some((r) => r.status === "PENDING")) {
       setFooterMode("PENDING");
-    } else if (requests.find((r) => ["SENT", "REMINDED"].includes(r.status))) {
+    } else if (requests.some((r) => ["SENT", "REMINDED"].includes(r.status))) {
       setFooterMode("WAITING");
     } else {
       setFooterMode("NO_REQUEST");
     }
-  }, [requests]);
+  }, [requests, requests.length]);
 
   function onStartRequest(fieldName) {
     setCurrentCorrectionRequestField(fieldName);
@@ -213,6 +247,8 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
       await api.put(`/referent/young/${young._id}`, body);
 
       //Notify young
+      // TODO: move notification logic to referent controller
+      const validationTemplate = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED;
       switch (state) {
         case "REFUSED":
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message: body.inscriptionRefusedMessage });
@@ -222,7 +258,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
           break;
         case "VALIDATED":
-          await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
+          await api.post(`/young/${young._id}/email/${validationTemplate}`);
           break;
       }
 
@@ -249,6 +285,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           </div>
         )}
         <SectionIdentite
+          cohort={cohort}
           young={young}
           globalMode={globalMode}
           requests={requests}
@@ -257,6 +294,7 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
           readonly={user.role === ROLES.HEAD_CENTER}
+          user={user}
         />
         <SectionParents
           young={young}
@@ -269,34 +307,38 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
           oldCohort={oldCohort}
           readonly={user.role === ROLES.HEAD_CENTER}
         />
-        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} readonly={user.role === ROLES.HEAD_CENTER} />}
+        {oldCohort ? (
+          <SectionOldConsentements young={young} />
+        ) : (
+          <SectionConsentements young={young} onChange={onChange} readonly={user.role === ROLES.HEAD_CENTER} cohort={cohort} />
+        )}
       </div>
       {globalMode === "correction" && (
         <>
           {footerMode === "PENDING" && (
-            <FooterPending young={young} requests={requests} onDeletePending={deletePendingRequests} sending={processing} onSendPending={sendPendingRequests} />
+            <FooterPending
+              young={young}
+              requests={requests}
+              onDeletePending={deletePendingRequests}
+              sending={processing}
+              onSendPending={sendPendingRequests}
+              footerClass={footerClass}
+            />
           )}
-          {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} />}
-          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} />}
+          {footerMode === "WAITING" && <FooterSent young={young} requests={requests} reminding={processing} onRemindRequests={remindRequests} footerClass={footerClass} />}
+          {footerMode === "NO_REQUEST" && <FooterNoRequest young={young} processing={processing} onProcess={processRegistration} footerClass={footerClass} />}
         </>
       )}
     </>
   );
 }
 
-function FooterPending({ young, requests, sending, onDeletePending, onSendPending }) {
-  const [sentRequestsCount, setSentRequestsCount] = useState(0);
-  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
-
-  useEffect(() => {
-    const sent = requests.filter((r) => r.status === "SENT" || r.status === "REMINDED").length;
-    const pending = requests.filter((r) => r.status === "PENDING").length;
-    setSentRequestsCount(sent);
-    setPendingRequestsCount(pending);
-  }, [requests]);
+function FooterPending({ young, requests, sending, onDeletePending, onSendPending, footerClass }) {
+  const sentRequestsCount = requests.filter((r) => r.status === "SENT" || r.status === "REMINDED")?.length || 0;
+  const pendingRequestsCount = requests.filter((r) => r.status === "PENDING")?.length || 0;
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[18px] font-medium leading-snug text-[#242526]">Le dossier est-il conforme&nbsp;?</span>
@@ -330,7 +372,7 @@ function FooterPending({ young, requests, sending, onDeletePending, onSendPendin
   );
 }
 
-function FooterSent({ young, requests, reminding, onRemindRequests }) {
+function FooterSent({ young, requests, reminding, onRemindRequests, footerClass }) {
   const [sentRequestsCount, setSentRequestsCount] = useState(0);
 
   useEffect(() => {
@@ -350,11 +392,11 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
       }
     }
   }
-  const sentAt = sentDate ? dayjs(sentDate).locale("fr").format("DD/MM/YYYY à HH:mm") : null;
-  const remindedAt = remindedDate ? dayjs(remindedDate).locale("fr").format("DD/MM/YYYY à HH:mm") : null;
+  const sentAt = sentDate ? dayjs(sentDate).format("DD/MM/YYYY à HH:mm") : null;
+  const remindedAt = remindedDate ? dayjs(remindedDate).format("DD/MM/YYYY à HH:mm") : null;
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[18px] font-medium leading-snug text-[#242526]">Demande de correction envoyée</span>
@@ -375,7 +417,7 @@ function FooterSent({ young, requests, reminding, onRemindRequests }) {
   );
 }
 
-function FooterNoRequest({ processing, onProcess, young }) {
+function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   const [confirmModal, setConfirmModal] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
@@ -383,41 +425,58 @@ function FooterNoRequest({ processing, onProcess, young }) {
 
   async function validate() {
     try {
-      const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
-      if (!res.ok) throw new Error(res);
-      const fillingRate = res.data;
-      if (fillingRate >= 1.05) {
+      if (young.source === YOUNG_SOURCE.CLE) {
         return setConfirmModal({
           icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
           title: (
             <span>
-              L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-              <strong className="text-bold">validé sur liste complémentaire</strong>.
+              Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur liste principale</strong>.
             </span>
           ),
           message: `Souhaitez-vous confirmer l'action ?`,
-          type: "SESSION_FULL",
+          type: "VALIDATED",
+          infoLink: {
+            href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
+            text: "Des questions sur ce fonctionnement ?",
+          },
+        });
+      } else {
+        const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
+        if (!res.ok) throw new Error(res);
+        const fillingRate = res.data;
+        if (fillingRate >= 1) {
+          return setConfirmModal({
+            icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
+            title: (
+              <span>
+                L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+                <strong className="text-bold">validé sur liste complémentaire</strong>.
+              </span>
+            ),
+            message: `Souhaitez-vous confirmer l'action ?`,
+            type: "SESSION_FULL",
+            infoLink: {
+              href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
+              text: "Des questions sur ce fonctionnement ?",
+            },
+          });
+        }
+        return setConfirmModal({
+          icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
+          title: (
+            <span>
+              L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+              <strong className="text-bold">validé sur liste principale</strong>.
+            </span>
+          ),
+          message: `Souhaitez-vous confirmer l'action ?`,
+          type: "VALIDATED",
           infoLink: {
             href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
             text: "Des questions sur ce fonctionnement ?",
           },
         });
       }
-      return setConfirmModal({
-        icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-        title: (
-          <span>
-            L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 105%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-            <strong className="text-bold">validé sur liste principale</strong>.
-          </span>
-        ),
-        message: `Souhaitez-vous confirmer l'action ?`,
-        type: "VALIDATED",
-        infoLink: {
-          href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
-          text: "Des questions sur ce fonctionnement ?",
-        },
-      });
     } catch (e) {
       capture(e);
       toastr.error(e.message);
@@ -439,9 +498,12 @@ function FooterNoRequest({ processing, onProcess, young }) {
     </option>,
   ];
 
+  const youngCleREfusedMessage =
+    "Votre inscription au SNU dans le cadre du dispositif Classe et Lycée Engagés a été refusée. Pour plus d'informations, merci de vous rapprocher de votre établissement.";
+
   function reject() {
-    setRejectionReason("");
-    setRejectionMessage("");
+    setRejectionReason(young.source === YOUNG_SOURCE.CLE ? "OTHER" : "");
+    setRejectionMessage(young.source === YOUNG_SOURCE.CLE ? youngCleREfusedMessage : "");
 
     setConfirmModal({
       icon: <XCircle className="h-[36px] w-[36px] text-[#D1D5DB]" />,
@@ -478,7 +540,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
   }
 
   return (
-    <div className="fixed bottom-0 left-[220px] right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)]">
+    <div className={`fixed bottom-0 right-0 flex bg-white py-[20px] px-[42px] shadow-[0px_-16px_16px_-3px_rgba(0,0,0,0.05)] ${footerClass}`}>
       <div className="grow">
         <div className="flex items-center">
           <span className="text-[18px] font-medium leading-snug text-[#242526]">Le dossier est-il conforme&nbsp;?</span>
@@ -507,7 +569,11 @@ function FooterNoRequest({ processing, onProcess, young }) {
               {confirmModal.type === "REFUSED" && (
                 <div className="mt-[24px]">
                   <div className="mb-[16px] flex w-[100%] items-center rounded-[6px] border-[1px] border-[#D1D5DB] bg-white pr-[15px]">
-                    <select value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} className="block grow appearance-none bg-[transparent] p-[15px]">
+                    <select
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      className="block grow appearance-none bg-[transparent] p-[15px]"
+                      disabled={young.source === YOUNG_SOURCE.CLE}>
                       {rejectionReasonOptions}
                     </select>
                     <ChevronDown className="flex-[0_0_16px] text-[#6B7280]" />
@@ -553,7 +619,7 @@ function FooterNoRequest({ processing, onProcess, young }) {
   );
 }
 
-function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
+function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false, user }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
@@ -574,7 +640,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
 
   useEffect(() => {
     if (data && data.birthdateAt) {
-      const date = dayjs(data.birthdateAt).locale("fr");
+      const date = dayjs(data.birthdateAt);
       setBirthDate({ day: date.date(), month: date.format("MMMM"), year: date.year() });
     }
   }, [data]);
@@ -601,7 +667,9 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     setSaving(true);
     if (validate()) {
       try {
-        const result = await api.put(`/young-edition/${young._id}/identite`, data);
+        // eslint-disable-next-line no-unused-vars
+        const { applications, ...dataToSend } = data;
+        const result = await api.put(`/young-edition/${young._id}/identite`, dataToSend);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
@@ -663,6 +731,11 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
     });
   };
 
+  const nationalityOptions = [
+    { value: "true", label: translate("true") },
+    { value: "false", label: translate("false") },
+  ];
+
   return (
     <SectionContext.Provider value={{ errors }}>
       <Section
@@ -677,17 +750,20 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
         <div className="flex-[1_0_50%] pr-[56px]">
           {globalMode === "correction" ? (
             <>
-              <SectionIdentiteCni
-                young={data}
-                globalMode={sectionMode}
-                requests={requests}
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={onLocalChange}
-              />
+              {young.source === YOUNG_SOURCE.VOLONTAIRE && (
+                <SectionIdentiteCni
+                  young={data}
+                  cohort={cohort}
+                  globalMode={sectionMode}
+                  requests={requests}
+                  onStartRequest={onStartRequest}
+                  currentRequest={currentRequest}
+                  onCorrectionRequestChange={onCorrectionRequestChange}
+                  onChange={onLocalChange}
+                  className="mb-[32px]"
+                />
+              )}
               <SectionIdentiteContact
-                className="mt-[32px]"
                 young={data}
                 globalMode={sectionMode}
                 requests={requests}
@@ -708,16 +784,19 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
                 onCorrectionRequestChange={onCorrectionRequestChange}
                 onChange={onLocalChange}
               />
-              <SectionIdentiteCni
-                className="mt-[32px]"
-                young={data}
-                globalMode={sectionMode}
-                requests={requests}
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={onLocalChange}
-              />
+              {young.source === YOUNG_SOURCE.VOLONTAIRE && (
+                <SectionIdentiteCni
+                  cohort={cohort}
+                  className="mt-[32px]"
+                  young={data}
+                  globalMode={sectionMode}
+                  requests={requests}
+                  onStartRequest={onStartRequest}
+                  currentRequest={currentRequest}
+                  onCorrectionRequestChange={onCorrectionRequestChange}
+                  onChange={onLocalChange}
+                />
+              )}
             </>
           )}
         </div>
@@ -786,6 +865,27 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
               young={young}
             />
           </div>
+          {young.source === YOUNG_SOURCE.CLE && (
+            <div className="mt-[32px]">
+              <MiniTitle>Nationalité Française</MiniTitle>
+              <Field
+                name="frenchNationality"
+                label="Nationalité Française"
+                value={data.frenchNationality}
+                mode={sectionMode}
+                className="mb-[16px]"
+                onStartRequest={onStartRequest}
+                currentRequest={currentRequest}
+                correctionRequest={getCorrectionRequest(requests, "frenchNationality")}
+                onCorrectionRequestChange={onCorrectionRequestChange}
+                type="select"
+                options={nationalityOptions}
+                transformer={translate}
+                onChange={(value) => onLocalChange("frenchNationality", value)}
+                young={young}
+              />
+            </div>
+          )}
           <div className="mt-[32px]">
             <MiniTitle>Adresse</MiniTitle>
             <Field
@@ -929,7 +1029,7 @@ function SectionIdentite({ young, onStartRequest, currentRequest, onCorrectionRe
   );
 }
 
-function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
+function SectionIdentiteCni({ young, cohort, globalMode, currentRequest, onStartRequest, requests, onCorrectionRequestChange, className, onChange }) {
   const user = useSelector((state) => state.Auth.user);
   const categoryOptions = ["cniNew", "cniOld", "passport"].map((s) => ({ value: s, label: translate(s) }));
   let cniDay = "";
@@ -937,7 +1037,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
   let cniYear = "";
 
   if (young.latestCNIFileExpirationDate) {
-    const date = dayjs(young.latestCNIFileExpirationDate).locale("fr");
+    const date = dayjs(young.latestCNIFileExpirationDate).toUtcLocally();
     cniDay = date.date();
     cniMonth = date.format("MMMM");
     cniYear = date.year();
@@ -966,6 +1066,7 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
         correctionRequest={getCorrectionRequest(requests, "latestCNIFileExpirationDate")}
         onCorrectionRequestChange={onCorrectionRequestChange}
         type="date"
+        disabled={young.latestCNIFileExpirationDate === null}
         value={young.latestCNIFileExpirationDate}
         onChange={(value) => onChange("latestCNIFileExpirationDate", value)}
         young={young}>
@@ -987,12 +1088,13 @@ function SectionIdentiteCni({ young, globalMode, currentRequest, onStartRequest,
           correctionRequest={getCorrectionRequest(requests, "latestCNIFileCategory")}
           onCorrectionRequestChange={onCorrectionRequestChange}
           type="select"
+          disabled={young.latestCNIFileCategory === "deleted"}
           options={categoryOptions}
           onChange={(cat) => onChange("latestCNIFileCategory", cat)}
           young={young}
         />
       )}
-      <HonorCertificate young={young} />
+      <HonorCertificate young={young} cohort={cohort} />
     </div>
   );
 }
@@ -1216,41 +1318,60 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
 
     if (!data.parent1Status) return true;
 
+    if (data.parent1Phone) data.parent1Phone = trimmedPhones[1];
+    if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
+
     for (let parent = 1; parent <= (young.parent2Status ? 2 : 1); ++parent) {
-      if ((data[`parent${parent}ContactPreference`] === "email" || data[`parent${parent}Email`] !== "") && !validator.isEmail(data[`parent${parent}Email`])) {
+      if (["", undefined].includes(data[`parent${parent}Email`]) || !validator.isEmail(data[`parent${parent}Email`])) {
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
-
-      if (
-        (data[`parent${parent}ContactPreference`] === "phone" || (trimmedPhones[parent] && trimmedPhones[parent] !== "")) &&
-        !isPhoneNumberWellFormated(data[`parent${parent}Phone`], data[`parent${parent}PhoneZone`] || "AUTRE")
-      ) {
+      if (!trimmedPhones[parent] || !data[`parent${parent}Phone`]) {
+        errors[`parent${parent}Phone`] = "Le numéro de téléphone est obligatoire";
+        result = false;
+      }
+      if (!trimmedPhones[parent]) {
+        errors[`parent${parent}Phone`] = "Le numéro de téléphone est obligatoire";
+        result = false;
+      }
+      if (trimmedPhones[parent] && trimmedPhones[parent] !== "" && !isPhoneNumberWellFormated(data[`parent${parent}Phone`], data[`parent${parent}PhoneZone`] || "AUTRE")) {
         errors[`parent${parent}Phone`] = PHONE_ZONES[data[`parent${parent}PhoneZone`] || "AUTRE"].errorMessage;
         result = false;
       }
       result = validateEmpty(data, `parent${parent}LastName`, errors) && result;
       result = validateEmpty(data, `parent${parent}FirstName`, errors) && result;
-
+      if (!data[`parent${parent}OwnAddress`]) {
+        errors[`parent${parent}OwnAddress`] = "Ce champ ne peut pas être vide";
+        result = false;
+      }
       if (data[`parent${parent}OwnAddress`] === "true") {
         result = validateEmpty(data, `parent${parent}Address`, errors) && result;
         result = validateEmpty(data, `parent${parent}Zip`, errors) && result;
         result = validateEmpty(data, `parent${parent}City`, errors) && result;
         result = validateEmpty(data, `parent${parent}Country`, errors) && result;
       }
-      if (!data.situation || data.situation === "") {
-        errors["situation"] = "Ce champ ne peut pas être vide";
-        result = false;
-      }
-      if (!data.grade || data.grade === "") {
-        errors["grade"] = "Ce champ ne peut pas être vide";
-        result = false;
+      if (young.source === YOUNG_SOURCE.VOLONTAIRE) {
+        if (!data.situation || data.situation === "") {
+          errors["situation"] = "Ce champ ne peut pas être vide";
+          result = false;
+        }
+        if (!data.grade || data.grade === "") {
+          errors["grade"] = "Ce champ ne peut pas être vide";
+          result = false;
+        }
       }
     }
-
     setErrors(errors);
     return result;
   }
+
+  const [isChecked, setIsChecked] = useState(young.sameSchoolCLE === "false");
+
+  const handleCheckboxChange = () => {
+    const newValue = !isChecked;
+    setIsChecked(newValue);
+    setData({ ...data, sameSchoolCLE: newValue ? "false" : "true" });
+  };
 
   function parentHasRequest(parentId) {
     return (
@@ -1286,73 +1407,120 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         <div className="flex">
           <div className="flex-[1_0_50%] pr-[56px]">
             <div>
-              <MiniTitle>Situation</MiniTitle>
-              <Field
-                name="grade"
-                label="Classe"
-                value={data.grade}
-                transformer={translateGrade}
-                mode={sectionMode}
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "grade")}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                type="select"
-                options={gradeOptions}
-                onChange={(value) => onLocalChange("grade", value)}
-                young={young}
-                className="flex-[1_1_50%]"
-              />
-              <Field
-                name="situation"
-                label="Statut"
-                value={data.situation}
-                transformer={translate}
-                mode={sectionMode}
-                className="mt-4 mb-4 flex-[1_1_50%]"
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, "situation")}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                type="select"
-                options={situationOptions}
-                onChange={(value) => onLocalChange("situation", value)}
-                young={young}
-              />
-              {data.schooled === "true" && (
+              {young.source === YOUNG_SOURCE.VOLONTAIRE ? (
                 <>
-                  {sectionMode === "edition" ? (
-                    <SchoolEditor young={data} onChange={onSchoolChange} />
-                  ) : (
+                  <MiniTitle>Situation</MiniTitle>
+                  <Field
+                    name="grade"
+                    label="Classe"
+                    value={data.grade}
+                    transformer={translateGrade}
+                    mode={sectionMode}
+                    onStartRequest={onStartRequest}
+                    currentRequest={currentRequest}
+                    correctionRequest={getCorrectionRequest(requests, "grade")}
+                    onCorrectionRequestChange={onCorrectionRequestChange}
+                    type="select"
+                    options={gradeOptions}
+                    onChange={(value) => onLocalChange("grade", value)}
+                    young={young}
+                    className="flex-[1_1_50%]"
+                  />
+                  <Field
+                    name="situation"
+                    label="Statut"
+                    value={data.situation}
+                    transformer={translate}
+                    mode={sectionMode}
+                    className="mt-4 mb-4 flex-[1_1_50%]"
+                    onStartRequest={onStartRequest}
+                    currentRequest={currentRequest}
+                    correctionRequest={getCorrectionRequest(requests, "situation")}
+                    onCorrectionRequestChange={onCorrectionRequestChange}
+                    type="select"
+                    options={situationOptions}
+                    onChange={(value) => onLocalChange("situation", value)}
+                    young={young}
+                  />
+                  {data.schooled === "true" && (
                     <>
-                      <Field
-                        name="schoolCity"
-                        label="Ville de l'établissement"
-                        value={data.schoolCity}
-                        mode={sectionMode}
-                        className="mb-[16px]"
-                        onStartRequest={onStartRequest}
-                        currentRequest={currentRequest}
-                        correctionRequest={getCorrectionRequest(requests, "schoolCity")}
-                        onCorrectionRequestChange={onCorrectionRequestChange}
-                        onChange={(value) => onLocalChange("schoolCity", value)}
-                        young={young}
-                      />
-                      <Field
-                        name="schoolName"
-                        label="Nom de l'établissement"
-                        value={data.schoolName}
-                        mode={sectionMode}
-                        className="mb-[16px]"
-                        onStartRequest={onStartRequest}
-                        currentRequest={currentRequest}
-                        correctionRequest={getCorrectionRequest(requests, "schoolName")}
-                        onCorrectionRequestChange={onCorrectionRequestChange}
-                        onChange={(value) => onLocalChange("schoolName", value)}
-                        young={young}
-                      />
+                      {sectionMode === "edition" ? (
+                        <SchoolEditor young={data} onChange={onSchoolChange} />
+                      ) : (
+                        <>
+                          <Field
+                            name="schoolCity"
+                            label="Ville de l'établissement"
+                            value={data.schoolCity}
+                            mode={sectionMode}
+                            className="mb-[16px]"
+                            onStartRequest={onStartRequest}
+                            currentRequest={currentRequest}
+                            correctionRequest={getCorrectionRequest(requests, "schoolCity")}
+                            onCorrectionRequestChange={onCorrectionRequestChange}
+                            onChange={(value) => onLocalChange("schoolCity", value)}
+                            young={young}
+                          />
+                          <Field
+                            name="schoolName"
+                            label="Nom de l'établissement"
+                            value={data.schoolName}
+                            mode={sectionMode}
+                            className="mb-[16px]"
+                            onStartRequest={onStartRequest}
+                            currentRequest={currentRequest}
+                            correctionRequest={getCorrectionRequest(requests, "schoolName")}
+                            onCorrectionRequestChange={onCorrectionRequestChange}
+                            onChange={(value) => onLocalChange("schoolName", value)}
+                            young={young}
+                          />
+                        </>
+                      )}
                     </>
                   )}
+                </>
+              ) : (
+                <>
+                  <MiniTitle>Classe engagée</MiniTitle>
+                  <Field name="classeName" label="Nom" value={data?.classe?.name} mode="readonly" className="mb-[16px]" young={young} />
+                  <div className="flex items-center gap-4">
+                    <Field name="uniqueKeyAndId" label="Numéro d'identification" value={data?.classe?.uniqueKeyAndId} mode="readonly" className="mb-[16px] w-1/2" young={young} />
+                    <Field
+                      name="coloration"
+                      label="Coloration"
+                      value={data?.classe?.coloration}
+                      mode="readonly"
+                      className="mb-[16px] w-1/2"
+                      young={young}
+                      transformer={translateColoration}
+                    />
+                  </div>
+                  <Link to={`/classes/${young.classeId}`} className="w-full ">
+                    <Button type="tertiary" title="Voir la classe" className="w-full mb-[16px]" />
+                  </Link>
+                  <MiniTitle>Situation scolaire</MiniTitle>
+                  <Field
+                    name="classeStatus"
+                    label="Statut"
+                    value={data?.etablissement?.sector}
+                    mode="readonly"
+                    className="mb-[16px]"
+                    young={young}
+                    transformer={translateEtbalissementSector}
+                  />
+                  <Field name="etablissementCity" label="Ville de l'établissement" value={data?.etablissement?.city} mode="readonly" className="mb-[16px]" young={young} />
+                  <Field name="classeGrade" label="Classe" value={data?.classe?.grade} mode="readonly" className="mb-[16px]" young={young} transformer={translateGrade} />
+                  <div className="flex items-center">
+                    <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} className="mr-2" />
+                    <p className="text-xs font-base text-gray-900 mr-1">Situation de l’élève différente de celle de la Classe engagée</p>
+                    <MdInfoOutline data-tip data-for="info_sameSchool" className="h-5 w-5 cursor-pointer text-gray-400" />
+                    <ReactTooltip id="info_sameSchool" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+                      <ul className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                        <li>à remplir</li>
+                        <li>blabla</li>
+                      </ul>
+                    </ReactTooltip>
+                  </div>
                 </>
               )}
             </div>
@@ -1584,18 +1752,9 @@ const PARENT_STATUS_NAME = {
   representant: "Le représentant légal",
 };
 
-function SectionConsentements({ young, onChange, readonly = false }) {
-  const [youngAge, setYoungAge] = useState("?");
+function SectionConsentements({ young, onChange, readonly = false, cohort }) {
   const [confirmModal, setConfirmModal] = useState(null);
   const [pdfDownloading, setPdfDownloading] = useState("");
-
-  useEffect(() => {
-    if (young) {
-      setYoungAge(getAge(young.birthdateAt));
-    } else {
-      setYoungAge("?");
-    }
-  }, [young]);
 
   const authorizationOptions = [
     { value: "true", label: "J'autorise" },
@@ -1718,17 +1877,19 @@ function SectionConsentements({ young, onChange, readonly = false }) {
           </span>
         </div>
         <div>
-          <CheckRead value={young.acceptCGU === "true"}>
-            A lu et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
-          </CheckRead>
-          <CheckRead value={young.acceptCGU === "true"}>A pris connaissance des modalités de traitement de mes données personnelles.</CheckRead>
           <CheckRead value={young.consentment === "true"}>
-            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-            <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
+            Se porte volontaire pour participer à la session <b>{getCohortYear(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis
+            la réalisation d&apos;une phase d'engagement.
           </CheckRead>
-          <CheckRead value={young.consentment === "true"}>S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.</CheckRead>
-          <CheckRead value={(young.inscriptionDoneDate !== undefined && young.inscriptionDoneDate !== null) || young.informationAccuracy === "true"}>
-            Certifie l&apos;exactitude des renseignements fournis
+          <CheckRead value={young.acceptCGU === "true"}>
+            {young.source === YOUNG_SOURCE.CLE ? (
+              <>S&apos;inscrit pour le séjour de cohésion et s&apos;engage à en respecter le règlement intérieur.</>
+            ) : (
+              <>
+                S&apos;inscrit pour le séjour de cohésion <strong>{getCohortPeriod(cohort)}</strong> sous réserve de places disponibles et s&apos;engage à en respecter le règlement
+                intérieur.
+              </>
+            )}
           </CheckRead>
         </div>
       </div>
@@ -1742,7 +1903,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             </span>
           </div>
           {young.parent1ValidationDate && (
-            <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+            <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
           )}
         </div>
         <div className="flex items-center gap-8">
@@ -1757,26 +1918,22 @@ function SectionConsentements({ young, onChange, readonly = false }) {
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à participer à la session <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-          réalisation d&apos;une mission d&apos;intérêt général.
+          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohort)}</b> du SNU.
         </div>
         <div>
           <CheckRead value={young.parent1AllowSNU === "true"}>
-            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de{" "}
             <b>
               {young.firstName} {young.lastName}
             </b>
+            .
           </CheckRead>
-          {youngAge < 15 && (
-            <CheckRead value={young.parent1AllowSNU === "true"}>
-              Accepte la collecte et le traitement des données personnelles de{" "}
-              <b>
-                {young.firstName} {young.lastName}
-              </b>
-            </CheckRead>
-          )}
           <CheckRead value={young.parent1AllowSNU === "true"}>
-            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+            S&apos;engage à communiquer la fiche sanitaire de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>{" "}
+            au responsable du séjour de cohésion.
           </CheckRead>
           <CheckRead value={young.parent1AllowSNU === "true"}>
             S&apos;engage à ce que{" "}
@@ -1786,7 +1943,13 @@ function SectionConsentements({ young, onChange, readonly = false }) {
             soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre
             jaune.
           </CheckRead>
-          <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du Règlement Intérieur du SNU.</CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>Reconnait avoir pris connaissance du règlement Intérieur du séjour de cohésion.</CheckRead>
+          <CheckRead value={young.parent1AllowSNU === "true"}>
+            Accepte la collecte et le traitement des données personnelles de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+          </CheckRead>
         </div>
         <div className="itemx-center mt-[16px] flex justify-between">
           <div className="grow text-[14px] leading-[20px] text-[#374151]">
@@ -1895,7 +2058,7 @@ function SectionConsentements({ young, onChange, readonly = false }) {
                 </span>
               </div>
               {young.parent2ValidationDate && (
-                <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+                <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
               )}
             </div>
             {young.parent1AllowImageRights === "true" && (
@@ -2155,12 +2318,12 @@ function getCorrectionRequest(requests, field) {
   });
 }
 
-function HonorCertificate({ young }) {
+function HonorCertificate({ young, cohort }) {
   let cniExpired = false;
   if (young && young.cohort && young.latestCNIFileExpirationDate) {
-    const cohortDate = START_DATE_SESSION_PHASE1[young.cohort];
+    const cohortDate = getCohortStartDate(young, cohort);
     if (cohortDate) {
-      cniExpired = new Date(young.latestCNIFileExpirationDate).valueOf() < cohortDate.valueOf();
+      cniExpired = dayjs(young.latestCNIFileExpirationDate).toUtc().valueOf() < dayjs(cohortDate).toUtc().valueOf();
     }
   }
 

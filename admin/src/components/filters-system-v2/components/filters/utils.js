@@ -1,9 +1,9 @@
 import { toastr } from "react-redux-toastr";
+import { COHESION_STAY_START } from "snu-lib";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
-import { COHESION_STAY_START } from "snu-lib";
 
-export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort) => {
+export const buildQuery = async (route, selectedFilters, page = 0, filterArray, sort, size = 10) => {
   try {
     const resAlternative = await api.post(route, {
       page,
@@ -12,11 +12,12 @@ export const buildQuery = async (route, selectedFilters, page = 0, filterArray, 
         return { ...e, [key]: value.filter.map((e) => String(e)) };
       }, {}),
       sort: sort ? { field: sort.field, order: sort.order } : null,
+      size,
     });
 
     const aggs = resAlternative.responses[1].aggregations;
     const data = resAlternative.responses[0].hits.hits.map((h) => ({ ...h._source, _id: h._id, sort: h?.sort }));
-    const count = resAlternative.responses[0].hits.total.value;
+    const count = resAlternative.responses[1].aggregations?.count?.total?.value || resAlternative.responses[0].hits?.total?.value || 0;
     const newFilters = {};
 
     // map a travers les aggregations pour recuperer les filtres
@@ -115,9 +116,25 @@ export const orderCohort = (cohorts) => {
     if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, cohort.key)) {
       cohort.date = COHESION_STAY_START[cohort.key];
     } else {
-      cohort.date = new Date(2000, 0, 1);
+      cohort.date = new Date("01/01/2000");
     }
   }
-  cohorts.sort((a, b) => b.date - a.date);
+  cohorts = cohorts.sort((a, b) => new Date(b.date) - new Date(a.date));
   return cohorts;
+};
+
+export const transformExistingField = (data) => {
+  const newData = [
+    { key: "true", doc_count: 0 },
+    { key: "false", doc_count: 0 },
+  ];
+  data.map((d) => {
+    console.log(d);
+    if (d.key === "N/A" || d.key === "") {
+      newData.find((e) => e.key === "false").doc_count += d.doc_count;
+    } else {
+      newData.find((e) => e.key === "true").doc_count += d.doc_count;
+    }
+  });
+  return newData;
 };

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
-const { COHORTS } = require("snu-lib");
+const { getCohortNames } = require("snu-lib");
 const ModificationBusSchema = require("./modificationBus").Schema;
 const PointDeRassemblementModel = require("./pointDeRassemblement");
 const MODELNAME = "plandetransport";
@@ -61,7 +61,7 @@ const Schema = new mongoose.Schema({
   cohort: {
     type: String,
     required: true,
-    enum: COHORTS,
+    enum: getCohortNames(),
     documentation: {
       description: "Cohorte de la ligne de bus",
     },
@@ -243,6 +243,22 @@ const Schema = new mongoose.Schema({
     required: true,
     documentation: {
       description: "Liste des modifications de lignes",
+    },
+  },
+  delayedForth: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La ligne est retardée à l'allée",
+    },
+  },
+  delayedBack: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La ligne est retardée au Retour",
     },
   },
 

@@ -18,6 +18,7 @@ const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
 const SENTRY_URL = process.env.SENTRY_URL || "";
 const SENTRY_TRACING_SAMPLE_RATE = process.env.SENTRY_TRACING_SAMPLE_RATE || "";
+const SENTRY_PROFILE_SAMPLE_RATE = process.env.SENTRY_PROFILE_SAMPLE_RATE || "";
 
 const CELLAR_ENDPOINT = process.env.CELLAR_ENDPOINT || "";
 const CELLAR_KEYID = process.env.CELLAR_KEYID || "";
@@ -35,6 +36,7 @@ const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "";
 const QPV_USERNAME = process.env.QPV_USERNAME || "";
 const QPV_PASSWORD = process.env.QPV_PASSWORD || "";
 
+const API_ENGAGEMENT_URL = process.env.API_ENGAGEMENT_URL || "https://api.api-engagement.beta.gouv.fr";
 const API_ENGAGEMENT_KEY = process.env.API_ENGAGEMENT_KEY || "";
 
 const API_ASSOCIATION_ES_ENDPOINT = process.env.API_ASSOCIATION_ES_ENDPOINT || "";
@@ -78,6 +80,7 @@ module.exports = {
   QPV_USERNAME,
   QPV_PASSWORD,
   API_ENGAGEMENT_KEY,
+  API_ENGAGEMENT_URL,
   API_ASSOCIATION_ES_ENDPOINT,
   API_ASSOCIATION_CELLAR_ENDPOINT,
   API_ASSOCIATION_CELLAR_KEYID,

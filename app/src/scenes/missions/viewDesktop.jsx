@@ -9,7 +9,6 @@ import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import {
   formatStringDateTimezoneUTC,
-  htmlCleaner,
   translate,
   translateApplication,
   copyToClipboard,
@@ -39,6 +38,7 @@ import ChevronDown from "../../assets/icons/ChevronDown";
 import Download from "../../assets/icons/Download";
 import { capture } from "../../sentry";
 import House from "./components/HouseIcon";
+import { htmlCleaner } from "snu-lib";
 
 export default function viewDesktop() {
   const [mission, setMission] = useState();
@@ -73,7 +73,7 @@ export default function viewDesktop() {
       if (mission?.application?.contractId) {
         const { ok, data, code } = await api.get(`/contract/${mission.application.contractId}`);
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);
@@ -145,7 +145,7 @@ export default function viewDesktop() {
 
   const updateApplication = async (status) => {
     setLoading(true);
-    const { ok } = await api.put(`/application`, { _id: mission.application._id, status });
+    const { ok } = await api.put(`/application`, { _id: mission.application._id, status, ...(APPLICATION_STATUS.ABANDON === status ? { missionDuration: "0" } : {}) });
     if (!ok) toastr.error("Une erreur s'est produite lors de la mise à jour de  votre candidature");
     let template;
     if (status === APPLICATION_STATUS.ABANDON) template = SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION;

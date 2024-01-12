@@ -1,14 +1,57 @@
 import { Popover, Transition } from "@headlessui/react";
-import dayjs from "dayjs";
-import React, { Fragment } from "react";
+import dayjs from "@/utils/dayjs.utils";
+import React, { Fragment, useEffect, useState } from "react";
 import DateIcon from "../../../../assets/icons/DateIcon";
 import DatePicker from "../DatePicker";
+import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, placeholder = "Date", readOnly = false }) {
+export default function DatePickerWrapper({ label, value, onChange, disabled = false, error, mode, isTime, placeholder, readOnly = false, className }) {
+  const [time, setTime] = useState("00:00");
+
+  useEffect(() => {
+    if (value) {
+      setTime(`${String(dayjs(value).utc().hour()).padStart(2, 0)}:${String(dayjs(value).utc().minute()).padStart(2, 0)}`);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    handleChange(value);
+  }, [time]);
+
+  const handleChange = (date) => {
+    if (!date) return undefined;
+    if (!isTime || mode !== "single") return onChange(date);
+
+    // eslint-disable-next-line
+    let [hours, minutes] = time
+      ? time.split(":")
+      : value
+        ? [dayjs(value).hour(), dayjs(value).minute()]
+        : ["00", "00"];
+
+    hours = Number(hours);
+    minutes = Number(minutes);
+    const seconds = hours === 23 && minutes === 59 ? 59 : 0;
+
+    const d = dayjs(date).utc().hour(Number(hours)).minute(Number(minutes)).second(seconds).millisecond(0).toDate();
+    onChange(d);
+  };
+
+  const getHoursOrMinutes = (type) => {
+    const [hours, minutes] = time.split(":");
+    if (type === "hours") return Number(hours);
+    return Number(minutes);
+  };
+
+  const setHoursOrMinutes = (type, n) => {
+    if (type === "hours") setTime(`${String(n).padStart(2, 0)}:${String(getHoursOrMinutes("minutes")).padStart(2, 0)}`);
+    else setTime(`${String(getHoursOrMinutes("hours")).padStart(2, 0)}:${String(n).padStart(2, 0)}`);
+  };
+
   return (
     <Popover className="relative w-full">
       {({ open }) => (
@@ -22,7 +65,7 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
               "w-full cursor-pointer rounded-lg outline-none ",
             )}>
             <div
-              className={`flex w-full items-center justify-between rounded-lg border-[1px] bg-white py-2 px-2.5 ${disabled ? "border-gray-200" : "border-gray-300"} ${
+              className={`flex w-full items-center justify-between rounded-lg border-[1px] bg-white py-2 px-2.5 ${className} ${disabled ? "border-gray-200" : "border-gray-300"} ${
                 error ? "border-red-500" : ""
               }`}>
               <div className="flex flex-1 flex-col">
@@ -31,7 +74,12 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
                   <input
                     className={`w-full bg-white text-sm ${disabled ? "text-gray-400" : "text-gray-900"}`}
                     disabled={true}
-                    value={value ? dayjs(value).format("DD/MM/YYYY") : ""}
+                    value={
+                      value
+                        ? dayjs(value).toUtcLocally().format("DD/MM/YYYY") +
+                          (isTime ? " " + dayjs().hour(dayjs(value).utc().hour()).minute(dayjs(value).utc().minute()).shiftTimeToUtc().format("HH:mm") : "")
+                        : ""
+                    }
                     placeholder={placeholder}
                   />
                 </div>
@@ -51,8 +99,72 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-1">
             <Popover.Panel className="absolute left-0 z-10 pt-2">
-              <div className="flex flex-auto rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 ">
-                <DatePicker mode={mode} fromYear={2022} toYear={2030} value={value} onChange={onChange} />
+              <div className="flex items-stretch flex-auto rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 overflow-hidden">
+                <DatePicker mode={mode} fromYear={new Date().getFullYear() - 70} toYear={new Date().getFullYear() + 10} value={value || new Date()} onChange={handleChange} />
+                {isTime && (
+                  <div className="flex items-center justify-between my-[16px] px-6 border-l-[1px] border-gray-200">
+                    <div className="flex items-start h-full">
+                      {["hours", "minutes"].map((c, colIndex) => (
+                        <div key={c + colIndex} className="flex items-center h-full">
+                          <div className="flex flex-col items-center justify-between h-full">
+                            <div
+                              className="flex items-center justify-center w-[40px] h-[40px] rounded-full cursor-pointer hover:bg-[#eff6ff]"
+                              onClick={() => {
+                                let hOrM = getHoursOrMinutes(c);
+                                // eslint-disable-next-line
+                                setHoursOrMinutes(
+                                  c,
+                                  c === "hours"
+                                    ? hOrM === 0 ? 23 : hOrM - 1
+                                    : hOrM === 0 ? 59 : hOrM - 1,
+                                  );
+                              }}>
+                              <BsChevronUp size={24} color="#797b86" />
+                            </div>
+                            {/* 42 * 5 =  */}
+                            <div className="max-h-[210px] overflow-hidden">
+                              <div className={`-translate-y-[0px]`} style={{ "--tw-translate-y": `-${42 * (getHoursOrMinutes(c) ?? 0)}px` }}>
+                                {[
+                                  "",
+                                  "",
+                                  ...Array(c === "hours" ? 24 : 60)
+                                    .fill(0)
+                                    .map((n, i) => n + i),
+                                  "",
+                                  "",
+                                ].map((n, i) => (
+                                  <div
+                                    key={c + n + i}
+                                    className={`flex items-center justify-center w-[40px] h-[40px] text-[14px] my-[2px] rounded-[8px] ${
+                                      typeof n === "number" && "cursor-pointer hover:bg-[#eff6ff]"
+                                    } ${n === getHoursOrMinutes(c) && "font-bold text-white !bg-[#2563eb]"}`}
+                                    onClick={() => !!n && setHoursOrMinutes(c, n)}>
+                                    {n}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div
+                              className="flex items-center justify-center w-[40px] h-[40px] rounded-full cursor-pointer hover:bg-[#eff6ff]"
+                              onClick={() => {
+                                let hOrM = getHoursOrMinutes(c);
+                                // eslint-disable-next-line
+                                setHoursOrMinutes(
+                                  c,
+                                  c === "hours"
+                                    ? hOrM === 23 ? 0 : hOrM + 1
+                                    : hOrM === 59 ? 0 : hOrM + 1,
+                                );
+                              }}>
+                              <BsChevronDown size={24} color="#797b86" />
+                            </div>
+                          </div>
+                          {c === "hours" ? <div className="font-bold mx-[4px] text-[15px] leading-[24px]">:</div> : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </Popover.Panel>
           </Transition>

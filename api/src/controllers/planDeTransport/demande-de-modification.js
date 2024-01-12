@@ -20,7 +20,7 @@ const {
   ROLES,
   isLigneBusDemandeDeModificationOpen,
 } = require("snu-lib");
-const { ObjectId } = require("mongodb");
+const { ObjectId } = require("mongoose").Types;
 const { sendTemplate } = require("../../sendinblue");
 const config = require("../../config");
 
@@ -57,11 +57,11 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!ligneBusCanCreateDemandeDeModification(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanCreateDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const cohort = await CohortModel.findOne({ name: req.user.cohort });
     if (!cohort) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isLigneBusDemandeDeModificationOpen(cohort, req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!isLigneBusDemandeDeModificationOpen(cohort, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { lineId, message } = value;
 
@@ -116,7 +116,7 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!ligneBusCanEditStatusDemandeDeModification(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanEditStatusDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { status, id } = value;
 
@@ -167,7 +167,7 @@ router.put("/:id/opinion", passport.authenticate("referent", { session: false, f
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!ligneBusCanEditOpinionDemandeDeModification(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanEditOpinionDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { opinion, id } = value;
 
@@ -201,7 +201,7 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
     console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!ligneBusCanSendMessageDemandeDeModification(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanSendMessageDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { message, id } = value;
 
@@ -231,7 +231,7 @@ router.put("/:id/tag/:tagId", passport.authenticate("referent", { session: false
     }).validate({ ...req.body, ...req.params });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { tagId, id } = value;
 
@@ -263,7 +263,7 @@ router.put("/:id/tag/:tagId/delete", passport.authenticate("referent", { session
     console.log(error);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanEditTagsDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { tagId, id } = value;
 
@@ -291,7 +291,7 @@ router.get("/ligne/:id", passport.authenticate("referent", { session: false, fai
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!ligneBusCanViewDemandeDeModification(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!ligneBusCanViewDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id } = value;
 

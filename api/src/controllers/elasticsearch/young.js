@@ -2,20 +2,22 @@ const passport = require("passport");
 const express = require("express");
 const Joi = require("joi");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch, YOUNG_STATUS_PHASE1, ES_NO_LIMIT } = require("snu-lib");
+const { ROLES, canSearchInElasticSearch, YOUNG_STATUS_PHASE1, ES_NO_LIMIT, youngExportFields } = require("snu-lib");
 const datesub = require("date-fns/sub");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
-const { serializeYoungs } = require("../../utils/es-serializer");
+
+const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
 const StructureObject = require("../../models/structure");
 const ApplicationObject = require("../../models/application");
 const SessionPhase1Object = require("../../models/sessionPhase1");
 const CohesionCenterObject = require("../../models/cohesionCenter");
 const MissionObject = require("../../models/mission");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
+const { populateYoungExport } = require("./populate/populateYoung");
 
 function getYoungsFilters(user) {
   return [
@@ -62,6 +64,9 @@ function getYoungsFilters(user) {
     "schoolDepartment.keyword",
     "parentAllowSNU.keyword",
     "sessionPhase1Id.keyword",
+    "source.keyword",
+    "classeId.keyword",
+    "etablissementId.keyword",
   ].filter(Boolean);
 }
 
@@ -153,10 +158,10 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
 router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
     const searchFields = ["email", "firstName", "lastName", "city", "zip"];
     const filterFields = ["meetingPointId.keyword", "meetingPointName.keyword", "meetingPointCity.keyword", "region.keyword", "department.keyword"];
     const sortFields = [];
-
     const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
@@ -171,7 +176,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
     ];
 
     // Body params validation
-    const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Build request body
@@ -182,6 +187,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
       page,
       sort: { field: "lastName.keyword", order: "asc" },
       contextFilters,
+      size,
       customQueries: {
         meetingPointName: (query, value) => {
           query.bool.must.push({ terms: { "meetingPointId.keyword": value } });
@@ -212,71 +218,6 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
   }
 });
 
-router.post("/moderator/sejour/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    if (req.user.role !== ROLES.ADMIN) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const filterFields = ["statusPhase1", "region", "department", "cohorts", "academy", "status"];
-    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const aggsFilter = {};
-    if (queryFilters?.statusPhase1?.length) {
-      aggsFilter.filter = {
-        bool: {
-          must: [],
-          filter: [{ terms: { "statusPhase1.keyword": queryFilters?.statusPhase1?.filter((s) => s !== YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) } }],
-        },
-      };
-    }
-
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        statusPhase1: { terms: { field: "statusPhase1.keyword" } },
-        pdr: {
-          ...aggsFilter,
-          aggs: { names: { terms: { field: "hasMeetingInformation.keyword", missing: "NR", size: ES_NO_LIMIT } } },
-        },
-        participation: {
-          ...aggsFilter,
-          aggs: { names: { terms: { field: "youngPhase1Agreement.keyword", size: ES_NO_LIMIT } } },
-        },
-        precense: {
-          ...aggsFilter,
-          aggs: { names: { terms: { field: "cohesionStayPresence.keyword", missing: "NR", size: ES_NO_LIMIT } } },
-        },
-        JDM: {
-          ...aggsFilter,
-          aggs: { names: { terms: { field: "presenceJDM.keyword", missing: "NR", size: ES_NO_LIMIT } } },
-        },
-        depart: {
-          ...aggsFilter,
-          aggs: { names: { terms: { field: "departInform.keyword", size: ES_NO_LIMIT } } },
-        },
-        departMotif: {
-          ...aggsFilter,
-          aggs: { names: { terms: { field: "departSejourMotif.keyword", size: ES_NO_LIMIT } } },
-        },
-      },
-      size: 0,
-      track_total_hits: true,
-    };
-
-    if (queryFilters.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": queryFilters.region } });
-    if (queryFilters.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": queryFilters.department } });
-    if (queryFilters.cohorts?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": queryFilters.cohorts } });
-    if (queryFilters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": queryFilters.academy } });
-    if (queryFilters.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": queryFilters.status } });
-
-    const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
-    return res.status(200).send(response.body);
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { queryFilters, error } = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
@@ -287,7 +228,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
       return res.status(youngContextError.status).send(youngContextError.body);
     }
 
-    const body = {
+    const bodyQuery = {
       query: {
         bool: {
           must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
@@ -311,7 +252,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
       track_total_hits: true,
     };
 
-    const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
+    const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, bodyQuery) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
@@ -322,6 +263,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
 router.post("/by-point-de-rassemblement/:meetingPointId/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
     const searchFields = ["email", "firstName", "lastName", "city", "zip"];
     const filterFields = ["cohort.keyword", "region.keyword", "sessionPhase1Id.keyword", "sessionPhase1Name", "sessionPhase1City", "department.keyword", "ligneId.keyword"];
     const sortFields = [];
@@ -340,7 +282,7 @@ router.post("/by-point-de-rassemblement/:meetingPointId/:action(search|export)",
     ];
 
     // Body params validation
-    const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Build request body
@@ -349,6 +291,7 @@ router.post("/by-point-de-rassemblement/:meetingPointId/:action(search|export)",
       filterFields,
       queryFilters,
       page,
+      size,
       sort: { field: "lastName.keyword", order: "asc" },
       contextFilters,
       customQueries: {
@@ -394,9 +337,11 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       "department.keyword",
       "gender.keyword",
       "grade.keyword",
+      "situation.keyword",
       "handicap.keyword",
       "ppsBeneficiary.keyword",
       "paiBeneficiary.keyword",
+      "isRegionRural.keyword",
       "qpv.keyword",
       "allergies.keyword",
       "specificAmenagment.keyword",
@@ -412,7 +357,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     ];
     const sortFields = [];
 
-    if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Context filters
     const contextFilters = [
@@ -432,14 +377,14 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
         return res.status(200).send({ ok: true, data: "no cohort available" });
       }
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
     if (user.role === ROLES.REFERENT_REGION) {
       const centers = await CohesionCenterObject.find({ region: user.region });
       const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
@@ -447,12 +392,12 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       const centers = await CohesionCenterObject.find({ department: user.department });
       const sessionsPhase1 = await SessionPhase1Object.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
       if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 
     // Body params validation
-    const { queryFilters, page, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Build request body
@@ -463,14 +408,36 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       page,
       sort: { field: "lastName.keyword", order: "asc" },
       contextFilters,
+      size,
     });
 
+    let response;
+
     if (["export", "exportBus"].includes(req.params.action)) {
-      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      if (req.query.needSchoolInfo) {
+        const data = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+        let schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
+        let all = data;
+
+        if (schoolsId.length) {
+          const schoolResponse = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolsId } } } });
+          const schools = schoolResponse.map((s) => ({ _id: s._id, _source: s }));
+          all = data.map((item) => ({ ...item, esSchool: schools.find((e) => e._id === item.schoolId) }));
+        }
+
+        response = { ok: true, data: serializeYoungs(all) };
+      } else {
+        const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+        return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      }
+    }
+
+    if (["export", "exportBus"].includes(req.params.action)) {
+      return res.status(200).send(response);
     } else {
-      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(serializeYoungs(response.body));
+      const esResponse = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      response = serializeYoungs(esResponse.body);
+      return res.status(200).send(response);
     }
   } catch (error) {
     capture(error);
@@ -482,11 +449,10 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["email.keyword^3", "firstName.folded^1", "lastName.folded^1", "parent1Email.keyword^4", "parent2Email.keyword^5", "zip^6"];
+    const searchFields = ["email.keyword^1", "firstName.folded^2", "lastName.folded^2", "parent1Email.keyword^1", "parent2Email.keyword^1", "zip^1"];
     const filterFields = getYoungsFilters(user);
 
     const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
-
     const { youngContextFilters, youngContextError } = await buildYoungContext(user);
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
@@ -502,9 +468,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       ...youngContextFilters,
       query.tab === "volontaire" ? { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST", "DELETED"] } } : null,
     ].filter(Boolean);
-
     // Body params validation
-    const { queryFilters, page, sort, exportFields, error } = joiElasticSearch({ filterFields, sortFields, body: body });
+    const { queryFilters, page, sort, exportFields, error, size } = joiElasticSearch({ filterFields, sortFields, body: body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Build request body
@@ -515,11 +480,13 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       page,
       sort,
       contextFilters,
+      size,
     });
-
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      let data = serializeYoungs(response);
+      data = await populateYoungExport(data, exportFields);
+      return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
@@ -567,7 +534,15 @@ router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", pa
 
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      let data = serializeYoungs(response);
+      //School
+      if (exportFields.includes("schoolId")) {
+        const schoolIds = [...new Set(data.map((item) => item.schoolId).filter(Boolean))];
+        const schools = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolIds } } } });
+        data = data.map((item) => ({ ...item, school: schools?.find((e) => e._id.toString() === item.schoolId) }));
+      }
+
+      return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
@@ -663,7 +638,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
       "departSejourMotif.keyword",
     ];
     const sortFields = [];
-    if (!canSearchInElasticSearch(user, "young")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(user, "young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     // Context filters
     const contextFilters = [];
 

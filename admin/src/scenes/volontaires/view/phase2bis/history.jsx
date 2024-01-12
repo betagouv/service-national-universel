@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 
 import HistoricComponent from "../../../../components/views/Historic";
 import { capture } from "../../../../sentry";
@@ -8,7 +8,7 @@ import api from "../../../../services/api";
 import YoungHeader from "../../../phase0/components/YoungHeader";
 import LeftArrow from "../../../../assets/icons/ArrowNarrowLeft";
 
-export default function history({ young, onChange }) {
+export default function History({ young, onChange }) {
   const [contract, setContract] = useState(null);
   const [application, setApplication] = useState(null);
   let { applicationId } = useParams();
@@ -16,10 +16,11 @@ export default function history({ young, onChange }) {
   useEffect(() => {
     const getContract = async () => {
       if (!young) return;
-      let { ok, data, code } = await api.get(`/application/${applicationId}/contract`);
+      let { ok, data } = await api.get(`/application/${applicationId}/contract`);
       if (!ok) {
-        capture(code);
-        return toastr.error("Oups, une erreur est survenue", code);
+        return;
+        // capture(new Error(code));
+        // return toastr.error("Oups, une erreur est survenue", code);
       }
 
       setContract(data);
@@ -28,7 +29,7 @@ export default function history({ young, onChange }) {
       if (!young) return;
       let { ok, data, code } = await api.get(`/application/${applicationId}`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
 

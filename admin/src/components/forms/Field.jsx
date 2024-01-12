@@ -1,5 +1,5 @@
 import React from "react";
-import DatePickerList from "../../scenes/phase0/components/DatePickerList";
+import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import { copyToClipboard } from "../../utils";
 import { HiCheckCircle } from "react-icons/hi";
 import { BiCopy } from "react-icons/bi";
@@ -17,6 +17,7 @@ export default function Field({
   isJvaMission = false,
   copy = false,
   autoFocus = false,
+  placeholder = "",
 }) {
   const [copied, setCopied] = React.useState(false);
   const border = (readOnly, error) => {
@@ -24,6 +25,13 @@ export default function Field({
     if (error) return "border-red-500";
     return "border-gray-300 focus-within:border-blue-500";
   };
+
+  if (type === "date")
+    return (
+      <div className={className}>
+        <DatePickerInput label={label} placeholder={placeholder} value={value} onChange={(date) => handleChange(date, name)} disabled={readOnly || isJvaMission} />
+      </div>
+    );
 
   return (
     <div className={className}>
@@ -42,9 +50,6 @@ export default function Field({
             </div>
           )}
         </div>
-        {type === "date" && (
-          <DatePickerList disabled={readOnly || isJvaMission} fromEdition={false} value={value ? new Date(value) : null} onChange={(date) => handleChange(new Date(date))} />
-        )}
         {["text", "tel"].includes(type) && (
           <input
             readOnly={(readOnly || isJvaMission) && "readonly"}
@@ -58,9 +63,18 @@ export default function Field({
         )}
 
         {type === "textarea" && (
-          <textarea rows={row} readOnly={readOnly || isJvaMission} type="text" name={name} value={value} onChange={handleChange} className={"w-full text-start " + className} />
+          <textarea
+            rows={row}
+            readOnly={readOnly || isJvaMission}
+            type="text"
+            placeholder={placeholder}
+            name={name}
+            value={value}
+            onChange={handleChange}
+            className={"w-full text-start " + className}
+          />
         )}
-        {errors[name] && <div className="mt-2 text-red-500">{errors[name]}</div>}
+        {errors[name] && <div className="mt-1 text-red-500">{errors[name]}</div>}
       </div>
     </div>
   );

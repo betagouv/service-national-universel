@@ -3,6 +3,7 @@ require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const puppeteer = require("puppeteer");
 const bodyParser = require("body-parser");
+
 const { initSentry, capture } = require("./sentry");
 
 require("events").EventEmitter.defaultMaxListeners = 30; // Fix warning node
@@ -44,7 +45,9 @@ const renderFromHtml = async (html, options) => {
 
 const getBrowserAndPage = async (options) => {
   try {
-    const browser = await puppeteer.launch(options?.launch ?? {});
+    const browser = await puppeteer.launch(
+      options?.launch ?? { headless: "new" }
+    );
     const page = await browser.newPage();
 
     if (options?.emulateMedia) {

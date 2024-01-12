@@ -3,13 +3,6 @@ env:
   APP_NAME: snu-api
   ENVIRONMENT_NAME: snu-api
 
-  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  SLACK_COLOR: "#3278BD"
-  SLACK_ICON_EMOJI: ":package:"
-  SLACK_USERNAME: Github
-  MSG_MINIMAL: true
-  SLACK_FOOTER: ""
-
 name: Test & Deploy API
 
 on:
@@ -37,12 +30,12 @@ jobs:
           node-version: 18.x
 
       - name: Start MongoDB 4.0
-        uses: supercharge/mongodb-github-action@1.7.0
+        uses: supercharge/mongodb-github-action@v1.10.0
         with:
           mongodb-version: "4.0"
 
       - name: Install packages
-        run: npm install
+        run: npm ci
 
       - name: Lint code
         working-directory: ${{ env.SUBFOLDER_NAME }}
@@ -80,9 +73,13 @@ jobs:
       - name: Build lib
         continue-on-error: false
         run: |
-          npm install -w packages/lib
+          npm ci -w packages/lib
           npm run build -w packages/lib
           rm packages/lib/.gitignore
+
+      - name: Remove DSFR
+        run: |
+          rm -Rf packages/ds
 
       - name: Create SSH key
         run: |
@@ -118,15 +115,3 @@ jobs:
         env:
           CLEVER_CLOUD_GIT_REMOTE_STAGING: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_STAGING }}
           CLEVER_CLOUD_GIT_REMOTE_PROD: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_PROD }}
-
-      - name: Notification on failure
-        if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: Failed to deploy api
-
-      - name: Notification on success
-        if: ${{ success() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: api deployed

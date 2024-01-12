@@ -2,11 +2,14 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { ROLES_LIST, PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
+const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
+const { capture } = require("../sentry");
 const MODELNAME = "young";
+const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
+const StateManager = require("../states");
 
 const File = new mongoose.Schema({
   name: String,
@@ -100,7 +103,7 @@ const Note = new mongoose.Schema({
     type: String,
     enum: ["INSCRIPTION", "PHASE_1", "PHASE_2", "PHASE_3", ""],
   },
-  note: { type: String, required: true, maxLength: 500 },
+  note: { type: String, required: true },
   referent: new mongoose.Schema({
     _id: { type: mongoose.Types.ObjectId, required: true },
     firstName: { type: String, required: true },
@@ -170,6 +173,19 @@ const Schema = new mongoose.Schema({
       description: "E-mail du volontaire",
     },
   },
+  emailVerified: {
+    type: String,
+    documentation: {
+      description: "L'utilisateur a validé son email : 2FA possible",
+    },
+  },
+  newEmail: {
+    type: String,
+    trim: true,
+    documentation: {
+      description: "E-mail que le volontaire souhaite utiliser (valiation par code envoyé par email avant changement définitif de l'email)",
+    },
+  },
   phone: {
     type: String,
     documentation: {
@@ -197,43 +213,13 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    enum: [
-      "Juillet 2023",
-      "Juin 2023",
-      "Avril 2023 - B",
-      "Avril 2023 - A",
-      "Février 2023 - C",
-      "Juillet 2022",
-      "Juin 2022",
-      "Février 2022",
-      "2022",
-      "2021",
-      "2020",
-      "2019",
-      "à venir",
-      "Séjour de test",
-    ],
+    enum: getCohortNames(),
     documentation: {
       description: "Cohorte",
     },
   },
   originalCohort: {
     type: String,
-    enum: [
-      "Juillet 2023",
-      "Juin 2023",
-      "Avril 2023 - B",
-      "Avril 2023 - A",
-      "Février 2023 - C",
-      "Juillet 2022",
-      "Juin 2022",
-      "Février 2022",
-      "2022",
-      "2021",
-      "2020",
-      "2019",
-      "à venir",
-    ],
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },
@@ -379,26 +365,35 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  hasStartedReinscription: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Le jeune a commencé sa réinscription",
+    },
+  },
+
+  // also used for 2024
   reinscriptionStep2023: {
     type: String,
-    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "CONSENTEMENTS", "DOCUMENTS", "WAITING_CONSENT", "DONE"],
+    enum: ["ELIGIBILITE", "NONELIGIBLE", "SEJOUR", "COORDONNEES", "CONSENTEMENTS", "DOCUMENTS", "REPRESENTANTS", "WAITING_CONSENT", "CONFIRM", "DONE"],
     documentation: {
       description: "Étape du tunnel de réinscription 2023",
     },
   },
 
+  // also used for 2024
   inscriptionStep2023: {
     type: String,
-    enum: ["COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
+    enum: ["EMAIL_WAITING_VALIDATION", "COORDONNEES", "CONSENTEMENTS", "REPRESENTANTS", "DOCUMENTS", "DONE", "CONFIRM", "WAITING_CONSENT"],
     documentation: {
-      description: "Étape du tunnel d'inscription 2023",
+      description: "Étape du tunnel d'inscription 2023/2024",
     },
   },
 
-  // keep track of the current inscription step
+  // @deprecated
   inscriptionStep: {
     type: String,
-    default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
     documentation: {
       description: "Étape du tunnel d'inscription",
@@ -460,13 +455,6 @@ const Schema = new mongoose.Schema({
       description: "Mot de passe du volontaire",
     },
   },
-  userIps: {
-    type: [String],
-    default: [],
-    documentation: {
-      description: "Liste des IP utilisées par l'utilisateur",
-    },
-  },
   token2FA: {
     type: String,
     default: "",
@@ -478,6 +466,33 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date limite de validité du token pour 2FA",
+    },
+  },
+  attempts2FA: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Tentative de connexion 2FA. Max 3",
+    },
+  },
+  tokenEmailValidation: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Token servant à la validation d'email",
+    },
+  },
+  tokenEmailValidationExpires: {
+    type: Date,
+    documentation: {
+      description: "Date limite de validité du token pour validation d'email",
+    },
+  },
+  attemptsEmailValidation: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Tentative de validation d'email. Max 3",
     },
   },
   loginAttempts: {
@@ -624,6 +639,30 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "La convacation a été telechargée",
+    },
+  },
+
+  //Phase 0 classe engagée
+  classeId: {
+    type: String,
+    documentation: {
+      description: "Id de la classe engagée",
+    },
+  },
+
+  etablissementId: {
+    type: String,
+    documentation: {
+      description: "Id de l'établissement CLE",
+    },
+  },
+
+  source: {
+    type: String,
+    enum: YOUNG_SOURCE_LIST,
+    default: YOUNG_SOURCE.VOLONTAIRE,
+    documentation: {
+      description: "Type de parcours d'un jeune",
     },
   },
 
@@ -792,6 +831,13 @@ const Schema = new mongoose.Schema({
       description: "Adresse pendant le snu du volontaire",
     },
   },
+  coordinatesAccuracyLevel: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+    documentation: {
+      description: "Type d'adresse du volontaire dans la Base adresse nationale",
+    },
+  },
   complementAddress: {
     type: String,
     documentation: {
@@ -860,8 +906,8 @@ const Schema = new mongoose.Schema({
   },
   qpv: {
     type: String,
+    // TODO: REMOVE "" value from enum after cleaning DB from string empty values.
     enum: ["true", "false", ""],
-    default: "",
     documentation: {
       description: "Le volontaire est dans un Quarier Prioritaire pendant le snu",
     },
@@ -1055,6 +1101,10 @@ const Schema = new mongoose.Schema({
       description: "Adresse du parent 1",
     },
   },
+  parent1coordinatesAccuracyLevel: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+  },
   parent1ComplementAddress: {
     type: String,
     documentation: {
@@ -1202,6 +1252,10 @@ const Schema = new mongoose.Schema({
       description: "Adresse du parent 2",
     },
   },
+  parent2coordinatesAccuracyLevel: {
+    type: String,
+    enum: ["housenumber", "street", "locality", "municipality"],
+  },
   parent2ComplementAddress: {
     type: String,
     documentation: {
@@ -1304,6 +1358,8 @@ const Schema = new mongoose.Schema({
       description: "Lien de l'hébergeur avec le volontaire",
     },
   },
+
+  // TODO: cleanup host address fields (they are not used anymore).
   hostCity: {
     type: String,
     documentation: {
@@ -1438,6 +1494,15 @@ const Schema = new mongoose.Schema({
       description: "Structure dans laquelle le volontaire est engagée en dehors du SNU",
     },
   },
+
+  sameSchoolCLE: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "savoir si le volontaire vient de la même école que sa classe engagée",
+    },
+  },
+
   specificAmenagment: {
     type: String,
     enum: ["true", "false"],
@@ -1865,7 +1930,7 @@ const Schema = new mongoose.Schema({
 
   latestCNIFileCategory: {
     type: String,
-    enum: ["cniOld", "cniNew", "passport"],
+    enum: ["cniOld", "cniNew", "passport", "deleted"],
     documentation: {
       description: "Catégorie du fichier le plus récent dans files.cniFiles",
     },
@@ -1954,33 +2019,83 @@ Schema.pre("save", function (next) {
   }
 });
 
-Schema.pre("save", async function (next) {
-  if (this.isModified("userIps") || this.isNew) {
-    if (!this.userIps) return next();
-    const _userIps = [];
-    for (let ip of this.userIps) {
-      const hashedIp = await bcrypt.hash(ip, 10);
-      _userIps.push(hashedIp);
-    }
-    this.userIps = _userIps;
-  }
-  return next();
-});
-
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
   return bcrypt.compare(p, user.password || "");
 };
 
-Schema.methods.compareIps = async function (ip) {
-  const user = await OBJ.findById(this._id).select("userIps");
-  const promises = user.userIps.map((_ip) => bcrypt.compare(ip, _ip));
-  const responses = await Promise.all(promises);
-  return responses.some((e) => e);
+Schema.methods.anonymise = function () {
+  this.email && (this.email = generateRandomEmail());
+  this.newEmail && (this.newEmail = generateRandomEmail());
+  this.parent1Email && (this.parent1Email = generateRandomEmail());
+  this.parent2Email && (this.parent2Email = generateRandomEmail());
+  this.firstName && (this.firstName = generateRandomName());
+  this.lastName && (this.lastName = generateRandomName());
+  this.parent1FirstName && (this.parent1FirstName = generateRandomName());
+  this.parent1LastName && (this.parent1LastName = generateRandomName());
+  this.parent2FirstName && (this.parent2FirstName = generateRandomName());
+  this.parent2LastName && (this.parent2LastName = generateRandomName());
+  this.historic && (this.historic = {});
+  this.phone && (this.phone = generateNewPhoneNumber());
+  this.parent1Phone && (this.parent1Phone = generateNewPhoneNumber());
+  this.parent2Phone && (this.parent2Phone = generateNewPhoneNumber());
+  this.address && (this.address = generateAddress());
+  this.parent1Address && (this.parent1Address = generateAddress());
+  this.parent2Address && (this.parent2Address = generateAddress());
+  this.birthdateAt && (this.birthdateAt = generateBirthdate());
+  this.engagedDescription && (this.engagedDescription = starify(this.engagedDescription));
+  this.motivations && (this.motivations = starify(this.motivations));
+  this.parentConsentmentFilesCompliantInfo && (this.parentConsentmentFilesCompliantInfo = starify(this.parentConsentmentFilesCompliantInfo));
+  this.withdrawnReason && (this.withdrawnReason = starify(this.withdrawnReason));
+  this.withdrawnMessage && (this.withdrawnMessage = starify(this.withdrawnMessage));
+  this.correctionRequests &&
+    (this.correctionRequests = this.correctionRequests?.map((e) => {
+      e.message = starify(e.message);
+      e.reason = starify(e.reason);
+      return e;
+    }));
+  this.notes &&
+    (this.notes = this.notes?.map((e) => {
+      e.note = starify(e.note);
+      if (e.referent) {
+        e.referent.firstName = starify(e.referent.firstName);
+        e.referent.lastName = starify(e.referent.lastName);
+      }
+      return e;
+    }));
+
+  const newLocation = getYoungLocation(this.zip);
+  this.location &&
+    (this.location = {
+      lat: newLocation?.latitude || 0,
+      lon: newLocation?.longitude || 0,
+    });
+
+  this.cniFiles && (this.cniFiles = []);
+  this.highSkilledActivityProofFiles && (this.highSkilledActivityProofFiles = []);
+  this.dataProcessingConsentmentFiles && (this.dataProcessingConsentmentFiles = []);
+  this.parentConsentmentFiles && (this.parentConsentmentFiles = []);
+  this.imageRightFiles && (this.imageRightFiles = []);
+  this.autoTestPCRFiles && (this.autoTestPCRFiles = []);
+  this.rulesFiles && (this.rulesFiles = []);
+  this.militaryPreparationFilesIdentity && (this.militaryPreparationFilesIdentity = []);
+  this.militaryPreparationFilesCensus && (this.militaryPreparationFilesCensus = []);
+  this.militaryPreparationFilesAuthorization && (this.militaryPreparationFilesAuthorization = []);
+  this.militaryPreparationFilesCertificate && (this.militaryPreparationFilesCertificate = []);
+  this.militaryPreparationCorrectionMessage && (this.militaryPreparationCorrectionMessage = starify(this.militaryPreparationCorrectionMessage));
+
+  this.files && (this.files = undefined);
+
+  return this;
 };
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
+  if (doc.source === YOUNG_SOURCE.CLE) {
+    // doc.previousStatus !== doc.status is not working in post save hook...
+    StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) }).catch((error) => capture(error));
+  }
+
   if (ENVIRONMENT === "testing") return;
   sendinblue.sync(doc, MODELNAME);
 });
@@ -2001,6 +2116,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
   this.updatedAt = Date.now();
+  this.previousStatus = this.status; // Used to compute classe if a young CLE has a change in status (see post save hook)
   next();
 });
 

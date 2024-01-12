@@ -16,12 +16,13 @@ import { COHESION_STAY_START, canPutSpecificDateOnSessionPhase1, isSessionEditio
 
 import Field from "../components/Field";
 
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import Loader from "../../../components/Loader";
 import ToggleDate from "../../../components/ui/forms/dateForm/ToggleDate";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import TimeSchedule from "../components/TimeSchedule";
+import PedagoProject from "../components/PedagoProject";
 
 export default function Index({ ...props }) {
   const history = useHistory();
@@ -102,7 +103,7 @@ export default function Index({ ...props }) {
         }
       }
       if (allSessions.data.length === 0) setSessions([]);
-      const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[0]?.cohort;
+      const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[allSessions?.data.length - 1]?.cohort;
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
         allSessions.data = allSessions.data.map((session) => {
           return {
@@ -113,7 +114,7 @@ export default function Index({ ...props }) {
         allSessions.data.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         setSessions(allSessions.data);
 
-        if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[0]);
+        if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[allSessions?.data.length - 1]);
       } else {
         const sessionFiltered = allSessions.data
           .filter((session) => session.headCenterId === user._id)
@@ -218,8 +219,6 @@ export default function Index({ ...props }) {
   }
 
   if (!center) return <Loader />;
-
-  console.log(focusedCohortData);
 
   return (
     <>
@@ -332,10 +331,7 @@ export default function Index({ ...props }) {
                             focusedCohortData ? (
                               <p>
                                 Les dates de cette session diffèrent des dates officielles :{" "}
-                                <strong>{`${dayjs(focusedCohortData.dateStart).locale("fr").format("DD")} - ${dayjs(focusedCohortData.dateEnd)
-                                  .locale("fr")
-                                  .format("DD MMMM YYYY")}`}</strong>
-                                .
+                                <strong>{`${dayjs(focusedCohortData.dateStart).format("DD")} - ${dayjs(focusedCohortData.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                               </p>
                             ) : null
                           }
@@ -360,7 +356,10 @@ export default function Index({ ...props }) {
                     </div>
                   </div>
                 </div>
-                <TimeSchedule session={focusedSession} className="p-8" onSessionChanged={onSessionChanged} />
+                <div className="flex mx-4 mt-4 gap-2 pb-4 justify-center">
+                  <PedagoProject session={focusedSession} className="p-1" onSessionChanged={onSessionChanged} />
+                  <TimeSchedule session={focusedSession} className="p-1" onSessionChanged={onSessionChanged} />
+                </div>
               </div>
             )}
           </div>

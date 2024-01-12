@@ -1,7 +1,6 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
-import { useParams } from "react-router";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 
 import api from "../../../../services/api";
 import { appURL } from "../../../../config";
@@ -75,7 +74,7 @@ export default function Phase2Application({ young, onChange }) {
     // todo : why not just
     let { ok, data, code } = await api.get(`/application/${applicationId}`);
     if (!ok) {
-      capture(code);
+      capture(new Error(code));
       return toastr.error("Oups, une erreur est survenue", code);
     }
 
@@ -90,7 +89,7 @@ export default function Phase2Application({ young, onChange }) {
     if (!application?.missionId) return;
     const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
     if (!ok) {
-      capture(code);
+      capture(new Error(code));
       return toastr.error("Oups, une erreur est survenue", code);
     }
     setMission(data);
@@ -110,7 +109,7 @@ export default function Phase2Application({ young, onChange }) {
       if (application?.contractId) {
         const { ok, data, code } = await api.get(`/contract/${application.contractId}`);
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);
@@ -155,15 +154,15 @@ export default function Phase2Application({ young, onChange }) {
               {translateApplication(application.status)}
             </p>
           </div>
-          {application?.contractId && (
-            <div className="flex justify-end">
-              <button
-                className="flex items-center gap-2 rounded border-[1px] border-gray-100 bg-gray-100 py-2 px-4 hover:border-gray-300"
-                onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
-                <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
-              </button>
-            </div>
-          )}
+          {/* {application?.contractId && ( */}
+          <div className="flex justify-end">
+            <button
+              className="flex items-center gap-2 rounded border-[1px] border-gray-100 bg-gray-100 py-2 px-4 hover:border-gray-300"
+              onClick={() => history.push(`/volontaire/${young._id.toString()}/phase2/application/${application._id.toString()}/historique`)}>
+              <img src={Clock} /> <div className="text-xs text-gray-800 ">Historique</div>
+            </button>
+          </div>
+          {/* )} */}
         </div>
 
         <div className="space-y-16">

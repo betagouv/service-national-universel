@@ -1,21 +1,22 @@
 import React, { useState } from "react";
 import { ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 import validator from "validator";
-import { copyToClipboard, formatPhoneNumberFR, getInitials, regexPhoneFrenchCountries, translate } from "../../../../utils";
+import { copyToClipboard, formatPhoneNumberFR, getInitials, translate } from "@/utils";
 import { AiOutlineClose } from "react-icons/ai";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle, HiOutlineTrash, HiPencil, HiPhone, HiPlus } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import Field from "../../../../components/forms/Field";
-import ModalChangeTutor from "../../../../components/modals/ModalChangeTutor";
-import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import ModalReferentDeleted from "../../../../components/modals/ModalReferentDeleted";
-import ModalTailwind from "../../../../components/modals/ModalTailwind";
-import API from "../../../../services/api";
+import Field from "@/components/forms/Field";
+import ModalChangeTutor from "@/components/modals/ModalChangeTutor";
+import ModalConfirm from "@/components/modals/ModalConfirm";
+import ModalReferentDeleted from "@/components/modals/ModalReferentDeleted";
+import ModalTailwind from "@/components/modals/ModalTailwind";
+import API from "@/services/api";
 import Select from "../../../centersV2/components/Select";
 import Button from "../Button";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
 
 export default function TeamModal({ isOpen, onCancel, team, setTeam, structure }) {
   const user = useSelector((state) => state.Auth.user);
@@ -81,7 +82,7 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam, structure }
       if (!responsible?.lastName?.trim()) error.lastName = "Le nom est obligatoire";
       if (!responsible?.email?.trim()) error.email = "L'email est obligatoire";
       if (responsible?.email?.trim() && !validator.isEmail(responsible?.email?.trim())) error.email = "L'email est au mauvais format";
-      if (responsible.phone && !validator.matches(responsible.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format";
+      if (responsible.phone && !isPossiblePhoneNumber(responsible.phone, "FR")) error.phone = "Le numéro de téléphone est au mauvais format";
 
       setErrors(error);
       if (Object.keys(error).length > 0) return;
@@ -99,7 +100,6 @@ export default function TeamModal({ isOpen, onCancel, team, setTeam, structure }
         setResponsible(null);
         toastr.success("Le contact a été sauvegardé !");
       } else {
-        responsible.role = structure.isNetwork ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE;
         responsible.structureId = structure._id;
         responsible.structureName = structure.name;
         const { ok, code, data } = await API.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`, responsible);
@@ -240,7 +240,7 @@ const AddContact = ({ setResponsible, isSupervisor = false }) => {
   return (
     <div
       className="border-grey-200 flex h-28 flex-row items-center justify-center rounded-lg border-[1px] border-dashed border-blue-600 bg-[#ffffff] px-2 hover:cursor-pointer hover:bg-[#eff6ff]"
-      onClick={() => setResponsible({})}>
+      onClick={() => setResponsible({ role: ROLES.RESPONSIBLE  })}>
       <HiPlus className="text-indigo-300" />
       <div className="pl-2 text-sm text-blue-600">Ajouter un {isSupervisor ? "membre" : "responsable"}</div>{" "}
     </div>
@@ -260,7 +260,7 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
 
   return (
     <div className="flex h-full flex-col space-y-6" onSubmit={handleSubmit}>
-      <p className="text-center text-lg font-medium">{responsible._id ? "L'équipe" : "Inviter un nouvel utilisateur"}</p>
+      <p className="text-center text-lg font-medium">{responsible._id ? "L'équipe" : "Inviter un nouveau responsable"}</p>
       {!responsible._id && (
         <p className="text-center text-gray-500">Vous pouvez partager les droits d&apos;administration de votre compte de structure d&apos;accueil SNU avec plusieurs personnes.</p>
       )}
@@ -274,7 +274,7 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
           <Select
             label="Sélectionnez un rôle"
             options={rolesOptions}
-            selected={rolesOptions.find((e) => e.value === responsible.role || { label: "Responsable", value: ROLES.RESPONSIBLE })}
+            selected={rolesOptions.find((e) => e.value === responsible.role)}
             setSelected={(e) => setResponsible({ ...responsible, role: e.value })}
           />
         )}

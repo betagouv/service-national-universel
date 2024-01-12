@@ -1,3 +1,5 @@
+import { YOUNG_SOURCE } from "snu-lib";
+
 export const INSCRIPTION_STEPS = {
   COORDONNEES: "COORDONNEES",
   CONSENTEMENTS: "CONSENTEMENTS",
@@ -15,7 +17,12 @@ export const PREINSCRIPTION_STEPS = {
   SEJOUR: "SEJOUR",
   PROFIL: "PROFIL",
   CONFIRM: "CONFIRM",
-  DONE: "DONE",
+};
+
+export const REINSCRIPTION_STEPS = {
+  ELIGIBILITE: "ELIGIBILITE",
+  SEJOUR: "SEJOUR",
+  CONFIRM: "CONFIRM",
 };
 
 export const CORRECTION_STEPS = {
@@ -45,7 +52,12 @@ export const PREINSCRIPTION_STEPS_LIST = [
   { name: PREINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
   { name: PREINSCRIPTION_STEPS.PROFIL, url: "profil" },
   { name: PREINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
-  { name: PREINSCRIPTION_STEPS.DONE, url: "done" },
+];
+
+export const REINSCRIPTION_STEPS_LIST = [
+  { name: REINSCRIPTION_STEPS.ELIGIBILITE, url: "eligibilite" },
+  { name: REINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
+  { name: REINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
 ];
 
 export const CORRECTION_STEPS_LIST = [
@@ -68,7 +80,7 @@ export const getStepUrl = (name, STEP_LIST) => {
 
 const WAITING_CORRECTION_LINK = [
   {
-    field: ["firstName", "lastName", "email"],
+    field: ["firstName", "lastName", "phone", "email"],
     redirect: "/inscription2023/correction/profil",
     step: "profil",
   },
@@ -115,7 +127,6 @@ const WAITING_CORRECTION_LINK = [
       "birthCountry",
       "birthCity",
       "birthCityZip",
-      "phone",
       "situation",
       "livesInFrance",
       "addressVerified",
@@ -148,16 +159,83 @@ const WAITING_CORRECTION_LINK = [
     step: "coordonnee",
   },
   {
-    field: ["cniFile", "latestCNIFileExpirationDate"],
+    field: ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"],
     redirect: "/inscription2023/correction/documents",
     step: "documents",
   },
 ];
 
+const WAITING_CORRECTION_LINK_CLE = [
+  {
+    field: ["firstName", "lastName", "frenchNationality", "phone", "email", "birthdateAt", "grade"],
+    redirect: "/inscription2023/correction/profil",
+    step: "profil",
+  },
+  {
+    field: [
+      "parent1Status",
+      "parent1FirstName",
+      "parent1LastName",
+      "parent1Email",
+      "parent1Phone",
+      "parent2",
+      "parent2Status",
+      "parent2FirstName",
+      "parent2LastName",
+      "parent2Email",
+      "parent2Phone",
+    ],
+    redirect: "/inscription2023/correction/representants",
+    step: "representants",
+  },
+  {
+    field: [
+      "gender",
+      "birthCountry",
+      "birthCity",
+      "birthCityZip",
+      "situation",
+      "livesInFrance",
+      "addressVerified",
+      "country",
+      "city",
+      "zip",
+      "address",
+      "location",
+      "department",
+      "region",
+      "cityCode",
+      "foreignCountry",
+      "foreignCity",
+      "foreignZip",
+      "foreignAddress",
+      "hostLastName",
+      "hostFirstName",
+      "hostRelationship",
+      "handicap",
+      "ppsBeneficiary",
+      "paiBeneficiary",
+      "allergies",
+      "moreInformation",
+      "specificAmenagment",
+      "specificAmenagmentType",
+      "reducedMobilityAccess",
+      "handicapInSameDepartment",
+    ],
+    redirect: "/inscription2023/correction/coordonnee",
+    step: "coordonnee",
+  },
+];
+
+const getCorrectionLink = (young) => {
+  return young.source === YOUNG_SOURCE.CLE ? WAITING_CORRECTION_LINK_CLE : WAITING_CORRECTION_LINK;
+};
+
 export const getCorrectionByStep = (young, step) => {
-  const keyList = WAITING_CORRECTION_LINK.find((link) => link.step === step);
+  const correctionLink = getCorrectionLink(young);
+  const keyList = correctionLink.find((link) => link.step === step);
   const corrections = young?.correctionRequests.reduce((acc, curr) => {
-    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field)) {
+    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field) && curr.cohort === young.cohort) {
       acc[curr.field] = curr.message;
     }
     return acc;
@@ -166,10 +244,13 @@ export const getCorrectionByStep = (young, step) => {
 };
 
 export const getCorrectionsForStepUpload = (young) => {
-  return young.correctionRequests?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate"].includes(e.field));
+  return young.correctionRequests
+    ?.filter((e) => e.cohort === young.cohort)
+    ?.filter((e) => ["SENT", "REMINDED"].includes(e.status) && ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field));
 };
 
-export const redirectToCorrection = (field) => {
-  const correction = WAITING_CORRECTION_LINK.find((correction) => correction.field.includes(field));
+export const redirectToCorrection = (young, field) => {
+  const correctionLink = getCorrectionLink(young);
+  const correction = correctionLink.find((correction) => correction.field.includes(field));
   return correction ? correction.redirect : "/";
 };

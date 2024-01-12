@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
 const esClient = require("../es");
 const path = require("path");
@@ -52,7 +51,7 @@ exports.handler = async () => {
           // send a mail to the young
           let template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
           let cc = getCcOfYoung({ template, young });
-          sendTemplate(template, {
+          await sendTemplate(template, {
             emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
             params: {
               missions,

@@ -1,13 +1,14 @@
+import queryString from "query-string";
 import React, { useEffect, useRef, useState } from "react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
-import { ES_NO_LIMIT, translate, YOUNG_SITUATIONS, YOUNG_STATUS } from "snu-lib";
-import api from "../../../../services/api";
-import { FilterComponent } from "../FilterDashBoard";
-import { BarChart, FullDoughnut, graphColors, Legend, Legends } from "../graphs";
-import { getLink as getOldLink } from "../../../../utils";
 import { Link } from "react-router-dom";
+import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, ROLES } from "snu-lib";
+import api from "../../../../services/api";
+import { getNewLink } from "../../../../utils";
+import { FilterComponent } from "../FilterDashBoard";
+import { BarChart, FullDoughnut, Legend, graphColors } from "../graphs";
 
-export default function Details({ selectedFilters }) {
+export default function Details({ selectedFilters, role, sessionId, centerId }) {
   const [age, setAge] = useState({});
   const [sexe, setSexe] = useState({});
   const [grade, setGrade] = useState({});
@@ -16,8 +17,8 @@ export default function Details({ selectedFilters }) {
   const [rural, setRural] = useState({});
   const [specificSituation, setSpecificSituation] = useState({});
   const [selectedDetail, setSelectedDetail] = useState("age");
-
   const [selectedFiltersBottom, setSelectedFiltersBottom] = React.useState({});
+  const base = role === ROLES.HEAD_CENTER ? `/centre/${centerId}/${sessionId}/general` : "/inscription";
   const filterArrayBottom = [
     {
       id: "status",
@@ -26,8 +27,6 @@ export default function Details({ selectedFilters }) {
       options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translate(status) })),
     },
   ];
-
-  console.log(qpv);
 
   async function fetchDetailInscriptions() {
     const res = await getDetailInscriptions({ ...selectedFilters, ...selectedFiltersBottom });
@@ -44,7 +43,7 @@ export default function Details({ selectedFilters }) {
     setSituation(res?.situation || {});
     setQpv(res?.qpv || {});
     setRural(res?.rural || {});
-    setSpecificSituation({
+    let specific = {
       handicap: res?.handicap || {},
       allergies: res?.allergies || {},
       handicapInSameDepartment: res?.handicapInSameDepartment || {},
@@ -52,7 +51,14 @@ export default function Details({ selectedFilters }) {
       ppsBeneficiary: res?.ppsBeneficiary || {},
       paiBeneficiary: res?.paiBeneficiary || {},
       specificAmenagment: res?.specificAmenagment || {},
+    };
+
+    Object.keys(specific).forEach((e) => {
+      const total = Object.values(specific[e]).reduce((acc, curr) => acc + curr, 0);
+      let percent = total ? Math.round(((specific[e].true || 0) / total) * 100) + "%" : "-";
+      specific[e] = { true: specific[e].true || 0, false: specific[e].false || 0, percent };
     });
+    setSpecificSituation(specific);
   }
 
   useEffect(() => {
@@ -63,11 +69,13 @@ export default function Details({ selectedFilters }) {
     <div className="flex w-[40%] flex-col items-center rounded-lg bg-white py-6 px-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="flex w-full flex-row justify-between">
         <div className="text-base font-bold text-gray-900">En détail</div>
-        <div className="flex flex-col items-end">
-          {filterArrayBottom.map((filter) => (
-            <FilterComponent key={filter.id} filter={filter} selectedFilters={selectedFiltersBottom} setSelectedFilters={setSelectedFiltersBottom} maxItems={2} />
-          ))}
-        </div>
+        {role !== ROLES.HEAD_CENTER && (
+          <div className="flex flex-col items-end">
+            {filterArrayBottom.map((filter) => (
+              <FilterComponent key={filter.id} filter={filter} selectedFilters={selectedFiltersBottom} setSelectedFilters={setSelectedFiltersBottom} maxItems={2} />
+            ))}
+          </div>
+        )}
       </div>
       {/* Filter to chose displayed graphs */}
       <div className="py-8">
@@ -94,8 +102,8 @@ export default function Details({ selectedFilters }) {
             maxLegends={2}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SEXE=%5B"male"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SEXE=%5B"female"%5D'] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ gender: "male" })] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ gender: "female" })] }),
             ]}
           />
         </div>
@@ -109,13 +117,13 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"2ndeGT"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"1ereGT"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"2ndePro"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"1erePro"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"3eme"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"Autre"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['GRADE=%5B"CAP"%5D'] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "2ndeGT" })] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "1ereGT" })] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "2ndePro" })] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "1erePro" })] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "3eme" })] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "Autre" })] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ grade: "CAP" })] }),
             ]}
           />
           <FullDoughnut
@@ -126,9 +134,17 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SITUATION=%5B"GENERAL_SCHOOL"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SITUATION=%5B"PROFESSIONAL_SCHOOL"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SITUATION=%5B"SPECIALIZED_SCHOOL"%5D'] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ situation: "GENERAL_SCHOOL" })] }),
+              getNewLink({
+                base: base,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ situation: "PROFESSIONAL_SCHOOL" })],
+              }),
+              getNewLink({
+                base: base,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ situation: "SPECIALIZED_SCHOOL" })],
+              }),
             ]}
           />
         </div>
@@ -141,20 +157,34 @@ export default function Details({ selectedFilters }) {
               specificSituation?.paiBeneficiary?.true || 0,
               specificSituation?.allergies?.true || 0,
             ]}
+            tooltips={[
+              specificSituation?.handicap?.percent || 0,
+              specificSituation?.ppsBeneficiary?.percent || 0,
+              specificSituation?.paiBeneficiary?.percent || 0,
+              specificSituation?.allergies?.percent || 0,
+            ]}
             noValue
             className="h-[150px]"
           />
           <div className="grid grid-cols-2 gap-10">
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['HANDICAP=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ handicap: "true" })] })}
+              target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="En situation de handicap" value={specificSituation.handicap.true || 0} color={graphColors[4][0]} />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['PPS=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ ppsBeneficiary: "true" })] })}
+              target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="Bénéficiaire d’un PPS" value={specificSituation.ppsBeneficiary.true || 0} color={graphColors[4][1]} />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['PAI=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ paiBeneficiary: "true" })] })}
+              target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="Bénéficiaire d’un PAI" value={specificSituation.paiBeneficiary.true || 0} color={graphColors[4][2]} />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['ALLERGIES=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ allergies: "true" })] })}
+              target="_blank">
               <Legend className="!flex-col !items-start !justify-start" name="Allergie / intolérance" value={specificSituation.allergies.true || 0} color={graphColors[4][3]} />
             </Link>
           </div>
@@ -163,11 +193,21 @@ export default function Details({ selectedFilters }) {
 
           <div className="flex w-full flex-row justify-between">
             <Link
-              to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SPECIFIC_AMENAGEMENT=%5B"true"%5D'] })}
+              to={getNewLink({
+                base: base,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ specificAmenagment: "true" })],
+              })}
               target="_blank">
               <Legend className="!flex-col text-center" name="Aménagement spécifique" value={specificSituation.specificAmenagment.true || 0} color={graphColors[1][0]} />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['SAME_DEPARTMENT=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({
+                base: base,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ handicapInSameDepartment: "true" })],
+              })}
+              target="_blank">
               <Legend
                 className="!flex-col text-center"
                 name="Affectation dans le département de résidence"
@@ -175,7 +215,13 @@ export default function Details({ selectedFilters }) {
                 color={graphColors[1][0]}
               />
             </Link>
-            <Link to={getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['PMR=%5B"true"%5D'] })} target="_blank">
+            <Link
+              to={getNewLink({
+                base: base,
+                filter: { ...selectedFilters, ...selectedFiltersBottom },
+                filtersUrl: [queryString.stringify({ reducedMobilityAccess: "true" })],
+              })}
+              target="_blank">
               <Legend
                 className="!flex-col text-center"
                 name="Aménagement pour mobilité réduite"
@@ -195,8 +241,8 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['QPV=%5B"true"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['QPV=%5B""%2C"false"%5D'] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ qpv: "true" })] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ qpv: "false" })] }),
             ]}
           />
 
@@ -208,8 +254,8 @@ export default function Details({ selectedFilters }) {
             maxLegends={3}
             tooltipsPercent={true}
             legendUrls={[
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['RURAL=%5B"true"%5D'] }),
-              getOldLink({ base: `/inscription`, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: ['RURAL=%5B"false"%5D'] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ isRegionRural: "true" })] }),
+              getNewLink({ base: base, filter: { ...selectedFilters, ...selectedFiltersBottom }, filtersUrl: [queryString.stringify({ isRegionRural: "false" })] }),
             ]}
           />
         </div>
@@ -219,112 +265,15 @@ export default function Details({ selectedFilters }) {
 }
 
 async function getDetailInscriptions(filters) {
-  const body = {
-    query: { bool: { must: { match_all: {} }, filter: [] } },
-    aggs: {
-      age: {
-        terms: {
-          field: "birthdateAt",
-          size: ES_NO_LIMIT,
-        },
-      },
-      gender: {
-        terms: {
-          field: "gender.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      grade: {
-        terms: {
-          field: "grade.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      situation: {
-        terms: {
-          field: "situation.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      qpv: {
-        terms: {
-          field: "qpv.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      rural: {
-        terms: {
-          field: "isRegionRural.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      handicap: {
-        terms: {
-          field: "handicap.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      allergies: {
-        terms: {
-          field: "allergies.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      handicapInSameDepartment: {
-        terms: {
-          field: "handicapInSameDepartment.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      reducedMobilityAccess: {
-        terms: {
-          field: "reducedMobilityAccess.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      ppsBeneficiary: {
-        terms: {
-          field: "ppsBeneficiary.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      paiBeneficiary: {
-        terms: {
-          field: "paiBeneficiary.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-      specificAmenagment: {
-        terms: {
-          field: "specificAmenagment.keyword",
-          size: ES_NO_LIMIT,
-        },
-      },
-    },
-    size: 0,
-  };
-  if (filters?.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort } });
-  if (filters?.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
-  if (filters?.region?.length)
-    body.query.bool.filter.push({
-      bool: {
-        should: [
-          { bool: { must: [{ term: { "schooled.keyword": "true" } }, { terms: { "schoolRegion.keyword": filters.region } }] } },
-          { bool: { must: [{ term: { "schooled.keyword": "false" } }, { terms: { "region.keyword": filters.region } }] } },
-        ],
-      },
-    });
-  if (filters?.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filters.department } });
-  if (filters?.status?.length) body.query.bool.filter.push({ terms: { "status.keyword": filters.status } });
-  const { responses } = await api.esQuery("young", body);
-  if (!responses.length) return;
+  const responses = await api.post("/elasticsearch/dashboard/inscription/inscriptionInfo", { filters: filters });
+  if (!responses?.aggregations) return;
   // get keys of aggregations
-  const keys = Object.keys(responses[0].aggregations);
+  const keys = Object.keys(responses.aggregations);
   const obj = {};
   keys.forEach((key) => {
     // for each key, get the buckets
     obj[key] = {};
-    responses[0].aggregations[key].buckets.forEach((e) => {
+    responses.aggregations[key].buckets.forEach((e) => {
       // for each bucket, get the key and the doc_count
       obj[key][e.key] = e.doc_count;
     });

@@ -3,13 +3,6 @@ env:
   APP_NAME: snu-stag-admin
   ENVIRONMENT_NAME: snu-admin-staging
 
-  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  SLACK_COLOR: "#3278BD"
-  SLACK_ICON_EMOJI: ":package:"
-  SLACK_USERNAME: Github
-  MSG_MINIMAL: true
-  SLACK_FOOTER: ""
-
 name: Deploy staging admin
 
 on:
@@ -17,9 +10,6 @@ on:
     branches:
       - main
       - staging
-    paths:
-      - admin/**
-      - packages/**
   workflow_dispatch:
 
 jobs:
@@ -36,6 +26,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Build lib
+        continue-on-error: false
+        run: |
+          npm ci
+          npm run build -w packages/ds
+          rm packages/ds/.gitignore
 
       - name: Create SSH key
         run: |
@@ -68,15 +65,3 @@ jobs:
           git push -f -u cloud master
         env:
           CLEVER_CLOUD_GIT_REMOTE: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_ADMIN_STAGING }}
-
-      - name: Notification on failure
-        if: ${{ failure() }}
-        uses: rtCamp/action-slack-notify@master
-        env:
-          SLACK_TITLE: Failed to deploy staging admin
-
-      # - name: Notification on success
-      #   if: ${{ success() }}
-      #   uses: rtCamp/action-slack-notify@master
-      #   env:
-      #     SLACK_TITLE: admin staging deployed

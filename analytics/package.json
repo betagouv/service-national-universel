@@ -1,11 +1,14 @@
 {
-  "name": "api-data",
+  "name": "analytics",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon --watch src src/index.js",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint --ext .js --fix src",
+    "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
   },
   "engines": {
     "node": "^18.16.0",
@@ -18,18 +21,27 @@
   "author": "Selego",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.19.1",
+    "@scaleway/sdk": "^1.38.1",
+    "@sentry/integrations": "^7.61.0",
+    "@sentry/node": "^7.61.0",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^11.0.0",
-    "express": "^4.17.2",
-    "helmet": "^5.0.1",
-    "joi": "^17.6.0",
-    "jsonwebtoken": "^9.0.0",
-    "nodemon": "^2.0.15",
-    "pg": "^8.7.3",
-    "sequelize": "^6.29.0",
-    "@sentry/integrations": "^7.56.0",
-    "@sentry/node": "^7.56.0",
-    "@sentry/tracing": "^7.56.0"
+    "express": "^4.18.2",
+    "helmet": "^5.1.1",
+    "joi": "^17.9.2",
+    "jsonwebtoken": "^9.0.1",
+    "node-cron": "^3.0.2",
+    "node-fetch": "^2.6.12",
+    "pg": "^8.11.3",
+    "redis": "^4.6.8",
+    "sequelize": "^6.32.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.1.1"
   }
 }

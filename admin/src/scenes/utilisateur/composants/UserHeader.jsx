@@ -1,6 +1,4 @@
-import dayjs from "dayjs";
-import "dayjs/locale/fr";
-import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "@/utils/dayjs.utils";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -14,10 +12,10 @@ import API from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import Tab from "../../phase0/components/Tab";
 import { ROLES, translate } from "../../../utils";
+import { Badge } from "@snu/ds/admin";
 
 const getSubtitle = (user) => {
   const createdAt = new Date(user.createdAt);
-  dayjs.extend(relativeTime).locale("fr");
   const diff = dayjs(createdAt).fromNow();
   return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
 };
@@ -47,6 +45,7 @@ export default function UserHeader({ user, tab, currentUser }) {
           <div className="mt-3 flex flex-col justify-between md:flex-row">
             <div className="mb-3 flex items-center md:mb-0">
               <span className="mr-2 text-2xl font-bold">{`${user.firstName} ${user.lastName}`}</span>
+              <Badge title={translate(user.role)} status="tertiary" className="border-gray-300 mr-2 mt-1" />
               <span className="text-xs">{getSubtitle(user)}</span>
             </div>
             <div className="flex items-center">
@@ -63,15 +62,19 @@ export default function UserHeader({ user, tab, currentUser }) {
             <Tab isActive={tab === "profile"} onClick={() => history.push(`/user/${user._id}`)}>
               <div className="flex items-center">Profil</div>
             </Tab>
-            <Tab isActive={tab === "notifications"} onClick={() => history.push(`/user/${user._id}/notifications`)}>
-              Notifications
-            </Tab>
-            <Tab isActive={tab === "historique"} onClick={() => history.push(`/user/${user._id}/historique`)}>
-              <div className="flex items-center">
-                <History className="mr-[4px] block flex-[0_0_18px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
-                Historique
-              </div>
-            </Tab>
+            {![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(currentUser.role) && (
+              <>
+                <Tab isActive={tab === "notifications"} onClick={() => history.push(`/user/${user._id}/notifications`)}>
+                  Notifications
+                </Tab>
+                <Tab isActive={tab === "historique"} onClick={() => history.push(`/user/${user._id}/historique`)}>
+                  <div className="flex items-center">
+                    <History className="mr-[4px] block flex-[0_0_18px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
+                    Historique
+                  </div>
+                </Tab>
+              </>
+            )}
           </TabList>
         </div>
       </div>

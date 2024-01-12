@@ -1,20 +1,32 @@
 import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
-import { formatDateFR, translate, translateGrade } from "snu-lib";
+import { PHONE_ZONES, formatDateFR, translate, translateGrade, isFeatureEnabled, FEATURES_NAME, getCohortPeriod } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import dayjs from "dayjs";
-import DSFRContainer from "../../../components/inscription/DSFRContainer";
-import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
+import ProgressBar from "../components/ProgressBar";
+import { environment, supportURL } from "@/config";
+import InfoMessage from "../components/InfoMessage";
 
 export default function StepConfirm() {
+  const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
+  const [context, bdcURI] = isLoggedIn
+    ? [ReinscriptionContext, "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    : [PreInscriptionContext, "je-me-preinscris-et-cree-mon-compte-volontaire"];
   const [error, setError] = useState({});
-  const [data, setData, removePersistedData] = React.useContext(PreInscriptionContext);
+  const [isLoading, setLoading] = useState(false);
+  const [data, removePersistedData] = React.useContext(context);
+  const selectedCohort = data?.sessions.find((s) => s?.name === data?.cohort);
+  const dispatch = useDispatch();
 
   const history = useHistory();
 
@@ -28,9 +40,48 @@ export default function StepConfirm() {
     [error],
   );
 
-  const onSubmit = async () => {
+  const isEmailValidationEnabled = !isLoggedIn && isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
+
+  const adjustSignup = async () => {
+    const values = {
+      schooled: data.school ? "true" : "false",
+      schoolName: data.school?.fullName,
+      schoolType: data.school?.type,
+      schoolAddress: data.school?.address || data.school?.adresse,
+      schoolZip: data.school?.postCode || data.school?.postcode,
+      schoolCity: data.school?.city,
+      schoolDepartment: data.school?.departmentName || data.school?.department,
+      schoolRegion: data.school?.region,
+      schoolCountry: data.school?.country,
+      schoolId: data.school?.id,
+      zip: data.zip,
+      cohort: data.cohort,
+      grade: data.scolarity,
+    };
+
+    try {
+      setLoading(true);
+      const { code, ok, data } = await api.put(`/young/reinscription?timeZoneOffset=${new Date().getTimezoneOffset()}`, values);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+        setLoading(false);
+      } else {
+        plausibleEvent("Phase0/CTA reinscription - inscription");
+        dispatch(setYoung(data));
+        history.push("/inscription2023");
+      }
+    } catch (e) {
+      setLoading(false);
+      capture(e);
+      setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
+    }
+  };
+
+  const signUp = async () => {
     const values = {
       email: data.email,
+      phone: data.phone,
+      phoneZone: data.phoneZone,
       firstName: data.firstName,
       lastName: data.lastName,
       frenchNationality: data.frenchNationality,
@@ -51,98 +102,133 @@ export default function StepConfirm() {
       grade: data.scolarity,
     };
 
-    if (values.schooled === "true") values.grade = data.scolarity;
-
     try {
-      // eslint-disable-next-line no-unused-vars
-      const { user, code, ok } = await api.post("/young/signup", values);
-      if (!ok) setError({ text: `Une erreur s'est produite : ${translate(code)}` });
-      plausibleEvent("Phase0/CTA preinscription - inscription");
-      setData({ ...data, step: PREINSCRIPTION_STEPS.DONE });
-      removePersistedData();
-      history.push("/preinscription/done");
+      setLoading(true);
+      const { code, ok, token, user } = await api.post(`/young/signup`, values);
+      if (!ok) {
+        setError({ text: `Une erreur s'est produite : ${translate(code)}` });
+        setLoading(false);
+      } else {
+        if (user) {
+          plausibleEvent("Phase0/CTA preinscription - inscription");
+          if (token) api.setToken(token);
+          dispatch(setYoung(user));
+          removePersistedData();
+          history.push(isEmailValidationEnabled ? "/preinscription/email-validation" : "/preinscription/done");
+        }
+      }
     } catch (e) {
-      if (e.code === "USER_ALREADY_REGISTERED")
-        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance)." });
-      else {
+      setLoading(false);
+      if (e.code === "USER_ALREADY_REGISTERED") {
+        history.push(`/je-suis-deja-inscrit`);
+      } else {
         capture(e);
         setError({ text: `Une erreur s'est produite : ${translate(e.code)}` });
       }
     }
   };
 
-  return (
-    <DSFRContainer title="Ces informations sont-elles correctes ?">
-      {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+  const onSubmit = async () => (isLoggedIn ? await adjustSignup() : await signUp());
 
-      <div className="space-y-4">
-        <div className="my-2 flex flex-row items-center justify-between">
-          <p className="text-lg font-semibold text-[#161616]">Mon éligibilité</p>
+  return (
+    <>
+      <ProgressBar isReinscription={isLoggedIn} />
+      <DSFRContainer title="Ces informations sont-elles correctes ?" supportEvent="Phase0/aide preinscription - recap" supportLink={`${supportURL}/base-de-connaissance/${bdcURI}`}>
+        {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
+        <div className="my-6 flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-[#161616]">Mon éligibilité</h1>
           <Link to="./eligibilite">
             <EditPen />
           </Link>
         </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Niveau de scolarité&nbsp;:</p>
-          <p className="text-right text-[#161616]">{translateGrade(data.scolarity)}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Date de naissance&nbsp;:</p>
-          <p className="text-right text-[#161616]">{formatDateFR(data.birthDate)}</p>
-        </div>
-        {data.school ? (
-          <>
-            {data.school?.country && (
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-[#666666]">Pays de l&apos;établissement&nbsp;:</p>
-                <p className="text-right capitalize text-[#161616]">{data.school?.country?.toLowerCase()}</p>
-              </div>
-            )}
-            {data.school?.city && (
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-[#666666]">Commune de l&apos;établissement&nbsp;:</p>
-                <p className="text-right text-[#161616]">{data.school.city}</p>
-              </div>
-            )}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-[#666666]">Nom de l&apos;établissement&nbsp;:</p>
-              <p className="truncate text-right text-[#161616]">{data.school.fullName}</p>
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-[#666666]">Code postal&nbsp;:</p>
-            <p className="text-base text-[#161616]">{data.zip}</p>
-          </div>
-        )}
 
-        <div className="my-16 flex items-center justify-between pt-8">
-          <p className="text-lg font-semibold text-[#161616]">Mes informations personnelles</p>
-          <Link to="profil">
+        <div className="space-y-2 text-base">
+          <div className="flex items-center justify-between ">
+            <p className="text-gray-500">Niveau de scolarité&nbsp;:</p>
+            <p className="text-right">{translateGrade(data.scolarity)}</p>
+          </div>
+          <div className="flex items-center justify-between ">
+            <p className="text-gray-500">Date de naissance&nbsp;:</p>
+            <p className="text-right">{formatDateFR(data.birthDate)}</p>
+          </div>
+          {data.school ? (
+            <>
+              {data.school?.country && (
+                <div className="flex items-center justify-between ">
+                  <p className="text-gray-500">Pays de l&apos;établissement&nbsp;:</p>
+                  <p className="text-right capitalize">{data.school?.country?.toLowerCase()}</p>
+                </div>
+              )}
+              {data.school?.city && (
+                <div className="flex items-center justify-between ">
+                  <p className="text-gray-500">Commune de l&apos;établissement&nbsp;:</p>
+                  <p className="text-right">{data.school.city}</p>
+                </div>
+              )}
+              <div className="flex items-center justify-between ">
+                <p className="text-gray-500">Nom de l&apos;établissement&nbsp;:</p>
+                <p className="truncate text-right">{data.school.fullName}</p>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-between ">
+              <p className="text-gray-500">Code postal&nbsp;:</p>
+              <p className="text-right">{data.zip}</p>
+            </div>
+          )}
+        </div>
+
+        <hr className="my-6" />
+
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold">Mon sejour de cohésion</h1>
+          <Link to="./sejour">
             <EditPen />
           </Link>
         </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Prénom&nbsp;:</p>
-          <p className="text-right text-[#161616]">{data.firstName}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Nom&nbsp;:</p>
-          <p className="text-right text-[#161616]">{data.lastName}</p>
-        </div>
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-[#666666]">Email&nbsp;:</p>
-          <p className="text-right text-[#161616]">{data.email}</p>
-        </div>
-      </div>
+        <div className="font-normal text-[#161616] pb-4">{getCohortPeriod(selectedCohort)}</div>
 
-      <SignupButtonContainer
-        onClickNext={() => onSubmit()}
-        labelNext="M'inscrire au SNU"
-        onClickPrevious={() => history.push("/preinscription/profil")}
-        disabled={Object.values(error).length}
-        collapsePrevious={true}
-      />
-    </DSFRContainer>
+        {!isLoggedIn && (
+          <>
+            <hr />
+            <div className="flex items-center justify-between my-6">
+              <h1 className="text-lg font-semibold text-[#161616]">Mes informations personnelles</h1>
+              <Link to="profil">
+                <EditPen />
+              </Link>
+            </div>
+
+            <div className="space-y-2 mb-6 text-base">
+              <div className="flex items-center justify-between">
+                <p className="text-gray-500">Prénom du volontaire&nbsp;:</p>
+                <p className="text-right">{data.firstName}</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-gray-500">Nom du volontaire&nbsp;:</p>
+                <p className="text-right">{data.lastName}</p>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-gray-500">Téléphone&nbsp;:</p>
+                <p className="text-right">
+                  {PHONE_ZONES[data.phoneZone].code} {data.phone}
+                </p>
+              </div>
+              <div className="flex items-center justify-between">
+                <p className="text-gray-500">Email&nbsp;:</p>
+                <p className="text-right">{data.email}</p>
+              </div>
+            </div>
+          </>
+        )}
+
+        {isEmailValidationEnabled && <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>}
+
+        <SignupButtonContainer
+          onClickNext={() => onSubmit()}
+          labelNext={isEmailValidationEnabled ? "Oui, recevoir un code d'activation par e-mail" : "Finaliser mon inscription"}
+          disabled={isLoading}
+        />
+      </DSFRContainer>
+    </>
   );
 }

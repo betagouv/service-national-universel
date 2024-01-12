@@ -1,25 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import queryString from "query-string";
 import { BiLoaderAlt } from "react-icons/bi";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { youngCanChangeSession } from "snu-lib";
+import { youngCanChangeSession, youngCanDeleteAccount } from "snu-lib";
 import { PHONE_ZONES } from "snu-lib/phone-number";
 import { useDispatch, useSelector } from "react-redux";
-import { setYoung } from "../../../../redux/auth/actions";
-import { validateEmail, validatePhoneNumber } from "../../../../utils/form-validation.utils";
-import { updateYoung } from "../../../../services/young.service";
-import Input from "../../../../components/forms/inputs/Input";
-import Select from "../../../../components/forms/inputs/Select";
-import InputPhone from "../../../../components/forms/inputs/InputPhone";
-import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
+import { setYoung } from "@/redux/auth/actions";
+import { validateEmail, validatePhoneNumber } from "@/utils/form-validation.utils";
+import { updateYoung } from "@/services/young.service";
+import Input from "@/components/forms/inputs/Input";
+import Select from "@/components/forms/inputs/Select";
+import InputPhone from "@/components/forms/inputs/InputPhone";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import IdCardReader from "./components/IdCardReader";
 import SectionTitle from "../../components/SectionTitle";
 import Withdrawal from "./components/Withdrawal";
-import FormRow from "../../../../components/forms/layout/FormRow";
-import ButtonLight from "../../../../components/ui/buttons/ButtonLight";
-import ChangeAddressButton from "./components/ChangeAddressButton";
+import FormRow from "@/components/forms/layout/FormRow";
+import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
-import { environment } from "../../../../config";
+import ChangeEmailModal from "./components/ChangeEmailModal";
+import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -37,11 +38,22 @@ const AccountGeneralPage = () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
 
+  const { search } = useLocation();
+  const { newEmailValidationToken } = queryString.parse(search);
+
   const [formValues, setFormValues] = useState(getInitialFormValues(young));
+
+  const shouldValidateEmail = newEmailValidationToken && young.newEmail;
+
+  useEffect(() => {
+    if (formValues.email === young.email) return;
+    setFormValues({ ...formValues, email: young.email });
+  }, [young.email, formValues]);
 
   const [errors, setErrors] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isChangeAddressModalOpen, setChangeAddressModalOpen] = useState(false);
+  const [isChangeEmailModalOpen, setChangeEmailModalOpen] = useState(shouldValidateEmail ? true : false);
 
   const validateForm = () => {
     const foundErrors = {};
@@ -71,7 +83,6 @@ const AccountGeneralPage = () => {
         gender: formValues.gender,
         phone: formValues.phone.phoneNumber.trim(),
         phoneZone: formValues.phone.phoneZone,
-        email: formValues.email.trim(),
       };
       const { title, message, data: updatedYoung } = await updateYoung("profile", youngDataToUpdate);
       toastr.success(title, message);
@@ -99,7 +110,13 @@ const AccountGeneralPage = () => {
   return (
     <>
       <div className="overflow-hidden bg-white shadow-sm lg:rounded-lg">
-        {environment !== "production" && <ChangeAddressModal isOpen={isChangeAddressModalOpen} onClose={() => setChangeAddressModalOpen(false)} young={young} />}
+        <ChangeAddressModal isOpen={isChangeAddressModalOpen} onClose={() => setChangeAddressModalOpen(false)} young={young} />
+        <ChangeEmailModal
+          isOpen={isChangeEmailModalOpen}
+          onClose={() => setChangeEmailModalOpen(false)}
+          young={young}
+          validationToken={shouldValidateEmail ? newEmailValidationToken : ""}
+        />
         <form onSubmit={handleSubmitGeneralForm}>
           <div className="grid grid-cols-1 lg:grid-cols-3">
             <div className="hidden py-6 pl-6 lg:col-start-1 lg:block">
@@ -131,7 +148,11 @@ const AccountGeneralPage = () => {
                   placeholder="example@example.com"
                   value={formValues.email}
                   onChange={handleChangeValue("email")}
+                  disabled
                 />
+                <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-4">
+                  Modifier mon adresse email
+                </InlineButton>
                 <InputPhone
                   label="Téléphone"
                   name="phone"
@@ -148,14 +169,18 @@ const AccountGeneralPage = () => {
                   <Input label="Code Postal" name="zip" value={young.zip} className="basis-1/2" disabled />
                   <Input label="Ville" name="city" value={young.city} className="basis-1/2" disabled />
                 </FormRow>
-                {environment !== "production" && <ChangeAddressButton onClick={() => setChangeAddressModalOpen(true)} className="mb-2" />}
+                <InlineButton onClick={() => setChangeAddressModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-2">
+                  J’ai changé d’adresse
+                </InlineButton>
               </section>
-              <section>
-                <SectionTitle>Pièce d&apos;identité</SectionTitle>
-                <div className="flex flex-col gap-2">
-                  {young.files.cniFiles && young.files.cniFiles.map((cniFile) => <IdCardReader key={cniFile._id} cniFile={cniFile} young={young} />)}
-                </div>
-              </section>
+              {young?.files.cniFiles.length > 0 && (
+                <section>
+                  <SectionTitle>Pièce d&apos;identité</SectionTitle>
+                  <div className="flex flex-col gap-2">
+                    {young.files.cniFiles && young.files.cniFiles.map((cniFile) => <IdCardReader key={cniFile._id} cniFile={cniFile} young={young} />)}
+                  </div>
+                </section>
+              )}
             </div>
           </div>
 
@@ -176,7 +201,7 @@ const AccountGeneralPage = () => {
             Changer de séjour
           </Link>
         ) : null}
-        <Withdrawal young={young} />
+        {youngCanDeleteAccount(young) ? <Withdrawal young={young} /> : null}
       </div>
     </>
   );

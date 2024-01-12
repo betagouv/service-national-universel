@@ -1,6 +1,32 @@
 import URI from "urijs";
 import { supportApiUrl } from "../config";
 
+/**
+ * Creates Formdata for file upload and sanitize file names to get past firewall strict validation rules e.g apostrophe
+ * @param [File]
+ * @returns FormData
+ **/
+function createFormDataForFileUpload(arr, properties) {
+  let files = [];
+  if (Array.isArray(arr)) files = arr.filter((e) => typeof e === "object");
+  else files = [arr];
+  let formData = new FormData();
+
+  // File object name property is read-only, so we need to change it with Object.defineProperty
+  for (let file of files) {
+    // eslint-disable-next-line no-control-regex
+    const name = encodeURIComponent(file.name.replace(/['/:*?"<>|\x00-\x1F\x80-\x9F]/g, "_").trim());
+    Object.defineProperty(file, "name", { value: name });
+    // We add each file under a different key in order to not squash them
+    formData.append(file.name, file, name);
+  }
+
+  const names = files.map((e) => e.name || e);
+  let allData = { names, ...(properties || {}) };
+  formData.append("body", JSON.stringify(allData));
+  return formData;
+}
+
 class ApiService {
   getUrl({ origin = supportApiUrl, path, query = {} }) {
     return new URI().origin(origin).path(path).setSearch(query).toString();
@@ -68,11 +94,8 @@ class ApiService {
     return this.execute({ method: "DELETE", ...args });
   }
 
-  uploadFile(path, files) {
-    let formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append(files[i].name, files[i], files[i].name);
-    }
+  uploadFiles(path, files) {
+    const formData = createFormDataForFileUpload(files);
     return new Promise((resolve, reject) => {
       try {
         fetch(this.getUrl({ path }), {

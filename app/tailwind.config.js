@@ -2,7 +2,8 @@ const { Media } = require("reactstrap");
 const colors = require("tailwindcss/colors");
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
-  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  presets: [require("@snu/ds/tailwind.config")],
+  content: ["./src/**/*.{js,ts,jsx,tsx}", "../packages/ds/dist/**/*.{js,jsx}"],
   safelist: ["w-full", "w-auto", "w-10"],
   darkMode: Media, // or 'media' or 'class'
   theme: {
@@ -60,6 +61,7 @@ module.exports = {
         "beige-gris-galet-975": "#f9f6f2",
         "blue-france-sun-113": "#000091",
         "blue-france-sun-113-hover": "#1212ff",
+        "blue-france-info": "#0063cb",
         "grey-625": "#929292",
         "grey-925": "#e5e5e5",
         "snu-primary": "#42389d",
@@ -67,9 +69,11 @@ module.exports = {
       },
       font: {
         sans: ["Ubuntu", "ui-sans-serif", "system-ui"],
+        caveat: ["Caveat", "cursive"],
       },
       fontFamily: {
         ubuntu: ["Marianne", "Ubuntu", "ui-sans-serif", "system-ui"],
+        caveat: ["Caveat", "cursive"],
       },
       width: {
         "screen-1/4": "25vw",

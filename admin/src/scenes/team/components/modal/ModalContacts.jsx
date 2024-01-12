@@ -136,8 +136,8 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   if (!contacts || !cohorts || !currentTab) return null;
 
   return (
-    <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} onCancel={onCancel}>
-      <div className="flex w-full flex-col pt-2">
+    <ModalForm classNameModal="max-w-7xl" isOpen={isOpen} onCancel={onCancel}>
+      <div className="flex w-full flex-col pt-2 ">
         <div className="mb-4 flex flex-row items-center justify-center gap-2">
           <span className="text-xl font-medium text-black">Mes contacts convocation</span>
           <MdInfoOutline data-tip data-for="inscriptions" className="h-5 w-5 cursor-pointer text-gray-400" />

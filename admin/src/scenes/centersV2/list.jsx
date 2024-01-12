@@ -3,7 +3,7 @@ import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import {
   COHESION_STAY_START,
-  COHORTS,
+  getCohortNames,
   ES_NO_LIMIT,
   ROLES,
   canCreateOrUpdateCohesionCenter,
@@ -19,7 +19,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import api from "../../services/api";
 import { Title } from "../pointDeRassemblement/components/common";
 import { Badge, TabItem } from "./components/commons";
-import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
+import { orderCohort, transformExistingField } from "../../components/filters-system-v2/components/filters/utils";
 
 import { useHistory, useParams } from "react-router-dom";
 
@@ -42,11 +42,15 @@ export default function List() {
 
   const [firstSession, setFirstSession] = useState(null);
   const getFirstCohortAvailable = () => {
-    for (const session of COHORTS) {
+    let firstSession = null;
+    for (const session of getCohortNames()) {
       if (Object.prototype.hasOwnProperty.call(COHESION_STAY_START, session) && COHESION_STAY_START[session].getTime() > new Date().getTime()) {
-        return setFirstSession(session);
+        firstSession = session;
+        break;
       }
     }
+    if (!firstSession) firstSession = "Juillet 2023";
+    setFirstSession(firstSession);
   };
 
   useEffect(() => {
@@ -89,9 +93,6 @@ export default function List() {
 
 const ListSession = ({ firstSession }) => {
   const user = useSelector((state) => state.Auth.user);
-  const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
-  const [cohesionCenter, setCohesionCenter] = useState([]);
-
   const history = useHistory();
 
   const [data, setData] = React.useState([]);
@@ -100,6 +101,7 @@ const ListSession = ({ firstSession }) => {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
   const filterArray = [
     { title: "Cohorte", name: "cohort", missingLabel: "Non renseignée", defaultValue: [firstSession], sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
@@ -112,34 +114,25 @@ const ListSession = ({ firstSession }) => {
     },
     { title: "Places restantes", name: "placesLeft", missingLabel: "Non renseignée" },
     { title: "Emploi du temps", name: "hasTimeSchedule", missingLabel: "Non renseignée", translate: translate },
+    { title: "Projet Pédagogique", name: "hasPedagoProject", missingLabel: "Non renseignée", translate: translate },
+    {
+      title: "Chef de centre renseigné",
+      name: "headCenterExist",
+      missingLabel: "Non renseigné",
+      transformData: transformExistingField,
+      translate,
+    },
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code", missingLabel: "Non renseignée" });
 
-  useEffect(() => {
-    (async () => {
-      if (cohesionCenterIds?.length) {
-        const { responses } = await api.esQuery("cohesioncenter", {
-          size: ES_NO_LIMIT,
-          query: { bool: { must: { match_all: {} }, filter: { terms: { _id: cohesionCenterIds } } } },
-        });
-        if (responses?.length) {
-          setCohesionCenter(responses[0]?.hits?.hits || []);
-        }
-      }
-    })();
-  }, [cohesionCenterIds]);
-  React.useEffect(() => {
-    if (data) setCohesionCenterIds(data.map((pdr) => pdr._id));
-  }, [data]);
-
   if (!firstSession) return <div></div>;
   return (
-    <div className="flex-column flex-1 flex-wrap bg-white">
+    <div className="flex-column flex-1 flex-wrap bg-white mb-4">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
             pageId={pageId}
-            route="/elasticsearch/sessionphase1/search"
+            route="/elasticsearch/sessionphase1/search?needCohesionCenterInfo=true"
             setData={(value) => setData(value)}
             filters={filterArray}
             searchPlaceholder="Rechercher par mots clés, ville, code postal..."
@@ -147,30 +140,13 @@ const ListSession = ({ firstSession }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <ExportComponent
             title="Exporter"
             exportTitle="Session"
-            route="/elasticsearch/sessionphase1/export"
+            route="/elasticsearch/sessionphase1/export?needCohesionCenterInfo=true&needHeadCenterInfo=true"
             transform={async (all) => {
-              const { responses } = await api.esQuery("cohesioncenter", {
-                size: ES_NO_LIMIT,
-                query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: [...new Set(all.map((s) => s.cohesionCenterId))].filter((e) => e) } }] } },
-                track_total_hits: true,
-              });
-
-              const centerList = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
-
-              console.log([...new Set(all.map((s) => s.headCenterId))]);
-
-              const { responses: responses2 } = await api.esQuery("referent", {
-                size: ES_NO_LIMIT,
-                query: { bool: { must: { match_all: {} }, filter: [{ terms: { _id: [...new Set(all.map((s) => s.headCenterId))].filter((e) => e) } }] } },
-                track_total_hits: true,
-              });
-
-              const headCenters = responses2[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
-
               return all
                 .sort(function (a, b) {
                   let res = a?.nameCentre?.localeCompare(b?.nameCentre);
@@ -180,11 +156,13 @@ const ListSession = ({ firstSession }) => {
                   }
                   return res;
                 })
-                .map((data) => {
-                  const center = centerList.find((e) => e?.id?.toString() === data?.cohesionCenterId?.toString());
-                  const headCenter = headCenters.find((e) => e?.id?.toString() === data?.headCenterId?.toString());
+                .map((item) => {
+                  const data = item._source;
+                  const center = data.cohesionCenter;
+                  const headCenter = data.headCenter;
+
                   return {
-                    "Id centre": center?.id?.toString(),
+                    "Id centre": center?._id?.toString(),
                     "Code du centre": center?.code2022,
                     "Nom du centre": center?.name,
                     "Désignation du centre": center?.centerDesignation,
@@ -232,6 +210,8 @@ const ListSession = ({ firstSession }) => {
         paramData={paramData}
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="mt-6 mb-2 flex w-full flex-col gap-1">
             <hr />
@@ -242,12 +222,7 @@ const ListSession = ({ firstSession }) => {
               <div className="w-[20%]">Disponibilités</div>
             </div>
             {data.map((hit) => (
-              <HitSession
-                onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)}
-                key={hit._id}
-                center={cohesionCenter.filter((e) => e._id === hit.cohesionCenterId)[0]}
-                hit={hit}
-              />
+              <HitSession onClick={() => history.push(`/centre/${hit?.cohesionCenterId}?cohorte=${hit.cohort}`)} key={hit._id} hit={hit} />
             ))}
             <hr />
           </div>
@@ -266,6 +241,7 @@ const ListCenter = ({ firstSession }) => {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
   const filterArray = [
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     {
@@ -296,39 +272,16 @@ const ListCenter = ({ firstSession }) => {
   ];
   if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", missingLabel: "Non renseignée" });
 
-  // List of sessionPhase1 IDS currently displayed in results
-  const [cohesionCenterIds, setCohesionCenterIds] = useState([]);
-  // List of cohesionCenter associated to the sessionPhase1
-  const [sessionsPhase1, setSessionsPhase1] = useState([]);
-
-  useEffect(() => {
-    (async () => {
-      if (cohesionCenterIds?.length) {
-        const { responses } = await api.esQuery("sessionphase1", {
-          size: ES_NO_LIMIT,
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohesionCenterId.keyword": cohesionCenterIds } }] } },
-        });
-        if (responses.length) {
-          setSessionsPhase1(responses[0]?.hits?.hits || []);
-        }
-      }
-    })();
-  }, [cohesionCenterIds]);
-
   const history = useHistory();
-
-  React.useEffect(() => {
-    if (data) setCohesionCenterIds(data.map((center) => center._id));
-  }, [data]);
 
   if (!firstSession) return <div></div>;
   return (
-    <div className="flex-column flex-1 flex-wrap bg-white">
+    <div className="flex-column flex-1 flex-wrap bg-white rounded-xl mb-4">
       <div className="mx-4">
         <div className="flex w-full flex-row justify-between">
           <Filters
             pageId={pageId}
-            route="/elasticsearch/cohesioncenter/search"
+            route="/elasticsearch/cohesioncenter/search?needSessionPhase1Info=true"
             setData={(value) => setData(value)}
             filters={filterArray}
             searchPlaceholder="Rechercher par mots clés, ville, code postal..."
@@ -336,6 +289,7 @@ const ListCenter = ({ firstSession }) => {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <ExportComponent
             title="Exporter"
@@ -386,6 +340,8 @@ const ListCenter = ({ firstSession }) => {
         paramData={paramData}
         setParamData={setParamData}
         currentEntryOnPage={data?.length}
+        size={size}
+        setSize={setSize}
         render={
           <div className="mt-6 mb-2 flex w-full flex-col gap-1">
             <hr />
@@ -394,13 +350,7 @@ const ListCenter = ({ firstSession }) => {
               <div className="w-[60%]">Cohortes à venir</div>
             </div>
             {data.map((hit) => (
-              <Hit
-                key={hit._id}
-                hit={hit}
-                history={history}
-                onClick={() => history.push(`/centre/${hit._id}`)}
-                sessionsPhase1={sessionsPhase1.filter((e) => e?._source?.cohesionCenterId === hit._id).map((e) => e)}
-              />
+              <Hit key={hit._id} hit={hit} history={history} onClick={() => history.push(`/centre/${hit._id}`)} />
             ))}
             <hr />
           </div>
@@ -409,8 +359,8 @@ const ListCenter = ({ firstSession }) => {
     </div>
   );
 };
-const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
-  const orderedSession = sessionsPhase1.sort((a, b) => COHESION_STAY_START[a._source.cohort] - COHESION_STAY_START[b._source.cohort]);
+const Hit = ({ hit, onClick, history }) => {
+  const orderedSession = hit.sessionsPhase1.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
   return (
     <>
       <hr />
@@ -426,9 +376,9 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
                 <Badge
                   onClick={(e) => {
                     e.stopPropagation();
-                    history.push(`/centre/${sessionPhase1._source.cohesionCenterId}?cohorte=${sessionPhase1._source.cohort}`);
+                    history.push(`/centre/${sessionPhase1.cohesionCenterId}?cohorte=${sessionPhase1.cohort}`);
                   }}
-                  cohort={sessionPhase1._source}
+                  cohort={sessionPhase1}
                 />
               </div>
             </div>
@@ -438,14 +388,14 @@ const Hit = ({ hit, sessionsPhase1, onClick, history }) => {
     </>
   );
 };
-const HitSession = ({ center, hit, onClick }) => {
+const HitSession = ({ hit, onClick }) => {
   return (
     <>
       <hr />
       <div onClick={onClick} className="flex cursor-pointer items-center py-3 px-4 hover:bg-gray-50">
         <div className="flex w-[40%] flex-col gap-1">
-          <div className="font-bold leading-6 text-gray-900">{center?._source.name}</div>
-          <div className="text-sm font-normal leading-4 text-gray-500">{`${center?._source.city || ""} • ${center?._source.department || ""}`}</div>
+          <div className="font-bold leading-6 text-gray-900">{hit?.cohesionCenter?.name}</div>
+          <div className="text-sm font-normal leading-4 text-gray-500">{`${hit?.cohesionCenter?.city || ""} • ${hit?.cohesionCenter?.department || ""}`}</div>
         </div>
         <div className="flex w-[20%] flex-wrap items-center">
           <Badge cohort={hit} />

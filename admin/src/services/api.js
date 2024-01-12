@@ -2,12 +2,15 @@ import fetchRetry from "fetch-retry";
 
 import { capture } from "../sentry";
 import { apiURL } from "../config";
+import { createFormDataForFileUpload } from "snu-lib";
+import { ERRORS } from "snu-lib/errors";
 
 let fetch = window.fetch;
 
 class api {
   constructor() {
     this.token = "";
+    this.headers = { "x-user-timezone": new Date().getTimezoneOffset() };
   }
 
   goToAuth() {
@@ -25,6 +28,11 @@ class api {
   checkToken() {
     return new Promise(async (resolve, reject) => {
       try {
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        window.addEventListener("beforeunload", () => controller.abort());
+
         const response = await fetch(`${apiURL}/referent/signin_token`, {
           retries: 3,
           retryDelay: 1000,
@@ -32,42 +40,21 @@ class api {
           mode: "cors",
           method: "GET",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+          signal,
         });
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        capture(e);
-        reject(e);
+        if (e.name === "AbortError") {
+          console.log("Fetch request was manually reloaded, ignoring error.");
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR });
+        } else {
+          capture(e, { extras: { path: "CHECK TOKEN", token: this.token } });
+          reject(e);
+        }
       }
     });
-  }
-
-  esQuery(index, body, route = null, queryParam = "") {
-    const header = { index, type: "_doc" };
-    return fetch(`${apiURL}/es/${route || index}/_msearch${queryParam}`, {
-      retries: 3,
-      retryDelay: 1000,
-      retryOn: [502, 503, 504],
-      mode: "cors",
-      method: "POST",
-      redirect: "follow",
-      referrer: "no-referrer",
-      headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
-      body: [header, body].map((e) => `${JSON.stringify(e)}\n`).join(""),
-    })
-      .then((response) => {
-        if (response.ok === false && response.status === 401) {
-          if (window?.location?.pathname !== "/auth") window.location.href = "/auth?unauthorized=1";
-          return { responses: [] };
-        }
-        return response.json();
-      })
-      .catch((e) => {
-        capture(e, { extra: { body: body, route: route } });
-        console.error(e);
-        return { responses: [] };
-      });
   }
 
   getTotal(response) {
@@ -95,6 +82,11 @@ class api {
   async openpdf(path, body) {
     let response;
     try {
+      const controller = new AbortController();
+      const { signal } = controller;
+
+      window.addEventListener("beforeunload", () => controller.abort());
+
       response = await fetch(`${apiURL}${path}`, {
         retries: 3,
         retryDelay: 1000,
@@ -102,8 +94,9 @@ class api {
         mode: "cors",
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+        headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
         body: typeof body === "string" ? body : JSON.stringify(body),
+        signal,
       });
       if (response.status === 401) {
         if (window?.location?.pathname !== "/auth") {
@@ -112,13 +105,18 @@ class api {
         }
       }
     } catch (e) {
-      capture(e, { extra: { path: path, body: body } });
+      if (e.name === "AbortError") {
+        console.log("Fetch request was manually reloaded, ignoring error.");
+        return;
+      } else {
+        capture(e, { extra: { path: path, body: body } });
+      }
     }
-    if (response.status !== 200) {
+    if (response?.status !== 200) {
       throw await response.json();
     }
     try {
-      return response.blob();
+      return response?.blob();
     } catch (e) {
       capture(e, { extra: { path: path, body: body } });
     }
@@ -127,6 +125,11 @@ class api {
   get(path) {
     return new Promise(async (resolve, reject) => {
       try {
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        window.addEventListener("beforeunload", () => controller.abort());
+
         const response = await fetch(`${apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
@@ -134,7 +137,8 @@ class api {
           mode: "cors",
           method: "GET",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+          signal,
         });
         if (response.status === 401) {
           if (window?.location?.pathname !== "/auth") {
@@ -145,8 +149,13 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        capture(e, { extra: { path: path } });
-        reject(e);
+        if (e.name === "AbortError") {
+          console.log("Fetch request was manually reloaded, ignoring error.");
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR });
+        } else {
+          capture(e, { extra: { path: path } });
+          reject(e);
+        }
       }
     });
   }
@@ -154,6 +163,11 @@ class api {
   put(path, body) {
     return new Promise(async (resolve, reject) => {
       try {
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        window.addEventListener("beforeunload", () => controller.abort());
+
         const response = await fetch(`${apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
@@ -161,8 +175,9 @@ class api {
           mode: "cors",
           method: "PUT",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
           body: typeof body === "string" ? body : JSON.stringify(body),
+          signal,
         });
         if (response.status === 401) {
           if (window?.location?.pathname !== "/auth") {
@@ -173,8 +188,13 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        capture(e, { extra: { path: path, body: body } });
-        reject(e);
+        if (e.name === "AbortError") {
+          console.log("Fetch request was manually reloaded, ignoring error.");
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR });
+        } else {
+          capture(e, { extra: { path: path, body: body } });
+          reject(e);
+        }
       }
     });
   }
@@ -195,7 +215,7 @@ class api {
           mode: "cors",
           method: "PUT",
           credentials: "include",
-          headers: { Authorization: `JWT ${this.token}` },
+          headers: { Authorization: `JWT ${this.token}`, ...this.headers },
           body: formData,
         });
         if (response.status === 401) {
@@ -229,7 +249,7 @@ class api {
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: {},
+          headers: { ...this.headers },
           body: formData,
         });
         if (response.status === 401) {
@@ -257,7 +277,7 @@ class api {
           mode: "cors",
           credentials: "include",
           method: "DELETE",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
         });
         if (response.status === 401) {
           if (window?.location?.pathname !== "/auth") {
@@ -274,16 +294,8 @@ class api {
     });
   }
 
-  uploadFile(path, arr, properties) {
-    const names = arr.map((e) => e.name || e);
-    const files = arr.filter((e) => typeof e === "object");
-    let formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      const safeFilename = encodeURIComponent(files[i].name.replace(/'/g, ""));
-      formData.append(files[i].name, files[i], safeFilename);
-    }
-    let allData = properties ? { names, ...properties } : { names };
-    formData.append("body", JSON.stringify(allData));
+  uploadFiles(path, arr, properties) {
+    const formData = createFormDataForFileUpload(arr, properties);
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
@@ -293,7 +305,7 @@ class api {
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { Authorization: `JWT ${this.token}` },
+          headers: { Authorization: `JWT ${this.token}`, ...this.headers },
           body: formData,
         });
 
@@ -312,45 +324,14 @@ class api {
     });
   }
 
-  uploadID(youngId, file, metadata = {}) {
-    let formData = new FormData();
-    const safeFilename = encodeURIComponent(file.name.replace(/'/g, ""));
-    formData.append("file", file, safeFilename);
-    for (const [key, value] of Object.entries(metadata)) {
-      formData.append(key, value);
-    }
-
-    return new Promise(async (resolve, reject) => {
-      try {
-        const response = await fetch(`${apiURL}/young/${youngId}/documents/cniFiles`, {
-          retries: 3,
-          retryDelay: 1000,
-          retryOn: [502, 503, 504],
-          mode: "cors",
-          method: "POST",
-          credentials: "include",
-          headers: { Authorization: `JWT ${this.token}` },
-          body: formData,
-        });
-
-        if (response.status === 401) {
-          if (window?.location?.pathname !== "/auth") {
-            window.location.href = "/auth?disconnected=1";
-            return;
-          }
-        }
-        const res = await response.json();
-        resolve(res);
-      } catch (e) {
-        capture(e);
-        reject(e);
-      }
-    });
-  }
-
   post(path, body) {
     return new Promise(async (resolve, reject) => {
       try {
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        window.addEventListener("beforeunload", () => controller.abort());
+
         const response = await fetch(`${apiURL}${path}`, {
           retries: 3,
           retryDelay: 1000,
@@ -358,8 +339,9 @@ class api {
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
           body: typeof body === "string" ? body : JSON.stringify(body),
+          signal,
         });
 
         if (response.status === 401) {
@@ -374,8 +356,13 @@ class api {
         }
         resolve(res);
       } catch (e) {
-        capture(e, { extra: { path: path, body: body } });
-        reject(e);
+        if (e.name === "AbortError") {
+          console.log("Fetch request was manually reloaded, ignoring error.");
+          resolve({ ok: false, code: ERRORS.ABORT_ERROR });
+        } else {
+          capture(e, { extra: { path: path, body: body } });
+          reject(e);
+        }
       }
     });
   }

@@ -76,10 +76,6 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
         errors.totalCapacity = "La capacité totale doit être supérieure ou égale à la capacité volontaire + la capacité accompagnateurs";
       }
 
-      if (dataForCheck.schemaVolume > dataForCheck.busVolume + data.youngCapacity) {
-        errors.youngCapacity = "La capacité volontaire est trop faible par rapport au schéma de répartition";
-      }
-
       if (dataForCheck.youngsCountBus > data.youngCapacity) {
         errors.youngCapacity = "La capacité volontaire est trop faible par rapport au nombre de volontaire deja affectés à cette ligne";
       }
@@ -118,7 +114,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">Informations générales</div>
-        {canEditLigneBusGeneralInfo(user) && isBusEditionOpen(user, cohort) ? (
+        {canEditLigneBusGeneralInfo(user) || isBusEditionOpen(user, cohort) ? (
           <>
             {!editInfo ? (
               <button

@@ -23,12 +23,16 @@ import { getFilterArray, transformVolontaires, transformVolontairesSchool } from
 
 export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
+  if (user?.role === ROLES.ADMINISTRATEUR_CLE) return history.push("/mes-eleves");
 
   const [volontaire, setVolontaire] = useState(null);
-  const [centers, setCenters] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
   const [bus, setBus] = useState(null);
+  const [classes, setClasses] = useState(null);
+  const [etablissements, setEtablissements] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [size, setSize] = useState(10);
 
   //List state
   const [data, setData] = useState([]);
@@ -39,24 +43,38 @@ export default function VolontaireList() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
 
-  const filterArray = getFilterArray(user, bus, sessionsPhase1);
+  const filterArray = getFilterArray(user, bus, sessionsPhase1, classes, etablissements);
 
   useEffect(() => {
     (async () => {
       try {
-        const { data: centers } = await api.get("/cohesion-center");
-        const { data: sessions } = await api.get("/session-phase1/");
-        const { data: bus } = await api.get("/ligne-de-bus/all");
-        setCenters(centers);
+        const { data: sessions } = await api.post(`/elasticsearch/sessionphase1/export`, {
+          filters: {},
+          exportFields: ["codeCentre", "cohesionCenterId"],
+        });
+        const { data: bus } = await api.post(`/elasticsearch/lignebus/export`, {
+          filters: {},
+          exportFields: ["busId"],
+        });
+        const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
+          filters: {},
+          exportFields: ["name", "uniqueKeyAndId"],
+        });
+        const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
+          filters: {},
+          exportFields: ["name", "uai"],
+        });
         setSessionsPhase1(sessions);
         setBus(bus);
+        setClasses(classes);
+        setEtablissements(etablissements);
       } catch (e) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des données");
       }
     })();
   }, []);
 
-  if (!centers || !sessionsPhase1 || !bus) return <Loader />;
+  if (!sessionsPhase1 || !bus || !classes || !etablissements) return <Loader />;
 
   return (
     <>
@@ -75,7 +93,7 @@ export default function VolontaireList() {
               isOpen={isExportOpen}
               setIsOpen={setIsExportOpen}
               route="/elasticsearch/young/export?tab=volontaire"
-              transform={(data, values) => transformVolontaires(data, values, centers, sessionsPhase1, bus)}
+              transform={(data, values) => transformVolontaires(data, values)}
               exportFields={youngExportFields}
               exportTitle="volontaires"
               showTotalHits={true}
@@ -114,6 +132,7 @@ export default function VolontaireList() {
               setSelectedFilters={setSelectedFilters}
               paramData={paramData}
               setParamData={setParamData}
+              size={size}
             />
             <SortOption
               sortOptions={[
@@ -124,6 +143,7 @@ export default function VolontaireList() {
                 { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
                 { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
               ]}
+              selectedFilters={selectedFilters}
               paramData={paramData}
               setParamData={setParamData}
             />
@@ -143,6 +163,8 @@ export default function VolontaireList() {
             paramData={paramData}
             setParamData={setParamData}
             currentEntryOnPage={data?.length}
+            size={size}
+            setSize={setSize}
             render={
               <table className="mt-4 mb-2 w-full table-auto font-marianne">
                 <thead>
@@ -203,7 +225,6 @@ const Hit = ({ hit, onClick }) => {
         {hit.status === "DELETED" && <Badge minify text="Supprimé" color={YOUNG_STATUS_COLORS.DELETED} tooltipText={translate(hit.status)} />}
         <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} style={hit.status === "DELETED" ? "opacity-50" : ""} />
         <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} style={hit.status === "DELETED" ? "opacity-50" : ""} />
-        <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} style={hit.status === "DELETED" ? "opacity-50" : ""} />
       </td>
       <td onClick={(e) => e.stopPropagation()} className="w-[20%] pr-4 py-3">
         <Action hit={hit} />
@@ -225,15 +246,9 @@ const BadgePhase = ({ text, value, redirect, style }) => {
   };
 
   return (
-    <Badge
-      onClick={() => history.push(redirect)}
-      minify
-      text={text}
-      tooltipText={translator()}
-      minTooltipText={`${text}: ${translate(value)}`}
-      color={YOUNG_STATUS_COLORS[value]}
-      className={style}
-    />
+    <Link to={redirect}>
+      <Badge minify text={text} tooltipText={translator()} minTooltipText={`${text}: ${translate(value)}`} color={YOUNG_STATUS_COLORS[value]} className={style} />
+    </Link>
   );
 };
 
@@ -243,6 +258,15 @@ function classNames(...classes) {
 
 const Action = ({ hit }) => {
   const user = useSelector((state) => state.Auth.user);
+
+  const onPrendreLaPlace = async (young_id) => {
+    if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
+
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    window.open(appURL, "_blank");
+  };
 
   return (
     <Listbox>
@@ -271,17 +295,12 @@ const Action = ({ hit }) => {
                   </Listbox.Option>
                 </Link>
                 {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
-                  <a
-                    className="!cursor-pointer"
-                    href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => plausibleEvent("Volontaires/CTA - Prendre sa place")}>
-                    <Listbox.Option
-                      className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}>
-                      <div className={"block truncate font-normal text-xs"}>Prendre sa place</div>
-                    </Listbox.Option>
-                  </a>
+                  <Listbox.Option
+                    className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}>
+                    <button className={"block truncate font-normal text-xs"} onClick={() => onPrendreLaPlace(hit._id)}>
+                      Prendre sa place
+                    </button>
+                  </Listbox.Option>
                 ) : null}
               </Listbox.Options>
             </Transition>

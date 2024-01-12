@@ -3,58 +3,48 @@ import { useSelector } from "react-redux";
 import { Redirect, useParams } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 
-import DesktopConfirm from "./desktop/stepConfirm";
-import DesktopConsentements from "./desktop/stepConsentements";
-import DesktopCoordonnees from "./desktop/stepCoordonnees";
-import DesktopDocuments from "./desktop/stepDocuments";
-import DesktopDone from "./desktop/stepDone";
-import DesktopRepresentants from "./desktop/stepRepresentants";
-import DesktopUpload from "./desktop/stepUpload";
+import StepConfirm from "./steps/stepConfirm";
+import StepConsentements from "./steps/stepConsentements";
+import StepCoordonnees from "./steps/stepCoordonnees";
+import StepDocuments from "./steps/stepDocuments";
+import StepDone from "./steps/stepDone";
+import StepRepresentants from "./steps/stepRepresentants";
+import StepUpload from "./steps/stepUpload";
 
-import MobileConfirm from "./mobile/stepConfirm";
-import MobileConsentements from "./mobile/stepConsentements";
-import MobileCoordonnees from "./mobile/stepCoordonnees";
-import MobileDocuments from "./mobile/stepDocuments";
-import MobileDone from "./mobile/stepDone";
-import MobileRepresentants from "./mobile/stepRepresentants";
-import MobileUpload from "./mobile/stepUpload";
+import MobileCorrectionEligibilite from "./steps/correction/stepEligibilite";
+import MobileCorrectionProfil from "./steps/correction/stepProfil";
 
-import DesktopCorrectionEligibilite from "./desktop/correction/stepEligibilite";
-import DesktopCorrectionProfil from "./desktop/correction/stepProfil";
-
-import MobileCorrectionEligibilite from "./mobile/correction/stepEligibilite";
-import MobileCorrectionProfil from "./mobile/correction/stepProfil";
-
-import useDevice from "../../hooks/useDevice";
-
-import HeaderMenu from "../../components/headerMenu";
-import Footer from "./../../components/footerV2";
-import Header from "./../../components/header";
+import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
-import { YOUNG_STATUS, inscriptionModificationOpenForYoungs } from "snu-lib";
+import { YOUNG_STATUS, inscriptionCreationOpenForYoungs, inscriptionModificationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
-import { environment } from "../../config";
+import InscriptionClosed from "./InscriptionClosed";
+import { environment, supportURL } from "../../config";
+import { getCohort } from "@/utils/cohorts";
+import useAuth from "@/services/useAuth";
+import Help from "./components/Help";
+import Stepper from "@/components/dsfr/ui/Stepper";
 
-function renderStep(step, device) {
-  if (step === STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
-  if (step === STEPS.REPRESENTANTS) return device === "desktop" ? <DesktopRepresentants /> : <MobileRepresentants />;
-  if (step === STEPS.CONSENTEMENTS) return device === "desktop" ? <DesktopConsentements /> : <MobileConsentements />;
-  if (step === STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
-  if (step === STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
-  if (step === STEPS.CONFIRM) return device === "desktop" ? <DesktopConfirm /> : <MobileConfirm />;
-  if (step === STEPS.WAITING_CONSENT) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
-  if (step === STEPS.DONE) return device === "desktop" ? <DesktopDone /> : <MobileDone />;
-  return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
+function renderStep(step) {
+  if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
+  if (step === STEPS.REPRESENTANTS) return <StepRepresentants />;
+  if (step === STEPS.CONSENTEMENTS) return <StepConsentements />;
+  if (step === STEPS.DOCUMENTS) return <StepDocuments />;
+  if (step === STEPS.UPLOAD) return <StepUpload />;
+  if (step === STEPS.CONFIRM) return <StepConfirm />;
+  if (step === STEPS.WAITING_CONSENT) return <StepDone />;
+  if (step === STEPS.DONE) return <StepDone />;
+  return <StepCoordonnees />;
 }
 
-const Step = ({ young: { inscriptionStep2023 } }) => {
-  const device = useDevice();
-  const [isOpen, setIsOpen] = React.useState(false);
+const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscriptionStep2023 } }) => {
   const { step } = useParams();
-
+  const { isCLE } = useAuth();
+  const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
+  const supportLink = `${supportURL}${isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"}`;
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
 
-  const eligibleStep = inscriptionStep2023 || STEPS.COORDONNEES;
+  const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
 
   if (!requestedStep && eligibleStep) {
     return <Redirect to={`/inscription2023/${getStepUrl(eligibleStep, STEP_LIST)}`} />;
@@ -68,71 +58,85 @@ const Step = ({ young: { inscriptionStep2023 } }) => {
 
   const updatedEligibleStepIndex = eligibleStepDetails.allowNext ? eligibleStepIndex + 1 : eligibleStepIndex;
 
+  let steps = [
+    { value: STEPS.COORDONNEES, label: "Dites-nous en plus sur vous", stepNumber: 1 },
+    { value: STEPS.CONSENTEMENTS, label: "Consentements", stepNumber: 2 },
+    { value: STEPS.REPRESENTANTS, label: "Mes représentants légaux", stepNumber: 3 },
+  ];
+
+  if (!isCLE) {
+    steps.push({ value: STEPS.DOCUMENTS, label: "Justifier de mon identité", stepNumber: 4 }, { value: STEPS.UPLOAD, label: "Justifier de mon identité", stepNumber: 4 });
+  }
+
   if (currentStepIndex > updatedEligibleStepIndex) {
     return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
   return (
-    <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
-      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
-      {renderStep(currentStep, device)}
-      {device === "desktop" && <Footer marginBottom={"0px"} />}
-    </div>
+    <DSFRLayout title={title}>
+      <Stepper steps={steps} stepValue={currentStep} />
+      {renderStep(currentStep)}
+      <Help supportLink={supportLink} />
+    </DSFRLayout>
   );
 };
 
-function renderStepCorrection(step, device) {
-  if (step === CORRECTION_STEPS.ELIGIBILITE) return device === "desktop" ? <DesktopCorrectionEligibilite /> : <MobileCorrectionEligibilite />;
-  if (step === CORRECTION_STEPS.PROFIL) return device === "desktop" ? <DesktopCorrectionProfil /> : <MobileCorrectionProfil />;
-  // On peut réutiliser les composants si on veut pas duppliquer le code
-  if (step === CORRECTION_STEPS.COORDONNEES) return device === "desktop" ? <DesktopCoordonnees /> : <MobileCoordonnees />;
-  if (step === CORRECTION_STEPS.REPRESENTANTS) return device === "desktop" ? <DesktopRepresentants /> : <MobileRepresentants />;
-  if (step === CORRECTION_STEPS.DOCUMENTS) return device === "desktop" ? <DesktopDocuments /> : <MobileDocuments />;
-  if (step === CORRECTION_STEPS.UPLOAD) return device === "desktop" ? <DesktopUpload /> : <MobileUpload />;
+function renderStepCorrection(step) {
+  if (step === CORRECTION_STEPS.ELIGIBILITE) return <MobileCorrectionEligibilite />;
+  if (step === CORRECTION_STEPS.PROFIL) return <MobileCorrectionProfil />;
+  if (step === CORRECTION_STEPS.COORDONNEES) return <StepCoordonnees />;
+  if (step === CORRECTION_STEPS.REPRESENTANTS) return <StepRepresentants />;
+  if (step === CORRECTION_STEPS.DOCUMENTS) return <StepDocuments />;
+  if (step === CORRECTION_STEPS.UPLOAD) return <StepUpload />;
   return false;
 }
 
 const StepCorrection = () => {
-  const device = useDevice();
-  const [isOpen, setIsOpen] = React.useState(false);
   const { step } = useParams();
-
-  if (renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device) === false) {
+  const { isCLE } = useAuth();
+  const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
+  if (renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST)) === false) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  return (
-    <div className="flex h-screen flex-col justify-between bg-white md:!bg-[#f9f6f2]">
-      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
-      {renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST), device)}
-      {device === "desktop" && <Footer />}
-    </div>
-  );
+  return <DSFRLayout title={title}>{renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST))}</DSFRLayout>;
 };
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
 
   if (!young) return <Redirect to="/preinscription" />;
 
-  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir") {
+  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir" && environment === "production") {
     return <FutureCohort />;
   }
 
   //il n'a pas acces a l'inscription
-  if (young?.status && ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.WAITING_CORRECTION].includes(young?.status)) {
+  if (
+    young?.status &&
+    ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REINSCRIPTION].includes(young?.status)
+  ) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
   //Il a fini son inscription
-  if (young.inscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION") {
+  if (young.inscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION" && !young.hasStartedReinscription) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
+  //il a fini sa re-inscription
+  if (young.reinscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION" && young.hasStartedReinscription) {
+    return <Redirect to={{ pathname: "/" }} />;
+  }
+
+  // Si la periode de modification est finie, pour les volontaires en cours d'inscription qui n'ont pas encore été basculés sur "à venir"
+  if (!inscriptionCreationOpenForYoungs(cohort) && young.status === YOUNG_STATUS.IN_PROGRESS) {
+    return <InscriptionClosed />;
+  }
+
   //si la periode de modification est finie
-  if (!inscriptionModificationOpenForYoungs(young.cohort, young, environment) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
+  if (!inscriptionModificationOpenForYoungs(cohort) && young.status !== YOUNG_STATUS.NOT_AUTORISED) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 

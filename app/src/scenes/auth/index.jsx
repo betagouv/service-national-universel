@@ -13,17 +13,13 @@ import DesktopSignupInvite from "./desktop/signupInvite";
 import DesktopSignin from "./desktop/signin";
 import DesktopSignin2FA from "./desktop/signin2FA";
 
-import Connect from "./connect";
 import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 
-import Header from "../../components/header";
-import HeaderMenu from "../../components/headerMenu";
-import Footer from "../../components/footerV2";
+import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 
 const Render = ({ screen }) => {
   const device = useDevice();
-  const [isOpen, setIsOpen] = React.useState(false);
 
   function renderScreen(screen) {
     if (screen === "invite") return device === "desktop" ? <DesktopSignupInvite /> : <MobileSignupInvite />;
@@ -33,14 +29,7 @@ const Render = ({ screen }) => {
     if (screen === "2fa") return device === "desktop" ? <DesktopSignin2FA /> : <MobileSignin2FA />;
   }
 
-  return (
-    <div>
-      <HeaderMenu isOpen={isOpen} setIsOpen={setIsOpen} />
-      <Header setIsOpen={setIsOpen} />
-      {renderScreen(screen)}
-      {device === "desktop" && <Footer marginBottom={"0px"} />}
-    </div>
-  );
+  return <DSFRLayout>{renderScreen(screen)}</DSFRLayout>;
 };
 
 export default function Index() {
@@ -52,7 +41,6 @@ export default function Index() {
       <SentryRoute path="/auth/signup/invite" component={() => <Render screen="invite" />} />
       <SentryRoute path="/auth/reset" component={() => <Render screen="reset" />} />
       <SentryRoute path="/auth/forgot" component={() => <Render screen="forgot" />} />
-      <SentryRoute path="/auth/connect" component={Connect} />
       <SentryRoute path="/auth/2fa" component={() => <Render screen="2fa" />} />
       <SentryRoute path="/auth" component={() => <Render screen="auth" />} />
       <Redirect to={parentPath} /> {/* This will redirect to the parent path if no other Routes match */}

@@ -3,9 +3,10 @@ import DashboardBox from "../../../../components/ui/DashboardBox";
 import api from "../../../../../../services/api";
 import StatusTable from "../../../../components/ui/StatusTable";
 import HorizontalMiniBar from "../../../../components/graphs/HorizontalMiniBar";
-import { computeMissionUrl } from "../../../../components/common";
 import ExportMissionStatusReport from "./ExportMissionStatusReport";
 import { translate } from "snu-lib";
+import { getNewLink } from "@/utils";
+import queryString from "query-string";
 
 export default function MissionsStatuts({ filters, missionFilters, className = "" }) {
   const [loading, setLoading] = useState(true);
@@ -21,7 +22,7 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     setError(null);
     setLoading(true);
     try {
-      const result = await api.post(`/dashboard/engagement/missions-statuts`, { filters, missionFilters });
+      const result = await api.post(`/elasticsearch/dashboard/engagement/mission-status`, { filters, missionFilters });
       if (result.ok) {
         setStatuses(
           result.data.map((status) => {
@@ -36,7 +37,14 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
                   labels={["occupées", "disponibles"]}
                 />
               ),
-              url: computeMissionUrl(filters, missionFilters, { STATUS: status.status }),
+              url: getNewLink(
+                {
+                  base: `/mission`,
+                  filter: { ...filters, ...missionFilters, status: [] },
+                  filtersUrl: [queryString.stringify({ status: status.status })],
+                },
+                "mission",
+              ),
             };
           }),
         );
@@ -82,10 +90,10 @@ export default function MissionsStatuts({ filters, missionFilters, className = "
     setLoading(false);
   }
 
-  const exportButton = <ExportMissionStatusReport filter={exportFilter} />;
+  // const exportButton = <ExportMissionStatusReport filter={exportFilter} />; TODO: fix export and add this component in the headerChildren prop of <DashboardBox />
 
   return (
-    <DashboardBox title="Statut des missions proposées" className={className} headerChildren={exportButton}>
+    <DashboardBox title="Statut des missions proposées" className={className}>
       {error ? (
         <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{error}</div>
       ) : (

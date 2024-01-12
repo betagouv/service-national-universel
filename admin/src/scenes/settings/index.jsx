@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { MdInfoOutline } from "react-icons/md";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -18,35 +18,29 @@ import SimpleToggle from "../../components/ui/forms/dateForm/SimpleToggle";
 import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
 import { settings, uselessSettings } from "./utils";
-import { environment } from "../../config";
-
-const cohortList = [
-  { label: "Février 2023 - C", value: "Février 2023 - C" },
-  { label: "Avril 2023 - A", value: "Avril 2023 - A" },
-  { label: "Avril 2023 - B", value: "Avril 2023 - B" },
-  { label: "Juin 2023", value: "Juin 2023" },
-  { label: "Juillet 2023", value: "Juillet 2023" },
-];
-
-if (environment !== "production") cohortList.push({ label: "Séjour de test", value: "Séjour de test" });
+import NumberInput from "../../components/ui/forms/NumberInput";
+import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
+  const cohorts = useSelector((state) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
-  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || "Février 2023 - C");
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [cohort, setCohort] = useState(urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : null);
+  const [cohortList, setCohortList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const readOnly = !isSuperAdmin(user);
-  const [noChange, setNoChange] = React.useState(true);
+  const [noChange, setNoChange] = useState(true);
   const history = useHistory();
-  const [mounted, setMounted] = React.useState(false);
-  const [data, setData] = React.useState({
+  const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState({});
+  const [data, setData] = useState({
     ...settings,
     ...uselessSettings,
   });
 
   const getCohort = async () => {
     try {
-      const { ok, data: reponseCohort } = await await api.get("/cohort/" + cohort);
+      const { ok, data: reponseCohort } = await api.get("/cohort/" + encodeURIComponent(cohort));
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du séjour");
       }
@@ -70,22 +64,42 @@ export default function Settings() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
+    const cohortList = getCohortSelectOptions(cohorts, true);
+    setCohortList(cohortList);
+    if (!cohort) {
+      setCohort("Février 2024 - C");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!cohort) return;
     setIsLoading(true);
     getCohort();
   }, [cohort]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mounted) return;
     setNoChange(false);
   }, [data]);
 
   const onSubmit = async () => {
     try {
+      let err = {};
+      if (!data.dateStart) err.dateStart = "La date de début est obligatoire";
+      if (!data.dateEnd) err.dateEnd = "La date de fin est obligatoire";
+      if (!data.inscriptionStartDate) err.inscriptionStartDate = "La date d'ouverture des inscriptions est obligatoire";
+      if (!data.inscriptionEndDate) err.inscriptionEndDate = "La date de fermeture des inscriptions est obligatoire";
+      if (!data.instructionEndDate) err.instructionEndDate = "La date de fermeture des inscriptions est obligatoire";
+      setError(err);
+      if (Object.values(err).length > 0) {
+        return toastr.warning("Veuillez corriger les erreurs dans le formulaire");
+      }
+
       setIsLoading(true);
       delete data.name;
       delete data.snuId;
-      const { ok, code } = await api.put(`/cohort/${cohort}`, data);
+      const { ok, code } = await api.put(`/cohort/${encodeURIComponent(cohort)}`, data);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", code);
         await getCohort();
@@ -129,14 +143,14 @@ export default function Settings() {
               selected={cohortList.find((e) => e.value === cohort)}
               setSelected={(e) => {
                 setCohort(e.value);
-                history.replace({ search: `?cohort=${e.value}` });
+                history.replace({ search: `?cohort=${encodeURIComponent(e.value)}` });
               }}
             />
           </div>
         </div>
         <div className="flex w-full flex-col gap-8">
           {/* Informations générales */}
-          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-col gap-8">
               <p className="text-lg font-medium leading-5 text-gray-900">Informations générales</p>
               <div className="flex">
@@ -168,11 +182,20 @@ export default function Settings() {
                         mode="single"
                         label="Début"
                         value={data.dateStart}
+                        error={error.dateStart}
                         onChange={(e) => setData({ ...data, dateStart: e })}
                         readOnly={readOnly}
                         disabled={isLoading}
                       />
-                      <DatePickerInput mode="single" label="Fin" value={data.dateEnd} onChange={(e) => setData({ ...data, dateEnd: e })} readOnly={readOnly} disabled={isLoading} />
+                      <DatePickerInput
+                        mode="single"
+                        label="Fin"
+                        value={data.dateEnd}
+                        error={error.dateEnd}
+                        onChange={(e) => setData({ ...data, dateEnd: e })}
+                        readOnly={readOnly}
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
                 </div>
@@ -238,7 +261,7 @@ export default function Settings() {
           </div>
           {/* TODO implementer parametres sur la plateforme */}
           {/* Inscriptions (phase 0) */}
-          {/* <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col rounded-xl pt-8 pb-12 px-8 bg-white gap-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex flex-col w-full gap-8">
               <p className="text-gray-900 leading-5 text-lg font-medium">Inscriptions (phase 0)</p>
               <div className="flex">
@@ -254,8 +277,27 @@ export default function Settings() {
                         </ul>
                       </ReactTooltip>
                     </div>
-                    <DatePickerInput mode="single" label="Ouverture" disabled={isLoading} readOnly={readOnly} />
-                    <DatePickerInput mode="range" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
+                    <DatePickerInput
+                      mode="single"
+                      isTime
+                      label="Ouverture"
+                      placeholder="Date et heure"
+                      value={data.inscriptionStartDate}
+                      error={error.inscriptionStartDate}
+                      onChange={(e) => setData({ ...data, inscriptionStartDate: e })}
+                      readOnly={readOnly}
+                      disabled={isLoading}
+                    />
+                    <DatePickerInput
+                      mode="single"
+                      isTime
+                      label="Fermeture"
+                      placeholder="Date et heure"
+                      value={data.inscriptionEndDate}
+                      onChange={(e) => setData({ ...data, inscriptionEndDate: e })}
+                      readOnly={readOnly}
+                      disabled={isLoading}
+                    />
                   </div>
                 </div>
                 <div className="flex w-[10%] justify-center items-center">
@@ -283,7 +325,16 @@ export default function Settings() {
                       </ReactTooltip>
                     </div>
                     <div className="flex gap-4 w-full">
-                      <DatePickerInput mode="single" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
+                      <DatePickerInput
+                        mode="single"
+                        isTime
+                        label="Fermeture"
+                        placeholder="Date"
+                        value={data.inscriptionModificationEndDate}
+                        onChange={(e) => setData({ ...data, inscriptionModificationEndDate: e })}
+                        readOnly={readOnly}
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
@@ -292,23 +343,32 @@ export default function Settings() {
                       <MdInfoOutline data-tip data-for="instruction" className="text-gray-400 h-5 w-5 cursor-pointer" />
                       <ReactTooltip id="instruction" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <ul className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-                          <li>Ouverture et fermeture de la proposition du séjour sur le formulaire d’inscription.</li>
-                          <li>Blocage de l’accès au dossier des dossiers d’inscription “en cours”.</li>
+                          <li> Fermeture de la proposition de séjour pour le changement de séjour.</li>
+                          <li>Le lendemain, les dossiers restants “en attente de validation” et “en attente de correction” seront basculés sur un autre séjour via script.</li>
                         </ul>
                       </ReactTooltip>
                     </div>
                     <div className="flex gap-4 w-full">
-                      <DatePickerInput mode="single" label="Fermeture" disabled={isLoading} readOnly={readOnly} />
+                      <DatePickerInput
+                        mode="single"
+                        isTime
+                        label="Fermeture"
+                        placeholder="Date"
+                        value={data.instructionEndDate}
+                        onChange={(e) => setData({ ...data, instructionEndDate: e })}
+                        readOnly={readOnly}
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
 
           {/* TODO implementer parametres sur la plateforme */}
           {/* Préparation des affectations et des transports (phase 1) */}
-          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-col gap-8">
               <p className="text-lg font-medium leading-5 text-gray-900">Préparation des affectations et des transports (phase 1)</p>
               <div className="flex">
@@ -521,7 +581,7 @@ export default function Settings() {
           </div>
 
           {/* Affectation et pointage (phase 1) */}
-          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pt-8 pb-12 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+          <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
             <div className="flex w-full flex-col gap-8">
               <p className="text-lg font-medium leading-5 text-gray-900">Affectation et pointage (phase 1)</p>
               <div className="flex">
@@ -805,22 +865,7 @@ export default function Settings() {
                         <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">Par défaut 9e jour après le début du séjour.</p>
                       </ReactTooltip>
                     </div>
-                    <DatePickerInput
-                      mode="single"
-                      label="Volontaires (non Terminales)"
-                      value={data.validationDate}
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      onChange={(e) => setData({ ...data, validationDate: e })}
-                    />
-                    <DatePickerInput
-                      mode="single"
-                      label="Volontaires (Terminales)"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      value={data.validationDateForTerminaleGrade}
-                      onChange={(e) => setData({ ...data, validationDateForTerminaleGrade: e })}
-                    />
+                    <NumberInput days={data.daysToValidate} label={"Nombre de jour pour validation"} onChange={(e) => setData({ ...data, daysToValidate: e })} />
                   </div>
                 </div>
               </div>

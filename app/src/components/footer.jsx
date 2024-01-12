@@ -1,35 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { NavLink, useHistory } from "react-router-dom";
+import React from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
-import { appURL } from "../config";
-import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { supportURL } from "@/config";
 
 export default function Footer() {
-  const young = useSelector((state) => state.Auth.young);
-  const [from, setFrom] = useState();
-  const [showOldFooter, setShowOldFooter] = useState(false);
-  const history = useHistory();
-
-  useEffect(() => {
-    if (history) {
-      return history.listen((location) => {
-        setFrom(location.pathname);
-      });
-    }
-  }, [history]);
-
-  useEffect(() => {
-    if (
-      ["preinscription", "auth", "inscription2023", "reinscription", "representants-legaux", "public-engagements", "inscription", "noneligible"].findIndex((route) =>
-        location.pathname.includes(route),
-      ) === -1
-    ) {
-      setShowOldFooter(true);
-    } else setShowOldFooter(false);
-  }, [from]);
-
-  return showOldFooter ? (
+  return (
     <FooterContainer>
       <Container>
         <ul>
@@ -40,7 +16,7 @@ export default function Footer() {
           </li>
           <li>
             <a href="https://snu.gouv.fr/accessibilite" target="_blank" rel="noreferrer">
-              Accessibilité
+              Accessibilité : non conforme
             </a>
           </li>
           <li>
@@ -49,12 +25,12 @@ export default function Footer() {
             </a>
           </li>
           <li>
-            <a href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
-              Conditions générales d&apos;utilisation
-            </a>
+            <Link to="conditions-generales-utilisation">Conditions générales d&apos;utilisation</Link>
           </li>
           <li>
-            <NavLink to={young ? `/besoin-d-aide?from=${from}` : `/public-besoin-d-aide?from=${window.location.pathname}`}>Besoin d&apos;aide</NavLink>
+            <a href={supportURL} target="_blank" rel="noreferrer">
+              Besoin d&apos;aide
+            </a>
           </li>
         </ul>
         <p>Tous droits réservés - Ministère de l&apos;éducation nationale et de la jeunesse - {new Date().getFullYear()}</p>
@@ -97,7 +73,7 @@ export default function Footer() {
         </ul>
       </Container>
     </FooterContainer>
-  ) : null;
+  );
 }
 
 const FooterContainer = styled.footer`

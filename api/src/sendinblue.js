@@ -2,8 +2,9 @@ const fetch = require("node-fetch");
 const queryString = require("querystring");
 
 const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
-const { capture } = require("./sentry");
+const { capture, captureMessage } = require("./sentry");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
+const { rateLimiterContactSIB } = require("./rateLimiters");
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -11,7 +12,7 @@ const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
 //https://my.sendinblue.com/lists/add-attributes
 
-const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports)\.gouv\.fr|lexfo\.fr/;
+const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports|snu)\.gouv\.fr|lexfo\.fr/;
 
 const api = async (path, options = {}) => {
   try {
@@ -34,7 +35,7 @@ const api = async (path, options = {}) => {
     return true;
   } catch (e) {
     console.log("Erreur in sendinblue api", e);
-    capture(e);
+    capture(e, { extra: { path, options } });
   }
 };
 
@@ -55,7 +56,9 @@ async function sendSMS(phoneNumber, content, tag) {
     body.tag = tag;
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
-    if (!sms || sms?.code) throw new Error(JSON.stringify({ sms, body }));
+    if (!sms || sms?.code) {
+      captureMessage("Error sending an SMS", { extra: { sms, body } });
+    }
     if (ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
@@ -85,7 +88,9 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    if (!mail || mail?.code) throw new Error(JSON.stringify({ mail, body }));
+    if (!mail || mail?.code) {
+      captureMessage("Error sending an email", { extra: { mail, body } });
+    }
     if (ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
@@ -150,9 +155,15 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
 
     // * To delete once we put the email of the parent in the template
     const isParentTemplate = Object.values(SENDINBLUE_TEMPLATES.parent).some((value) => value == body?.templateId);
-    if (mail?.message == "email is missing in to" && isParentTemplate) throw new Error("Parent sans email : " + body?.to?.[0]?.name);
+    if (mail?.message == "email is missing in to" && isParentTemplate) {
+      captureMessage("Parent sans email", { extra: { mail, body } });
+      return;
+    }
 
-    if (!mail || mail?.code) throw new Error(JSON.stringify({ mail, body }));
+    if (!mail || mail?.code) {
+      captureMessage("Error sending a template", { extra: { mail, body } });
+      return;
+    }
     if (ENVIRONMENT !== "production" || force) {
       console.log(body, mail);
     }
@@ -271,6 +282,7 @@ async function sync(obj, type, { force } = { force: false }) {
     if (attributes.TYPE === "REFERENT") listIds.push(47);
     user.statusPhase1 === "WAITING_ACCEPTATION" && listIds.push(106);
     ["referent_region", "referent_department"].includes(user.role) && listIds.push(147);
+    user.role === "supervisor" && listIds.push(1049);
 
     delete attributes.EMAIL;
     delete attributes.PASSWORD;
@@ -291,7 +303,7 @@ async function sync(obj, type, { force } = { force: false }) {
 
 async function syncContact(email, attributes, listIds) {
   try {
-    const res = await createContact({ email, attributes, listIds, updateEnabled: true });
+    const res = await rateLimiterContactSIB.call(() => createContact({ email, attributes, listIds, updateEnabled: true }));
     if (!res || res?.code) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
     return;
   } catch (e) {
@@ -299,21 +311,34 @@ async function syncContact(email, attributes, listIds) {
   }
 }
 
-async function unsync(obj, { force } = { force: false }) {
-  if (ENVIRONMENT !== "production" && !force) return console.log("no unsync sendinblue");
-  try {
-    if (obj.hasOwnProperty("parent1Email") && obj.parent1Email) {
-      await deleteContact(obj.parent1Email);
-    }
-    if (obj.hasOwnProperty("parent2Email") && obj.parent2Email) {
-      await deleteContact(obj.parent2Email);
-    }
+async function unsync(obj, options = { force: false }) {
+  if (ENVIRONMENT !== "production" && !options.force) {
+    console.log("no unsync sendinblue");
+    return;
+  }
 
-    await deleteContact(obj.email);
-  } catch (e) {
-    console.log("Can't delete in sendinblue", obj.email);
-    capture(e);
+  const emails = [obj.parent1Email, obj.parent2Email, obj.email].filter(Boolean);
+
+  try {
+    await Promise.all(emails.map(deleteContact));
+  } catch (error) {
+    console.log("Can't delete in sendinblue", emails);
+    capture(error);
   }
 }
 
-module.exports = { api, sync, unsync, sendSMS, sendEmail, getEmailsList, getEmailContent, sendTemplate, createContact, updateContact, deleteContact, getContact };
+module.exports = {
+  regexp_exception_staging,
+  api,
+  sync,
+  unsync,
+  sendSMS,
+  sendEmail,
+  getEmailsList,
+  getEmailContent,
+  sendTemplate,
+  createContact,
+  updateContact,
+  deleteContact,
+  getContact,
+};

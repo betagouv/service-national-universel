@@ -3,9 +3,10 @@ const router = express.Router();
 const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
-const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
+const { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } = require("../utils/cohort");
 const { validateId } = require("../utils/validator");
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 const passport = require("passport");
 const { ROLES } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
@@ -31,7 +32,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
           birthdateAt: Joi.date().required(),
           grade: Joi.string(),
           status: Joi.string(),
-          zip: Joi.string(),
+          zip: Joi.string().allow("", null),
         })
           .unknown()
           .validate(req.body);
@@ -41,24 +42,61 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
         }
         young = body;
       }
-      const { error: errorQuery, value: query } = Joi.object({
+      const { error: errorParams, value: params } = Joi.object({
         getAllSessions: Joi.boolean().default(false),
-      }).validate(req.query, {
-        stripUnknown: true,
-      });
+      })
+        .unknown()
+        .validate(req.query, { stripUnknown: true });
 
-      if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const bypassFilter =
-        (user?.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && query.getAllSessions);
-      const sessions = bypassFilter ? await getAllSessions(young) : await getFilteredSessions(young);
-      if (sessions.length === 0) return res.send({ ok: true, data: { msg: "Sont éligibles les volontaires âgés de 15 à 17 ans au moment du SNU." } });
+        (user?.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
+      const sessions = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user?.role)
+        ? await getFilteredSessionsForCLE()
+        : bypassFilter
+          ? await getAllSessions(young)
+          : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
+      if (sessions.length === 0) return res.send({ ok: true, data: [], message: "no_session_found" });
       return res.send({ ok: true, data: sessions });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
   })(req, res);
+});
+
+router.get("/isInscriptionOpen", async (req, res) => {
+  const { error, value } = Joi.object({
+    sessionName: Joi.string(),
+  })
+    .unknown()
+    .validate(req.query, { stripUnknown: true });
+
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+  const { sessionName: cohortName } = value;
+
+  const userTimezoneOffsetInMilliseconds = req.headers["x-user-timezone"] * 60 * 1000; // User's offset from UTC
+
+  // Adjust server's time for user's timezone
+  const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;
+  const now = new Date(adjustedTimeForUser);
+
+  try {
+    if (cohortName) {
+      const cohort = await CohortModel.findOne({ name: cohortName });
+      if (!cohort) return res.status(400).send({ ok: true, data: false });
+      return res.send({ ok: true, data: now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate) });
+    }
+    const cohorts = await CohortModel.find({});
+    return res.send({
+      ok: true,
+      data: cohorts.some((cohort) => now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate)),
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
 });
 
 module.exports = router;

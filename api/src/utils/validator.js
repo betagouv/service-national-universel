@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, COHORTS, PHONE_ZONES_NAMES_ARR } = require("snu-lib");
+const { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames } = require("snu-lib");
 const { isYoung } = require("../utils");
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -43,12 +43,12 @@ function validateMission(mission) {
       hebergementPayant: Joi.string().allow(null, ""),
       justifications: Joi.string().allow(null, ""),
       contraintes: Joi.string().allow(null, ""),
-      structureId: Joi.string().allow(null, ""),
+      structureId: Joi.string().regex(idRegex, "id"),
       structureName: Joi.string().allow(null, ""),
       status: Joi.string().allow(null, ""),
       visibility: Joi.string().allow(null, ""),
       statusComment: Joi.string().allow(null, ""),
-      tutorId: Joi.string().allow(null, ""),
+      tutorId: Joi.string().regex(idRegex, "id"),
       tutorName: Joi.string().allow(null, ""),
       address: Joi.string().allow(null, ""),
       zip: Joi.string().allow(null, ""),
@@ -155,7 +155,7 @@ function validateContract(program) {
       youngAddress: Joi.string().allow(null, ""),
       youngCity: Joi.string().allow(null, ""),
       youngDepartment: Joi.string().allow(null, ""),
-      youngEmail: Joi.string().allow(null, ""),
+      youngEmail: Joi.string().email().allow(null, ""),
       youngPhone: Joi.string().allow(null, ""),
       parent1FirstName: Joi.string().allow(null, ""),
       parent1LastName: Joi.string().allow(null, ""),
@@ -163,14 +163,14 @@ function validateContract(program) {
       parent1City: Joi.string().allow(null, ""),
       parent1Department: Joi.string().allow(null, ""),
       parent1Phone: Joi.string().allow(null, ""),
-      parent1Email: Joi.string().allow(null, ""),
+      parent1Email: Joi.string().email().allow(null, ""),
       parent2FirstName: Joi.string().allow(null, ""),
       parent2LastName: Joi.string().allow(null, ""),
       parent2Address: Joi.string().allow(null, ""),
       parent2City: Joi.string().allow(null, ""),
       parent2Department: Joi.string().allow(null, ""),
       parent2Phone: Joi.string().allow(null, ""),
-      parent2Email: Joi.string().allow(null, ""),
+      parent2Email: Joi.string().email().allow(null, ""),
       missionName: Joi.string().allow(null, ""),
       missionObjective: Joi.string().allow(null, ""),
       missionAction: Joi.string().allow(null, ""),
@@ -185,11 +185,11 @@ function validateContract(program) {
       projectManagerFirstName: Joi.string().allow(null, ""),
       projectManagerLastName: Joi.string().allow(null, ""),
       projectManagerRole: Joi.string().allow(null, ""),
-      projectManagerEmail: Joi.string().allow(null, ""),
+      projectManagerEmail: Joi.string().email().allow(null, ""),
       structureManagerFirstName: Joi.string().allow(null, ""),
       structureManagerLastName: Joi.string().allow(null, ""),
       structureManagerRole: Joi.string().allow(null, ""),
-      structureManagerEmail: Joi.string().allow(null, ""),
+      structureManagerEmail: Joi.string().email().allow(null, ""),
       structureSiret: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
       sendMessage: Joi.boolean().allow(null),
@@ -249,7 +249,8 @@ function validateNewApplication(application, user) {
 
 const cohesionCenterKeys = () => {
   let dynamicCohort = {};
-  COHORTS.forEach((c) => {
+  const cohorts = getCohortNames();
+  cohorts.forEach((c) => {
     dynamicCohort[c] = Joi.object()
       .keys({
         status: Joi.string().allow(null, ""),
@@ -573,6 +574,7 @@ function validateYoung(young, user) {
     statusMilitaryPreparationFiles: Joi.string().allow(null, ""),
     militaryPreparationCorrectionMessage: Joi.string().allow(null, ""),
     missionsInMail: Joi.array().items(Joi.any().allow(null, "")),
+    classeId: Joi.string().allow(null, ""),
   };
 
   if (!isYoung(user)) {
@@ -656,16 +658,11 @@ function validateSelf(referent) {
       lastName: Joi.string().uppercase().allow(null, ""),
       email: Joi.string().lowercase().trim().email().allow(null, ""),
       password: Joi.string().allow(null, ""),
-      region: Joi.string().allow(null, ""),
-      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, "god"]),
-      cohesionCenterId: Joi.string().allow(null, ""),
-      cohesionCenterName: Joi.string().allow(null, ""),
       phone: Joi.string().allow(null, ""),
       mobile: Joi.string().allow(null, ""),
-      structureId: Joi.string().allow(null, ""),
     })
     .validate(referent, { stripUnknown: true });
 }
@@ -734,12 +731,13 @@ function validateStructureManager(structureManager) {
 }
 
 function validateHeadOfCenterCohortChange(values) {
+  const cohorts = getCohortNames();
   return Joi.object()
     .keys({
       cohesionCenterId: Joi.string().regex(idRegex, "id").required(),
       headCenterId: Joi.string().regex(idRegex, "id").required(),
-      oldCohort: Joi.string().valid(...COHORTS),
-      newCohort: Joi.string().valid(...COHORTS),
+      oldCohort: Joi.string().valid(...cohorts),
+      newCohort: Joi.string().valid(...cohorts),
     })
     .validate(values, { stripUnknown: true });
 }

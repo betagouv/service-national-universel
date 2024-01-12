@@ -18,17 +18,19 @@ import {
   translateInscriptionStatus,
   translatePhase1,
   translatePhase2,
+  translateYoungSource,
   translateStatusMilitaryPreparationFiles,
 } from "snu-lib";
 import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
 import api from "../../../services/api";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
-export const getFilterArray = (user, bus, session) => {
+export const getFilterArray = (user, bus, session, classes, etablissements) => {
   return [
-    { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
-    { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
+    { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
+    { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
     { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus, defaultValue: ["VALIDATED"] },
+    { title: "Source", name: "source", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateYoungSource },
     { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     { title: "Académie", name: "academy", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     {
@@ -160,6 +162,30 @@ export const getFilterArray = (user, bus, session) => {
       translate: translatePhase1,
     },
     {
+      title: "Classe Engagée ID",
+      name: "classeId",
+      parentGroup: "Phase 1",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !classes.length) return item;
+        const res = classes.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.uniqueKeyAndId;
+      },
+    },
+    {
+      title: "Etablissement CLE",
+      name: "etablissementId",
+      parentGroup: "Phase 1",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !etablissements.length) return item;
+        const res = etablissements.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.name;
+      },
+    },
+    {
       title: "Centre",
       name: "sessionPhase1Id",
       parentGroup: "Phase 1",
@@ -233,8 +259,8 @@ export const getFilterArray = (user, bus, session) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !bus?.ligneBus) return item;
-        return bus.ligneBus.find((option) => option._id.toString() === item)?.busId;
+        if (item === "N/A" || !bus?.length) return item;
+        return bus.find((option) => option._id.toString() === item)?.busId;
       },
     },
     {
@@ -296,38 +322,22 @@ export const getFilterArray = (user, bus, session) => {
   ].filter(Boolean);
 };
 
-export async function transformVolontaires(data, values, centers, sessionsPhase1, busLines) {
+export async function transformVolontaires(data, values) {
   let all = data;
-  if (values.includes("schoolSituation")) {
-    const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-    if (schoolsId?.length) {
-      const { responses } = await api.esQuery("schoolramses", {
-        query: { bool: { must: { ids: { values: schoolsId } } } },
-        size: ES_NO_LIMIT,
-      });
-      if (responses.length) {
-        const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-      }
-    }
-  }
-  const meetingPoints = busLines.meetingPoints || [];
-  const ligneBus = busLines.ligneBus || [];
-  const ligneToPoints = busLines.ligneToPoints || [];
 
   return all.map((data) => {
     let center = {};
-    if (data.cohesionCenterId && centers && sessionsPhase1) {
-      center = centers.find((c) => c._id === data.cohesionCenterId);
+    if (data.cohesionCenterId && data.sessionPhase1Id) {
+      center = data?.center;
       if (!center) center = {};
     }
     let meetingPoint = {};
     let bus = {};
     let ligneToPoint = {};
-    if (data.meetingPointId && meetingPoints) {
-      meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-      bus = ligneBus.find((lb) => lb._id === data.ligneId);
-      ligneToPoint = ligneToPoints.find((ltp) => ltp.lineId === data.ligneId && ltp.meetingPointId === data.meetingPointId);
+    if (data.meetingPointId && data.ligneId) {
+      bus = data?.bus || {};
+      ligneToPoint = data?.ligneToPoint || {};
+      meetingPoint = data?.meetingPoint || {};
     }
 
     if (!data.domains) data.domains = [];
@@ -372,12 +382,12 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
       schoolSituation: {
         Situation: translate(data.situation),
         Niveau: translate(data.grade),
-        "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-        "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-        "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-        "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-        "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-        "UAI de l'établissement": data.esSchool?.uai,
+        "Type d'établissement": translate(data.school?.type || data.schoolType),
+        "Nom de l'établissement": data.school?.fullName || data.schoolName,
+        "Code postal de l'établissement": data.school?.postcode || data.schoolZip,
+        "Ville de l'établissement": data.school?.city || data.schoolCity,
+        "Département de l'établissement": departmentLookUp[data.school?.department] || data.schoolDepartment,
+        "UAI de l'établissement": data.school?.uai,
       },
       situation: {
         "Quartier Prioritaire de la ville": translate(data.qpv),
@@ -446,7 +456,7 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
       },
       phase1Transport: {
         "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
-        "Informations de transport sont transmises par les services locaux": translate(data.transportInfoGivenByLocal),
+        "Informations de transports transmises par email": translate(data.transportInfoGivenByLocal),
         "Bus n˚": bus?.busId,
         "Nom du point de rassemblement": meetingPoint?.name,
         "Adresse point de rassemblement": meetingPoint?.address,
@@ -523,17 +533,6 @@ export async function transformVolontaires(data, values, centers, sessionsPhase1
 
 export async function transformVolontairesSchool(data) {
   let all = data;
-  const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-  if (schoolsId?.length) {
-    const { responses } = await api.esQuery("schoolramses", {
-      query: { bool: { must: { ids: { values: schoolsId } } } },
-      size: ES_NO_LIMIT,
-    });
-    if (responses.length) {
-      const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-      all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-    }
-  }
   return all.map((data) => {
     return {
       _id: data._id,
@@ -543,12 +542,12 @@ export async function transformVolontairesSchool(data) {
       Département: data.department,
       Situation: translate(data.situation),
       Niveau: translate(data.grade),
-      "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-      "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-      "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-      "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-      "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-      "UAI de l'établissement": data.esSchool?.uai,
+      "Type d'établissement": translate(data.school?.type || data.schoolType),
+      "Nom de l'établissement": data.school?.fullName || data.schoolName,
+      "Code postal de l'établissement": data.school?.postcode || data.schoolZip,
+      "Ville de l'établissement": data.school?.city || data.schoolCity,
+      "Département de l'établissement": departmentLookUp[data.school?.department] || data.schoolDepartment,
+      "UAI de l'établissement": data.school?.uai,
       "Statut général": translate(data.status),
       "Statut Phase 1": translate(data.statusPhase1),
     };
@@ -557,17 +556,6 @@ export async function transformVolontairesSchool(data) {
 
 export async function transformInscription(data) {
   let all = data;
-  const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-  if (schoolsId?.length) {
-    const { responses } = await api.esQuery("schoolramses", {
-      query: { bool: { must: { ids: { values: schoolsId } } } },
-      size: ES_NO_LIMIT,
-    });
-    if (responses.length) {
-      const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-      all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-    }
-  }
   return all.map((data) => {
     return {
       _id: data._id,
@@ -599,12 +587,12 @@ export async function transformInscription(data) {
       "Pays - étranger": data.foreignCountry,
       Situation: translate(data.situation),
       Niveau: data.grade,
-      "Type d'établissement": translate(data.esSchool?.type || data.schoolType),
-      "Nom de l'établissement": data.esSchool?.fullName || data.schoolName,
-      "Code postal de l'établissement": data.esSchool?.postcode || data.schoolZip,
-      "Ville de l'établissement": data.esSchool?.city || data.schoolCity,
-      "Département de l'établissement": departmentLookUp[data.esSchool?.department] || data.schoolDepartment,
-      "UAI de l'établissement": data.esSchool?.uai,
+      "Type d'établissement": translate(data.school?.type || data.schoolType),
+      "Nom de l'établissement": data.school?.fullName || data.schoolName,
+      "Code postal de l'établissement": data.school?.postcode || data.schoolZip,
+      "Ville de l'établissement": data.school?.city || data.schoolCity,
+      "Département de l'établissement": departmentLookUp[data.school?.department] || data.schoolDepartment,
+      "UAI de l'établissement": data.school?.uai,
       "Quartier Prioritaire de la ville": translate(data.qpv),
       "Zone Rurale": translate(isInRuralArea(data)),
       Handicap: translate(data.handicap),

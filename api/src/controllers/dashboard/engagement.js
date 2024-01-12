@@ -3,12 +3,11 @@ const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
-const { YOUNG_STATUS, MISSION_STATUS } = require("snu-lib");
+const { ROLES, YOUNG_STATUS, MISSION_STATUS } = require("snu-lib");
 const router = express.Router();
 const YoungModel = require("../../models/young");
 const MissionModel = require("../../models/mission");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
-const StructureModel = require("../../models/structure");
 
 const filtersJoi = Joi.object({
   status: Joi.array().items(Joi.string().valid(...Object.values(YOUNG_STATUS))),
@@ -16,6 +15,7 @@ const filtersJoi = Joi.object({
   academy: Joi.array().items(Joi.string()),
   department: Joi.array().items(Joi.string()),
   cohorts: Joi.array().items(Joi.string()),
+  cohort: Joi.array().items(Joi.string()),
 });
 
 const missionFiltersJoi = Joi.object({
@@ -24,16 +24,10 @@ const missionFiltersJoi = Joi.object({
   sources: Joi.array().items(Joi.string()),
 });
 
-function computeYoungFilter(filters) {
+function computeYoungFilter(filters, user) {
   let matchs = {};
   if (filters && filters.status && filters.status.length > 0) {
     matchs.status = { $in: filters.status };
-  }
-  if (filters && filters.region && filters.region.length > 0) {
-    matchs.region = { $in: filters.region };
-  }
-  if (filters && filters.department && filters.department.length > 0) {
-    matchs.department = { $in: filters.department };
   }
   if (filters && filters.academies && filters.academies.length > 0) {
     matchs.academy = { $in: filters.academies };
@@ -41,28 +35,29 @@ function computeYoungFilter(filters) {
   if (filters && filters.cohort && filters.cohort.length > 0) {
     matchs.cohort = { $in: filters.cohort };
   }
-  return matchs;
-}
+  if (filters && filters.cohorts && filters.cohorts.length > 0) {
+    matchs.cohort = { $in: filters.cohorts };
+  }
 
-function computeStructureFilter(filters) {
-  let matchs = {};
-  if (filters && filters.region && filters.region.length > 0) {
+  // Roles
+  // Roles
+  if (user.role === ROLES.REFERENT_REGION) {
+    matchs.region = user.region;
+  } else if (filters && filters.region && filters.region.length > 0) {
     matchs.region = { $in: filters.region };
   }
-  if (filters && filters.department && filters.department.length > 0) {
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    matchs.department = { $in: filters.department.length ? filters.department.filter((d) => user.department.includes(d)) : user.department };
+  } else if (filters && filters.department && filters.department.length > 0) {
     matchs.department = { $in: filters.department };
   }
   return matchs;
 }
 
-function computeMissionFilter(filters) {
+function computeMissionFilter(filters, user) {
   let matchs = {};
-  if (filters && filters.region && filters.region.length > 0) {
-    matchs.region = { $in: filters.region };
-  }
-  if (filters && filters.department && filters.department.length > 0) {
-    matchs.department = { $in: filters.department };
-  }
+
   if (filters && filters.start) {
     matchs.endAt = { $gte: filters.start };
   }
@@ -86,43 +81,31 @@ function computeMissionFilter(filters) {
       // no filter
     }
   }
+
+  // Roles
+  if (user.role === ROLES.REFERENT_REGION) {
+    matchs.region = user.region;
+  } else if (filters && filters.region && filters.region.length > 0) {
+    matchs.region = { $in: filters.region };
+  }
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    matchs.department = { $in: filters.department.length ? filters.department.filter((d) => user.department.includes(d)) : user.department };
+  } else if (filters && filters.department && filters.department.length > 0) {
+    matchs.department = { $in: filters.department };
+  }
+
   return matchs;
 }
 
-router.post("/volontaires-statuts-phase", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/volontaires-equivalence-mig", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    // --- test body
-    const { error, value } = Joi.object({
-      filters: filtersJoi,
-      phase: Joi.number().valid(1, 2, 3).required(),
-    }).validate(req.body);
-    if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-    const { filters, phase } = value;
 
-    // --- get data
-    const pipeline = [
-      { $match: computeYoungFilter(filters) },
-      {
-        $group: {
-          _id: `$statusPhase${phase}`,
-          count: { $sum: 1 },
-        },
-      },
-    ];
-    const data = await YoungModel.aggregate(pipeline);
-
-    // --- result
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/volontaires-statuts-divers", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
     // --- test body
     const { error, value } = Joi.object({
       filters: filtersJoi,
@@ -134,232 +117,80 @@ router.post("/volontaires-statuts-divers", passport.authenticate("referent", { s
 
     // --- get data
     // TODO: optimization
-    const youngs = await YoungModel.find(computeYoungFilter(filters), { phase2ApplicationStatus: 1, statusPhase2Contract: 1 });
-    let phase2 = {};
-    let totalPhase2 = 0;
-    let contract = {};
-    let totalContract = 0;
-    for (const young of youngs) {
-      // statuses
-      for (const status of young.phase2ApplicationStatus) {
-        if (phase2[status] === undefined) {
-          phase2[status] = 0;
-        }
-        ++phase2[status];
-        ++totalPhase2;
-      }
+    const youngs = await YoungModel.find(
+      { ...computeYoungFilter(filters, req.user), status_equivalence: { $exists: true } },
+      { phase2ApplicationStatus: 1, statusPhase2Contract: 1 },
+    );
 
-      // contracts
-      for (const status of young.statusPhase2Contract) {
-        if (contract[status] === undefined) {
-          contract[status] = 0;
-        }
-        ++contract[status];
-        ++totalContract;
-      }
-    }
-
-    // missions equivalences
     const youngIds = youngs.map((young) => young._id.toString());
-    const equivalences = await MissionEquivalenceModel.aggregate([
-      { $match: { youngId: { $in: youngIds } } },
-      {
-        $group: {
-          _id: `$status`,
-          count: { $sum: 1 },
-        },
-      },
-    ]);
+    const missions = await MissionEquivalenceModel.find({ youngId: { $in: youngIds } });
 
-    // --- format data
-    let data = [];
-    for (const status of Object.keys(phase2)) {
-      data.push({ category: "phase2", status, value: phase2[status], percentage: totalPhase2 ? phase2[status] / totalPhase2 : 0 });
-    }
-    for (const status of Object.keys(contract)) {
-      data.push({ category: "contract", status, value: contract[status], percentage: totalContract ? contract[status] / totalContract : 0 });
-    }
-    const totalEquivalences = equivalences.reduce((acc, eq) => acc + eq.count, 0);
-    for (const status of equivalences) {
-      data.push({ category: "equivalence", status: status._id, value: status.count, percentage: totalEquivalences ? status.count / totalEquivalences : 0 });
-    }
+    let total = 0;
+    let statuses = {};
+    let types = {};
+    let subTypes = {};
+    for (const mission of missions) {
+      ++total;
 
-    // --- result
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+      if (statuses[mission.status] === undefined) {
+        statuses[mission.status] = 0;
+      }
+      ++statuses[mission.status];
 
-router.post("/structures", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    // --- test body
-    const { error, value } = Joi.object({
-      filters: filtersJoi,
-    }).validate(req.body);
-    if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    const { filters } = value;
-
-    // --- get data
-    const pipeline = [
-      { $match: computeYoungFilter(filters) },
-      {
-        $unwind: {
-          path: "$types",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $group: {
-          _id: {
-            legalStatus: "$legalStatus",
-            type: "$types",
+      if (types[mission.type] === undefined) {
+        types[mission.type] = {
+          statuses: {
+            [mission.status]: 0,
           },
-          total: { $sum: 1 },
-          national: {
-            $sum: {
-              $switch: {
-                branches: [
-                  {
-                    case: { $and: [{ $ifNull: ["$networkName", false] }, { $ne: ["$networkName", ""] }] },
-                    then: 1,
-                  },
-                ],
-                default: 0,
-              },
+          count: 0,
+        };
+      }
+      if (types[mission.type].statuses[mission.status] === undefined) {
+        types[mission.type].statuses[mission.status] = 0;
+      }
+      ++types[mission.type].count;
+      ++types[mission.type].statuses[mission.status];
+
+      if (mission.sousType) {
+        if (subTypes[mission.sousType] === undefined) {
+          subTypes[mission.sousType] = {
+            statuses: {
+              [mission.status]: 0,
             },
-          },
-        },
-      },
-    ];
-    let data = await StructureModel.aggregate(pipeline);
-
-    // --- format data
-    data = data.filter((structure) => structure._id.legalStatus !== null && structure._id.legalStatus !== undefined);
-
-    // --- result
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/mission-sources", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    // --- test body
-    const { error, value } = Joi.object({
-      filters: filtersJoi,
-    }).validate(req.body);
-    if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    const { filters } = value;
-
-    // --- get data
-    const sources = await StructureModel.find({ ...computeStructureFilter(filters) }, { _id: 1, name: 1 }, { sort: { name: 1 } });
-
-    // --- format data
-    const data = sources.filter((source) => source._id !== null);
-
-    // --- result
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/mission-proposed-places", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    // --- test body
-    const { error, value } = Joi.object({
-      filters: filtersJoi,
-      missionFilters: missionFiltersJoi,
-    }).validate(req.body);
-    if (error) {
-      console.log(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    const { filters, missionFilters } = value;
-
-    // --- get data
-    let pipeline = [
-      { $match: { ...computeMissionFilter({ ...filters, ...missionFilters }), status: "VALIDATED" } },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$placesTotal" },
-          left: { $sum: "$placesLeft" },
-        },
-      },
-    ];
-    let result = await MissionModel.aggregate(pipeline);
-
-    console.log("result: ", result);
-
-    let data;
-    if (result.length > 0) {
-      // --- format data
-      data = {
-        left: result[0].left,
-        occupied: result[0].total - result[0].left,
-        total: result[0].total,
-      };
-    } else {
-      data = {
-        left: 0,
-        occupied: 0,
-        total: 0,
-      };
+            type: mission.type,
+            count: 0,
+          };
+        }
+        if (subTypes[mission.sousType].statuses[mission.status] === undefined) {
+          subTypes[mission.sousType].statuses[mission.status] = 0;
+        }
+        ++subTypes[mission.sousType].count;
+        ++subTypes[mission.sousType].statuses[mission.status];
+      }
     }
 
-    // --- result
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/missions-statuts", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    // --- test body
-    const { error, value } = Joi.object({
-      filters: filtersJoi,
-      missionFilters: missionFiltersJoi,
-    }).validate(req.body);
-    if (error) {
-      console.log(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    const data = { statuses: [], types: [], subTypes: [] };
+    for (const status of Object.keys(statuses)) {
+      data.statuses.push({ status, value: statuses[status], percentage: total ? statuses[status] / total : 0 });
     }
-    const { filters, missionFilters } = value;
-
-    // --- get data
-    let pipeline = [
-      { $match: { ...computeMissionFilter({ ...filters, ...missionFilters }) } },
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
-          total: { $sum: "$placesTotal" },
-          left: { $sum: "$placesLeft" },
-        },
-      },
-    ];
-    let result = await MissionModel.aggregate(pipeline);
-
-    const total = result.reduce((acc, eq) => acc + eq.count, 0);
-    const data = result.map((status) => ({
-      status: status._id,
-      value: status.count,
-      percentage: total ? status.count / total : 0,
-      total: status.total,
-      left: status.left,
-    }));
+    for (const subType of Object.keys(subTypes)) {
+      data.subTypes.push({
+        label: subType,
+        value: subTypes[subType].count,
+        percentage: total ? subTypes[subType].count / total : 0,
+        type: subTypes[subType].type,
+        statuses: subTypes[subType].statuses,
+      });
+    }
+    for (const type of Object.keys(types)) {
+      data.types.push({
+        label: type,
+        value: types[type].count,
+        percentage: total ? types[type].count / total : 0,
+        subTypes: data.subTypes.filter((subType) => subType.type === type),
+        statuses: types[type].statuses,
+      });
+    }
 
     // --- result
     return res.status(200).send({ ok: true, data });
@@ -371,6 +202,12 @@ router.post("/missions-statuts", passport.authenticate("referent", { session: fa
 
 router.post("/missions-detail", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     // --- test body
     const { error, value } = Joi.object({
       filters: filtersJoi,
@@ -386,7 +223,7 @@ router.post("/missions-detail", passport.authenticate("referent", { session: fal
 
     // get data
     // --- missions
-    let missionPipeline = [{ $match: { ...computeMissionFilter(filters, missionFilters), status: MISSION_STATUS.VALIDATED } }];
+    let missionPipeline = [{ $match: { ...computeMissionFilter({ ...missionFilters, ...filters }, req.user), status: MISSION_STATUS.VALIDATED } }];
     switch (group) {
       case "domain":
         missionPipeline.push({
@@ -423,7 +260,7 @@ router.post("/missions-detail", passport.authenticate("referent", { session: fal
     const missionData = await MissionModel.aggregate(missionPipeline);
 
     // --- youngs preference
-    let youngPipeline = [{ $match: computeYoungFilter(filters) }];
+    let youngPipeline = [{ $match: computeYoungFilter(filters, req.user) }];
     switch (group) {
       case "domain":
         youngPipeline.push({ $unwind: "$domains" });
@@ -488,6 +325,12 @@ router.post("/missions-detail", passport.authenticate("referent", { session: fal
 
 router.post("/missions-young-preferences", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
+    // TODO: refacto this part with middleware
+    const allowedRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     // --- test body
     const { error, value } = Joi.object({
       filters: filtersJoi,
@@ -501,7 +344,7 @@ router.post("/missions-young-preferences", passport.authenticate("referent", { s
     const { filters, group } = value;
 
     // get data
-    const youngFilter = computeYoungFilter(filters);
+    const youngFilter = computeYoungFilter(filters, req.user);
     let pipeline = [{ $match: youngFilter }];
     switch (group) {
       case "project":
@@ -598,7 +441,6 @@ router.post("/missions-young-preferences", passport.authenticate("referent", { s
     }
     pipeline.push({ $sort: { count: -1 } });
     const result = await YoungModel.aggregate(pipeline);
-    // console.log("Young Pref RESULT: ", result);
 
     let uniformResult;
     if (group === "project") {

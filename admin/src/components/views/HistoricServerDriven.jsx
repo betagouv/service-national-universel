@@ -6,7 +6,7 @@ import { translateHistory, debounce } from "../../utils";
 import { formatLongDateFR, translateAction, translateBusPatchesField } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
-import MultiSelect from "../../scenes/dashboard/components/MultiSelect";
+import MultiSelect from "../legacy-dashboard/MultiSelect";
 import { HiOutlineArrowRight } from "react-icons/hi";
 import PaginationServerDriven from "../PaginationServerDriven";
 import Loader from "../Loader";
@@ -51,6 +51,7 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
               itemsPerPage={pagination.itemsPerPage}
               itemsCount={data.length}
               className="p-4"
+              size={20}
             />
             {extraTool}
           </div>
@@ -91,6 +92,7 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
             itemsPerPage={pagination.itemsPerPage}
             itemsCount={data.length}
             className="p-4"
+            size={20}
           />
         </>
       )}

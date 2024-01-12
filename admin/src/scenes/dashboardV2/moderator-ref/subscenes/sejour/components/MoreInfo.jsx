@@ -1,6 +1,6 @@
 import React from "react";
 import FullDoughnut from "../../../../components/graphs/FullDoughnut";
-import { getNewLink } from "../../../../../../utils";
+import { getNewLink } from "@/utils";
 
 export default function MoreInfo({ typology, domains, filter }) {
   return (

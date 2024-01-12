@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
 const { capture } = require("../sentry");
 const slack = require("../slack");
@@ -8,6 +7,7 @@ const YoungModel = require("../models/young");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
 const { APP_URL } = require("../config");
 const { sendTemplate } = require("../sendinblue");
+const { getCcOfYoung } = require("../utils");
 
 const clean = async () => {
   let countAutoCancel = 0;
@@ -40,12 +40,16 @@ const notify1Week = async () => {
     total++;
     if (diffDays(application.createdAt, now) === 7) {
       notice1week++;
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_1_WEEK_NOTICE, {
+      const young = await YoungModel.findById(application.youngId);
+      const emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_1_WEEK_NOTICE;
+      let cc = getCcOfYoung({ template: emailTemplate, young });
+      await sendTemplate(emailTemplate, {
         emailTo: [{ name: `${application?.youngFirstName} ${application?.youngLastName}`, email: application?.youngEmail }],
         params: {
           missionName: application?.missionName,
           cta: `${APP_URL}/mission/${application?.missionId}`,
         },
+        cc,
       });
     }
   });
@@ -62,13 +66,17 @@ const notify13Days = async () => {
     if (diffDays(application.createdAt, now) === 13) {
       notice13Days++;
       const structure = await StructureModel.findById(application?.structureId);
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_13_DAY_NOTICE, {
+      const young = await YoungModel.findById(application.youngId);
+      const emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_13_DAY_NOTICE;
+      let cc = getCcOfYoung({ template: emailTemplate, young });
+      await sendTemplate(emailTemplate, {
         emailTo: [{ name: `${application?.youngFirstName} ${application?.youngLastName}`, email: application?.youngEmail }],
         params: {
           missionName: application?.missionName,
           structureName: structure?.name,
           cta: `${APP_URL}/mission/${application?.missionId}`,
         },
+        cc,
       });
     }
   });

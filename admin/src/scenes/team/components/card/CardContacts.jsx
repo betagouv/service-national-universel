@@ -1,14 +1,33 @@
 import React, { useEffect, useState } from "react";
 import ModalContacts from "../modal/ModalContacts";
-import { oldSessions, sessions2023 } from "snu-lib";
+import { oldSessions } from "snu-lib";
+import API from "@/services/api";
+import { capture } from "@/sentry";
 
 export default function CardContacts({ contacts, idServiceDep, getService }) {
   const [isOpen, setIsOpen] = useState(false);
   const [sortedContacts, setSortedContacts] = useState({});
   const [nbCohorts, setNbCohorts] = useState(0);
   const [cohorts, setCohorts] = useState([]);
+  const [sessions2023, setSessions2023] = useState([]);
 
   const [contactsFromCohort, setContactsFromCohort] = useState([]);
+
+  async function cohortsInit() {
+    try {
+      const result = await API.get("/cohort");
+      if (result.status === 401) {
+        return;
+      }
+      if (!result?.ok) {
+        capture("Unable to load global cohorts data :" + JSON.stringify(result));
+      } else {
+        setSessions2023(result.data);
+      }
+    } catch (err) {
+      capture(err);
+    }
+  }
 
   const getInitials = (word) =>
     (word || "UK")
@@ -18,33 +37,33 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
       .toUpperCase();
 
   useEffect(() => {
-    if (contacts) {
+    cohortsInit();
+  }, []);
+
+  useEffect(() => {
+    if (contacts && sessions2023.length > 0) {
       let existCohort = [];
       let tempContact = {};
 
-      // we take only the last 2 oldCohorts
-      let oldCohorts = oldSessions.map((session) => session.name);
-      oldCohorts = oldCohorts.slice(oldCohorts.length - 2, oldCohorts.length);
-      const newCohorts = sessions2023.map((session) => session.name);
-
-      const concatCohorts = [...oldCohorts, ...newCohorts];
-      setCohorts(concatCohorts);
+      //TODO update this when we will have the new cohort or change completely this part
+      const newCohorts = sessions2023.filter((cohort) => cohort.name.match(/2024|Juillet 2023|Juin 2023/)).map((cohort) => cohort.name);
+      setCohorts(newCohorts);
 
       contacts.forEach((contact) => {
-        if (!existCohort.includes(contact.cohort) && concatCohorts.includes(contact.cohort)) {
+        if (!existCohort.includes(contact.cohort) && newCohorts.includes(contact.cohort)) {
           existCohort.push(contact.cohort);
         }
       });
 
-      concatCohorts.forEach((cohort) => {
+      newCohorts.forEach((cohort) => {
         tempContact[cohort] = [];
         tempContact[cohort].push(...contacts.filter((contact) => contact.cohort === cohort));
       });
       setNbCohorts(existCohort.length);
       setSortedContacts(tempContact);
-      setContactsFromCohort(contacts.filter((contact) => concatCohorts.includes(contact.cohort)));
+      setContactsFromCohort(contacts.filter((contact) => newCohorts.includes(contact.cohort)));
     }
-  }, [contacts]);
+  }, [contacts, sessions2023]);
 
   const handleShowModal = () => setIsOpen(true);
 

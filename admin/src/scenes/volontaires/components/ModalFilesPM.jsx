@@ -39,7 +39,7 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title, readOnly =
       if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
       if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
     }
-    const res = await api.uploadFile(`${path}`, files);
+    const res = await api.uploadFiles(`${path}`, files);
     if (res.code === "FILE_CORRUPTED") {
       return toastr.error(
         "Le fichier semble corrompu",

@@ -1,16 +1,32 @@
 const Joi = require("joi");
+const { ROLES, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../sentry");
+const { ERRORS, isYoung, isReferent } = require("../../utils");
+const StructureObject = require("../../models/structure");
 
 const ES_NO_LIMIT = 10000;
 
 function searchSubQuery([value], fields) {
+  const words = value?.trim().split(" ");
+
+  const shouldClauses = words.map((word, index) => {
+    return [
+      {
+        multi_match: {
+          query: word,
+          fields,
+          type: "cross_fields",
+          operator: "and",
+        },
+      },
+      { multi_match: { query: word, fields, type: "phrase", operator: "and" } },
+      { multi_match: { query: word, fields: fields.map((e) => e.replace(".keyword", "")), type: "phrase_prefix", operator: "and" } },
+    ];
+  });
+
   return {
     bool: {
-      should: [
-        { multi_match: { query: value, fields, type: "cross_fields", operator: "and" } },
-        { multi_match: { query: value, fields, type: "phrase", operator: "and" } },
-        { multi_match: { query: value, fields: fields.map((e) => e.replace(".keyword", "")), type: "phrase_prefix", operator: "and" } },
-      ],
+      should: shouldClauses.flat(),
       minimum_should_match: 1,
     },
   };
@@ -71,21 +87,30 @@ function buildArbitratyNdJson(...args) {
   return args.map((e) => JSON.stringify(e)).join("\n") + "\n";
 }
 
-function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 20 }) {
+function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 10 }) {
   // We always need a fresh query to avoid side effects.
   const getMainQuery = () => unsafeStrucuredClone({ bool: { must: [{ match_all: {} }], filter: contextFilters } });
   // Search query
   const search = (queryFilters.searchbar || []).filter((e) => e.trim()).length ? searchSubQuery(queryFilters.searchbar, searchFields) : null;
   // Hits request body
   const hitsRequestBody = { query: getMainQuery(), size, from: page * size, sort: buildSort(sort) };
-  if (search) hitsRequestBody.query.bool.must.push(search);
+  let countAggsQuery = unsafeStrucuredClone({ bool: { must: [], filter: contextFilters } });
+  if (search) {
+    hitsRequestBody.query.bool.must.push(search);
+    countAggsQuery.bool.must.push(search);
+    // We want to sort by score if there a search.
+    delete hitsRequestBody.sort;
+  }
   for (const key of filterFields) {
     const keyWithoutKeyword = key.replace(".keyword", "");
     if (!queryFilters[keyWithoutKeyword]?.length) continue;
     hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
+    countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
   }
   // Aggs request body
   const aggsRequestBody = { query: getMainQuery(), aggs: aggsSubQuery(filterFields, search, queryFilters, contextFilters, customQueries), size: 0, track_total_hits: true };
+  //add agg for count all of documents that maths the query
+  aggsRequestBody.aggs.count = { filter: countAggsQuery, aggs: { total: { value_count: { field: "_id" } } } };
   return { hitsRequestBody, aggsRequestBody };
 }
 
@@ -94,7 +119,15 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
     filters: Joi.object(
       ["searchbar", ...filterFields].reduce((acc, field) => ({ ...acc, [field.replace(".keyword", "")]: Joi.array().items(Joi.string().allow("")).max(200) }), {}),
     ),
-    page: Joi.number().integer().min(0).default(0),
+    page: Joi.number()
+      .integer()
+      .default(0)
+      .custom((value, helpers) => {
+        if (value < 0) {
+          return 0;
+        }
+        return value;
+      }),
     sort: Joi.object({
       field: Joi.string().valid(...sortFields),
       order: Joi.string().valid("asc", "desc"),
@@ -102,11 +135,69 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
       .allow(null)
       .default(null),
     exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
+    size: Joi.number().integer().min(10).max(100).default(10),
   });
 
   const { error, value } = schema.validate({ ...body }, { stripUnknown: true });
   if (error) capture(error);
-  return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, error };
+  return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, size: value.size, error };
+}
+
+async function buildMissionContext(user) {
+  const contextFilters = [];
+
+  // A young can only see validated missions.
+  if (isYoung(user)) contextFilters.push({ term: { "status.keyword": "VALIDATED" } });
+  if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // A responsible cans only see their structure's missions.
+  if (user.role === ROLES.RESPONSIBLE) {
+    if (!user.structureId) return { missionContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    contextFilters.push({ terms: { "structureId.keyword": [user.structureId] } });
+  }
+
+  // A supervisor can only see their structures' missions.
+  if (user.role === ROLES.SUPERVISOR) {
+    if (!user.structureId) return { missionContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+  }
+
+  return { missionContextFilters: contextFilters };
+}
+
+async function buildApplicationContext(user) {
+  const contextFilters = [];
+
+  if (!canSearchInElasticSearch(user, "application")) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // A responsible can only see their structure's applications.
+  if (user.role === ROLES.RESPONSIBLE) {
+    if (!user.structureId) return { applicationContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    contextFilters.push({ terms: { "structureId.keyword": [user.structureId] } });
+    contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
+  }
+
+  // A supervisor can only see their structures' applications.
+  if (user.role === ROLES.SUPERVISOR) {
+    if (!user.structureId) return { applicationContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+    contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+    contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
+  }
+
+  return { applicationContextFilters: contextFilters };
+}
+
+function buildDashboardUserRoleContext(user) {
+  const contextFilters = [];
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    contextFilters.push({ terms: { "department.keyword": user.department } });
+  }
+  if (user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR) {
+    contextFilters.push({ terms: { "region.keyword": [user.region] } });
+  }
+  return { dashboardUserRoleContextFilters: contextFilters };
 }
 
 module.exports = {
@@ -114,4 +205,7 @@ module.exports = {
   buildArbitratyNdJson,
   buildRequestBody,
   joiElasticSearch,
+  buildMissionContext,
+  buildApplicationContext,
+  buildDashboardUserRoleContext,
 };

@@ -3,7 +3,8 @@ const colors = require("tailwindcss/colors");
 
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
-  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  presets: [require("@snu/ds/tailwind.config")],
+  content: ["./src/**/*.{js,ts,jsx,tsx}", "../packages/ds/dist/**/*.{js,jsx}"],
   darkMode: Media, // or 'media' or 'class'
   theme: {
     minWidth: {
@@ -36,6 +37,9 @@ module.exports = {
       },
       fontSize: {
         0: "0px",
+      },
+      fontWeight: {
+        bold: "600",
       },
       colors: {
         "snu-purple-900": "#32257F",

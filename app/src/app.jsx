@@ -1,54 +1,65 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./index.css";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, Router, Switch, useLocation } from "react-router-dom";
+import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
+import queryString from "query-string";
+import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
 
 import { setYoung } from "./redux/auth/actions";
+import { toastr } from "react-redux-toastr";
+import * as Sentry from "@sentry/react";
 
-import Footer from "./components/footer";
-import Navbar from "./components/layout/navbar";
-import Loader from "./components/Loader";
-import ModalResumePhase1ForWithdrawn from "./components/modals/ModalResumePhase1ForWithdrawn";
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
 import Auth from "./scenes/auth";
 import Candidature from "./scenes/candidature";
 import CGU from "./scenes/CGU";
+import ChangeSejour from "./scenes/phase1/changeSejour";
+import Contact from "./scenes/contact";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
+import DesignSystemPage from "./scenes/develop/DesignSystemPage";
 import Diagoriente from "./scenes/diagoriente";
 import Engagement from "./scenes/engagement";
+import Footer from "./components/footer";
 import Home from "./scenes/home";
 import Inscription2023 from "./scenes/inscription2023";
+import Loader from "./components/Loader";
 import Maintenance from "./scenes/maintenance";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Missions from "./scenes/missions";
+import ModalCGU from "./components/modals/ModalCGU";
+import Navbar from "./components/layout/navbar";
 import NonEligible from "./scenes/noneligible";
 import Phase1 from "./scenes/phase1";
-import changeSejour from "./scenes/phase1/changeSejour";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
+import Echanges from "./scenes/echanges";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
-import PublicSupport from "./scenes/public-support-center";
 import ReInscription from "./scenes/reinscription";
+import OnBoarding from "./scenes/cle/OnBoarding";
+import AccountAlreadyExists from "./scenes/account/AccountAlreadyExists";
 import RepresentantsLegaux from "./scenes/representants-legaux";
-import SupportCenter from "./scenes/support-center";
+import Thanks from "./scenes/contact/Thanks";
+import ViewMessage from "./scenes/echanges/View";
 
-import ModalCGU from "./components/modals/ModalCGU";
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
-
-import { toastr } from "react-redux-toastr";
-import "./index.css";
-import { canYoungResumePhase1, ENABLE_PM, YOUNG_STATUS } from "./utils";
-
-import * as Sentry from "@sentry/react";
-import { inscriptionModificationOpenForYoungs, youngCanChangeSession } from "snu-lib";
-import { history, initSentry, SentryRoute } from "./sentry";
+import { ENABLE_PM, YOUNG_STATUS } from "./utils";
+import {
+  youngCanChangeSession,
+  inscriptionModificationOpenForYoungs,
+  shouldForceRedirectToReinscription,
+  shouldForceRedirectToInscription,
+  isFeatureEnabled,
+  FEATURES_NAME,
+} from "snu-lib";
+import { capture, history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
-import { cohortsInit } from "./utils/cohorts";
+import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
 
 initSentry();
 initApi();
@@ -59,33 +70,40 @@ function FallbackComponent() {
 
 const myFallback = <FallbackComponent />;
 
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: (error) => capture(error) }),
+});
+
 export default function App() {
   return (
     <Sentry.ErrorBoundary fallback={myFallback}>
-      <Router history={history}>
-        <ScrollToTop />
-        {/* <GoogleTags /> */}
-        <div className={`${environment === "production" ? "main" : "flex h-screen flex-col justify-between"}`}>
-          {maintenance && !localStorage?.getItem("override_maintenance") ? (
-            <Switch>
-              <SentryRoute path="/" component={Maintenance} />
-            </Switch>
-          ) : (
-            <Switch>
-              {/* Aucune authentification nécessaire */}
-              <SentryRoute path="/preinscription" component={PreInscription} />
-              <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-              <SentryRoute path="/validate-contract/done" component={ContractDone} />
-              <SentryRoute path="/validate-contract" component={Contract} />
-              <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-              {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements"]} component={() => <OptionalLogIn />} />
-              {/* Authentification nécessaire */}
-              <SentryRoute path="/" component={() => <MandatoryLogIn />} />
-            </Switch>
-          )}
-        </div>
-      </Router>
+      <QueryClientProvider client={queryClient}>
+        <Router history={history}>
+          <ScrollToTop />
+          <div className="flex h-screen flex-col justify-between">
+            {maintenance ? (
+              <Switch>
+                <SentryRoute path="/" component={Maintenance} />
+              </Switch>
+            ) : (
+              <Switch>
+                {/* Aucune authentification nécessaire */}
+                <SentryRoute path="/noneligible" component={NonEligible} />
+                <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+                <SentryRoute path="/validate-contract/done" component={ContractDone} />
+                <SentryRoute path="/validate-contract" component={Contract} />
+                <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
+                <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+                <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
+                {/* Authentification accessoire */}
+                <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci", "/preinscription"]} component={() => <OptionalLogIn />} />
+                {/* Authentification nécessaire */}
+                <SentryRoute path="/" component={() => <MandatoryLogIn />} />
+              </Switch>
+            )}
+          </div>
+        </Router>
+      </QueryClientProvider>
     </Sentry.ErrorBoundary>
   );
 }
@@ -93,14 +111,13 @@ export default function App() {
 const OptionalLogIn = () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.Auth.young);
 
   const location = useLocation();
 
   useEffect(() => {
     async function fetchData() {
       try {
-        if (location.pathname.includes("/auth/connect")) return setLoading(false);
-
         const { ok, user, token } = await api.checkToken();
         if (!ok) {
           api.setToken(null);
@@ -111,7 +128,6 @@ const OptionalLogIn = () => {
         if (ok && user) {
           dispatch(setYoung(user));
           await cohortsInit();
-          if (location.pathname.includes("/auth")) return <Redirect to="/" />;
         }
       } catch (e) {
         console.log(e);
@@ -123,20 +139,28 @@ const OptionalLogIn = () => {
   }, []);
 
   if (loading) return <Loader />;
+  if (user && location.pathname.includes("/auth")) return <Redirect to="/" />;
 
   return (
     <Switch>
-      <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+      <SentryRoute path="/public-besoin-d-aide" component={Contact} />
+      <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
+      <SentryRoute path="/besoin-d-aide" component={Contact} />
       <SentryRoute path="/auth" component={Auth} />
       <SentryRoute path="/public-engagements" component={AllEngagements} />
+      <SentryRoute path="/merci" component={Thanks} />
+      <SentryRoute path="/preinscription" component={PreInscription} />
       <Redirect to="/" />
     </Switch>
   );
 };
 
 const MandatoryLogIn = () => {
+  const { pathname, search } = useLocation();
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const user = useSelector((state) => state.Auth.young);
+  const history = useHistory();
 
   useEffect(() => {
     async function fetchData() {
@@ -145,12 +169,17 @@ const MandatoryLogIn = () => {
         if (!ok) {
           api.setToken(null);
           dispatch(setYoung(null));
-          return <Redirect to="/auth" />;
         }
+        await cohortsInit();
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
-          await cohortsInit();
+          const cohort = await getCohort(user.cohort);
+
+          const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
+          const forceEmailValidation =
+            isEmailValidationEnabled && user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && inscriptionModificationOpenForYoungs(cohort);
+          if (forceEmailValidation) return history.push("/preinscription");
         }
       } catch (e) {
         console.log(e);
@@ -162,10 +191,17 @@ const MandatoryLogIn = () => {
   }, []);
 
   if (loading) return <Loader />;
+  if (!user) {
+    const queryObject = { disconnected: 1 };
+    if (pathname) queryObject.redirect = `${pathname}${search}`;
+
+    return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
+  }
 
   return (
     <Switch>
       <SentryRoute path="/inscription2023" component={Inscription2023} />
+      <SentryRoute path="/reinscription" component={ReInscription} />
       <SentryRoute path="/" component={Espace} />
     </Switch>
   );
@@ -173,10 +209,9 @@ const MandatoryLogIn = () => {
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
-  const [isResumePhase1WithdrawnModalOpen, setIsResumePhase1WithdrawnModalOpen] = useState(false);
-  // const [isModalMondayOpen, setIsModalMondayOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
+  const cohort = getCohort(young.cohort);
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
@@ -192,39 +227,13 @@ const Espace = () => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
     }
-
-    // ! To clean after departure. Or just keep it for later.
-    // if (young && young.cohort === "Juin 2023" && busLignesDepartLundi.includes(young.ligneId)) {
-    //   setIsModalMondayOpen(true);
-    // }
-
-    if (location.pathname === "/" && young && young.acceptCGU === "true" && canYoungResumePhase1(young)) {
-      getAvailableSessions(young).then((sessions) => {
-        if (sessions.length) setIsResumePhase1WithdrawnModalOpen(true);
-      });
-    }
-    return () => {
-      setIsModalCGUOpen(false);
-      setIsResumePhase1WithdrawnModalOpen(false);
-      // setIsModalMondayOpen(false);
-    };
   }, [young]);
 
-  if (!young) {
-    const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
-    if (redirect === "inscription") return <Redirect to="/preinscription" />;
-    else return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}&disconnected=1` : "", pathname: "/auth" }} />;
-  }
+  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  if (young.status === YOUNG_STATUS.NOT_ELIGIBLE) return <Redirect to="/noneligible" />;
+  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
 
-  const forceRedirectReinscription = young.reinscriptionStep2023 && young.reinscriptionStep2023 !== "DONE";
-  if (forceRedirectReinscription) return <Redirect to="/reinscription" />;
-
-  const forceRedirectInscription =
-    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED].includes(young.status) ||
-    (inscriptionModificationOpenForYoungs(young.cohort, young, environment) && young.status === YOUNG_STATUS.WAITING_VALIDATION && young.inscriptionStep2023 !== "DONE");
-  if (forceRedirectInscription) return <Redirect to="/inscription2023" />;
+  if (shouldForceRedirectToInscription(young, inscriptionModificationOpenForYoungs(cohort))) return <Redirect to="/inscription2023" />;
 
   return (
     <>
@@ -234,10 +243,8 @@ const Espace = () => {
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
         <Switch>
           <SentryRoute exact path="/" component={Home} />
-          <SentryRoute path="/besoin-d-aide" component={SupportCenter} />
-          <SentryRoute path="/noneligible" component={NonEligible} />
-          <SentryRoute path="/reinscription" component={ReInscription} />
           <SentryRoute path="/account" component={Account} />
+          <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
           <SentryRoute path="/phase3" component={Phase3} />
@@ -245,9 +252,10 @@ const Espace = () => {
           <SentryRoute path="/preferences" component={Preferences} />
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
-          {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
-          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={changeSejour} /> : null}
+          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={ChangeSejour} /> : null}
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <Redirect to="/" />
         </Switch>
@@ -255,8 +263,6 @@ const Espace = () => {
       <Footer />
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
-      <ModalResumePhase1ForWithdrawn isOpen={isResumePhase1WithdrawnModalOpen} onClose={() => setIsResumePhase1WithdrawnModalOpen(false)} />
-      {/* <ModalMonday isOpen={isModalMondayOpen} onClose={() => setIsModalMondayOpen(false)} /> */}
     </>
   );
 };

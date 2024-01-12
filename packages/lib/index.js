@@ -1,7 +1,8 @@
 import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
 import translation from "./translation";
-import regionAndDepartments from "./region-and-departments";
 import { ROLES } from "./roles";
+import sanitizeHtml from "sanitize-html";
+import { YOUNG_SOURCE } from "./constants";
 
 const isInRuralArea = (v) => {
   if (!v.populationDensity) return null;
@@ -11,71 +12,6 @@ const isInRuralArea = (v) => {
 // See: https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai
 function isEndOfInscriptionManagement2021() {
   return new Date() > new Date(2021, 4, 7); // greater than 7 mai 2021 morning
-}
-
-//force redeploy
-
-function inscriptionModificationOpenForYoungs(cohort, young, env) {
-  if (env !== undefined && env !== "production") return true;
-
-  switch (cohort) {
-    case "2019":
-    case "2020":
-    case "2021":
-      return false;
-    case "2022":
-      return new Date() < new Date(2022, 4, 5); // before 5 mai 2022 morning
-    case "Février 2022":
-      return new Date() < new Date(2022, 0, 10); // before 10 janvier 2022 morning
-    case "Juin 2022":
-      return new Date() < new Date(2022, 3, 27); // before 27 avril 2022 morning
-    case "Juillet 2022":
-      return new Date() < new Date(2022, 4, 5); // before 5 mai 2022 morning
-    case "Février 2023 - C":
-      return new Date() <= new Date(2023, 0, 12, 23, 59); // before 9 janvier 2023 23h59
-    case "Avril 2023 - A":
-      return new Date() < new Date(2023, 1, 14, 23, 59); // before 14 février 2023 23h59
-    case "Avril 2023 - B":
-      return new Date() < new Date(2023, 1, 28, 23, 59); // before 28 fevrier 2023 23h59
-    case "Juin 2023":
-      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023 - A modifier quand on connaitra la date.
-    case "Juillet 2023":
-      if (young && regionAndDepartments.isFromFrenchPolynesia(young)) {
-        return new Date() < new Date(2023, 5, 1, 23, 59); // before 1 june 2023
-      }
-      if (young && regionAndDepartments.isFromDOMTOM(young)) {
-        return new Date() < new Date(2023, 4, 21, 23, 59); // before 22 mai 2023
-      }
-      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
-    case "à venir":
-      return false;
-    default:
-      return new Date() < new Date(2023, 4, 11, 23, 59); // before 11 mai 2023
-  }
-}
-
-function inscriptionCreationOpenForYoungs(cohort, allowed = false, env) {
-  if ((env !== undefined && env !== "production") || allowed) return true;
-  switch (cohort) {
-    case "Février 2022":
-      return new Date() < new Date(2022, 0, 10); // before 10 janvier 2022 morning
-    case "Juin 2022":
-      return new Date() < new Date(2022, 3, 25); // before 25 avril 2022 morning
-    case "2022":
-    case "Juillet 2022":
-      return new Date() < new Date(2022, 4, 2); // before 2 mai 2022 morning
-    default:
-      return new Date() < new Date(2023, 4, 11); // before 11 mai 2023 morning
-  }
-}
-
-function reInscriptionModificationOpenForYoungs(cohort, env) {
-  if (env !== undefined && env !== "production") return true;
-
-  switch (cohort) {
-    default:
-      return new Date() < new Date(2023, 4, 11); // before 11 mai 2023 morning
-  }
 }
 
 const getFilterLabel = (selected, placeholder = "Choisissez un filtre", prelabel = "") => {
@@ -150,7 +86,7 @@ const getSelectedFilterLabel = (selected, prelabel) => {
   };
   let value = "";
   if (typeof selected === "object") {
-    translated = selected.map((item) => {
+    const translated = selected.map((item) => {
       return translator(item);
     });
     value = translated.join(", ");
@@ -190,8 +126,9 @@ function canUserUpdateYoungStatus(actor) {
 
 const SESSIONPHASE1ID_CANCHANGESESSION = ["627cd8b873254d073af93147", "6274e6359ea0ba074acf6557"];
 
-const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
+const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id, source }) => {
   //   console.log([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(status), "alorss?");
+  if(source === YOUNG_SOURCE.CLE) return false;
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(status)) return true;
   if ([YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(statusPhase1) && status === YOUNG_STATUS.VALIDATED) {
     return true;
@@ -203,6 +140,16 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
   if (statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return true;
   return false;
 };
+
+const youngCanDeleteAccount = (young) => {
+  if(young.source === YOUNG_SOURCE.CLE) return false;
+  return true;
+}
+
+const isYoungInReinscription = (young) => {
+  return young.hasStartedReinscription || false;
+}
+
 const formatPhoneNumberFR = (tel) => {
   if (!tel) return "";
   const regex = /^((?:(?:\+|00)33|0)\s*[1-9])((?:[\s.-]*\d{2}){4})$/;
@@ -215,11 +162,25 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
+const patternEmailAcademy = "^[a-zA-Z0-9._+-]+@ac-[a-zA-Z]{1,}.fr$"
+
+const htmlCleaner = (text) => {
+  return sanitizeHtml(text, {
+    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
+    allowedAttributes: {
+      a: ["href", "target", "rel"],
+    },
+  });
+};
+
+const formatMessageForReadingInnerHTML = (content) => {
+  const cleanedMessage = htmlCleaner(content);
+  const message = cleanedMessage.replace(/\\n/g, "<br>").replace(/\\r/g, "<br>");
+  return message;
+};
+
 export {
   isEndOfInscriptionManagement2021,
-  inscriptionModificationOpenForYoungs,
-  inscriptionCreationOpenForYoungs,
-  reInscriptionModificationOpenForYoungs,
   isInRuralArea,
   getFilterLabel,
   getSelectedFilterLabel,
@@ -228,19 +189,28 @@ export {
   canUpdateYoungStatus,
   canUserUpdateYoungStatus,
   youngCanChangeSession,
+  youngCanDeleteAccount,
+  isYoungInReinscription,
   formatPhoneNumberFR,
+  formatMessageForReadingInnerHTML,
+  patternEmailAcademy,
+  htmlCleaner,
 };
+
 export * from "./academy";
 export * from "./colors";
 export * from "./constants";
 export * from "./date";
 export * from "./excelExports";
+export * from "./features";
 export * from "./file";
 export * from "./phone-number";
 export * from "./plan-de-transport";
 export * from "./region-and-departments";
 export * from "./roles";
 export * from "./sessions";
+export * from "./todo.constants";
 export * from "./translation";
-export * from "./zammood";
 export * from "./transport-info";
+export * from "./young";
+export * from "./zammood";

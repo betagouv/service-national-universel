@@ -8,10 +8,10 @@ import ContactSupportModalContent from "./ContactSupportModalContent";
 import ChangedDepartmentInfoModalContent from "./ChangedDepartmentInfoModalContent";
 import ChooseCohortModalContent from "./ChooseCohortModalContent";
 import { updateYoung } from "../../../../../../services/young.service";
-import API from "../../../../../../services/api";
 import { capture } from "../../../../../../sentry";
-import { getCohortPeriod, isCohortDone } from "../../../../../../utils/cohorts";
-import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, translateCohort } from "snu-lib";
+import { isCohortDone } from "../../../../../../utils/cohorts";
+import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 import api from "../../../../../../services/api";
 import { setYoung } from "../../../../../../redux/auth/actions";
 
@@ -43,22 +43,10 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
 
   useEffect(() => {
     if (young) {
-      getCohort();
+      const cohort = getCohort(young.cohort);
+      setCurrentCohort(cohort);
     }
   }, [young]);
-
-  const getCohort = async () => {
-    try {
-      setLoading(true);
-      const { ok, data } = await API.get(`/cohort/${young.cohort}`);
-      if (ok) setCurrentCohort(data);
-      else throw new Error(`cohort ${young.cohort} not found`);
-    } catch (e) {
-      capture(e);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onAddressEntered = async (newAddress) => {
     setNewAddress(newAddress);
@@ -74,16 +62,16 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   };
 
-  const checkInscriptionGoal = async (cohortName, department = newAddress.department) => {
+  const checkInscriptionGoal = async (cohortName, address) => {
     setLoading(true);
     try {
-      const res = await api.get(`/inscription-goal/${cohortName}/department/${department}/reached`);
+      const res = await api.get(`/inscription-goal/${cohortName}/department/${address.department}/reached`);
       if (!res.ok) throw new Error(res);
       const isGoalReached = res.data;
       if (isGoalReached && young.status === YOUNG_STATUS.VALIDATED) {
         setStep(changeAddressSteps.COMPLEMENTARY_LIST);
       } else {
-        updateAddress(newAddress, isGoalReached ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED);
+        updateAddress(address, isGoalReached ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED);
       }
     } catch (error) {
       capture(error);
@@ -96,16 +84,22 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
   const getAvailableCohorts = async (address = {}) => {
     try {
       setLoading(true);
-      const { data } = await api.post("/cohort-session/eligibility/2023/", { ...young, ...address });
+      // @todo eligibility is based on address, should be based on school address.
+      const { data } = await api.post("/cohort-session/eligibility/2023timeZoneOffset=${new Date().getTimezoneOffset()}", {
+        grade: young.grade,
+        birthdateAt: young.birthdateAt,
+        ...address,
+      });
       const isArray = Array.isArray(data);
       let cohorts = [];
       // get all available cohorts except the current one
       if (isArray) {
         const isCurrentCohortAvailable = data.find((cohort) => cohort.name === young.cohort);
-        if (isCurrentCohortAvailable) return checkInscriptionGoal(young.cohort);
+        if (isCurrentCohortAvailable) return checkInscriptionGoal(young.cohort, address);
         cohorts = data.map((cohort) => cohort.name).filter((cohort) => cohort !== young.cohort);
       }
       // if no available cohort, check eligibility and add "à venir" cohort
+      // @todo : this date should come from the db
       if (cohorts.length === 0 && calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18) {
         cohorts.push("à venir");
       }
@@ -130,7 +124,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     if (cohort === "à venir") {
       updateAddress(newAddress, young.status, cohort);
     } else {
-      checkInscriptionGoal(cohort);
+      checkInscriptionGoal(cohort, newAddress);
     }
   };
 
@@ -187,7 +181,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
             <ChooseCohortModalContent
               onCancel={onCancel}
               onConfirm={chooseNewCohort}
-              cohorts={availableCohorts.map((cohort) => ({ value: cohort, label: `Séjour ${translateCohort(cohort)}` }))}
+              cohorts={availableCohorts.map((cohort) => ({ value: cohort, label: cohort === "à venir" ? "Séjour à venir" : `Séjour ${getCohortPeriod(getCohort(cohort))}` }))}
               currentCohortPeriod={getCohortPeriod(currentCohort)}
               isLoading={isLoading}
             />

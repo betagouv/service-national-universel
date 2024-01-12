@@ -1,6 +1,6 @@
 require("../../mongo");
 
-const { ObjectId } = require("mongodb");
+const { ObjectId } = require("mongoose").Types;
 const fetch = require("node-fetch");
 
 const { capture } = require("../../sentry");
@@ -55,6 +55,8 @@ async function createLog(patch, actualMission, event, value) {
   const missionInfos = await actualMission.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let mission = rebuildMission(missionInfos);
 
+  const anonymisedMission = new MissionModel(mission).anonymise();
+
   const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/mission`, {
     method: "POST",
     redirect: "follow",
@@ -81,7 +83,7 @@ async function createLog(patch, actualMission, event, value) {
       mission_preparationMilitaire: mission.isMilitaryPreparation || actualMission.isMilitaryPreparation,
       mission_JVA: mission.isJvaMission || actualMission.isJvaMission,
       date: patch.date,
-      raw_data: mission,
+      raw_data: anonymisedMission,
     }),
   });
 
@@ -112,5 +114,19 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Mission Logs", text: e });
     capture(e);
+  }
+};
+
+// Script de rattrapage manuel
+// commande terminal : node -e "require('./mission').manualHandler('2023-08-17', '2023-08-18')"
+exports.manualHandler = async (startDate, endDate) => {
+  try {
+    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+
+    await findAll(MissionPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
+
+    console.log(result);
+  } catch (e) {
+    console.log(e);
   }
 };

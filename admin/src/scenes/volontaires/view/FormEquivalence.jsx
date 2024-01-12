@@ -64,7 +64,7 @@ export default function FormEquivalence({ young, onChange }) {
   const uploadFiles = async (files) => {
     setFilesList(files);
     setUploading(true);
-    const res = await api.uploadFile("/referent/file/equivalenceFiles", files, { youngId: young._id });
+    const res = await api.uploadFiles("/referent/file/equivalenceFiles", files, { youngId: young._id });
     if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
     // We update it instant ( because the bucket is updated instant )
     setValue("files", res.data);
@@ -244,7 +244,7 @@ export default function FormEquivalence({ young, onChange }) {
                     />
                     <Controller
                       rules={{ required: true }}
-                      name="frequency.frequency"
+                      name="frequency.frequence"
                       control={control}
                       render={({ field: { ref, ...rest } }) => <Select {...rest} options={optionsFrequence} label="Fréquence" />}
                     />

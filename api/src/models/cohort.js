@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 const patchHistory = require("mongoose-patch-history").default;
+const { COHORT_TYPE, COHORT_TYPE_LIST } = require("snu-lib");
 
 const MODELNAME = "cohort";
 
@@ -9,6 +10,21 @@ const DSNJExportDates = new mongoose.Schema({
   cohesionCenters: Date,
   youngsBeforeSession: Date,
   youngsAfterSession: Date,
+});
+
+const Eligibility = new mongoose.Schema({
+  zones: {
+    type: [String],
+    enum: ["A", "B", "C", "DOM", "PF", "Etranger", "NC", "Corse", "Mayotte", "La Réunion", "Guadeloupe", "Guyane", "Martinique"],
+    required: true,
+  },
+  schoolLevels: {
+    type: [String],
+    enum: ["4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE"],
+    required: true,
+  },
+  bornAfter: { type: Date, required: true },
+  bornBefore: { type: Date, required: true },
 });
 
 const Schema = new mongoose.Schema({
@@ -62,6 +78,26 @@ const Schema = new mongoose.Schema({
   dateStart: { type: Date, required: true },
   dateEnd: { type: Date, required: true },
 
+  eligibility: { type: Eligibility, required: true },
+
+  inscriptionStartDate: { type: Date, required: true },
+  inscriptionEndDate: { type: Date, required: true },
+  instructionEndDate: { type: Date, required: true },
+  inscriptionModificationEndDate: { type: Date },
+
+  buffer: {
+    type: Number,
+    required: true,
+  },
+
+  event: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Event plausible",
+    },
+  },
+
   pdrChoiceLimitDate: {
     type: Date,
     documentation: {
@@ -75,6 +111,7 @@ const Schema = new mongoose.Schema({
       description: "Date d'autoValidation du jeune (apèrs cette date, sa phase 1 est validée), par defaut 23h59",
     },
   },
+
   validationDateForTerminaleGrade: {
     type: Date,
     documentation: {
@@ -212,6 +249,29 @@ const Schema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     documentation: {
       description: "Information complémentaire non utilisée par l'application",
+    },
+  },
+
+  daysToValidate: {
+    type: Number,
+    documentation: {
+      description: "Nombre de jours nécessaire pour valider le séjour",
+    },
+  },
+
+  daysToValidateForTerminalGrade: {
+    type: Number,
+    documentation: {
+      description: "Nombre de jours pour valider le séjour pour les jeunes étant en Terminale",
+    },
+  },
+
+  type: {
+    type: String,
+    enum: COHORT_TYPE_LIST,
+    default: COHORT_TYPE.VOLONTAIRE,
+    documentation: {
+      description: "Type de la cohorte",
     },
   },
 

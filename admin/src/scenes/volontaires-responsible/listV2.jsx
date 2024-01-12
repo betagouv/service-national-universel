@@ -18,9 +18,10 @@ import {
   getAge,
   translate,
   translateApplication,
+  translateContractStatus,
   translateApplicationFileType,
   formatStringDateTimezoneUTC,
-} from "../../utils";
+} from "@/utils";
 import { SelectStatusApplicationPhase2 } from "../volontaires/view/phase2bis/components/SelectStatusApplicationPhase2";
 import Panel from "./panel";
 
@@ -33,6 +34,7 @@ import SelectAction from "../../components/SelectAction";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { currentFilterAsUrl } from "../../components/filters-system-v2/components/filters/utils";
 import ModalConfirm from "../../components/modals/ModalConfirm";
+import { captureMessage } from "../../sentry";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -64,6 +66,7 @@ export default function List() {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   //Filters
   const filterArray = [
@@ -84,7 +87,12 @@ export default function List() {
       missingLabel: "Non renseigné",
       translate: (e) => translateApplication(e),
     },
-
+    {
+      title: "Statut du Contrat",
+      name: "contractStatus",
+      missingLabel: "Non renseigné",
+      translate: (e) => translateContractStatus(e),
+    },
     {
       title: "Pièces jointes",
       name: "filesType",
@@ -136,27 +144,9 @@ export default function List() {
 
   const getApplicationCount = async () => {
     try {
-      let body = {
-        query: { bool: { must: { match_all: {} } } },
-        aggs: {
-          all: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } },
-          pending: {
-            filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } },
-            aggs: { pending: { filter: { terms: { "status.keyword": ["WAITING_VALIDATION"] } } } },
-          },
-          follow: {
-            filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } },
-            aggs: { follow: { filter: { terms: { "status.keyword": ["IN_PROGRESS", "VALIDATED"] } } } },
-          },
-        },
-        size: 0,
-        track_total_hits: true,
-      };
-
-      // aggs: { filter: [{ terms: { "missionId.keyword": missions.map((e) => e._id) } }] },
-      const resAggs = await api.esQuery("application", body);
-      if (!resAggs || !resAggs.responses || !resAggs.responses[0]) return;
-      const aggs = resAggs.responses[0].aggregations;
+      const structureIds = [...new Set(missions.map((item) => item.structureId))].filter(Boolean);
+      const res = await api.post("/elasticsearch/application/count-by-status", { filters: { structureId: structureIds } });
+      const aggs = res.responses[0].aggregations;
       setCountAll(aggs.all.doc_count);
       setCountFollow(aggs.follow.follow.doc_count);
       setCountPending(aggs.pending.pending.doc_count);
@@ -273,58 +263,17 @@ export default function List() {
   };
 
   const handleClick = async (application) => {
+    if (!application?.youngId) {
+      captureMessage("Error with application :", { extra: { application } });
+      return;
+    }
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setPanel({ application, young: data });
   };
 
   async function transform(data, values) {
     let all = data;
-    if (values && ["contact", "address", "location", "application", "status", "choices", "representative1", "representative2"].some((e) => values.includes(e))) {
-      const youngIds = [...new Set(data.map((item) => item.youngId))];
-      if (youngIds?.length) {
-        const { responses: responsesYoungs } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
-        if (responsesYoungs.length) {
-          const youngs = responsesYoungs[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
-        }
-      }
-    }
-
-    if (values && ["missionInfo", "missionLocation"].some((e) => values.includes(e))) {
-      const missionIds = [...new Set(data.map((item) => item.missionId))];
-      if (missionIds?.length) {
-        const { responses: responsesMissions } = await api.esQuery("mission", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: missionIds } } });
-        if (responsesMissions.length) {
-          const missions = responsesMissions[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, mission: missions.find((e) => e._id === item.missionId) || {} }));
-        }
-      }
-    }
-
-    if (values && ["missionTutor"].some((e) => values.includes(e))) {
-      const missionTutorIds = [...new Set(data.map((item) => item.tutorId))];
-      if (missionTutorIds?.length) {
-        const { responses: responsesTutors } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: missionTutorIds } } });
-        if (responsesTutors.length) {
-          const missionTutors = responsesTutors[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, tutor: missionTutors.find((e) => e._id === item.tutorId) || {} }));
-        }
-      }
-    }
-
-    if (values && ["structureInfo", "structureLocation"].some((e) => values.includes(e))) {
-      const structureIds = [...new Set(data.map((item) => item.structureId))];
-      if (structureIds?.length) {
-        const { responses: responsesStructures } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
-        if (responsesStructures.length) {
-          const structures = responsesStructures[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = all.map((item) => ({ ...item, structure: structures.find((e) => e._id === item.structureId) || {} }));
-        }
-      }
-    }
-
     const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
-
     return all.map((data) => {
       if (!data.young) data.young = {};
       if (!data.young.domains) data.young.domains = [];
@@ -538,6 +487,7 @@ export default function List() {
                 setSelectedFilters={setSelectedFilters}
                 paramData={paramData}
                 setParamData={setParamData}
+                size={size}
               />
               {tab !== "all" ? (
                 <SelectAction Icon={<CursorClick className="text-gray-400" />} title="Actions" alignItems="right" optionsGroup={[{ items: optionsFilteredRole }]} />
@@ -571,6 +521,8 @@ export default function List() {
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
+              size={size}
+              setSize={setSize}
               render={
                 <Table>
                   <thead>
@@ -589,25 +541,33 @@ export default function List() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((hit) => (
-                      <Hit
-                        key={hit._id}
-                        hit={hit}
-                        currentTab={tab}
-                        mission={missions.find((m) => m._id.toString() === hit.missionId.toString())}
-                        onClick={() => handleClick(hit)}
-                        opened={panel?.application?._id === hit._id}
-                        selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
-                        onSelect={(newItem) =>
-                          setYoungSelected((prev) => {
-                            if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
-                              return prev.filter((e) => e._id.toString() !== newItem._id.toString());
-                            }
-                            return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
-                          })
-                        }
-                      />
-                    ))}
+                    {data.map((hit) => {
+                      const mission = missions.find((m) => m._id.toString() === hit.missionId.toString());
+                      if (!mission) {
+                        captureMessage("Error with application / No missionId :", { extra: { hit, missions } });
+                        return null;
+                      }
+
+                      return (
+                        <Hit
+                          key={hit._id}
+                          hit={hit}
+                          currentTab={tab}
+                          mission={mission}
+                          onClick={() => handleClick(hit)}
+                          opened={panel?.application?._id === hit._id}
+                          selected={youngSelected.find((e) => e._id.toString() === hit._id.toString())}
+                          onSelect={(newItem) =>
+                            setYoungSelected((prev) => {
+                              if (prev.find((e) => e._id.toString() === newItem._id.toString())) {
+                                return prev.filter((e) => e._id.toString() !== newItem._id.toString());
+                              }
+                              return [...prev, { _id: newItem._id, firstName: newItem.firstName, lastName: newItem.lastName }];
+                            })
+                          }
+                        />
+                      );
+                    })}
                   </tbody>
                 </Table>
               }

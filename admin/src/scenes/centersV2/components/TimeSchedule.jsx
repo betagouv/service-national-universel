@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Field from "./Field";
-import { MoreButton } from "../../phase0/components/commons";
-import { PlainButton } from "../../phase0/components/Buttons";
-import Cni from "../../../assets/icons/Cni";
+import Download from "../../../assets/icons/Download";
+import { PlainButton, BorderButton } from "../../phase0/components/Buttons";
+import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
 import ModalTimeSchedule from "./modals/ModalTimeSchedule";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
@@ -10,6 +9,7 @@ import api from "../../../services/api";
 import queryString from "query-string";
 import { ROLES } from "snu-lib/roles";
 import { useSelector } from "react-redux";
+import EmptyFileIcon from "../../../assets/icons/EmptyFileIcon";
 
 export default function TimeSchedule({ session, className = "", onSessionChanged }) {
   const [modalOpened, setModalOpened] = useState(false);
@@ -43,21 +43,25 @@ export default function TimeSchedule({ session, className = "", onSessionChanged
   }
 
   return (
-    <div className={`flex items-center justify-center ${className}`}>
+    <div className={`items-center justify-center ${className}`}>
       <div className="flex items-center rounded-lg bg-gray-50 p-9">
-        <Cni />
+        {hasTimeSchedule ? <UploadedFileIcon /> : <EmptyFileIcon />}
         <div className="grow-1 mx-7">
-          <div className="text-sm font-bold text-[#242526]">Emploi du temps du séjour</div>
-          {!hasTimeSchedule && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && (
-            <PlainButton className="mt-3" onClick={sendReminder}>
-              Relancer le chef de centre
+          <div className="text-sm font-bold text-[#242526]">
+            Emploi du temps du séjour : <span className="font-normal">{hasTimeSchedule ? "Déposé" : "Non déposé"}</span>
+          </div>
+          <div className="flex gap-2">
+            {!hasTimeSchedule && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && (
+              <BorderButton className="mt-3" onClick={sendReminder} mode={"blue"}>
+                Relancer le chef de centre
+              </BorderButton>
+            )}
+            <PlainButton className="mt-3" onClick={() => setModalOpened(true)}>
+              <Download />
+              &#xA0;{hasTimeSchedule ? "Télécharger le(s) document(s)" : "Téléverser"}
             </PlainButton>
-          )}
+          </div>
         </div>
-        <MoreButton onClick={() => setModalOpened(true)} />
-      </div>
-      <div className=" ml-[70px] w-[250px]">
-        <Field readOnly={true} label="Statut" value={hasTimeSchedule ? "Déposé" : "Non déposé"} />
       </div>
       {modalOpened && <ModalTimeSchedule session={session} onCancel={() => setModalOpened(false)} onChanged={onSessionChanged} />}
     </div>

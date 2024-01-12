@@ -3,22 +3,30 @@ import React, { useEffect, useState } from "react";
 import { Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { appURL, environment } from "../config";
 import { useSelector } from "react-redux";
-import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, copyToClipboard, formatDateFR } from "../utils";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, copyToClipboard, formatDateFR, translateModelFields } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
 import { Box } from "./box";
 import { toastr } from "react-redux-toastr";
-import { useParams } from "react-router";
 import Badge from "./Badge";
 import DownloadContractButton from "./buttons/DownloadContractButton";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import HistoricComponent from "./views/Historic";
 import { capture } from "../sentry";
+import validator from "validator";
+
+function validateEmail(value) {
+  let error;
+  if (value && !validator.isEmail(value)) {
+    error = "L'e-mail est invalide";
+  }
+  return error;
+}
 
 export default function Contract({ young }) {
   const history = useHistory();
@@ -48,7 +56,7 @@ export default function Contract({ young }) {
       // let { ok, data, code } = await api.get(`/application/${applicationId}`);
       let { ok, data, code } = await api.get(`/young/${young._id}/application`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       const currentApplication = data.find((e) => e._id === applicationId);
@@ -56,7 +64,7 @@ export default function Contract({ young }) {
       if (currentApplication.contractId) {
         ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
         if (!ok) {
-          capture(code);
+          capture(new Error(code));
           return toastr.error("Oups, une erreur est survenue", code);
         }
         setContract(data);
@@ -71,7 +79,7 @@ export default function Contract({ young }) {
       if (!application) return;
       const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       return setMission(data);
@@ -119,7 +127,7 @@ export default function Contract({ young }) {
       if (!application) return;
       const { ok, data, code } = await api.get(`/structure/${application.structureId}`);
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
       }
       return setStructure(data);
@@ -129,6 +137,15 @@ export default function Contract({ young }) {
 
   const onSubmit = async (values) => {
     try {
+      const emailFields = ["youngEmail", "parent1Email", "parent2Email", "projectManagerEmail", "structureManagerEmail"];
+
+      for (const field of emailFields) {
+        const error = validateEmail(values[field]);
+        if (error) {
+          toastr.error(`Erreur avec le champ ${translateModelFields("contract", field)}`, error);
+          return;
+        }
+      }
       values.sendMessage
         ? setLoadings({
             saveButton: false,
@@ -138,6 +155,7 @@ export default function Contract({ young }) {
             saveButton: true,
             submitButton: false,
           });
+
       const { ok, code } = await api.post(`/contract`, {
         ...values,
         missionDuration: values.missionDuration?.toString(),
@@ -166,6 +184,14 @@ export default function Contract({ young }) {
       });
       toastr.error("Erreur !", translate(e.code));
     }
+  };
+
+  const trimEmailValues = async (values, setFieldValue) => {
+    if (values["youngEmail"]) await setFieldValue("youngEmail", values["youngEmail"].trim());
+    if (values["parent1Email"]) await setFieldValue("parent1Email", values["parent1Email"].trim());
+    if (values["parent2Email"]) await setFieldValue("parent2Email", values["parent2Email"].trim());
+    if (values["projectManagerEmail"]) await setFieldValue("projectManagerEmail", values["projectManagerEmail"].trim());
+    if (values["structureManagerEmail"]) await setFieldValue("structureManagerEmail", values["structureManagerEmail"].trim());
   };
 
   if (!application || !mission || !managerDepartment || !tutor || !structure) return <Loader />;
@@ -370,7 +396,7 @@ export default function Contract({ young }) {
                             <ContractField name="projectManagerRole" placeholder="Rôle" className="md" context={context} />
                             <div>
                               Email :
-                              <ContractField name="projectManagerEmail" placeholder="Email" className="md" context={context} />
+                              <ContractField name="projectManagerEmail" placeholder="Email" className="md" context={context} validate={validateEmail} />
                             </div>
                           </div>
                         </div>
@@ -384,7 +410,7 @@ export default function Contract({ young }) {
                             <ContractField name="structureManagerRole" placeholder="Rôle" className="md" context={context} />
                             <div>
                               Email :
-                              <ContractField name="structureManagerEmail" placeholder="Email" className="md" context={context} />
+                              <ContractField name="structureManagerEmail" placeholder="Email" className="md" context={context} validate={validateEmail} />
                             </div>
                             <div>
                               Siret (optionnel) :
@@ -408,7 +434,7 @@ export default function Contract({ young }) {
                               <ContractField name="youngCity" placeholder="Ville" context={context} />
                               <ContractField name="youngDepartment" placeholder="Département" context={context} />
                             </div>
-                            Email : <ContractField name="youngEmail" placeholder="Email" className="md" type="email" context={context} />
+                            Email : <ContractField name="youngEmail" placeholder="Email" className="md" type="email" context={context} validate={validateEmail} />
                             Téléphone :
                             <ContractField name="youngPhone" placeholder="0123456789" className="md" context={context} />
                           </div>
@@ -427,7 +453,7 @@ export default function Contract({ young }) {
                                 <ContractField name="parent1City" placeholder="Ville" context={context} />
                                 <ContractField name="parent1Department" placeholder="Département" context={context} />
                               </div>
-                              Email : <ContractField name="parent1Email" placeholder="Email" className="md" type="email" context={context} />
+                              Email : <ContractField name="parent1Email" placeholder="Email" className="md" type="email" context={context} validate={validateEmail} />
                               Téléphone :
                               <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
                             </div>
@@ -443,7 +469,8 @@ export default function Contract({ young }) {
                                   <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
                                   <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
                                 </div>
-                                Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} optional={true} />
+                                Email :{" "}
+                                <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} optional={true} validate={validateEmail} />
                                 Téléphone :
                                 <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
                               </div>
@@ -782,6 +809,7 @@ export default function Contract({ young }) {
                           title: "Modification du contrat",
                           message: confirmText,
                           onConfirm: async () => {
+                            await trimEmailValues(values, setFieldValue);
                             const erroredFields = await validateForm();
                             if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
                             setFieldValue("sendMessage", true, false);
@@ -802,6 +830,7 @@ export default function Contract({ young }) {
                   {contract?.invitationSent !== "true" && (
                     <LoadingButton
                       onClick={async () => {
+                        await trimEmailValues(values, setFieldValue);
                         const erroredFields = await validateForm();
                         if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
                         setFieldValue("sendMessage", true, false);
@@ -855,7 +884,7 @@ export default function Contract({ young }) {
 const ContractField = ({ name, placeholder, optional, context: { values, errors, handleChange }, ...rest }) => {
   const content = (
     <>
-      {errors[name] && <ErrorInContractField>Ce champ est obligatoire</ErrorInContractField>}
+      {errors[name] && <ErrorInContractField>{errors[name] === true ? "Ce champ est obligatoire" : errors[name]}</ErrorInContractField>}
       <Field validate={(v) => (optional ? undefined : !v)} value={values[name]} onChange={handleChange} name={name} placeholder={placeholder} {...rest} />
     </>
   );

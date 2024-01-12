@@ -1,3 +1,5 @@
+const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+
 const formatDay = (date) => {
   if (!date) return "-";
   return new Date(date).toISOString().split("T")[0];
@@ -111,26 +113,6 @@ function getAge(d) {
   return age;
 }
 
-const getLimitDateForPhase2 = (cohort) => {
-  if (cohort === "2019") return "23 mars 2021";
-  if (cohort === "2020") return "31 décembre 2021 ";
-  return "30 juin 2022";
-};
-
-const COHESION_STAY_END = {
-  2019: new Date("06/28/2019"),
-  2020: new Date("07/02/2021"),
-  2021: new Date("07/02/2021"),
-  "Février 2022": new Date("02/25/2022"),
-  "Juin 2022": new Date("06/24/2022"),
-  "Juillet 2022": new Date("07/15/2022"),
-  "Février 2023 - C": new Date("03/03/2023"),
-  "Avril 2023 - A": new Date("04/21/2023"),
-  "Avril 2023 - B": new Date("04/28/2023"),
-  "Juin 2023": new Date("06/23/2023"),
-  "Juillet 2023": new Date("07/13/2023"),
-};
-
 function isIsoDate(str) {
   if (!Date.parse(str)) {
     return false;
@@ -153,7 +135,18 @@ function calculateAge(birthDate, otherDate) {
   return years;
 }
 
+const formatDateForPostGre = (date) => {
+  if (!date) return "-";
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const day = d.getDate().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
 export {
+  MONTHS,
   formatDay,
   formatDateFR,
   formatToActualTime,
@@ -166,9 +159,8 @@ export {
   formatStringDateWithDayTimezoneUTC,
   dateForDatePicker,
   getAge,
-  getLimitDateForPhase2,
   formatLongDateUTCWithoutTime,
-  COHESION_STAY_END,
   isIsoDate,
   calculateAge,
+  formatDateForPostGre,
 };

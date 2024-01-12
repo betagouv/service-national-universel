@@ -11,7 +11,7 @@ import PlusSVG from "../../assets/plus.svg";
 import CrossSVG from "../../assets/cross.svg";
 import { region2department, departmentList, department2region } from "../../utils";
 
-import YearPicker from "../dashboard/components/YearPicker";
+import YearPicker from "../../components/legacy-dashboard/YearPicker";
 export default function Goal() {
   useDocumentTitle("Objectifs");
 
@@ -61,6 +61,15 @@ export default function Goal() {
               { key: "Avril 2023 - B", label: "Avril 2023 - B" },
               { key: "Juin 2023", label: "Juin 2023" },
               { key: "Juillet 2023", label: "Juillet 2023" },
+              { key: "Octobre 2023 - NC", label: "Octobre 2023 - NC" },
+              { key: "Février 2024 - C", label: "Février 2024 - C" },
+              { key: "Février 2024 - A", label: "Février 2024 - A" },
+              { key: "Février 2024 - B", label: "Février 2024 - B" },
+              { key: "Avril 2024 - C", label: "Avril 2024 - C" },
+              { key: "Avril 2024 - A", label: "Avril 2024 - A" },
+              { key: "Avril 2024 - B", label: "Avril 2024 - B" },
+              { key: "Juin 2024 - 2", label: "Juin 2024 - 2" },
+              { key: "Juillet 2024", label: "Juillet 2024" },
             ]}
             onChange={(c) => setCohort(c)}
             value={cohort}

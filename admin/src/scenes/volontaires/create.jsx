@@ -1,40 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import validator from "validator";
-import "dayjs/locale/fr";
 
-import { translate } from "../../utils";
-import api from "../../services/api";
+import { translate } from "@/utils";
+import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { capture } from "../../sentry";
-import { useHistory } from "react-router-dom";
+import { capture } from "@/sentry";
+import { useHistory, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { translateGrade, GRADES, getAge, COHESION_STAY_LIMIT_DATE, ES_NO_LIMIT, YOUNG_STATUS } from "snu-lib";
+import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, ROLES } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
 import RadioButton from "../phase0/components/RadioButton";
 import { Spinner } from "reactstrap";
 
 //Identite
-import Field from "./components/Field";
-import { CniField } from "../phase0/components/CniField";
+import Field from "@/components/ui/forms/Field";
 import SchoolEditor from "../phase0/components/SchoolEditor";
 import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
-import Check from "../../assets/icons/Check";
+import Check from "@/assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
-import ConfirmationModal from "../../components/ui/modals/ConfirmationModal";
+import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 
 export default function Create() {
   const history = useHistory();
+  const location = useLocation();
   const [selectedRepresentant, setSelectedRepresentant] = useState(1);
-  const [uploadError, setUploadError] = useState("");
-  const [youngId, setYoungId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState([]);
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
+  const user = useSelector((state) => state.Auth.user);
+  const classeId = new URLSearchParams(location.search).get("classeId");
 
   const [errors, setErrors] = useState({});
   const [values, setValues] = useState({
@@ -47,9 +47,6 @@ export default function Create() {
     gender: "",
     grade: "",
     birthCountry: "",
-    filesToUpload: [],
-    latestCNIFileExpirationDate: new Date(),
-    latestCNIFileCategory: "",
     email: "",
     expirationDate: null,
     phone: "",
@@ -88,7 +85,6 @@ export default function Create() {
     paiBeneficiary: "false",
     allergies: "false",
     consentment: "false",
-    certifyData: "false",
     parentAllowSNU: "",
     parent1Status: "",
     rulesParent1: "false",
@@ -119,6 +115,7 @@ export default function Create() {
     parent2Zip: "",
     parent2City: "",
     parent2Country: "",
+    frenchNationality: "",
   });
 
   const cohort = cohorts.find(({ name }) => name === values?.cohort);
@@ -139,7 +136,6 @@ export default function Create() {
       "region",
       "phone",
       "cohort",
-      "parentStatementOfHonorInvalidId",
       "parent1Status",
       "parent1LastName",
       "parent1FirstName",
@@ -147,7 +143,11 @@ export default function Create() {
       "address",
       "city",
       "zip",
+      "frenchNationality",
     ];
+
+    if (classeId) values.classeId = classeId;
+
     for (const key of required) {
       if (values[key] === null || !values[key] || validator.isEmpty(values[key], { ignore_whitespace: true })) {
         errors[key] = errorEmpty;
@@ -157,9 +157,7 @@ export default function Create() {
     if (values.temporaryDate === null) {
       errors.temporaryDate = errorEmpty;
     }
-    if (values.latestCNIFileExpirationDate === "" || values.latestCNIFileExpirationDate === null) {
-      errors.latestCNIFileExpirationDate = errorEmpty;
-    }
+
     // check email volontaire
     if (!validator.isEmail(values.email)) {
       errors.email = errorEmail;
@@ -265,9 +263,6 @@ export default function Create() {
     if (values.consentment === "false") {
       errors.consentment = errorEmpty;
     }
-    if (values.certifyData === "false") {
-      errors.certifyData = errorEmpty;
-    }
     if (values.parentAllowSNU === "false" || values.parentAllowSNU === "") {
       errors.parentAllowSNU = errorEmpty;
     }
@@ -275,40 +270,11 @@ export default function Create() {
       errors.rulesParent1 = errorEmpty;
     }
 
-    if (values.filesToUpload.length === 0) {
-      errors.filesToUpload = errorEmpty;
-      toastr.error("Vous devez ajouter une pièce d'identité");
-    }
-    if (validator.isEmpty(values.latestCNIFileCategory)) {
-      errors.latestCNIFileCategory = errorEmpty;
-      toastr.error("Vous devez spécifier une catégorie pour le document d'identité");
-    }
     if (Object.keys(errors).length > 0) {
       console.log(errors);
       toastr.error("Le formulaire n'est pas complet");
     }
     return errors;
-  };
-
-  const uploadFiles = async (id, filesToUpload, latestCNIFileCategory, latestCNIFileExpirationDate) => {
-    setLoading(true);
-    const res = await api.uploadFile(`/young/${id}/documents/cniFiles`, Array.from(filesToUpload), {}, latestCNIFileCategory, latestCNIFileExpirationDate);
-    if (res.code === "FILE_CORRUPTED") {
-      setUploadError(
-        "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-      );
-      setLoading(false);
-      return "err";
-    }
-    if (!res.ok) {
-      capture(res.code);
-      setLoading(false);
-      setUploadError("Une erreur s'est produite lors du téléversement de votre fichier.");
-      return "err";
-    }
-    setLoading(false);
-    toastr.success("Volontaire créé !");
-    return history.push(`/volontaire/${id}`);
   };
 
   const handleChange = (event) => {
@@ -329,27 +295,32 @@ export default function Create() {
     const receivedErrors = validate();
     setErrors(receivedErrors);
     if (Object.keys(receivedErrors).length !== 0) return;
-    const res = await api.get(`/inscription-goal/${cohort?.name}/department/${values.department}`);
-    if (!res.ok) throw new Error(res);
-    const fillingRate = res.data;
-    if (fillingRate >= 1.05) {
-      setComplememtaryListModalOpen(true);
-    } else {
+    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)) {
       sendData();
+    } else {
+      const res = await api.get(`/inscription-goal/${cohort?.name}/department/${values.department}`);
+      if (!res.ok) throw new Error(res);
+      const fillingRate = res.data;
+      if (fillingRate >= 1) {
+        setComplememtaryListModalOpen(true);
+      } else {
+        sendData();
+      }
     }
   };
 
-  const sendData = async (status = YOUNG_STATUS.VALIDATED) => {
+  const sendData = async (status = YOUNG_STATUS.WAITING_VALIDATION) => {
     try {
       setLoading(true);
       values.addressVerified = values.addressVerified.toString();
       // necessaire ?
-      delete values.certifyData;
       const { ok, code, young } = await api.post("/young/invite", { ...values, status });
-      if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-      const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
-      setYoungId(young._id);
-      if (res === "err") return toastr.error("Une erreur s'est produite avec le téléversement de vos fichiers");
+      if (!ok) {
+        toastr.error("Une erreur s'est produite :", translate(code));
+      } else {
+        toastr.success("Le volontaire a bien été créé");
+        history.push(`/volontaire/${young._id}`);
+      }
     } catch (e) {
       setLoading(false);
       console.log(e);
@@ -359,7 +330,7 @@ export default function Create() {
 
   React.useEffect(() => {
     if (!values.temporaryDate) return;
-    setFieldValue("birthdateAt", dayjs(values.temporaryDate).locale("fr").format("YYYY-MM-DD"));
+    setFieldValue("birthdateAt", dayjs(values.temporaryDate).format("YYYY-MM-DD"));
   }, [values.temporaryDate]);
 
   React.useEffect(() => {
@@ -383,13 +354,14 @@ export default function Create() {
               zip: values.zip,
             };
           }
-          const res = await api.post("/cohort-session/eligibility/2023", body);
+          const res = await api.post(`/cohort-session/eligibility/2023`, body);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
-            setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
+            setEgibilityError("Il n'y a malheureusement plus de séjour disponible.");
           } else {
             setEgibilityError("");
           }
+
           setCohorts(res.data);
         } catch (e) {
           capture(e);
@@ -410,7 +382,7 @@ export default function Create() {
         isOpen={isComplememtaryListModalOpen}
         title={
           <span>
-            L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {values.firstName} {values.lastName} va être{" "}
+            L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {values.firstName} {values.lastName} va être{" "}
             <strong className="text-bold">validé sur liste complémentaire</strong>.
           </span>
         }
@@ -444,10 +416,10 @@ export default function Create() {
           <div className="flex-[1_0_50%] pl-14 pr-8">
             <div className="ml-5 mb-4 flex items-start justify-start">
               <div onClick={() => setSelectedRepresentant(1)} className={`cursor-pointer pb-4 ${selectedRepresentant === 1 && "border-b-4 text-[#3B82F6]"} mr-9 border-[#3B82F6]`}>
-                Représentant légal 1
+                Représentant légal&nbsp;1
               </div>
               <div onClick={() => setSelectedRepresentant(2)} className={`cursor-pointer pb-4 ${selectedRepresentant === 2 && "border-b-4 text-[#3B82F6]"} mr-9 border-[#3B82F6]`}>
-                Représentant légal 2
+                Représentant légal&nbsp;2
               </div>
             </div>
             {selectedRepresentant === 1 ? (
@@ -485,7 +457,8 @@ export default function Create() {
         </div>
       )}
 
-      {values.firstName !== "" &&
+      {cohort &&
+        values.firstName !== "" &&
         values.lastName !== "" &&
         values.parent1FirstName !== "" &&
         values.parent1LastName !== "" &&
@@ -497,26 +470,15 @@ export default function Create() {
           <div className="relative mb-4 rounded bg-white pt-4 shadow">
             <div className="ml-8 mb-6 text-lg font-normal">Consentements</div>
             <div className={"flex px-8 pb-14"}>
-              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} />
+              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} cohort={cohort} />
             </div>
           </div>
         )}
       {egibilityError === "" && (
         <div className="w-100 flex items-center justify-center">
-          {uploadError === "" ? (
-            <div onClick={handleSubmit} className="w-80 cursor-pointer self-center rounded-md bg-[#2563EB] py-2 px-4 text-center text-white">
-              {!loading ? "Créer l'inscription" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
-            </div>
-          ) : (
-            <div className="flex-column flex">
-              <div>{uploadError}</div>
-              <div
-                onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate)}
-                className="w-80 cursor-pointer self-center rounded-md bg-[#2563EB] py-2 px-4 text-center text-white">
-                {!loading ? "Réessayer de téleverser les fichiers" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
-              </div>
-            </div>
-          )}
+          <div onClick={handleSubmit} className="w-80 cursor-pointer self-center rounded-md bg-[#2563EB] py-2 px-4 text-center text-white">
+            {!loading ? "Créer l'inscription" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
+          </div>
         </div>
       )}
     </div>
@@ -537,7 +499,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
       <Field
         name={parent === "1" ? "parent1Status" : "parent2Status"}
         label="Statut"
-        errors={errors}
+        error={parent === "1" ? errors?.parent1Status : errors?.parent2Status}
         type="select"
         value={parent === "1" ? values.parent1Status : values.parent2Status}
         options={[
@@ -547,40 +509,41 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={setFieldValue}
+        onChange={(value, key) => setFieldValue(key, value)}
       />
       <div className="mb-4 flex items-start justify-between">
         <Field
           name={parent === "1" ? "parent1LastName" : "parent2LastName"}
           label="Nom"
-          errors={errors}
+          error={parent === "1" ? errors?.parent1LastName : errors?.parent2LastName}
           value={parent === "1" ? values.parent1LastName : values.parent2LastName}
           transformer={translate}
           className="mr-2 flex-[1_1_50%]"
-          handleChange={handleChange}
+          onChange={(value, name) => handleChange({ target: { name, value } })}
         />
         <Field
           name={parent === "1" ? "parent1FirstName" : "parent2FirstName"}
           label="Prénom"
-          errors={errors}
+          error={parent === "1" ? errors?.parent1FistName : errors?.parent2FistName}
           value={parent === "1" ? values.parent1FirstName : values.parent2FirstName}
           transformer={translate}
           className="flex-[1_1_50%]"
-          handleChange={handleChange}
+          onChange={(value, name) => handleChange({ target: { name, value } })}
         />
       </div>
       <Field
         name={parent === "1" ? "parent1Email" : "parent2Email"}
         label="Email"
-        errors={errors}
+        error={parent === "1" ? errors?.parent1Email : errors?.parent2Email}
         value={parent === "1" ? values.parent1Email : values.parent2Email}
         transformer={translate}
         className="mb-4"
-        handleChange={handleChange}
+        onChange={(value, name) => handleChange({ target: { name, value } })}
       />
       <PhoneField
         name={`parent${parent}Phone`}
         mode="edition"
+        className="mb-4"
         error={errors[`parent${parent}Phone`]}
         value={values[`parent${parent}Phone`]}
         placeholder={PHONE_ZONES[values[`parent${parent}PhoneZone`]]?.example}
@@ -591,7 +554,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
       <Field
         name={parent === "1" ? "parent1OwnAddress" : "parent2OwnAddress"}
         label="Adresse différente de celle du volontaire"
-        errors={errors}
+        error={parent === "1" ? errors?.parent1OwnAddress : errors?.parent2OwnAddress}
         type="select"
         value={parent === "1" ? values.parent1OwnAddress : values.parent2OwnAddress}
         options={[
@@ -600,7 +563,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
         ]}
         transformer={translate}
         className="mb-4"
-        handleChange={setFieldValue}
+        onChange={(value, key) => setFieldValue(key, value)}
       />
       {(parent === "1" ? values.parent1OwnAddress : values.parent2OwnAddress) === "true" && (
         <>
@@ -608,40 +571,40 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
           <Field
             name={parent === "1" ? "parent1Address" : "parent2Address"}
             label="Adresse"
-            errors={errors}
+            error={parent === "1" ? errors?.parent1Address : errors?.parent2Address}
             value={parent === "1" ? values.parent1Address : values.parent2Address}
             transformer={translate}
             className="flex-[1_1_50%]"
-            handleChange={handleChange}
+            onChange={(value, name) => handleChange({ target: { name, value } })}
           />
           <div className="my-4 flex items-start justify-between">
             <Field
               name={parent === "1" ? "parent1Zip" : "parent2Zip"}
               label="Code postal"
-              errors={errors}
+              error={parent === "1" ? errors?.parent1Zip : errors?.parent2Zip}
               value={parent === "1" ? values.parent1Zip : values.parent2Zip}
               transformer={translate}
               className="mr-2 flex-[1_1_50%]"
-              handleChange={handleChange}
+              onChange={(value, name) => handleChange({ target: { name, value } })}
             />
             <Field
               name={parent === "1" ? "parent1City" : "parent2City"}
               label="Ville"
-              errors={errors}
+              error={parent === "1" ? errors?.parent1City : errors?.parent2City}
               value={parent === "1" ? values.parent1City : values.parent2City}
               transformer={translate}
               className="flex-[1_1_50%]"
-              handleChange={handleChange}
+              onChange={(value, name) => handleChange({ target: { name, value } })}
             />
           </div>
           <Field
             name={parent === "1" ? "parent1Country" : "parent2Country"}
             label="Pays"
-            errors={errors}
+            error={parent === "1" ? errors?.parent1Country : errors?.parent2Country}
             value={parent === "1" ? values.parent1Country : values.parent2Country}
             transformer={translate}
             className="flex-[1_1_50%]"
-            handleChange={handleChange}
+            onChange={(value, name) => handleChange({ target: { name, value } })}
           />
         </>
       )}
@@ -681,9 +644,6 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
   };
 
   const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
-  const onParticuliereChange = (key, value) => {
-    setFieldValue(key, value);
-  };
 
   return (
     <>
@@ -693,24 +653,24 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
         name="grade"
         label="Classe"
         type="select"
-        errors={errors}
+        error={errors?.grade}
         value={values.grade}
         transformer={translate}
         className="flex-[1_1_50%]"
         options={gradeOptions}
-        handleChange={onChangeGrade}
+        onChange={(value, key) => onChangeGrade(key, value)}
       />
       {values.schooled !== "" && (
         <Field
           name="situation"
           label="Statut"
           type="select"
-          errors={errors}
+          error={errors?.situation}
           value={values.situation}
           transformer={translate}
           className="mt-4 flex-[1_1_50%]"
           options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
-          handleChange={onChangeSituation}
+          onChange={(value, key) => onChangeSituation(key, value)}
         />
       )}
 
@@ -721,15 +681,15 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
       )}
       <div className="mt-8">
         <div className="mt-8 mb-2 text-xs font-medium leading-snug text-[#242526]">Situations particulières</div>
-        <FieldSituationsParticulieres name="specificSituations" young={values} mode={"edition"} onChange={onParticuliereChange} />
+        <FieldSituationsParticulieres name="specificSituations" young={values} mode="edition" onChange={(key, value) => setFieldValue(key, value)} />
         {values.specificAmenagment === "true" && (
           <Field
             name="specificAmenagmentType"
             label="Nature de l'aménagement spécifique"
-            errors={errors}
+            error={errors?.specificAmenagmentType}
             value={values.specificAmenagmentType}
             mode="edition"
-            handleChange={handleChange}
+            onChange={(value, name) => handleChange({ target: { name, value } })}
           />
         )}
       </div>
@@ -779,14 +739,7 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   };
   const [countries, setCountries] = React.useState([]);
   async function loadCountries() {
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      size: 0,
-      aggs: {
-        countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
-      },
-    };
-    const { responses } = await api.esQuery("schoolramses", body);
+    const { responses } = await api.post("/elasticsearch/schoolramses/public/search?aggsByCountries=true");
     if (responses && responses.length > 0) {
       setCountries(
         responses[0].aggregations.countries.buckets
@@ -803,40 +756,40 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
         name="temporaryDate"
         label="Date de naissance"
         type="date"
-        errors={errors}
+        error={errors?.temporaryDate}
         value={values.temporaryDate}
         transformer={translate}
         className="mb-4"
-        setFielValue={setFieldValue}
+        onChange={(date, key) => setFieldValue(key, date)}
       />
       <div className="mb-4 flex items-start justify-between">
         <Field
           name="birthCity"
           label="Ville de naissance"
-          errors={errors}
+          error={errors?.birthCity}
           value={values.birthCity}
           transformer={translate}
           className="mr-2 flex-[1_1_50%]"
-          handleChange={handleChange}
+          onChange={(value, name) => handleChange({ target: { name, value } })}
         />
         <Field
           name="birthCityZip"
           label="Code postal de naissance"
-          errors={errors}
+          error={errors?.birthCityZip}
           value={values.birthCityZip}
           transformer={translate}
           className="flex-[1_1_50%]"
-          handleChange={handleChange}
+          onChange={(value, name) => handleChange({ target: { name, value } })}
         />
       </div>
       <Field
         name="birthCountry"
         label="Pays de naissance"
-        errors={errors}
+        error={errors?.birthCountry}
         value={values.birthCountry}
         transformer={translate}
         className="flex-[1_1_50%]"
-        handleChange={handleChange}
+        onChange={(value, name) => handleChange({ target: { name, value } })}
       />
       <div className="mt-8 mb-2 flex items-center justify-between">
         <div className="text-xs font-medium leading-snug text-[#242526]">Adresse</div>
@@ -860,11 +813,11 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
       <Field
         name={liveInFrance ? "address" : "foreignAddress"}
         label="Adresse"
-        errors={errors}
+        error={liveInFrance ? errors?.address : errors?.foreignAddress}
         value={liveInFrance ? values.address : values.foreignAddress}
         transformer={translate}
         className="mb-4"
-        handleChange={handleAdressChange}
+        onChange={(value, name) => handleAdressChange({ target: { name, value } })}
       />
       {!liveInFrance && (
         <Field
@@ -872,32 +825,32 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
           type="select"
           options={countries ? countries.map((c) => ({ value: c, label: c })) : []}
           label="Pays"
-          errors={errors}
+          error={errors?.foreignCountry}
           filterOnType
           value={values.foreignCountry}
           transformer={translate}
           className="mb-4"
-          handleChange={setFieldValue}
+          onChange={(value, key) => setFieldValue(key, value)}
         />
       )}
       <div className="mb-4 flex items-start justify-between">
         <Field
           name={liveInFrance ? "zip" : "foreignZip"}
           label="Code postal"
-          errors={errors}
+          error={liveInFrance ? errors?.zip : errors?.foreignZip}
           value={liveInFrance ? values.zip : values.foreignZip}
           transformer={translate}
           className="mr-2 flex-[1_1_50%]"
-          handleChange={handleAdressChange}
+          onChange={(value, name) => handleAdressChange({ target: { name, value } })}
         />
         <Field
           name={liveInFrance ? "city" : "foreignCity"}
           label="Ville"
-          errors={errors}
+          error={liveInFrance ? errors?.city : errors?.foreignCity}
           value={liveInFrance ? values.city : values.foreignCity}
           transformer={translate}
           className="flex-[1_1_50%]"
-          handleChange={handleAdressChange}
+          onChange={(value, name) => handleAdressChange({ target: { name, value } })}
         />
       </div>
       {liveInFrance ? (
@@ -933,8 +886,22 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
             À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
           </p>
           <div className="my-4 flex items-start justify-between">
-            <Field className="mr-2 flex-[1_1_50%]" name="hostFirstName" value={values.hostFirstName} label="Prénom de l’hébergeur" handleChange={handleChange} errors={errors} />
-            <Field className="flex-[1_1_50%]" name="hostLastName" value={values.hostLastName} label="Nom de l’hébergeur" handleChange={handleChange} errors={errors} />
+            <Field
+              className="mr-2 flex-[1_1_50%]"
+              name="hostFirstName"
+              value={values.hostFirstName}
+              label="Prénom de l’hébergeur"
+              onChange={(value, name) => handleChange({ target: { name, value } })}
+              error={errors?.hostFirstName}
+            />
+            <Field
+              className="flex-[1_1_50%]"
+              name="hostLastName"
+              value={values.hostLastName}
+              label="Nom de l’hébergeur"
+              onChange={(value, name) => handleChange({ target: { name, value } })}
+              error={errors?.hostLastName}
+            />
           </div>
           <Field
             options={hostRelationshipOptions}
@@ -943,13 +910,29 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
             type="select"
             label="Précisez votre lien avec l’hébergeur"
             className="mb-4"
-            handleChange={setFieldValue}
-            errors={errors}
+            onChange={(value, key) => setFieldValue(key, value)}
+            error={errors?.hostRelationship}
           />
-          <Field value={values.address} name="address" label="Son adresse" handleChange={handleAdressChange} errors={errors} />
+          <Field value={values.address} name="address" label="Son adresse" onChange={(value, name) => handleAdressChange({ target: { name, value } })} error={errors?.address} />
           <div className="my-4 flex items-start justify-between">
-            <Field name="zip" label="Code postal" errors={errors} value={values.zip} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleAdressChange} />
-            <Field name="city" label="Ville" errors={errors} value={values.city} transformer={translate} className="flex-[1_1_50%]" handleChange={handleAdressChange} />
+            <Field
+              name="zip"
+              label="Code postal"
+              error={errors?.zip}
+              value={values.zip}
+              transformer={translate}
+              className="mr-2 flex-[1_1_50%]"
+              onChange={(value, name) => handleAdressChange({ target: { name, value } })}
+            />
+            <Field
+              name="city"
+              label="Ville"
+              error={errors?.city}
+              value={values.city}
+              transformer={translate}
+              className="flex-[1_1_50%]"
+              onChange={(value, name) => handleAdressChange({ target: { name, value } })}
+            />
           </div>
           <VerifyAddress
             address={values.address}
@@ -974,14 +957,14 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
     { value: "male", label: "Homme" },
     { value: "female", label: "Femme" },
   ];
+  const nationalityOptions = [
+    { value: "true", label: translate("true") },
+    { value: "false", label: translate("false") },
+  ];
+  const user = useSelector((state) => state.Auth.user);
   const handleChangeBool = (e, value) => {
     e.target.value = value;
     handleChange(e);
-  };
-  const handleCniChange = (young) => {
-    setFieldValue("latestCNIFileExpirationDate", young.latestCNIFileExpirationDate);
-    setFieldValue("filesToUpload", young.filesToUpload);
-    setFieldValue("latestCNIFileCategory", young.latestCNIFileCategory);
   };
 
   const handlePhoneChange = (name) => (value) => {
@@ -997,21 +980,45 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
     <>
       <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Identité et contact</div>
       <div className="mb-4 flex items-start justify-between">
-        <Field name="lastName" label="Nom" errors={errors} value={values.lastName} transformer={translate} className="mr-2 flex-[1_1_50%]" handleChange={handleChange} />
-        <Field name="firstName" label="Prénom" errors={errors} value={values.firstName} transformer={translate} className="flex-[1_1_50%]" handleChange={handleChange} />
+        <Field
+          name="lastName"
+          label="Nom"
+          error={errors?.lastName}
+          value={values.lastName}
+          transformer={translate}
+          className="mr-2 flex-[1_1_50%]"
+          onChange={(value, name) => handleChange({ target: { name, value } })}
+        />
+        <Field
+          name="firstName"
+          label="Prénom"
+          error={errors?.firstName}
+          value={values.firstName}
+          transformer={translate}
+          className="flex-[1_1_50%]"
+          onChange={(value, name) => handleChange({ target: { name, value } })}
+        />
       </div>
       <Field
         name="gender"
         label="Sexe"
-        errors={errors}
+        error={errors?.gender}
         value={values.gender}
         className="mb-4"
         type="select"
         options={genderOptions}
         transformer={translate}
-        handleChange={setFieldValue}
+        onChange={(value, key) => setFieldValue(key, value)}
       />
-      <Field name="email" label="Email" errors={errors} value={values.email} className="mb-4" transformer={translate} handleChange={handleChange} />
+      <Field
+        name="email"
+        label="Email"
+        error={errors?.email}
+        value={values.email}
+        className="mb-4"
+        transformer={translate}
+        onChange={(value, name) => handleChange({ target: { name, value } })}
+      />
       <PhoneField
         name="phone"
         mode="edition"
@@ -1023,69 +1030,32 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
         onChangeZone={handlePhoneChange("phoneZone")}
       />
       <div className="mt-8 ">
-        <CniField
-          name="cniFile"
-          label="Pièce d'identité"
-          young={values}
+        <Field
+          name="frenchNationality"
+          label="Nationalité Française"
+          value={values.frenchNationality}
+          error={errors?.frenchNationality}
           mode="edition"
-          className={(errors.filesToUpload || errors.latestCNIFileCategory) && "border-[1px] border-red-500"}
-          blockUpload={true}
-          onStartRequest={null}
-          currentRequest={null}
-          correctionRequest={false}
-          onCorrectionRequestChange={null}
-          onInscriptionChange={(young) => handleCniChange(young)}
+          className="mb-[16px]"
+          type="select"
+          options={nationalityOptions}
+          transformer={translate}
+          onChange={(value, key) => setFieldValue(key, value)}
         />
       </div>
-      {values.filesToUpload.length > 0 && (
-        <>
-          <Field
-            name="latestCNIFileExpirationDate"
-            label="Date d'expiration de la pièce d'identité"
-            type="date"
-            errors={errors}
-            value={values.latestCNIFileExpirationDate}
-            transformer={translate}
-            className="mb-4"
-            setFielValue={setFieldValue}
-          />
-          {values.latestCNIFileExpirationDate !== null && cohort?.dateStart && new Date(values.latestCNIFileExpirationDate).getTime() < new Date(cohort?.dateStart).getTime() && (
-            <div className="w-100 flew-row mt-4 flex items-center justify-between">
-              <div>Attestation sur l&apos;honneur</div>
-              {values.parentStatementOfHonorInvalidId === "true" ? (
-                <a
-                  onClick={(e) => handleChangeBool(e, "false")}
-                  name="parentStatementOfHonorInvalidId"
-                  className="py cursor-pointer rounded-3xl border border-[#D1D5DB] bg-[#3B82F6] p-2 text-center leading-5 text-white">
-                  Validée
-                </a>
-              ) : (
-                <a
-                  onClick={(e) => handleChangeBool(e, "true")}
-                  name="parentStatementOfHonorInvalidId"
-                  className="py text-whit cursor-pointer rounded-3xl  border border-[#D1D5DB] p-2 text-center leading-5">
-                  Non validée
-                </a>
-              )}
-            </div>
-          )}
-        </>
-      )}
     </>
   );
 }
+
 const PARENT_STATUS_NAME = {
   father: "Le père",
   mother: "La mère",
   representant: "Le représentant légal",
 };
-function SectionConsentements({ young, setFieldValue, errors }) {
-  const [youngAge, setYoungAge] = React.useState("?");
+function SectionConsentements({ young, setFieldValue, errors, cohort }) {
   const [volontaireConsentement, setVolontaireConsentement] = React.useState({
     acceptCGU1: false,
-    acceptCGU2: false,
     consentment1: false,
-    consentment2: false,
     inscriptionDoneDate: false,
   });
   const [parent1Consentement, setParent1Consentement] = React.useState({
@@ -1097,20 +1067,12 @@ function SectionConsentements({ young, setFieldValue, errors }) {
   });
 
   React.useEffect(() => {
-    if (young) {
-      setYoungAge(getAge(young.temporaryDate));
-    } else {
-      setYoungAge("?");
-    }
-  }, [young]);
-
-  React.useEffect(() => {
-    if (volontaireConsentement.acceptCGU1 && volontaireConsentement.acceptCGU2) {
+    if (volontaireConsentement.acceptCGU1) {
       setFieldValue("acceptCGU", "true");
     } else {
       setFieldValue("acceptCGU", "false");
     }
-    if (volontaireConsentement.consentment1 && volontaireConsentement.consentment2) {
+    if (volontaireConsentement.consentment1) {
       setFieldValue("consentment", "true");
     } else {
       setFieldValue("consentment", "false");
@@ -1118,18 +1080,10 @@ function SectionConsentements({ young, setFieldValue, errors }) {
   }, [volontaireConsentement]);
 
   React.useEffect(() => {
-    if (youngAge !== "?" && youngAge < 15) {
-      if (parent1Consentement.allow1 && parent1Consentement.allow2 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
-        setFieldValue("parent1AllowSNU", "true");
-      } else {
-        setFieldValue("parent1AllowSNU", "false");
-      }
+    if (parent1Consentement.allow1 && parent1Consentement.allow2 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
+      setFieldValue("parent1AllowSNU", "true");
     } else {
-      if (parent1Consentement.allow1 && parent1Consentement.allow3 && parent1Consentement.allow4 && parent1Consentement.allowGeneral) {
-        setFieldValue("parent1AllowSNU", "true");
-      } else {
-        setFieldValue("parent1AllowSNU", "false");
-      }
+      setFieldValue("parent1AllowSNU", "false");
     }
   }, [parent1Consentement]);
 
@@ -1174,21 +1128,13 @@ function SectionConsentements({ young, setFieldValue, errors }) {
           </span>
         </div>
         <div>
-          <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU1")} errors={errors} value={volontaireConsentement.acceptCGU1}>
-            A lu et accepté les Conditions Générales d&apos;Utilisation (CGU) de la plateforme du Service National Universel.
-          </CheckRead>
-          <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU2")} errors={errors} value={volontaireConsentement.acceptCGU2}>
-            A pris connaissance des modalités de traitement de mes données personnelles.
-          </CheckRead>
           <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment1")} errors={errors} value={volontaireConsentement.consentment1}>
-            Est volontaire pour effectuer la session 2023 du Service National Universel qui comprend la participation au séjour de cohésion{" "}
-            <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> puis la réalisation d&apos;une mission d&apos;intérêt général.
+            Se porte volontaire pour participer à la session <b>{getCohortYear(cohort)}</b> du Service National Universel qui comprend la participation à un séjour de cohésion puis
+            la réalisation d&apos;une mission d&apos;intérêt général.
           </CheckRead>
-          <CheckRead name="consentment" onClick={() => handleVolontaireChange("consentment2")} errors={errors} value={volontaireConsentement.consentment2}>
-            S&apos;engage à respecter le règlement intérieur du SNU, en vue de ma participation au séjour de cohésion.
-          </CheckRead>
-          <CheckRead name="certifyData" onClick={() => handleConsentementChange("certifyData")} errors={errors} value={young.certifyData === "true"}>
-            Certifie l&apos;exactitude des renseignements fournis
+          <CheckRead name="acceptCGU" onClick={() => handleVolontaireChange("acceptCGU1")} errors={errors} value={volontaireConsentement.acceptCGU1}>
+            S&apos;inscrit pour le séjour de cohésion <strong>{getCohortPeriod(cohort)}</strong> sous réserve de places disponibles et s&apos;engage à en respecter le règlement
+            intérieur.
           </CheckRead>
         </div>
       </div>
@@ -1201,7 +1147,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
               {young.parent1FirstName} {young.parent1LastName}
             </span>
           </div>
-          <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+          <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
         </div>
         <div className="flex-column flex">
           <RadioButton value={young.parentAllowSNU} options={authorizationOptions} onChange={() => handleConsentementChange("parentAllowSNU")} />
@@ -1219,26 +1165,22 @@ function SectionConsentements({ young, setFieldValue, errors }) {
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
-          à participer à la session <b>{COHESION_STAY_LIMIT_DATE[young.cohort]}</b> du Service National Universel qui comprend la participation à un séjour de cohésion et la
-          réalisation d&apos;une mission d&apos;intérêt général.
+          à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohort)}</b> du SNU.
         </div>
         <div>
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow1")} errors={errors} value={parent1Consentement.allow1}>
-            Confirme être titulaire de l&apos;autorité parentale/ représentant(e) légal(e) de{" "}
+            Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de{" "}
             <b>
               {young.firstName} {young.lastName}
             </b>
+            .
           </CheckRead>
-          {youngAge < 15 && (
-            <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow2")} errors={errors} value={parent1Consentement.allow2}>
-              Accepte la collecte et le traitement des données personnelles de{" "}
-              <b>
-                {young.firstName} {young.lastName}
-              </b>
-            </CheckRead>
-          )}
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow3")} errors={errors} value={parent1Consentement.allow3}>
-            S&apos;engage à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires avant son départ en séjour de cohésion.
+            S&apos;engage à communiquer la fiche sanitaire de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>{" "}
+            au responsable du séjour de cohésion.
           </CheckRead>
           <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow4")} errors={errors} value={parent1Consentement.allow4}>
             S&apos;engage à ce que{" "}
@@ -1249,7 +1191,14 @@ function SectionConsentements({ young, setFieldValue, errors }) {
             jaune.
           </CheckRead>
           <CheckRead name="rulesParent1" onClick={() => handleConsentementChange("rulesParent1")} errors={errors} value={young.rulesParent1 === "true"}>
-            Reconnait avoir pris connaissance du Règlement Intérieur du SNU.
+            Reconnait avoir pris connaissance du Règlement Intérieur du séjour de cohésion.
+          </CheckRead>
+          <CheckRead name="parent1AllowSNU" onClick={() => handleParent1Change("allow2")} errors={errors} value={parent1Consentement.allow2}>
+            Accepte la collecte et le traitement des données personnelles de{" "}
+            <b>
+              {young.firstName} {young.lastName}
+            </b>
+            .
           </CheckRead>
         </div>
         <div className="itemx-center mt-[16px] flex justify-between">
@@ -1283,7 +1232,7 @@ function SectionConsentements({ young, setFieldValue, errors }) {
                   {young.parent2FirstName} {young.parent2LastName}
                 </span>
               </div>
-              <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).locale("fr").format("DD/MM/YYYY HH:mm")}</div>
+              <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
             </div>
             <div className="mt-[16px] flex items-center justify-between">
               <div className="grow text-[14px] leading-[20px] text-[#374151]">

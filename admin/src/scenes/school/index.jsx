@@ -10,7 +10,7 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/etablissement/liste-jeunes" component={List} />
+      <SentryRoute path="/school/liste-jeunes" component={List} />
     </Switch>
   );
 }

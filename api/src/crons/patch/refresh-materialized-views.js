@@ -23,10 +23,10 @@ exports.handler = async () => {
     });
     await slack.info({
       title: "✅ Refresh Materialized Views",
-      text: `<@U044RT0N3JR> Perfect!`,
+      text: `Perfect!`,
     });
   } catch (e) {
-    slack.error({ title: "❌ Refresh Materialized Views", text: `<@U044RT0N3JR> ${JSON.toString(e)}` });
+    slack.error({ title: "❌ Refresh Materialized Views", text: `${JSON.toString(e)}` });
     capture(e);
   }
 };

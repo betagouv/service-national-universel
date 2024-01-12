@@ -21,13 +21,11 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
 import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
-import { getCohortByName, getCohorts } from "../../../services/cohort.service";
+import { getCohortByName } from "../../../services/cohort.service";
 import ReactTooltip from "react-tooltip";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import Puzzle from "../../../assets/icons/Puzzle";
-import dayjs from "dayjs";
-import advancedFormat from "dayjs/plugin/advancedFormat";
-dayjs.extend(advancedFormat);
+import dayjs from "@/utils/dayjs.utils";
 
 const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
@@ -49,7 +47,7 @@ export default function SchemaRepartition({ region, department }) {
     toRegions: [],
   });
   const [data, setData] = useState({ rows: getDefaultRows() });
-  const [cohortList, setCohortList] = useState(null);
+  const cohortList = useSelector((state) => state.Cohorts);
   const [cohortOptions, setCohortOptions] = useState([]);
 
   if (region) useDocumentTitle(`Schéma de répartition - ${region}`);
@@ -79,10 +77,6 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   useEffect(() => {
-    loadCohorts();
-  }, []);
-
-  useEffect(() => {
     if (cohortList !== null) {
       setCohortOptions(
         cohortList
@@ -93,6 +87,7 @@ export default function SchemaRepartition({ region, department }) {
               (user.role === ROLES.REFERENT_REGION && c.schemaAccessForReferentRegion)
             );
           })
+          .sort((a, b) => new Date(b.dateStart) - new Date(a.dateStart))
           .map((c) => ({ value: c.name, label: formatCohortName(c) })),
       );
     } else {
@@ -150,8 +145,8 @@ export default function SchemaRepartition({ region, department }) {
     let from;
 
     if (cohort) {
-      const start = dayjs(cohort.dateStart).locale("fr");
-      const end = dayjs(cohort.dateEnd).locale("fr");
+      const start = dayjs(cohort.dateStart);
+      const end = dayjs(cohort.dateEnd);
 
       if (start.year() === end.year()) {
         if (start.month() === end.month()) {
@@ -163,7 +158,7 @@ export default function SchemaRepartition({ region, department }) {
         from = start.format("Do MMMM YYYY");
       }
       const to = end.format("Do MMMM YYYY");
-      return `Séjour du ${from} au ${to}`;
+      return `${cohort.name} (du ${from} au ${to})`;
     } else {
       return "";
     }
@@ -187,18 +182,6 @@ export default function SchemaRepartition({ region, department }) {
       intradepartmental: 0,
       intradepartmentalAssigned: 0,
     };
-  }
-
-  async function loadCohorts() {
-    try {
-      setLoading(true);
-      const cohorts = await getCohorts();
-      setCohortList(cohorts);
-      setLoading(false);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des données");
-    }
   }
 
   async function loadData() {
@@ -371,6 +354,8 @@ export default function SchemaRepartition({ region, department }) {
   const handleChangeDepartment = (value) => {
     history.push(`/schema-repartition/${department2region[value]}/${value}?cohort=${cohort}`);
   };
+
+  if (!cohort) return <Loading />;
 
   return (
     <div>

@@ -2,6 +2,18 @@ import constants from "snu-lib/constants";
 import translation from "snu-lib/translation";
 import countries from "i18n-iso-countries";
 import * as fr from "i18n-iso-countries/langs/fr.json";
+import cniNewBack from "../../../assets/IDProof/cniNewBack.jpg";
+import cniNewDate from "../../../assets/IDProof/cniNewDate.jpg";
+import cniNewFront from "../../../assets/IDProof/cniNewFront.jpg";
+import cniOldBack from "../../../assets/IDProof/cniOldBack.jpg";
+import cniOldDate from "../../../assets/IDProof/cniOldDate.jpg";
+import cniOldFront from "../../../assets/IDProof/cniOldFront.jpg";
+import passport from "../../../assets/IDProof/passport.jpg";
+import passportDate from "../../../assets/IDProof/passportDate.jpg";
+import API from "@/services/api";
+import { capture } from "@/sentry";
+import dayjs from "dayjs";
+
 countries.registerLocale(fr);
 const countriesList = countries.getNames("fr", { select: "official" });
 
@@ -68,22 +80,53 @@ export const ID = {
     category: "cniNew",
     title: "Carte Nationale d'Identité",
     subtitle: "Nouveau format (après août 2021)",
-    imgFront: "cniNewFront.jpg",
-    imgBack: "cniNewBack.jpg",
-    imgDate: "cniNewDate.jpg",
+    imgFront: cniNewFront,
+    imgBack: cniNewBack,
+    imgDate: cniNewDate,
   },
   cniOld: {
     category: "cniOld",
     title: "Carte Nationale d'Identité",
     subtitle: "Ancien format",
-    imgFront: "cniOldFront.jpg",
-    imgBack: "cniOldBack.jpg",
-    imgDate: "cniOldDate.jpg",
+    imgFront: cniOldFront,
+    imgBack: cniOldBack,
+    imgDate: cniOldDate,
   },
   passport: {
     category: "passport",
     title: "Passeport",
-    imgFront: "passport.jpg",
-    imgDate: "passportDate.jpg",
+    imgFront: passport,
+    imgDate: passportDate,
   },
 };
+
+export async function getCities(query) {
+  try {
+    const { responses } = await API.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
+    const cities = responses[0].aggregations.cities.buckets;
+    return cities.map((e) => ({ label: e.key[0] + " - " + e.key[1], value: e.key })) ?? [];
+  } catch (e) {
+    capture(e);
+    return [];
+  }
+}
+
+export async function getSchools(city) {
+  try {
+    const { responses } = await API.post("/elasticsearch/schoolramses/public/search", {
+      filters: { country: ["FRANCE"], city: [city.value[0]], departmentName: [city.value[1]] },
+    });
+    const schools = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
+    return schools;
+  } catch (e) {
+    capture(e);
+  }
+}
+
+export function validateBirthDate(date) {
+  const d = dayjs(date);
+  if (!d.isValid()) return false;
+  if (d.isBefore(dayjs(new Date(2000, 0, 1)))) return false;
+  if (d.isAfter(dayjs())) return false;
+  return true;
+}

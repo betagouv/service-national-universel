@@ -3,19 +3,20 @@ import { Editable, withReact, Slate, useSlateStatic, useSelected, ReactEditor, u
 import { Transforms, createEditor } from "slate";
 import { withHistory } from "slate-history";
 
-const TextEditor = ({ content, readOnly }) => {
+const TextEditor = ({ content, readOnly, _id }) => {
   const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
   const editorRef = useRef();
   if (!editorRef.current) editorRef.current = withHistory(withReact(createEditor()));
   const editor = editorRef.current;
-
+  
   return (
     <>
       <div className={`flex flex-shrink flex-grow flex-col py-2 px-2 ${!readOnly ? "bg-white" : ""} overflow-hidden print:bg-transparent`}>
-        <Slate editor={editor} value={content} onChange={console.log}>
+        <Slate key={_id} editor={editor} initialValue={content} onChange={console.log}>
           <div id="text-editor" className="flex-shrink flex-grow overflow-auto">
             <Editable readOnly={readOnly} renderElement={renderElement} renderLeaf={renderLeaf} placeholder="Commencez à écrire votre article..." spellCheck autoFocus />
+            {/* <RenderSlateObject value={content} /> */}
           </div>
         </Slate>
       </div>
@@ -34,7 +35,7 @@ const InlineChromiumBugfix = () => (
 const LinkComponent = ({ attributes, children, element }) => {
   const selected = useSelected();
   return (
-    <a {...attributes} href={element.url} className={`${selected ? "border-2" : ""} text-blue-900 underline`}>
+    <a {...attributes} href={element.url} className={`${selected ? "border-2" : ""} text-blue-600 underline`}>
       <InlineChromiumBugfix />
       {children}
       <InlineChromiumBugfix />

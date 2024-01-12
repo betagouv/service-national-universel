@@ -1,23 +1,26 @@
+import { Fragment, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import useUser from "../../hooks/useUser";
 import API from "../../services/api";
-import KnowledgeBaseArticleCard from "./KnowledgeBaseArticleCard";
-import KnowledgeBasePublicNoAnswer from "./KnowledgeBasePublicNoAnswer";
-import Loader from "../Loader";
+import { Combobox, Dialog, Transition } from "@headlessui/react";
+import { XCircleIcon, MagnifyingGlassIcon, ChevronLeftIcon } from "@heroicons/react/24/solid";
+import SearchResults from "./SearchResults";
 
-const KnowledgeBaseSearch = ({ restriction, path, showAllowedRoles, showNoAnswerButton, noAnswer, placeholder = "Comment pouvons-nous vous aider ?", className = "" }) => {
-  const [search, setSearch] = useState("");
+export default function KnowledgeBaseSearch({ open = false, setOpen }) {
+  const { restriction } = useUser();
+  const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [items, setItems] = useState([]);
-  const [hideItems, setHideItems] = useState(false);
-
   const searchTimeout = useRef(null);
+  const router = useRouter();
 
-  const computeSearch = () => {
+  const computeSearch = (e) => {
+    const search = e.target.value;
+    setQuery(search);
     if (search.length > 0 && !isSearching) setIsSearching(true);
     if (!search.length) {
       setIsSearching(false);
-      setSearch("");
       clearTimeout(searchTimeout.current);
       setItems([]);
       return;
@@ -25,67 +28,90 @@ const KnowledgeBaseSearch = ({ restriction, path, showAllowedRoles, showNoAnswer
     clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(async () => {
       setIsSearching(true);
-      setHideItems(false);
       const response = await API.get({ path: `/knowledge-base/${restriction}/search`, query: { search } });
       setIsSearching(false);
-      if (response.ok) {
-        setItems(response.data);
-      }
+      if (response.ok) setItems(response.data);
     }, 1000);
   };
 
-  useEffect(() => {
-    computeSearch();
-    return () => {
-      clearTimeout(searchTimeout.current);
-      setIsSearching(false);
-    };
-  }, [search]);
+  const handleDelete = () => {
+    setSelectedItem(null);
+    setItems([]);
+  };
 
-  const router = useRouter();
-  useEffect(() => {
-    setHideItems(true);
-  }, [router?.query?.slug]);
+  const handleSelect = (item) => {
+    setOpen(false);
+    setSelectedItem(item);
+    setItems([]);
+    if (item === "noresult") return router.push("https://moncompte.snu.gouv.fr/public-besoin-d-aide");
+    return router.push(`/base-de-connaissance/${item.slug}?loadingType=article`, undefined, { shallow: true });
+  };
 
   return (
-    <div className="relative flex w-full flex-col items-center">
-      <div className="relative flex w-full items-center">
-        <input
-          className={`w-full py-2.5 pl-10 pr-3 text-sm text-gray-500 transition-colors ${className}`}
-          type="text"
-          placeholder={placeholder}
-          onChange={(e) => setSearch(e.target.value)}
-          value={search}
-        />
-        <span className="material-icons absolute right-2 text-xl text-red-400" onClick={() => setSearch("")}>
-          clear
-        </span>
-        <span className="material-icons absolute left-3 text-xl text-gray-400">search</span>
-      </div>
-      <div className="relative flex w-full items-center">
-        {!hideItems && (search.length > 0 || isSearching || items.length) > 0 && (
-          <div className="absolute top-0 left-0 z-20 max-h-80 w-full overflow-auto bg-white">
-            {search.length > 0 && isSearching && !items.length && <Loader size={20} className="my-4" />}
-            {search.length > 0 && !isSearching && !items.length && <span className="block py-2 px-8 text-sm text-black">{noAnswer}</span>}
-            {items?.map((item) => (
-              <KnowledgeBaseArticleCard
-                key={item._id}
-                _id={item._id}
-                position={item.position}
-                title={item.type === "article" ? item.title : `📂 ${item.title}`}
-                slug={item.slug}
-                path={path}
-                allowedRoles={showAllowedRoles ? item.allowedRoles : []}
-                className="!my-0"
-                contentClassName="!py-2 !shadow-none !rounded-none border-b-2"
-              />
-            ))}
-            {showNoAnswerButton && <KnowledgeBasePublicNoAnswer className="!my-0 !shadow-none" />}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+    <Transition.Root show={open} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-60 transition-opacity" />
+        </Transition.Child>
 
-export default KnowledgeBaseSearch;
+        <div className="fixed inset-0 z-10 overflow-y-auto">
+          <div className="flex flex-col min-h-full items-end justify-start p-4 text-center sm:items-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <Dialog.Panel className="w-full md:w-[44rem] md:mt-40">
+                <Combobox as="div" value={selectedItem} onChange={handleSelect}>
+                  <div className="relative mt-2 w-full">
+                    <Combobox.Input
+                      className="w-full rounded-md border-0 bg-white p-3 px-10 text-gray-800 shadow-sm sm:text-sm sm:leading-6"
+                      onChange={computeSearch}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                        }
+                      }}
+                      displayValue={query}
+                      placeholder="Rechercher un article"
+                    />
+
+                    <div className="absolute inset-y-0 left-0 flex items-center">
+                      {query ? (
+                        <button onClick={() => setOpen(false)} className="ml-3 reset">
+                          <ChevronLeftIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        </button>
+                      ) : (
+                        <MagnifyingGlassIcon className="h-5 w5 px-3 text-gray-400" aria-hidden="true" />
+                      )}
+                    </div>
+
+                    {query ? (
+                      <Combobox.Button onClick={handleDelete} className="absolute inset-y-0 right-0 items-center px-3 focus:outline-none bg-transparent border-none shadow-none">
+                        <XCircleIcon className="text-gray-400 h-5 w-5" aria-hidden="true" />
+                      </Combobox.Button>
+                    ) : null}
+
+                    {query && <SearchResults isSearching={isSearching} items={items} />}
+                  </div>
+                </Combobox>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
+  );
+}

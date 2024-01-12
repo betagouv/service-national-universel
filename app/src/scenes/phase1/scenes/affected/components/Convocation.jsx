@@ -6,8 +6,8 @@ import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
 import { supportURL } from "../../../../../config";
 import api from "../../../../../services/api";
-import { translate, htmlCleaner } from "../../../../../utils";
-import { getMeetingHour, getReturnHour, transportDatesToString } from "snu-lib";
+import { translate } from "../../../../../utils";
+import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner } from "snu-lib";
 
 import Loader from "../../../../../components/Loader";
 import { Hero, Content } from "../../../../../components/Content";
@@ -48,8 +48,8 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
   return (
     <Hero>
       <Content style={{ width: "100%" }}>
-        <ConvocText style={{ fontWeight: "500", textDecoration: "underline", display: "flex", justifyContent: "space-between" }}>
-          Affaire suivie par :
+        <ConvocText style={{ fontWeight: "500", textDecoration: "underline" }}>
+          <div>Affaire suivie par :</div>
           <div
             dangerouslySetInnerHTML={{
               __html: htmlCleaner(
@@ -62,6 +62,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
             }}
           />
         </ConvocText>
+
         <ConvocText style={{ textAlign: "center" }}>
           <b>CONVOCATION</b>
           <br /> au séjour de cohésion dans le cadre du service national universel (SNU)
@@ -145,14 +146,22 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
           du centre
         </ConvocText>
         <ConvocText>Nous vous félicitons pour votre engagement et vous souhaitons un excellent séjour de cohésion.</ConvocText>
-        <Sign>
-          Thibaut de SAINT POL
-          <br />
-          Le Directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative
-        </Sign>
+        {young.cohort === "Octobre 2023 - NC" ? (
+          <Sign>
+            Louis Le Franc
+            <br />
+            Haut commissaire de la République en Nouvelle-Calédonie
+          </Sign>
+        ) : (
+          <Sign>
+            Thibaut de SAINT POL
+            <br />
+            Le Directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative
+          </Sign>
+        )}
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
           Pour toute information complémentaire, rendez-vous sur votre compte volontaire (rubrique «{" "}
-          <a href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+          <a className="underline" href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
             Besoin d&apos;aide
           </a>{" "}
           »).

@@ -92,14 +92,17 @@ const Notes = ({ young, onChange }) => {
     setNote(note);
   };
 
-  const updateNote = (key) => (value) => {
-    setNote({ ...note, [key]: value });
-  };
-
   return (
     <>
       <ConfirmationModal title="Êtes-vous sûr(e) de vouloir supprimer la note ?" isOpen={isDeleteConfirmModalOpen} onCancel={closeDeleteConfirmModal} onConfirm={deleteNote} />
-      <NoteEditModal isOpen={isNoteModalOpen} onClose={toggleNoteModal} onSave={saveNote} isLoading={isLoading} note={note} updateNote={updateNote} />
+      <NoteEditModal
+        isOpen={isNoteModalOpen}
+        onClose={toggleNoteModal}
+        onSave={saveNote}
+        isLoading={isLoading}
+        note={note}
+        updateNote={(key, value) => setNote({ ...note, [key]: value })}
+      />
       <YoungHeader young={young} tab="notes" onChange={onChange} />
       <div className="box-border p-8">
         <Box className="p-8">

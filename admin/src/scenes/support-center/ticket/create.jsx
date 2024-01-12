@@ -35,13 +35,13 @@ export default function Create(props) {
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
       setTypeList(typesReferent);
       setSubjectsList(subjectsReferent);
-    } else if ([ROLES.ADMIN].includes(user.role)) {
+    } else if ([ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) {
       setTypeList(typesAdmin);
       setSubjectsList(subjectsAdmin);
     } else if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
       setTypeList(typesStructure);
       setSubjectsList(subjectsStructure);
-    } else if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) {
+    } else if ([ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.TRANSPORTER].includes(user.role)) {
       setTypeList(step1Public);
     }
   }, [user]);
@@ -73,7 +73,7 @@ export default function Create(props) {
               setLoading(true);
               let uploadedFiles;
               if (files.length > 0) {
-                const filesResponse = await api.uploadFile("/zammood/upload", files);
+                const filesResponse = await api.uploadFiles("/zammood/upload", files);
                 if (!filesResponse.ok) {
                   setLoading(false);
                   const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
@@ -98,7 +98,6 @@ export default function Create(props) {
               console.log(e);
               capture(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
-            } finally {
             }
           }}>
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
@@ -113,7 +112,7 @@ export default function Create(props) {
                 errors={errors}
                 touched={touched}
               />
-              {[ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
+              {[ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(user.role) ? (
                 <Item
                   name="messageSubject"
                   title="Ma demande"
@@ -133,7 +132,9 @@ export default function Create(props) {
                   souhaitez joindre des pièces envoyez votre demande à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
                 </p>
               ) : null}
-              {values.type?.id && !["OTHER", "QUESTION_SUPPORT"].includes(values.type?.id) && ![ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role) ? (
+              {values.type?.id &&
+              !["OTHER", "QUESTION_SUPPORT"].includes(values.type?.id) &&
+              ![ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(user.role) ? (
                 <SelectTag
                   name="subject"
                   options={Object.values(subjectsList).filter((e) => e.parentId === values?.type?.id)}
@@ -271,7 +272,9 @@ const ContinueButton = styled(LoadingButton)`
   display: block;
   width: auto;
   outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   align-self: flex-start;
   margin-top: 1rem;
   :hover {
@@ -284,7 +287,9 @@ const Form = styled.div`
   flex: 2;
   padding: 2rem;
   border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   flex-direction: column;
   background-color: #fff;
   margin: 0 auto;

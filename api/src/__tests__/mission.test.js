@@ -22,7 +22,7 @@ afterAll(dbClose);
 
 describe("Mission", () => {
   describe("POST /mission", () => {
-    xit("should create a new mission", async () => {
+    it.skip("should create a new mission", async () => {
       const missionFixture = getNewMissionFixture();
       const missionsBefore = await getMissionsHelper();
       const res = await request(getAppHelper()).post("/mission").send(missionFixture);
@@ -34,7 +34,7 @@ describe("Mission", () => {
     });
   });
   describe("PUT /mission/:id", () => {
-    xit("should update a mission", async () => {
+    it.skip("should update a mission", async () => {
       const missionFixture = getNewMissionFixture();
       let mission = await createMissionHelper(missionFixture);
       const modifiedMission = { ...missionFixture };
@@ -54,11 +54,11 @@ describe("Mission", () => {
       const passport = require("passport");
       passport.user.role = ROLES.VISITOR;
       let res = await request(getAppHelper()).put("/mission/" + mission._id);
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
 
       passport.user.role = ROLES.HEAD_CENTER;
       res = await request(getAppHelper()).put("/mission/" + mission._id);
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -195,7 +195,7 @@ describe("Mission", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/mission/${mission._id}/patches`).send();
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if mission found with patches", async () => {

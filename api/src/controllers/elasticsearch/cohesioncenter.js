@@ -12,15 +12,15 @@ const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
+    const { user, body } = req;
+
     const searchFields = ["name", "city", "zip", "code2022", "typology", "domain"];
     const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "typology.keyword", "domain.keyword"];
     const sortFields = [];
-
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
+    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
@@ -29,14 +29,29 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
+
+    let response;
+    let cohesionCenters = [];
+    if (req.params.action === "export") {
+      response = await allRecords("cohesioncenter", hitsRequestBody.query);
+      cohesionCenters = response.map((s) => ({ _id: s._id, _source: s }));
+    } else {
+      const esReponse = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      response = esReponse.body;
+      cohesionCenters = response?.responses[0]?.hits?.hits || [];
+    }
+
+    if (req.query.needSessionPhase1Info) {
+      cohesionCenters = await populateWithSessionPhase1Info(cohesionCenters);
+      if (req.params.action === "export") response = cohesionCenters.map((s) => s._source);
+      else response.responses[0].hits.hits = cohesionCenters;
+    }
 
     if (req.params.action === "export") {
-      const response = await allRecords("cohesioncenter", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(response);
     }
   } catch (error) {
     capture(error);
@@ -50,7 +65,7 @@ router.post("/not-in-cohort/:cohort", passport.authenticate(["referent"], { sess
     const searchFields = ["name", "city", "zip", "code2022", "typology", "domain", "centerDesignation"];
 
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields: [], body: req.body });
@@ -78,16 +93,21 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
   try {
     // Configuration
     const searchFields = ["name", "city", "zip", "code2022"];
-    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status", "statusPhase1"];
+    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status.keyword", "statusPhase1.keyword"];
+    const filterFieldsCenter = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword"];
     const sortFields = [];
 
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    if (!canSearchSessionPhase1(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const queryFiltersCenter = { ...queryFilters };
+    delete queryFiltersCenter.status;
+    delete queryFiltersCenter.statusPhase1;
 
     // Context filters
     let contextFilters = [];
@@ -95,7 +115,15 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
 
     // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
+    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+      searchFields,
+      filterFields: filterFieldsCenter,
+      queryFilters: queryFiltersCenter,
+      page,
+      sort,
+      contextFilters,
+      size,
+    });
 
     async function getAdditionalData(centerIds) {
       const sessionQuery = {
@@ -213,6 +241,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+
       const reducedAdditionalData = await getAdditionalData(response.body.responses[0].hits.hits.map((h) => h._id));
       response.body.responses[0].hits.hits = response.body.responses[0].hits.hits.map((h) => {
         const additionalData = reducedAdditionalData[h._id];
@@ -226,5 +255,16 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+const populateWithSessionPhase1Info = async (cohesionCenters) => {
+  const cohesionCentersIds = cohesionCenters.map((s) => s._id);
+  const sessionPhase1s = await allRecords("sessionphase1", { terms: { "cohesionCenterId.keyword": cohesionCentersIds } });
+  cohesionCenters = cohesionCenters.map((center) => ({
+    ...center,
+    _source: { ...center._source, sessionsPhase1: sessionPhase1s.filter((sp) => sp.cohesionCenterId.toString() === center._id.toString()) },
+  }));
+
+  return cohesionCenters;
+};
 
 module.exports = router;

@@ -21,7 +21,7 @@ export default function ProposeMission({ mission, updateMission }) {
 
   //Filters
   const filterArray = [
-    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné", translate: translate, sort: orderCohort },
+    { title: "Cohorte", name: "cohort", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     {
       title: "Statut phase 2",
       name: "statusPhase2",
@@ -164,7 +164,7 @@ const ResultBox = ({ mission, updateMission, data, paramData, setParamData, sele
       {data.length ? (
         <>
           {hasSearch ? <p className="suggested">Recommandation de volontaires disponibles autour de la mission :</p> : <p className="suggested">Résultat de la recherche :</p>}
-          <div className="bg-[#f4f5f7] mt-4">
+          <div className="bg-[#f4f5f7] mt-4 mb-4">
             <ResultTable
               paramData={paramData}
               setParamData={setParamData}
@@ -224,6 +224,7 @@ const Hit = ({ hit, mission, applicationsToTheMission, onClick }) => {
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
+        marginTop: "15px",
       }}>
       <div style={{ padding: "1.5rem 1.5rem 10px 1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>

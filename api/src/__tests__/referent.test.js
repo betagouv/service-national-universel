@@ -58,7 +58,7 @@ describe("Referent", () => {
       passport.user.role = ROLES.RESPONSIBLE;
       const referentFixture = { ...getNewReferentFixture(), role: ROLES.ADMIN };
       const res = await request(getAppHelper()).post("/referent/signup_invite/001").send(referentFixture);
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 409 when user already exists", async () => {
@@ -254,7 +254,7 @@ describe("Referent", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/referent/${referent._id}/patches`).send();
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if referent found with patches", async () => {
@@ -289,7 +289,7 @@ describe("Referent", () => {
       passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).get(`/referent/${referent._id}`).send();
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
   });
@@ -329,7 +329,7 @@ describe("Referent", () => {
       passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
 
@@ -373,7 +373,7 @@ describe("Referent", () => {
       passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).delete(`/referent/${referent._id}`).send();
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
   });
@@ -386,7 +386,7 @@ describe("Referent", () => {
       const res = await request(getAppHelper())
         .post("/referent/signin_as/referent/" + referent._id)
         .send();
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 404 if referent not found", async () => {
@@ -419,13 +419,6 @@ describe("Referent", () => {
         .post("/referent/signin_as/young/" + young._id)
         .send();
       expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toEqual(
-        expect.objectContaining({
-          _id: young._id.toString(),
-          firstName: young.firstName,
-          lastName: young.lastName,
-        }),
-      );
     });
     it("should return a jwt token", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
@@ -433,7 +426,7 @@ describe("Referent", () => {
         .post("/referent/signin_as/referent/" + referent._id)
         .send();
       expect(res.statusCode).toEqual(200);
-      expect(res.headers["set-cookie"][0]).toContain("jwt=");
+      expect(res.headers["set-cookie"][0]).toContain("jwt_ref=");
     });
   });
 });

@@ -1,5 +1,6 @@
 import React, { createContext, useState } from "react";
 import { PREINSCRIPTION_STEPS } from "../utils/navigation";
+import { PHONE_ZONES_NAMES } from "snu-lib";
 
 export const PreInscriptionContext = createContext();
 
@@ -8,6 +9,8 @@ const defaultState = {
   step: PREINSCRIPTION_STEPS.ELIGIBILITE,
   firstName: "",
   lastName: "",
+  phone: "",
+  phoneZone: PHONE_ZONES_NAMES.FRANCE,
   email: "",
   emailConfirm: "",
   password: "",
@@ -21,7 +24,7 @@ const SECRET_VALUE_KEYS = [
   { key: "confirmPassword", values: [] },
   { key: "acceptCGU", values: [] },
   { key: "rulesYoung", values: [] },
-  { key: "step", values: [PREINSCRIPTION_STEPS.CONFIRM, PREINSCRIPTION_STEPS.DONE], fallbackValue: PREINSCRIPTION_STEPS.PROFIL },
+  { key: "step", values: [PREINSCRIPTION_STEPS.CONFIRM], fallbackValue: PREINSCRIPTION_STEPS.PROFIL },
 ];
 const LOCAL_STORAGE_KEY = "preinscription";
 
@@ -40,7 +43,7 @@ const getDefaultState = () => {
 const PreInscriptionContextProvider = ({ children }) => {
   const [value, setValue] = useState(getDefaultState());
 
-  const updateValue = (value) => {
+  const updateValue = (value = defaultState) => {
     setValue(value);
 
     // remove secret values before persisting into local storage
@@ -56,11 +59,9 @@ const PreInscriptionContextProvider = ({ children }) => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(valuesToPersist));
   };
 
-  const removePersistedValue = (resetAll) => {
+  const removePersistedValue = () => {
     localStorage.removeItem(LOCAL_STORAGE_KEY);
-    if (resetAll) {
-      setValue(defaultState);
-    }
+    setValue(defaultState);
   };
 
   return <PreInscriptionContext.Provider value={[value, updateValue, removePersistedValue]}>{children}</PreInscriptionContext.Provider>;

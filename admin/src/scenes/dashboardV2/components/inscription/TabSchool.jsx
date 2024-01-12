@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { HiOutlineChevronLeft, HiOutlineChevronRight, HiOutlineExternalLink } from "react-icons/hi";
+import { ROLES } from "snu-lib";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ROLES } from "snu-lib";
 import api from "../../../../services/api";
-import { replaceSpaces } from "../../../../utils";
-import { currentFilterAsUrl } from "../FilterDashBoard";
+import { getNewLink, replaceSpaces } from "../../../../utils";
+import queryString from "query-string";
 
 const PAGE_SIZE = 6;
 
@@ -25,35 +25,15 @@ export default function TabSchool({ filters }) {
     setPageMax(0);
     setIsLoading(true);
 
-    const body = {
-      query: { bool: { must: { match_all: {} }, filter: [] } },
-      aggs: {
-        school: {
-          terms: { field: "schoolId.keyword", size: 500 },
-          aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
-        },
-      },
-      size: 0,
-      track_total_hits: true,
-    };
-    if (filters.region?.length) body.query.bool.filter.push({ terms: { "schoolRegion.keyword": filters.region } });
-    if (filters.department?.length) body.query.bool.filter.push({ terms: { "schoolDepartment.keyword": filters.department } });
-    if (filters.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filters.cohort } });
-    if (filters.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filters.academy } });
-
-    let route = "young";
-    if (user.role === ROLES.REFERENT_DEPARTMENT) route = "young-having-school-in-department/inscriptions";
-    if (user.role === ROLES.REFERENT_REGION) route = "young-having-school-in-region/inscriptions";
-
-    const { responses } = await api.esQuery("young", body, route);
-    if (!responses?.length) return setNoResult(true);
-    if (setNoResult(responses[0].aggregations.school.buckets.length === 0)) {
+    const responses = await api.post("/elasticsearch/dashboard/inscription/youngBySchool", { filters: filters });
+    if (!responses?.aggregations) return setNoResult(true);
+    if (setNoResult(responses.aggregations.school.buckets.length === 0)) {
       setNoResult(true);
       setIsLoading(false);
       return;
     }
 
-    let reducedSchool = responses[0]?.aggregations?.school?.buckets?.reduce((acc, school) => {
+    let reducedSchool = responses?.aggregations?.school?.buckets?.reduce((acc, school) => {
       if (school.key === "") return acc;
       const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
       const total = school.doc_count;
@@ -93,22 +73,24 @@ export default function TabSchool({ filters }) {
       <div className="flex w-full flex-row justify-between">
         <div className="flex items-center gap-3">
           <div className="text-base font-bold text-gray-900">Liste des établissements</div>
-          <Link to={`/etablissement/liste-jeunes?${currentFilterAsUrl(filters)}`} target={"_blank"}>
+          <Link to={getNewLink({ base: `/school/liste-jeunes`, filter: filters, filtersUrl: [queryString.stringify({ departmentName: filters.department })] })} target={"_blank"}>
             <HiOutlineExternalLink className="h-5 w-5 cursor-pointer text-gray-400" />
           </Link>
         </div>
-        <div className="text-xs text-gray-600">
-          Export depuis le menu{" "}
-          <Link
-            to={`/inscription`}
-            target="_blank"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            className="cursor-pointer text-blue-600">
-            Inscriptions
-          </Link>
-        </div>
+        {user.role !== ROLES.VISITOR ? (
+          <div className="text-xs text-gray-600">
+            Export depuis le menu{" "}
+            <Link
+              to={`/inscription`}
+              target="_blank"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="cursor-pointer text-blue-600">
+              Inscriptions
+            </Link>
+          </div>
+        ) : null}
       </div>
       <table className={`w-full table-fixed ${isLoading || noResult ? "h-full" : ""}`}>
         <thead>
@@ -133,18 +115,10 @@ export default function TabSchool({ filters }) {
             youngBySchool?.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)?.map((school) => (
               <tr key={school?.key} className="flex h-1/6 cursor-default items-center border-b-[1px] border-gray-100 py-3 hover:bg-gray-50">
                 <td className="flex w-[80%] flex-col gap-1">
-                  <Link
-                    to={`/inscription?SCHOOL=%5B"${replaceSpaces(school.schoolName)}"%5D`}
-                    target="_blank"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                    }}
-                    className="cursor-pointer">
-                    <p className="w-[90%] truncate text-sm font-bold leading-6 text-gray-900">{school.schoolName}</p>
-                    <p className="text-xs leading-4 text-gray-500">
-                      {school?.schoolCity} • {school.schoolZip}
-                    </p>
-                  </Link>
+                  <p className="w-[90%] truncate text-sm font-bold leading-6 text-gray-900">{school.schoolName}</p>
+                  <p className="text-xs leading-4 text-gray-500">
+                    {school?.schoolCity} • {school.schoolZip}
+                  </p>
                 </td>
 
                 <td className="flex w-[20%] flex-col gap-1 ">

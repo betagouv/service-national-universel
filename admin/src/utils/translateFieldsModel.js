@@ -103,12 +103,14 @@ const translateFieldYoung = (f) => {
     case "inscriptionStep":
     case "inscriptionStep2023":
       return "Étape d'inscription";
+    case "reinscriptionStep2023":
+      return "Étape de réinscription";
     case "cohesion2020Step":
       return "Étape d'inscription (2020)";
     case "historic":
       return "Historique";
     case "cohesionStayPresence":
-      return "Présence séjour de cohésion";
+      return "Présence au séjour de cohésion";
     case "cohesionStayMedicalFileReceived":
       return "Fiche sanitaire";
     case "cohesionStayMedicalFileDownload":
@@ -465,8 +467,6 @@ const translateFieldYoung = (f) => {
       return "Même département (handicap)";
     case "notes":
       return "Notes";
-    case "cohesionStayPresence":
-      return "Présence au séjour de cohésion";
     default:
       return f;
   }

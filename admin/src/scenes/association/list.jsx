@@ -19,6 +19,7 @@ export default function List() {
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   const filterArray = [
     { title: "Région", name: "coordonnees_adresse_region", missingLabel: "Non renseignée", defaultValues: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
@@ -44,7 +45,7 @@ export default function List() {
                 bool: {
                   should: [
                     {
-                      terms: { "associationRna.keyword": rnas },
+                      terms: { "associationRNA.keyword": rnas },
                     },
                     {
                       terms: { "organizationRNA.keyword": rnas },
@@ -52,7 +53,6 @@ export default function List() {
                   ],
                 },
               },
-              { match: { deleted: "no" } },
             ],
           },
         },
@@ -71,7 +71,7 @@ export default function List() {
 
         if (res.hits?.hits?.length > 0) {
           for (const association of associations) {
-            const hits = res.hits.hits.filter((e) => e._source.associationRna === association._source.id_rna || e._source.organizationRNA === association._source.id_rna);
+            const hits = res.hits.hits.filter((e) => e._source.associationRNA === association._source.id_rna || e._source.organizationRNA === association._source.id_rna);
             result[association._id] = {
               countMissions: hits.length,
               countPlaces: hits.reduce((prev, curr) => (curr._source.places ? prev + curr._source.places : 0), 0),
@@ -102,11 +102,12 @@ export default function List() {
         <div className="flex flex-1 justify-between items-center">
           <div className="text-2xl font-bold leading-7 text-[#242526]">Annuaire des associations</div>
 
+          {/* fixme: make it work ? worth it ? */}
           <ExportComponent
             title="Exporter les associations"
-            filters={filterArray}
             exportTitle="Associations"
             route="/elasticsearch/association/export"
+            filters={filterArray}
             selectedFilters={selectedFilters}
             icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
             customCss={{
@@ -114,27 +115,25 @@ export default function List() {
               button: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
               loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
             }}
-            transform={(data) => {
-              return data.map((association) => {
-                return {
-                  "Nom association": association.identite_nom,
-                  Description: association.description || association.activites_objet,
-                  Adresse: association.coordonnees_adresse_nom_complet,
-                  SIREN: association.identite_id_siren || association.id_siren,
-                  "Statut juridique": association.statut_juridique || association.identite_lib_forme_juridique,
-                  "Domaine d’action": association.activites_lib_theme1,
-                  RNA: association.id_rna,
-                  "Nombre de mission publiées sur la plateforme": missionsInfo[association._id]?.countMissions || 0,
-                  "Nombre de places disponible sur la plateforme": missionsInfo[association._id]?.countPlaces || 0,
-                  Mail: association.coordonnees_courriel,
-                  Téléphone: association.coordonnees_telephone,
-                  "Lien facebook": association.facebook,
-                  "Lien linkedin": association.linkedin,
-                  "Lien web": association.url,
-                  "Lien twitter": association.twitter,
-                };
-              });
-            }}
+            transform={(data) =>
+              data.map((association) => ({
+                "Nom association": association.identite_nom,
+                Description: association.description || association.activites_objet,
+                Adresse: association.coordonnees_adresse_nom_complet,
+                SIREN: association.identite_id_siren || association.id_siren,
+                "Statut juridique": association.statut_juridique || association.identite_lib_forme_juridique,
+                "Domaine d’action": association.activites_lib_theme1,
+                RNA: association.id_rna,
+                "Nombre de mission publiées sur la plateforme": missionsInfo[association._id]?.countMissions || 0,
+                "Nombre de places disponible sur la plateforme": missionsInfo[association._id]?.countPlaces || 0,
+                Mail: association.coordonnees_courriel,
+                Téléphone: association.coordonnees_telephone,
+                "Lien facebook": association.facebook,
+                "Lien linkedin": association.linkedin,
+                "Lien web": association.url,
+                "Lien twitter": association.twitter,
+              }))
+            }
           />
         </div>
 
@@ -152,6 +151,7 @@ export default function List() {
             setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
+            size={size}
           />
           <div className="flex flex-row flex-wrap items-center mt-2">
             <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
@@ -169,7 +169,8 @@ export default function List() {
           paramData={paramData}
           setParamData={setParamData}
           currentEntryOnPage={data?.length}
-          size={data?.length}
+          size={size}
+          setSize={setSize}
           render={
             <div className="flex flex-col gap-5">
               <p className="text-lg text-gray-500">

@@ -213,7 +213,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     // - admin and referent can send contract to everybody
     // - responsible and supervisor can send contract in their structures
     if (!canCreateOrUpdateContract(req.user)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     let previousStructureId, currentStructureId;
     if (id) {
@@ -228,14 +228,14 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     if (req.user.role === ROLES.RESPONSIBLE) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       if (previousStructureId.toString() !== req.user.structureId.toString() || currentStructureId.toString() !== req.user.structureId.toString()) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
     }
     if (req.user.role === ROLES.SUPERVISOR) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
       if (!structures.map((e) => e._id.toString()).includes(previousStructureId.toString()) || !structures.map((e) => e._id.toString()).includes(currentStructureId.toString())) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
     }
 
@@ -281,19 +281,19 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
     // - admin and referent can send contract to everybody
     // - responsible and supervisor can send contract in their structures
     if (!canCreateOrUpdateContract(req.user, contract)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     if (req.user.role === ROLES.RESPONSIBLE) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       if (contract.structureId.toString() !== req.user.structureId.toString()) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
     }
     if (req.user.role === ROLES.SUPERVISOR) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const structures = await StructureObject.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
       if (!structures.map((e) => e._id.toString()).includes(contract.structureId.toString())) {
-        return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
     }
 
@@ -319,11 +319,11 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && data.youngId.toString() !== req.user._id.toString()) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     if (isReferent(req.user) && !canViewContract(req.user, data)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
@@ -433,11 +433,11 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
 
     // A young can only download their own documents.
     if (isYoung(req.user) && contract.youngId.toString() !== req.user._id.toString()) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     if (isReferent(req.user) && !canCreateOrUpdateContract(req.user, contract)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     // Create html

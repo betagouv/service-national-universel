@@ -53,9 +53,12 @@ function serializeYoung(young, user) {
       delete ret.sqlId;
       delete ret.password;
       delete ret.passwordChangedAt;
-      delete ret.userIps;
       delete ret.token2FA;
       delete ret.token2FAExpires;
+      delete ret.attempts2FA;
+      delete ret.tokenEmailValidation;
+      delete ret.tokenEmailValidationExpires;
+      delete ret.attemptsEmailValidation;
       delete ret.lastLogoutAt;
       delete ret.nextLoginAttemptIn;
       delete ret.forgotPasswordResetToken;
@@ -79,9 +82,9 @@ function serializeReferent(referent) {
       delete ret.sqlId;
       delete ret.password;
       delete ret.passwordChangedAt;
-      delete ret.userIps;
       delete ret.token2FA;
       delete ret.token2FAExpires;
+      delete ret.attempts2FA;
       delete ret.lastLogoutAt;
       delete ret.nextLoginAttemptIn;
       delete ret.forgotPasswordResetToken;
@@ -141,6 +144,14 @@ function serializeArray(arr, user, serialize) {
   return arr.map((s) => serialize(s, user));
 }
 
+function serializeAlerteMessage(message) {
+  return message.toObject();
+}
+
+function serializeClasse(classe) {
+  return classe.toObject();
+}
+
 // return only the initialValue's properties that are in the whitelist 'keys'
 const subObject = (initialValue, keys) =>
   keys.reduce((o, k) => {
@@ -162,4 +173,6 @@ module.exports = {
   serializeMeetingPoint,
   serializeEmail,
   serializeContract,
+  serializeAlerteMessage,
+  serializeClasse,
 };

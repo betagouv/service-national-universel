@@ -9,12 +9,17 @@ import api from "../../../services/api";
 import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, debounce } from "../../../utils";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import CardMission from "../components/CardMission";
+import { useSelector } from "react-redux";
 
 export default function ProposeMission({ young, onSend }) {
+  const cohortList = useSelector((state) => state.Cohorts);
   const [missionIds, setMissionIds] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({ page: 0 });
   const [data, setData] = useState([]);
+  const [size, setSize] = useState(10);
+
+  const cohort = cohortList.find((c) => c.name === young.cohort);
 
   useEffect(() => {
     getApplications().then((applications) => {
@@ -27,7 +32,7 @@ export default function ProposeMission({ young, onSend }) {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
     if (!ok) {
-      capture(code);
+      capture(new Error(code));
       return toastr.error("Oups, une erreur est survenue", code);
     }
     return data;
@@ -110,8 +115,7 @@ export default function ProposeMission({ young, onSend }) {
             Proposer une mission à {young.firstName} {young.lastName}
           </h1>
         </div>
-
-        {canApplyToPhase2(young) ? (
+        {canApplyToPhase2(young, cohort) ? (
           <>
             <div className="h-[38px] w-1/3 mx-auto overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
               <input
@@ -128,6 +132,8 @@ export default function ProposeMission({ young, onSend }) {
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
+              size={size}
+              setSize={setSize}
               render={data.map((hit, i) => (
                 <CardMission key={i} mission={hit} onSend={() => handleProposal(hit)} sent={missionIds.includes(hit._id)} />
               ))}

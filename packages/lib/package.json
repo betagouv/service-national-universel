@@ -5,10 +5,12 @@
   "main": "common-js/index.cjs",
   "module": "index.js",
   "scripts": {
+    "postinstall": "npm run build",
     "build": "rollup -c",
     "dev": "rollup -c --watch",
     "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint --ext .js --fix src",
+    "lint:fix": "eslint . --ext .js --fix",
+    "lint:report": "eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -18,7 +20,11 @@
     "@babel/preset-env": "^7.21.5",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-node-resolve": "^15.0.2",
-    "eslint": "^8.41.0",
+    "eslint": "^8.56.0",
     "rollup": "^2.79.1"
+  },
+  "dependencies": {
+    "@rollup/plugin-commonjs": "^25.0.3",
+    "sanitize-html": "^2.11.0"
   }
 }

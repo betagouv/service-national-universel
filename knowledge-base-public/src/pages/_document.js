@@ -11,9 +11,8 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
           <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-          <script defer data-domain="support.snu.gouv.fr" src="https://plausible.io/js/plausible.js"></script>
+          <script defer data-domain="support.snu.gouv.fr" src="https://plausible.io/js/script.manual.outbound-links.js"></script>
         </Head>
         <body>
           <Main />

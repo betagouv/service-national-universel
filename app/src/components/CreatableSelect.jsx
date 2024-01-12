@@ -1,6 +1,6 @@
 import React from "react";
 import Select from "react-select/creatable";
-import ErrorMessage from "../scenes/inscription2023/components/ErrorMessage";
+import ErrorMessage from "./dsfr/forms/ErrorMessage";
 
 const CreatableSelect = ({ label, options, value, onChange, placeholder = "Sélectionner une option", error = "", onCreateOption = null, correction = "" }) => {
   return (
@@ -8,7 +8,7 @@ const CreatableSelect = ({ label, options, value, onChange, placeholder = "Séle
       <label className={`my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>{label}</label>
       <Select
         styles={customStyles}
-        value={options.find((option) => option.value === value)}
+        value={options.find((option) => option.value === value) || { label: value }}
         onChange={(option) => onChange(option.value)}
         options={options}
         isSearchable

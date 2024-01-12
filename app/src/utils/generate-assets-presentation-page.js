@@ -6,7 +6,7 @@ const slugify = require("slugify");
 
 const projectDir = path.resolve(__dirname, "..", "..");
 const srcDir = path.join(projectDir, "src");
-const destinationPath = path.join(srcDir, "scenes", "develop", "AssetsPresentationPage.js");
+const destinationPath = path.join(srcDir, "scenes", "develop", "AssetsPresentationPage.jsx");
 let uniqueId = 0;
 
 const ASSET_COUNT_PER_LINE = 8;
@@ -96,7 +96,7 @@ function createView(context) {
     '<div className="flex items-center justify-center">' +
     '<div className="mr-2 text-[#BBBBBB]">Filtre :</div>' +
     '<input type="text" value={filter} onChange={changeFilter} className="p-1 border-[1px] border-[#BBBBBB] rounded-md" />' +
-    '<div className="ml-2 w-[24px] h-[24px] text-[#BBBBBB] hover:border-[1px] hover:border-[#DDDDDD] rounded-md hover:text-[#808080] cursor-pointer flex items-center justify-center" onClick={resetFilter}><div className="w-[10px] h-[10px]"><Close_1 /></div></div>' +
+    '<div className="ml-2 w-[24px] h-[24px] text-[#BBBBBB] hover:border-[1px] hover:border-[#DDDDDD] rounded-md hover:text-[#808080] cursor-pointer flex items-center justify-center" onClick={resetFilter}><div className="w-[10px] h-[10px]"><HiX /></div></div>' +
     "</div>";
 
   return (
@@ -105,7 +105,8 @@ function createView(context) {
     "   Cette Page est générée automatiquement par le script\n" +
     "   /utils/generate-assets-presentation-page.js\n" +
     "   ------------------------------------------------------ */\n\n" +
-    `import React, { useState, useEffect } from "react";\n${imports.join("\n")}\n\n` +
+    `import React, { useState, useEffect } from "react";\nimport { HiX } from "react-icons/hi";
+    \n${imports.join("\n")}\n\n` +
     "export default function AssetsPresentationPage() {\n" +
     'const [filter, setFilter] = useState("");\n' +
     "\tuseEffect(() => {\n" +

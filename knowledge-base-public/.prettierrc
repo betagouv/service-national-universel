@@ -5,6 +5,5 @@
   "doubleQuote": true,
   "tabWidth": 2,
   "trailingComma": "all",
-  "tailwindConfig": "./styles/tailwind.config.js",
   "jsxBracketSameLine": true
 }

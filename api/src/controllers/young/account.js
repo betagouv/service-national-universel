@@ -18,7 +18,6 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
   try {
     const { value, error } = Joi.object({
       gender: Joi.string().valid("male", "female").required(),
-      email: Joi.string().trim().email().required(),
       phone: Joi.string().required(),
       phoneZone: Joi.string().required(),
     }).validate(req.body, { stripUnknown: true });
@@ -32,8 +31,6 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
-
-    if (!validator.isEmail(value.email)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -84,7 +81,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
     // If the young is affected and the cohort is not ended address can't be updated.
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && new Date(currentCohort.dateEnd).valueOf() > Date.now()) {
-      return res.status(418).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
     }
 
     if (
@@ -94,7 +91,8 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
       (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
     ) {
-      const availableSessions = await getFilteredSessions({ ...young, ...value });
+      // @todo eligibility is based on address, should be based on school address.
+      const availableSessions = await getFilteredSessions({ grade: young.grade, birthdateAt: young.birthdateAt, ...value }, req.headers["x-user-timezone"] || null);
 
       const cohort = value.cohort ? value.cohort : young.cohort;
       const status = value.status ? value.status : young.status;
@@ -104,7 +102,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       const isEligible = availableSessions.find((s) => s.name === cohort);
 
       if (!isEligible && status !== YOUNG_STATUS.NOT_ELIGIBLE) {
-        return res.status(418).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
       }
 
       // Check if cohort goal is reached
@@ -114,12 +112,12 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       }
 
       if (isGoalReached && status === YOUNG_STATUS.VALIDATED) {
-        return res.status(418).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
       }
 
       // Address should be updated without any other modification.
     } else if ((value.cohort && value.cohort !== young.cohort && value.cohort !== "à venir") || (value.status && value.status !== young.status)) {
-      return res.status(418).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
     }
 
     if (young.department && value.department !== young.department) {

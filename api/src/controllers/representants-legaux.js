@@ -13,6 +13,7 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
@@ -31,7 +32,7 @@ function tokenParentValidMiddleware(req, res, next) {
   const field = req.query.parent === "2" ? "parent2Inscription2023Token" : "parent1Inscription2023Token";
   YoungModel.findOne({ [field]: token })
     .then((young) => {
-      if (!young) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!young) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       req.young = young;
       next();
     })
@@ -44,7 +45,13 @@ function fromUser(young, parent = 1) {
 
 router.get("/young", tokenParentValidMiddleware, async (req, res) => {
   try {
-    return res.status(200).send({ ok: true, data: serializeYoung(req.young) });
+    const cohortDetails = { name: req.young.cohort };
+    const cohort = await CohortModel.findOne({ name: req.young.cohort });
+    if (cohort) {
+      cohortDetails.dateStart = cohort.dateStart;
+      cohortDetails.dateEnd = cohort.dateEnd;
+    }
+    return res.status(200).send({ ok: true, data: { ...serializeYoung(req.young), cohort: cohortDetails } });
   } catch (e) {
     capture(e);
     return res.status(500).send(e);
@@ -70,7 +77,7 @@ router.put("/representant-fromFranceConnect/:id", tokenParentValidMiddleware, as
     const young = req.young;
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -188,16 +195,11 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
       value.parent1ValidationDate = new Date();
       if (young.parentAllowSNU !== value.parentAllowSNU) {
         if (value.parentAllowSNU === "true") {
-          if (young.status === YOUNG_STATUS.REINSCRIPTION) {
-            value.status = YOUNG_STATUS.VALIDATED;
-            value.statusPhase1 = YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
-          } else {
-            value.status = YOUNG_STATUS.WAITING_VALIDATION;
-          }
+          value.status = YOUNG_STATUS.WAITING_VALIDATION;
         } else value.status = YOUNG_STATUS.NOT_AUTORISED;
 
         if (!canUpdateYoungStatus({ body: value, current: young })) {
-          return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
         statusChanged = true;
 
@@ -249,6 +251,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
             emailTo,
             params: {
               cta: `${APP_URL}/`,
+              SOURCE: young.source,
             },
           });
         } else {

@@ -2,21 +2,23 @@ import StatusText from "../../moderator-ref/subscenes/sejour/components/StatusTe
 import React from "react";
 import { LoadingBar } from "./loading";
 
-export default function StatusTable({ statuses, className = "", onStatusClicked = () => {}, loading = false, nocols = false }) {
-  const columns = nocols ?
-    { left: statuses, right: [] } :
-    statuses ? {
-      left: statuses.slice(0, Math.ceil(statuses.length / 2)),
-      right: statuses.slice(Math.ceil(statuses.length / 2)),
-    } : {
-      left: [],
-      right: [],
-    };
+export default function StatusTable({ statuses, className = "", onStatusClicked = () => {}, loading = false, nocols = false, colWidth = "w-[45%]" }) {
+  const columns = nocols
+    ? { left: statuses, right: [] }
+    : statuses
+    ? {
+        left: statuses.slice(0, Math.ceil(statuses.length / 2)),
+        right: statuses.slice(Math.ceil(statuses.length / 2)),
+      }
+    : {
+        left: [],
+        right: [],
+      };
 
   return (
     <div className={`flex justify-center items-center ${className}`}>
       <div className="flex justify-center w-100">
-        <div className="flex w-[45%] flex-col gap-4">
+        <div className={`flex ${colWidth} flex-col gap-4`}>
           {loading ? (
             <>
               <LoadingBar width="100%" />

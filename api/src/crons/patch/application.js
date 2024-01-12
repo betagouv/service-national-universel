@@ -1,6 +1,6 @@
 require("../../mongo");
 
-const { ObjectId } = require("mongodb");
+const { ObjectId } = require("mongoose").Types;
 const fetch = require("node-fetch");
 
 const { capture } = require("../../sentry");
@@ -49,6 +49,8 @@ async function createLog(patch, actualApplication, event, value) {
   const applicationInfos = await actualApplication.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let application = rebuildApplication(applicationInfos);
 
+  const anonymizedApplication = new ApplicationModel(application).anonymise();
+
   const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/application`, {
     method: "POST",
     redirect: "follow",
@@ -68,7 +70,7 @@ async function createLog(patch, actualApplication, event, value) {
       candidature_structure_id: actualApplication.structureId.toString(),
       candidature_status: application.status || actualApplication.status,
       date: patch.date,
-      raw_data: application,
+      raw_data: anonymizedApplication,
     }),
   });
 
@@ -99,5 +101,19 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Application Logs", text: e });
     capture(e);
+  }
+};
+
+// Script de rattrapage manuel
+// commande terminal : node -e "require('./application').manualHandler('2023-08-17', '2023-08-18')"
+exports.manualHandler = async (startDate, endDate) => {
+  try {
+    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+
+    await findAll(ApplicationPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
+
+    console.log(result);
+  } catch (e) {
+    console.log(e);
   }
 };

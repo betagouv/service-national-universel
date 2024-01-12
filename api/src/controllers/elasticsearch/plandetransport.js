@@ -34,14 +34,16 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "modificationBuses.status.keyword",
       "modificationBuses.opinion.keyword",
       "lineFillingRate",
+      "delayedForth.keyword",
+      "delayedBack.keyword",
     ];
     const sortFields = [];
 
     // Authorization
-    if (!canSearchLigneBus(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
+    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
@@ -79,6 +81,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       page,
       sort,
       contextFilters,
+      size,
     });
     if (req.params.action === "export") {
       const response = await allRecords("plandetransport", hitsRequestBody.query);

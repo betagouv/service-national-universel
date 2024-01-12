@@ -1,9 +1,7 @@
-import Img4 from "../../assets/JVA_round.png";
-import Img3 from "../../assets/logo-snu.png";
-import React, { useEffect, useState } from "react";
+import { React, useEffect, useState } from "react";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import {
   formatDateFR,
   formatLongDateUTC,
@@ -15,6 +13,8 @@ import {
   translatePhase2,
   translateSource,
 } from "snu-lib";
+import Img4 from "../../assets/JVA_round.png";
+import Img3 from "../../assets/logo-snu.png";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import SelectAction from "../../components/SelectAction";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -41,6 +41,7 @@ export default function List() {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   useEffect(() => {
     (async () => {
@@ -63,24 +64,6 @@ export default function List() {
 
   async function transform(data, selectedFields) {
     let all = data;
-    if (selectedFields.includes("tutor")) {
-      const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
-      if (tutorIds?.length) {
-        const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
-        if (responses.length) {
-          const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-          all = data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
-        }
-      }
-    }
-    if (["structureInfo", "structureLocation"].some((e) => selectedFields.includes(e))) {
-      const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
-      const { responses } = await api.esQuery("structure", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: structureIds } } });
-      if (responses?.length) {
-        const structures = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        all = all.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
-      }
-    }
     return all.map((data) => {
       if (!data.domains) data.domains = [];
       if (!data.structure) {
@@ -163,54 +146,6 @@ export default function List() {
   async function transformCandidature(data, selectedFields) {
     let all = data;
 
-    // Add tutor info
-    if (selectedFields.includes("missionTutor")) {
-      const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
-      if (tutorIds?.length) {
-        const queryTutor = {
-          query: { ids: { type: "_doc", values: tutorIds } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
-        const resultTutor = await api.post(`/es/referent/export`, {
-          ...queryTutor,
-          fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "missionTutor")?.fields,
-        });
-        if (resultTutor?.data?.length) {
-          all = data.map((item) => ({ ...item, tutor: resultTutor?.data?.find((e) => e._id === item.tutorId) }));
-        }
-      }
-    }
-
-    // Add structure info
-    let structureCategorie = ["structureInfo", "structureLocation"];
-    if (structureCategorie.some((e) => selectedFields.includes(e))) {
-      const structureIds = [...new Set(data.map((item) => item.structureId).filter((e) => e))];
-      const queryStructure = {
-        query: { ids: { type: "_doc", values: structureIds } },
-        track_total_hits: true,
-        size: ES_NO_LIMIT,
-      };
-
-      let fieldsToExportsStructure = [];
-
-      selectedFields.forEach((selected) => {
-        if (structureCategorie.includes(selected)) {
-          let fields = missionCandidatureExportFields.find((f) => f.id === selected)?.fields;
-          fieldsToExportsStructure = [...fieldsToExportsStructure, ...fields];
-        }
-      });
-
-      const resultStructure = await api.post(`/es/structure/export`, {
-        ...queryStructure,
-        fieldsToExport: fieldsToExportsStructure,
-      });
-
-      if (resultStructure?.data?.length) {
-        all = all.map((item) => ({ ...item, structure: resultStructure?.data?.find((e) => e._id === item.structureId) }));
-      }
-    }
-
     let youngCategorie = ["representative2", "representative1", "location", "address", "imageRight", "contact", "identity", "status"];
     let fieldsToExportsYoung = [];
 
@@ -221,22 +156,13 @@ export default function List() {
       }
     });
 
-    //If we want to export young info or application
+    //We want to export young info or application
     if ([...youngCategorie, "application"].some((e) => selectedFields.includes(e))) {
       // Add applications info
       const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
-      const queryApplication = {
-        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }] } },
-        track_total_hits: true,
-        size: ES_NO_LIMIT,
-      };
-      if (selectedFilters?.applicationStatus?.filter?.length) {
-        queryApplication.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.applicationStatus.filter } });
-      }
-
-      const resultApplications = await api.post(`/es/application/export`, {
-        ...queryApplication,
-        fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
+      const resultApplications = await api.post(`/elasticsearch/application/export`, {
+        filters: { missionId: missionIds, status: selectedFilters.applicationStatus.filter },
+        exportFields: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
       if (resultApplications?.data?.length) {
         all = all.map((item) => ({ ...item, candidatures: resultApplications?.data?.filter((e) => e.missionId === item._id.toString()) }));
@@ -244,28 +170,16 @@ export default function List() {
         all = all.map((item) => ({ ...item, candidatures: [] }));
       }
 
-      let youngIds = [];
-      all.forEach((item) => {
-        if (item.candidatures?.length) {
-          youngIds = [...youngIds, ...item.candidatures.map((e) => e.youngId)];
-        }
-      });
-      youngIds = [...new Set(youngIds.filter((e) => e))];
-
-      const queryYoung = {
-        query: { ids: { type: "_doc", values: youngIds } },
-        track_total_hits: true,
-        size: ES_NO_LIMIT,
-      };
-
-      const resultYoungs = await api.post(`/es/young/export`, {
-        ...queryYoung,
-        fieldsToExports: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
-      });
-      if (resultYoungs?.data?.length) {
+      if (resultApplications?.data?.length) {
+        // filter young on resultApplications response
+        const youngsData = resultApplications.data.map((app) => app.young).filter((young) => young);
+        // Add young info
         all = all.map((item) => {
           if (item.candidatures?.length) {
-            item.candidatures = item.candidatures.map((e) => ({ ...e, young: resultYoungs?.data?.find((y) => y._id === e.youngId) }));
+            item.candidatures = item.candidatures.map((candidature) => {
+              const youngDetails = youngsData.find((young) => young._id === candidature.youngId);
+              return { ...candidature, young: youngDetails };
+            });
           }
           return item;
         });
@@ -399,7 +313,6 @@ export default function List() {
     });
     return result;
   }
-
   //Filters
   const filterArray = [
     { title: "Région", name: "region", parentGroup: "Général", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
@@ -577,6 +490,7 @@ export default function List() {
                 setSelectedFilters={setSelectedFilters}
                 paramData={paramData}
                 setParamData={setParamData}
+                size={size}
               />
               <SortOption
                 sortOptions={[
@@ -587,6 +501,7 @@ export default function List() {
                   { label: "Nom de la mission (A > Z)", field: "name.keyword", order: "asc" },
                   { label: "Nom de la mission (Z > A)", field: "name.keyword", order: "desc" },
                 ]}
+                selectedFilters={selectedFilters}
                 paramData={paramData}
                 setParamData={setParamData}
               />
@@ -606,6 +521,8 @@ export default function List() {
               paramData={paramData}
               setParamData={setParamData}
               currentEntryOnPage={data?.length}
+              size={size}
+              setSize={setSize}
               render={
                 <div className="mt-6 mb-2 flex w-full flex-col divide-y divide-gray-100 border-y-[1px] border-gray-100">
                   <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400 ">
@@ -642,7 +559,7 @@ const Hit = ({ hit, callback }) => {
   return (
     <>
       <div className="flex items-center py-3 px-4 hover:bg-gray-50">
-        <div className="flex w-[40%] cursor-pointer items-center gap-4 " onClick={() => history.push(`/mission/${hit._id}`)}>
+        <Link to={`/mission/${hit._id}`} className="flex w-[40%] cursor-pointer items-center gap-4 ">
           {hit.isJvaMission === "true" ? (
             <img src={Img4} className="mx-auto h-8 w-8 group-hover:scale-105" />
           ) : (
@@ -661,8 +578,8 @@ const Hit = ({ hit, callback }) => {
               <div className="table-cel truncate text-sm leading-4 text-gray-500 font-bold">{hit.structureName}</div>
             </div>
           </div>
-        </div>
-        <div className="w-[5%]">
+        </Link>
+        <Link to={`/mission/${hit._id}`} className="w-[5%]">
           {hit?.visibility === "HIDDEN" && (
             <div className="group relative cursor-pointer">
               <HiOutlineLockClosed size={20} className="text-gray-400" />
@@ -672,22 +589,22 @@ const Hit = ({ hit, callback }) => {
               </div>
             </div>
           )}
-        </div>
+        </Link>
 
-        <div className="flex w-[15%] flex-col gap-2">
+        <Link to={`/mission/${hit._id}`} className="flex w-[15%] flex-col gap-2">
           <p className="text-sm font-normal leading-none text-gray-900">{hit.placesLeft} places(s)</p>
           <p className="text-sm font-normal leading-none text-gray-500">
             sur <span className="text-gray-900">{hit.placesTotal}</span>
           </p>
-        </div>
-        <div className="flex w-[20%] flex-col gap-2 text-sm font-normal leading-none text-gray-500">
+        </Link>
+        <Link to={`/mission/${hit._id}`} className="flex w-[20%] flex-col gap-2 text-sm font-normal leading-none text-gray-500">
           <p>
             Du <span className="text-gray-900">{formatStringDateTimezoneUTC(hit.startAt)}</span>
           </p>
           <p>
             Au <span className="text-gray-900">{formatStringDateTimezoneUTC(hit.endAt)}</span>
           </p>
-        </div>
+        </Link>
         <div className="w-[20%]">
           <SelectStatusMissionV2 hit={hit} callback={onChangeStatus} />
         </div>

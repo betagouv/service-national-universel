@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
-import { ES_NO_LIMIT, ROLES } from "snu-lib";
+import { ROLES } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import Breadcrumbs from "../../../components/Breadcrumbs";
 import Select from "../components/Select";
@@ -9,28 +9,36 @@ import API from "../../../services/api";
 import { Loading, regionList, SubTitle, Title } from "../components/commons";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { cohortList, parseQuery } from "../util";
+import { parseQuery } from "../util";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
+import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function National() {
   useDocumentTitle("Table de répartition");
   const user = useSelector((state) => state.Auth.user);
-  const [cohort, setCohort] = React.useState(getDefaultCohort());
-  const [youngsByRegion, setYoungsByRegion] = React.useState([]);
-  const [placesCenterByRegion, setPlacesCenterByRegion] = React.useState({});
-  const [loadingQuery, setLoadingQuery] = React.useState(false);
-  const [searchRegion, setSearchRegion] = React.useState("");
-  const [regions, setRegions] = React.useState(regionList);
-  const [data, setData] = React.useState([]);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const [cohort, setCohort] = useState(getDefaultCohort());
+  const [cohortList, setCohortList] = useState([]);
+  const [youngsByRegion, setYoungsByRegion] = useState([]);
+  const [placesCenterByRegion, setPlacesCenterByRegion] = useState({});
+  const [loadingQuery, setLoadingQuery] = useState(false);
+  const [searchRegion, setSearchRegion] = useState("");
+  const [regions, setRegions] = useState(regionList);
+  const [data, setData] = useState([]);
   const history = useHistory();
+
+  useEffect(() => {
+    const cohortList = getCohortSelectOptions(cohorts);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[0].value);
+  }, []);
 
   function getDefaultCohort() {
     const { cohort } = parseQuery(location.search);
     if (cohort) {
       return cohort;
-    } else {
-      return cohortList[0].value;
     }
+    return undefined;
   }
 
   const getRepartitionRegion = async () => {
@@ -48,45 +56,28 @@ export default function National() {
     (async () => {
       try {
         setLoadingQuery(true);
-
+        if (!cohort) return;
         await getRepartitionRegion();
 
         //get youngs by region
-        const bodyYoung = {
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": cohort } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
-          aggs: {
-            region: { terms: { field: "region.keyword" } },
-          },
-          track_total_hits: true,
-          size: 0,
-        };
-
-        const { responses } = await API.esQuery("young", bodyYoung);
-        setYoungsByRegion(responses[0].aggregations.region.buckets);
+        const response = await API.post("/elasticsearch/young/search", {
+          filters: { cohort: [cohort], status: ["VALIDATED"] },
+        });
+        if (!response.responses.length) return toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires");
+        setYoungsByRegion(response.responses[1].aggregations.region.names.buckets);
 
         //get places center by region
-        const bodyCohesionCenter = {
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohorts.keyword": [cohort] } }] } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
+        const { ok, data } = await API.post("/elasticsearch/sessionphase1/export?needCohesionCenterInfo=true", {
+          filters: { cohort: [cohort] },
+        });
+        if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des centres");
 
-        const { responses: responsesCenter } = await API.esQuery("cohesioncenter", bodyCohesionCenter);
-        const centerDetail = responsesCenter[0].hits.hits.map((e) => new Object({ ...e._source, _id: e._id }));
-
-        const bodySession = {
-          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohesionCenterId.keyword": centerDetail.map((c) => c._id) } }, { term: { "cohort.keyword": cohort } }] } },
-          track_total_hits: true,
-          size: ES_NO_LIMIT,
-        };
-
-        const { responses: responsesSession } = await API.esQuery("sessionphase1", bodySession);
-        const sessionsDetail = responsesSession[0].hits.hits.map((e) => e._source);
-
-        const sessionPlacesBycohesionCenterRegion = sessionsDetail.reduce((acc, session) => {
-          const region = centerDetail.find((c) => c._id === session.cohesionCenterId).region;
-          if (!acc[region]) acc[region] = 0;
-          acc[region] += session.placesTotal;
+        const sessionPlacesBycohesionCenterRegion = data.reduce((acc, item) => {
+          const { region, placesTotal } = item._source;
+          if (!acc[region]) {
+            acc[region] = 0;
+          }
+          acc[region] += placesTotal;
           return acc;
         }, {});
 

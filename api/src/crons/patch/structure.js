@@ -1,6 +1,6 @@
 require("../../mongo");
 
-const { ObjectId } = require("mongodb");
+const { ObjectId } = require("mongoose").Types;
 const fetch = require("node-fetch");
 
 const { capture } = require("../../sentry");
@@ -47,6 +47,8 @@ async function createLog(patch, actualStructure, event, value) {
   const structInfos = await actualStructure.patches.find({ ref: ObjectId(patch.ref.toString()), date: { $lte: patch.date } }).sort({ date: 1 });
   let structure = rebuildStruct(structInfos);
 
+  const anonymisedStructure = new StructureModel(structure).anonymise();
+
   // console.log(
   //   (Array.isArray(structure?.types) ? structure?.types[0] : structure?.types) || (Array.isArray(actualStructure?.types) ? actualStructure?.types[0] : actualStructure?.types),
   // );
@@ -75,7 +77,7 @@ async function createLog(patch, actualStructure, event, value) {
       structure_preparationMilitaire: structure.isMilitaryPreparation || actualStructure.isMilitaryPreparation,
       structure_reseau: structure.isNetwork,
       date: patch.date,
-      raw_data: structure,
+      raw_data: anonymisedStructure,
     }),
   });
 
@@ -106,5 +108,19 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Structure Logs", text: e });
     capture(e);
+  }
+};
+
+// Script de rattrapage manuel
+// commande terminal : node -e "require('./structure').manualHandler('2023-08-17', '2023-08-18')"
+exports.manualHandler = async (startDate, endDate) => {
+  try {
+    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+
+    await findAll(StructurePatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
+
+    console.log(result);
+  } catch (e) {
+    console.log(e);
   }
 };

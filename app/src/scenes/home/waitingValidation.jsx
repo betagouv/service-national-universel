@@ -1,7 +1,7 @@
 import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import Clock from "../../assets/icons/Clock";
@@ -10,10 +10,12 @@ import { capture } from "../../sentry";
 import API from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { inscriptionModificationOpenForYoungs, translate, YOUNG_STATUS } from "../../utils";
-import { environment } from "../../config";
+import { getCohort } from "@/utils/cohorts";
+import useAuth from "@/services/useAuth";
 
 export default function WaitingValidation() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
+  const cohort = getCohort(young.cohort);
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -40,7 +42,8 @@ export default function WaitingValidation() {
           <div className="flex items-center justify-between rounded-xl bg-white ">
             <div className="flex w-1/2 flex-col gap-8 py-6 pl-10 pr-3">
               <div className="text-[44px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
+                <strong>{young.firstName}, </strong>
+                {isCLE ? "bienvenue sur votre compte élève." : "bienvenue sur votre compte volontaire."}
               </div>
               <div className="mt-2 text-xl font-bold text-[#242526]">Merci, votre inscription a bien été enregistrée.</div>
               <hr className="text-gray-200" />
@@ -49,13 +52,14 @@ export default function WaitingValidation() {
                   <Clock />
                 </div>
                 <div className="text-sm leading-5 text-[#6B7280]">
-                  Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement
-                  de votre inscription.
+                  {isCLE
+                    ? "Votre dossier est en cours de traitement par votre établissement scolaire. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."
+                    : "Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."}
                 </div>
               </div>
               <hr className="text-gray-200" />
               <div>
-                {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(young.cohort, young, environment) && (
+                {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(cohort) && (
                   <button
                     className="rounded-lg border-[1px] border-blue-600 bg-white  py-2.5 px-3 text-sm font-medium leading-5 !text-blue-600 transition duration-150 ease-in-out hover:!bg-blue-600 hover:!text-white"
                     onClick={goToInscription}>
@@ -81,7 +85,8 @@ export default function WaitingValidation() {
         <div className="flex flex-col-reverse bg-white">
           <div className="flex flex-col gap-4 px-4 pb-8   ">
             <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
-              <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
+              <strong>{young.firstName}, </strong>
+              {isCLE ? "bienvenue sur votre compte élève." : "bienvenue sur votre compte volontaire."}
             </div>
             <div className="mt-3 text-lg font-bold text-[#242526]">Merci, votre inscription a bien été enregistrée.</div>
             <hr className="mt-3 text-gray-200" />
@@ -90,12 +95,13 @@ export default function WaitingValidation() {
                 <Clock />
               </div>
               <div className="text-sm text-[#738297]">
-                Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement de
-                votre inscription.
+                {isCLE
+                  ? "Votre dossier est en cours de traitement par votre établissement scolaire. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."
+                  : "Votre dossier est en cours de traitement par l’administration. Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription."}
               </div>
             </div>
             <hr className="text-gray-200" />
-            {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(young.cohort, young, environment) && (
+            {young.status === YOUNG_STATUS.WAITING_VALIDATION && inscriptionModificationOpenForYoungs(cohort) && (
               <button
                 className="mt-4 rounded-lg border-[1px] border-blue-600 bg-white  py-2.5 px-3 text-sm font-medium leading-5 !text-blue-600 transition duration-150 ease-in-out hover:!bg-blue-600 hover:!text-white"
                 onClick={goToInscription}>

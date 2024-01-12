@@ -1,27 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
 import validator from "validator";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
-import InfoCircleMission from "../../../assets/icons/InfoCircleMission";
+import InfoCircleMission from "@/assets/icons/InfoCircleMission";
 
-import {
-  translate,
-  ROLES,
-  MISSION_DOMAINS,
-  PERIOD,
-  MISSION_PERIOD_DURING_HOLIDAYS,
-  MISSION_PERIOD_DURING_SCHOOL,
-  ES_NO_LIMIT,
-  regexPhoneFrenchCountries,
-  SENDINBLUE_TEMPLATES,
-} from "../../../utils";
+import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES, ENABLE_PM } from "@/utils";
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
-import Field from "../components/Field";
+import Field from "@/components/ui/forms/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import Toggle from "../../../components/Toggle";
 
@@ -33,6 +22,8 @@ import { adminURL } from "../../../config";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import { MISSION_STATUS } from "snu-lib";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
+import { useSelector } from "react-redux";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -41,7 +32,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [errors, setErrors] = useState({});
   const [referents, setReferents] = useState([]);
   const [creationTutor, setCreationTutor] = useState(false);
-  const [selectedStructure, setSelectedStructure] = useState(null);
+  const { user } = useSelector((state) => state.Auth);
+  const [structure, setStructure] = useState(null);
 
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
@@ -70,15 +62,23 @@ export default function DetailsView({ mission, setMission, getMission }) {
     "region",
     "department",
     "location",
+    "isMilitaryPreparation",
   ];
 
   const history = useHistory();
 
   const referentSelectRef = useRef();
 
-  async function initReferents() {
-    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": values.structureId } }] } }, size: ES_NO_LIMIT };
-    const { responses } = await api.esQuery("referent", body);
+  async function initContext({ structureId }) {
+    if (!structureId) return history.push("/mission");
+
+    //init structure
+    const { ok, data, code } = await api.get(`/structure/${structureId}`);
+    if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
+    setValues({ ...values, structureName: data.name, structureId: data._id.toString() });
+    setStructure(data);
+
+    const { responses } = await api.post("/elasticsearch/referent/structure/" + structureId);
     if (responses?.length) {
       const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
       if (!responseReferents.find((ref) => ref.value === values.tutorId)) {
@@ -90,57 +90,24 @@ export default function DetailsView({ mission, setMission, getMission }) {
   }
 
   useEffect(() => {
-    initReferents();
+    initContext({ structureId: values.structureId });
   }, [values.structureId]);
 
   const fetchStructures = async (inputValue) => {
-    const body = {
-      query: { bool: { must: [] } },
-      size: 50,
-      track_total_hits: true,
-    };
-    if (inputValue) {
-      body.query.bool.must.push({
-        bool: {
-          should: [
-            {
-              multi_match: {
-                query: inputValue,
-                fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-                type: "cross_fields",
-                operator: "and",
-              },
-            },
-            {
-              multi_match: {
-                query: inputValue,
-                fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-                type: "phrase",
-                operator: "and",
-              },
-            },
-            {
-              multi_match: {
-                query: inputValue,
-                fields: ["name", "address", "city", "zip", "department", "region", "code2022", "centerDesignation"],
-                type: "phrase_prefix",
-                operator: "and",
-              },
-            },
-          ],
-          minimum_should_match: "1",
-        },
-      });
-    }
-    const { responses } = await api.esQuery("structure", body);
+    const { responses } = await api.post("/elasticsearch/structure/search", { filters: { searchbar: [inputValue] } });
     return responses[0].hits.hits.map((hit) => {
       return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
     });
   };
 
-  const onSubmit = () => {
+  const onSubmitForm = async () => {
+    // Réinitialiser les états de chargement et d'erreur
     setLoading(true);
+    setLoadingBottom(true);
     const error = {};
+    const errorBottom = {};
+
+    setLoading(true);
     const baseError = "Ce champ est obligatoire";
     valuesToCheck.map((val) => {
       if (!values[val]) error[val] = baseError;
@@ -156,21 +123,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
       return setLoading(false);
     }
 
-    // open modal to confirm is mission has to change status
-    if ((values.description !== mission.description || values.actions !== mission.actions) && mission.status !== "WAITING_VALIDATION") return setModalConfirmation(true);
-    updateMission(valuesToUpdate);
-  };
-
-  useEffect(() => {
-    if (values.period.length === 0 || (values.period.length === 1 && values.period[0] === "WHENEVER")) {
-      setValues({ ...values, subPeriod: [] });
-    }
-  }, [values.period]);
-
-  const onSubmitBottom = () => {
     setLoadingBottom(true);
-    const error = {};
-    if (values.startAt < new Date()) error.startAt = "La date est incorrect";
+    if (values.startAt < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date est incorrect";
     if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
     if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
     if (values.placesTotal < mission.placesTotal && mission.placesLeft - (mission.placesTotal - values.placesTotal) < 0)
@@ -181,14 +135,42 @@ export default function DetailsView({ mission, setMission, getMission }) {
       toastr.error("Oups, le formulaire est incomplet");
       return setLoadingBottom(false);
     }
-    updateMission(["startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
+
+    // Fusionner les objets d'erreur
+    const combinedError = { ...error, ...errorBottom };
+
+    // Si des erreurs sont trouvées, afficher un message d'erreur
+    if (Object.keys(combinedError).length > 0) {
+      toastr.error("Oups, le formulaire est incomplet");
+      setLoading(false);
+      setLoadingBottom(false);
+      return;
+    }
+
+    // Déterminer si le statut de la mission doit être modifié
+    const shouldChangeStatus = (values.description !== mission.description || values.actions !== mission.actions) && mission.status !== "WAITING_VALIDATION";
+
+    // Si nécessaire, ouvrir la modale de confirmation
+    if (shouldChangeStatus) {
+      return setModalConfirmation(true);
+    }
+
+    // Mettre à jour la mission avec tous les champs nécessaires
+    await updateMission([...valuesToUpdate, "startAt", "endAt", "placesTotal", "frequence", "period", "subPeriod"]);
   };
+
+  useEffect(() => {
+    if (values.period.length === 0 || (values.period.length === 1 && values.period[0] === "WHENEVER")) {
+      setValues({ ...values, subPeriod: [] });
+    }
+  }, [values.period]);
 
   const updateMission = async (valuesToUpdate) => {
     try {
       // build object from array of keys
       const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {});
       if (valuesToSend.addressVerified) valuesToSend.addressVerified = valuesToSend.addressVerified.toString();
+      if (structure.isMilitaryPreparation !== "true") valuesToSend.isMilitaryPreparation = "false";
       const { ok, code, data: missionReturned } = await api.put(`/mission/${values._id}`, valuesToSend);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
@@ -237,13 +219,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
       if (!newTutor.lastName) error.lastName = "Ce champ est obligatoire";
       if (!validator.isEmail(newTutor.email)) error.email = "L'email est incorrect";
       if (!newTutor.phone) error.phone = "Ce champ est obligatoire";
-      if (!validator.matches(newTutor.phone, regexPhoneFrenchCountries)) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+      if (!isPossiblePhoneNumber(newTutor.phone, "FR")) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
       setErrors(error);
       if (Object.keys(error).length > 0) return setLoading(false);
 
       newTutor.structureId = values.structureId;
       newTutor.structureName = values.structureName;
-      if (selectedStructure?.isNetwork === "true") {
+      if (structure?.isNetwork === "true") {
         newTutor.role = ROLES.SUPERVISOR;
       } else {
         newTutor.role = ROLES.RESPONSIBLE;
@@ -252,7 +234,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
       if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
       setNewTutor({ firstName: "", lastName: "", email: "", phone: "" });
       setCreationTutor(false);
-      initReferents();
+      initContext({ structureId: values.structureId });
       return toastr.success("Invitation envoyée");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
@@ -260,6 +242,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
       toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
     }
   };
+
+  if (!mission || !structure) return null;
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -277,7 +261,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
         }}
       />
       <MissionView mission={mission} getMission={getMission} tab="details">
-        {(editing || editingBottom) && mission?.isJvaMission === "true" ? (
+        {editing && mission?.isJvaMission === "true" ? (
           <div className="mb-2.5 rounded-lg bg-violet-100 p-4 text-center text-base text-indigo-800">
             Les informations grisées sont à modifier par le responsable de la structure depuis son espace{" "}
             <a target="_blank" rel="noreferrer" href="https://www.jeveuxaider.gouv.fr/">
@@ -290,6 +274,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
             bg="bg-blue-700"
             Icon={InfoCircleMission}
             message="La mission est en attente de validation. Son contenu va être vérifié par un référent SNU du département dans lequel se déroulera la mission dans les jours à venir."
+          />
+        ) : null}
+        {mission.status === MISSION_STATUS.DRAFT ? (
+          <InfoMessage
+            bg="bg-blue-700"
+            Icon={InfoCircleMission}
+            message='Si la mission reste au statut brouillon celle-ci ne sera pas étudiée et par conséquent le volontaire ne pourra pas y candidater. Pensez à modifier son statut en la passant "En attente de validation". (bouton en haut à droite de votre écran)'
           />
         ) : null}
         <div className="mb-8 rounded-xl bg-white pt-2 mt-8">
@@ -342,13 +333,14 @@ export default function DetailsView({ mission, setMission, getMission }) {
                           setEditing(false);
                           setValues({ ...mission });
                           setErrors({});
+                          setErrorsBottom({});
                         }}
                         disabled={loading}>
                         Annuler
                       </button>
                       <button
                         className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={onSubmit}
+                        onClick={onSubmitForm}
                         disabled={loading}>
                         <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                         Enregistrer les changements
@@ -365,14 +357,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. Ex : « Je fais les courses de produits pour mes voisins les plus
                     fragiles »
                   </div>
-                  <Field
-                    name="name"
-                    errors={errors}
-                    readOnly={!editing}
-                    handleChange={(e) => setValues({ ...values, name: e.target.value })}
-                    label="Nom de la mission"
-                    value={values.name}
-                  />
+                  <Field name="name" error={errors?.name} readOnly={!editing} onChange={(name) => setValues({ ...values, name })} label="Nom de la mission" value={values.name} />
                 </div>
                 <div className="mt-4">
                   <div className="mb-2 text-xs font-medium">Structure rattachée</div>
@@ -393,7 +378,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     defaultOptions
                     onChange={(e) => {
                       setValues({ ...values, structureName: e.label, structureId: e._id });
-                      setSelectedStructure(e.structure);
                     }}
                     placeholder="Rechercher une structure"
                     error={errors.structureName}
@@ -433,37 +417,34 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Lieu où se déroule la mission</div>
                   <div className="mb-2 text-xs font-medium">Adresse</div>
                   <Field
-                    errors={errors}
                     readOnly={!editing}
-                    isJvaMission={mission?.isJvaMission === "true"}
+                    bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                     label="Adresse"
                     name="address"
-                    handleChange={(e) => {
-                      setValues({ ...values, address: e.target.value, addressVerified: false });
+                    onChange={(address) => {
+                      setValues({ ...values, address, addressVerified: false });
                     }}
                     value={values.address}
                     error={errors?.address}
                   />
                   <div className="my-4 flex flex-row justify-between gap-3">
                     <Field
-                      errors={errors}
                       readOnly={!editing}
-                      isJvaMission={mission?.isJvaMission === "true"}
+                      bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                       label="Code postal"
                       className="w-[50%]"
                       name="zip"
-                      handleChange={(e) => setValues({ ...values, zip: e.target.value, addressVerified: false })}
+                      onChange={(zip) => setValues({ ...values, zip, addressVerified: false })}
                       value={values.zip}
                       error={errors?.zip}
                     />
                     <Field
-                      errors={errors}
                       readOnly={!editing}
-                      isJvaMission={mission?.isJvaMission === "true"}
+                      bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                       label="Ville"
                       name="city"
                       className="w-[50%]"
-                      handleChange={(e) => setValues({ ...values, city: e.target.value, addressVerified: false })}
+                      onChange={(city) => setValues({ ...values, city, addressVerified: false })}
                       value={values.city}
                       error={errors?.city}
                     />
@@ -524,7 +505,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         );
                       }}
                       isValidNewOption={() => true}
-                      value={referents?.find((ref) => ref.value === values.tutorId)}
+                      value={referents?.find((ref) => ref.value === values.tutorId) || ""}
                     />
                   )}
 
@@ -534,44 +515,40 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       <div className="mb-2 text-xs font-medium">Identité et contact</div>
                       <div className="mb-4 flex flex-row justify-between gap-3">
                         <Field
-                          errors={errors}
                           readOnly={!editing}
                           label="Nom"
                           className="w-[50%]"
                           name="lastName"
-                          handleChange={(e) => setNewTutor({ ...newTutor, lastName: e.target.value })}
+                          onChange={(lastName) => setNewTutor({ ...newTutor, lastName })}
                           value={newTutor.lastName}
-                          error={errors}
+                          error={errors?.lastName}
                         />
                         <Field
-                          errors={errors}
                           readOnly={!editing}
                           label="Prénom"
                           name="firstName"
                           className="w-[50%]"
-                          handleChange={(e) => setNewTutor({ ...newTutor, firstName: e.target.value })}
+                          onChange={(firstName) => setNewTutor({ ...newTutor, firstName })}
                           value={newTutor.firstName}
-                          error={errors}
+                          error={errors?.firstName}
                         />
                       </div>
                       <Field
-                        errors={errors}
                         readOnly={!editing}
                         label="Email"
                         name="email"
-                        handleChange={(e) => setNewTutor({ ...newTutor, email: e.target.value })}
+                        onChange={(email) => setNewTutor({ ...newTutor, email })}
                         value={newTutor.email}
-                        error={errors}
+                        error={errors?.email}
                       />
                       <Field
-                        errors={errors}
                         readOnly={!editing}
                         label="Téléphone"
                         name="phone"
                         className="my-4"
-                        handleChange={(e) => setNewTutor({ ...newTutor, phone: e.target.value })}
+                        onChange={(phone) => setNewTutor({ ...newTutor, phone })}
                         value={newTutor.phone}
-                        error={errors}
+                        error={errors?.phone}
                       />
                       <div className="flex w-full justify-end">
                         <div className="inline-block cursor-pointer rounded bg-blue-600 py-2.5 px-4 text-sm font-medium text-white" onClick={sendInvitation}>
@@ -604,10 +581,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   </div>
                   <div className="mb-2 text-xs font-medium">Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</div>
                   <Field
-                    errors={errors}
+                    error={errors?.duration}
                     readOnly={!editing}
                     name="duration"
-                    handleChange={(e) => setValues({ ...values, duration: e.target.value })}
+                    onChange={(duration) => setValues({ ...values, duration })}
                     label="Heure(s)"
                     value={translate(values.duration)}
                   />
@@ -623,12 +600,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     </div>
                   </div>
                   <Field
-                    errors={errors}
+                    error={errors?.description}
                     readOnly={!editing}
                     name="description"
                     type="textarea"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, description: e.target.value })}
+                    onChange={(description) => setValues({ ...values, description })}
                     label="Décrivez votre mission"
                     value={translate(values.description)}
                   />
@@ -644,12 +621,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     </div>
                   </div>
                   <Field
-                    errors={errors}
+                    error={errors?.actions}
                     readOnly={!editing}
                     type="textarea"
                     name="actions"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, actions: e.target.value })}
+                    onChange={(actions) => setValues({ ...values, actions })}
                     label="Listez les actions confiées au(x) volontaires"
                     value={translate(values.actions)}
                   />
@@ -666,11 +643,25 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     readOnly={!editing}
                     type="textarea"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, contraintes: e.target.value })}
+                    onChange={(contraintes) => setValues({ ...values, contraintes })}
                     label="Précisez les informations complémentaires à préciser au volontaire."
                     value={translate(values.contraintes)}
                   />
                 </div>
+                {ENABLE_PM && structure.isMilitaryPreparation === "true" ? (
+                  <div className="flex flex-row items-center justify-between">
+                    <div className="font-medium text-gray-800">Préparation Militaire : {values?.isMilitaryPreparation === "true" ? "oui" : "non"}</div>
+                    <Toggle
+                      id="hebergement"
+                      name="hebergement"
+                      disabled={!editing}
+                      value={values?.isMilitaryPreparation === "true"}
+                      onChange={(e) => {
+                        setValues({ ...values, isMilitaryPreparation: e.toString() });
+                      }}
+                    />
+                  </div>
+                ) : null}
                 <div>
                   <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Hébergement</div>
                   <div className="flex flex-row items-center justify-between">
@@ -714,11 +705,11 @@ export default function DetailsView({ mission, setMission, getMission }) {
               </div>
               {mission.status !== MISSION_STATUS.ARCHIVED && (
                 <>
-                  {!editingBottom ? (
+                  {!editing ? (
                     <button
                       className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      onClick={() => setEdittingBottom(true)}
-                      disabled={loadingBottom}>
+                      onClick={() => setEditing(true)}
+                      disabled={loading}>
                       <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                       Modifier
                     </button>
@@ -727,8 +718,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       <button
                         className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={() => {
-                          setEdittingBottom(false);
+                          setEditing(false);
                           setValues({ ...mission });
+                          setErrors({});
                           setErrorsBottom({});
                         }}
                         disabled={loading}>
@@ -736,8 +728,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       </button>
                       <button
                         className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={onSubmitBottom}
-                        disabled={loadingBottom}>
+                        onClick={onSubmitForm}
+                        disabled={loading}>
                         <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                         Enregistrer les changements
                       </button>
@@ -752,25 +744,23 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="mb-2 text-xs font-medium">Dates de la mission</div>
                   <div className="my-2 flex flex-row justify-between gap-3">
                     <Field
-                      errors={errorsBottom}
                       name="startAt"
-                      readOnly={!editingBottom}
+                      readOnly={!editing}
                       label="Date de début"
                       type="date"
                       className="w-[50%]"
-                      handleChange={(e) => setValues({ ...values, startAt: e })}
+                      onChange={(startAt) => setValues({ ...values, startAt })}
                       value={values.startAt}
                       error={errors?.startAt}
                     />
                     <Field
-                      errors={errorsBottom}
-                      readOnly={!editingBottom}
-                      isJvaMission={mission?.isJvaMission === "true"}
+                      readOnly={!editing}
+                      bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                       label="Date de fin"
                       name="endAt"
                       className="w-[50%]"
                       type="date"
-                      handleChange={(e) => setValues({ ...values, endAt: e })}
+                      onChange={(endAt) => setValues({ ...values, endAt })}
                       value={values.endAt}
                       error={errors?.endAt}
                     />
@@ -783,13 +773,13 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     </div>
                   </div>
                   <Field
-                    errors={errorsBottom}
-                    readOnly={!editingBottom}
-                    isJvaMission={mission?.isJvaMission === "true"}
+                    error={errorsBottom?.frequence}
+                    readOnly={!editing}
+                    bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                     name="frequence"
                     type="textarea"
                     row={4}
-                    handleChange={(e) => setValues({ ...values, frequence: e.target.value })}
+                    onChange={(frequence) => setValues({ ...values, frequence })}
                     label="Fréquence estimée de la mission"
                     value={values.frequence}
                   />
@@ -806,17 +796,17 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   </div>
                   {/* Script pour passage d'array periode en single value */}
                   <CustomSelect
-                    readOnly={!editingBottom}
+                    readOnly={!editing}
                     isMulti
                     options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
                     placeholder={"Sélectionnez une ou plusieurs périodes"}
                     onChange={(e) => setValues({ ...values, period: e })}
                     value={values.period}
                   />
-                  {(editingBottom || values.subPeriod.length > 0) && values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
+                  {(editing || values.subPeriod.length > 0) && values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
                     <div className="mt-4">
                       <CustomSelect
-                        readOnly={!editingBottom}
+                        readOnly={!editing}
                         isMulti
                         options={(() => {
                           const valuesToCheck = values.period;
@@ -838,10 +828,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   </div>
                   <Field
                     name="placesTotal"
-                    errors={errorsBottom}
-                    readOnly={!editingBottom}
+                    error={errorsBottom?.placesTotal}
+                    readOnly={!editing}
                     isJvaMission={mission?.isJvaMission === "true"}
-                    handleChange={(e) => setValues({ ...values, placesTotal: e.target.value })}
+                    onChange={(placesTotal) => setValues({ ...values, placesTotal })}
                     value={values.placesTotal}
                   />
                 </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import api from "../../../services/api";
+import plausibleEvent from "@/services/plausible";
 
 export default function FranceConnectButton({ callback, beforeRedirect, className }) {
   const [hover, setHover] = useState(false);
@@ -11,6 +12,7 @@ export default function FranceConnectButton({ callback, beforeRedirect, classNam
   }, [redirection]);
 
   async function redirectToFranceConnect() {
+    plausibleEvent("Phase0/CTA representant legal - france connect");
     if (beforeRedirect) await beforeRedirect();
     const response = await api.post("/young/france-connect/authorization-url", { callback });
     setRedirection(response.data.url);

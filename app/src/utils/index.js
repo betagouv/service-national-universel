@@ -1,7 +1,6 @@
 import PasswordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, sessions2023 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 export * from "snu-lib";
-import sanitizeHtml from "sanitize-html";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
 function addOneDay(date) {
@@ -62,6 +61,7 @@ export function permissionPhase1(y) {
 
 export function permissionPhase2(y) {
   if (!permissionPhase1(y)) return false;
+  if (!hasAccessToPhase2(y)) return false;
   return (
     (y.status !== YOUNG_STATUS.WITHDRAWN &&
       (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) ||
@@ -76,29 +76,25 @@ export function permissionPhase3(y) {
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
 }
 
-// eslint-disable-next-line no-unused-vars
-export function permissionReinscription(_y) {
-  // return y.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && !["Exclusion"].includes(y.departSejourMotif);
-  return false;
+export function hasAccessToPhase2(young) {
+  if (young.statusPhase2 === "VALIDATED") return true;
+  const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
+  const cohortIsTooOld = ["2019", "2020"].includes(young.cohort);
+  if (cohortIsTooOld && !userIsDoingAMission) {
+    return false;
+  }
+  return true;
 }
 
+// from the end of the cohort's last day
 export function isYoungCanApplyToPhase2Missions(young) {
   const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
-  return isCohortDone(young.cohort) && hasYoungPhase1DoneOrExempted;
+  return isCohortDone(young.cohort, 1) && hasYoungPhase1DoneOrExempted;
 }
 
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
 
 export const ENABLE_PM = true;
-
-export const htmlCleaner = (text) => {
-  return sanitizeHtml(text, {
-    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
-    allowedAttributes: {
-      a: ["href", "target", "rel"],
-    },
-  });
-};
 
 export function urlWithScheme(url) {
   if (!/^https?:\/\//i.test(url)) return `http://${url}`;
@@ -127,35 +123,25 @@ export function slugifyFileName(str) {
   return slugify(str, { replacement: "-", remove: /[*+~.()'"!:@]/g });
 }
 
-export const getDistance = (lat1, lon1, lat2, lon2) => {
-  if (lat1 === lat2 && lon1 === lon2) {
-    return 0;
-  } else {
-    let radlat1 = (Math.PI * lat1) / 180;
-    let radlat2 = (Math.PI * lat2) / 180;
-    let theta = lon1 - lon2;
-    let radtheta = (Math.PI * theta) / 180;
-    let dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-    if (dist > 1) {
-      dist = 1;
-    }
-    dist = Math.acos(dist);
-    dist = (dist * 180) / Math.PI;
-    dist = dist * 60 * 1.1515;
+function toRadians(degrees) {
+  return (degrees * Math.PI) / 180;
+}
 
-    return dist;
-  }
-};
+// Calculer la distance haversine entre deux points géographiques
+export function getDistance(lat1, lon1, lat2, lon2) {
+  const earthRadiusKm = 6371; // Rayon de la Terre en kilomètres
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = earthRadiusKm * c;
+
+  return distance;
+}
 
 export const regexPhoneFrenchCountries = /^((00|\+)(33|590|594|262|596|269|687|689|508|681)|0)[1-9]?(\d{8})$/;
-
-export const canYoungResumePhase1 = (y) => {
-  return (
-    sessions2023.map((e) => e.name).includes(y.cohort) &&
-    y.status === YOUNG_STATUS.WITHDRAWN &&
-    ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.NOT_DONE].includes(y.statusPhase1)
-  );
-};
 
 export const debounce = (fn, delay) => {
   let timeOutId;
@@ -167,6 +153,11 @@ export const debounce = (fn, delay) => {
       fn(...args);
     }, delay);
   };
+};
+
+export const validateId = (id) => {
+  const idRegex = /^[0-9a-fA-F]{24}$/;
+  return idRegex.test(id);
 };
 
 export const desktopBreakpoint = 768;

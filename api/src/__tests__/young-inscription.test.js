@@ -160,13 +160,6 @@ describe("Young", () => {
       expect(res.status).toBe(400);
     });
 
-    it("Should return 200 when no body is sent when type url param is 'save'", async () => {
-      const typeUrlParam = "save";
-
-      let res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`);
-      expect(res.status).toBe(200);
-    });
-
     it("Should return 400 when body sent is invalid when type url param is 'next' or 'correction'", async () => {
       let typeUrlParam = "next";
 
@@ -196,11 +189,10 @@ describe("Young", () => {
         birthCountry: "France",
         birthCity: "Paris",
         birthCityZip: "75008",
-        phone: "0600010203",
-        phoneZone: "FRANCE",
         situation: YOUNG_SITUATIONS.GENERAL_SCHOOL,
         livesInFrance: "true",
         addressVerified: "true",
+        coordinatesAccuracyLevel: "housenumber",
         country: "France",
         city: "Paris",
         zip: "75008",
@@ -231,7 +223,6 @@ describe("Young", () => {
         ...coordonneeObj,
         gender: "male",
         handicap: "false",
-        phone: "0601020304",
       };
 
       res = await request(getAppHelper()).put(`/young/inscription2023/coordinates/${typeUrlParam}`).send(correctCoordonneeObj);
@@ -327,33 +318,6 @@ describe("Young", () => {
 
       typeUrlParam = "correction";
       res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`);
-      expect(res.status).toBe(400);
-    });
-
-    it("Should return 200 when no body is sent when type url param is 'save'", async () => {
-      const typeUrlParam = "save";
-
-      let res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`);
-      expect(res.status).toBe(200);
-    });
-
-    it("Should return 400 when body sent is invalid when type url param is 'next' or 'correction'", async () => {
-      let typeUrlParam = "next";
-
-      const representantObj = {
-        parent1Status: "",
-        parent1FirstName: "",
-        parent1LastName: "",
-        parent1Email: "",
-        parent1Phone: "",
-        parent2: null,
-      };
-
-      let res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`).send(representantObj);
-      expect(res.status).toBe(400);
-
-      typeUrlParam = "correction";
-      res = await request(getAppHelper()).put(`/young/inscription2023/representants/${typeUrlParam}`).send(representantObj);
       expect(res.status).toBe(400);
     });
 
@@ -461,7 +425,7 @@ describe("Young", () => {
       const cohortObj = {
         cohort: "Juillet 2023",
       };
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
+      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").set("x-user-timezone", -60).send(cohortObj);
       expect(res.status).toBe(404);
     });
 
@@ -477,7 +441,7 @@ describe("Young", () => {
         cohort: "Juillet 2023",
       };
 
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
+      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").set("x-user-timezone", -60).send(cohortObj);
       expect(res.status).toBe(409);
     });
 
@@ -714,6 +678,8 @@ describe("Young", () => {
         firstName: "John",
         lastName: "DOE",
         email: "john@doe.com",
+        phone: "600000000",
+        phoneZone: "FRANCE",
       };
       let res = await request(getAppHelper()).put("/young/inscription2023/profil").send(profilObj);
       expect(res.status).toBe(404);
@@ -731,6 +697,8 @@ describe("Young", () => {
         firstName: faker.name.firstName().toLowerCase(),
         lastName: faker.name.lastName().toUpperCase(),
         email: faker.internet.email().toLowerCase(),
+        phone: "600000000",
+        phoneZone: "FRANCE",
       };
 
       let res = await request(getAppHelper()).put("/young/inscription2023/profil").send(profilObj);

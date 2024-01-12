@@ -8,6 +8,7 @@ import api from "../../../../services/api";
 import Pencil from "../../../../assets/icons/Pencil";
 import { capture } from "../../../../sentry";
 import ModalDispense from "../ModalDispense";
+import ModalConfirm from "../../../../components/modals/ModalConfirm";
 
 const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, loading = false, setValues, setYoung, user }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -17,36 +18,14 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
     return young.hasMeetingInformation === "true" && ["AFFECTED", "DONE", "NOT_DONE", "EXEMPTED"].includes(young.statusPhase1);
   };
 
-  const handleSendAttestationByEmail = async () => {
-    try {
-      setLoading(true);
-      const { ok, code } = await api.post(`/young/${young._id}/documents/certificate/1/send-email`, {
-        fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
-      });
-      setLoading(false);
-      if (!ok) throw new Error(translate(code));
-      toastr.success(`Document envoyé à ${young.email}`);
-    } catch (e) {
-      capture(e);
-      setLoading(false);
-      toastr.error("Erreur lors de l'envoie du document", e.message);
-    }
-  };
-
-  const handleDownloadAttestationPdfFile = async () => {
-    await downloadPDF({
-      url: `/young/${young._id}/documents/certificate/1`,
-      fileName: `${young.firstName} ${young.lastName} - attestation 1.pdf`,
-    });
-  };
-
   const handleSendConvocationByEmail = async () => {
     try {
       setLoading(true);
       const { ok, code } = await api.post(`/young/${young._id}/documents/convocation/cohesion/send-email`, {
-        fileName: `${young.firstName} ${young.lastName} - convocation.pdf`,
+        fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
       });
       setLoading(false);
+      setModal({ isOpen: false });
       if (!ok) throw new Error(translate(code));
       toastr.success(`Document envoyé à ${young.email}`);
     } catch (e) {
@@ -59,7 +38,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
   const handleDownloadConvocationPdfFile = async () => {
     await downloadPDF({
       url: `/young/${young._id}/documents/convocation/cohesion`,
-      fileName: `${young.firstName} ${young.lastName} - attestation 1.pdf`,
+      fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
     });
   };
 
@@ -111,20 +90,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
               }
             />
           )}
-          {young.statusPhase1 === "DONE" && (
-            <DocumentSelect
-              title="Attestation de réalisation phase 1"
-              onClickPdf={handleDownloadAttestationPdfFile}
-              onClickMail={() =>
-                setModal({
-                  isOpen: true,
-                  title: "Envoie de document par mail",
-                  message: `Êtes-vous sûr de vouloir transmettre le document Attestation de réalisation de la phase 1 par mail à ${young.email} ?`,
-                  onConfirm: handleSendAttestationByEmail,
-                })
-              }
-            />
-          )}
+
           {young.statusPhase1 === "NOT_DONE" && user.role !== ROLES.HEAD_CENTER && (
             <div onClick={() => setModalDispense({ isOpen: true })} className="ml-2 cursor-pointer rounded border-[1px] border-blue-700 px-2.5 py-1.5 font-medium text-blue-700">
               Dispenser le volontaire du séjour
@@ -133,6 +99,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
         </div>
         <EditTop />
       </div>
+      <ModalConfirm isOpen={modal?.isOpen} title={modal?.title} message={modal?.message} onCancel={() => setModal({ isOpen: false })} onConfirm={modal?.onConfirm} />
       <ModalDispense
         isOpen={modalDispense?.isOpen}
         youngId={young?._id}

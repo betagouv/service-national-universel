@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
-import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { COHESION_STAY_START, translate } from "snu-lib";
-import Footer from "../../../components/footerV2";
-import StickyButton from "../../../components/inscription/stickyButton";
+import React, { useContext, useState } from "react";
+import { Redirect, useHistory } from "react-router-dom";
+import { translate } from "snu-lib";
+import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import api from "../../../services/api";
@@ -19,19 +19,16 @@ export default function CniInvalide() {
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (young) {
-      if (young.parentStatementOfHonorInvalidId === "true" || young.parentStatementOfHonorInvalidId === "false") {
-        history.push(`/representants-legaux/cni-invalide-done?token=${token}`);
-      }
-    }
-  }, [young]);
-
   if (!young) return <Loader />;
 
-  const youngFullname = young.firstName + " " + young.lastName;
-  const parentFullname = young.parent1FirstName + " " + young.parent1LastName;
-  const dateSejour = COHESION_STAY_START[young.cohort] ? dayjs(COHESION_STAY_START[young.cohort]).locale("fr").format("D MMMM YYYY") : young.cohort;
+  if (young.parentStatementOfHonorInvalidId === "true" || young.parentStatementOfHonorInvalidId === "false") {
+    return <Redirect to={`/representants-legaux/cni-invalide-done?token=${token}`} />;
+  }
+
+  const { firstName, lastName, parent1FirstName, parent1LastName, cohort } = young;
+  const youngFullname = firstName + " " + lastName;
+  const parentFullname = parent1FirstName + " " + parent1LastName;
+  const dateSejour = cohort.dateStart ? dayjs(cohort.dateStart).locale("fr").format("D MMMM YYYY") : cohort.name;
 
   async function onSubmit() {
     setSaving(true);
@@ -61,9 +58,8 @@ export default function CniInvalide() {
 
   return (
     <>
-      <div className="bg-white p-4 text-[#161616]">
+      <DSFRContainer title="Déclaration sur l'honneur">
         <div className="flex flex-col gap-4">
-          <h1 className="text-[22px] font-bold">Déclaration sur l’honneur</h1>
           <div className="mt-2 text-[#161616]">
             Malheureusement, la pièce d’identité de <strong>{youngFullname}</strong> périme d’ici son départ en séjour de cohésion prévu le{" "}
             <strong className="whitespace-nowrap">{dateSejour}</strong>.
@@ -78,9 +74,8 @@ export default function CniInvalide() {
             </div>
           </Check>
         </div>
-      </div>
-      <Footer marginBottom="mb-[88px]" />
-      <StickyButton onClick={onSubmit} disabled={saving} text="Valider ma déclaration" />
+        <SignupButtonContainer onClickNext={onSubmit} labelNext="Valider ma déclaration" disabled={saving} />
+      </DSFRContainer>
     </>
   );
 }

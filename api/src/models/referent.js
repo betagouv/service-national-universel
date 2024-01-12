@@ -4,6 +4,8 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
+const { generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
+
 const { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST } = require("snu-lib");
 
 const MODELNAME = "referent";
@@ -28,6 +30,7 @@ const Schema = new mongoose.Schema({
       description: "Nom de l'utilisateur",
     },
   },
+
   email: {
     type: String,
     required: true,
@@ -35,6 +38,19 @@ const Schema = new mongoose.Schema({
     trim: true,
     documentation: {
       description: "Email de l'utilisateur",
+    },
+  },
+  emailValidatedAt: {
+    type: Date,
+    documentation: {
+      description: "[CLE] Date à laquelle l'email a été validé",
+    },
+  },
+  emailWaitingValidation: {
+    type: String,
+    trim: true,
+    documentation: {
+      description: "[CLE] Email renseigné par l'utilisateur pendant l'inscription mais pas encore validé (code envoyé)",
     },
   },
 
@@ -52,13 +68,6 @@ const Schema = new mongoose.Schema({
       description: "tentative de connexion. Max 15",
     },
   },
-  userIps: {
-    type: [String],
-    default: [],
-    documentation: {
-      description: "Liste des IP utilisées par l'utilisateur",
-    },
-  },
   token2FA: {
     type: String,
     default: "",
@@ -70,6 +79,13 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date limite de validité du token pour 2FA",
+    },
+  },
+  attempts2FA: {
+    type: Number,
+    default: 0,
+    documentation: {
+      description: "Tentative de connexion 2FA. Max 3",
     },
   },
   acceptCGU: {
@@ -221,6 +237,7 @@ const Schema = new mongoose.Schema({
       description: "Numéro de téléphone fix",
     },
   },
+
   mobile: {
     type: String,
     documentation: {
@@ -233,22 +250,16 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.virtual("fullName").get(function () {
+  const { firstName, lastName } = this;
+  if (firstName && lastName) return `${firstName} ${lastName}`;
+  else return firstName || lastName;
+});
+
 Schema.pre("save", async function (next) {
   if (this.isModified("password")) {
     const hashedPassword = await bcrypt.hash(this.password, 10);
     this.password = hashedPassword;
-  }
-  return next();
-});
-
-Schema.pre("save", async function (next) {
-  if (this.isModified("userIps") || this.isNew) {
-    const _userIps = [];
-    for (let ip of this.userIps) {
-      const hashedIp = await bcrypt.hash(ip, 10);
-      _userIps.push(hashedIp);
-    }
-    this.userIps = _userIps;
   }
   return next();
 });
@@ -258,11 +269,13 @@ Schema.methods.comparePassword = async function (p) {
   return bcrypt.compare(p, user.password || "");
 };
 
-Schema.methods.compareIps = async function (ip) {
-  const user = await OBJ.findById(this._id).select("userIps");
-  const promises = user.userIps.map((_ip) => bcrypt.compare(ip, _ip));
-  const responses = await Promise.all(promises);
-  return responses.some((e) => e);
+Schema.methods.anonymise = function () {
+  this.phone && (this.phone = generateNewPhoneNumber());
+  this.mobile && (this.mobile = generateNewPhoneNumber());
+  this.email && (this.email = generateRandomEmail());
+  this.firstName && (this.firstName = generateRandomName());
+  this.lastName && (this.lastName = generateRandomName());
+  return this;
 };
 
 //Sync with Sendinblue
@@ -309,8 +322,8 @@ Schema.plugin(patchHistory, {
     "/invitationToken",
     "/invitationExpires",
     "/loginAttempts",
+    "/attempts2FA",
     "/updatedAt",
-    "/userIps",
     "/token2FA",
     "/token2FAExpires",
   ],
@@ -329,15 +342,18 @@ Schema.plugin(
       "invitationToken",
       "invitationExpires",
       "loginAttempts",
+      "attempts2FA",
       "updatedAt",
       "lastActivityAt",
-      "userIps",
       "token2FA",
       "token2FAExpires",
     ],
   }),
   MODELNAME,
 );
+
+Schema.set("toObject", { virtuals: true });
+Schema.set("toJSON", { virtuals: true });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 

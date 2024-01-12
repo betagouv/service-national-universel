@@ -8,16 +8,17 @@ import { Link, useHistory } from "react-router-dom";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, translateCohort, HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES } from "../../utils";
+import { translate, HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES } from "../../utils";
 import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
 import { setYoung } from "../../redux/auth/actions";
 
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { capture } from "../../sentry";
-import { calculateAge, regionsListDROMS, translateCohortTemp } from "snu-lib";
+import { YOUNG_STATUS, getCohortPeriod, getCohortPeriodTemp } from "snu-lib";
+import { getCohort } from "@/utils/cohorts";
 
-export default function changeSejour() {
+export default function ChangeSejour() {
   const young = useSelector((state) => state.Auth.young);
   const [newSejour, setNewSejour] = useState("");
   const [motif, setMotif] = useState("");
@@ -41,24 +42,16 @@ export default function changeSejour() {
   useEffect(() => {
     (async function getInfo() {
       try {
-        if (young.cohort !== "à venir" && calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18) {
-          setSejours(["à venir"]);
-          setIsElegible(true);
+        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+        const isArray = Array.isArray(data);
+        if (isArray) {
+          const availableCohorts = data.map((cohort) => cohort.name).filter((cohort) => (young.status === YOUNG_STATUS.WITHDRAWN ? cohort : cohort !== young.cohort));
+          setSejours(availableCohorts);
+          setIsElegible(availableCohorts.length > 0);
         } else {
           setIsElegible(false);
           setSejours([]);
         }
-
-        // const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
-        // const isArray = Array.isArray(data);
-        // if (isArray) {
-        //   const availableCohorts = data.map((cohort) => cohort.name).filter((cohort) => (young.status === YOUNG_STATUS.WITHDRAWN ? cohort : cohort !== young.cohort));
-        //   setSejours(availableCohorts);
-        //   setIsElegible(availableCohorts.length > 0);
-        // } else {
-        //   setIsElegible(false);
-        //   setSejours([]);
-        // }
       } catch (e) {
         capture(e);
         toastr.error("Oups, une erreur est survenue", translate(e.code));
@@ -70,13 +63,13 @@ export default function changeSejour() {
   const onConfirmer = async () => {
     try {
       if (newSejour && motif && messageTextArea) {
-        if (newSejour === "à venir") {
-          setmodalConfirmControlOk(true);
-          return;
+        if (!young?.department) {
+          toastr.error("Il n'y a pas de département pour ce jeune");
+          throw new Error("Department is undefined");
         }
         const res = await api.get(`/inscription-goal/${newSejour}/department/${young.department}/reached`);
         if (!res.ok) throw new Error(res);
-        let isGoalReached = res.data;
+        const isGoalReached = res.data;
         if (!isGoalReached) {
           setmodalConfirmControlOk(true);
         } else {
@@ -98,7 +91,7 @@ export default function changeSejour() {
         cohort: newSejour,
       });
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", translate(code));
       }
       toastr.success("Cohorte modifiée avec succés. Votre nouvelle session se tiendra en " + newSejour);
@@ -118,7 +111,7 @@ export default function changeSejour() {
         cohort: newSejour,
       });
       if (!ok) {
-        capture(code);
+        capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", translate(code));
       }
       toastr.success("Vous avez été ajouté en liste d'attente");
@@ -146,7 +139,7 @@ export default function changeSejour() {
                   <p>
                     <b>Une contrainte personnelle, familiale, scolaire ou professionnelle ?</b>
                     <br />
-                    Vous pouvez modifier les dates de votre séjour initialement prévu {translateCohortTemp(young)}.
+                    Vous pouvez modifier les dates de votre séjour initialement prévu {getCohortPeriodTemp({ ...young, cohort: getCohort(young.cohort) })}.
                   </p>
                   <p style={{ marginTop: 10, marginBottom: 9, fontSize: 14, fontWeight: 500 }}>Dates de séjour</p>
                   <ActionBox color="#ffffff" width="375px">
@@ -160,15 +153,10 @@ export default function changeSejour() {
                           {sejours.map((cohort) => {
                             return (
                               <DropdownItem key={cohort} className="dropdown-item" onClick={() => setNewSejour(cohort)}>
-                                {cohort === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)
-                                  ? "Séjour du 5 au 17 Juillet"
-                                  : `Séjour ${translateCohort(cohort)}`}
+                                {`Séjour ${getCohortPeriod(getCohort(cohort))}`}
                               </DropdownItem>
                             );
                           })}
-                          {/* <DropdownItem className="dropdown-item" onClick={() => setNewSejour("à venir")}>
-                            Séjour à venir
-                          </DropdownItem> */}
                         </DropdownMenu>
                       </UncontrolledDropdown>
                       <a
@@ -228,19 +216,11 @@ export default function changeSejour() {
                         message={
                           <>
                             Êtes-vous sûr ? <br /> <br />
-                            Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
+                            Ancien séjour :{" "}
+                            <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={`Séjour ${getCohortPeriod(getCohort(young.cohort))}`} style={{ cursor: "default" }} />
                             <br />
                             Nouveau séjour :{" "}
-                            <Badge
-                              color="#0C7CFF"
-                              backgroundColor="#F9FCFF"
-                              text={
-                                newSejour === "Juillet 2023" && ![...regionsListDROMS, "Polynésie française"].includes(young.region)
-                                  ? "Séjour du 5 au 17 Juillet"
-                                  : translateCohort(newSejour)
-                              }
-                              style={{ cursor: "default" }}
-                            />
+                            <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={`Séjour ${getCohortPeriod(getCohort(newSejour))}`} style={{ cursor: "default" }} />
                             <div className="mt-2 text-xs">Cette action est irréversible, souhaitez-vous confirmer cette action ?</div>
                           </>
                         }

@@ -1,4 +1,3 @@
-import { COHESION_STAY_END } from "./date";
 import { region2department } from "./region-and-departments";
 
 const ROLES = {
@@ -11,6 +10,8 @@ const ROLES = {
   VISITOR: "visitor",
   DSNJ: "dsnj",
   TRANSPORTER: "transporter",
+  ADMINISTRATEUR_CLE: "administrateur_cle",
+  REFERENT_CLASSE: "referent_classe",
 };
 
 const SUB_ROLES = {
@@ -20,6 +21,8 @@ const SUB_ROLES = {
   secretariat: "secretariat",
   coordinator: "coordinator",
   assistant_coordinator: "assistant_coordinator",
+  referent_etablissement: "referent_etablissement",
+  coordinateur_cle: "coordinateur_cle",
   none: "",
 };
 
@@ -98,7 +101,14 @@ function canInviteUser(actorRole, targetRole) {
 
 const canDeleteStructure = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target);
 
-const canDeleteYoung = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target) || actor._id.toString() === target._id.toString();
+const canDeleteYoung = (actor, target) => {
+  // un référent peut supprimer un volontaire, mais un volontaire peut se supprimer uniquement si il est HTS
+  if (actor._id.toString() === target._id.toString()) {
+    if (target.source === "CLE") return false;
+    return true;
+  }
+  return isAdmin(actor) || referentInSameGeography(actor, target);
+};
 
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
@@ -108,8 +118,10 @@ function canEditYoung(actor, young) {
   const actorAndTargetInTheSameDepartment = actor.department.includes(young.department);
   const referentRegionFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && actorAndTargetInTheSameRegion;
   const referentDepartmentFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actorAndTargetInTheSameDepartment;
+  //TODO update this
+  const referentCLEAuthorized = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role) && young.source === "CLE";
 
-  const authorized = isAdmin || isHeadCenter || referentRegionFromTheSameRegion || referentDepartmentFromTheSameDepartment;
+  const authorized = isAdmin || isHeadCenter || referentRegionFromTheSameRegion || referentDepartmentFromTheSameDepartment || referentCLEAuthorized;
   return authorized;
 }
 
@@ -172,7 +184,9 @@ function canDeleteReferent({ actor, originalTarget, structure }) {
 }
 
 function canViewPatchesHistory(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(
+    actor.role,
+  );
   return isAdminOrReferent;
 }
 
@@ -183,12 +197,12 @@ function canDeletePatchesHistory(actor, target) {
 }
 
 function canViewEmailHistory(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
   return isAdminOrReferent;
 }
 
 function canViewNotes(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
   return isAdminOrReferent;
 }
 
@@ -197,12 +211,15 @@ function canViewReferent(actor, target) {
   const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
   const isResponsibleModifyingResponsible = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) && [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(target.role);
   const isHeadCenter = actor.role === ROLES.HEAD_CENTER && [ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(target.role);
+  const isAdministratorCLE = actor.role === ROLES.ADMINISTRATEUR_CLE && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(target.role);
+  const isReferentClasse = actor.role === ROLES.REFERENT_CLASSE && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(target.role);
+  //@todo update doc
   // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-  return isMe || isAdminOrReferent || isResponsibleModifyingResponsible || isHeadCenter;
+  return isMe || isAdminOrReferent || isResponsibleModifyingResponsible || isHeadCenter || isAdministratorCLE || isReferentClasse;
 }
 
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }) {
-  const isMe = actor._id === originalTarget._id;
+  const isMe = actor._id?.toString() === originalTarget._id?.toString();
   const isAdmin = actor.role === ROLES.ADMIN;
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
   const isResponsibleModifyingResponsibleWithoutChangingRole =
@@ -245,8 +262,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
   const geographicTargetData = {
     region: originalTarget.region || structure?.region,
     // many users have an array like [""] for department
-    department:
-      originalTarget.department?.length && originalTarget.department.length !== 1 && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
+    department: originalTarget.department?.length && originalTarget.department[0] !== "" ? originalTarget.department : [structure?.department],
   };
 
   const isActorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
@@ -262,7 +278,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
       isReferentModifyingHeadCenterWithoutChangingRole) &&
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
-      ? ([ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
+      ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
         (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
       : true);
   return authorized;
@@ -320,6 +336,10 @@ function canViewSessionPhase1(actor) {
 
 function canPutSpecificDateOnSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
+function canSeeYoungInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function isSessionEditionOpen(actor, cohort) {
@@ -435,7 +455,7 @@ const canAssignCohesionCenter = (actor, target) => !FORCE_DISABLED_ASSIGN_COHESI
 const FORCE_DISABLED_ASSIGN_MEETING_POINT = false;
 const canAssignMeetingPoint = (actor, target) => !FORCE_DISABLED_ASSIGN_MEETING_POINT && isReferentOrAdmin(actor) && (!target?.statusPhase1Tmp || !isTemporaryAffected(target));
 
-const canEditPresenceYoung = (actor, _target) => {
+const canEditPresenceYoung = (actor) => {
   // todo affiner les droits
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 };
@@ -443,7 +463,7 @@ const canEditPresenceYoung = (actor, _target) => {
 const canSigninAs = (actor, target) => {
   if (isAdmin(actor)) return true;
   if (!isReferent(actor)) return false;
-  if (target.constructor.modelName !== "young") return false;
+  if (![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(target.role)) return false;
 
   const isReferentRegionFromSameRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
   const isReferentDepartmentFromSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
@@ -522,7 +542,16 @@ function canGetYoungByEmail(actor) {
 }
 
 function canViewYoung(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.HEAD_CENTER,
+    ROLES.RESPONSIBLE,
+    ROLES.SUPERVISOR,
+    ROLES.ADMINISTRATEUR_CLE,
+    ROLES.REFERENT_CLASSE,
+  ].includes(actor.role);
 }
 
 function canViewBus(actor) {
@@ -554,15 +583,19 @@ function canViewStructureChildren(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
-function canDownloadYoungDocuments(actor, target, _applications) {
-  return (
-    canEditYoung(actor, target) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role)
-    // && applications?.length
-  );
+function canDownloadYoungDocuments(actor, target, type = null) {
+  if (type === "certificate" || type === "convocation") {
+    return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
+  } else {
+    return (
+      canEditYoung(actor, target) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role)
+      // && applications?.length
+    );
+  }
 }
 
 function canInviteYoung(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
 function canSendTemplateToYoung(actor, young) {
@@ -598,7 +631,16 @@ function canChangeYoungCohort(actor, young) {
 }
 
 function canViewDepartmentService(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(actor.role);
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.RESPONSIBLE,
+    ROLES.SUPERVISOR,
+    ROLES.HEAD_CENTER,
+    ROLES.ADMINISTRATEUR_CLE,
+    ROLES.REFERENT_CLASSE,
+  ].includes(actor.role);
 }
 
 function canAssignManually(actor, young, cohort) {
@@ -614,7 +656,7 @@ function canSearchInElasticSearch(actor, index) {
   if (index === "mission") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "school" || index === "schoolramses") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(actor.role);
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].includes(actor.role);
   } else if (index === "young-having-school-in-department") {
     return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young-having-school-in-region") {
@@ -622,11 +664,22 @@ function canSearchInElasticSearch(actor, index) {
   } else if (index === "cohesionyoung") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (/* legacy and new name */ index === "sessionphase1young" || index === "sessionphase1") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER].includes(actor.role);
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(
+      actor.role,
+    );
   } else if (index === "structure") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "referent") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(actor.role);
+    return [
+      ROLES.ADMIN,
+      ROLES.REFERENT_REGION,
+      ROLES.REFERENT_DEPARTMENT,
+      ROLES.RESPONSIBLE,
+      ROLES.SUPERVISOR,
+      ROLES.HEAD_CENTER,
+      ROLES.ADMINISTRATEUR_CLE,
+      ROLES.REFERENT_CLASSE,
+    ].includes(actor.role);
   } else if (index === "application") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "cohesioncenter") {
@@ -635,13 +688,19 @@ function canSearchInElasticSearch(actor, index) {
     return [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "modificationbus") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (index === "young-having-meeting-point-in-geography") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "young-by-school") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "aggregate-status") {
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  } else if (index === "lignebus") {
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+  } else if (index === "classe") {
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+  } else if (index === "youngCle") {
+    return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+  } else if (index === "etablissement") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   }
   return false;
@@ -655,9 +714,12 @@ function canShareSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
-function canApplyToPhase2(young) {
-  const now = new Date();
-  return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= COHESION_STAY_END[young.cohort];
+function canCreateAlerteMessage(actor) {
+  return [ROLES.ADMIN].includes(actor.role);
+}
+
+function canReadAlerteMessage(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.SUPERVISOR].includes(actor.role);
 }
 
 function canViewTableDeRepartition(actor) {
@@ -727,19 +789,19 @@ function canExportConvoyeur(actor) {
 }
 
 function canEditLigneBusTeam(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
 function canEditLigneBusGeneralInfo(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canEditLigneBusCenter(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canEditLigneBusPointDeRassemblement(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function ligneBusCanCreateDemandeDeModification(actor) {
@@ -772,6 +834,79 @@ function canCreateTags(actor) {
 
 function isSuperAdmin(actor) {
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === "god";
+}
+
+function canCheckIfRefExist(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR].includes(actor.role);
+}
+
+function canSeeDashboardSejourInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
+function canSeeDashboardSejourHeadCenter(actor) {
+  return [ROLES.HEAD_CENTER].includes(actor.role);
+}
+
+function canSeeDashboardInscriptionInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR].includes(actor.role);
+}
+
+function canSeeDashboardInscriptionDetail(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR, ROLES.HEAD_CENTER].includes(actor.role);
+}
+
+function canSeeDashboardEngagementInfo(actor) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+}
+
+function canSeeDashboardEngagementStatus(actor) {
+  return [ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(actor.role);
+}
+
+function canUpdateMyself({ actor, modifiedTarget }) {
+  const isMe = actor._id.toString() === modifiedTarget._id.toString();
+  return isMe;
+}
+
+//CLE
+function canInviteCoordinateur(actor) {
+  return actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement;
+}
+
+function canCreateClasse(actor) {
+  return actor.role === ROLES.ADMINISTRATEUR_CLE;
+}
+
+function canUpdateClasse(actor) {
+  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
+function canUpdateClasseStay(actor) {
+  return [ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
+function canViewClasse(actor) {
+  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
+function canUpdateEtablissement(actor) {
+  return (
+    (actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement) ||
+    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role)
+  );
+}
+
+function canViewEtablissement(actor) {
+  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
+function canSearchStudent(actor) {
+  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
+function canDeleteClasse(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
 }
 
 export {
@@ -852,9 +987,11 @@ export {
   canRefuseMilitaryPreparation,
   canChangeYoungCohort,
   canSendTutorTemplate,
+  canSeeYoungInfo,
   canEditPresenceYoung,
   canShareSessionPhase1,
-  canApplyToPhase2,
+  canCreateAlerteMessage,
+  canReadAlerteMessage,
   canViewTableDeRepartition,
   canEditTableDeRepartitionDepartment,
   canEditTableDeRepartitionRegion,
@@ -889,4 +1026,21 @@ export {
   isSupervisor,
   canPutSpecificDateOnSessionPhase1,
   isBusEditionOpen,
+  canCheckIfRefExist,
+  canSeeDashboardSejourInfo,
+  canSeeDashboardInscriptionInfo,
+  canSeeDashboardInscriptionDetail,
+  canSeeDashboardEngagementInfo,
+  canSeeDashboardEngagementStatus,
+  canSeeDashboardSejourHeadCenter,
+  canUpdateMyself,
+  canInviteCoordinateur,
+  canCreateClasse,
+  canUpdateClasse,
+  canUpdateClasseStay,
+  canViewClasse,
+  canUpdateEtablissement,
+  canViewEtablissement,
+  canSearchStudent,
+  canDeleteClasse,
 };

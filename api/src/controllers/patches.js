@@ -13,7 +13,7 @@ const get = async (req, res, model) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (!canViewPatchesHistory(req.user)) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const elem = await model.findById(value.id);
     if (!elem) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

@@ -3,7 +3,7 @@ import { Switch, useHistory, useLocation } from "react-router-dom";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
 
-import General from "./subscenes/general";
+import General from "../components/General";
 import Sejour from "./subscenes/sejour";
 
 export default function Index() {

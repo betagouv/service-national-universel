@@ -6,8 +6,8 @@ import { toastr } from "react-redux-toastr";
 
 import Loader from "../../../components/Loader";
 import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
-import StickyButton from "../../../components/inscription/stickyButton";
-import Footer from "../../../components/footerV2";
+import StickyButton from "../../../components/dsfr/ui/buttons/stickyButton";
+import Footer from "@/components/dsfr/layout/Footer";
 const images = import.meta.globEager("../../../assets/programmes-engagement/*");
 
 const EngagementsProgramMobile = () => {
@@ -47,7 +47,7 @@ const EngagementsProgramMobile = () => {
           return (
             <div key={item._id} className="mb-4">
               <div className="h-[195px] w-full">
-                <img src={images[`../../assets/programmes-engagement/${item.imageString}`]?.default} className="h-full w-full object-cover" />
+                <img src={images[`../../../assets/programmes-engagement/${item.imageString}`]?.default} className="h-full w-full object-cover" />
               </div>
 
               <div className={`min-h-min border border-[#E5E5E5] pl-4 pr-1 pb-2 ${!isOpen[clickId] && "h-[250px]"}`}>

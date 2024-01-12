@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import * as FileSaver from "file-saver";
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
@@ -134,19 +134,18 @@ async function toArrayOfArray(results, transform) {
 }
 
 async function getAllResults(route, selectedFilters, searchType, fieldsToExport) {
-  let result;
   if (searchType === "_msearch") {
     throw new Error("Not implemented");
     // TODO ......
   } else {
-    result = await api.post(route, {
+    const { data } = await api.post(route, {
       filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
         return { ...e, [key]: value.filter };
       }, {}),
       exportFields: fieldsToExport,
     });
-    if (!result.data.length) return [];
-    return result.data;
+    if (!data?.length) return [];
+    return data;
   }
 }
 

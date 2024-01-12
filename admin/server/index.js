@@ -22,7 +22,7 @@ if (process.env.PROD) {
   );
 }
 
-if (process.env.STAGING) {
+if (process.env.STAGING && !process.env.CLE) {
   app.use(
     forceDomain({
       hostname: "admin.beta-snu.dev",

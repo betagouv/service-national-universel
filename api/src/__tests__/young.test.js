@@ -66,8 +66,6 @@ describe("Young", () => {
       const fieldToKeep = [
         "_id",
         "__v",
-        "email",
-        "status",
         "birthdateAt",
         "cohort",
         "gender",
@@ -83,17 +81,20 @@ describe("Young", () => {
         "statusPhase2",
         "phase2ApplicationStatus",
         "statusPhase3",
+        "inscriptionStep2023",
+        "inscriptionDoneDate",
+        "reinscriptionStep2023",
         "department",
         "region",
         "zip",
         "city",
-        "files",
+        "createdAt",
       ];
 
       //Check that the fields deleted are deleted
       for (const key in updatedYoung) {
         if (!fieldToKeep.find((val) => val === key)) {
-          if (key !== "updatedAt") expect(updatedYoung[key]).toEqual(undefined);
+          if (!["updatedAt", "status", "email", "_id", "phase2ApplicationStatus", "birthdateAt"].includes(key)) expect(updatedYoung[key]).toEqual(undefined);
         }
       }
 
@@ -109,7 +110,7 @@ describe("Young", () => {
             expect(updatedYoung[key]).toEqual(young[key].toString());
           } else if (key === "phase2ApplicationStatus") {
             expect(updatedYoung[key]).toEqual(Array.from(young[key]));
-          } else if (key === "birthdateAt") {
+          } else if (["birthdateAt", "createdAt"].includes(key)) {
             expect(Date(updatedYoung[key])).toEqual(Date(young[key]));
           } else {
             expect(updatedYoung[key]).toEqual(young[key]);
@@ -142,7 +143,7 @@ describe("Young", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/young/${young._id}/patches`).send();
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if young found with patches", async () => {
@@ -195,7 +196,7 @@ describe("Young", () => {
       const previous = passport.user;
       passport.user = me;
       const res = await request(getAppHelper()).put(`/young/${they._id}/validate-mission-phase3`).send();
-      expect(res.statusCode).toEqual(418);
+      expect(res.statusCode).toEqual(403);
       passport.user = previous;
     });
   });
@@ -256,16 +257,13 @@ describe("Young", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      const newEmail = faker.internet.email();
       const res = await request(getAppHelper()).put("/young/account/profile").send({
         gender: "male",
-        email: newEmail,
         phone: "0600000000",
         phoneZone: "FRANCE",
       });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.gender).toEqual("male");
-      expect(res.body.data.email).toEqual(newEmail);
       expect(res.body.data.phone).toEqual("0600000000");
       expect(res.body.data.phoneZone).toEqual("FRANCE");
       passport.user = previous;
@@ -654,7 +652,7 @@ describe("Young", () => {
   });
 
   describe("POST /young/:id/:email/:template", () => {
-    const validTemplate = "170";
+    const validTemplate = "1229";
     it("should return 400 if template not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(getAppHelper()).post(`/young/${young._id}/email/test/`).send();
@@ -717,7 +715,7 @@ describe("Young", () => {
 
       // Failed request (not allowed)
       res = await request(getAppHelper()).get("/young/" + secondYoung._id + "/application");
-      expect(res.status).toBe(418);
+      expect(res.status).toBe(403);
 
       passport.user = previous;
     });

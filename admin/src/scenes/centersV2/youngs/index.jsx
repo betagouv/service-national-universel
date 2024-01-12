@@ -1,10 +1,10 @@
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 import * as FileSaver from "file-saver";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
-import { ES_NO_LIMIT, download, getDepartmentNumber } from "snu-lib";
+import { COHORTS_BEFORE_JULY_2023, ES_NO_LIMIT, download, getDepartmentNumber } from "snu-lib";
 import * as XLSX from "xlsx";
 import Bus from "../../../assets/icons/Bus";
 import ClipboardList from "../../../assets/icons/ClipboardList";
@@ -82,6 +82,13 @@ export default function CenterYoungIndex() {
       translate: translate,
     },
     {
+      title: "Situation",
+      name: "situation",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
       title: "Handicap",
       name: "handicap",
       parentGroup: "Dossier",
@@ -97,6 +104,13 @@ export default function CenterYoungIndex() {
       title: "PAI",
       name: "paiBeneficiary",
       parentGroup: "Dossier",
+      translate: translate,
+    },
+    {
+      title: "Région rurale",
+      name: "isRegionRural",
+      parentGroup: "Dossier",
+      missingLabel: "Non renseigné",
       translate: translate,
     },
     {
@@ -206,6 +220,7 @@ export default function CenterYoungIndex() {
   }, [currentTab]);
 
   React.useEffect(() => {
+    if (!sessionId) return;
     (async function () {
       try {
         const result = await api.get(`/cohort/bysession/${sessionId}`);
@@ -227,7 +242,7 @@ export default function CenterYoungIndex() {
         setIsYoungCheckinOpen(false);
       }
     })();
-  }, []);
+  }, [sessionId]);
 
   const viewAttestation = async () => {
     setModal({
@@ -252,13 +267,18 @@ export default function CenterYoungIndex() {
   };
 
   const exportData = async () => {
-    const data = await api.post(`/elasticsearch/young/by-session/${focusedSession._id}/export`, {
+    const data = await api.post(`/elasticsearch/young/by-session/${focusedSession._id}/export?needSchoolInfo=true`, {
       filters: Object.entries(filter).reduce((e, [key, value]) => {
         if (value.filter.length === 1 && value.filter[0] === "") return e;
         return { ...e, [key]: value.filter.map((e) => String(e)) };
       }, {}),
     });
     const result = await transformData({ data: data.data, centerId: id });
+    if (!COHORTS_BEFORE_JULY_2023.includes(result[0]?.Cohorte)) {
+      result.forEach((item) => {
+        delete item["Présence à la JDM"];
+      });
+    }
     const csv = await toArrayOfArray(result);
     await toXLSX(`volontaires_pointage_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`, csv);
   };
@@ -406,7 +426,7 @@ export default function CenterYoungIndex() {
 
   const exportImageRights = async () => {
     try {
-      const file = await api.openpdf(`/session-phase1/${focusedSession._id}/image-rights`, {});
+      const file = await api.openpdf(`/session-phase1/${focusedSession._id}/image-rights/export`, {});
       download(file, "droits-a-l-image.zip");
     } catch (e) {
       // We don't capture unauthorized. Just redirect.
@@ -480,7 +500,7 @@ export default function CenterYoungIndex() {
               title={modal?.title}
               message={modal?.message}
               estimation={modal?.estimation}
-              onClose={() => setIsOpen(false)}
+              onClose={() => setModal({ isOpen: false })}
               className="w-[900px] rounded-xl bg-white"
             />
             <SelectAction
@@ -585,18 +605,6 @@ const TabItem = ({ to, title, icon, extraIcon, extraTooltip }) => (
 
 const transformData = async ({ data, centerId }) => {
   let all = data;
-  const schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
-  if (schoolsId?.length) {
-    const { responses } = await api.esQuery("schoolramses", {
-      query: { bool: { must: { ids: { values: schoolsId } } } },
-      size: ES_NO_LIMIT,
-    });
-    if (responses.length) {
-      const schools = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-      all = data.map((item) => ({ ...item, esSchool: schools?.find((e) => e._id === item.schoolId) }));
-    }
-  }
-
   let resultCenter = await api.get(`/cohesion-center/${centerId}`);
   const center = resultCenter ? resultCenter.data : {};
 
@@ -612,6 +620,7 @@ const transformData = async ({ data, centerId }) => {
       bus = ligneBus.find((lb) => lb._id === data?.ligneId);
       if (!meetingPoint) meetingPoint = {};
     }
+
     return {
       _id: data._id,
       Cohorte: data.cohort,

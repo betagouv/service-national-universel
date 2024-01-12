@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../../es");
 const patchHistory = require("mongoose-patch-history").default;
-const { COHORTS } = require("snu-lib");
+const { getCohortNames } = require("snu-lib");
 const MODELNAME = "lignebus";
+const { generateRandomName, generateBirthdate, generateRandomEmail, generateNewPhoneNumber } = require("../../utils/anonymise");
 
 const BusTeam = new mongoose.Schema({
   role: {
@@ -68,7 +69,7 @@ const Schema = new mongoose.Schema({
   cohort: {
     type: String,
     required: true,
-    enum: COHORTS,
+    enum: getCohortNames(),
     documentation: {
       description: "Cohorte de la ligne de bus",
     },
@@ -199,11 +200,40 @@ const Schema = new mongoose.Schema({
       description: "Liste des accompagnateurs du bus",
     },
   },
+  delayedForth: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La ligne est retardée à l'allée",
+    },
+  },
+  delayedBack: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La ligne est retardée au Retour",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   deletedAt: { type: Date },
 });
+
+Schema.methods.anonymise = function () {
+  this.team &&
+    (this.team = this.team.map((t) => {
+      t.lastName && (t.lastName = generateRandomName());
+      t.firstName && (t.firstName = generateRandomName());
+      t.birthdate && (t.birthdate = generateBirthdate());
+      t.mail && (t.mail = generateRandomEmail());
+      t.phone && (t.phone = generateNewPhoneNumber());
+      return t;
+    }));
+  return this;
+};
 
 Schema.virtual("user").set(function (user) {
   if (user) {
@@ -230,6 +260,8 @@ Schema.plugin(patchHistory, {
 });
 
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
+
+Schema.index({ cohort: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

@@ -11,10 +11,12 @@ router.use("/pointderassemblement", require("./pointderassemblement"));
 router.use("/lignebus", require("./lignebus"));
 router.use("/schoolramses", require("./schoolramses"));
 router.use("/mission", require("./mission"));
+router.use("/missionapi", require("./missionapi"));
 router.use("/email", require("./email"));
 router.use("/application", require("./application"));
 router.use("/referent", require("./referent"));
-router.use("/dashboard", require("./dashboard"));
+router.use("/dashboard", require("./dashboard/index"));
 router.use("/association", require("./association"));
+router.use("/cle", require("./cle"));
 
 module.exports = router;

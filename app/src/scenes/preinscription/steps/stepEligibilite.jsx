@@ -1,31 +1,48 @@
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import { setYoung } from "@/redux/auth/actions";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
+import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import { capture } from "../../../sentry";
 import validator from "validator";
 import dayjs from "dayjs";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
-import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
+import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
+import ModalRecap from "../components/ModalRecap";
+import { PaddedContainer } from "@snu/ds/dsfr";
 
 import IconFrance from "../../../assets/IconFrance";
-import CheckBox from "../../../components/inscription/checkbox";
-import Input from "../../../components/inscription/input";
-import Toggle from "../../../components/inscription/toggle";
-import SearchableSelect from "../../../components/SearchableSelect";
+import School from "../../../assets/school.png";
+import CheckBox from "../../../components/dsfr/forms/checkbox";
+import Input from "../../../components/dsfr/forms/input";
+import Toggle from "../../../components/dsfr/forms/toggle";
+import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
-import DatePickerList from "../components/DatePickerList";
-import DSFRContainer from "../../../components/inscription/DSFRContainer";
-import SignupButtonContainer from "../../../components/inscription/SignupButtonContainer";
+import DatePicker from "../../../components/dsfr/forms/DatePicker";
+import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
+import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
+import ProgressBar from "../components/ProgressBar";
+import { supportURL } from "@/config";
+import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
+import { validateBirthDate } from "@/scenes/inscription2023/utils";
 
 export default function StepEligibilite() {
-  const [data, setData] = React.useContext(PreInscriptionContext);
+  const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
+  const [STEPS, context, isBirthdayModificationDisabled, uri, bdcUri] = isLoggedIn
+    ? [REINSCRIPTION_STEPS, ReinscriptionContext, true, "reinscription", "jetais-inscrit-en-2023-comment-me-reinscrire-en-2024"]
+    : [PREINSCRIPTION_STEPS, PreInscriptionContext, false, "preinscription", "je-me-preinscris-et-cree-mon-compte-volontaire"];
+  const [data, setData] = React.useContext(context);
   const [error, setError] = React.useState({});
   const [toggleVerify, setToggleVerify] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [confirmationModal, setConfirmationModal] = React.useState({ isOpen: false, onConfirm: null });
 
+  const dispatch = useDispatch();
   const history = useHistory();
 
   const optionsScolarite = [
@@ -42,21 +59,20 @@ export default function StepEligibilite() {
     { value: "Autre", label: "Scolarisé(e) (autre niveau)" },
   ];
 
-  const onSubmit = async () => {
+  const onVerify = async () => {
     let errors = {};
 
-    // Nationality
-    if (!data?.frenchNationality) {
-      errors.frenchNationality = "Vous devez être français";
+    if (data.frenchNationality === "false" || !data.frenchNationality) {
+      errors.frenchNationality = "Pour participer au SNU, vous devez être de nationalité française.";
     }
+
     // Scolarity
     if (!data?.scolarity) {
       errors.scolarity = "Choisissez un niveau de scolarité";
     }
     // Birthdate
-    // ? Check age ?
-    if (!data?.birthDate) {
-      errors.birthDate = "Vous devez choisir une date de naissance";
+    if (!data?.birthDate || !validateBirthDate(data?.birthDate)) {
+      errors.birthDate = "Vous devez saisir une date de naissance valide";
     }
 
     if (data.scolarity) {
@@ -68,10 +84,23 @@ export default function StepEligibilite() {
         }
       } else {
         // School
-        if (!data?.school) {
+        if (!validateSchool(data)) {
           // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
           errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
+      }
+    }
+
+    function validateSchool(data) {
+      if (data.isAbroad) {
+        if (!data?.school?.fullName) return false;
+        if (!data?.school?.country) return false;
+        return true;
+      } else {
+        if (!data?.school?.fullName) return false;
+        if (!data?.school?.city) return false;
+        if (!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip && !data?.school?.codePays) return false;
+        return true;
       }
     }
 
@@ -85,13 +114,47 @@ export default function StepEligibilite() {
       return;
     }
 
+    if (isLoggedIn) {
+      setConfirmationModal({
+        isOpen: true,
+        onConfirm: onSubmit,
+      });
+    } else {
+      onSubmit();
+    }
+  };
+
+  const onSubmit = async () => {
+    // Check if young is more than 17 years old
+    const age = dayjs().diff(dayjs(data.birthDate), "year");
+    if (age > 17) {
+      if (!isLoggedIn) {
+        setData({ ...data, message: "age", step: PREINSCRIPTION_STEPS.INELIGIBLE });
+        return history.push("/preinscription/noneligible");
+      } else {
+        const { ok, code } = await api.put("/young/reinscription/not-eligible");
+        if (!ok) {
+          capture(new Error(code));
+          setError({ text: "Impossible de vérifier votre éligibilité" });
+          return;
+        }
+        // setData({ ...data, message: "age", step: REINSCRIPTION_STEPS.INELIGIBLE });
+        return history.push("/noneligible");
+      }
+    }
+
     setLoading(true);
-    plausibleEvent("Phase0/CTA preinscription - eligibilite");
+    plausibleEvent(`Phase0/CTA ${uri}- eligibilite`);
     if (data.frenchNationality === "false") {
       setData({ ...data, msg: "Pour participer au SNU, vous devez être de nationalité française." });
-      return history.push("/preinscription/noneligible");
+      return history.push(`/${uri}/noneligible`);
     }
-    const res = await api.post("/cohort-session/eligibility/2023", {
+    const {
+      ok,
+      code,
+      data: sessions,
+      message,
+    } = await api.post(`/cohort-session/eligibility/2023`, {
       schoolDepartment: data.school?.departmentName,
       department: data.school?.department,
       schoolRegion: data.school?.region,
@@ -99,94 +162,141 @@ export default function StepEligibilite() {
       grade: data.scolarity,
       zip: data.zip,
     });
-    if (!res.ok) {
-      capture(res.code);
+
+    if (!ok) {
+      capture(new Error(code));
       setError({ text: "Impossible de vérifier votre éligibilité" });
       setLoading(false);
     }
-    if (res.data.msg) {
-      setData({ ...data, msg: res.data.msg, step: PREINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
-    }
-    const sessions = res.data;
+
     if (sessions.length === 0) {
-      setData({ ...data, msg: "Il n'y a malheureusement plus de place dans votre département.", step: PREINSCRIPTION_STEPS.INELIGIBLE });
-      return history.push("/preinscription/noneligible");
+      if (isLoggedIn) {
+        const { ok, data, code } = await api.put("/young/reinscription/not-eligible");
+        if (!ok) {
+          capture(new Error(code));
+          setError({ text: "Impossible de vérifier votre éligibilité" });
+          setLoading(false);
+          return;
+        }
+        dispatch(setYoung(data));
+      }
+      setData({ ...data, message, step: STEPS.INELIGIBLE });
+      return history.push(`/${uri}/noneligible`);
     }
-    setData({ ...data, sessions, step: PREINSCRIPTION_STEPS.SEJOUR });
-    return history.push("/preinscription/sejour");
+
+    setData({ ...data, sessions, step: STEPS.SEJOUR });
+    return history.push(`/${uri}/sejour`);
   };
 
   return (
-    <DSFRContainer title="Vérifiez votre éligibilité au SNU">
-      <div className="space-y-5">
-        <div className="flex-start flex flex-col">
-          <div className="flex items-center">
-            <CheckBox checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-            <div className="flex items-center">
-              <span className="ml-4 mr-2">Je suis de nationalité française</span>
-              <IconFrance />
-            </div>
+    <>
+      <ProgressBar isReinscription={isLoggedIn} />
+      {!isLoggedIn && (
+        <PaddedContainer className="flex py-4 sm:flex-row-reverse md:flex-row">
+          <div className="pt-3 md:pr-4 sm:w-80 md:w-40">
+            <img src={School} alt="" />
           </div>
-          {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
-        </div>
-
-        <div className="flex flex-col gap-4 md:flex-row">
-          <div className="flex w-full flex-col md:w-1/2">
-            <SearchableSelect
-              label="Niveau de scolarité"
-              value={data.scolarity}
-              options={optionsScolarite}
-              onChange={(value) => {
-                setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
-              }}
-              placeholder="Sélectionnez une option"
-            />
-            {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
+          <div>
+            <p className="mb-2 text-xl font-bold">Classes engagées</p>
+            <p className="text-sm sm:mr-4 md:mr-0">
+              Si vous envisagez une participation au SNU dans le cadre des classes engagées, vous ne pouvez pas vous inscrire ici. Veuillez attendre que votre référent classe vous
+              indique la procédure à suivre.
+            </p>
+            <InlineButton className="text-sm md:pr-4 pt-2 md:pr-2 pb-1">
+              <a rel="noreferrer noopener" target="blank" href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
+                En savoir plus →
+              </a>
+            </InlineButton>
           </div>
-          <label className="flex-start mt-2 flex w-full flex-col text-base md:w-1/2">
-            Date de naissance
-            <DatePickerList value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
-            {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
-          </label>
-        </div>
-
-        {data.scolarity && (
-          <>
-            <div className="flex items-center justify-between">
-              <p className="flex flex-col">
-                <span>
-                  <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
-                </span>
-                <span className="flex h-5 items-center">
-                  <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
-                </span>
-              </p>
-
-              <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad })} toggled={!data.isAbroad} />
-              {error.isAbroad ? <span className="text-sm text-red-500">{error.isAbroad}</span> : null}
-            </div>
-
-            {data.scolarity !== "NOT_SCOLARISE" ? (
-              data.isAbroad ? (
-                <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
-              ) : (
-                <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
-              )
-            ) : !data.isAbroad ? (
-              <div className="flex-start my-4 flex flex-col">
-                Code Postal
-                <div className="flex h-5 items-center">
-                  <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
-                </div>
-                <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
-                {error.zip ? <span className="text-sm text-red-500">{error.zip}</span> : null}
+        </PaddedContainer>
+      )}
+      <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
+        <div className="space-y-5">
+          {!isLoggedIn && (
+            <div className="flex-start flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckBox
+                  checked={data.frenchNationality === "true"}
+                  onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })}
+                  label="Je suis de nationalité française"
+                />
+                <IconFrance />
               </div>
-            ) : null}
-          </>
-        )}
-        <SignupButtonContainer onClickNext={onSubmit} disabled={loading} />
-      </div>
-    </DSFRContainer>
+              {error.frenchNationality ? <ErrorMessage>{error.frenchNationality}</ErrorMessage> : null}
+            </div>
+          )}
+          <div className="flex flex-col gap-4">
+            <div className="flex w-full flex-col">
+              <SearchableSelect
+                label="Niveau de scolarité"
+                value={data.scolarity}
+                options={optionsScolarite}
+                onChange={(value) => {
+                  setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
+                }}
+                placeholder="Sélectionnez une option"
+              />
+              {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
+            </div>
+            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
+              Date de naissance
+              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} disabled={isBirthdayModificationDisabled} />
+              {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
+            </label>
+          </div>
+
+          {data.scolarity && (
+            <>
+              <div className="flex items-center justify-between">
+                <p className="flex flex-col">
+                  <span>
+                    <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
+                  </span>
+                  <span className="flex h-5 items-center">
+                    <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
+                  </span>
+                </p>
+
+                <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, school: {}, zip: undefined })} toggled={!data.isAbroad} />
+                {error.isAbroad ? <span className="text-sm text-red-500">{error.isAbroad}</span> : null}
+              </div>
+
+              {data.scolarity !== "NOT_SCOLARISE" ? (
+                data.isAbroad ? (
+                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} />
+                ) : (
+                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} errors={error} />
+                )
+              ) : !data.isAbroad ? (
+                <div className="flex-start my-4 flex flex-col">
+                  Code Postal
+                  <div className="flex h-5 items-center">
+                    <span className="text-xs leading-5 text-[#666666]">Exemple : 75008</span>
+                  </div>
+                  <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} />
+                  {error.zip ? <span className="text-sm text-red-500">{error.zip}</span> : null}
+                </div>
+              ) : null}
+            </>
+          )}
+          <SignupButtonContainer onClickNext={onVerify} disabled={loading} />
+          {confirmationModal.isOpen && (
+            <ModalRecap
+              isOpen={confirmationModal?.isOpen}
+              title={"Les informations sont-elles correctes ?"}
+              message={"Ces informations seront utilisées pour déterminer votre éligibilité. Si vous n'êtes pas éligible, vous ne pourrez plus revenir en arrière."}
+              confirmText="Oui, confirmer"
+              cancelText="Non"
+              young={data}
+              onCancel={() => setConfirmationModal({ isOpen: false, onConfirm: null })}
+              onConfirm={async () => {
+                await confirmationModal?.onConfirm();
+                setConfirmationModal({ isOpen: false, onConfirm: null });
+              }}
+            />
+          )}
+        </div>
+      </DSFRContainer>
+    </>
   );
 }

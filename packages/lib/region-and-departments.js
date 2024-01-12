@@ -103,6 +103,7 @@ const departmentLookUp = {
   974: "La Réunion",
   975: "Saint-Pierre-et-Miquelon",
   976: "Mayotte",
+  977: "Saint-Barthélemy",
   978: "Saint-Martin",
   984: "Terres australes et antarctiques françaises",
   986: "Wallis-et-Futuna",
@@ -156,23 +157,12 @@ const regionList = [
   "Saint-Pierre-et-Miquelon",
   "Mayotte",
   "Terres australes et antarctiques françaises",
-  "Wallis-et-Futuna",
   "Polynésie française",
   "Nouvelle-Calédonie",
 ];
 
 // Attention : Polynésie française et Nouvelle-Calédonie ne sont pas des DROMS mais des cas à part.
-const regionsListDROMS = [
-  "Guadeloupe",
-  "Martinique",
-  "Guyane",
-  "La Réunion",
-  "Saint-Pierre-et-Miquelon",
-  "Mayotte",
-  "Terres australes et antarctiques françaises",
-  "Wallis-et-Futuna",
-];
-
+const regionsListDROMS = ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Terres australes et antarctiques françaises"];
 
 const department2region = {
   Ain: "Auvergne-Rhône-Alpes",
@@ -281,7 +271,7 @@ const department2region = {
   "Saint-Barthélemy": "Guadeloupe",
   "Saint-Martin": "Guadeloupe",
   "Terres australes et antarctiques françaises": "Terres australes et antarctiques françaises",
-  "Wallis-et-Futuna": "Wallis-et-Futuna",
+  "Wallis-et-Futuna": "Nouvelle-Calédonie",
   "Polynésie française": "Polynésie française",
   "Nouvelle-Calédonie": "Nouvelle-Calédonie",
 };
@@ -320,9 +310,8 @@ const region2department = {
   "Saint-Pierre-et-Miquelon": ["Saint-Pierre-et-Miquelon"],
   Mayotte: ["Mayotte"],
   "Terres australes et antarctiques françaises": ["Terres australes et antarctiques françaises"],
-  "Wallis-et-Futuna": ["Wallis-et-Futuna"],
   "Polynésie française": ["Polynésie française"],
-  "Nouvelle-Calédonie": ["Nouvelle-Calédonie"],
+  "Nouvelle-Calédonie": ["Nouvelle-Calédonie", "Wallis-et-Futuna"],
 };
 
 const region2zone = {
@@ -339,14 +328,14 @@ const region2zone = {
   Occitanie: "C",
   "Pays de la Loire": "B",
   "Provence-Alpes-Côte d'Azur": "B",
-  Guadeloupe: "DOM",
-  Martinique: "DOM",
-  Guyane: "DOM",
-  "La Réunion": "DOM",
+  Guadeloupe: "Guadeloupe",
+  Martinique: "Martinique",
+  Guyane: "Guyane",
+  "La Réunion": "La Réunion",
   "Saint-Pierre-et-Miquelon": "DOM",
-  Mayotte: "DOM",
+  Mayotte: "Mayotte",
   "Terres australes et antarctiques françaises": "DOM",
-  "Wallis-et-Futuna": "DOM",
+  "Wallis-et-Futuna": "NC",
   "Polynésie française": "PF",
   "Nouvelle-Calédonie": "NC",
   Etranger: "Etranger",
@@ -381,6 +370,7 @@ const isFromFrenchPolynesia = (young) => {
   return region2zone[region] === "PF";
 };
 
+// attention avant l'utilisation : depuis juillet 2023 WF est aussi attaché à la zone + region NC sur la plateforme (avant c'était region WF et zone DOM)
 const isFromNouvelleCaledonie = (young) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "NC";

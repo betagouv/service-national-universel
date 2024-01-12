@@ -4,17 +4,17 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { formatLongDateFR } from "snu-lib";
-import Eye from "../../assets/icons/Eye";
-import Pencil from "../../assets/icons/Pencil";
-import Trash from "../../assets/icons/Trash";
-import Badge from "../../components/Badge";
-import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
-import Invite from "../../components/header/invite";
-import { MultiLine, Table } from "../../components/list";
-import ModalConfirm from "../../components/modals/ModalConfirm";
-import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
-import api from "../../services/api";
-import { ROLES, canDeleteReferent, canUpdateReferent, formatStringLongDate, translate } from "../../utils";
+import Eye from "@/assets/icons/Eye";
+import Pencil from "@/assets/icons/Pencil";
+import Trash from "@/assets/icons/Trash";
+import Badge from "@/components/Badge";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
+import Invite from "@/components/drawer/components/invite";
+import { MultiLine, Table } from "@/components/list";
+import ModalConfirm from "@/components/modals/ModalConfirm";
+import ModalReferentDeleted from "@/components/modals/ModalReferentDeleted";
+import api from "@/services/api";
+import { ROLES, canDeleteReferent, canUpdateReferent, formatStringLongDate, translate } from "@/utils";
 import Nav from "./components/nav";
 import Panel from "./panel";
 
@@ -33,6 +33,7 @@ export default function List() {
   const [paramData, setParamData] = useState({
     page: 0,
   });
+  const [size, setSize] = useState(10);
 
   //Filters
   const filterArray = [
@@ -165,6 +166,7 @@ export default function List() {
                   setSelectedFilters={setSelectedFilters}
                   paramData={paramData}
                   setParamData={setParamData}
+                  size={size}
                 />
                 <SortOption
                   sortOptions={[
@@ -175,6 +177,7 @@ export default function List() {
                     { label: "Date de création (récent > ancien)", field: "createdAt", order: "desc" },
                     { label: "Date de création (ancien > récent)", field: "createdAt", order: "asc" },
                   ]}
+                  selectedFilters={selectedFilters}
                   paramData={paramData}
                   setParamData={setParamData}
                 />
@@ -195,6 +198,8 @@ export default function List() {
                 paramData={paramData}
                 setParamData={setParamData}
                 currentEntryOnPage={data?.length}
+                size={size}
+                setSize={setSize}
                 render={
                   <Table>
                     <thead>

@@ -3,19 +3,17 @@
  * Il vérifie si on est la veille de la fermeture des instructions d'une cohorte.
  * Si c'est le cas, il envoit à tous les référents départementaux pour qui il reste des jeunes en attente de validation une relance mail.
  */
-const path = require("path");
-const apiDir = path.resolve(__dirname, "..", "..");
-const srcDir = path.join(apiDir, "src");
-require("dotenv").config({ path: path.join(apiDir, ".env-staging") });
-require(path.join(srcDir, "mongo"));
+require("../mongo");
 const { capture } = require("../sentry");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { ADMIN_URL } = require("../config");
-const { sessions2023, YOUNG_STATUS, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { YOUNG_STATUS, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 
+// /!\ WARNING /!\ Only works if the instructionEndDate is set to midnight UTC +/- 30 minutes
 const HOURS_BEFORE_END_REMINDER = 48 - 14; // à 14h la veille
 const MS_BEFORE_END_REMINDER = HOURS_BEFORE_END_REMINDER * 60 * 60 * 1000; // la même chose en ms
 const MS_THIRTY_MINUTES = 30 * 60 * 1000;
@@ -54,13 +52,13 @@ async function getCohortsEndingTomorrow() {
   const month = now.getMonth() + 1;
   const todayDate = new Date(`${now.getFullYear()}-${month < 9 ? "0" + month : month}-${now.getDate()}T14:00:00.000Z`);
   const today = todayDate.valueOf();
+  const sessions2023 = await CohortModel.find({});
   return sessions2023
     .filter((session) => {
       return (
-        session.eligibility &&
-        session.eligibility.instructionEndDate &&
-        session.eligibility.instructionEndDate.valueOf() - MS_BEFORE_END_REMINDER <= today + MS_THIRTY_MINUTES &&
-        session.eligibility.instructionEndDate.valueOf() - MS_BEFORE_END_REMINDER >= today - MS_THIRTY_MINUTES
+        session.instructionEndDate &&
+        session.instructionEndDate.valueOf() - MS_BEFORE_END_REMINDER <= today + MS_THIRTY_MINUTES &&
+        session.instructionEndDate.valueOf() - MS_BEFORE_END_REMINDER >= today - MS_THIRTY_MINUTES
       );
     })
     .map((session) => session.name);

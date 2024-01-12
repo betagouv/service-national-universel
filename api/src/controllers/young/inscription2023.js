@@ -5,18 +5,21 @@ const Joi = require("joi");
 const crypto = require("crypto");
 
 const YoungObject = require("../../models/young");
+const CohortObject = require("../../models/cohort");
 const { capture } = require("../../sentry");
 const { serializeYoung } = require("../../utils/serializer");
 const { validateFirstName, validateParents, representantSchema } = require("../../utils/validator");
 const { ERRORS, STEPS2023, YOUNG_SITUATIONS } = require("../../utils");
 const {
   canUpdateYoungStatus,
-  START_DATE_SESSION_PHASE1,
   YOUNG_STATUS,
   SENDINBLUE_TEMPLATES,
   isInRuralArea,
   PHONE_ZONES_NAMES_ARR,
   formatPhoneNumberFromPhoneZone,
+  getCohortNames,
+  isYoungInReinscription,
+  isCle,
 } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
@@ -57,7 +60,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       birthdateAt: Joi.string().trim().required(),
       schooled: Joi.string().trim().required(),
       grade: Joi.string().trim().valid("4eme", "3eme", "2ndePro", "2ndeGT", "1erePro", "1ereGT", "TermPro", "TermGT", "CAP", "Autre", "NOT_SCOLARISE").required(),
-      schoolName: Joi.string().trim().required(),
+      schoolName: Joi.string().trim(),
       schoolType: Joi.string().trim().allow(null, ""),
       schoolAddress: Joi.string().trim().allow(null, ""),
       schoolZip: Joi.string().trim().allow(null, ""),
@@ -102,7 +105,7 @@ router.put("/eligibilite", passport.authenticate("young", { session: false, fail
       ...validateCorrectionRequest(young, keyList),
     };
 
-    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const formatedDate = new Date(update.birthdateAt);
     formatedDate.setUTCHours(11, 0, 0, 0);
@@ -142,95 +145,77 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const isRequired = type !== "save";
-
-    const coordonneeSchema = {
-      gender: needRequired(Joi.string().trim().valid("female", "male"), isRequired),
-      birthCountry: needRequired(Joi.string().trim(), isRequired),
-      birthCity: needRequired(Joi.string().trim(), isRequired),
+    let coordonneeSchema = {
+      gender: Joi.string().trim().valid("female", "male").required(),
+      birthCountry: Joi.string().trim().required(),
+      birthCity: Joi.string().trim().required(),
       birthCityZip: Joi.string().trim().allow(null, ""),
-      phone: needRequired(Joi.string().trim(), isRequired),
-      phoneZone: needRequired(
-        Joi.string()
-          .trim()
-          .valid(...PHONE_ZONES_NAMES_ARR),
-        isRequired,
-      ),
-      situation: Joi.alternatives().conditional("schooled", {
-        is: "true",
-        then: needRequired(
-          Joi.string()
-            .trim()
-            .valid(...youngSchooledSituationOptions),
-          isRequired,
-        ),
-        otherwise: needRequired(
-          Joi.string()
-            .trim()
-            .valid(...youngActiveSituationOptions),
-          isRequired,
-        ),
-      }),
-      livesInFrance: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      addressVerified: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      country: needRequired(Joi.string().trim(), isRequired),
-      city: needRequired(Joi.string().trim(), isRequired),
-      zip: needRequired(Joi.string().trim(), isRequired),
-      address: needRequired(Joi.string().trim(), isRequired),
-      location: Joi.object()
-        .keys({
-          lat: needRequired(Joi.number(), isRequired),
-          lon: needRequired(Joi.number(), isRequired),
-        })
-        .default({
-          lat: undefined,
-          lon: undefined,
-        })
-        .allow({}, null),
-      department: needRequired(Joi.string().trim(), isRequired),
-      region: needRequired(Joi.string().trim(), isRequired),
+      livesInFrance: Joi.string().trim().valid("true", "false").required(),
+      addressVerified: Joi.string().trim().valid("true", "false").required(),
+      coordinatesAccuracyLevel: Joi.string().trim().valid("housenumber", "street", "locality", "municipality").allow(null, ""),
+      country: Joi.string().trim().required(),
+      city: Joi.string().trim().required(),
+      zip: Joi.string().trim().required(),
+      address: Joi.string().trim().required(),
+      location: Joi.object().keys({ lat: Joi.number().required(), lon: Joi.number().required() }).default({ lat: undefined, lon: undefined }).allow({}, null),
+      department: Joi.string().trim().required(),
+      region: Joi.string().trim().required(),
       cityCode: Joi.string().trim().default("").allow("", null),
-      foreignCountry: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      foreignCity: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      foreignZip: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      foreignAddress: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      foreignCountry: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      foreignCity: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      foreignZip: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      foreignAddress: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
       hostLastName: Joi.alternatives().conditional("livesInFrance", {
         is: "false",
-        then: needRequired(Joi.string().trim(), isRequired),
+        then: Joi.string().trim().required(),
         otherwise: Joi.isError(new Error()),
       }),
-      hostFirstName: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      hostFirstName: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().required().trim(), otherwise: Joi.isError(new Error()) }),
       hostRelationship: Joi.alternatives().conditional("livesInFrance", {
         is: "false",
-        then: needRequired(Joi.string().trim().valid("Parent", "Frere/Soeur", "Grand-parent", "Oncle/Tante", "Ami de la famille", "Autre"), isRequired),
+        then: Joi.string().trim().valid("Parent", "Frere/Soeur", "Grand-parent", "Oncle/Tante", "Ami de la famille", "Autre").required(),
         otherwise: Joi.isError(new Error()),
       }),
-      handicap: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      ppsBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      paiBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      allergies: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      moreInformation: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      handicap: Joi.string().trim().valid("true", "false").required(),
+      ppsBeneficiary: Joi.string().trim().valid("true", "false").required(),
+      paiBeneficiary: Joi.string().trim().valid("true", "false").required(),
+      allergies: Joi.string().trim().valid("true", "false").required(),
+      moreInformation: Joi.string().trim().valid("true", "false").required(),
       specificAmenagment: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
       specificAmenagmentType: Joi.alternatives().conditional("specificAmenagment", {
         is: "true",
-        then: needRequired(Joi.string().trim(), isRequired),
+        then: Joi.string().trim().required(),
         otherwise: Joi.isError(new Error()),
       }),
       reducedMobilityAccess: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
       handicapInSameDepartment: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
     };
+
+    if (!isCle(young)) {
+      coordonneeSchema.situation = Joi.alternatives().conditional("schooled", {
+        is: "true",
+        then: Joi.string()
+          .trim()
+          .valid(...youngSchooledSituationOptions)
+          .required(),
+        otherwise: Joi.string()
+          .trim()
+          .valid(...youngActiveSituationOptions)
+          .required(),
+      });
+    }
 
     let { error, value } = Joi.object(coordonneeSchema).validate({ ...req.body, schooled: young.schooled }, { stripUnknown: true });
 
@@ -238,16 +223,20 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
-
-    if (type === "next") value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+    if (type === "next") {
+      if (isYoungInReinscription(young)) {
+        value.reinscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+      } else {
+        value.inscriptionStep2023 = STEPS2023.CONSENTEMENTS;
+      }
+    }
 
     if (type === "correction") {
       const keyList = Object.keys(coordonneeSchema);
       value = { ...value, ...validateCorrectionRequest(young, keyList) };
     }
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       ...value,
@@ -263,10 +252,9 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       try {
         const qpv = await getQPV(value.zip, value.city, value.address);
         if (qpv === true) young.set({ qpv: "true" });
-        else if (qpv === false) young.set({ qpv: "false" });
-        else young.set({ qpv: "" });
+        if (qpv === false) young.set({ qpv: "false" });
       } catch (error) {
-        young.set({ qpv: "" });
+        // Continue
       }
     }
 
@@ -300,13 +288,19 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
       acceptCGU: "true",
       consentment: "true",
-      inscriptionStep2023: STEPS2023.REPRESENTANTS,
     });
+
+    if (isYoungInReinscription(young)) {
+      young.set({ reinscriptionStep2023: STEPS2023.REPRESENTANTS });
+    } else {
+      young.set({ inscriptionStep2023: STEPS2023.REPRESENTANTS });
+    }
+
     await young.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -320,7 +314,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     const { error: typeError, value: type } = checkParameter(req.params.type);
     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    let { error, value } = validateParents(req.body, type !== "save");
+    let { error, value } = validateParents(req.body, true);
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -338,11 +332,16 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       value.parent2LastName = "";
       value.parent2Email = "";
       value.parent2Phone = "";
+      value.parent2PhoneZone = undefined;
       value.parent2Inscription2023Token = "";
     }
 
     if (type === "next") {
-      value.inscriptionStep2023 = STEPS2023.DOCUMENTS;
+      if (isYoungInReinscription(young)) {
+        value.reinscriptionStep2023 = isCle(young) ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
+      } else {
+        value.inscriptionStep2023 = isCle(young) ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
+      }
 
       if (!young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
       if (!young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
@@ -351,7 +350,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       const keyList = Object.keys(representantSchema(false));
       value = { ...value, ...validateCorrectionRequest(young, keyList) };
     }
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -367,11 +366,17 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const value = { informationAccuracy: "true", inscriptionStep2023: STEPS2023.WAITING_CONSENT };
+    let value = { informationAccuracy: "true" };
+    if (isYoungInReinscription(young)) {
+      value.reinscriptionStep2023 = STEPS2023.WAITING_CONSENT;
+    } else {
+      value.inscriptionStep2023 = STEPS2023.WAITING_CONSENT;
+    }
 
-    if (young.status === "IN_PROGRESS" && !young?.inscriptionDoneDate) {
+    if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && !young?.inscriptionDoneDate) {
+      const cohort = await CohortObject.findOne({ name: young.cohort });
       // If latest ID proof has an invalid date, notify parent 1.
-      if (young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort]) {
+      if (young.latestCNIFileExpirationDate < new Date(cohort.dateStart)) {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
           emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
           params: {
@@ -385,9 +390,17 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
+        },
+      });
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CONSENT, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: {
+          cta: config.APP_URL,
+          SOURCE: young.source,
         },
       });
 
@@ -406,7 +419,10 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
 router.put("/changeCohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      cohort: Joi.string().trim().valid("Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023", "Juillet 2023").required(),
+      cohort: Joi.string()
+        .trim()
+        .valid(...getCohortNames(true, false, false))
+        .required(),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {
@@ -416,12 +432,12 @@ router.put("/changeCohort", passport.authenticate("young", { session: false, fai
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Check inscription goals
-    const sessions = await getFilteredSessions(young);
+    const sessions = await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
     const session = sessions.find(({ name }) => name === value.cohort);
-    if (!session || session.goalReached) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED }); //|| session.isFull
+    if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED }); //|| session.isFull || session.goalReached
 
     let template = SENDINBLUE_TEMPLATES.parent.PARENT_YOUNG_COHORT_CHANGE;
     const emailsTo = [];
@@ -457,32 +473,38 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (type === "next") {
-      if (young.files.cniFiles.length > 0) {
-        young.set("inscriptionStep2023", STEPS2023.CONFIRM);
-      } else return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      const { error, value } = Joi.object({ date: Joi.date().required() }).validate(req.body, { stripUnknown: true });
+      if (young.files.cniFiles.length === 0) {
+        return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      const { error, value } = Joi.object({ date: Joi.date().required(), latestCNIFileCategory: Joi.string().trim() }).validate(req.body, { stripUnknown: true });
       if (error) {
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      const CNIFileNotValidOnStart = value.date < START_DATE_SESSION_PHASE1[young.cohort];
-      young.set({ latestCNIFileExpirationDate: value.date, CNIFileNotValidOnStart });
+      const cohort = await CohortObject.findOne({ name: young.cohort });
+      const CNIFileNotValidOnStart = value.date < new Date(cohort.dateStart);
+      young.set({ latestCNIFileExpirationDate: value.date, latestCNIFileCategory: value.latestCNIFileCategory, CNIFileNotValidOnStart });
+      if (isYoungInReinscription(young)) {
+        young.set({ reinscriptionStep2023: STEPS2023.CONFIRM });
+      } else {
+        young.set({ inscriptionStep2023: STEPS2023.CONFIRM });
+      }
     }
 
     if (type === "correction") {
-      const fileSchema = {
-        latestCNIFileExpirationDate: Joi.date().required(),
-        latestCNIFileCategory: Joi.string().trim().required(),
-      };
-      const { error, value } = Joi.object(fileSchema).validate(req.body, { stripUnknown: true });
+      const fileSchema = Joi.object({
+        latestCNIFileExpirationDate: Joi.date(),
+        latestCNIFileCategory: Joi.string().trim(),
+      }).or("latestCNIFileExpirationDate", "latestCNIFileCategory");
+      const { error, value } = fileSchema.validate(req.body, { stripUnknown: true });
       if (error) {
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-
-      let data = { ...value, ...validateCorrectionRequest(young, ["latestCNIFileExpirationDate", "cniFile"]) };
-      if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      const CNIFileNotValidOnStart = data.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort];
+      let data = { ...value, ...validateCorrectionRequest(young, ["latestCNIFileExpirationDate", "cniFile", "latestCNIFileCategory"]) };
+      if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const cohort = await CohortObject.findOne({ name: young.cohort });
+      const CNIFileNotValidOnStart = data.latestCNIFileExpirationDate < new Date(cohort.dateStart);
       young.set({ ...data, CNIFileNotValidOnStart });
     }
     await young.save({ fromUser: req.user });
@@ -499,7 +521,8 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // If latest ID proof has an invalid date, notify parent 1.
-    const notifyExpirationDate = young.latestCNIFileExpirationDate < START_DATE_SESSION_PHASE1[young.cohort];
+    const cohort = await CohortObject.findOne({ name: young.cohort });
+    const notifyExpirationDate = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
     const needCniRelance = young?.parentStatementOfHonorInvalidId !== "true";
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
 
@@ -517,7 +540,7 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
@@ -539,7 +562,11 @@ router.put("/done", passport.authenticate("young", { session: false, failWithErr
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ inscriptionStep2023: STEPS2023.DONE });
+    if (young.reinscriptionStep2023 === "WAITING_CONSENT") {
+      young.set({ reinscriptionStep2023: STEPS2023.DONE });
+    } else {
+      young.set({ inscriptionStep2023: STEPS2023.DONE });
+    }
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -554,7 +581,12 @@ router.put("/goToInscriptionAgain", passport.authenticate("young", { session: fa
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set({ inscriptionStep2023: STEPS2023.CONFIRM });
+    if (isYoungInReinscription(young)) {
+      young.set({ reinscriptionStep2023: STEPS2023.CONFIRM });
+    } else {
+      young.set({ inscriptionStep2023: STEPS2023.CONFIRM });
+    }
+
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -566,24 +598,32 @@ router.put("/goToInscriptionAgain", passport.authenticate("young", { session: fa
 
 router.put("/profil", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const profilSchema = {
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       email: Joi.string().lowercase().trim().email().required(),
+      phone: Joi.string().trim().required(),
+      phoneZone: Joi.string()
+        .trim()
+        .valid(...PHONE_ZONES_NAMES_ARR)
+        .required(),
+      birthdateAt: isCle(young) ? Joi.string().trim().required() : Joi.string().trim(),
+      frenchNationality: isCle(young) ? Joi.string().trim().required() : Joi.string().trim(),
     };
+
     const { error, value } = Joi.object(profilSchema).validate(req.body, { stripUnknown: true });
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const young = await YoungObject.findById(req.user._id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     const keyList = Object.keys(profilSchema);
     let data = { ...value, ...validateCorrectionRequest(young, keyList) };
 
-    if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateYoungStatus({ body: data, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(data);
     await young.save({ fromUser: req.user });
@@ -611,15 +651,10 @@ const validateCorrectionRequest = (young, keyList) => {
 };
 
 const checkParameter = (parameter) => {
-  const keys = ["next", "save", "correction"];
+  const keys = ["next", "correction"];
   return Joi.string()
     .valid(...keys)
     .validate(parameter, { stripUnknown: true });
-};
-
-const needRequired = (joi, isRequired) => {
-  if (isRequired) return joi.required();
-  else return joi.allow(null, "");
 };
 
 module.exports = router;

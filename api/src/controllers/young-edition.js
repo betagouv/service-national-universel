@@ -71,8 +71,9 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
         .trim()
         .valid(...PHONE_ZONES_NAMES_ARR)
         .allow("", null),
-      latestCNIFileExpirationDate: Joi.date(),
+      latestCNIFileExpirationDate: Joi.date().allow(null),
       latestCNIFileCategory: Joi.string().trim(),
+      frenchNationality: Joi.string().trim(),
       birthdateAt: Joi.date(),
       birthCity: Joi.string().trim(),
       birthCityZip: Joi.string().trim(),
@@ -169,6 +170,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       schoolDepartment: Joi.string().trim().allow(""),
       schoolRegion: Joi.string().trim().allow(""),
       grade: Joi.string().valid(...Object.keys(GRADES)),
+      sameSchoolCLE: Joi.string().trim(),
 
       parent1Status: Joi.string().trim().allow(""),
       parent1LastName: Joi.string().trim().allow(""),
@@ -318,7 +320,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
 
     // --- check rights
     if (!canUserUpdateYoungStatus(req.user)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- update young
@@ -496,7 +498,7 @@ router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", {
     }
 
     if (!canEditYoung(req.user, young)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- reset parent image rights
@@ -541,7 +543,7 @@ router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { se
     }
 
     if (!canEditYoung(req.user, young)) {
-      return res.status(418).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- reset parent allow snu

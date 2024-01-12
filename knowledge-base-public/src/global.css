@@ -2,59 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-#__next {
-  height: 100vh;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: visible;
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Regular.woff);
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Regular_Italic.woff);
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Bold.woff);
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Bold_Italic.woff);
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Medium.woff);
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Medium_Italic.woff);
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-ExtraBold.woff);
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-ExtraBold_Italic.woff);
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Light.woff);
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Light_Italic.woff);
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Thin.woff);
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Marianne;
+  src: url(/fonts/Marianne-Thin_Italic.woff);
+  font-weight: 100;
+  font-style: italic;
 }
 
 * {
-  font-family: Inter, sans-serif;
-  font-smooth: always;
+  font-family: Marianne, sans-serif;
   -webkit-font-smoothing: antialiased;
-}
-
-@layer base {
-  button,
-  [type="button"],
-  [type="submit"] {
-    padding: 0.5em 3em;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background-color: #5145cc;
-
-    color: white;
-    font-size: 1rem;
-    font-weight: 700;
-
-    border: 2px solid #5145cc;
-    border-radius: 10px;
-    box-shadow: rgb(0 0 0 / 10%) 0px 10px 15px -3px, rgb(0 0 0 / 5%) 0px 4px 6px -2px;
-
-    opacity: 1;
-    cursor: pointer;
-  }
-  button.loading {
-    color: transparent;
-  }
-  button:disabled {
-    opacity: 0.5;
-    pointer-events: none;
-    cursor: default;
-  }
-
-  summary::marker {
-    color: #a1a09c;
-  }
-
-  .wrapper {
-    @apply mx-auto max-w-6xl p-4;
-  }
 }
 
 .content {
@@ -69,15 +103,6 @@
   direction: ltr;
 }
 
-.show-button-on-hover:hover .button-container {
-  opacity: 1;
-  pointer-events: initial;
-}
-
-.show-button-on-hover .button-container {
-  opacity: 0;
-  pointer-events: none;
-}
 /*
 
 Toastify
@@ -148,7 +173,7 @@ body {
   margin-left: 0;
   margin-right: 0;
   padding-left: 10px;
-  color: #aaa;
+  color: #6B7280;
   font-style: italic;
 }
 
@@ -182,13 +207,27 @@ body {
 }
 
 #text-editor [data-slate-editor] h1 {
-  font-size: 2em;
+  font-size: 30px;
   font-weight: bold;
+  line-height: 40px;
+}
+
+@media screen and (max-width: 768px) {
+  #text-editor [data-slate-editor] h1 {
+    font-size: 24px;
+    line-height: 32px;
+  }
 }
 
 #text-editor [data-slate-editor] h2 {
-  font-size: 1.5em;
+  font-size: 1.25em;
   font-weight: bold;
+  line-height: 27px;
+}
+
+#text-editor [data-slate-editor] h3 {
+  font-size: 18px;
+  line-height: 24px;
 }
 
 #text-editor ul {
@@ -269,18 +308,4 @@ body {
   *::-webkit-scrollbar {
     width: 0 !important;
   }
-}
-
-/*
-
-TICKETS
-
-
-*/
-
-.ticket-message {
-  overflow-wrap: anywhere;
-}
-.ticket-message blockquote {
-  display: none;
 }

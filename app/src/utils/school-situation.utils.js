@@ -10,4 +10,4 @@ export const getSchoolGradesOptions = () =>
   Object.keys(GRADES).map((grade) => ({
     value: GRADES[grade],
     label: translateGrade(grade),
-}));
+  }));

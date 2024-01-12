@@ -6,6 +6,8 @@ const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { faker } = require("@faker-js/faker");
 const crypto = require("crypto");
+const { createCohortHelper } = require("./helpers/cohort");
+const getNewCohortFixture = require("./fixtures/cohort");
 
 const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
@@ -142,9 +144,12 @@ describe("Young", () => {
     it("should return 409 when user already exists", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
-      await createYoungHelper({ ...fixture, email });
-      res = await request(getAppHelper()).post("/young/signup").send({
-        email: fixture.email,
+      const young = await createYoungHelper({ ...fixture, email });
+      const cohort = await createCohortHelper({ ...getNewCohortFixture(), name: young.cohort });
+      res = await request(getAppHelper()).post("/young/signup").set("x-user-timezone", -60).send({
+        email: email,
+        phone: fixture.phone,
+        phoneZone: fixture.phoneZone,
         firstName: "foo",
         lastName: "bar",
         password: VALID_PASSWORD,
@@ -153,7 +158,7 @@ describe("Young", () => {
         grade: fixture.grade,
         frenchNationality: fixture.frenchNationality,
         schooled: fixture.schooled,
-        cohort: fixture.cohort,
+        cohort: cohort.name,
       });
       expect(res.status).toBe(409);
     });
@@ -178,7 +183,7 @@ describe("Young", () => {
       passport.user = young;
       passport.user.set = jest.fn();
       passport.user.save = jest.fn();
-      const res = await request(getAppHelper()).get("/young/signin_token").set("Cookie", ["jwt=blah"]);
+      const res = await request(getAppHelper()).get("/young/signin_token").set("Cookie", ["jwt_young=blah"]);
       expect(res.status).toBe(200);
       expect(passport.user.set).toHaveBeenCalled();
       expect(passport.user.save).toHaveBeenCalled();
@@ -254,9 +259,9 @@ describe("Young", () => {
       res = await request(getAppHelper()).post("/young/forgot_password");
       expect(res.status).toBe(404);
     });
-    it("should return 404 when user does not exist", async () => {
+    it("should return 200 when user does not exist", async () => {
       const res = await request(getAppHelper()).post("/young/forgot_password").send({ email: "foo@bar.fr" });
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(200);
     });
     it("should return return 200 when user exists", async () => {
       const fixture = getNewYoungFixture();

@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
 const path = require("path");
 const { capture } = require("../sentry");
@@ -15,7 +14,9 @@ const fileName = path.basename(__filename, ".js");
 
 const clean = async () => {
   let countAutoArchived = 0;
-  const cursor = await Mission.find({ endAt: { $lt: Date.now() }, status: "VALIDATED" }).cursor();
+  const cursor = await Mission.find({ endAt: { $lt: Date.now() }, status: "VALIDATED" })
+    .cursor()
+    .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
     countAutoArchived++;
     console.log(`${mission._id} ${mission.name} archived.`);
@@ -42,7 +43,9 @@ const clean = async () => {
 const notify1Week = async () => {
   let countNotice = 0;
   const now = Date.now();
-  const cursor = await Mission.find({ endAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" }).cursor();
+  const cursor = await Mission.find({ endAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" })
+    .cursor()
+    .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
     countNotice++;
     console.log(`${mission._id} ${mission.name} : 1 week notice.`);
@@ -73,7 +76,7 @@ const cancelApplications = async (mission) => {
         APPLICATION_STATUS.WAITING_VALIDATION,
         APPLICATION_STATUS.WAITING_ACCEPTATION,
         APPLICATION_STATUS.WAITING_VERIFICATION,
-        // todo maybe add other status later
+        // todo maybe add other status later.
       ],
     },
   });

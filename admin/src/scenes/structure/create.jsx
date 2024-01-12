@@ -6,14 +6,15 @@ import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
-import validator from "validator";
 import AddressInput from "../../components/addressInput";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import MultiSelect from "../../components/Multiselect";
 import api from "../../services/api";
-import { ENABLE_PM, legalStatus, regexPhoneFrenchCountries, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
+import { ENABLE_PM, legalStatus, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
+import { isPossiblePhoneNumber } from "libphonenumber-js";
+import validator from "validator";
 
 export default function Create() {
   const user = useSelector((state) => state.Auth.user);
@@ -22,6 +23,14 @@ export default function Create() {
   const [isLoading, setIsLoading] = useState(false);
 
   const redirect = new URLSearchParams(window.location.search).get("redirect");
+
+  function validateEmail(value) {
+    let error;
+    if (value && !validator.isEmail(value)) {
+      error = "L'e-mail est invalide";
+    }
+    return error;
+  }
 
   useEffect(() => {
     if (redirect) window.scrollTo(0, 0);
@@ -61,9 +70,14 @@ export default function Create() {
         try {
           setIsLoading(true);
 
-          const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "email.keyword": values.email } }] } } };
-          const { responses } = await api.esQuery("referent", body);
-          if (responses.length && responses[0].hits.hits.length) {
+          const emailError = validateEmail(values.email);
+          if (emailError) {
+            toastr.error(emailError);
+            setIsLoading(false);
+            return;
+          }
+          const { data: exist } = await api.post("/referent/exist", { email: values.email });
+          if (exist) {
             toastr.warning("Utilisateur déjà inscrit", "Merci de vérifier si la structure existe déjà sur la plateforme");
             setIsLoading(false);
             return;
@@ -369,8 +383,7 @@ export default function Create() {
                       onChange={handleChange}
                       placeholder="06/02 00 00 00 00"
                       validate={(v) =>
-                        (!v && requiredMessage) ||
-                        (!validator.matches(v, regexPhoneFrenchCountries) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
+                        (!v && requiredMessage) || (!isPossiblePhoneNumber(v, "FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
                       }
                     />
                     <ErrorMessage errors={errors} touched={touched} name="phone" />
