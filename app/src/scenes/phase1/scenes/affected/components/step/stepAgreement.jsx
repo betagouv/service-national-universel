@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { BsCheck2 } from "react-icons/bs";
-import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
@@ -15,8 +14,7 @@ import { isStepAgreementDone, isStepPDRDone } from "../../utils/steps.utils";
 
 export default function StepAgreement({ departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
-  const [stateDesktop, setStateDesktop] = useState(false);
-  const [stateMobil, setStateMobil] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const valid = isStepAgreementDone(young);
   const enabled = isStepPDRDone(young);
   const dispatch = useDispatch();
@@ -28,43 +26,15 @@ export default function StepAgreement({ departureDate, returnDate }) {
     toastr.success("Votre engagement a bien été enregistré");
     plausibleEvent("affecté_step2");
     dispatch(setYoung(data));
-    setStateDesktop(false);
-    setStateMobil(false);
+    setIsOpen(false);
   };
 
   return (
     <>
-      {/* Desktop */}
-      <div className={`hidden flex-row items-center justify-between md:flex ${enabled && "cursor-pointer"}`} onClick={() => setStateDesktop(enabled ? !stateDesktop : false)}>
-        <div className="flex flex-1 flex-row items-center py-4">
-          {valid ? (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
-              <BsCheck2 className="h-5 w-5 text-white" />
-            </div>
-          ) : (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 text-gray-700">2</div>
-          )}
-          <div className="mx-3 flex flex-1 flex-col">
-            <h1 className={`text-base leading-7 ${enabled ? "text-gray-900" : "text-gray-400"}`}>Confirmez votre participation au séjour</h1>
-            <p className={`text-sm leading-5 ${enabled ? "text-gray-500" : "text-gray-400"}`}>Vous devez confirmer votre participation au séjour avant votre départ.</p>
-          </div>
-        </div>
-        {enabled ? (
-          stateDesktop ? (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:scale-110">
-              <HiOutlineChevronUp className="h-5 w-5" />
-            </div>
-          ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 hover:scale-110">
-              <HiOutlineChevronDown className="h-5 w-5" />
-            </div>
-          )
-        ) : null}
-      </div>
-      {/* Mobile */}
-      <div
-        className={`mb-3 ml-4 flex h-36 cursor-pointer items-center rounded-xl border-[1px] md:hidden ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
-        onClick={() => setStateMobil(enabled ? !stateMobil : false)}>
+      <button
+        className={`mb-3 ml-4 flex h-36 items-center rounded-xl border-[1px] text-left ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
+        onClick={() => setIsOpen(true)}
+        disabled={!enabled}>
         <div className="flex w-full -translate-x-5 flex-row items-center">
           {valid ? (
             <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
@@ -81,12 +51,11 @@ export default function StepAgreement({ departureDate, returnDate }) {
             {!valid && enabled ? <div className="text-right text-sm leading-5 text-blue-600">Commencer</div> : null}
           </div>
         </div>
-      </div>
-      {stateDesktop ? content({ handleSubmit, young, departureDate, returnDate }) : null}
-      {stateMobil ? (
-        <Modal centered isOpen={stateMobil} toggle={() => setStateMobil(false)} size="xl">
+      </button>
+      {isOpen ? (
+        <Modal centered isOpen={isOpen} toggle={() => setIsOpen(false)} size="xl">
           <ModalContainer>
-            <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setStateMobil(false)} />
+            <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setIsOpen(false)} />
             <div className="w-full p-4">
               <h1 className="pb-1 text-center text-xl text-gray-900">Confirmez votre participation au séjour</h1>
               <p className="pb-4 text-center text-base text-gray-500">Vous devez confirmer votre participation au séjour avant votre départ.</p>

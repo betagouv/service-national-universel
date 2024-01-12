@@ -38,23 +38,11 @@ export default function StepsAffected({ center, session, meetingPoint, departure
           </div>
         </div>
       </article>
-      <hr className="-mx-20 hidden text-gray-200 md:flex" />
-      <div className="flex flex-col ">
-        <StepPDR center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-      </div>
-      <hr className="-mx-20 hidden text-gray-200 md:flex" />
-      <div className="flex flex-col ">
-        <StepAgreement departureDate={departureDate} returnDate={returnDate} />
-      </div>
-      <hr className="-mx-20 hidden text-gray-200 md:flex" />
-      <div className="flex flex-col ">
-        <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-      </div>
-      <hr className="-mx-20 hidden text-gray-200 md:flex" />
-      <div className="flex flex-col ">
-        <StepMedicalField young={young} />
-      </div>
-      <hr className="-mx-20 hidden text-gray-200 md:flex" />
+
+      <StepPDR center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+      <StepAgreement departureDate={departureDate} returnDate={returnDate} />
+      <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+      <StepMedicalField young={young} />
     </section>
   );
 }
