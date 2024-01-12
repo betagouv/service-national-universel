@@ -29,7 +29,7 @@ import useAuth from "@/services/useAuth";
 export default function StepEligibilite() {
   const { young, isCLE } = useAuth();
   function isInFranceOrOut(young) {
-    if (!young.schoolCountry) {
+    if (young.schoolCity) {
       return false;
     } else if (young.schoolCountry !== "France") {
       return true;
@@ -239,7 +239,7 @@ export default function StepEligibilite() {
           />
           <label className="flex-start mt-2 flex w-full flex-col text-base">
             Date de naissance
-            <DatePicker value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+            <DatePicker disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
             <ErrorMessage>{error.birthDate}</ErrorMessage>
             <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
           </label>

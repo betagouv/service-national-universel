@@ -59,7 +59,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
 
   const manualEntryOption = {
     value: "MANUAL_ENTRY",
-    label: <strong>Je n'ai pas trouvé mon établissement</strong>,
+    label: <strong>Je ne trouve pas mon établissement</strong>,
   };
 
   return manualFilling ? (

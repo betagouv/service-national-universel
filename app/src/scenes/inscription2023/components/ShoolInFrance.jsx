@@ -6,7 +6,7 @@ import { RiArrowGoBackLine } from "react-icons/ri";
 import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
 import { toastr } from "react-redux-toastr";
-import Select from "@/components/dsfr/forms/Select";
+import Select from "@/components/dsfr/forms/SearchableSelect";
 
 export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
   const [loading, setLoading] = useState(false);
@@ -58,8 +58,9 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   }
   const manualEntryOption = {
     value: "MANUAL_ENTRY",
-    label: <strong>Je n'ai pas trouvé mon établissement</strong>,
+    label: <strong>Je ne pas trouve mon établissement</strong>,
   };
+  const eee = "Je ne pas trouve mon établissement";
 
   return manualFilling ? (
     <>
@@ -71,6 +72,8 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           onClick={() => {
             setManualFilling(false);
             onSelectSchool(null);
+            // setManualSchool(school);
+            // setCity(null);
           }}>
           Revenir à la liste des établissements
         </button>
@@ -121,6 +124,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
             .sort((a, b) => a.label.localeCompare(b.label)),
           manualEntryOption,
         ]}
+        manualEntryOption={eee}
         onChange={(value) => {
           if (value === manualEntryOption.value) {
             setManualFilling(true);
