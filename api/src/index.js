@@ -22,7 +22,6 @@ const { forceDomain } = require("forcedomain");
   const express = require("express");
   const cookieParser = require("cookie-parser");
   const helmet = require("helmet");
-  // const logger = require("morgan");
   const passport = require("passport");
   require("./mongo");
 
@@ -59,10 +58,6 @@ const { forceDomain } = require("forcedomain");
       }),
     );
   }
-
-  // if (ENVIRONMENT === "development") {
-  // app.use(logger("dev"));
-  // }
 
   // eslint-disable-next-line no-unused-vars
   function handleError(err, req, res, next) {
