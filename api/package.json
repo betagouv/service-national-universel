@@ -49,7 +49,6 @@
     "mime-types": "^2.1.35",
     "mongoose": "^5.13.9",
     "mongoose-patch-history": "^2.0.0",
-    "morgan": "^1.10.0",
     "nanoid": "^2.1.11",
     "netmask": "^2.0.2",
     "node-cron": "^3.0.2",
