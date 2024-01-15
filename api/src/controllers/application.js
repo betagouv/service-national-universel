@@ -734,7 +734,7 @@ router.post(
           captureMessage("Wrong filetype", { extra: { tempFilePath, mimetype } });
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
-        if (ENVIRONMENT === "staging" || ENVIRONMENT === "production") {
+        if (ENVIRONMENT === "production") {
           try {
             const clamscan = await new NodeClam().init({
               removeInfected: true,

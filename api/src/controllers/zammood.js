@@ -455,7 +455,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      if (ENVIRONMENT === "staging" || ENVIRONMENT === "production") {
+      if (ENVIRONMENT === "production") {
         try {
           const clamscan = await new NodeClam().init({
             removeInfected: true,

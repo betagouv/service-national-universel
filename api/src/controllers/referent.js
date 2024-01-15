@@ -991,7 +991,7 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+        if (config.ENVIRONMENT === "production") {
           try {
             const clamscan = await new NodeClam().init({
               removeInfected: true,

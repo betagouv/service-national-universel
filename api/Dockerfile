@@ -21,6 +21,11 @@ ENV HOST 0.0.0.0
 
 WORKDIR /service-national-universel
 
+# Installer ClamAV
+RUN apk update && \
+    apk add clamav clamav-libunrar && \
+    freshclam
+
 COPY --chown=node:node --from=build /build/out .
 
 LABEL org.opencontainers.image.source=https://github.com/betagouv/service-national-universel
