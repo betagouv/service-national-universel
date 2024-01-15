@@ -18,7 +18,6 @@ import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
 import { RiArrowLeftLine } from "react-icons/ri";
-import { pl } from "date-fns/locale";
 
 const Title = () => (
   <div>
