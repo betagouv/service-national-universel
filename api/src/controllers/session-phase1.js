@@ -44,6 +44,7 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const FileType = require("file-type");
 const fs = require("fs");
 const config = require("../config");
+const NodeClam = require("clamscan");
 const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
@@ -575,6 +576,21 @@ router.post(
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      }
+
+      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
+        try {
+          const clamscan = await new NodeClam().init({
+            removeInfected: true,
+          });
+          const { isInfected } = await clamscan.isInfected(tempFilePath);
+          if (isInfected) {
+            capture(`File ${name} of user(${req.user.id})is infected`);
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          }
+        } catch {
+          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+        }
       }
 
       const newFile = {
