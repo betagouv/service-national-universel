@@ -1,6 +1,6 @@
 import React from "react";
 import { useDispatch } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import Error from "../../../components/error";
 import Avatar from "../assets/avatar.png";
 import ErrorPic from "../assets/error.png";
@@ -9,21 +9,20 @@ import api from "../../../services/api";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
-import EditPen from "../../../assets/icons/EditPen";
+import { RiEditFill } from "react-icons/ri";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
+import JDMA from "@/components/JDMA";
 
 export default function StepWaitingConsent() {
   const { young, logout, isCLE } = useAuth();
   const [disabled, setDisabled] = React.useState(false);
   const [error, setError] = React.useState({});
-  const [loading, setLoading] = React.useState(false);
   const notAuthorised = young?.parentAllowSNU === "false";
-  const history = useHistory();
   const dispatch = useDispatch();
 
   const handleClick = async () => {
@@ -104,7 +103,7 @@ export default function StepWaitingConsent() {
               <div className="text-sm text-[#666666] ">{young?.parent1Email}</div>
               <div className="mt-2 flex justify-between">
                 <button
-                  className="mt-2 h-10 w-1/2 bg-[#000091] text-base text-white disabled:bg-[#E5E5E5]  disabled:text-[#929292] "
+                  className="mt-2 h-10 w-32 bg-[#000091] text-base text-white disabled:bg-[#E5E5E5]  disabled:text-[#929292] "
                   disabled={disabled}
                   onClick={() => handleClick()}>
                   Relancer
@@ -112,17 +111,22 @@ export default function StepWaitingConsent() {
                 <img className="translate-y-4" src={Avatar} />
               </div>
             </div>
-            <div className="my-4 flex cursor-pointer items-center justify-end gap-2 text-base text-[#000091]" onClick={() => history.push("/inscription2023/confirm")}>
-              <EditPen />
-              Modifier mes informations
-            </div>
+
             {!isCLE && (
-              <div className="flex w-full justify-end">
-                <a className="w-36" href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3504?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f">
-                  <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
-                </a>
+              <div className="my-6 p-8 flex flex-col md:flex-row gap-6 justify-between bg-[#F5F5FD]">
+                <div>
+                  <p className="font-semibold">Comment s'est passé votre inscription ?</p>
+                  <p className="mt-2 text-sm">Partagez votre expérience et contribuez à l'amélioration de nos services</p>
+                </div>
+                <JDMA id={3504} />
               </div>
             )}
+
+            <Link className="mt-6 flex cursor-pointer items-center justify-end gap-2 text-base text-[#000091]" to="/inscription2023/confirm">
+              <RiEditFill className="h-5 w-5" />
+              Modifier mes informations
+            </Link>
+
             <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={logout} />
           </DSFRContainer>
         </>
@@ -144,7 +148,7 @@ export default function StepWaitingConsent() {
           Mais tout n’est pas perdu, il existe d’autres moyens de s’engager ! Découvrez-les maintenant.
         </div>
         <EngagementPrograms />
-        <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={logout} disabled={loading} />
+        <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={logout} />
       </DSFRContainer>
     </>
   );
