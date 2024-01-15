@@ -1,3 +1,15 @@
+# [1.358.0](https://github.com/betagouv/service-national-universel/compare/v1.357.1...v1.358.0) (2024-01-15)
+
+
+### Bug Fixes
+
+* **app:** onboarding wording ([bf44472](https://github.com/betagouv/service-national-universel/commit/bf444727de88d2fd35e1bb21228ed28e96c67919))
+
+
+### Features
+
+* **app:** 1636 - Hide cohesion stay dates for CLE users [#3456](https://github.com/betagouv/service-national-universel/issues/3456) ([e6b0bc3](https://github.com/betagouv/service-national-universel/commit/e6b0bc3f9fb6e18f3c70df551ca843ce6fedbe24))
+
 ## [1.357.1](https://github.com/betagouv/service-national-universel/compare/v1.357.0...v1.357.1) (2024-01-12)
 
 
