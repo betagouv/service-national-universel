@@ -49,7 +49,7 @@ const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
 
           <div className="flex gap-6 text-2xl text-black font-semibold my-4">
             <p>→</p>
-            <p>Je suis inscrit en tant que volontaire</p>
+            <p>Je suis inscrit(e) en tant que volontaire</p>
           </div>
 
           <p>Vous avez un compte hors Classes engagées ? Contactez le support pour mettre à jour votre compte et vous faire gagner du temps.</p>
