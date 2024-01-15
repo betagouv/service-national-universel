@@ -32,7 +32,7 @@ export default function WaitingAffectation() {
           <div className="mb-10 max-w-3xl">
             <header className="md:mt-12 mb-12">
               <h1 className="text-[44px] mt-0 mb-1">Mon séjour de cohésion</h1>
-              <h2 className="text-[44px] mt-0 mb-3 font-bold">{young.cohort === "CLE 23-24" ? "à venir" : cohortDate}</h2>
+              <h2 className="text-[44px] mt-0 mb-3 font-bold">{young.cohort.includes("CLE") ? "à venir" : cohortDate}</h2>
               {shouldShowChangeStayLink && <ChangeStayLink />}
             </header>
             <div className="flex my-4 items-center gap-4 rounded-xl border-[1px] border-gray-200 bg-white p-3">
