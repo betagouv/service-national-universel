@@ -1,4 +1,5 @@
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
+const loggingMiddleware = require("./middlewares/loggingMiddleware");
 const { forceDomain } = require("forcedomain");
 
 (async () => {
@@ -21,7 +22,7 @@ const { forceDomain } = require("forcedomain");
   const express = require("express");
   const cookieParser = require("cookie-parser");
   const helmet = require("helmet");
-  const logger = require("morgan");
+  // const logger = require("morgan");
   const passport = require("passport");
   require("./mongo");
 
@@ -60,7 +61,7 @@ const { forceDomain } = require("forcedomain");
   }
 
   // if (ENVIRONMENT === "development") {
-  app.use(logger("dev"));
+  // app.use(logger("dev"));
   // }
 
   // eslint-disable-next-line no-unused-vars
@@ -92,6 +93,8 @@ const { forceDomain } = require("forcedomain");
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+
+  app.use(loggingMiddleware);
 
   require("./crons");
   app.use(cookieParser());
