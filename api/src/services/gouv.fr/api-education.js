@@ -1,4 +1,4 @@
-const queryString = require("query-string");
+const queryString = require("querystring");
 const { capture } = require("../../sentry");
 
 const apiEducation = async ({ filters, page, size }, path, options = {}) => {
