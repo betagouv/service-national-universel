@@ -1,3 +1,37 @@
+# [1.358.0](https://github.com/betagouv/service-national-universel/compare/v1.357.1...v1.358.0) (2024-01-15)
+
+
+### Bug Fixes
+
+* **app:** onboarding wording ([bf44472](https://github.com/betagouv/service-national-universel/commit/bf444727de88d2fd35e1bb21228ed28e96c67919))
+
+
+### Features
+
+* **app:** 1636 - Hide cohesion stay dates for CLE users [#3456](https://github.com/betagouv/service-national-universel/issues/3456) ([e6b0bc3](https://github.com/betagouv/service-national-universel/commit/e6b0bc3f9fb6e18f3c70df551ca843ce6fedbe24))
+
+## [1.357.1](https://github.com/betagouv/service-national-universel/compare/v1.357.0...v1.357.1) (2024-01-12)
+
+
+### Bug Fixes
+
+* **api:** demande de modif authorization ([17557d3](https://github.com/betagouv/service-national-universel/commit/17557d392e3c2c2eba3dbb11d44468045d2a9689))
+
+# [1.357.0](https://github.com/betagouv/service-national-universel/compare/v1.356.0...v1.357.0) (2024-01-11)
+
+
+### Bug Fixes
+
+* **api:** 1520: remediation token duration ([#3468](https://github.com/betagouv/service-national-universel/issues/3468)) ([780d7dd](https://github.com/betagouv/service-national-universel/commit/780d7dd2992b392f450b41562340020693444c3b))
+* **api:** Get referent CLE classes ([#3469](https://github.com/betagouv/service-national-universel/issues/3469)) ([b369fad](https://github.com/betagouv/service-national-universel/commit/b369fade939313c025c993cf1d400b5372139661))
+* **api:** trim code 2fa signup CLE admin ([#3474](https://github.com/betagouv/service-national-universel/issues/3474)) ([a9619b6](https://github.com/betagouv/service-national-universel/commit/a9619b6e164305394b04984a7241b83a4f46dddf))
+
+
+### Features
+
+* **api:** notify transporteur on change PDT ([#3470](https://github.com/betagouv/service-national-universel/issues/3470)) ([ed7c8cb](https://github.com/betagouv/service-national-universel/commit/ed7c8cbe26d62a4b8512a18604fdd498ac7e6a43))
+* **api/admin:** 1682 - Export associations ([#3471](https://github.com/betagouv/service-national-universel/issues/3471)) ([be96ff5](https://github.com/betagouv/service-national-universel/commit/be96ff54363afe99ca69e3428e97450d014b9d0b))
+
 # [1.356.0](https://github.com/betagouv/service-national-universel/compare/v1.355.0...v1.356.0) (2024-01-10)
 
 

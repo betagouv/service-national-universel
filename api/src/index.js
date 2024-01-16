@@ -117,7 +117,6 @@ const { forceDomain } = require("forcedomain");
   app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
   app.use("/elasticsearch", require("./controllers/elasticsearch"));
   app.use("/email", require("./controllers/email"));
-  app.use("/es", require("./controllers/es"));
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters"));
   app.use("/inscription-goal", require("./controllers/inscription-goal"));
