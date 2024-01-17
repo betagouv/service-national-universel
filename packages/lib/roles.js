@@ -463,11 +463,14 @@ const canEditPresenceYoung = (actor) => {
 const canSigninAs = (actor, target) => {
   if (isAdmin(actor)) return true;
   if (!isReferent(actor)) return false;
-  if (![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(target.role)) return false;
+  
+  const allowedTargetRoles = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];
+  if (!allowedTargetRoles.includes(target.role)) return false;
+  
+  if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.some((d) => target.department.includes(d))) return true;
+  if (actor.role === ROLES.REFERENT_REGION && actor.region === target.region) return true;
 
-  const isReferentRegionFromSameRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
-  const isReferentDepartmentFromSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
-  return isReferentRegionFromSameRegion || isReferentDepartmentFromSameDepartment;
+  return false;
 };
 
 const canSendFileByMailToYoung = (actor, young) => {
