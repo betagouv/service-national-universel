@@ -69,16 +69,6 @@ const render = async (young) => {
     if (young.source === "CLE") {
       const html = fs.readFileSync(path.resolve(__dirname, "./cohesion-CLE.html"), "utf8");
       return html
-        .replace(
-          /{{CONTACTS}}/g,
-          sanitizeAll(
-            contacts
-              .map((contact) => {
-                return `<li>${contact.contactName} - ${contact.contactPhone || ""} - ${contact.contactMail || ""}</li>`;
-              })
-              .join(""),
-          ),
-        )
         .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
         .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
         .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
