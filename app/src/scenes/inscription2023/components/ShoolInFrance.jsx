@@ -56,11 +56,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
     if (!school?.adresse) return school.fullName;
     return school.fullName + " - " + school.adresse;
   }
-  const manualEntryOption = {
-    value: "MANUAL_ENTRY",
-    label: <strong>Je ne pas trouve mon établissement</strong>,
-  };
-  const eee = "Je ne pas trouve mon établissement";
 
   return manualFilling ? (
     <>
@@ -72,8 +67,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           onClick={() => {
             setManualFilling(false);
             onSelectSchool(null);
-            // setManualSchool(school);
-            // setCity(null);
           }}>
           Revenir à la liste des établissements
         </button>
@@ -83,7 +76,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         label="Saisir le nom de l'établissement"
         onChange={(value) => {
           setManualSchool({ ...manualSchool, fullName: value });
-          onSelectSchool(null);
         }}
         error={errors?.manualFullName}
         correction={corrections?.schoolName}
@@ -122,20 +114,21 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
               label: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
             }))
             .sort((a, b) => a.label.localeCompare(b.label)),
-          manualEntryOption,
         ]}
-        manualEntryOption={eee}
         onChange={(value) => {
-          if (value === manualEntryOption.value) {
-            setManualFilling(true);
-            onSelectSchool(null);
-          } else {
-            onSelectSchool(schoolOptions.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
-          }
+          onSelectSchool(schoolOptions.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
         }}
         error={errors?.school}
         correction={corrections?.schoolName}
       />
+      <span
+        className="text-xs ml-2 text-gray-500 underline underline-offset-2 cursor-pointer"
+        onClick={() => {
+          setManualFilling(true);
+          onSelectSchool(null);
+        }}>
+        Je n'ai pas trouvé mon établissement
+      </span>
     </>
   );
 }

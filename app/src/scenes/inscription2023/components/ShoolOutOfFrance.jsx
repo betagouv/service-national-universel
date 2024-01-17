@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Select from "@/components/dsfr/forms/Select";
+import Select from "@/components/dsfr/forms/SearchableSelect";
 import { HiArrowRight } from "react-icons/hi";
 import Input from "./Input";
 import { RiArrowGoBackLine } from "react-icons/ri";
@@ -57,11 +57,6 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
     return school.fullName + " - " + school.city;
   }
 
-  const manualEntryOption = {
-    value: "MANUAL_ENTRY",
-    label: <strong>Je ne trouve pas mon établissement</strong>,
-  };
-
   return manualFilling ? (
     <>
       <hr></hr>
@@ -71,7 +66,6 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
           className="text-[#000091] cursor-pointer"
           onClick={() => {
             setManualFilling(false);
-            onSelectSchool(null);
           }}>
           Revenir à la liste des établissements
         </button>
@@ -111,19 +105,21 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
               label: `${e.fullName} - ${e.city}`,
             }))
             .sort((a, b) => a.label.localeCompare(b.label)),
-          manualEntryOption,
         ]}
         onChange={(value) => {
-          if (value === manualEntryOption.value) {
-            setManualFilling(true);
-            onSelectSchool(null);
-          } else {
-            onSelectSchool(schools.find((e) => `${e.fullName} - ${e.city}` === value));
-          }
+          onSelectSchool(schools.find((e) => `${e.fullName} - ${e.city}` === value));
         }}
         error={errors?.school}
         correction={corrections?.schoolName}
       />
+      <span
+        className="text-xs ml-2 text-gray-500 underline underline-offset-2 cursor-pointer"
+        onClick={() => {
+          setManualFilling(true);
+          onSelectSchool(null);
+        }}>
+        Je n'ai pas trouvé mon établissement
+      </span>
     </>
   );
 }
