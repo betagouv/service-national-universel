@@ -332,7 +332,6 @@ const Action = ({ hit, structure }) => {
     }
   };
 
-  console.log("#########", user, hit, canSigninAs(user, hit));
 
   return (
     <>
