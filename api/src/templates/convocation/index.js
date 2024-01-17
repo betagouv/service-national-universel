@@ -66,42 +66,77 @@ const render = async (young) => {
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
     const departureDate = await getDepartureDateSession(meetingPoint, session, young, cohort);
     const returnDate = await getReturnDateSession(meetingPoint, session, young, cohort);
-
-    const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
-    return html
-      .replace(
-        /{{CONTACTS}}/g,
-        sanitizeAll(
-          contacts
-            .map((contact) => {
-              return `<li>${contact.contactName} - ${contact.contactPhone || ""} - ${contact.contactMail || ""}</li>`;
-            })
-            .join(""),
-        ),
-      )
-      .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
-      .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
-      .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
-      .replace(/{{BIRTHDATE}}/g, sanitizeAll(formatStringDateTimezoneUTC(young.birthdateAt)))
-      .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
-      .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
-      .replace(/{{CITY}}/g, sanitizeAll(young.city))
-      .replace(/{{COHESION_STAY_DATE_STRING}}/g, sanitizeAll(transportDatesToString(departureDate, returnDate)))
-      .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
-      .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
-      .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
-      .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
-      .replace(/{{MEETING_DATE}}/g, sanitizeAll("<b>Le</b> " + dayjs(departureDate).locale("fr-FR").format("dddd DD MMMM YYYY")))
-      .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
-      .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
-      .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
-      .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")))
-      .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(meetingPoint ? ligneToPoint.returnHour : "11:00"))
-      .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
-      .replace(/{{TOP}}/g, sanitizeAll(getTop()))
-      .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
-      .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()))
-      .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
+    if (young.source === "CLE") {
+      const html = fs.readFileSync(path.resolve(__dirname, "./cohesion-CLE.html"), "utf8");
+      return html
+        .replace(
+          /{{CONTACTS}}/g,
+          sanitizeAll(
+            contacts
+              .map((contact) => {
+                return `<li>${contact.contactName} - ${contact.contactPhone || ""} - ${contact.contactMail || ""}</li>`;
+              })
+              .join(""),
+          ),
+        )
+        .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
+        .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+        .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+        .replace(/{{BIRTHDATE}}/g, sanitizeAll(formatStringDateTimezoneUTC(young.birthdateAt)))
+        .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
+        .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
+        .replace(/{{CITY}}/g, sanitizeAll(young.city))
+        .replace(/{{COHESION_STAY_DATE_STRING}}/g, sanitizeAll(transportDatesToString(departureDate, returnDate)))
+        .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
+        .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
+        .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
+        .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
+        .replace(/{{MEETING_DATE}}/g, sanitizeAll("<b>Le</b> " + dayjs(departureDate).locale("fr-FR").format("dddd DD MMMM YYYY")))
+        .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
+        .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")))
+        .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(meetingPoint ? ligneToPoint.returnHour : "11:00"))
+        .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+        .replace(/{{TOP}}/g, sanitizeAll(getTop()))
+        .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
+        .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()))
+        .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
+    } else {
+      const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
+      return html
+        .replace(
+          /{{CONTACTS}}/g,
+          sanitizeAll(
+            contacts
+              .map((contact) => {
+                return `<li>${contact.contactName} - ${contact.contactPhone || ""} - ${contact.contactMail || ""}</li>`;
+              })
+              .join(""),
+          ),
+        )
+        .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
+        .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
+        .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
+        .replace(/{{BIRTHDATE}}/g, sanitizeAll(formatStringDateTimezoneUTC(young.birthdateAt)))
+        .replace(/{{ADDRESS}}/g, sanitizeAll(young.address))
+        .replace(/{{ZIP}}/g, sanitizeAll(young.zip))
+        .replace(/{{CITY}}/g, sanitizeAll(young.city))
+        .replace(/{{COHESION_STAY_DATE_STRING}}/g, sanitizeAll(transportDatesToString(departureDate, returnDate)))
+        .replace(/{{COHESION_CENTER_NAME}}/g, sanitizeAll(center.name))
+        .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
+        .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
+        .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
+        .replace(/{{MEETING_DATE}}/g, sanitizeAll("<b>Le</b> " + dayjs(departureDate).locale("fr-FR").format("dddd DD MMMM YYYY")))
+        .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
+        .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
+        .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
+        .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")))
+        .replace(/{{MEETING_HOURS_RETURN}}/g, sanitizeAll(meetingPoint ? ligneToPoint.returnHour : "11:00"))
+        .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
+        .replace(/{{TOP}}/g, sanitizeAll(getTop()))
+        .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
+        .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()))
+        .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
+    }
   } catch (e) {
     throw e;
   }
