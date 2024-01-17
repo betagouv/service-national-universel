@@ -20,7 +20,7 @@ const datefns = require("date-fns");
 var { fr } = require("date-fns/locale");
 
 function getBg() {
-  return getSignedUrl("convocation/convocation_template_base.png");
+  return getSignedUrl("convocation/convocation_template_base_2024.png");
 }
 function getTop() {
   return getSignedUrl("convocation/top.png");
@@ -101,12 +101,6 @@ const render = async (young) => {
       .replace(/{{TOP}}/g, sanitizeAll(getTop()))
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
       .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()))
-      .replace(
-        /{{SANITARY_INSTRUCTIONS}}/g,
-        sanitizeAll(
-          `<li>en fonction des consignes sanitaires le jour du départ, 2 masques jetables à usage médical pour le transport en commun${ligneBus?.lunchBreak ? "," : "."}</li>`,
-        ),
-      )
       .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
   } catch (e) {
     throw e;
