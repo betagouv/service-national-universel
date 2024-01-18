@@ -1,5 +1,5 @@
 import React from "react";
-import { Input as DSFRInput } from "@codegouvfr/react-dsfr/Input";
+import { Input as DSFRInput } from "@snu/ds/dsfr";
 
 export default function Input({
   value,

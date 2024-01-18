@@ -1,6 +1,7 @@
 import React, { MouseEvent } from "react";
 import Container from "./Container";
 import { Button } from "@codegouvfr/react-dsfr/Button";
+import { fr } from "@codegouvfr/react-dsfr";
 
 type OwnProps = {
   children: React.ReactNode;
@@ -29,7 +30,9 @@ export default function PaddedContainer({
             <h1 className="m-0 text-2xl font-bold">{title}</h1>
             {href && (
               <Button
-                iconId="fr-icon-question-fill"
+                iconId={
+                  fr.cx("fr-icon-question-fill") as "fr-icon-question-fill"
+                }
                 onClick={(e) => {
                   if (handleClickEvent) handleClickEvent(e);
                   window.open(href, "_blank")?.focus();

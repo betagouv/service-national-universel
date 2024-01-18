@@ -17,6 +17,8 @@ import { capture, captureMessage } from "../../../sentry";
 import api from "../../../services/api";
 import { cohortsInit } from "../../../utils/cohorts";
 
+import { Button } from "@snu/ds/dsfr";
+
 export default function Signin() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -99,8 +101,8 @@ export default function Signin() {
     <div className="flex bg-[#F9F6F2] py-6">
       <div className="mx-auto w-full bg-white px-[1rem] py-[2rem] shadow-sm md:w-[56rem] md:px-[6rem] md:pt-[3rem]">
         {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-        <div className="mb-2 text-[32px] font-bold text-[#161616]">Me connecter</div>
-        <div className="mb-2 flex items-center gap-4">
+        <div className="mb-4 text-[32px] font-bold text-[#161616]">Me connecter</div>
+        <div className="mb-4 flex items-center gap-4">
           <RightArrow />
           <div className="text-[21px] font-bold text-[#161616]">Mon espace volontaire</div>
         </div>
@@ -115,36 +117,42 @@ export default function Signin() {
             {showPassword ? <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} /> : <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />}
           </div>
         </div>
-        <div className="cursor-pointer pb-4 text-base font-normal text-[#000091] underline" onClick={() => history.push("/auth/forgot")}>
-          Mot de passe perdu ?
-        </div>
+        <a href="/auth/forgot">Mot de passe perdu ?</a>
         <div className="flex w-full justify-end">
-          <button
-            disabled={disabled || loading}
-            className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0 disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
-            onClick={onSubmit}>
+          <Button disabled={disabled || loading} onClick={onSubmit}>
             Connexion
-          </button>
+          </Button>
         </div>
         <hr className="mt-3 border-b-1 text-[#E5E5E5]" />
         <div className="mt-3 text-[#E5E5E5] space-y-3">
           <div className="mt-3 mb-2 text-center text-xl font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
           {/* <p className="text-center text-base text-[#161616] my-3">Les inscriptions sont actuellement fermées.</p> */}
           {isInscriptionOpen ? (
-            <Link
-              onClick={() => plausibleEvent("Connexion/Lien vers preinscription")}
-              to="/preinscription"
-              className="w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-blue-france-sun-113 px-3 py-2 text-blue-france-sun-113 hover:bg-blue-france-sun-113 hover:text-white">
-              Commencer mon inscription
-            </Link>
+            <div className="flex w-full justify-center">
+              <Button
+                priority="secondary"
+                onClick={() => {
+                  plausibleEvent("Connexion/Lien vers preinscription");
+                  return history.push("/preinscription");
+                }}>
+                Commencer mon inscription
+              </Button>
+            </div>
           ) : (
             <>
               <p className="text-center text-base text-[#161616] m-3">Soyez informé(e) lors de l'ouverture des prochaines inscriptions.</p>
-              <a
-                className="plausible-event-name=Clic+LP+Inscription w-fit mx-auto flex cursor-pointer text-base items-center text-center justify-center border-[1px] border-[#000091] px-3 py-2 text-[#000091] hover:bg-[#000091] hover:text-white"
-                href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire">
-                Recevoir une alerte par email
-              </a>
+              <div className="flex w-full justify-center">
+                <Button
+                  priority="secondary"
+                  onClick={() => {
+                    plausibleEvent("Connexion/Lien vers preinscription");
+                    return window.location.replace(
+                      "https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire",
+                    );
+                  }}>
+                  Recevoir une alerte par email
+                </Button>
+              </div>
             </>
           )}
         </div>
