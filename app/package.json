@@ -13,8 +13,7 @@
     "build:dev": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode development",
     "preview": "vite preview",
     "postinstall": "npm run copy:dsfr",
-    "predev": "only-include-used-icons",
-    "copy:dsfr": "copy-dsfr-to-public && only-include-used-icons",
+    "copy:dsfr": "copy-dsfr-to-public",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint src --ext .js --fix",
     "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
