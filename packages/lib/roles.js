@@ -460,16 +460,18 @@ const canEditPresenceYoung = (actor) => {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 };
 
-const canSigninAs = (actor, target) => {
+const canSigninAs = (actor, target, source) => {
   if (isAdmin(actor)) return true;
   if (!isReferent(actor)) return false;
-  
-  const allowedTargetRoles = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];
-  if (!allowedTargetRoles.includes(target.role)) return false;
-  
-  if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.some((d) => target.department.includes(d))) return true;
-  if (actor.role === ROLES.REFERENT_REGION && actor.region === target.region) return true;
 
+  if (source === "referent") {
+    const allowedTargetRoles = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];
+    if (!allowedTargetRoles.includes(target.role)) return false;
+    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.some((d) => target.department.includes(d))) return true;
+  } else {
+    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department)) return true;
+  }
+  if (actor.role === ROLES.REFERENT_REGION && actor.region === target.region) return true;
   return false;
 };
 

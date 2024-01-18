@@ -332,7 +332,6 @@ const Action = ({ hit, structure }) => {
     }
   };
 
-
   return (
     <>
       <DropdownButton
@@ -354,7 +353,7 @@ const Action = ({ hit, structure }) => {
                   </Link>
                 ),
               },
-              canSigninAs(user, hit) ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
+              canSigninAs(user, hit, "referent") ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
               canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? { key: "delete", render: <p>Supprimer le profil</p>, action: onClickDelete } : null,
             ].filter(Boolean),
           },
