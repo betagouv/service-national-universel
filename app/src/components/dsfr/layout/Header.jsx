@@ -55,8 +55,8 @@ const Header = ({ title }) => {
         </>
       }
       homeLinkProps={{
-        href: "/",
-        title: "Acceuil",
+        to: "/",
+        title: "Acceuil - Service National Universel",
       }}
       operatorLogo={{
         alt: "Logo Service National Universel",
