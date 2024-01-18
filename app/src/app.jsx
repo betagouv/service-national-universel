@@ -175,6 +175,19 @@ const OptionalLogIn = () => {
   );
 };
 
+const Inscription = () => {
+  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+  startReactDsfr({ defaultColorScheme: "light", Link });
+
+  return (
+    <Switch>
+      <SentryRoute path="/inscription2023" component={Inscription2023} />
+      <SentryRoute path="/reinscription" component={ReInscription} />
+      <Redirect to="/" />
+    </Switch>
+  );
+};
+
 const MandatoryLogIn = () => {
   const { pathname, search } = useLocation();
   const [loading, setLoading] = useState(true);
@@ -220,8 +233,7 @@ const MandatoryLogIn = () => {
 
   return (
     <Switch>
-      <SentryRoute path="/inscription2023" component={Inscription2023} />
-      <SentryRoute path="/reinscription" component={ReInscription} />
+      <SentryRoute path={["/inscription2023", "/reinscription"]} component={() => <Inscription />} />
       <SentryRoute path="/" component={Espace} />
     </Switch>
   );
