@@ -1,3 +1,16 @@
+# [1.361.0](https://github.com/betagouv/service-national-universel/compare/v1.360.0...v1.361.0) (2024-01-18)
+
+
+### Bug Fixes
+
+* **api:** canSigninAs ([506c398](https://github.com/betagouv/service-national-universel/commit/506c39814a619d05ef0c96510f1be3df79fe4dfc))
+* **api:** syncro pdt ligne de bus centre hours ([5aa8601](https://github.com/betagouv/service-national-universel/commit/5aa8601a80cd30fffff04ca6e0bbfd993afe693e))
+
+
+### Features
+
+* **api:** update import PDT hours format ([881a67a](https://github.com/betagouv/service-national-universel/commit/881a67a169e73a3f1d34f57a93d40ec9be1f0af3))
+
 # [1.360.0](https://github.com/betagouv/service-national-universel/compare/v1.359.0...v1.360.0) (2024-01-17)
 
 
