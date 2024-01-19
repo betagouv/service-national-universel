@@ -285,11 +285,7 @@ router.post(
             quarantineInfected: false,
             scanLog: null,
             debugMode: true,
-            clamdscan: {
-              socket: "/run/clamav/clamd.ctl", // Path to the clamd socket file
-              timeout: 60000,
-              localFallback: true,
-            },
+            preference: "clamscan",
           });
           const { isInfected } = await clamscan.isInfected(tempFilePath);
           if (isInfected) {
