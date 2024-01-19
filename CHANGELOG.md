@@ -1,3 +1,16 @@
+# [1.362.0](https://github.com/betagouv/service-national-universel/compare/v1.361.0...v1.362.0) (2024-01-19)
+
+
+### Bug Fixes
+
+* **api:** Version check for old tokens ([7a845d7](https://github.com/betagouv/service-national-universel/commit/7a845d750d90e8ebdcdb64e0f7f4127089e7f9d8))
+
+
+### Features
+
+* **api:** new convocation for 2024 ([#3483](https://github.com/betagouv/service-national-universel/issues/3483)) ([c8fca45](https://github.com/betagouv/service-national-universel/commit/c8fca45aa5baf199fa6d72f1b4c97faa654a6911))
+* **api:** Update get PDR functions [#3487](https://github.com/betagouv/service-national-universel/issues/3487) ([251b841](https://github.com/betagouv/service-national-universel/commit/251b841a2fd149ec299002ebcb47b35cf366ee48))
+
 # [1.361.0](https://github.com/betagouv/service-national-universel/compare/v1.360.0...v1.361.0) (2024-01-18)
 
 
