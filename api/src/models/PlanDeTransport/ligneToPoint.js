@@ -36,13 +36,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  meetingHour: {
-    type: String,
-    required: true,
-    documentation: {
-      description: "Heure de convocation",
-    },
-  },
+  // meetingHour: {
+  //   type: String,
+  //   required: true,
+  //   documentation: {
+  //     description: "Heure de convocation",
+  //   },
+  // },
 
   returnHour: {
     type: String,
@@ -113,6 +113,14 @@ Schema.virtual("user").set(function (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;
     this._user = { _id, role, department, region, email, firstName, lastName, model };
   }
+});
+
+Schema.virtual("meetingHour").get(function () {
+  const [hour, minute] = this.departureHour.split(":");
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+  date.setMinutes(date.getMinutes() - 30);
+  return date.toTimeString().split(" ")[0].substring(0, 5);
 });
 
 Schema.pre("save", function (next, params) {
