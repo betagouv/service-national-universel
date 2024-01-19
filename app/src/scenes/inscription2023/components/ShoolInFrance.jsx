@@ -125,6 +125,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         className="text-xs ml-2 text-gray-500 underline underline-offset-2 cursor-pointer"
         onClick={() => {
           setManualFilling(true);
+          setManualSchool({});
           onSelectSchool(null);
         }}>
         Je n'ai pas trouvé mon établissement

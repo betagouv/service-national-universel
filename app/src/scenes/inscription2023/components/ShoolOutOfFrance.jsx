@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Select from "@/components/dsfr/forms/SearchableSelect";
-import { HiArrowRight } from "react-icons/hi";
 import Input from "./Input";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import api from "../../../services/api";
