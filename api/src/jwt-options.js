@@ -7,8 +7,8 @@ const JWT_TRUST_TOKEN_MAX_AGE_SEC = 60 * 60 * 24 * 30; // 1 mois
 const JWT_SIGNIN_VERSION = "0";
 const JWT_TRUST_TOKEN_VERSION = "0";
 
-const checkJwtSigninVersion = (token) => token.__v === JWT_SIGNIN_VERSION;
-const checkJwtTrustTokenVersion = (token) => token.__v === JWT_TRUST_TOKEN_VERSION;
+const checkJwtSigninVersion = (token) => token?.__v === JWT_SIGNIN_VERSION;
+const checkJwtTrustTokenVersion = (token) => token?.__v === JWT_TRUST_TOKEN_VERSION;
 
 module.exports = {
   JWT_SIGNIN_MAX_AGE_SEC,
