@@ -455,20 +455,20 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      if (ENVIRONMENT === "production") {
-        try {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            capture(`File ${name} is infected`);
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          }
-        } catch {
-          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+      // if (ENVIRONMENT === "production") {
+      try {
+        const clamscan = await new NodeClam().init({
+          removeInfected: true,
+        });
+        const { isInfected } = await clamscan.isInfected(tempFilePath);
+        if (isInfected) {
+          capture(`File ${name} is infected`);
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
+      } catch {
+        return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
       }
+      // }
 
       const data = fs.readFileSync(tempFilePath);
       const path = getS3Path(name);
