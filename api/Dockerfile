@@ -23,7 +23,7 @@ WORKDIR /service-national-universel
 
 # Installer ClamAV
 RUN apk update && \
-    apk add clamav clamav-libunrar && \
+    apk add clamav clamav-daemon clamav-libunrar && \
     freshclam
 
 COPY --chown=node:node --from=build /build/out .
