@@ -280,12 +280,16 @@ router.post(
 
         // if (config.ENVIRONMENT === "production") {
         try {
-          const clamscan = await new NodeClam().init({
+          const clamscan = new NodeClam().init({
             removeInfected: true,
             quarantineInfected: false,
             scanLog: null,
             debugMode: true,
-            preference: "clamscan",
+            clamdscan: {
+              socket: "/run/clamav/clamd.ctl",
+              timeout: 60000,
+              localFallback: true,
+            },
           });
           const { isInfected } = await clamscan.isInfected(tempFilePath);
           if (isInfected) {
