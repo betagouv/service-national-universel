@@ -1,5 +1,5 @@
 #!/bin/sh
-
+set -e
 # Start ClamAV daemon
 clamd --foreground &
 
