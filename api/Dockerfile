@@ -4,8 +4,6 @@ ENV APP_NAME api
 
 WORKDIR /build
 
-COPY . .
-
 RUN --mount=type=cache,target=/build/.npm/cache \
     npx turbo prune --scope=$APP_NAME --out-dir ./out && \
     cd out && \
@@ -29,7 +27,6 @@ COPY clamd.conf /etc/clamav/clamd.conf
 
 COPY --chown=node:node --from=build /build/out .
 
-COPY start.sh /service-national-universel/api/start.sh
 RUN chmod +x /service-national-universel/api/start.sh
 
 LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel" \
