@@ -30,11 +30,12 @@ COPY --chown=node:node --from=build /build/out .
 RUN echo "TCPSocket 3310" > /etc/clamav/clamd.conf
 RUN echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf
 
-RUN chmod +x /service-national-universel/api/start.sh
+# RUN chmod +x /service-national-universel/api/start.sh
 
 LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel" \
       org.opencontainers.image.description="This image provides a consistent and reproducible environment for the backend, ensuring it deploys faster and runs the same way regardless of the deployment environment."
 
 EXPOSE $PORT
 
-CMD ["/service-national-universel/api/start.sh"]
+# CMD ["/service-national-universel/api/start.sh"]
+CMD clamd && npm start
