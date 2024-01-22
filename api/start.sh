@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Start ClamAV daemon
-clamd 
+clamd --foreground &
 
 # Start your Node.js application
 npm start
