@@ -304,6 +304,14 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     await ligne.save({ fromUser: req.user });
 
+    const planDeTransport = await PlanTransportModel.findById(id);
+    planDeTransport.set({
+      centerArrivalTime,
+      centerDepartureTime,
+    });
+
+    await planDeTransport.save({ fromUser: req.user });
+
     const infoBus = await getInfoBus(ligne);
 
     await notifyTranporteurs(ligne, "Centre de cohésion");
