@@ -25,7 +25,7 @@ RUN apk update && \
     apk add clamav clamav-libunrar && \
     freshclam
 
-COPY clamd.conf /etc/clamav/clamd.conf
+COPY /service-national-universel/api/clamd.conf /etc/clamav/clamd.conf
 
 COPY --chown=node:node --from=build /build/out .
 
