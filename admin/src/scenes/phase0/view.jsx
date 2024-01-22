@@ -2203,29 +2203,29 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
             ) : null}
           </div>
         )}
-        {1 === 1 /* [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS].includes(young.status) &&
+        {[YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS].includes(young.status) &&
           [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) &&
-          young.parentAllowSNU !== "true" */ && (
-          <>
-            <div className="flex justify-end mt-4 border-t border-t-[#E5E7EB] p-4">
-              <Button title="Accepter à la place des représentants légaux" type="tertiary" leftIcon={<FaCheck />} onClick={() => setModalConsent(true)} />
-            </div>
-            <ModalConfirmation
-              isOpen={modalConsent}
-              onClose={() => {
-                setModalConsent(false);
-              }}
-              className="md:max-w-[700px]"
-              icon={<IoShieldCheckmarkOutline size={40} />}
-              title="Consentements à la place des représentants légaux"
-              text="Vous allez valider le consentements et le droit à l'image à la place des représentants légaux. Conservez bien l’autorisation écrite dans le dossier des élèves au sein de l’établissement."
-              actions={[
-                { title: "Fermer", isCancel: true },
-                { title: "Confirmer", onClick: onConfirmConsent },
-              ]}
-            />
-          </>
-        )}
+          young.parentAllowSNU !== "true" && (
+            <>
+              <div className="flex justify-end mt-4 border-t border-t-[#E5E7EB] p-4">
+                <Button title="Accepter à la place des représentants légaux" type="tertiary" leftIcon={<FaCheck />} onClick={() => setModalConsent(true)} />
+              </div>
+              <ModalConfirmation
+                isOpen={modalConsent}
+                onClose={() => {
+                  setModalConsent(false);
+                }}
+                className="md:max-w-[700px]"
+                icon={<IoShieldCheckmarkOutline size={40} />}
+                title="Consentements à la place des représentants légaux"
+                text="Vous allez valider le consentements et le droit à l'image à la place des représentants légaux. Conservez bien l’autorisation écrite dans le dossier des élèves au sein de l’établissement."
+                actions={[
+                  { title: "Fermer", isCancel: true },
+                  { title: "Confirmer", onClick: onConfirmConsent },
+                ]}
+              />
+            </>
+          )}
       </div>
       {confirmModal && (
         <ConfirmationModal
