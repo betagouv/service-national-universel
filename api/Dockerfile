@@ -28,7 +28,7 @@ RUN apk update && \
 COPY --chown=node:node --from=build /build/out .
 
 RUN echo "TCPSocket 3310" > /etc/clamav/clamd.conf
-RUN echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf
+RUN echo "TCPAddr localhost" >> /etc/clamav/clamd.conf
 
 RUN chmod +x /service-national-universel/api/start.sh
 
