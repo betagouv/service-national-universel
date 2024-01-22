@@ -283,7 +283,7 @@ router.post(
           const clamscan = await new NodeClam().init({
             removeInfected: true,
             clamdscan: {
-              host: "localhost",
+              host: "127.0.0.1",
               port: 3310,
               timeout: 30000,
               socket: null,
