@@ -5,4 +5,4 @@ clamd --foreground &
 
 sleep 10
 # Start your Node.js application
-npm start
+exec npm start
