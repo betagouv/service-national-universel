@@ -4,6 +4,8 @@ ENV APP_NAME api
 
 WORKDIR /build
 
+COPY . .
+
 RUN --mount=type=cache,target=/build/.npm/cache \
     npx turbo prune --scope=$APP_NAME --out-dir ./out && \
     cd out && \
