@@ -742,7 +742,7 @@ router.post(
               host: "127.0.0.1",
               port: 3310,
               timeout: 30000,
-              socket: "/run/clamav/clamd.ctl",
+              socket: null,
             },
           });
           const { isInfected } = await clamscan.isInfected(tempFilePath);
