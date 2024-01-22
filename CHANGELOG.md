@@ -1,3 +1,11 @@
+# [1.363.0](https://github.com/betagouv/service-national-universel/compare/v1.362.0...v1.363.0) (2024-01-22)
+
+
+### Features
+
+* **lib:** create cohort CLE ([#3494](https://github.com/betagouv/service-national-universel/issues/3494)) ([9a88c49](https://github.com/betagouv/service-national-universel/commit/9a88c493d6ff471e45240ae3b108937a8aa21eda))
+* **lib:** delete cohort ([#3493](https://github.com/betagouv/service-national-universel/issues/3493)) ([2ea83ed](https://github.com/betagouv/service-national-universel/commit/2ea83ed48660d7b082411c4d5da8918da3de81bc))
+
 # [1.362.0](https://github.com/betagouv/service-national-universel/compare/v1.361.0...v1.362.0) (2024-01-19)
 
 
