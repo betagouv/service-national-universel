@@ -17,6 +17,8 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
   const history = useHistory();
   const [service, setService] = useState();
 
+  console.log(meetingPoint);
+
   const getService = async () => {
     const { data, code, ok } = await api.get(`/department-service/${young.department}`);
     if (!ok) return toastr.error("error", translate(code));
@@ -69,16 +71,19 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
           <br /> <i style={{ fontSize: ".8rem" }}>Article R.113-1 du code du service national</i>
         </ConvocText>
         <ConvocText>
-          Je suis heureux de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service national universel,{" "}
-          <b>{transportDatesToString(departureDate, returnDate)}</b>, a été retenue. Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
+          Je suis heureuse de vous confirmer votre participation au séjour de cohésion du service national universel, <b>{transportDatesToString(departureDate, returnDate)}</b>.
+          <br></br>
+          <div className="text-center">
+            Votre séjour se déroulera au : {center.name}, {center.address} {center.zip} {center.city}
+          </div>
         </ConvocText>
         {young.transportInfoGivenByLocal === "true" ? (
           <ConvocText>Vos informations de transports vous seront transmises par email.</ConvocText>
         ) : (
           <>
             <ConvocText>
-              Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
               <div className="text-center">
+                Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
                 <div>
                   <b>Le </b>
                   {dayjs(departureDate).locale("fr").format("dddd DD MMMM YYYY")}
@@ -113,9 +118,8 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
         <ConvocText>
           <ul style={{ marginLeft: "1rem" }}>
             <li>- votre convocation</li>
-            <li>- votre pièce d&apos;identité</li>
+            <li>- une pièce d&apos;identité</li>
             <li>- la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire,</li>
-            <li>- en fonction des consignes sanitaires le jour du départ, 2 masques jetables à usage médical pour le transport en commun, </li>
             <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>
           </ul>
         </ConvocText>
@@ -126,8 +130,11 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
           </ConvocText>
         ) : (
           <ConvocText>
-            Le <b>retour de votre séjour </b>est prévu le {dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")} à {getReturnHour(meetingPoint)}, au même endroit que le jour
-            du départ en centre SNU.
+            Le <b>retour de votre séjour </b>est prévu{" "}
+            <b>
+              le {dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")} à {getReturnHour(meetingPoint)}{" "}
+            </b>
+            , au même endroit que le jour du départ en centre SNU.
           </ConvocText>
         )}
         <ConvocText>
@@ -154,9 +161,9 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
           </Sign>
         ) : (
           <Sign>
-            Thibaut de SAINT POL
+            Corinne ORZECHOWSKI
             <br />
-            Le Directeur de la jeunesse, de l&apos;éducation populaire et de la vie associative
+            La déléguée générale au service national universel,
           </Sign>
         )}
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
