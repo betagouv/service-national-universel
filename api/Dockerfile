@@ -25,9 +25,10 @@ RUN apk update && \
     apk add clamav clamav-libunrar && \
     freshclam
 
-COPY /api/clamd.conf /etc/clamav/clamd.conf
-
 COPY --chown=node:node --from=build /build/out .
+
+RUN echo "TCPSocket 3310" > /etc/clamav/clamd.conf
+RUN echo "TCPAddr 0.0.0.0" >> /etc/clamav/clamd.conf
 
 RUN chmod +x /service-national-universel/api/start.sh
 
