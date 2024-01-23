@@ -98,7 +98,7 @@ export const questions = [
   {
     value: "PHASE_1_LUGGAGE",
     category: "QUESTION",
-    label: "Phase 1 - Que prendre dans ma valise ?",
+    label: "Séjour - Que prendre dans ma valise ?",
     articles: ["dans-ma-valise-materiel-trousseau"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
@@ -106,7 +106,7 @@ export const questions = [
   {
     category: "QUESTION",
     value: "PHASE_1_ITEMS",
-    label: "Phase 1 - Dois-je apporter des affaires spécifiques (draps, serviettes…) ?",
+    label: "Séjour - Dois-je apporter des affaires spécifiques (draps, serviettes…) ?",
     articles: ["dans-ma-valise-materiel-trousseau"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
@@ -114,7 +114,7 @@ export const questions = [
   {
     category: "QUESTION",
     value: "PHASE_1_AFFECTATION",
-    label: "Phase 1 - Mon lieu d’affectation",
+    label: "Séjour - Mon lieu d’affectation",
     articles: ["mon-lieu-daffectation"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
@@ -122,7 +122,7 @@ export const questions = [
   {
     category: "QUESTION",
     value: "PHASE_1_MEETING_POINT",
-    label: "Phase 1 - Point de rassemblement",
+    label: "Séjour - Point de rassemblement",
     articles: ["le-point-de-rassemblement"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
@@ -130,7 +130,7 @@ export const questions = [
   {
     category: "QUESTION",
     value: "PHASE_1_WITHDRAWAL",
-    label: "Phase 1 - Changer de séjour/se désister",
+    label: "Séjour - Changer de séjour/se désister",
     articles: ["je-souhaite-changer-les-dates-de-mon-sejour", "je-me-desiste-du-snu"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
