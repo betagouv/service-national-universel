@@ -77,8 +77,8 @@ const ToolTipView = ({ selectedFilterValues, filter }) => {
     <ReactTooltip id={"tooltip-filtre" + filter.id} className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
       <div className="flex max-w-[600px] flex-row flex-wrap gap-2 rounded">
         {selectedFilterValues.map((item) => {
-          const founded = filter.options.find((option) => option.key === item);
-          const label = founded?.label;
+          const found = filter.options.find((option) => option.key === item);
+          const label = found?.label;
           return (
             <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
               {label}
