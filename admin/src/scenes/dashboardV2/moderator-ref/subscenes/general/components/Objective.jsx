@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import queryString from "query-string";
 import { toastr } from "react-redux-toastr";
-import { REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, COHORT_TYPE } from "snu-lib";
+import { REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, COHORT_TYPE, getDepartmentNumber } from "snu-lib";
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 import api from "@/services/api";
 import { getNewLink } from "@/utils";
@@ -49,6 +49,7 @@ export default function Index({ user }) {
       name: "Département",
       fullValue: "Tous",
       options: departmentOptions,
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     {
       id: "cohort",
