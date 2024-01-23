@@ -26,6 +26,7 @@ locals {
   api_hostname    = "api.${local.domain}"
   admin_hostname  = "admin.${local.domain}"
   app_hostname    = "moncompte.${local.domain}"
+  clamav_hostname = "clamav.${local.domain}"
   secrets         = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -272,6 +273,36 @@ resource "scaleway_domain_record" "app" {
 resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
   hostname     = local.app_hostname
+}
+
+# clamav
+resource "scaleway_container" "clamav" {
+  name            = "${local.env}-clamav"
+  namespace_id    = scaleway_container_namespace.main.id
+  registry_image  = "clamav/clamav:1.2"
+  port            = 3310
+  cpu_limit       = 768
+  memory_limit    = 2048
+  min_scale       = 1
+  max_scale       = 1
+  timeout         = 60
+  max_concurrency = 50
+  privacy         = "public"
+  protocol        = "http1"
+  deploy          = true
+}
+
+resource "scaleway_domain_record" "clamav" {
+  dns_zone = scaleway_domain_zone.main.id
+  name     = "clamav"
+  type     = "CNAME"
+  data     = "${scaleway_container.clamav.domain_name}."
+  ttl      = 3600
+}
+
+resource "scaleway_container_domain" "clamav" {
+  container_id = scaleway_container.clamav.id
+  hostname     = local.clamav_hostname
 }
 
 
