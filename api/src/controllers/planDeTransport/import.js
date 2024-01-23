@@ -7,7 +7,9 @@ const Joi = require("joi");
 const { canSendPlanDeTransport, MIME_TYPES, PDT_IMPORT_ERRORS, departmentLookUp } = require("snu-lib");
 const FileType = require("file-type");
 const fs = require("fs");
+const config = require("../../config");
 const { parse: parseDate } = require("date-fns");
+const NodeClam = require("clamscan");
 const XLSX = require("xlsx");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
@@ -77,7 +79,7 @@ router.post(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      const { tempFilePath, mimetype } = file;
+      const { name, tempFilePath, mimetype } = file;
       const filetype = await FileType.fromFile(tempFilePath);
       const mimeFromMagicNumbers = filetype ? filetype.mime : MIME_TYPES.EXCEL;
       const validTypes = [MIME_TYPES.EXCEL];
@@ -85,6 +87,27 @@ router.post(
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
+
+      // if (config.ENVIRONMENT === "production") {
+      try {
+        const clamscan = await new NodeClam().init({
+          removeInfected: true,
+          clamdscan: {
+            host: "clamav.ci.beta-snu.dev",
+            port: 3310,
+            timeout: 30000,
+            socket: null,
+          },
+        });
+        const { isInfected } = await clamscan.isInfected(tempFilePath);
+        if (isInfected) {
+          capture(`File ${name} of user(${req.user.id})is infected`);
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        }
+      } catch {
+        return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+      }
+      // }
 
       const workbook = XLSX.readFile(tempFilePath);
       const worksheet = workbook.Sheets["ALLER-RETOUR"];
