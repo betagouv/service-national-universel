@@ -196,7 +196,6 @@ export default function SchemaRepartition({ region, department }) {
       }
       const { data, ok } = await API.get(url + "/" + cohort);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
-      console.log(data);
       setData(data);
       setLoading(false);
     } catch (e) {
