@@ -16,6 +16,9 @@
     case "patch/structure":
       await require("./patch/structure").manualHandler("2023-11-08", "2023-11-09");
       break;
+    case "reminder/inscription":
+      await require("./reminderInscription").handler();
+      break;
   }
   process.exit(0);
 })();
