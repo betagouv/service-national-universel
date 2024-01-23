@@ -17,8 +17,6 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
   const history = useHistory();
   const [service, setService] = useState();
 
-  console.log(meetingPoint);
-
   const getService = async () => {
     const { data, code, ok } = await api.get(`/department-service/${young.department}`);
     if (!ok) return toastr.error("error", translate(code));
@@ -46,7 +44,6 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
   if ((young.meetingPointId && !meetingPoint) || !center || !service) return <Loader />;
 
   const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
-
   return (
     <Hero>
       <Content style={{ width: "100%" }}>
@@ -112,21 +109,19 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
             </ConvocText>
           </>
         )}
-        <ConvocText>
-          Il vous est demandé de confirmer votre participation en amont du départ via votre compte volontaire et de vous présenter au point de rassemblement avec :
-        </ConvocText>
+        <ConvocText>Il vous est demandé de vous présenter au point de rassemblement avec :</ConvocText>
         <ConvocText>
           <ul style={{ marginLeft: "1rem" }}>
             <li>- votre convocation</li>
             <li>- une pièce d&apos;identité</li>
             <li>- la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire,</li>
-            {meetingPoint.bus?.lunchbreak && <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>}
+            {meetingPoint.bus.lunchBreak && <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>}
           </ul>
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
         {young.transportInfoGivenByLocal === "true" ? (
           <ConvocText>
-            Le <b>retour de votre séjour </b>est prévu au même endroit que le jour du départ en centre SNU.
+            Le <b>retour de votre séjour </b>est prévu au même endroit que le jour du départ en centre.
           </ConvocText>
         ) : (
           <ConvocText>
@@ -150,7 +145,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
               règlement intérieur
             </a>
           </b>{" "}
-          du centre
+          du centre.
         </ConvocText>
         <ConvocText>Nous vous félicitons pour votre engagement et vous souhaitons un excellent séjour de cohésion.</ConvocText>
         {young.cohort === "Octobre 2023 - NC" ? (
