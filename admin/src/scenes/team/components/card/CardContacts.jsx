@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import ModalContacts from "../modal/ModalContacts";
-import { oldSessions } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
 
