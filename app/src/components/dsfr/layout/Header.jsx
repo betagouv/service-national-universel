@@ -31,7 +31,7 @@ const Header = ({ title }) => {
         href: supportURL,
         target: "_blank",
       },
-      iconId: fr.cx("fr-icon-question-line"),
+      iconId: fr.cx("fr-icon-question-line") || fr.cx("fr-icon-question-fill"),
       text: "Besoin d'aide",
     },
     {
