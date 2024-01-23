@@ -914,6 +914,10 @@ function canDeleteClasse(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
 }
 
+function canAllowSNU(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -1048,4 +1052,5 @@ export {
   canViewEtablissement,
   canSearchStudent,
   canDeleteClasse,
+  canAllowSNU,
 };
