@@ -6,7 +6,6 @@ const crypto = require("crypto");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const NodeClam = require("clamscan");
 const mime = require("mime-types");
 const fs = require("fs");
 const FileType = require("file-type");
@@ -69,6 +68,7 @@ const { anonymizeApplicationsFromYoungId } = require("../../services/application
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
 const { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } = require("../../jwt-options");
+const scanFile = require("../../utils/virusScanner");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
@@ -195,24 +195,7 @@ router.post(
         }
 
         if (config.ENVIRONMENT === "production") {
-          try {
-            const clamscan = await new NodeClam().init({
-              removeInfected: true,
-              clamdscan: {
-                host: "127.0.0.1",
-                port: 3310,
-                timeout: 30000,
-                socket: null,
-              },
-            });
-            const { isInfected } = await clamscan.isInfected(tempFilePath);
-            if (isInfected) {
-              capture(`File ${name} of user(${user._id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-            }
-          } catch {
-            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
-          }
+          scanFile(tempFilePath, name, req.user._id, res);
         }
 
         const data = fs.readFileSync(tempFilePath);

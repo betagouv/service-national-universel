@@ -279,7 +279,7 @@ router.post(
         }
 
         if (config.ENVIRONMENT === "production") {
-          scanFile(tempFilePath, name, user, res);
+          scanFile(tempFilePath, name, req.user.id, res);
         }
 
         // align date

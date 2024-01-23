@@ -24,6 +24,7 @@ const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
 const optionalAuth = require("../middlewares/optionalAuth");
 const { serializeClasse } = require("../utils/serializer");
+const scanFile = require("../utils/virusScanner");
 
 const router = express.Router();
 
@@ -456,24 +457,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
       }
 
       if (ENVIRONMENT === "production") {
-        try {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-            clamdscan: {
-              host: "127.0.0.1",
-              port: 3310,
-              timeout: 30000,
-              socket: null,
-            },
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            capture(`File ${name} is infected`);
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          }
-        } catch {
-          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
-        }
+        scanFile(tempFilePath, name, req.user._id, res);
       }
 
       const data = fs.readFileSync(tempFilePath);

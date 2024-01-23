@@ -735,7 +735,7 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
         if (ENVIRONMENT === "production") {
-          scanFile(tempFilePath, name, user, res);
+          scanFile(tempFilePath, name, user._id, res);
         }
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);

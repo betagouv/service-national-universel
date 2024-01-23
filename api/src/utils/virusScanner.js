@@ -2,7 +2,7 @@ const NodeClam = require("clamscan");
 const { capture } = require("../sentry");
 const { ERRORS } = require("./index");
 
-async function scanFile(tempFilePath, name, user, res) {
+async function scanFile(tempFilePath, name, userId, res) {
   try {
     const clamscan = await new NodeClam().init({
       removeInfected: true,
@@ -15,7 +15,7 @@ async function scanFile(tempFilePath, name, user, res) {
     });
     const { isInfected } = await clamscan.isInfected(tempFilePath);
     if (isInfected) {
-      capture(`File ${name} of user(${user._id}) is infected`);
+      capture(`File ${name} of user(${userId}) is infected`);
       return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
     }
   } catch {

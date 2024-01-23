@@ -9,7 +9,6 @@ const FileType = require("file-type");
 const fs = require("fs");
 const config = require("../../config");
 const { parse: parseDate } = require("date-fns");
-const NodeClam = require("clamscan");
 const XLSX = require("xlsx");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
@@ -20,6 +19,7 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+const scanFile = require("../../utils/virusScanner");
 
 function isValidDate(date) {
   return date.match(/^[0-9]{2}\/[0-9]{2}\/202[0-9]$/);
@@ -81,24 +81,7 @@ router.post(
       }
 
       if (config.ENVIRONMENT === "production") {
-        try {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-            clamdscan: {
-              host: "127.0.0.1",
-              port: 3310,
-              timeout: 30000,
-              socket: null,
-            },
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            capture(`File ${name} of user(${req.user.id})is infected`);
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          }
-        } catch {
-          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
-        }
+        scanFile(tempFilePath, name, req.user.id, res);
       }
 
       const workbook = XLSX.readFile(tempFilePath);
