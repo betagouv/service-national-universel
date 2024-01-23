@@ -90,6 +90,13 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.virtual("cohesionCenter", {
+  ref: "cohesioncenter",
+  localField: "centerId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 Schema.virtual("user").set(function (user) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;
