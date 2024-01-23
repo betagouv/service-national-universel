@@ -1,6 +1,7 @@
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
 const loggingMiddleware = require("./middlewares/loggingMiddleware");
 const { forceDomain } = require("forcedomain");
+const requestIp = require("request-ip"); // Import request-ip package
 
 (async () => {
   await require("./env-manager")();
@@ -89,6 +90,10 @@ const { forceDomain } = require("forcedomain");
   app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
+  app.use(function (req, res, next) {
+    req.ipInfo = requestIp.getClientIp(req);
+    next();
+  });
   app.use(loggingMiddleware);
 
   require("./crons");

@@ -10,10 +10,16 @@ const loggingMiddleware = async (req, res, next) => {
 
       if (req.user) {
         const userRole = req.user.patches.modelName === "ReferentPatches" && "referent";
-
         userlog = userRole ? `User: ${userRole} | UserId: ${req.user.id} ` : `UserId: ${req.user.id} `;
       }
-      console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${req.responseTimeMs}ms | ${userlog}| Body: ${JSON.stringify(req.body)}`);
+
+      const ip = req.ipInfo;
+
+      const headers = JSON.stringify(req.headers);
+
+      const payload = JSON.stringify(req.body);
+
+      console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${req.responseTimeMs}ms | ${userlog}| IP: ${ip} | Headers: ${headers} | Payload: ${payload}`);
     } catch (error) {
       console.error("Error in logging middleware:", error);
     }
