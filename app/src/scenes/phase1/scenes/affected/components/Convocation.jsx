@@ -129,7 +129,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
             <b>
               le {dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")} à {getReturnHour(meetingPoint)}{" "}
             </b>
-            , au même endroit que le jour du départ en centre SNU.
+            , au même endroit que le jour du départ en centre.
           </ConvocText>
         )}
         <ConvocText>
