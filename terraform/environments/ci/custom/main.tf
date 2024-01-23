@@ -75,7 +75,7 @@ resource "scaleway_container" "api" {
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
   port            = 8080
   cpu_limit       = 768
-  memory_limit    = 4096
+  memory_limit    = 1024
   min_scale       = 1
   max_scale       = 1
   timeout         = 60
