@@ -77,7 +77,8 @@ const ToolTipView = ({ selectedFilterValues, filter }) => {
     <ReactTooltip id={"tooltip-filtre" + filter.id} className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
       <div className="flex max-w-[600px] flex-row flex-wrap gap-2 rounded">
         {selectedFilterValues.map((item) => {
-          const label = filter.options.find((option) => option.key === item).label;
+          const founded = filter.options.find((option) => option.key === item);
+          const label = founded?.label;
           return (
             <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
               {label}
@@ -184,7 +185,6 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                       {optionsVisible
                         ?.sort((a, b) => {
                           if (filter?.translate) {
-                            console.log(filter.translate(a.key));
                             return filter.translate(a.key)?.toString().localeCompare(filter.translate(b.key)?.toString());
                           }
                           a.key?.toString().localeCompare(b.key?.toString());
