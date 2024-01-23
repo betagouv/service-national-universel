@@ -13,7 +13,6 @@ const YoungObject = require("../models/young");
 const CohortObject = require("../models/cohort");
 const ReferentObject = require("../models/referent");
 const { decrypt, encrypt } = require("../cryptoUtils");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
@@ -46,6 +45,7 @@ const {
 } = require("../utils");
 const mime = require("mime-types");
 const patches = require("./patches");
+const scanFile = require("../utils/virusScanner");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
@@ -734,27 +734,9 @@ router.post(
           captureMessage("Wrong filetype", { extra: { tempFilePath, mimetype } });
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
-        // if (ENVIRONMENT === "production") {
-        try {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-            clamdscan: {
-              host: "127.0.0.1",
-              port: 3310,
-              timeout: 30000,
-              socket: null,
-            },
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            capture(`File ${name} of user(${user._id})is infected`);
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          }
-        } catch {
-          captureMessage("SCAN FILE down");
-          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+        if (ENVIRONMENT === "production") {
+          scanFile(tempFilePath, name, user, res);
         }
-        // }
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
