@@ -14,16 +14,12 @@ const loggingMiddleware = async (req, res, next) => {
       }
 
       const ip = req.ipInfo;
-      const ip1 = req.headers["x-forwarded-for"];
-      const ip2 = req.headers["x-forwarded-for"];
 
       const headers = JSON.stringify(req.headers);
 
       const payload = JSON.stringify(req.body);
 
-      console.log(
-        `${req.method} ${req.originalUrl} ${res.statusCode} ${req.responseTimeMs}ms |${userlog} IP: ${ip} | IP1: ${ip1} | IP2: ${ip2} | Headers: ${headers} | Payload: ${payload}`,
-      );
+      console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${req.responseTimeMs}ms |${userlog} IP: ${ip} | Headers: ${headers} | Payload: ${payload}`);
     } catch (error) {
       console.error("Error in logging middleware:", error);
     }
