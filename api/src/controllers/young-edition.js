@@ -427,7 +427,7 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
 
     const classe = await ClasseModel.findById(young.classeId).populate({
       path: "etablissement",
-      options: { select: { createdAt: 0, updatedAt: 0 } },
+      options: { select: { coordinateurIds: 1, referentEtablissementIds: 1 } },
     });
 
     if (!classe) {
