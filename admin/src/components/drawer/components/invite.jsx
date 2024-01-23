@@ -366,6 +366,7 @@ const ChooseRole = ({ value, onChange, validate }) => {
       {user.role === ROLES.ADMIN ? <option value={ROLES.ADMIN}>{translate(ROLES.ADMIN)}</option> : null}
       {user.role === ROLES.ADMIN ? <option value={ROLES.DSNJ}>{translate(ROLES.DSNJ)}</option> : null}
       {user.role === ROLES.ADMIN ? <option value={ROLES.TRANSPORTER}>{translate(ROLES.TRANSPORTER)}</option> : null}
+      {user.role === ROLES.ADMIN ? <option value={ROLES.ADMINISTRATEUR_CLE}>{translate(ROLES.ADMINISTRATEUR_CLE)}</option> : null}
     </Field>
   );
 };

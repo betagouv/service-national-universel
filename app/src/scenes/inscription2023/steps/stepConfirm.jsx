@@ -33,6 +33,8 @@ export default function StepConfirm() {
     young?.highSkilledActivity === "true" ||
     young?.highSkilledActivityInSameDepartment === "true";
 
+  const isCLE = young?.source === "CLE";
+
   const onSubmit = async () => {
     setLoading(true);
     try {
@@ -43,7 +45,8 @@ export default function StepConfirm() {
         return;
       }
       dispatch(setYoung(responseData));
-      plausibleEvent("Phase0/CTA inscription - valider inscription");
+      const eventName = isCLE ? "CLE/CTA inscription - valider inscription" : "Phase0/CTA inscription - valider inscription";
+      plausibleEvent(eventName);
       history.push("/inscription2023/done");
     } catch (e) {
       capture(e);
@@ -59,33 +62,47 @@ export default function StepConfirm() {
     <>
       <DSFRContainer
         title="Vous y êtes presque..."
-        subtitle="Vous êtes sur le point de soumettre votre dossier à l’administration du SNU. Veuillez vérifier vos informations avant de valider votre demande d’inscription.">
+        subtitle={`Vous êtes sur le point de soumettre votre dossier à ${
+          isCLE ? "votre établissement scolaire" : "l’administration du SNU"
+        }. Veuillez vérifier vos informations avant de valider votre demande d’inscription.`}>
         {error?.text && <Error {...error} onClose={() => setError({})} />}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
-            <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div>
-          </div>
-          <button
-            onClick={() => {
-              plausibleEvent("Phase0/CTA inscription - modifier sejour");
-              setModal({ isOpen: true });
-            }}>
-            <EditPen />
-          </button>
-        </div>
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+
+        {!isCLE && (
+          <>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1">
+                <h1 className="mt-2 text-lg font-bold text-[#161616]">Séjour de cohésion :</h1>
+                <div className="text-lg font-normal text-[#161616]">{capitalizeFirstLetter(getCohortPeriod(getCohort(young?.cohort)))}</div>
+              </div>
+              <button
+                onClick={() => {
+                  plausibleEvent("Phase0/CTA inscription - modifier sejour");
+                  setModal({ isOpen: true });
+                }}>
+                <EditPen />
+              </button>
+            </div>
+            <hr className="my-4 h-px border-0 bg-gray-200" />
+            {modal.isOpen && <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />}
+          </>
+        )}
+
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mon profil</h1>
             <Link to="/inscription2023/coordonnee">
-              <EditPen onClick={() => plausibleEvent("Phase0/CTA inscription - modifier profil")} />
+              <EditPen
+                onClick={() => {
+                  const eventName = isCLE ? "CLE/CTA inscription - modifier profil" : "Phase0/CTA inscription - modifier profil";
+                  plausibleEvent(eventName);
+                }}
+              />
             </Link>
           </div>
-          <Details title="Sexe" value={translate(young.gender)} />
           <Details title="Pays de naissance" value={young.birthCountry} />
           <Details title="Ville de naissance" value={young.birthCity} />
           <Details title="Code postal de naissance" value={young.birthCityZip} />
+          <Details title="Sexe" value={translate(young.gender)} />
           <Details title="Adresse de résidence" value={young.address} />
           <Details title="Ville de résidence" value={young.city} />
           <Details title="Code postal de résidence" value={young.zip} />
@@ -99,7 +116,7 @@ export default function StepConfirm() {
               <Details title="Pays à l'étranger" value={young.foreignCity} />
             </>
           )}
-          <Details title={young.schooled === "true" ? "Ma situation scolaire" : "Ma situation"} value={translate(young.situation)} />
+          {!isCLE && <Details title={young.schooled === "true" ? "Ma situation scolaire" : "Ma situation"} value={translate(young.situation)} />}
           {hasHandicap ? (
             <>
               <Details title="Handicap" value={translate(young.handicap)} />
@@ -121,7 +138,12 @@ export default function StepConfirm() {
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mes représentants légaux</h1>
             <Link to="/inscription2023/representants">
-              <EditPen onClick={() => plausibleEvent("Phase0/CTA inscription - modifier rl")} />
+              <EditPen
+                onClick={() => {
+                  const eventName = isCLE ? "CLE/CTA inscription - modifier rl" : "Phase0/CTA inscription - modifier rl";
+                  plausibleEvent(eventName);
+                }}
+              />
             </Link>
           </div>
           <Details title="Votre lien" value={translate(young.parent1Status)} />
@@ -142,7 +164,6 @@ export default function StepConfirm() {
         </div>
         <SignupButtonContainer onClickNext={onSubmit} labelNext="Valider mon inscription au SNU" disabled={loading} />
       </DSFRContainer>
-      <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />
     </>
   );
 }

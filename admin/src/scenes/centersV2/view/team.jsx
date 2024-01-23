@@ -182,8 +182,18 @@ const ChefCenterBlock = ({ headCenterId }) => {
       <Wrapper gridTemplateColumns="120px auto" style={{ marginBlock: "1rem" }}>
         <b>E-mail :</b>
         <p style={{ margin: 0 }}>{chefCenter?.email}</p>
-        <b>Téléphone :</b>
-        <p style={{ margin: 0 }}>{chefCenter?.phone}</p>
+        {chefCenter?.phone && (
+          <>
+            <b>Téléphone fixe :</b>
+            <p style={{ margin: 0 }}>{chefCenter.phone}</p>
+          </>
+        )}
+        {chefCenter?.mobile && (
+          <>
+            <b>Mobile :</b>
+            <p style={{ margin: 0 }}>{chefCenter.mobile}</p>
+          </>
+        )}
       </Wrapper>
     </div>
   );

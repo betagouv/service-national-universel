@@ -22,21 +22,23 @@ const FileUpload = ({ className, files = [], addFiles, deleteFile, filesAccepted
 
   return (
     <div className={className}>
-      <label className="text-[14px] font-semibold text-[#374151]">Ajouter un fichier</label>
-      <div className="mt-1 text-sm text-gray-500">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf, docx, xlsx. Plusieurs fichiers possibles.</div>
-      <input
-        ref={inputRef}
-        disabled={disabled}
-        type="file"
-        multiple
-        id="file-upload"
-        name="file-upload"
-        accept={accept}
-        onChange={(e) => {
-          addFiles(e.target.files);
-        }}
-        className="hidden"
-      />
+      <label className="w-full text-[14px] font-semibold text-[#374151]">
+        Ajouter un fichier
+        <div className="mt-1 text-sm text-gray-500">Taille maximale : 5 Mo. Formats supportés : jpg, png, pdf, docx, xlsx. Plusieurs fichiers possibles.</div>
+        <input
+          ref={inputRef}
+          disabled={disabled}
+          type="file"
+          multiple
+          id="file-upload"
+          name="file-upload"
+          accept={accept}
+          onChange={(e) => {
+            addFiles(e.target.files);
+          }}
+          className="hidden"
+        />
+      </label>
       <div className={`flex flex-col md:flex-row ${files.length === 0 && "flex-row"} mt-4 w-full`}>
         <div>
           <label htmlFor="file-upload" className={`cursor-pointer ${disabled && "cursor-not-allowed"} rounded bg-[#EEEEEE] py-2 px-3 text-sm text-gray-600`}>

@@ -4,13 +4,17 @@
     "build": {
       "outputs": [".dist/**", "!.dist/cache/**"]
     },
-    "start": {
-      "outputs": [".launch/**", "!.launch/cache/**"]
+    "@snu/ds#build": {
+      "cache": false
     },
     "dev": {
       "cache": false,
       "persistent": true,
-      "outputs": ["dist/**", "build/**"]
+      "outputs": ["dist/**", "build/**"],
+      "dependsOn": ["@snu/ds#build"]
+    },
+    "start": {
+      "outputs": [".launch/**", "!.launch/cache/**"]
     },
     "test": {
       "cache": false,

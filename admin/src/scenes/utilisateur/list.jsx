@@ -1,15 +1,14 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 
-import { Listbox, Transition } from "@headlessui/react";
+import AdminIcon from "@/components/drawer/icons/Admin";
 import dayjs from "@/utils/dayjs.utils";
+import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
 import { BsDownload } from "react-icons/bs";
-import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { formatLongDateFR, getDepartmentNumber } from "snu-lib";
-import Badge from "../../components/Badge";
-import Breadcrumbs from "../../components/Breadcrumbs";
+import { IoFlashOutline } from "react-icons/io5";
+import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs } from "snu-lib";
 import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
@@ -18,8 +17,7 @@ import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
-import { ROLES, canDeleteReferent, canUpdateReferent, translate } from "../../utils";
-import { Title } from "../pointDeRassemblement/components/common";
+import { ROLES, canDeleteReferent, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
 
@@ -65,16 +63,20 @@ export default function List() {
       missingLabel: "Non renseignée",
       translate: translate,
     },
-    {
-      title: "Cohorte",
-      name: "cohorts",
-      missingLabel: "Non renseignée",
-      translate: translate,
-    },
-  ];
+
+    ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)
+      ? {
+          title: "Cohorte",
+          name: "cohorts",
+          missingLabel: "Non renseignée",
+          translate: translate,
+        }
+      : null,
+  ].filter(Boolean);
 
   useEffect(() => {
     (async () => {
+      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) return;
       const { data, ok } = await api.get("/structure");
       if (!ok) return;
       setStructures(data);
@@ -89,13 +91,17 @@ export default function List() {
   if (user.role === ROLES.HEAD_CENTER && !sessionPhase1) return <Loader />;
 
   return (
-    <>
-      <Breadcrumbs items={[{ label: "Utilisateurs" }]} />
-      <div className="flex w-full flex-col px-8">
-        <div className="flex items-center justify-between py-8">
-          <Title>Utilisateurs</Title>
+    <Page>
+      <Header
+        title={[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Liste de mes contacts" : "Utilisateurs"}
+        breadcrumb={[
+          { title: <AdminIcon className="scale-[65%]" /> },
+          { title: [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "Mes contacts" : "Utilisateurs" },
+        ]}
+        actions={[
           <ExportComponent
-            title="Exporter les utilisateurs"
+            key={0}
+            title="Exporter"
             exportTitle="Utilisateurs"
             route={`/elasticsearch/referent/export${user.role === ROLES.HEAD_CENTER ? "?cohort=" + sessionPhase1?.cohort : ""}`}
             filters={filterArray}
@@ -141,8 +147,10 @@ export default function List() {
                 };
               });
             }}
-          />
-        </div>
+          />,
+        ]}
+      />
+      <Container className="!p-0">
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
           <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
             <Filters
@@ -188,62 +196,71 @@ export default function List() {
             size={size}
             setSize={setSize}
             render={
-              <table className="mt-4 mb-2 w-full table-auto font-marianne">
+              <table className="mt-6 mb-2 flex w-full flex-col divide-y table-auto divide-gray-100 border-gray-100">
                 <thead>
-                  <tr className="border-y-[1px] border-y-gray-100 uppercase text-gray-400 text-sm">
-                    <th className="pl-4 py-3">Email</th>
-                    <th className="text-center px-4 py-3">Rôle</th>
-                    <th className="text-center px-4 py-3">Création</th>
-                    <th className="text-center px-4 py-3">Dernière connexion</th>
-                    <th className="text-center pr-4 py-3">Actions</th>
+                  <tr className="flex items-center py-3 px-4 text-xs font-[500] leading-5 uppercase text-gray-500 bg-gray-50 cursor-default">
+                    <span className="w-[30%]">Utilisateurs</span>
+                    <span className="w-[30%]">Rôles / Fonctions</span>
+                    <span className="w-[17%]">Création</span>
+                    <span className="w-[18%]">Dernière connexion</span>
+                    <span className="w-[5%]">Actions</span>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-gray-100">
                   {data.map((hit) => (
                     <Hit structure={structures?.find((s) => s._id === hit.structureId)} key={hit._id} hit={hit} user={user} onClick={() => setResponsable(hit)} />
                   ))}
                 </tbody>
+                <tr className="flex items-center py-3 px-4 text-xs font-[500] leading-5 uppercase text-gray-500 bg-gray-50 cursor-default">
+                  <span className="w-[30%]">Utilisateurs</span>
+                  <span className="w-[30%]">Rôles / Fonctions</span>
+                  <span className="w-[17%]">Création</span>
+                  <span className="w-[18%]">Dernière connexion</span>
+                  <span className="w-[5%]">Actions</span>
+                </tr>
               </table>
             }
           />
         </div>
-      </div>
+      </Container>
       <Panel value={responsable} onChange={() => setResponsable(null)} />
-    </>
+    </Page>
   );
 }
 
 const Hit = ({ hit, onClick, user, structure }) => {
-  const displayActionButton = canUpdateReferent({ actor: user, originalTarget: hit, structure });
+  const displayActionButton = canViewReferent(user, hit);
 
   return (
-    <tr onClick={onClick} className="border-b-[1px] border-y-gray-100 hover:bg-gray-50">
-      <td className="pl-4 py-3">
-        <span className="font-bold text-gray-900 leading-6">{`${hit.firstName} ${hit.lastName}`}</span>
-        <p className="text-sm text-gray-600 leading-5">{hit.email}</p>
+    <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={onClick}>
+      <td className="w-[30%] table-cell truncate cursor-pointer">
+        <span className="font-bold text-gray-900 text-base leading-5">
+          {hit.firstName} {hit.lastName}
+        </span>
+        <p className="text-xs text-gray-500 leading-5">{hit.email}</p>
       </td>
-      <td className="flex flex-col items-center py-3">
+      <td className="flex w-[30%] flex-col gap-2">
         {hit.role && (
           <>
-            <Badge text={translate(hit.role)} className="!border-blue-500 !bg-blue-50 !text-blue-500" />
-            {hit.subRole && hit.subRole !== "god" ? <Badge text={translate(hit.subRole)} className="!border-gray-500 !bg-gray-50 !text-gray-500" /> : null}
+            <Badge title={translate(hit.role)} />
+            {hit.subRole && hit.subRole !== "god" ? <Badge title={translate(hit.subRole)} status={"secondary"} /> : null}
           </>
         )}
       </td>
-      <td className="text-center">
+      <td className="w-[17%]">
         <p className="text-sm leading-none text-gray-900">{dayjs(hit.createdAt).format("DD/MM/YYYY")}</p>
         <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.createdAt).format("hh:mm")}</p>
       </td>
-      <td className="text-center">
+      <td className="w-[18%]">
         <p className="text-sm leading-none text-gray-900">{dayjs(hit.lastLoginAt).format("DD/MM/YYYY")}</p>
         <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.lastLoginAt).format("hh:mm")}</p>
       </td>
       {displayActionButton ? (
-        <td onClick={(e) => e.stopPropagation()}>
+        <td className="flex w-[5%] flex-col gap-2">
           <Action hit={hit} structure={structure} />
         </td>
       ) : (
-        <td />
+        <td className="flex w-[5%] flex-col gap-2" />
       )}
     </tr>
   );
@@ -314,53 +331,35 @@ const Action = ({ hit, structure }) => {
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
   };
+
   return (
     <>
-      <Listbox>
-        {({ open }) => (
-          <>
-            <div className="relative w-4/5 mx-auto">
-              <Listbox.Button className="relative w-full text-left">
-                <div className={`${open ? "border-blue-500" : ""} flex items-center gap-0 space-y-0 rounded-lg border-[1px] bg-white py-2 px-2.5`}>
-                  <div className="flex w-full items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-gray-900">Choisissez une action</p>
-                    </div>
-                    <div className="pointer-events-none flex items-center pr-2">
-                      {open && <HiOutlineChevronUp className="h-5 w-5 text-gray-400" aria-hidden="true" />}
-                      {!open && <HiOutlineChevronDown className="h-5 w-5 text-gray-400" aria-hidden="true" />}
-                    </div>
-                  </div>
-                </div>
-              </Listbox.Button>
-
-              <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                  <Link className="!cursor-pointer" to={`/user/${hit._id}`} target="_blank">
-                    <Listbox.Option className={("text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600")}>
-                      <span className={"block truncate font-normal text-xs"}>Consulter le profil</span>
-                    </Listbox.Option>
+      <DropdownButton
+        title={<IoFlashOutline size={20} />}
+        mode={"badge"}
+        rightIcon={false}
+        buttonClassName={"rounded-[50%] !p-0 !w-10 !h-10 border-none hover:bg-white hover:text-blue-600"}
+        position="right"
+        optionsGroup={[
+          {
+            key: "actions",
+            title: "",
+            items: [
+              {
+                key: "view",
+                render: (
+                  <Link to={`/user/${hit._id}`} className="appearance-none w-full">
+                    <p>Consulter le profil</p>
                   </Link>
-                  {user.role === ROLES.ADMIN ? (
-                    <Listbox.Option
-                      className={("text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600")}
-                      onClick={handleImpersonate}>
-                      <span className={"block truncate font-normal text-xs"}>Prendre sa place</span>
-                    </Listbox.Option>
-                  ) : null}
-                  {canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? (
-                    <Listbox.Option
-                      className={("text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600")}
-                      onClick={onClickDelete}>
-                      <div className={"block truncate font-normal text-xs"}>Supprimer le profil</div>
-                    </Listbox.Option>
-                  ) : null}
-                </Listbox.Options>
-              </Transition>
-            </div>
-          </>
-        )}
-      </Listbox>
+                ),
+              },
+              canSigninAs(user, hit, "referent") ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
+              canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? { key: "delete", render: <p>Supprimer le profil</p>, action: onClickDelete } : null,
+            ].filter(Boolean),
+          },
+        ]}
+      />
+
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}

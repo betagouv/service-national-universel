@@ -156,22 +156,13 @@ export default function List() {
       }
     });
 
-    //If we want to export young info or application
+    //We want to export young info or application
     if ([...youngCategorie, "application"].some((e) => selectedFields.includes(e))) {
       // Add applications info
       const missionIds = [...new Set(data.map((item) => item._id.toString()).filter((e) => e))];
-      const queryApplication = {
-        query: { bool: { filter: [{ terms: { "missionId.keyword": missionIds } }] } },
-        track_total_hits: true,
-        size: ES_NO_LIMIT,
-      };
-      if (selectedFilters?.applicationStatus?.filter?.length) {
-        queryApplication.query.bool.filter.push({ terms: { "status.keyword": selectedFilters.applicationStatus.filter } });
-      }
-
-      const resultApplications = await api.post(`/es/application/export`, {
-        ...queryApplication,
-        fieldsToExport: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
+      const resultApplications = await api.post(`/elasticsearch/application/export`, {
+        filters: { missionId: missionIds, status: selectedFilters.applicationStatus.filter },
+        exportFields: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
       });
       if (resultApplications?.data?.length) {
         all = all.map((item) => ({ ...item, candidatures: resultApplications?.data?.filter((e) => e.missionId === item._id.toString()) }));
@@ -179,28 +170,16 @@ export default function List() {
         all = all.map((item) => ({ ...item, candidatures: [] }));
       }
 
-      let youngIds = [];
-      all.forEach((item) => {
-        if (item.candidatures?.length) {
-          youngIds = [...youngIds, ...item.candidatures.map((e) => e.youngId)];
-        }
-      });
-      youngIds = [...new Set(youngIds.filter((e) => e))];
-
-      const queryYoung = {
-        query: { ids: { type: "_doc", values: youngIds } },
-        track_total_hits: true,
-        size: ES_NO_LIMIT,
-      };
-
-      const resultYoungs = await api.post(`/es/young/export`, {
-        ...queryYoung,
-        fieldsToExports: [...fieldsToExportsYoung, "statusMilitaryPreparationFiles"],
-      });
-      if (resultYoungs?.data?.length) {
+      if (resultApplications?.data?.length) {
+        // filter young on resultApplications response
+        const youngsData = resultApplications.data.map((app) => app.young).filter((young) => young);
+        // Add young info
         all = all.map((item) => {
           if (item.candidatures?.length) {
-            item.candidatures = item.candidatures.map((e) => ({ ...e, young: resultYoungs?.data?.find((y) => y._id === e.youngId) }));
+            item.candidatures = item.candidatures.map((candidature) => {
+              const youngDetails = youngsData.find((young) => young._id === candidature.youngId);
+              return { ...candidature, young: youngDetails };
+            });
           }
           return item;
         });
@@ -334,7 +313,6 @@ export default function List() {
     });
     return result;
   }
-
   //Filters
   const filterArray = [
     { title: "Région", name: "region", parentGroup: "Général", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },

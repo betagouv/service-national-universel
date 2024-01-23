@@ -206,8 +206,8 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     return resultYoung;
   };
   // Dans cette fonction on utilise nos Deux Query (Session Cohesion) afin de créer notre objet pour le Front.
-  const getCenterAndSessionInfoForSejourDashboard = async (filters) => {
-    const esRequestBodyForCohesion = buildESRequestBodyForCohesion(filters);
+  const getCenterAndSessionInfoForSejourDashboard = async (filters, user) => {
+    const esRequestBodyForCohesion = buildESRequestBodyForCohesion(filters, user);
     const responseCohesion = await esClient.search({ index: "cohesioncenter", body: esRequestBodyForCohesion });
     if (!responseCohesion?.body?.aggregations || !responseCohesion?.body?.hits)
       return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterAndSessionInfoForSejourDashboard" });

@@ -9,13 +9,15 @@ const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
-const { serializeYoungs } = require("../../utils/es-serializer");
+
+const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
 const StructureObject = require("../../models/structure");
 const ApplicationObject = require("../../models/application");
 const SessionPhase1Object = require("../../models/sessionPhase1");
 const CohesionCenterObject = require("../../models/cohesionCenter");
 const MissionObject = require("../../models/mission");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
+const { populateYoungExport } = require("./populate/populateYoung");
 
 function getYoungsFilters(user) {
   return [
@@ -62,6 +64,9 @@ function getYoungsFilters(user) {
     "schoolDepartment.keyword",
     "parentAllowSNU.keyword",
     "sessionPhase1Id.keyword",
+    "source.keyword",
+    "classeId.keyword",
+    "etablissementId.keyword",
   ].filter(Boolean);
 }
 
@@ -480,35 +485,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
       let data = serializeYoungs(response);
-
-      //School
-      if (exportFields.includes("schoolId")) {
-        const schoolIds = [...new Set(data.map((item) => item.schoolId).filter(Boolean))];
-        const schools = await allRecords("schoolramses", { bool: { must: { ids: { values: schoolIds } } } });
-        data = data.map((item) => ({ ...item, school: schools?.find((e) => e._id.toString() === item.schoolId) }));
-      }
-
-      //center
-      if (exportFields.includes("cohesionCenterId")) {
-        const centerIds = [...new Set(data.map((item) => item.cohesionCenterId).filter(Boolean))];
-        const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
-        data = data.map((item) => ({ ...item, center: centers?.find((e) => e._id.toString() === item.cohesionCenterId) }));
-      }
-
-      //full info bus
-      if (exportFields.includes("ligneId")) {
-        //get bus
-        const busIds = [...new Set(data.map((item) => item.ligneId).filter(Boolean))];
-        const bus = await allRecords("lignebus", { bool: { must: { ids: { values: busIds } } } });
-        data = data.map((item) => ({ ...item, bus: bus?.find((e) => e._id.toString() === item.ligneId) }));
-        //get ligneToPoint
-        const meetingPointsIds = [...new Set(bus.reduce((prev, item) => [...prev, ...item.meetingPointsIds], []))];
-        const lignesToPoint = await allRecords("lignetopoint", { bool: { must: { terms: { "meetingPointId.keyword": meetingPointsIds } } } });
-        data = data.map((item) => ({ ...item, ligneToPoint: lignesToPoint?.find((e) => e.meetingPointId === item.meetingPointId && e.lineId === item.ligneId) }));
-        //get meetingPoint
-        const meetingPoints = await allRecords("pointderassemblement", { bool: { must: { ids: { values: meetingPointsIds } } } });
-        data = data.map((item) => ({ ...item, meetingPoint: meetingPoints?.find((e) => e._id.toString() === item.meetingPointId) }));
-      }
+      data = await populateYoungExport(data, exportFields);
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });

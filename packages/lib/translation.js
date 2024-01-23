@@ -126,6 +126,10 @@ const translate = (value) => {
       return "Responsable";
     case "head_center":
       return "Chef de centre";
+    case "administrateur_cle":
+      return "Administrateur CLE";
+    case "referent_classe":
+      return "Référent de classe";
     case "visitor":
       return "Visiteur";
     case "supervisor":
@@ -158,6 +162,10 @@ const translate = (value) => {
       return "Secrétaire général d'académie (SGA)";
     case "drajes":
       return "Délégué régional académique à la jeunesse, à l'engagement et aux sports (DRAJES)";
+    case "referent_etablissement":
+      return "Chef d'établissement";
+    case "coordinateur_cle":
+      return "Coordinateur d'établissement";
     case "INSCRIPTION":
       return "Inscription";
     case "COHESION_STAY":
@@ -344,6 +352,12 @@ const translate = (value) => {
       return "De l'hébergement d'un proche";
     case "N/A":
       return "Non renseigné";
+    case "INSCRIPTION_IN_PROGRESS":
+      return "Inscription en cours";
+    case "INSCRIPTION_TO_CHECK":
+      return "Inscription à vérifier";
+    case "CREATED":
+      return "Créée";
     default:
       return value;
   }
@@ -819,6 +833,8 @@ const translateField = (field) => {
       return "Email";
     case "phone":
       return "Téléphone";
+    case "frenchNationality":
+      return "Nationalité";
     case "birthdateAt":
       return "Date de naissance";
     case "birthCountry":
@@ -1060,6 +1076,63 @@ const translateCniExpired = (cniExpired) => {
   }
 };
 
+const translateEtbalissementSector = (sector) => {
+  switch (sector) {
+    case "pro":
+      return "Professionnel";
+    case "gen":
+      return "Général";
+    default:
+      return sector;
+  }
+};
+
+const translateColoration = (coloration) => {
+  switch (coloration) {
+    case "SPORT":
+      return "Sport";
+    case "ENVIRONMENT":
+      return "Environnement";
+    case "DEFENSE":
+      return "Défense";
+    case "RESILIENCE":
+      return "Résilience";
+    default:
+      return coloration;
+  }
+};
+
+const translateYoungSource = (source) => {
+  switch (source) {
+    case "CLE":
+      return "CLE";
+    case "VOLONTAIRE":
+      return "Volontaire";
+
+    default:
+      return source;
+  }
+};
+
+const translateStatusClasse = (status) => {
+  switch (status) {
+    case "WITHDRAWN":
+      return "Désistée";
+    case "DRAFT":
+      return "Brouillon";
+    case "CREATED":
+      return "Créée";
+    case "INSCRIPTION_IN_PROGRESS":
+      return "Inscription en cours";
+    case "INSCRIPTION_TO_CHECK":
+      return "Inscription à valider";
+    case "VALIDATED":
+      return "Classe validée";
+    default:
+      return status;
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé pour traduire l'historique des plans de transport
 
@@ -1157,6 +1230,10 @@ export {
   translateBusPatchesField,
   translateInscriptionStatus,
   translateCniExpired,
+  translateEtbalissementSector,
+  translateColoration,
+  translateYoungSource,
+  translateStatusClasse,
 };
 export default {
   translate,
@@ -1188,4 +1265,8 @@ export default {
   translateBusPatchesField,
   translateInscriptionStatus,
   translateCniExpired,
+  translateEtbalissementSector,
+  translateColoration,
+  translateYoungSource,
+  translateStatusClasse,
 };

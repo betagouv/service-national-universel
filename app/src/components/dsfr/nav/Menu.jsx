@@ -1,24 +1,12 @@
 import React from "react";
 import Close from "@/assets/CloseBlue.svg";
-import { Link, useLocation, useHistory } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { setYoung } from "../../../redux/auth/actions";
-import api from "../../../services/api";
-import { toastr } from "react-redux-toastr";
+import { Link, useLocation } from "react-router-dom";
+import useAuth from "../../../services/useAuth";
 import { HiOutlineClipboard, HiOutlineQuestionMarkCircle, HiOutlineUserCircle } from "react-icons/hi";
 import { supportURL } from "@/config";
 
 const ModalMenu = ({ isOpen, setIsOpen }) => {
-  const history = useHistory();
-  const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young);
-
-  const logout = async () => {
-    await api.post(`/young/logout`);
-    dispatch(setYoung(null));
-    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
-    return history.push("/auth");
-  };
+  const { isCLE, loginOrLogout, isLoggedIn } = useAuth();
 
   const { pathname } = useLocation();
   return (
@@ -40,10 +28,10 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
               Le programme
             </a>
           ) : (
-            young && (
+            isLoggedIn && (
               <Link to="/" className="flex items-center py-3 gap-2">
                 <HiOutlineUserCircle className="text-lg" />
-                Mon compte volontaire
+                {isCLE ? "Mon compte élève" : "Mon compte volontaire"}
               </Link>
             )
           )}
@@ -53,16 +41,8 @@ const ModalMenu = ({ isOpen, setIsOpen }) => {
             Besoin d&apos;aide ?
           </a>
 
-          <button
-            className="flex items-center py-3 ml-4 gap-2"
-            onClick={() => {
-              if (!young) {
-                history.push("/auth?redirect=" + pathname);
-              } else {
-                logout();
-              }
-            }}>
-            {!young ? "Se connecter" : "Se déconnecter"}
+          <button className="flex items-center py-3 ml-4 gap-2" onClick={() => loginOrLogout()}>
+            {isLoggedIn ? "Se déconnecter" : "Se connecter"}
           </button>
         </div>
       </div>

@@ -13,21 +13,21 @@ import Input from "../../components/Input";
 import Select from "../../../../components/dsfr/forms/Select";
 import ErrorMessage from "../../../../components/dsfr/forms/ErrorMessage";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setYoung } from "../../../../redux/auth/actions";
 import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import { translate } from "../../../../utils";
 import DatePicker from "../../../../components/dsfr/forms/DatePicker";
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
-import Navbar from "../../components/Navbar";
 import { supportURL } from "@/config";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import Loader from "@/components/Loader";
+import useAuth from "@/services/useAuth";
 
 export default function StepEligibilite() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const [data, setData] = React.useState({
     frenchNationality: young?.frenchNationality,
     birthDate: new Date(young?.birthdateAt),
@@ -99,10 +99,23 @@ export default function StepEligibilite() {
         }
       } else {
         // School
-        if (!data?.school) {
+        if (!validateSchool(data)) {
           // Permet de rentrer dans la gestion d'erreur et ne pas valider le formulaire
           errors.school = "Vous devez renseigner complètement votre établissement scolaire";
         }
+      }
+    }
+
+    function validateSchool(data) {
+      if (data.isAbroad) {
+        if (!data?.school?.fullName) return false;
+        if (!data?.school?.country) return false;
+        return true;
+      } else {
+        if (!data?.school?.fullName) return false;
+        if (!data?.school?.city) return false;
+        if (!data?.school?.postCode && !data?.school?.postcode && !data?.school?.zip && !data?.school?.codePays) return false;
+        return true;
       }
     }
 
@@ -192,14 +205,12 @@ export default function StepEligibilite() {
   if (!corrections) return <Redirect to="/" />;
   return (
     <>
-      <Navbar />
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="flex-start my-4 flex flex-col">
           <div className="flex items-center">
-            <CheckBox disabled={true} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
+            <CheckBox disabled={!isCLE} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
             <div className="flex items-center backdrop-opacity-100">
-              <span className="ml-2 mr-2 text-[#929292]">Je suis de nationalité française</span>
-              {/* // ! J'arrive pas a griser le drapeau */}
+              <span className={`ml-2 mr-2 ${!isCLE && "text-[#929292]"}`}>Je suis de nationalité française</span>
               <IconFrance />
             </div>
           </div>

@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
@@ -8,7 +8,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { getDepartmentNumber, translateCniExpired } from "snu-lib";
+import { getDepartmentNumber, translateCniExpired, translateYoungSource } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -23,11 +23,14 @@ import { transformInscription, transformVolontairesSchool } from "../volontaires
 import DeletedInscriptionPanel from "./deletedPanel";
 import Panel from "./panel";
 import { toastr } from "react-redux-toastr";
+import Loader from "@/components/Loader";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState(null);
+  const [classes, setClasses] = useState(null);
+  const [etablissements, setEtablissements] = useState(null);
 
   //List state
   const [data, setData] = useState([]);
@@ -38,11 +41,58 @@ export default function Inscription() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
   const [size, setSize] = useState(10);
-  //parentAllowSNU
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
+          filters: {},
+          exportFields: ["name", "uniqueKeyAndId"],
+        });
+        const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
+          filters: {},
+          exportFields: ["name", "uai"],
+        });
+
+        setClasses(classes);
+        setEtablissements(etablissements);
+      } catch (e) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+      }
+    })();
+  }, []);
+
+  if (!classes || !etablissements) return <Loader />;
+
   const filterArray = [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
     { title: "Autorisation de participation", name: "parentAllowSNU", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus },
+    { title: "Source", name: "source", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateYoungSource },
+    {
+      title: "Classe Engagée ID",
+      name: "classeId",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !classes.length) return item;
+        const res = classes.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.uniqueKeyAndId;
+      },
+    },
+    {
+      title: "Etablissement CLE",
+      name: "etablissementId",
+      parentGroup: "Général",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !etablissements.length) return item;
+        const res = etablissements.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.name;
+      },
+    },
     { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     { title: "Académie", name: "academy", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     {

@@ -11,9 +11,7 @@ import { RiArrowRightLine } from "react-icons/ri";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
-import Help from "../components/Help";
 import MyDocs from "../components/MyDocs";
-import Navbar from "../components/Navbar";
 import Info from "../../../components/info";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import plausibleEvent from "@/services/plausible";
@@ -84,7 +82,6 @@ export default function StepDocuments() {
 
   return (
     <>
-      <Navbar />
       <DSFRContainer title="Ma pièce d’identité" supportLink={supportLink} supportEvent="Phase0/aide inscription - CI">
         <div className="my-4">
           {corrections?.map((e) => (
@@ -128,7 +125,6 @@ export default function StepDocuments() {
         </div>
         <SignupButtonContainer onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />
       </DSFRContainer>
-      <Help supportLink={supportLink} />
     </>
   );
 }

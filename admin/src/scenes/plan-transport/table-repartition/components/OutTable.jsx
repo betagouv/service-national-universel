@@ -245,7 +245,7 @@ export function OutTable({ cohort, region, user }) {
 const Department = ({ department, loadingQuery, data, youngInDepartment, placesCenterByDepartment, onCreate, onDelete, regionAccueil, selectAll, user }) => {
   const [open, setOpen] = React.useState(false);
   const [assignDepartment, setAssignDepartment] = React.useState([]);
-  const editDisabled = ![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role);
+  const canEdit = (user.role === ROLES.REFERENT_REGION && user.region === department2region[department]) || user.role === ROLES.ADMIN;
 
   React.useEffect(() => {
     let assignDepartment = data.filter((e) => e.fromDepartment === department) || [];
@@ -272,7 +272,7 @@ const Department = ({ department, loadingQuery, data, youngInDepartment, placesC
                   {assign.toDepartment} ({getDepartmentNumber(assign.toDepartment)})
                 </div>
               ))}
-              {!editDisabled && (
+              {canEdit && (
                 <>
                   {assignDepartment.length === 0 ? (
                     <button className="cursor-pointer rounded-full bg-blue-600 px-2 py-1 text-xs leading-5 text-white hover:scale-105" onClick={() => setOpen(!open)}>

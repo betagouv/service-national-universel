@@ -6,17 +6,28 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
-export default function WaitingReinscription() {
+export default function WaitingReinscription({ reinscriptionOpen }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
-
   let textPrecision;
   let textSecond;
+
+  if (reinscriptionOpen) {
     textPrecision = "Vérifiez dès maintenant votre éligibilité !";
-  if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE)) {
-    textPrecision = "Votre Phase 1 n'a pas été validée.";
-    textSecond = "Pour la valider, inscrivez-vous pour participer à un prochain séjour !";
-  };
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
+      textPrecision = "Votre Phase 1 n'a pas été validée.";
+      textSecond = "Pour la valider, inscrivez-vous pour participer à un prochain séjour !";
+    }
+  } else {
+    if (young.status === YOUNG_STATUS.WAITING_LIST && young.cohort === "à venir")
+      textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
+    else if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
+    else if (young.cohort === "à venir")
+      textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
+    else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
+      textPrecision = "Vous n'avez pas pu participer au séjour de cohésion.";
+    else return;
+  }
   const onClickEligibilte = async () => {
     plausibleEvent("Phase0/CTA reinscription - home page");
     return history.push("/reinscription");
@@ -34,13 +45,17 @@ export default function WaitingReinscription() {
               </div>
               <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
               {textSecond && <div className="left-7 mt-3 text-[#738297] pr-16">{textSecond}</div>}
-              <div className="flex w-fit flex-col items-stretch">
-                <button
-                  className="mt-4 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
-                  onClick={onClickEligibilte}>
-                  Vérifier mon éligibilité
-                </button>
-              </div>
+              {reinscriptionOpen && (
+                <>
+                  <div className="flex w-fit flex-col items-stretch">
+                    <button
+                      className="mt-4 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
+                      onClick={onClickEligibilte}>
+                      Vérifier mon éligibilité
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
             <img className="w-1/2 object-fill" src={Img3} />
           </div>
@@ -55,11 +70,15 @@ export default function WaitingReinscription() {
             </div>
             <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
             {textSecond && <div className="left-7 mt-3 text-[#738297]">{textSecond}</div>}
-            <button
-              className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
-              onClick={onClickEligibilte}>
-              Vérifier mon éligibilité
-            </button>
+            {reinscriptionOpen && (
+              <>
+                <button
+                  className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
+                  onClick={onClickEligibilte}>
+                  Vérifier mon éligibilité
+                </button>
+              </>
+            )}
           </div>
           <img src={Img2} />
         </div>

@@ -10,13 +10,14 @@ const ENVS = {
 const FEATURES_NAME = {
   SIDEBAR: "sidebar",
   DASHBOARD: "dashboard",
-  FLEXIBLE_REDIRECT: "flexibleRedirect",
+  FORCE_REDIRECT: "forceRedirect",
   EMAIL_VALIDATION: "emailValidation",
+  DEVELOPERS_MODE: "developersMode",
 };
 
 // If the environment is not defined then the feature is enabled
 const features = {
-  [FEATURES_NAME.FLEXIBLE_REDIRECT]: {
+  [FEATURES_NAME.FORCE_REDIRECT]: {
     [ENVS.production]: [],
     [ENVS.staging]: [],
   },
@@ -26,6 +27,10 @@ const features = {
   },
   [FEATURES_NAME.YOUNG_INSCRIPTION]: {
     [ENVS.production]: [],
+  },
+  [FEATURES_NAME.DEVELOPERS_MODE]: {
+    [ENVS.production]: [],
+    // Allow developers mode in staging and development
   },
 };
 

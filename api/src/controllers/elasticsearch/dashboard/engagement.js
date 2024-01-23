@@ -81,6 +81,7 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { dashboardUserRoleContextFilters } = buildDashboardUserRoleContext(req.user);
+
     const body = {
       query: {
         bool: {
@@ -136,6 +137,7 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { dashboardUserRoleContextFilters } = buildDashboardUserRoleContext(req.user);
+
     const body = {
       query: {
         bool: {
@@ -199,6 +201,7 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { dashboardUserRoleContextFilters } = buildDashboardUserRoleContext(req.user);
+
     let filters = [
       queryFilters.region?.length ? { terms: { "region.keyword": queryFilters.region } } : null,
       queryFilters.department?.length ? { terms: { "department.keyword": queryFilters.department } } : null,
@@ -339,8 +342,12 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
 
 router.post("/application-status", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { user } = req;
-    if (!canSeeDashboardEngagementStatus(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // TODO: refacto this part with middleware
+    const user = req.user;
+    const allowedRoles = [ROLES.SUPERVISOR, ROLES.RESPONSIBLE];
+    if (!allowedRoles.includes(user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const { applicationContextFilters, applicationContextError } = await buildApplicationContext(user);
     if (applicationContextError) {

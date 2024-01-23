@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "preserveWatchOutput": true,
+    "module": "ESNext",
+    "target": "ES2021",
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "exclude": [
+    "**/node_modules/*"
+  ],
+  "extends": "@tsconfig/vite-react/tsconfig.json"
+}

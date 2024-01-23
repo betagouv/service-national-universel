@@ -1,0 +1,82 @@
+name: "Check docker image tag"
+description: "Check if a docker image has already been built for a specific tag"
+
+inputs:
+  registry:
+    description: "Registry endpoint"
+    required: true
+  image_name:
+    description: "Name of the image"
+    required: true
+  image_tag:
+    description: "Unique tag of the image"
+    required: true
+  secret_key:
+    description: "Secret key"
+    required: true
+  region:
+    description: "Region of the registry"
+    required: true
+    default: "fr-par"
+  api_endpoint:
+    description: "Stable tag for the image"
+    required: false
+    default: "https://api.scaleway.com/registry/v1/regions"
+
+outputs:
+  tag_exists:
+    description: ""
+    value: ${{ steps.tag_exists.outputs.tag_exists }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get registry name
+      id: registry_name
+      shell: bash
+      run: |
+        registry_name=$(echo "${{ inputs.registry }}" | cut -d "/" -f 2)
+        echo $registry_name
+        echo "registry_name=$registry_name" >> $GITHUB_OUTPUT
+
+    - name: Get registry ID
+      id: registry_id
+      shell: bash
+      env:
+        SCW_SECRET_KEY: ${{ inputs.secret_key }}
+      run: |
+        registry_id=$(
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/namespaces?name=${{ steps.registry_name.outputs.registry_name }}" \
+          | jq -r ".namespaces[0].id"
+        )
+        echo $registry_id
+        echo "registry_id=$registry_id" >> $GITHUB_OUTPUT
+
+    - name: Get image ID
+      id: image_id
+      shell: bash
+      env:
+        SCW_SECRET_KEY: ${{ inputs.secret_key }}
+      run: |
+        image_id=$(
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/images?namespace_id=${{ steps.registry_id.outputs.registry_id }}&name=${{ inputs.image_name }}" \
+          | jq -r ".images[0].id"
+        )
+        echo $image_id
+        echo "image_id=$image_id" >> $GITHUB_OUTPUT
+
+    - name: Check tag existence
+      id: tag_exists
+      shell: bash
+      env:
+        SCW_SECRET_KEY: ${{ inputs.secret_key }}
+      run: |
+        tag_exists=$(
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?name=${{ inputs.image_tag }}" \
+          | jq -r ".total_count"
+        )
+        echo $tag_exists
+        echo "tag_exists=$tag_exists" >> $GITHUB_OUTPUT

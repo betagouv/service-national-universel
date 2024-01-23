@@ -29,6 +29,10 @@ jobs:
           npm run build -w packages/lib
           rm packages/lib/.gitignore
 
+      - name: Remove DSFR
+        run: |
+          rm -Rf packages/ds
+
       - name: Create SSH key
         run: |
           mkdir -p ~/.ssh/

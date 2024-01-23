@@ -8,6 +8,7 @@ const Joi = require("joi");
 const Young = require("./models/young");
 const Referent = require("./models/referent");
 const { ROLES } = require("snu-lib");
+const { checkJwtSigninVersion } = require("./jwt-options");
 
 function getToken(req) {
   let token = ExtractJwt.fromAuthHeaderWithScheme("JWT")(req);
@@ -24,91 +25,36 @@ function getToken(req) {
   }
   return token;
 }
+async function validateUser(Model, jwtPayload, done, role) {
+  try {
+    const { error, value } = Joi.object({
+      __v: Joi.string().required(),
+      _id: Joi.string().required(),
+      passwordChangedAt: Joi.date().allow(null),
+      lastLogoutAt: Joi.date().allow(null),
+    }).validate(jwtPayload, { stripUnknown: true });
+
+    if (error) return done(null, false);
+    if (!checkJwtSigninVersion(value)) return done(null, false);
+    delete value.__v;
+
+    const user = await Model.findOne(value);
+    if (user && (!role || user.role === role)) return done(null, user);
+  } catch (error) {
+    capture(error);
+  }
+  return done(null, false);
+}
 
 module.exports = function () {
   const opts = {};
   opts.jwtFromRequest = getToken;
   opts.secretOrKey = secret;
 
-  passport.use(
-    "young",
-    new JwtStrategy(opts, async function (jwtPayload, done) {
-      try {
-        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
-          _id: jwtPayload._id,
-          passwordChangedAt: jwtPayload.passwordChangedAt,
-          lastLogoutAt: jwtPayload.lastLogoutAt,
-        });
-        if (error) return done(null, false);
-
-        const young = await Young.findOne(value);
-        if (young) return done(null, young);
-      } catch (error) {
-        capture(error);
-      }
-      return done(null, false);
-    }),
-  );
-
-  passport.use(
-    "referent",
-    new JwtStrategy(opts, async function (jwtPayload, done) {
-      try {
-        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
-          _id: jwtPayload._id,
-          passwordChangedAt: jwtPayload.passwordChangedAt,
-          lastLogoutAt: jwtPayload.lastLogoutAt,
-        });
-        if (error) return done(null, false);
-
-        const referent = await Referent.findOne(value);
-        if (referent) return done(null, referent);
-      } catch (error) {
-        capture(error);
-      }
-      return done(null, false);
-    }),
-  );
-
-  passport.use(
-    "admin",
-    new JwtStrategy(opts, async function (jwtPayload, done) {
-      try {
-        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
-          _id: jwtPayload._id,
-          passwordChangedAt: jwtPayload.passwordChangedAt,
-          lastLogoutAt: jwtPayload.lastLogoutAt,
-        });
-        if (error) return done(null, false);
-
-        const referent = await Referent.findOne(value);
-        if (referent && referent.role === ROLES.ADMIN) return done(null, referent);
-      } catch (error) {
-        capture(error);
-      }
-      return done(null, false);
-    }),
-  );
-
-  passport.use(
-    "dsnj",
-    new JwtStrategy(opts, async function (jwtPayload, done) {
-      try {
-        const { error, value } = Joi.object({ _id: Joi.string().required(), passwordChangedAt: Joi.date().allow(null), lastLogoutAt: Joi.date().allow(null) }).validate({
-          _id: jwtPayload._id,
-          passwordChangedAt: jwtPayload.passwordChangedAt,
-          lastLogoutAt: jwtPayload.lastLogoutAt,
-        });
-        if (error) return done(null, false);
-
-        const referent = await Referent.findOne(value);
-        if (referent && referent.role === ROLES.DSNJ) return done(null, referent);
-      } catch (error) {
-        capture(error);
-      }
-      return done(null, false);
-    }),
-  );
+  passport.use("young", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Young, jwtPayload, done)));
+  passport.use("referent", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done)));
+  passport.use("admin", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done, ROLES.ADMIN)));
+  passport.use("dsnj", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done, ROLES.DSNJ)));
 };
 
 module.exports.getToken = getToken;

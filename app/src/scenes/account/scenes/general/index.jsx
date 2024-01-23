@@ -3,7 +3,7 @@ import queryString from "query-string";
 import { BiLoaderAlt } from "react-icons/bi";
 import { Link, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { youngCanChangeSession } from "snu-lib";
+import { youngCanChangeSession, youngCanDeleteAccount } from "snu-lib";
 import { PHONE_ZONES } from "snu-lib/phone-number";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "@/redux/auth/actions";
@@ -201,7 +201,7 @@ const AccountGeneralPage = () => {
             Changer de séjour
           </Link>
         ) : null}
-        <Withdrawal young={young} />
+        {youngCanDeleteAccount(young) ? <Withdrawal young={young} /> : null}
       </div>
     </>
   );

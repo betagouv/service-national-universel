@@ -11,8 +11,9 @@ import { colors, translateState, urlWithScheme } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
-import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles } from "./articles";
+import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles, administrator_cleArticles, referent_classeArticles } from "./articles";
 import plausibleEvent from "../../services/plausible";
+import { ROLES } from "snu-lib";
 
 const Dashboard = (props) => {
   const [userTickets, setUserTickets] = useState(null);
@@ -23,18 +24,27 @@ const Dashboard = (props) => {
   const from = new URLSearchParams(props.location.search).get("from");
 
   useEffect(() => {
-    if (user.role === "responsible" || user.role === "supervisor") {
+    if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
       setArticles(structureArticles);
       setKbRole("structure");
-    } else if (user.role === "referent_department" || user.role === "referent_region") {
+    } else if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) {
       setArticles(referentArticles);
       setKbRole("referent");
-    } else if (user.role === "head_center") {
+    } else if (user.role === ROLES.HEAD_CENTER) {
       setArticles(headCenterArticles);
       setKbRole("head_center");
-    } else if (user.role === "visitor") {
+    } else if (user.role === ROLES.VISITOR) {
       setArticles(visitorArticles);
       setKbRole("visitor");
+    } else if (user.role === ROLES.TRANSPORTER) {
+      setArticles(visitorArticles);
+      setKbRole(ROLES.TRANSPORTER);
+    } else if (user.role === ROLES.ADMINISTRATEUR_CLE) {
+      setArticles(administrator_cleArticles);
+      setKbRole(`${user.role}_${user.subRole}`);
+    } else if (user.role === ROLES.REFERENT_CLASSE) {
+      setArticles(referent_classeArticles);
+      setKbRole("referent_classe");
     } else {
       setArticles(adminArticles);
       setKbRole("admin");
@@ -197,8 +207,12 @@ const Dashboard = (props) => {
           <strong>Une question ? </strong> Utilisez notre moteur de recherche ci-dessus pour trouver l'article ou le tutoriel pour vous aider. Pour faciliter vos recherches
           utilisez <strong>des mots clés</strong> (ex : inscriptions, contrat d'engagement …)
         </div>
-        <h4 className="my-4 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
-        <ArticlesBlock articles={articles} />
+        {articles?.length > 0 && (
+          <>
+            <h4 className="my-4 ml-2">Quelques articles pour vous aider&nbsp;:</h4>
+            <ArticlesBlock articles={articles} />
+          </>
+        )}
         <hr style={{ margin: "2rem" }} />
         <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande?</h4>
 
@@ -216,28 +230,31 @@ const Dashboard = (props) => {
           </div>
         </div>
       </Container>
-
-      <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations :</h4>
-      <List>
-        <section className="ticket titles">
-          <p>Nº demande</p>
-          <p>Sujet</p>
-          <p>Etat</p>
-          <p className="ticket-date">Dernière mise à jour</p>
-        </section>
-        {!userTickets ? <Loader /> : null}
-        {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
-        {userTickets
-          ?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-          ?.map((ticket) => (
-            <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
-              <p>{ticket.number}</p>
-              <p>{ticket.subject}</p>
-              <p>{displayState(ticket.status)}</p>
-              <div className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</div>
-            </NavLink>
-          ))}
-      </List>
+      {![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
+        <>
+          <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations :</h4>
+          <List>
+            <section className="ticket titles">
+              <p>Nº demande</p>
+              <p>Sujet</p>
+              <p>Etat</p>
+              <p className="ticket-date">Dernière mise à jour</p>
+            </section>
+            {!userTickets ? <Loader /> : null}
+            {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
+            {userTickets
+              ?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+              ?.map((ticket) => (
+                <NavLink to={`/besoin-d-aide/ticket/${ticket._id}`} key={ticket._id} className="ticket">
+                  <p>{ticket.number}</p>
+                  <p>{ticket.subject}</p>
+                  <p>{displayState(ticket.status)}</p>
+                  <div className="ticket-date">{dayjs(new Date(ticket.updatedAt)).fromNow()}</div>
+                </NavLink>
+              ))}
+          </List>
+        </>
+      )}
     </HeroContainer>
   );
 };
@@ -397,7 +414,9 @@ const Articles = styled.div`
 
 const List = styled.div`
   background-color: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-radius: 0.5rem;
   overflow: hidden;
   .ticket {

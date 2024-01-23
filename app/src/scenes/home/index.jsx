@@ -7,14 +7,13 @@ import { capture } from "@/sentry";
 import API from "@/services/api";
 import { toastr } from "react-redux-toastr";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToPhase2, hasAccessToReinscription } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
 import WaitingReinscription from "./WaitingReinscription";
-import WaitingReinscriptionInscriptionClosed from "./WaitingReinscriptionOld";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
 import ValidatedV2 from "./validatedV2";
@@ -22,6 +21,7 @@ import WaitingCorrectionV2 from "./waitingCorrectionV2";
 import WaitingValidation from "./waitingValidation";
 import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
+import DelaiDepasse from "./DelaiDepasse";
 
 export default function Home() {
   useDocumentTitle("Accueil");
@@ -52,20 +52,23 @@ export default function Home() {
   const renderStep = () => {
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
+    if (!hasAccessToPhase2(young)) return <DelaiDepasse />;
+
     if (isReinscriptionOpen === false) {
       if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
       if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
-      if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
     }
 
     if (hasAccessToReinscription(young)) {
       if (isReinscriptionOpenLoading) return <Loader />;
-      // @todo: WaitingReinscriptionInscriptionClosed should be deleted and WaitingReinscription updated to handle both cases
       if (young.status === YOUNG_STATUS.WITHDRAWN && ["DONE", "EXEMPTED"].includes(young.statusPhase1)) {
         return <Withdrawn />;
       }
-      return isReinscriptionOpen ? <WaitingReinscription /> : <WaitingReinscriptionInscriptionClosed />;
+      return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
     }
+
+    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
+
     if (
       young.status === YOUNG_STATUS.VALIDATED &&
       [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) &&

@@ -151,6 +151,8 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
 
     const infoBus = await getInfoBus(ligne);
 
+    await notifyTranporteurs(ligne, "Informations générales");
+
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
     capture(error);
@@ -215,6 +217,8 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
 
     const infoBus = await getInfoBus(ligne);
 
+    await notifyTranporteurs(ligne, "Équipe");
+
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
     capture(error);
@@ -259,6 +263,8 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
 
     const infoBus = await getInfoBus(ligne);
 
+    await notifyTranporteurs(ligne, "Équipe");
+
     res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
     capture(error);
@@ -298,7 +304,17 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     await ligne.save({ fromUser: req.user });
 
+    const planDeTransport = await PlanTransportModel.findById(id);
+    planDeTransport.set({
+      centerArrivalTime,
+      centerDepartureTime,
+    });
+
+    await planDeTransport.save({ fromUser: req.user });
+
     const infoBus = await getInfoBus(ligne);
+
+    await notifyTranporteurs(ligne, "Centre de cohésion");
 
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
@@ -383,6 +399,8 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
     // * End update slave PlanTransport
 
     const infoBus = await getInfoBus(ligne);
+
+    await notifyTranporteurs(ligne, "Point de rassemblement");
 
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
@@ -608,16 +626,6 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
       youngsCountBus = data.youngsBusCount;
     }
     result.youngsCountBus = youngsCountBus;
-
-    //Get young volume need for the destination center in schema
-    const dataSchema = await schemaRepartitionModel.find({ sessionId: ligneBus.sessionId, intradepartmental: "false" });
-
-    let schemaVolume = 0;
-    for (let data of dataSchema) {
-      schemaVolume += data.youngsVolume;
-    }
-
-    result.schemaVolume = schemaVolume;
 
     //Get young volume need for the destination center in bus
     const dataBus = await LigneBusModel.find({ sessionId: ligneBus.sessionId, _id: { $ne: ligneBus._id } });
@@ -1070,4 +1078,22 @@ function mergeArrayItems(array, subProperty) {
     }
   }
   return Object.values(set);
+}
+
+async function notifyTranporteurs(ligne, type) {
+  const usersToNotify = await ReferentModel.find({ role: ROLES.TRANSPORTER });
+
+  await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_TRANSPORTEUR_MODIF, {
+    emailTo: usersToNotify.map((referent) => ({
+      name: `${referent.firstName} ${referent.lastName}`,
+      email: referent.email,
+    })),
+    params: {
+      type,
+      cohort: ligne.cohort,
+      ID: ligne._id.toString(),
+      lineName: ligne.busId,
+      cta: `${ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
+    },
+  });
 }

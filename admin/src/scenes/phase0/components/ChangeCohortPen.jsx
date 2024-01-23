@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { IoWarningOutline } from "react-icons/io5";
+import { IoRepeat } from "react-icons/io5";
+import { HiUsers, HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { DropdownItem, DropdownMenu, DropdownToggle, Modal, UncontrolledDropdown } from "reactstrap";
-import { ROLES, translate, getCohortPeriod, YOUNG_STATUS, calculateAge } from "snu-lib";
-import IconChangementCohorte from "@/assets/IconChangementCohorte";
+import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_STATUS, YOUNG_SOURCE, STATUS_CLASSE } from "snu-lib";
+import { ProfilePic } from "@snu/ds";
+import { Badge, ModalConfirmation, Select } from "@snu/ds/admin";
 import Pencil from "@/assets/icons/Pencil";
-import Badge from "@/components/Badge";
-import Chevron from "@/components/Chevron";
-import ModalConfirm from "@/components/modals/ModalConfirm";
 import api from "@/services/api";
-import { BorderButton, PlainButton } from "./Buttons";
+import Loader from "@/components/Loader";
+import { capture } from "@/sentry";
 
 export function ChangeCohortPen({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
@@ -18,37 +17,29 @@ export function ChangeCohortPen({ young, onChange }) {
   const [options, setOptions] = useState(null);
 
   const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
-  let unmounted = false;
 
   useEffect(() => {
-    if (young) {
-      (async function getSessions() {
-        //When inscription is open for youngs, we don't want to display the cohort to come
-        // const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18;
-        // const cohortToCome = { name: "à venir", isEligible: isEligibleForCohortToCome };
-        // if (user.role !== ROLES.ADMIN) {
-        //   setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
-        //   return;
-        // }
-        const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
-        if (Array.isArray(data)) {
-          const cohorts = data
-            .map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible }))
-            .filter((c) => c.name !== young.cohort)
-            //todo rajouter un flag hidden pour les cohort non visible
-            .filter((c) => !["Juin 2024 - 1", "Mars 2024 - La Réunion"].includes(c.name));
-          // cohorts.push(cohortToCome);
-          if (!unmounted) setOptions(cohorts);
-        } else if (!unmounted) setOptions([]);
-      })();
-    }
-    return () => {
-      unmounted = true;
-    };
+    if (!young) return undefined;
+
+    (async function getSessions() {
+      //When inscription is open for youngs, we don't want to display the cohort to come
+      // const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18;
+      // const cohortToCome = { name: "à venir", isEligible: isEligibleForCohortToCome };
+      // if (user.role !== ROLES.ADMIN) {
+      //   setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
+      //   return;
+      // }
+      const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
+      if (Array.isArray(data)) {
+        const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
+        // TODO: rajouter un flag hidden pour les cohort non visible
+
+        setOptions(cohorts);
+      } else setOptions([]);
+    })();
   }, [young]);
 
   if (disabled) return null;
-  if (options === null || options.length === 0) return null;
 
   return (
     <>
@@ -57,34 +48,23 @@ export function ChangeCohortPen({ young, onChange }) {
         onClick={() => setChangeCohortModal(true)}>
         <Pencil stroke="#66A7F4" className="h-[11px] w-[11px]" />
       </div>
-      <ChangeCohortModal isOpen={changeCohortModal} young={young} options={options} close={() => setChangeCohortModal(false)} onChange={onChange} />
+      <ChangeCohortModal isOpen={changeCohortModal} user={user} young={young} cohorts={options} onClose={() => setChangeCohortModal(false)} onChange={onChange} />
     </>
   );
 }
 
-function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
-  const [modalConfirmWithMessage, setModalConfirmWithMessage] = useState(false);
-  const [newCohort, setNewCohort] = useState({});
-  const [motif, setMotif] = useState("");
-  const [message, setMessage] = useState("");
-  const [fillingRateMet, setFillingRateMet] = useState(false);
-
-  const verifyFillingRate = async () => {
-    if (newCohort?.name === "à venir") return setModalConfirmWithMessage(true);
-    const res = await api.get(`/inscription-goal/${newCohort?.name}/department/${young.department}`);
-    if (!res.ok) throw new Error(res);
-    const fillingRate = res.data;
-    if (fillingRate >= 1.05) {
-      setFillingRateMet(true);
-    }
-    setModalConfirmWithMessage(true);
-  };
-
-  useEffect(() => {
-    if (modalConfirmWithMessage === false) {
-      setFillingRateMet(false);
-    }
-  }, [modalConfirmWithMessage]);
+function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) {
+  const [state, setState] = useState("hts-cle");
+  const [step, setStep] = useState(undefined);
+  const [isSaving, setIsSaving] = useState(false);
+  // HTS
+  const [motif, setMotif] = useState(undefined);
+  const [cohort, setCohort] = useState(undefined);
+  const [emailMessage, setEmailMessage] = useState(undefined);
+  // CLE
+  const [etablissement, setEtablissement] = useState(undefined);
+  const [classes, setClasses] = useState(undefined);
+  const [classe, setClasse] = useState(undefined);
 
   const motifs = [
     "Non disponibilité pour motif familial ou personnel",
@@ -94,168 +74,396 @@ function ChangeCohortModal({ isOpen, young, close, onChange, options }) {
     "Autre",
   ];
 
-  async function handleChangeCohort() {
-    try {
-      if (!message) return toastr.error("Veuillez indiquer un message");
-      await api.put(`/referent/young/${young._id}/change-cohort`, { cohort: newCohort.name, message, cohortChangeReason: motif });
-      if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
-      if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
-      await onChange();
-      toastr.success("Cohorte modifiée avec succès");
-      setModalConfirmWithMessage(false);
-    } catch (e) {
-      return toastr.error("Oups, une erreur est survenue pendant le changement de cohorte du volontaire :", translate(e.code));
+  // Reset state when modal is closed/opened
+  useEffect(() => {
+    if (state !== "hts-cle") {
+      setState("hts-cle");
+      // HTS
+      setMotif(undefined);
+      setCohort(undefined);
+      setEmailMessage(undefined);
+      // CLE
+      setEtablissement(undefined);
+      setClasse(undefined);
     }
-  }
-
-  return (
-    <>
-      <ModalConfirm
-        size="lg"
-        isOpen={isOpen}
-        title="Changement de cohorte"
-        message={
-          <>
-            Vous êtes sur le point de changer la cohorte de {young.firstName} {young.lastName}. <br />
-          </>
-        }
-        onCancel={close}
-        onConfirm={() => {
-          close();
-          verifyFillingRate();
-        }}
-        disableConfirm={!motif || !newCohort.name}
-        showHeaderIcon={true}
-        showHeaderText={false}>
-        <>
-          <div style={{ display: "grid", marginBlock: "20px", gridTemplateColumns: "1fr 375px", gridGap: "20px", alignItems: "center", justifyItems: "left", minWidth: "75%" }}>
-            <p style={{ margin: 0 }}>Précisez le motif de changement de séjour :</p>
-
-            <div className="w-[375px] bg-[#ffffff] text-[#9a9a9a]">
-              <UncontrolledDropdown setActiveFromChild>
-                <DropdownToggle tag="button">
-                  <div className="flex w-[375px] items-center justify-between rounded-[100px] border-[1px] border-[#D1D5DB] bg-white py-[4px] px-[15px]">
-                    {motif || <p></p>}
-                    <Chevron color="#9a9a9a" style={{ padding: 0, margin: 0, marginLeft: "15px" }} />
-                  </div>
-                </DropdownToggle>
-                <DropdownMenu right>
-                  {motifs
-                    .filter((e) => e !== motif)
-                    .map((status) => {
-                      return (
-                        <DropdownItem key={status} className="dropdown-item" onClick={() => setMotif(status)}>
-                          {status}
-                        </DropdownItem>
-                      );
-                    })}
-                </DropdownMenu>
-              </UncontrolledDropdown>
-            </div>
-            <p style={{ margin: 0 }}>Choix de la nouvelle cohorte :</p>
-            <CohortDropDown cohort={newCohort} onClick={(value) => setNewCohort(value)} options={options} />
-          </div>
-          <p style={{ margin: 0, marginTop: "16px" }}>
-            Veuillez vous assurer de son éligibilité , pour en savoir plus consulter{" "}
-            <a target="_blank" rel="noreferrer" href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion" style={{ color: "#5145cc" }}>
-              l’article de la base de connaissance
-            </a>
-          </p>
-        </>
-      </ModalConfirm>
-      <Modal size="lg" centered isOpen={modalConfirmWithMessage}>
-        <div className="rounded-[8px] bg-white">
-          <div className="px-[24px] pt-[24px]">
-            <h1 className="mt-[24px] text-center text-[20px] leading-[28px] text-red-500">ALERTE</h1>
-            {fillingRateMet && young.status !== YOUNG_STATUS.VALIDATED && (
-              <div className="my-4 mx-4 rounded-lg border-l-4 border-yellow-500 bg-yellow-100 px-4 py-3 text-yellow-700">
-                <div className="flex items-center gap-2">
-                  <IoWarningOutline className="h-6 w-6" />
-                  <p className="font-bold">Objectif d&apos;inscription départementale atteint</p>
-                </div>
-                <p className="text-l">L&apos;objectif d&apos;inscription de votre département a été atteint à 105%.</p>
-              </div>
-            )}
-            {fillingRateMet && young.status === YOUNG_STATUS.VALIDATED && (
-              <div className="my-4 mx-4 rounded-lg border-l-4 border-yellow-500 bg-yellow-100 px-4 py-3 text-yellow-700">
-                <div className="flex items-center gap-2">
-                  <IoWarningOutline className="h-6 w-6" />
-                  <p className="font-bold">Objectif d&apos;inscription départementale atteint</p>
-                </div>
-                <p className="text-l">
-                  L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier de {young.firstName} {young.lastName} va être{" "}
-                  <strong className="text-bold uppercase">validé sur liste complémentaire</strong>.
-                </p>
-              </div>
-            )}
-            <p className="mt-[8px] text-center text-[14px] leading-[20px] text-[#6B7280]">
-              Veuillez éditer le message ci-dessous pour préciser le motif de changement de cohorte avant de l’envoyer :
-            </p>
-            <div className="mx-auto mt-[24px] flex w-2/3 flex-col items-center justify-center text-center">
-              Bonjour {young.firstName} {young.lastName}, Votre changement de séjour pour le Service National Universel a été pris en compte.
-              <div className="mt-2">
-                Ancien séjour : <Badge color="#aaaaaa" backgroundColor="#F9FCFF" text={young.cohort} style={{ cursor: "default" }} />
-              </div>
-              <div>
-                Nouveau séjour :{" "}
-                <Badge color="#0C7CFF" backgroundColor="#F9FCFF" text={newCohort.name === "à venir" ? "à venir" : getCohortPeriod(newCohort)} style={{ cursor: "default" }} />
-              </div>
-              <textarea className="mt-2 w-full rounded-lg border-[1px] p-2" placeholder="Votre message..." rows="5" value={message} onChange={(e) => setMessage(e.target.value)} />
-              <div className="mt-2">
-                Cordialement, <br /> Les équipes du Service National Universel
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center justify-between p-[24px]">
-            <BorderButton onClick={() => setModalConfirmWithMessage(false)} className="mr-[6px] grow">
-              Annuler
-            </BorderButton>
-            <PlainButton onClick={handleChangeCohort} className="ml-[6px] grow">
-              Confirmer
-            </PlainButton>
-          </div>
-        </div>
-      </Modal>
-    </>
-  );
-}
-
-function CohortDropDown({ originalCohort, cohort, onClick, options }) {
-  const user = useSelector((state) => state.Auth.user);
-  const disabled = ![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
-  const [ops, setOps] = useState(options);
+  }, [isOpen]);
 
   useEffect(() => {
-    setOps(options.filter((e) => e.name !== cohort.name));
-  }, [cohort, options]);
+    switch (state) {
+      // HTS
+      case "hts-cohorts":
+        return setStep({
+          icon: <ProfilePic icon={({ size, className }) => <HiUsers size={size} className={className + " text-indigo-500"} />} />,
+          title: "Changement vers cohorte HTS",
+          content: (
+            <div className="text-gray-900">
+              <p className="text-lg">
+                Veuillez renseigner ces informations pour le changement de cohorte de&nbsp;
+                <span className="font-medium">
+                  {young.firstName} <span className="uppercase">{young.lastName}</span>
+                </span>
+                .
+              </p>
+              <Select
+                className="mt-6 mb-4 text-left"
+                placeholder="Motif de changement de cohorte"
+                options={motifs.map((e) => ({ label: e, value: e }))}
+                closeMenuOnSelect
+                isClearable={true}
+                value={motif}
+                onChange={setMotif}
+              />
+              {Array.isArray(cohorts) ? (
+                <Select
+                  className="text-left"
+                  placeholder="Choix de la nouvelle cohorte"
+                  options={cohorts?.map((c) => ({ ...c, label: `Cohorte ${c.name}${!c.isEligible ? " (non éligible)" : null}`, value: c.name }))}
+                  noOptionsMessage={"Aucune cohorte éligible n'est disponible."}
+                  closeMenuOnSelect
+                  isClearable={true}
+                  value={cohort}
+                  onChange={setCohort}
+                />
+              ) : (
+                <div className="flex items-center justify-between">
+                  <Loader size="20px" containerClassName="!grow-0 !shrink-0 w-auto" />
+                  <p className="flex-1 text-left">Chargement des cohortes en cours...</p>
+                </div>
+              )}
+              <p className="my-6 text-lg">
+                Assurez-vous de son éligibilité, pour en savoir plus consultez cet&nbsp;
+                <a
+                  href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="!underline !text-blue-600">
+                  article de la Base de connaissance
+                </a>
+                .
+              </p>
+            </div>
+          ),
+          actions: [
+            { title: "Annuler", isCancel: true, onClick: onClose },
+            { title: "Valider", disabled: !motif || !cohort, onClick: () => setState("hts-confirmation") },
+          ],
+        });
+      case "hts-confirmation":
+        return setStep({
+          ...step,
+          content: (
+            <div className="text-gray-900">
+              <p className="text-lg">
+                Veuillez confirmer les informations de la nouvelle cohorte de &nbsp;
+                <span className="font-medium">
+                  {young.firstName} <span className="uppercase">{young.lastName}</span>
+                </span>
+                .
+              </p>
+              <div className="my-6">
+                <div className="flex items-center justify-between min-h-[32px] mb-2">
+                  <div className="text-sm">Motif de changement :</div>
+                  <div className="font-medium">{motif.label}</div>
+                </div>
+                <div className="flex items-center justify-between min-h-[32px] mb-2">
+                  <div className="text-sm">Ancienne cohorte :</div>
+                  <Badge title={young.cohort} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
+                </div>
+                <div className="flex items-center justify-between min-h-[32px] mb-2">
+                  <div className="text-sm">Nouvelle cohorte :</div>
+                  <Badge title={cohort.label} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
+                </div>
+              </div>
+            </div>
+          ),
+          actions: [
+            { title: "Annuler", isCancel: true, onClick: onClose },
+            { title: "Valider", onClick: () => setState("hts-cni") },
+          ],
+        });
+      case "hts-cni":
+        return setStep({
+          ...step,
+          content: (
+            <div className="text-gray-900">
+              <div className="flex items-center justify-between my-4 text-green-600">
+                <HiCheckCircle size={24} className="shrink-0 mr-6 text-green-500" />
+                <p className="flex-1 text-lg text-left">
+                  Le changement de cohorte de&nbsp;
+                  <span className="font-medium">
+                    {young.firstName} <span className="uppercase">{young.lastName}</span>
+                  </span>
+                  &nbsp;a été pris en compte, veuillez lui envoyer un message en précisant un motif si besoin.
+                </p>
+              </div>
+              {!young.cniFiles?.length && !young.files?.cniFiles?.length && (
+                <div className="flex items-center justify-between my-4 text-red-600">
+                  <HiExclamationCircle size={24} className="shrink-0 mr-6 text-red-500" />
+                  <p className="flex-1 text-lg text-left">
+                    {Array.isArray(young.cniFiles) && young.cniFiles.length > 0
+                      ? "Pensez à vérifier la validité de sa CNI pour ce nouveau séjour !"
+                      : "Il doit ajouter sa CNI pour ce nouveau séjour !"}
+                  </p>
+                </div>
+              )}
+              <div className="my-6 p-8 bg-gray-50">
+                <p className="text-base -mx-4">
+                  Bonjour&nbsp;
+                  <span className="font-medium">
+                    {young.firstName} <span className="uppercase">{young.lastName}</span>
+                  </span>
+                  , votre changement de séjour pour le Service National Universel a bien été pris en compte. Vous êtes maintenant positionné(e) sur le séjour de{" "}
+                  <span className="font-medium">{cohort.name}</span>.{!young.cniFiles?.length && !young.files?.cniFiles?.length && " Veuillez ajouter votre CNI dans votre compte."}
+                </p>
+                <textarea
+                  className="my-6 px-[10px] py-[6px] w-full min-h-[88px] rounded-md border-[1px] border-gray-300 bg-white"
+                  placeholder="Ajouter un message"
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}></textarea>
+                <p className="text-base font-medium">Cordialement, les équipes du SNU.</p>
+              </div>
+            </div>
+          ),
+          actions: [
+            { title: "Annuler", isCancel: true, onClick: onClose },
+            {
+              title: "Envoyer",
+              disabled: !emailMessage,
+              loading: isSaving,
+              onClick: async () => {
+                try {
+                  if (!emailMessage) return toastr.error("Veuillez indiquer un message");
+                  setIsSaving(true);
+                  await api.put(`/referent/young/${young._id}/change-cohort`, {
+                    source: YOUNG_SOURCE.VOLONTAIRE,
+                    cohort: cohort.name,
+                    message: emailMessage,
+                    cohortChangeReason: motif.label,
+                  });
+                  // if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
+                  // if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
+                  await onChange();
+                  toastr.success("Cohorte modifiée avec succès");
+                } catch (error) {
+                  capture(error);
+                  toastr.error(error.message);
+                } finally {
+                  setIsSaving(false);
+                }
+              },
+            },
+          ],
+        });
+      // CLE
+      case "cle-etablissement":
+        return setStep({
+          icon: <ProfilePic icon={({ size, className }) => <HiUsers size={size} className={className + " text-pink-500"} />} />,
+          title: "Changement vers cohorte CLE",
+          content: (
+            <div className="text-gray-900">
+              <p className="text-lg">
+                Veuillez renseigner l’établissement de la nouvelle cohorte de&nbsp;
+                <span className="font-medium">
+                  {young.firstName} <span className="uppercase">{young.lastName}</span>
+                </span>
+                .
+              </p>
+              <Select
+                isAsync
+                className="my-6 text-left"
+                placeholder="Rechercher un établissement"
+                loadOptions={(q) => searchEtablissement(user, q)}
+                closeMenuOnSelect
+                isClearable={true}
+                noOptionsMessage={"Aucun établissement ne correspond à cette recherche"}
+                value={etablissement ? { label: etablissement.name } : null}
+                onChange={({ etablissement }) => setEtablissement(etablissement)}
+              />
+            </div>
+          ),
+          actions: [
+            { title: "Annuler", isCancel: true, onClick: onClose },
+            {
+              title: "Valider",
+              disabled: !etablissement,
+              onClick: async () => {
+                if (!etablissement) return toastr.error("Veuillez sélectionner un établissement");
+                setState("cle-classe");
+                getClasses(etablissement._id).then((classes) => setClasses(classes));
+              },
+            },
+          ],
+        });
+      case "cle-classe":
+        return setStep({
+          ...step,
+          content: (
+            <div className="text-gray-900">
+              <p className="text-lg">
+                Veuillez choisir la classe de la nouvelle cohorte de&nbsp;
+                <span className="font-medium">
+                  {young.firstName} <span className="uppercase">{young.lastName}</span>
+                </span>
+                .
+              </p>
+              <Select
+                className="my-6 text-left"
+                placeholder="Classe"
+                options={classes}
+                closeMenuOnSelect
+                isClearable={true}
+                value={classe ? { label: classe.label } : null}
+                onChange={({ classe }) => setClasse(classe)}
+              />
+            </div>
+          ),
+          actions: [
+            { title: "Annuler", isCancel: true, onClick: onClose },
+            { title: "Valider", disabled: !classe, onClick: () => setState("cle-confirmation") },
+          ],
+        });
+      case "cle-confirmation":
+        return setStep({
+          ...step,
+          content: (
+            <div className="text-gray-900">
+              <p className="text-lg">
+                Veuillez confirmer les informations de la nouvelle cohorte de &nbsp;
+                <span className="font-medium">
+                  {young.firstName} <span className="uppercase">{young.lastName}</span>
+                </span>
+                .
+              </p>
+              <div className="my-6">
+                <div className="flex items-center justify-between min-h-[32px] mb-2">
+                  <div className="text-sm">Ancienne cohorte :</div>
+                  <Badge title={young.cohort} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
+                </div>
+                <div className="flex items-center justify-between min-h-[32px] mb-2">
+                  <div className="text-sm">Nouvelle cohorte :</div>
+                  <Badge title={classe.cohort} leftIcon={<HiUsers size={16} className="text-pink-500" />} />
+                </div>
+                <div className="flex items-center justify-between min-h-[32px] mb-2">
+                  <div className="text-sm">Établissement :</div>
+                  <div className="font-medium">{etablissement.name}</div>
+                </div>
+                <div className="flex items-center justify-between min-h-[32px] mb-2">
+                  <div className="text-sm">Classe :</div>
+                  <div className="font-medium">{classe.label}</div>
+                </div>
+                <div className="flex items-center justify-between min-h-[32px] mb-2">
+                  <div className="text-sm">Statut de la classe :</div>
+                  <Badge title={translateStatusClasse(classe.status)} status={classe.status} />
+                </div>
+                <div className="flex items-center justify-between min-h-[32px] mb-2">
+                  <div className="text-sm">Statut de l'élève :</div>
+                  <Badge title={translateInscriptionStatus(young.status)} status={young.status} />
+                </div>
+              </div>
+            </div>
+          ),
+          actions: [
+            { title: "Annuler", isCancel: true, onClick: onClose },
+            {
+              title: "Valider",
+              loading: isSaving,
+              onClick: async () => {
+                try {
+                  setIsSaving(true);
+                  await api.put(`/referent/young/${young._id}/change-cohort`, {
+                    source: YOUNG_SOURCE.CLE,
+                    cohort: classe.cohort,
+                    etablissementId: etablissement._id,
+                    classeId: classe._id,
+                  });
+                  // if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
+                  // if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
+                  await onChange();
+                  toastr.success("Cohorte modifiée avec succès");
+                } catch (error) {
+                  capture(error);
+                  toastr.error(error.message);
+                } finally {
+                  setIsSaving(false);
+                }
+              },
+            },
+          ],
+        });
+      // Type of cohort selection
+      default:
+        return setStep({
+          icon: <ProfilePic icon={({ size, className }) => <IoRepeat size={size} className={className} />} />,
+          title: "Changement de cohorte",
+          content: (
+            <div className="text-gray-900">
+              <p className="text-lg">
+                Vous allez changer la cohorte actuelle de&nbsp;
+                <span className="font-medium">
+                  {young.firstName} <span className="uppercase">{young.lastName}</span>
+                </span>
+                .
+                <br />
+                Veuillez choisir le type de sa nouvelle cohorte&nbsp;:
+              </p>
+              <div className="mt-6 gap-2 flex items-center justify-center">
+                <Badge mode="editable" title="Hors temps scolaire (HTS)" leftIcon={<HiUsers size={16} className="text-indigo-500" />} onClick={() => setState("hts-cohorts")} />
+                <Badge mode="editable" title="Classe engagée (CLE)" leftIcon={<HiUsers size={16} className="text-pink-500" />} onClick={() => setState("cle-etablissement")} />
+              </div>
+            </div>
+          ),
+          actions: [{ title: "Annuler", isCancel: true, onClick: onClose }],
+        });
+    }
+  }, [state, motif, isSaving, cohorts, cohort, emailMessage, etablissement, classes, classe]);
+
+  if (!step || !isOpen) return null;
 
   return (
-    <div className={` w-[375px] `}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button" disabled={disabled}>
-          <div className={`flex w-[375px] items-center justify-between gap-1 rounded-[100px] border-[1px] border-[#0C7CFF] bg-[#F9FCFF] py-[4px] px-[15px] text-[#0C7CFF]`}>
-            {originalCohort ? <IconChangementCohorte /> : <p></p>}
-            {cohort?.name || <p></p>}
-            {!disabled ? <Chevron color="#0C7CFF" style={{ padding: 0, margin: 0, marginLeft: "15px" }} /> : null}
-          </div>
-        </DropdownToggle>
-        <DropdownMenu className="max-h-[25vh] overflow-scroll">
-          {ops.length > 0 ? (
-            options
-              .filter((e) => e.name !== cohort.name)
-              .map((op) => {
-                return (
-                  <DropdownItem key={op.name} className="dropdown-item" onClick={() => onClick(op)}>
-                    Cohorte {op.name}
-                    {!op.isEligible && " (non éligible)"}
-                  </DropdownItem>
-                );
-              })
-          ) : (
-            <DropdownItem className="dropdown-item">Aucune autre cohorte disponible</DropdownItem>
-          )}
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </div>
+    <ModalConfirmation isOpen={isOpen} onClose={onClose} className="min-w-[700px] max-w-[700px]" icon={step.icon} title={step.title} text={step.content} actions={step.actions} />
   );
 }
+
+const searchEtablissement = async (user, q) => {
+  if (!q) q = "Lycée";
+
+  const query = {
+    filters: {
+      searchbar: [q],
+      region: user.region ? [user.region] : [],
+      department: user.department ? user.department : [],
+    },
+    sort: {
+      filed: "name.keyword",
+      order: "asc",
+    },
+    page: 0,
+    size: 10,
+  };
+
+  const { responses } = await api.post(`/elasticsearch/cle/etablissement/search`, query);
+  return responses[0].hits.hits.map((hit) => {
+    const label = hit._source.name + (hit._source.city ? ` (${hit._source.city})` : "");
+    return { value: hit._source, _id: hit._id, label, etablissement: { ...hit._source, _id: hit._id } };
+  });
+};
+
+const getClasses = async (etablissementId) => {
+  if (!etablissementId) return [];
+
+  const query = {
+    filters: {
+      etablissementId: [etablissementId],
+    },
+    page: 0,
+    size: 100,
+  };
+
+  const { responses } = await api.post(`/elasticsearch/cle/classe/search`, query);
+  return responses[0].hits.hits
+    .filter((hit) => ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN].includes(hit._source.status))
+    .map((hit) => {
+      const label = `${hit._source.uniqueKeyAndId} - ${hit._source.name ?? "(Nom à renseigner)"}`;
+      return { value: hit._source, _id: hit._id, label, classe: { ...hit._source, _id: hit._id, label } };
+    });
+};

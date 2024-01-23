@@ -1,0 +1,51 @@
+{
+  "name": "@snu/ds",
+  "version": "1.0.0",
+  "description": "React components for SNU",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./src/index.ts",
+  "scripts": {
+    "postinstall": "npm run build",
+    "dev": "npx tsc -w --jsx preserve -t ES2021 --outDir dist --noEmit false",
+    "build": "npx tsc --jsx preserve -t ES2021 --outDir dist --noEmit false",
+    "lint": "eslint src \"{**/*,*}.{js,ts,jsx,tsx}\"",
+    "lint:fix": "eslint src --ext .js,.ts,jsx,tsx --fix",
+    "lint:report": "eslint src --ext .js,.ts,jsx,tsx --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
+    "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\""
+  },
+  "author": "",
+  "license": "ISC",
+  "exports": {
+    ".": "./dist/common/index.js",
+    "./tailwind.config": "./dist/tailwind.config.js",
+    "./admin": "./dist/admin/index.js",
+    "./app": "./dist/app/index.js",
+    "./dsfr": "./dist/dsfr/index.js"
+  },
+  "peerDependencies": {
+    "@headlessui/react": "^1.7.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-icons": "4.11.0",
+    "react-router-dom": "5.3.4"
+  },
+  "devDependencies": {
+    "@tsconfig/vite-react": "^2.0.1",
+    "@types/node": "^20.8.8",
+    "@types/react": "^16.14.50",
+    "@types/react-dom": "^16.9.21",
+    "@types/react-router-dom": "^5.3.3",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.4",
+    "typescript": "^5.2.2"
+  }
+}

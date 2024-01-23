@@ -19,7 +19,7 @@
     "next": "^13.4.12",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-icons": "^4.10.1",
+    "react-icons": "4.11.0",
     "react-loader-spinner": "4.0.0",
     "react-modal": "3.16.1",
     "react-toastify": "8.2.0",
@@ -32,12 +32,12 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^13.4.12",
-    "eslint": "^8.46.0",
-    "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "eslint-plugin-react": "^7.33.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^3.0.1",
+    "prettier": "^3.1.1",
     "tailwindcss": "3.3.3"
   },
   "engines": {

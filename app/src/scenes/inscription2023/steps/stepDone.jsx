@@ -1,6 +1,6 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Link, useHistory } from "react-router-dom";
 import Error from "../../../components/error";
 import Avatar from "../assets/avatar.png";
 import ErrorPic from "../assets/error.png";
@@ -9,21 +9,20 @@ import api from "../../../services/api";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
-import EditPen from "../../../assets/icons/EditPen";
+import { RiEditFill } from "react-icons/ri";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
 import plausibleEvent from "@/services/plausible";
+import useAuth from "@/services/useAuth";
+import JDMA from "@/components/JDMA";
 
 export default function StepWaitingConsent() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, logout, isCLE } = useAuth();
   const [disabled, setDisabled] = React.useState(false);
   const [error, setError] = React.useState({});
-  const [loading, setLoading] = React.useState(false);
   const notAuthorised = young?.parentAllowSNU === "false";
-
-  const history = useHistory();
   const dispatch = useDispatch();
 
   const handleClick = async () => {
@@ -35,7 +34,8 @@ export default function StepWaitingConsent() {
         setDisabled(false);
         return;
       }
-      plausibleEvent("Phase0/CTA inscription - relancer rep leg");
+      const eventName = isCLE ? "CLE/CTA inscription - relancer rep leg" : "Phase0/CTA inscription - relancer rep leg";
+      plausibleEvent(eventName);
       toastr.success("Succès", "Votre relance a bien été prise en compte.");
     } catch (e) {
       capture(e);
@@ -67,14 +67,6 @@ export default function StepWaitingConsent() {
     }
   };
 
-  const logout = async () => {
-    setLoading(true);
-    await api.post(`/young/logout`);
-    dispatch(setYoung(null));
-    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
-    return history.push("/auth");
-  };
-
   return !notAuthorised ? (
     <>
       {young?.parentAllowSNU === "true" ? (
@@ -88,7 +80,9 @@ export default function StepWaitingConsent() {
           <p className="text-base text-[#161616] ">
             Bonne nouvelle, votre représentant légal a <strong>déjà donné son consentement.</strong>
           </p>
-          <p className="mt-2 text-base text-[#161616]">Vous pouvez désormais accéder à votre compte volontaire.</p>
+          <p className="mt-2 text-base text-[#161616]">
+            {isCLE ? "Vous pouvez désormais accéder à votre compte élève" : "Vous pouvez désormais accéder à votre compte volontaire"}
+          </p>
           <SignupButtonContainer labelNext="Accéder à mon compte" onClickNext={handleDone} />
         </DSFRContainer>
       ) : (
@@ -96,7 +90,9 @@ export default function StepWaitingConsent() {
           <DSFRContainer title="Bravo, vous avez terminé votre inscription.">
             {error?.text && <Error {...error} onClose={() => setError({})} />}
             <p className="mt-2 text-sm text-[#666666]">
-              Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider.
+              {isCLE
+                ? "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à votre établissement scolaire pour le valider."
+                : "Dès lors que votre Représentant Légal aura consenti à votre participation au SNU, votre dossier sera envoyé à l’administration pour le valider."}
             </p>
 
             <div className="mt-4 flex flex-col gap-1 border-[1px] border-b-4 border-[#E5E5E5] border-b-[#000091] p-4">
@@ -107,7 +103,7 @@ export default function StepWaitingConsent() {
               <div className="text-sm text-[#666666] ">{young?.parent1Email}</div>
               <div className="mt-2 flex justify-between">
                 <button
-                  className="mt-2 h-10 w-1/2 bg-[#000091] text-base text-white disabled:bg-[#E5E5E5]  disabled:text-[#929292] "
+                  className="mt-2 h-10 w-32 bg-[#000091] text-base text-white disabled:bg-[#E5E5E5]  disabled:text-[#929292] "
                   disabled={disabled}
                   onClick={() => handleClick()}>
                   Relancer
@@ -115,16 +111,23 @@ export default function StepWaitingConsent() {
                 <img className="translate-y-4" src={Avatar} />
               </div>
             </div>
-            <div className="my-4 flex cursor-pointer items-center justify-end gap-2 text-base text-[#000091]" onClick={() => history.push("/inscription2023/confirm")}>
-              <EditPen />
+
+            {!isCLE && (
+              <div className="my-6 p-8 flex flex-col md:flex-row gap-6 justify-between bg-[#F5F5FD]">
+                <div>
+                  <p className="font-semibold">Comment s'est passé votre inscription ?</p>
+                  <p className="mt-2 text-sm">Partagez votre expérience et contribuez à l'amélioration de nos services</p>
+                </div>
+                <JDMA id={3504} />
+              </div>
+            )}
+
+            <Link className="mt-6 flex cursor-pointer items-center justify-end gap-2 text-base text-[#000091]" to="/inscription2023/confirm">
+              <RiEditFill className="h-5 w-5" />
               Modifier mes informations
-            </div>
-            <div className="flex w-full justify-end">
-              <a className="w-36" href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3504?&view-mode=formulaire-avis&nd_source=button&key=060c41afff346d1b228c2c02d891931f">
-                <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu.svg" alt="Je donne mon avis" />
-              </a>
-            </div>
-            <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={() => logout()} />
+            </Link>
+
+            <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={logout} />
           </DSFRContainer>
         </>
       )}
@@ -145,7 +148,7 @@ export default function StepWaitingConsent() {
           Mais tout n’est pas perdu, il existe d’autres moyens de s’engager ! Découvrez-les maintenant.
         </div>
         <EngagementPrograms />
-        <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={() => logout()} disabled={loading} />
+        <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={logout} />
       </DSFRContainer>
     </>
   );

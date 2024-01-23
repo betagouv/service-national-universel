@@ -3,28 +3,17 @@ import LogoFr from "@/assets/fr.png";
 import SNU from "@/assets/logo-snu.png";
 import Burger from "@/assets/icons/Burger";
 import Menu from "../nav/Menu";
-import { Link, useLocation, useHistory } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { setYoung } from "../../../redux/auth/actions";
-import api from "../../../services/api";
-import { toastr } from "react-redux-toastr";
+import { Link } from "react-router-dom";
+import useAuth from "../../../services/useAuth";
+
 import { supportURL } from "@/config";
 import { HiOutlineClipboard, HiOutlineQuestionMarkCircle, HiOutlineUserCircle } from "react-icons/hi";
 
 const Header = ({ title }) => {
-  const history = useHistory();
-  const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young);
+  const { isCLE, isLoggedIn, loginOrLogout } = useAuth();
+
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const logout = async () => {
-    await api.post(`/young/logout`);
-    dispatch(setYoung(null));
-    toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
-    return history.push("/auth");
-  };
-
-  const { pathname } = useLocation();
   return (
     <>
       <Menu isOpen={isOpen} setIsOpen={setIsOpen} />
@@ -52,10 +41,10 @@ const Header = ({ title }) => {
               Programme
             </a>
           ) : (
-            young && (
+            isLoggedIn && (
               <Link to="/" className="flex items-center py-1 px-2 gap-2 hover:bg-gray-100 hover:text-blue-france-sun-113">
                 <HiOutlineUserCircle className="text-base" />
-                Mon compte volontaire
+                {isCLE ? "Mon compte élève" : "Mon compte volontaire"}
               </Link>
             )
           )}
@@ -68,10 +57,9 @@ const Header = ({ title }) => {
           <button
             className="border border-gray-500 py-1 px-2 hover:bg-gray-100"
             onClick={() => {
-              if (!young) history.push("/auth?redirect=" + pathname);
-              else logout();
+              loginOrLogout();
             }}>
-            {!young ? "Se connecter" : "Se déconnecter"}
+            {isLoggedIn ? "Se déconnecter" : "Se connecter"}
           </button>
         </nav>
       </header>

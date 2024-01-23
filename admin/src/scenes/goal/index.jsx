@@ -1,24 +1,35 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { toastr } from "react-redux-toastr";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
-import api from "../../services/api";
-import LoadingButton from "../../components/buttons/LoadingButton";
-import Loader from "../../components/Loader";
-import PlusSVG from "../../assets/plus.svg";
 import CrossSVG from "../../assets/cross.svg";
-import { region2department, departmentList, department2region } from "../../utils";
+import PlusSVG from "../../assets/plus.svg";
+import Loader from "../../components/Loader";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import api from "../../services/api";
+import { department2region, departmentList, region2department } from "../../utils";
 
-import YearPicker from "../../components/legacy-dashboard/YearPicker";
+import { getCohortSelectOptions } from "@/services/cohort.service";
+import { useSelector } from "react-redux";
+import Select from "../plan-transport/components/Select";
 export default function Goal() {
   useDocumentTitle("Objectifs");
 
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [loading, setLoading] = useState(false);
   const [blocsOpened, setBlocsOpened] = useState([]);
-  const [cohort, setCohort] = useState("Février 2023 - C");
+  const [cohort, setCohort] = useState(null);
+  const [cohortList, setCohortList] = useState([]);
+  const cohorts = useSelector((state) => state.Cohorts);
+
+  useEffect(() => {
+    //regex to match cohort witch not include CLE
+    const cohortList = getCohortSelectOptions(cohorts).filter((c) => !c.label.includes("CLE"));
+    setCohortList(cohortList);
+    if (!cohort) setCohort("Février 2024 - C");
+  }, []);
 
   const getInscriptionGoals = async () => {
     if (!cohort) return;
@@ -30,7 +41,7 @@ export default function Goal() {
     getInscriptionGoals();
   }, [cohort]);
 
-  if (!inscriptionGoals) return <Loader />;
+  if (!inscriptionGoals || !cohortList.length || !cohort) return <Loader />;
 
   return (
     <>
@@ -38,46 +49,26 @@ export default function Goal() {
         <div style={{ flex: 1 }}>
           <Title>Objectifs d&apos;inscriptions au SNU</Title>
         </div>
-        <LoadingButton
-          loading={loading}
-          onClick={async () => {
-            setLoading(true);
-            await api.post(`/inscription-goal/${cohort}`, inscriptionGoals);
-            setLoading(false);
-          }}>
-          Enregistrer
-        </LoadingButton>
-      </Header>
-      <div style={{ marginLeft: "2rem", display: "flex" }}>
-        {cohort ? (
-          <YearPicker
-            options={[
-              { key: "2021", label: "2021" },
-              { key: "Février 2022", label: "Février 2022" },
-              { key: "Juin 2022", label: "Juin 2022" },
-              { key: "Juillet 2022", label: "Juillet 2022" },
-              { key: "Février 2023 - C", label: "Février 2023 - C" },
-              { key: "Avril 2023 - A", label: "Avril 2023 - A" },
-              { key: "Avril 2023 - B", label: "Avril 2023 - B" },
-              { key: "Juin 2023", label: "Juin 2023" },
-              { key: "Juillet 2023", label: "Juillet 2023" },
-              { key: "Octobre 2023 - NC", label: "Octobre 2023 - NC" },
-              { key: "Février 2024 - C", label: "Février 2024 - C" },
-              { key: "Février 2024 - A", label: "Février 2024 - A" },
-              { key: "Février 2024 - B", label: "Février 2024 - B" },
-              { key: "Mars 2024 - La Réunion", label: "Mars 2024 - La Réunion" },
-              { key: "Avril 2024 - C", label: "Avril 2024 - C" },
-              { key: "Avril 2024 - A", label: "Avril 2024 - A" },
-              { key: "Avril 2024 - B", label: "Avril 2024 - B" },
-              { key: "Juin 2024 - 1", label: "Juin 2024 - 1" },
-              { key: "Juin 2024 - 2", label: "Juin 2024 - 2" },
-              { key: "Juillet 2024", label: "Juillet 2024" },
-            ]}
-            onChange={(c) => setCohort(c)}
+        <div className="flex items-center gap-2">
+          <LoadingButton
+            loading={loading}
+            onClick={async () => {
+              setLoading(true);
+              await api.post(`/inscription-goal/${cohort}`, inscriptionGoals);
+              setLoading(false);
+            }}>
+            Enregistrer
+          </LoadingButton>
+          <Select
+            options={cohortList}
             value={cohort}
+            onChange={(e) => {
+              setCohort(e);
+            }}
           />
-        ) : null}
-      </div>
+        </div>
+      </Header>
+
       <div style={{ flex: "2 1 0%", position: "relative", padding: "3rem" }}>
         {Object.entries(region2department).map(([region, departements]) => {
           const total = inscriptionGoals
