@@ -1,8 +1,9 @@
+// virusScanner.js
 const NodeClam = require("clamscan");
 const { capture } = require("../sentry");
 const { ERRORS } = require("./index");
 
-async function scanFile(tempFilePath, name, userId, res) {
+async function scanFile(tempFilePath, name, userId) {
   try {
     const clamscan = await new NodeClam().init({
       removeInfected: true,
@@ -16,10 +17,12 @@ async function scanFile(tempFilePath, name, userId, res) {
     const { isInfected } = await clamscan.isInfected(tempFilePath);
     if (isInfected) {
       capture(`File ${name} of user(${userId}) is infected`);
-      return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+      return { infected: true, error: null };
     }
-  } catch {
-    return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+    return { infected: false, error: null };
+  } catch (error) {
+    capture(error);
+    return { infected: false, error: ERRORS.FILE_SCAN_DOWN };
   }
 }
 

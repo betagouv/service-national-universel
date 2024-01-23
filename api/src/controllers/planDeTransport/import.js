@@ -81,7 +81,12 @@ router.post(
       }
 
       if (config.ENVIRONMENT === "production") {
-        scanFile(tempFilePath, name, req.user.id, res);
+        const scanResult = await scanFile(tempFilePath, name, req.user.id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        } else if (scanResult.error) {
+          return res.status(500).send({ ok: false, code: scanResult.error });
+        }
       }
 
       const workbook = XLSX.readFile(tempFilePath);
