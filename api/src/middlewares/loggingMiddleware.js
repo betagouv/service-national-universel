@@ -15,11 +15,10 @@ const loggingMiddleware = async (req, res, next) => {
 
       const ip = req.ipInfo;
 
-      const headers = JSON.stringify(req.headers);
+      const hasPayload = req.body && Object.keys(req.body).length > 0;
+      const payloadLog = hasPayload ? ` Payload: ${JSON.stringify(req.body)} |` : "";
 
-      const payload = JSON.stringify(req.body);
-
-      console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${req.responseTimeMs}ms |${userlog} IP: ${ip} | Headers: ${headers} | Payload: ${payload}`);
+      console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${req.responseTimeMs}ms |${userlog}${payloadLog} IP: ${ip}`);
     } catch (error) {
       console.error("Error in logging middleware:", error);
     }
