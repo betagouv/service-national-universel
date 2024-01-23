@@ -183,8 +183,13 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                     <>
                       {optionsVisible
                         ?.sort((a, b) => {
+                          if (filter?.translate) {
+                            console.log(filter.translate(a.key));
+                            return filter.translate(a.key)?.toString().localeCompare(filter.translate(b.key)?.toString());
+                          }
                           a.key?.toString().localeCompare(b.key?.toString());
                         })
+
                         ?.map((option) => {
                           const optionSelected = filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key));
                           return (
@@ -194,7 +199,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                               onClick={() => handleSelect(option?.key)}>
                               <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
                                 <input type="checkbox" disabled={filter?.fixed?.includes(option.key)} checked={optionSelected} onChange={() => {}} />
-                                {option.label}
+                                {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
                               </div>
                             </div>
                           );
