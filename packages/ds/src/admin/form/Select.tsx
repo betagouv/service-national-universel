@@ -29,7 +29,7 @@ type OwnProps = {
   noOptionsMessage?: string;
   loadOptions?: (
     inputValue: string,
-    callback: (options: GroupBase<string>[]) => void,
+    callback: (options: GroupBase<string>[]) => void
   ) => void | Promise<GroupBase<string>[]>;
   defaultOptions?:
     | boolean
