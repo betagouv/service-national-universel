@@ -86,10 +86,8 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   }, [newContact, hit]);
 
   useEffect(() => {
-    if (cohorts && contacts) {
-      if (!currentTab) {
-        setCurrentTab(cohorts[0]);
-      }
+    if (cohorts && contacts && !currentTab) {
+      setCurrentTab(cohorts[0]);
     }
   }, [cohorts]);
 
@@ -139,10 +137,6 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   };
 
   if (!contacts || !cohorts || !currentTab) return null;
-
-  console.log(edit);
-  console.log(currentTab);
-  console.log(contacts[currentTab].length);
 
   return (
     <ModalForm classNameModal="max-w-4xl" isOpen={isOpen} onCancel={onCancel}>

@@ -8,7 +8,6 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, represe
   const onCancel = () => setIsOpen(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState({});
-  console.log(representant);
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });

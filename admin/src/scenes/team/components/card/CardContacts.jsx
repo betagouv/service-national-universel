@@ -47,7 +47,6 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
       //TODO update this when we will have the new cohort or change completely this part
       const newCohorts = sessions2023.filter((cohort) => cohort.name.match(/^(?!.*CLE).*2024/)).map((cohort) => cohort.name);
       setCohorts(newCohorts);
-      console.log(newCohorts.length);
 
       contacts.forEach((contact) => {
         if (!existCohort.includes(contact.cohort) && newCohorts.includes(contact.cohort)) {
