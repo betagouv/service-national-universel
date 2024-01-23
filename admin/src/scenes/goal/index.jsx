@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { toastr } from "react-redux-toastr";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
-import api from "../../services/api";
-import LoadingButton from "../../components/buttons/LoadingButton";
-import Loader from "../../components/Loader";
-import PlusSVG from "../../assets/plus.svg";
 import CrossSVG from "../../assets/cross.svg";
-import { region2department, departmentList, department2region } from "../../utils";
+import PlusSVG from "../../assets/plus.svg";
+import Loader from "../../components/Loader";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import api from "../../services/api";
+import { department2region, departmentList, region2department } from "../../utils";
 
-import YearPicker from "../../components/legacy-dashboard/YearPicker";
-import Select from "../plan-transport/components/Select";
 import { getCohortSelectOptions } from "@/services/cohort.service";
 import { useSelector } from "react-redux";
+import Select from "../plan-transport/components/Select";
 export default function Goal() {
   useDocumentTitle("Objectifs");
 
