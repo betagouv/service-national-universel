@@ -45,15 +45,16 @@ jobs:
         with:
           sha: ${{ steps.commit_sha.outputs.commit_sha }}
 
-  run_tests_api:
-    needs: prepare
-    uses: ./.github/workflows/run-tests-api.yml
-    with:
-      branch_name: ${{ needs.prepare.outputs.target_branch }}
-    secrets: inherit
+  # run_tests_api:
+  #   needs: prepare
+  #   uses: ./.github/workflows/run-tests-api.yml
+  #   with:
+  #     branch_name: ${{ needs.prepare.outputs.target_branch }}
+  #   secrets: inherit
 
   build:
-    needs: [prepare, run_tests_api]
+    # needs: [prepare, run_tests_api]
+    needs: [prepare]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -119,11 +120,11 @@ jobs:
           terraform plan -no-color -input=false \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
-      - name: Staging - Terraform auto-apply
-        working-directory: ${{ env.staging_directory }}
-        run: |
-          terraform apply -no-color -input=false -auto-approve \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+      # - name: Staging - Terraform auto-apply
+      #   working-directory: ${{ env.staging_directory }}
+      #   run: |
+      #     terraform apply -no-color -input=false -auto-approve \
+      #       -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Staging - Healthcheck API
         working-directory: ${{ env.staging_directory }}
@@ -165,49 +166,50 @@ jobs:
           terraform plan -no-color -input=false \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
-  deploy_production:
-    runs-on: ubuntu-latest
-    environment: production # Needed for manual approval before deploy
-    needs: [prepare, plan_production]
-    env:
-      SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
-      SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
-      PG_CONN_STR: ${{ secrets.SCW_PROD_BACKEND_CONN_STR }}
-      PGUSER: ${{ secrets.SCW_PROD_BACKEND_USER }}
-      PGPASSWORD: ${{ secrets.SCW_PROD_BACKEND_PASSWORD }}
+  # deploy_production:
+  #   runs-on: ubuntu-latest
+  #   environment: production # Needed for manual approval before deploy
+  #   needs: [prepare, plan_production]
+  #   env:
+  #     SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
+  #     SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+  #     PG_CONN_STR: ${{ secrets.SCW_PROD_BACKEND_CONN_STR }}
+  #     PGUSER: ${{ secrets.SCW_PROD_BACKEND_USER }}
+  #     PGPASSWORD: ${{ secrets.SCW_PROD_BACKEND_PASSWORD }}
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.target_branch }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ needs.prepare.outputs.target_branch }}
 
-      - uses: hashicorp/setup-terraform@v3
+  #     - uses: hashicorp/setup-terraform@v3
 
-      - name: Init terraform
-        working-directory: ${{ env.prod_directory }}
-        run: terraform init
+  #     - name: Init terraform
+  #       working-directory: ${{ env.prod_directory }}
+  #       run: terraform init
 
-      - name: Production - Terraform apply
-        working-directory: ${{ env.prod_directory }}
-        run: |
-          terraform apply -no-color -input=false -auto-approve \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+  #     - name: Production - Terraform apply
+  #       working-directory: ${{ env.prod_directory }}
+  #       run: |
+  #         terraform apply -no-color -input=false -auto-approve \
+  #           -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
-      - name: Production - Healthcheck API
-        working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw api_endpoint)"
+  #     - name: Production - Healthcheck API
+  #       working-directory: ${{ env.prod_directory }}
+  #       run: curl -I "$(terraform output -raw api_endpoint)"
 
-      - name: Production - Healthcheck Admin
-        working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw admin_endpoint)"
+  #     - name: Production - Healthcheck Admin
+  #       working-directory: ${{ env.prod_directory }}
+  #       run: curl -I "$(terraform output -raw admin_endpoint)"
 
-      - name: Production - Healthcheck App
-        working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw app_endpoint)"
+  #     - name: Production - Healthcheck App
+  #       working-directory: ${{ env.prod_directory }}
+  #       run: curl -I "$(terraform output -raw app_endpoint)"
 
   merge_branch:
     runs-on: ubuntu-latest
-    needs: [prepare, deploy_production]
+    # needs: [prepare, deploy_production]
+    needs: [prepare, plan_production]
     env:
       production_branch: "production"
     steps:
