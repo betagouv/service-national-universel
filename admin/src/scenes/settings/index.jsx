@@ -500,7 +500,8 @@ export default function Settings() {
                       <MdInfoOutline data-tip data-for="téléchargement_schema" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="téléchargement_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Ouverture ou fermeture pour les utilisateurs de la possibilité de télécharger le schéma de répartition.
+                          Ouverture ou fermeture pour les utilisateurs de la possibilité de télécharger le schéma de répartition. L’ouverture active les notifications au
+                          transporteur lors des modifications sur le schéma de répartition.
                         </p>
                       </ReactTooltip>
                     </div>
