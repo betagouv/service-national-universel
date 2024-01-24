@@ -103,11 +103,10 @@ resource "scaleway_container" "api" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "api" {
-#  container_id = scaleway_container.api.id
-#  hostname     = local.api_hostname
-#}
+resource "scaleway_container_domain" "api" {
+  container_id = scaleway_container.api.id
+  hostname     = local.api_hostname
+}
 
 
 
@@ -145,11 +144,10 @@ resource "scaleway_container" "admin" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "admin" {
-#  container_id = scaleway_container.admin.id
-#  hostname     = local.admin_hostname
-#}
+resource "scaleway_container_domain" "admin" {
+  container_id = scaleway_container.admin.id
+  hostname     = local.admin_hostname
+}
 
 resource "scaleway_container" "app" {
   name            = "production-app"
@@ -186,11 +184,10 @@ resource "scaleway_container" "app" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "app" {
-#  container_id = scaleway_container.app.id
-#  hostname     = local.app_hostname
-#}
+resource "scaleway_container_domain" "app" {
+  container_id = scaleway_container.app.id
+  hostname     = local.app_hostname
+}
 
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
