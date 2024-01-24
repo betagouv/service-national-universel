@@ -50,11 +50,8 @@ export default function PDRModal({ open, setOpen, meetingPoints, center, session
 
   return (
     <Modal isOpen={open} onClose={() => setOpen(false)}>
-      <div className="flex justify-between mb-3">
-        <p className="text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</p>
-        <Close className="hover:cursor-pointer" height={20} width={20} onClick={() => setOpen(false)} />
-      </div>
-      <div className="flex flex-col md:flex-row items-center gap-6">
+      <p className="text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</p>
+      <div className="flex flex-col md:flex-row items-center gap-6 mt-4">
         {meetingPoints.map((mp) => (
           <MeetingPointChooser
             key={mp._id}

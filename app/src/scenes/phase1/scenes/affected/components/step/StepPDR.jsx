@@ -13,13 +13,13 @@ import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
 
 export default function StepPDR({ center, session, meetingPoint, departureDate, returnDate }) {
-  const [open, setOpen] = useState(false);
-  const [meetingPoints, setMeetingPoints] = useState([]);
-
   const young = useSelector((state) => state.Auth.young);
   const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
   const pdrChoiceLimitDate = date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
   const pdrChoiceExpired = date ? dayjs.utc().isAfter(dayjs(date)) : false;
+
+  const [open, setOpen] = useState(false);
+  const [meetingPoints, setMeetingPoints] = useState([]);
 
   async function loadMeetingPoints() {
     try {
@@ -102,21 +102,27 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
     if (young.deplacementPhase1Autonomous === "true") {
       return (
         <StepCard state="done" stepNumber={1}>
-          <p className="font-semibold">Lieu de rassemblement</p>
-          <p className="leading-tight my-2">Je me rends au centre et en reviens par mes propres moyens</p>
-          <div className="my-3 grid grid-cols-2 max-w-md">
+          <div className="flex flex-col md:flex-row gap-3 justify-between text-sm">
             <div>
-              <p className="font-semibold">Aller à {ALONE_ARRIVAL_HOUR}</p>
-              <p className="capitalize">{dayjs(departureDate).locale("fr").format("dddd D MMMM")}</p>
+              <p className="font-semibold">Lieu de rassemblement</p>
+              <p className="leading-tight my-2">Je me rends au centre et en reviens par mes propres moyens</p>
+              <div className="mt-3 grid grid-cols-2 max-w-md">
+                <div>
+                  <p className="font-semibold">Aller à {ALONE_ARRIVAL_HOUR}</p>
+                  <p className="capitalize">{dayjs(departureDate).locale("fr").format("dddd D MMMM")}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Retour à {ALONE_DEPARTURE_HOUR}</p>
+                  <p className="capitalize">{dayjs(returnDate).locale("fr").format("dddd D MMMM")}</p>
+                </div>
+              </div>
             </div>
             <div>
-              <p className="font-semibold">Retour à {ALONE_DEPARTURE_HOUR}</p>
-              <p className="capitalize">{dayjs(returnDate).locale("fr").format("dddd D MMMM")}</p>
+              <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
+                Modifier
+              </button>
             </div>
           </div>
-          <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
-            Modifier
-          </button>
         </StepCard>
       );
     }
