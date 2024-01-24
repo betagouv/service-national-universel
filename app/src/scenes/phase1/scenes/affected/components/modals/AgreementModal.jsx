@@ -1,14 +1,14 @@
-import Close from "@/components/layout/navbar/assets/Close";
-import { ModalContainer } from "@/components/modals/Modal";
+import React from "react";
 import { setYoung } from "@/redux/auth/actions";
 import API from "@/services/api";
 import plausibleEvent from "@/services/plausible";
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import { Modal } from "reactstrap";
 import { transportDatesToString } from "snu-lib";
+import Close from "@/components/layout/navbar/assets/Close";
+import { ModalContainer } from "@/components/modals/Modal";
 
 export function AgreementModal({ isOpen, setIsOpen, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
