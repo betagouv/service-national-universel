@@ -14,7 +14,7 @@ import PDRModal from "../modals/PDRModal";
 
 export default function StepPDR({ center, session, meetingPoint, departureDate, returnDate }) {
   const [open, setOpen] = useState(false);
-  const [meetingPoints, setMeetingPoints] = useState(null);
+  const [meetingPoints, setMeetingPoints] = useState([]);
 
   const young = useSelector((state) => state.Auth.young);
   const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
