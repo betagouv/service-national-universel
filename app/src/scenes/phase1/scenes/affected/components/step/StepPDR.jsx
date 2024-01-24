@@ -12,7 +12,6 @@ import { getCohort, getMeetingPointChoiceLimitDateForCohort } from "../../../../
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, isStepPDRDone } from "../../utils/steps.utils";
 
 import CloseSvg from "../../../../../../assets/Close";
-import LinearMap from "../../../../../../assets/icons/LinearMap";
 import MeetingPointChooser from "../MeetingPointChooser";
 import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
 import MeetingPointGoAlone from "../MeetingPointGoAlone";
@@ -59,8 +58,8 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
   }
 
   function renderStep() {
-    if (pdrChoiceExpired) return <Disabled />;
-    if (isStepPDRDone(young)) return <Done />;
+    // if (pdrChoiceExpired) return <Disabled />;
+    // if (isStepPDRDone(young)) return <Done />;
     return <Todo />;
   }
 
@@ -84,24 +83,27 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
     if (young.meetingPointId) {
       return (
         <StepCard state="done" stepNumber={1}>
-          <div className="flex justify-center">
-            <p className="font-semibold">Lieu de rassemblement</p>
-            <LinearMap className="ml-2" height={20} width={20} />
-          </div>
-          <p className="leading-tight my-2">{addressOf(meetingPoint)}</p>
-          <div className="my-3 grid grid-cols-2">
+          <div className="flex flex-col md:flex-row gap-3 justify-between">
             <div>
-              <p className="font-semibold">Aller à {meetingHour}</p>
-              <p className="capitalize">{dayjs(departureDate).locale("fr").format("dddd D MMMM")}</p>
+              <p className="font-semibold">Lieu de rassemblement</p>
+              <p className="leading-tight my-2">{addressOf(meetingPoint)}</p>
+              <div className="mt-3 grid grid-cols-2 max-w-md">
+                <div>
+                  <p className="font-semibold">Aller à {meetingHour}</p>
+                  <p className="capitalize">{dayjs(departureDate).locale("fr").format("dddd D MMMM")}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Retour à {returnHour}</p>
+                  <p className="capitalize">{dayjs(returnDate).locale("fr").format("dddd D MMMM")}</p>
+                </div>
+              </div>
             </div>
             <div>
-              <p className="font-semibold">Retour à {returnHour}</p>
-              <p className="capitalize">{dayjs(returnDate).locale("fr").format("dddd D MMMM")}</p>
+              <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
+                Modifier
+              </button>
             </div>
           </div>
-          <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
-            Modifier
-          </button>
         </StepCard>
       );
     }
@@ -111,7 +113,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
         <StepCard state="done" stepNumber={1}>
           <p className="font-semibold">Lieu de rassemblement</p>
           <p className="leading-tight my-2">Je me rends au centre et en reviens par mes propres moyens</p>
-          <div className="my-3 grid grid-cols-2">
+          <div className="my-3 grid grid-cols-2 max-w-md">
             <div>
               <p className="font-semibold">Aller à {ALONE_ARRIVAL_HOUR}</p>
               <p className="capitalize">{dayjs(departureDate).locale("fr").format("dddd D MMMM")}</p>
@@ -141,13 +143,19 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
   function Todo() {
     return (
       <StepCard state="todo" stepNumber={1}>
-        <p className="font-semibold leading-tight">Confirmez votre point de rassemblement</p>
-        <p className="text-sm mt-2 text-gray-500">
-          À faire avant le <strong>{pdrChoiceLimitDate}</strong>.
-        </p>
-        <button onClick={handleOpen} className="w-full mt-3 text-sm text-white bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded">
-          Commencer
-        </button>
+        <div className="flex flex-col md:flex-row gap-3 justify-between">
+          <div>
+            <p className="font-semibold leading-tight">Confirmez votre point de rassemblement</p>
+            <p className="text-sm mt-2 text-gray-500">
+              À faire avant le <strong>{pdrChoiceLimitDate}</strong>.
+            </p>
+          </div>
+          <div>
+            <button onClick={handleOpen} className="w-full text-sm text-white bg-blue-600 hover:bg-blue-700 py-2 px-4 rounded">
+              Commencer
+            </button>
+          </div>
+        </div>
       </StepCard>
     );
   }
