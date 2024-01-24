@@ -13,8 +13,9 @@ export default function StepsAffected({ center, session, meetingPoint, departure
   const nbvalid = numberOfStepsCompleted(young);
 
   return (
-    <section className={`order-3 mx-[1rem] my-[2rem] flex flex-col md:mx-[4rem] ${isStepMedicalFieldDone(young) ? "order-4" : "order-3"}`}>
-      <article className="mb-3">
+    <section className={`order-3 m-[1rem] flex flex-col md:mx-[4rem] ${isStepMedicalFieldDone(young) ? "order-4" : "order-3"}`}>
+      <article className="mb-6">
+        {/* mobile header */}
         <div className="flex flex-row items-center md:hidden">
           {nbvalid !== 4 && (
             <div className="mr-3 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500">
@@ -26,6 +27,8 @@ export default function StepsAffected({ center, session, meetingPoint, departure
             <p className="text-sm leading-5 text-gray-500">{nbvalid} de 4 tâches réalisées</p>
           </div>
         </div>
+
+        {/* desktop header */}
         <div className="hidden md:flex">
           {nbvalid !== 4 && (
             <div className="mr-6 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500">
@@ -39,10 +42,12 @@ export default function StepsAffected({ center, session, meetingPoint, departure
         </div>
       </article>
 
-      <StepPDR center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-      <StepAgreement departureDate={departureDate} returnDate={returnDate} />
-      <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-      <StepMedicalField young={young} />
+      <div className="grid grid-cols-1 gap-4">
+        <StepPDR center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        <StepAgreement departureDate={departureDate} returnDate={returnDate} />
+        <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        <StepMedicalField young={young} />
+      </div>
     </section>
   );
 }
