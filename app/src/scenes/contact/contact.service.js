@@ -101,7 +101,7 @@ export const questions = [
   {
     category: "QUESTION",
     value: "PHASE_1_ITEMS",
-    label: "Séjour - Dois-je apporter des affaires spécifiques (draps, serviettes…) ?",
+    label: "Séjour - Dois-je apporter des affaires spécifiques (draps, duvets, autres...) ?",
     articles: ["dans-ma-valise-materiel-trousseau"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
