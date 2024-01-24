@@ -1,3 +1,16 @@
+# [1.365.0](https://github.com/betagouv/service-national-universel/compare/v1.364.0...v1.365.0) (2024-01-24)
+
+
+### Bug Fixes
+
+* **admin/api:** 561-resolution du bug de cohérence entre les centres dans l'export du SR ([ecfbea0](https://github.com/betagouv/service-national-universel/commit/ecfbea0bcf1f521caf82cec89633d6fa42daea21))
+
+
+### Features
+
+* **admin/api:** permettre aux refs CLE d'accepter le consentement OU le droit a l'image a la place des parents ([#3503](https://github.com/betagouv/service-national-universel/issues/3503)) ([e74a93e](https://github.com/betagouv/service-national-universel/commit/e74a93ee43648fa2ed8f596c88487bc80754cbcc))
+* **app:** 1697 - remove MaskNeeded for session ([#3499](https://github.com/betagouv/service-national-universel/issues/3499)) ([0f45d27](https://github.com/betagouv/service-national-universel/commit/0f45d279d88ec1cd237642a7f645cea8b9aea6e5))
+
 # [1.364.0](https://github.com/betagouv/service-national-universel/compare/v1.363.0...v1.364.0) (2024-01-23)
 
 
