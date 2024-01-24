@@ -24,7 +24,7 @@ export function StepCard({ state = "todo", stepNumber, children }) {
 
   if (state === "disabled") {
     return (
-      <div className="flex items-center">
+      <div className="flex items-center -ml-4">
         <div className="translate-x-5 flex-none flex h-9 w-9 items-center justify-center rounded-full border bg-white">
           <BsCheck2 className="h-5 w-5 text-gray-500" />
         </div>

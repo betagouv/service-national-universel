@@ -58,8 +58,8 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
   }
 
   function renderStep() {
-    // if (pdrChoiceExpired) return <Disabled />;
-    // if (isStepPDRDone(young)) return <Done />;
+    if (pdrChoiceExpired) return <Disabled />;
+    if (isStepPDRDone(young)) return <Done />;
     return <Todo />;
   }
 
