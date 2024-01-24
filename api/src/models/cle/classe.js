@@ -183,6 +183,14 @@ Schema.virtual("isFull").get(function () {
   return this.totalSeats - this.seatsTaken <= 0;
 });
 
+Schema.virtual("department").get(function () {
+  return this.etablissement?.department ?? null;
+});
+
+Schema.virtual("region").get(function () {
+  return this.etablissement?.region ?? null;
+});
+
 Schema.virtual("user").set(function (user) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;

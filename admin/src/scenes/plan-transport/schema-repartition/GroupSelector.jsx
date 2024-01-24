@@ -83,9 +83,10 @@ function GroupBox({ group, className = "", onSelect, selected }) {
         onClick={() => onSelect(group)}>
         <GroupSummary group={group} className="justify-between" />
         <div className={`mt-[24px] ${group.centerId ? "" : "opacity-30"}`}>
-          <div className="text-[15px] font-bold leading-[18px] text-[#374151]">{group.centerName ? group.centerName : "Centre d'affectation"}</div>
+          <div className="text-[15px] font-bold leading-[18px] text-[#374151]">{group.cohesionCenter ? group.cohesionCenter.name : "Centre d'affectation"}</div>
           <div className="mt-[8px] text-[15px] leading-[18px] text-[#6B7280]">
-            {group.centerCity ? group.centerCity : "Ville"} • {group.toDepartment ? `${group.toDepartment} (${getDepartmentNumber(group.toDepartment)})` : "Département"}
+            {group.cohesionCenter ? group.cohesionCenter.city : "Ville"} •{" "}
+            {group.toDepartment ? `${group.toDepartment} (${getDepartmentNumber(group.toDepartment)})` : "Département"}
           </div>
         </div>
       </div>

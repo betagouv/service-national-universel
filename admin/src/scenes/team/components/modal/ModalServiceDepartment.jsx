@@ -84,12 +84,12 @@ export default function ModalServiceDepartment({ isOpen, setIsOpen, onSubmit, se
             </div>
           </div>
         </div>
-        <Footer>
-          <ModalButton disabled={isLoading} type="submit" primary>
+        <div className="mt-4 mb-4 flex flex-row w-[55%] mx-auto justify-center">
+          <ModalButton onClick={onCancel}>Annuler</ModalButton>
+          <ModalButton disabled={isLoading} type="submit" newPrimary>
             Enregistrer
           </ModalButton>
-          <ModalButton onClick={onCancel}>Annuler</ModalButton>
-        </Footer>
+        </div>
       </form>
     </ModalForm>
   );

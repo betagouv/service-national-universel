@@ -214,7 +214,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     else if (type === "young") user = await YoungModel.findById(id);
     if (!user) return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
 
-    if (!canSigninAs(req.user, user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSigninAs(req.user, user, type)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,

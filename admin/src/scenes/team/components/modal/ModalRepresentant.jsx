@@ -84,12 +84,12 @@ export default function ModalRepresentant({ isOpen, setIsOpen, onSubmit, represe
             <input required disabled={isLoading} className="w-full disabled:bg-gray-200" name="role" id="role" onChange={handleChange} value={data.role} />
           </div>
         </div>
-        <Footer>
-          <ModalButton disabled={isLoading} type="submit" primary>
+        <div className="mt-4 mb-4 flex flex-row w-[55%] mx-auto justify-center">
+          <ModalButton onClick={onCancel}>Annuler</ModalButton>
+          <ModalButton disabled={isLoading} type="submit" newPrimary>
             Enregistrer
           </ModalButton>
-          <ModalButton onClick={onCancel}>Annuler</ModalButton>
-        </Footer>
+        </div>
       </form>
     </ModalForm>
   );
