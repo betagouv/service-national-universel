@@ -719,7 +719,7 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
         if (young?.departSejourMotif === "Exclusion") {
           young.set({ statusPhase1: "NOT_DONE" });
         } else {
-          young.set({ statusPhase1: "DONE" });
+          young.set({ statusPhase1: "DONE", statusPhase2OpenedAt: now });
         }
       } else {
         // Sinon on ne valide pas sa phase 1.

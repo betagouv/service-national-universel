@@ -312,7 +312,6 @@ const Schema = new mongoose.Schema({
   },
   statusPhase2OpenedAt: {
     type: Date,
-    immutable: true,
     documentation: {
       description: "Date d'ouverture de la seconde phase",
     },
