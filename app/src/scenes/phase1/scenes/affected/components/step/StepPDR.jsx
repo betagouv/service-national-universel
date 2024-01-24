@@ -1,22 +1,16 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setYoung } from "../../../../../../redux/auth/actions";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import { capture } from "../../../../../../sentry";
 import api from "../../../../../../services/api";
-import { getDepartureDate, getMeetingHour, getReturnDate, getReturnHour } from "snu-lib";
-import { getCohort, getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
+import { getMeetingHour, getReturnHour } from "snu-lib";
+import { getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, isStepPDRDone } from "../../utils/steps.utils";
-
-import CloseSvg from "../../../../../../assets/Close";
-import MeetingPointChooser from "../MeetingPointChooser";
-import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
-import MeetingPointGoAlone from "../MeetingPointGoAlone";
-import Modal from "../../../../../../components/ui/modals/Modal";
 import { StepCard } from "../StepCard";
+import PDRModal from "../modals/PDRModal";
 
 export default function StepPDR({ center, session, meetingPoint, departureDate, returnDate }) {
   const [open, setOpen] = useState(false);
@@ -26,11 +20,8 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
   const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
   const pdrChoiceLimitDate = date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
   const pdrChoiceExpired = date ? dayjs.utc().isAfter(dayjs(date)) : false;
-  const meetingHour = getMeetingHour(meetingPoint);
-  const returnHour = getReturnHour(meetingPoint);
 
   async function loadMeetingPoints() {
-    if (meetingPoints?.length) return;
     try {
       const result = await api.get(`/point-de-rassemblement/available`);
       if (!result.ok) {
@@ -65,7 +56,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
 
   return (
     <>
-      <Step1Modal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired} />
+      <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired} />
       {renderStep()}
     </>
   );
@@ -89,11 +80,11 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
               <p className="leading-tight my-2">{addressOf(meetingPoint)}</p>
               <div className="mt-3 grid grid-cols-2 max-w-md">
                 <div>
-                  <p className="font-semibold">Aller à {meetingHour}</p>
+                  <p className="font-semibold">Aller à {getMeetingHour(meetingPoint)}</p>
                   <p className="capitalize">{dayjs(departureDate).locale("fr").format("dddd D MMMM")}</p>
                 </div>
                 <div>
-                  <p className="font-semibold">Retour à {returnHour}</p>
+                  <p className="font-semibold">Retour à {getReturnHour(meetingPoint)}</p>
                   <p className="capitalize">{dayjs(returnDate).locale("fr").format("dddd D MMMM")}</p>
                 </div>
               </div>
@@ -159,86 +150,4 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
       </StepCard>
     );
   }
-}
-
-function Step1Modal({ open, setOpen, meetingPoints, center, session, pdrChoiceExpired }) {
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
-  const dispatch = useDispatch();
-  const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
-  const [loading, setLoading] = useState(false);
-
-  const goAloneDepartureDate = getDepartureDate(young, session, cohort);
-  const goAloneReturnDate = getReturnDate(young, session, cohort);
-
-  function chooseMeetingPoint(meetingPoint) {
-    saveChoice({ meetingPointId: meetingPoint._id, ligneId: meetingPoint.busLineId });
-  }
-
-  function chooseGoAlone() {
-    saveChoice({ deplacementPhase1Autonomous: "true" });
-  }
-
-  async function saveChoice(choice) {
-    try {
-      setLoading(true);
-      const result = await api.put(`/young/${young._id}/point-de-rassemblement`, choice);
-      if (result.ok) {
-        toastr.success("Votre choix est enregistré");
-        dispatch(setYoung(result.data));
-        setOpen(false);
-      } else {
-        toastr.error("Erreur", "Nous n'avons pas pu enregistrer votre choix. Veuillez réessayer dans quelques instants.");
-      }
-      setLoading(false);
-      setModalMeetingPoint({ isOpen: false, meetingPoint: null });
-    } catch (err) {
-      setLoading(false);
-      setModalMeetingPoint({ isOpen: false, meetingPoint: null });
-      capture(err);
-      toastr.error("Erreur", "Nous n'avons pas pu enregistrer votre choix. Veuillez réessayer dans quelques instants.");
-    }
-  }
-
-  return (
-    <Modal isOpen={open} onClose={() => setOpen(false)}>
-      <div className="flex justify-between mb-3">
-        <p className="text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</p>
-        <CloseSvg className="hover:cursor-pointer" height={20} width={20} onClick={() => setOpen(false)} />
-      </div>
-      <div className="flex flex-col md:flex-row items-center gap-6">
-        {meetingPoints &&
-          meetingPoints.map((mp) => (
-            <MeetingPointChooser
-              key={mp._id}
-              meetingPoint={mp}
-              onChoose={() => {
-                return setModalMeetingPoint({ isOpen: true, meetingPoint: mp });
-              }}
-              chosen={mp._id === young.meetingPointId}
-              expired={pdrChoiceExpired}
-            />
-          ))}
-        <MeetingPointGoAlone
-          center={center}
-          young={young}
-          onChoose={() => {
-            return setModalMeetingPoint({ isOpen: true });
-          }}
-          chosen={!young.meetingPointId && young.deplacementPhase1Autonomous === "true"}
-          expired={pdrChoiceExpired}
-          departureDate={goAloneDepartureDate}
-          returnDate={goAloneReturnDate}
-        />
-      </div>
-
-      <MeetingPointConfirmationModal
-        modalMeetingPoint={modalMeetingPoint}
-        setModalMeetingPoint={setModalMeetingPoint}
-        chooseGoAlone={chooseGoAlone}
-        chooseMeetingPoint={chooseMeetingPoint}
-        loading={loading}
-      />
-    </Modal>
-  );
 }
