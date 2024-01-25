@@ -1,70 +1,105 @@
 import React, { useState } from "react";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { BsCheck2 } from "react-icons/bs";
-import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
+import { useDispatch, useSelector } from "react-redux";
+import { setYoung } from "@/redux/auth/actions";
 import { toastr } from "react-redux-toastr";
-import { Modal } from "reactstrap";
-import CloseSvg from "../../../../../../assets/Close";
-import DownloadConvocationButton from "../../../../../../components/buttons/DownloadConvocationButton";
-import { ModalContainer } from "../../../../../../components/modals/Modal";
-import ModalConfirm from "../../../../../../components/modals/ModalConfirm";
-import api from "../../../../../../services/api";
-import Convocation from "../Convocation";
-import { capture } from "../../../../../../sentry";
+import API from "@/services/api";
 import { translate } from "snu-lib";
+import { capture } from "@/sentry";
+import plausibleEvent from "@/services/plausible";
+import downloadPDF from "@/utils/download-pdf";
 import { isStepAgreementDone, isStepConvocationDone } from "../../utils/steps.utils";
-import { useSelector } from "react-redux";
+import { StepCard } from "../StepCard";
+import ModalConfirm from "@/components/modals/ModalConfirm";
+import ConvocationModal from "../modals/ConvocationModal";
+import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
 
 export default function StepConvocation({ center, meetingPoint, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
-  const [showConvocation, setShowConvocation] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const valid = isStepConvocationDone(young);
-  const enabled = isStepAgreementDone(young);
+  const dispatch = useDispatch();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [openConvocation, setOpenConvocation] = useState(false);
+
+  const viewFile = async () => {
+    try {
+      plausibleEvent("Phase1/telechargement convocation");
+      await downloadPDF({
+        url: `/young/${young._id}/documents/convocation/cohesion`,
+        fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
+        errorTitle: "Une erreur est survenue lors de l'édition de votre convocation",
+      });
+      if (!young?.convocationFileDownload === "true") {
+        const { data } = await API.put(`/young/phase1/convocation`, { convocationFileDownload: "true" });
+        plausibleEvent("affecté_step3");
+        dispatch(setYoung(data));
+      }
+    } catch (e) {
+      console.log(e);
+      toastr.error("Une erreur est survenue lors de l'édition de votre convocation", e.message);
+    }
+  };
 
   const handleMail = async () => {
     try {
       let template = "cohesion";
       let type = "convocation";
-      const { ok, code } = await api.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
+      const { ok, code } = await API.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
         fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
       });
       if (!ok) throw new Error(translate(code));
       toastr.success(`Document envoyé à ${young.email}`);
-      setIsOpen(false);
       setModal({ isOpen: false, onConfirm: null });
     } catch (e) {
       capture(e);
-      toastr.error("Erreur lors de l'envoie du document : ", e.message);
-      setIsOpen(false);
+      toastr.error("Erreur lors de l'envoi du document : ", e.message);
       setModal({ isOpen: false, onConfirm: null });
     }
   };
 
+  if (!isStepAgreementDone(young)) {
+    return (
+      <StepCard state="disabled" stepNumber={3}>
+        <p className="font-medium text-gray-400">Téléchargez votre convocation</p>
+      </StepCard>
+    );
+  }
+
   return (
-    <>
-      <button
-        className={`mb-3 ml-4 flex h-36 items-center rounded-xl border-[1px] text-left ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
-        onClick={() => setIsOpen(true)}
-        disabled={!enabled}>
-        <div className="flex w-full -translate-x-5 flex-row items-center">
-          {valid ? (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
-              <BsCheck2 className="h-5 w-5 text-white" />
-            </div>
-          ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 bg-white text-gray-700">3</div>
-          )}
-          <div className="ml-3 flex flex-1 flex-col">
-            <div className={`text-sm ${valid && "text-green-600"} ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre convocation</div>
-            <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
-              Votre convocation sera à présenter à l&apos;arrivée munie d&apos;une pièce d&apos;identité valide.
-            </div>
-            {enabled ? <div className={` text-right text-sm leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Télécharger</div> : null}
-          </div>
+    <StepCard state={isStepConvocationDone(young) ? "done" : "todo"} stepNumber={3}>
+      <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
+        <div>
+          <p className="font-semibold">Téléchargez votre convocation</p>
+          <p className="mt-1 text-gray-500">Votre convocation sera à présenter à l'arrivée munie d'une pièce d'identité valide.</p>
         </div>
-      </button>
+        <div className="w-full md:w-auto mt-1 md:mt-0 flex flex-col md:flex-row-reverse gap-2">
+          <button
+            onClick={viewFile}
+            className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
+              isStepConvocationDone(young) ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}>
+            <HiOutlineDownload className="h-5 w-5" />
+            Télécharger
+          </button>
+
+          <button
+            onClick={() =>
+              setModal({
+                isOpen: true,
+                title: "Envoi par mail",
+                message: "Êtes-vous sûr(e) de vouloir envoyer la convocation par mail ?",
+                onConfirm: handleMail,
+              })
+            }
+            className="w-full text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
+            <HiMail className="h-5 w-5" />
+            <p className="md:hidden">Envoyer par mail</p>
+          </button>
+
+          <button onClick={() => setOpenConvocation(true)} className="w-full text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
+            <HiEye className="h-5 w-5" />
+            <p className="md:hidden">Afficher la convocation</p>
+          </button>
+        </div>
+      </div>
       <ModalConfirm
         isOpen={modal?.isOpen}
         title={modal?.title}
@@ -72,61 +107,7 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => modal?.onConfirm()}
       />
-
-      {showConvocation ? (
-        <div className="hidden pb-4 md:flex">
-          <Convocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-        </div>
-      ) : null}
-      {isOpen ? (
-        <Modal centered isOpen={isOpen} toggle={() => setIsOpen(false)}>
-          <ModalContainer>
-            <CloseSvg className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setIsOpen(false)} />
-            <div className="w-full p-4">
-              <div className="flex flex-col items-center justify-center">
-                <h1 className="pb-3 text-center text-xl text-gray-900">Choisissez une option de téléchargement</h1>
-                <DownloadConvocationButton
-                  young={young}
-                  uri="cohesion"
-                  className="flex w-full cursor-pointer flex-row items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:scale-105">
-                  <HiOutlineDownload className="mr-2 h-5 w-5 text-blue-300" />
-                  Télécharger
-                </DownloadConvocationButton>
-
-                <div className="flex w-full flex-shrink flex-row items-center py-2">
-                  <button
-                    type="button"
-                    className="mr-2 flex cursor-pointer flex-row items-center justify-center rounded-lg border-[1px] border-blue-700 px-4 py-2 hover:scale-105"
-                    onClick={() => setShowConvocation(!showConvocation)}>
-                    {showConvocation ? <AiOutlineEyeInvisible className="mr-2 h-5 w-5 text-blue-700" /> : <AiOutlineEye className="mr-2 h-5 w-5 text-blue-700" />}
-                    <span className="text-sm text-blue-700">Voir</span>
-                  </button>
-                  <button
-                    onClick={() =>
-                      setModal({
-                        isOpen: true,
-                        onConfirm: handleMail,
-                        title: "Envoie de document par mail",
-                        message: `Vous allez recevoir votre convocation par mail à l'adresse ${young.email}.`,
-                      })
-                    }
-                    type="button"
-                    className="flex flex-1 cursor-pointer flex-row items-center justify-center rounded-lg border-[1px] border-blue-700 px-4 py-2 hover:scale-105">
-                    <HiOutlineMail className="mr-2 h-5 w-5 text-blue-700" />
-
-                    <span className="text-sm text-blue-700">Recevoir par mail</span>
-                  </button>
-                </div>
-              </div>
-              {showConvocation ? (
-                <div className="pb-4">
-                  <Convocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-                </div>
-              ) : null}
-            </div>
-          </ModalContainer>
-        </Modal>
-      ) : null}
-    </>
+      <ConvocationModal isOpen={openConvocation} setIsOpen={setOpenConvocation} center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+    </StepCard>
   );
 }
