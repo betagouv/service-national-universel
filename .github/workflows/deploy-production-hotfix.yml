@@ -59,7 +59,7 @@ jobs:
       - name: Delete hotfix branch if exists
         run: |
           git fetch origin ${{ env.hotfix_branch }} --prune
-          if [[ $? -e 0 ]]; then
+          if [[ $? -eq 0 ]]; then
             git push origin --delete ${{ env.hotfix_branch }}
           fi
 
