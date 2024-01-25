@@ -492,6 +492,7 @@ function generateChanges(value, young) {
   };
 
   setIfTrue(value.consent, "parentAllowSNU", "true");
+  setIfTrue(value.consent, "status", YOUNG_STATUS.WAITING_VALIDATION);
   setIfTrue(value.consent, "parent1AllowSNU", "true");
   setIfTrue(value.consent, "parent1ValidationDate", new Date());
 
