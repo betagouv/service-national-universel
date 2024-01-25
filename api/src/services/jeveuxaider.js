@@ -34,7 +34,7 @@ router.get("/signin", async (req, res) => {
       return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
     }
     if (!jwtPayload) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
-    const { error_token, value_token } = Joi.object({
+    const { error: error_token, value: value_token } = Joi.object({
       __v: Joi.string().required(),
       _id: Joi.string().required(),
       passwordChangedAt: Joi.string(),
