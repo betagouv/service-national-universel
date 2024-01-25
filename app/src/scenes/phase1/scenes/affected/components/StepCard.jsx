@@ -24,7 +24,7 @@ export function StepCard({ state = "todo", stepNumber, children }) {
 
   if (state === "disabled") {
     return (
-      <div className="flex items-center -ml-4">
+      <div className="w-full flex items-center -ml-4">
         <div className="translate-x-5 flex-none flex h-9 w-9 items-center justify-center rounded-full bg-white border">{stepNumber}</div>
         <div className="w-full bg-white rounded-xl border p-8 md:px-10">{children}</div>
       </div>

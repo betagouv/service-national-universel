@@ -15,7 +15,6 @@ export default function StepsAffected({ center, session, meetingPoint, departure
   return (
     <section className={`order-3 m-[1rem] flex flex-col md:mx-[4rem] ${isStepMedicalFieldDone(young) ? "order-4" : "order-3"}`}>
       <article className="mb-6">
-        {/* mobile header */}
         <div className="flex flex-row items-center md:hidden">
           {nbvalid !== 4 && (
             <div className="mr-3 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500">
@@ -28,7 +27,6 @@ export default function StepsAffected({ center, session, meetingPoint, departure
           </div>
         </div>
 
-        {/* desktop header */}
         <div className="hidden md:flex">
           {nbvalid !== 4 && (
             <div className="mr-6 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500">

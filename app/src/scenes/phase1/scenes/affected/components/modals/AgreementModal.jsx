@@ -31,7 +31,9 @@ export function AgreementModal({ isOpen, setIsOpen, departureDate, returnDate })
   return (
     <Modal centered isOpen={isOpen} toggle={() => setIsOpen(false)} size="xl">
       <ModalContainer>
-        <Close className="close-icon hover:cursor-pointer" height={10} width={10} onClick={() => setIsOpen(false)} />
+        <button onClick={() => setIsOpen(false)}>
+          <Close className="close-icon" height={10} width={10} />
+        </button>
         <div className="w-full p-4">
           <h1 className="pb-1 text-center text-xl text-gray-900">Confirmez votre participation au séjour</h1>
           <p className="pb-4 text-center text-base text-gray-500">Vous devez confirmer votre participation au séjour avant votre départ.</p>

@@ -50,6 +50,11 @@ export default function PDRModal({ open, setOpen, meetingPoints, center, session
 
   return (
     <Modal isOpen={open} onClose={() => setOpen(false)}>
+      <div className="flex justify-end">
+        <button onClick={() => setOpen(false)} className="text-gray-600 p-2 translate-x-2 -translate-y-2">
+          <Close className="close-icon" height={10} width={10} />
+        </button>
+      </div>
       <p className="text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</p>
       <div className="flex flex-col md:flex-row items-center gap-6 mt-4">
         {meetingPoints.map((mp) => (
@@ -75,7 +80,6 @@ export default function PDRModal({ open, setOpen, meetingPoints, center, session
           returnDate={getReturnDate(young, session, cohort)}
         />
       </div>
-
       <MeetingPointConfirmationModal
         modalMeetingPoint={modalMeetingPoint}
         setModalMeetingPoint={setModalMeetingPoint}

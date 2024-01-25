@@ -4,16 +4,16 @@ import { SENDINBLUE_TEMPLATES } from "../../../../../../utils";
 import { isStepConvocationDone, isStepMedicalFieldDone } from "../../utils/steps.utils";
 import { toastr } from "react-redux-toastr";
 import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
-import useDevice from "../../../../../../hooks/useDevice";
 
-import { BsCheck2 } from "react-icons/bs";
 import ConfirmationModal from "../../../../../../components/ui/modals/ConfirmationModal";
 import MedicalFileModal from "../../../../components/MedicalFileModal";
+import { StepCard } from "../StepCard";
+import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
+import { setYoung } from "@/redux/auth/actions";
+import { useDispatch } from "react-redux";
 
 export default function StepMedicalField({ young }) {
-  const device = useDevice();
-  const valid = isStepMedicalFieldDone(young);
-  const enabled = isStepConvocationDone(young);
+  const dispatch = useDispatch();
   const [isSendEmailConfirmationModalOpen, setSendEmailConfirmationModalOpen] = useState(false);
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
 
@@ -25,48 +25,67 @@ export default function StepMedicalField({ young }) {
         link: CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf" + "?utm_campaign=transactionnel+telecharger+docum&utm_source=notifauto&utm_medium=mail+410+telecharger",
       });
       if (ok) toastr.success(`Document envoyé à ${young.email}`, "");
-      else toastr.error("Erreur lors de l'envoie du document", "");
+      else toastr.error("Erreur lors de l'envoi du document", "");
     } catch (error) {
-      toastr.error("Erreur lors de l'envoie du document", "");
+      toastr.error("Erreur lors de l'envoi du document", "");
     }
   };
 
+  const updateDocumentInformation = async () => {
+    const { ok, data } = await api.put("/young/phase1/cohesionStayMedical", { cohesionStayMedicalFileDownload: "true" });
+    if (ok) dispatch(setYoung(data));
+  };
+
+  if (!isStepMedicalFieldDone(young)) {
+    return (
+      <StepCard state="disabled" stepNumber={4}>
+        <p className="font-medium text-gray-400">Téléchargez votre fiche sanitaire</p>
+      </StepCard>
+    );
+  }
+
   return (
-    <>
-      <MedicalFileModal
-        title={device === "desktop" ? "Mode d’emploi de la fiche sanitaire" : "Téléchargez votre fiche sanitaire"}
-        isOpen={isMedicalFileModalOpen}
-        onClose={() => setMedicalFileModalOpen(false)}
-      />
+    <StepCard state={isStepMedicalFieldDone(young) ? "done" : "todo"} stepNumber={4}>
+      <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
+        <div>
+          <p className="font-semibold">Téléchargez votre fiche sanitaire</p>
+          <p className="mt-1 text-gray-500">Si vous ne l’avez pas déjà fait, vous devez renseigner votre fiche sanitaire et la remettre à votre arrivée au centre de séjour.</p>
+        </div>
+        <div className="w-full md:w-auto mt-1 md:mt-0 flex flex-col md:flex-row-reverse gap-2">
+          <a
+            href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"}
+            onClick={updateDocumentInformation}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
+              isStepConvocationDone(young) ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}>
+            <HiOutlineDownload className="h-5 w-5" />
+            Télécharger
+          </a>
+
+          <button
+            onClick={() => setSendEmailConfirmationModalOpen(true)}
+            className="w-full text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
+            <HiMail className="h-5 w-5" />
+            <p className="md:hidden">Envoyer par mail</p>
+          </button>
+
+          <button onClick={() => setMedicalFileModalOpen(true)} className="w-full text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
+            <HiEye className="h-5 w-5" />
+            <p className="md:hidden">Afficher le mode d'emploi</p>
+          </button>
+        </div>
+      </div>
+      <MedicalFileModal title={"Mode d’emploi de la fiche sanitaire"} isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
       <ConfirmationModal
         isOpen={isSendEmailConfirmationModalOpen}
         onCancel={() => setSendEmailConfirmationModalOpen(false)}
         onClose={() => setSendEmailConfirmationModalOpen(false)}
         onConfirm={handleMail}
-        title="Envoie de document par mail"
+        title="Envoi de document par mail"
         subTitle={`Vous allez recevoir le lien de téléchargement de la fiche sanitaire par mail à l'adresse ${young.email}.`}
       />
-      <button
-        className={`mb-3 ml-4 flex h-36 items-center rounded-xl border-[1px] text-left ${valid ? "border-green-500 bg-green-50" : "bg-white"} `}
-        onClick={() => setMedicalFileModalOpen(true)}
-        disabled={!enabled}>
-        <div className="flex w-full -translate-x-5 flex-row items-center">
-          {valid ? (
-            <div className="mr-4 flex h-9 w-9 items-center justify-center rounded-full bg-green-500">
-              <BsCheck2 className="h-5 w-5 text-white" />
-            </div>
-          ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full border-[1px] border-gray-200 bg-white text-gray-700">4</div>
-          )}
-          <div className="ml-3 flex flex-1 flex-col">
-            <div className={`text-sm ${valid && "text-green-600"} ${enabled ? "text-gray-900" : "text-gray-400"}`}>Téléchargez votre fiche sanitaire</div>
-            <div className={` text-sm leading-5 ${valid && "text-green-600 opacity-70"} ${enabled ? "text-gray-500" : "text-gray-400"}`}>
-              Vous devez renseigner votre fiche sanitaire et la remettre à votre arrivée au centre de séjour.
-            </div>
-            {enabled ? <div className={` text-right text-sm leading-5 ${valid ? "text-green-500" : "text-blue-600"}`}>Télécharger</div> : null}
-          </div>
-        </div>
-      </button>
-    </>
+    </StepCard>
   );
 }

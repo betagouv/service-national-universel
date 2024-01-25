@@ -9,7 +9,7 @@ import plausibleEvent from "@/services/plausible";
 import downloadPDF from "@/utils/download-pdf";
 import { isStepAgreementDone, isStepConvocationDone } from "../../utils/steps.utils";
 import { StepCard } from "../StepCard";
-import ModalConfirm from "@/components/modals/ModalConfirm";
+import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import ConvocationModal from "../modals/ConvocationModal";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
 
@@ -100,12 +100,13 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
           </button>
         </div>
       </div>
-      <ModalConfirm
+      <ConfirmationModal
         isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={() => modal?.onConfirm()}
+        onClose={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={modal}
+        title="Envoi de document par mail"
+        subTitle={`Vous allez recevoir le lien de téléchargement de votre convocation par mail à l'adresse ${young.email}.`}
       />
       <ConvocationModal isOpen={openConvocation} setIsOpen={setOpenConvocation} center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
     </StepCard>
