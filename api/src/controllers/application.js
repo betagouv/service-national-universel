@@ -734,14 +734,14 @@ router.post(
           captureMessage("Wrong filetype", { extra: { tempFilePath, mimetype } });
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
-        // if (ENVIRONMENT === "production") {
-        //   const scanResult = await scanFile(tempFilePath, name, user._id);
-        //   if (scanResult.infected) {
-        //     return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-        //   } else if (scanResult.error) {
-        //     return res.status(500).send({ ok: false, code: scanResult.error });
-        //   }
-        // }
+        if (ENVIRONMENT === "production") {
+          const scanResult = await scanFile(tempFilePath, name, user._id);
+          if (scanResult.infected) {
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          } else if (scanResult.error) {
+            return res.status(500).send({ ok: false, code: scanResult.error });
+          }
+        }
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
