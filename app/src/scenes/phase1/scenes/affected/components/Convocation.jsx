@@ -115,7 +115,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
             <li>- votre convocation</li>
             <li>- une pièce d&apos;identité</li>
             <li>- la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire,</li>
-            {meetingPoint.bus.lunchBreak && <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>}
+            {meetingPoint?.bus?.lunchBreak && <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>}
           </ul>
         </ConvocText>
         <ConvocText>Enfin, nous vous demandons de bien vouloir étiqueter vos bagages.</ConvocText>
