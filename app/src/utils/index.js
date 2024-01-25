@@ -60,7 +60,8 @@ export function permissionPhase1(y) {
 }
 
 export function permissionPhase2(y) {
-  if (!permissionPhase1(y)) return false;
+  if (!y) return false;
+  if (y.statusPhase2OpenedAt && new Date(y.statusPhase2OpenedAt) < new Date()) return true;
   if (!hasAccessToPhase2(y)) return false;
   return (
     (y.status !== YOUNG_STATUS.WITHDRAWN &&
