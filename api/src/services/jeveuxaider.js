@@ -44,12 +44,9 @@ router.get("/signin", async (req, res) => {
     delete value_token.__v;
 
     const user = await ReferentModel.findOne(value_token);
-    console.log("🚀 ~ file: jeveuxaider.js:47 ~ router.get ~ user:", user);
     if (!user) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
 
     const structure = await StructureModel.findById(user.structureId);
-    console.log("🚀 ~ file: jeveuxaider.js:50 ~ router.get ~ user.structureId:", user.structureId);
-    console.log("🚀 ~ file: jeveuxaider.js:50 ~ router.get ~ structure:", structure);
 
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (structure.isJvaStructure !== "true") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
