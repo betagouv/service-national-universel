@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - production_hotfix
-      - gha-hotfix-workflow-test # TODO: remove
+      - gha-hotfix-workflow # TODO: remove
 
 concurrency:
   group: ${{ github.workflow }}
@@ -18,7 +18,7 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'production_hotfix' || github.ref_name == 'gha-hotfix-workflow-test' # TODO: remove
+    if: github.ref_name == 'production_hotfix' || github.ref_name == 'gha-hotfix-workflow' # TODO: remove
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
@@ -45,16 +45,44 @@ jobs:
         with:
           sha: ${{ steps.commit_sha.outputs.commit_sha }}
 
-  # run_tests_api:
-  #   needs: prepare
-  #   uses: ./.github/workflows/run-tests-api.yml
-  #   with:
-  #     branch_name: ${{ needs.prepare.outputs.target_branch }}
-  #   secrets: inherit
+
+  test_delete_hotfix_branch:
+    runs-on: ubuntu-latest
+    needs: [prepare, deploy_production]
+    env:
+      hotfix_branch: "gha-hotfix-workflow-test"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.target_branch }}
+
+      - name: Delete hotfix branch if exists
+        run: |
+          git fetch origin ${{ env.hotfix_branch }} --prune
+          if [[ $? -e 0 ]]; then
+            git push origin --delete ${{ env.hotfix_branch }}
+          fi
+
+      - name: Create hotfix branch from production
+        run: git checkout -b ${{ env.hotfix_branch }}
+
+      - name: Push hotfix branch
+        run: git push origin ${{ env.hotfix_branch }}
+
+      - name: Fail
+        run: exit 1
+
+
+  run_tests_api:
+    # needs: prepare
+    needs: [prepare, test_delete_hotfix_branch]
+    uses: ./.github/workflows/run-tests-api.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.target_branch }}
+    secrets: inherit
 
   build:
-    # needs: [prepare, run_tests_api]
-    needs: [prepare]
+    needs: [prepare, run_tests_api]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -120,11 +148,11 @@ jobs:
           terraform plan -no-color -input=false \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
-      # - name: Staging - Terraform auto-apply
-      #   working-directory: ${{ env.staging_directory }}
-      #   run: |
-      #     terraform apply -no-color -input=false -auto-approve \
-      #       -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+      - name: Staging - Terraform auto-apply
+        working-directory: ${{ env.staging_directory }}
+        run: |
+          terraform apply -no-color -input=false -auto-approve \
+            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Staging - Healthcheck API
         working-directory: ${{ env.staging_directory }}
@@ -166,63 +194,42 @@ jobs:
           terraform plan -no-color -input=false \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
-  # deploy_production:
-  #   runs-on: ubuntu-latest
-  #   environment: production # Needed for manual approval before deploy
-  #   needs: [prepare, plan_production]
-  #   env:
-  #     SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
-  #     SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
-  #     PG_CONN_STR: ${{ secrets.SCW_PROD_BACKEND_CONN_STR }}
-  #     PGUSER: ${{ secrets.SCW_PROD_BACKEND_USER }}
-  #     PGPASSWORD: ${{ secrets.SCW_PROD_BACKEND_PASSWORD }}
-
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #       with:
-  #         ref: ${{ needs.prepare.outputs.target_branch }}
-
-  #     - uses: hashicorp/setup-terraform@v3
-
-  #     - name: Init terraform
-  #       working-directory: ${{ env.prod_directory }}
-  #       run: terraform init
-
-  #     - name: Production - Terraform apply
-  #       working-directory: ${{ env.prod_directory }}
-  #       run: |
-  #         terraform apply -no-color -input=false -auto-approve \
-  #           -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
-
-  #     - name: Production - Healthcheck API
-  #       working-directory: ${{ env.prod_directory }}
-  #       run: curl -I "$(terraform output -raw api_endpoint)"
-
-  #     - name: Production - Healthcheck Admin
-  #       working-directory: ${{ env.prod_directory }}
-  #       run: curl -I "$(terraform output -raw admin_endpoint)"
-
-  #     - name: Production - Healthcheck App
-  #       working-directory: ${{ env.prod_directory }}
-  #       run: curl -I "$(terraform output -raw app_endpoint)"
-
-  merge_branch:
+  deploy_production:
     runs-on: ubuntu-latest
-    # needs: [prepare, deploy_production]
+    environment: production # Needed for manual approval before deploy
     needs: [prepare, plan_production]
     env:
-      # production_branch: "production"
-      production_branch: "gha-hotfix-workflow"
+      SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+      PG_CONN_STR: ${{ secrets.SCW_PROD_BACKEND_CONN_STR }}
+      PGUSER: ${{ secrets.SCW_PROD_BACKEND_USER }}
+      PGPASSWORD: ${{ secrets.SCW_PROD_BACKEND_PASSWORD }}
+
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.production_branch }}
+          ref: ${{ needs.prepare.outputs.target_branch }}
 
-      - name: Pull & merge hotfix into production
-        run: git pull origin ${{ needs.prepare.outputs.target_branch }} --ff-only
+      - uses: hashicorp/setup-terraform@v3
 
-      - name: Push production
-        run: git push origin ${{ env.production_branch }}
+      - name: Init terraform
+        working-directory: ${{ env.prod_directory }}
+        run: terraform init
 
-      - name: Remove hotfix branch
-        run: git push origin --delete ${{ needs.prepare.outputs.target_branch }}
+      - name: Production - Terraform apply
+        working-directory: ${{ env.prod_directory }}
+        run: |
+          terraform apply -no-color -input=false -auto-approve \
+            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+
+      - name: Production - Healthcheck API
+        working-directory: ${{ env.prod_directory }}
+        run: curl -I "$(terraform output -raw api_endpoint)"
+
+      - name: Production - Healthcheck Admin
+        working-directory: ${{ env.prod_directory }}
+        run: curl -I "$(terraform output -raw admin_endpoint)"
+
+      - name: Production - Healthcheck App
+        working-directory: ${{ env.prod_directory }}
+        run: curl -I "$(terraform output -raw app_endpoint)"
