@@ -343,7 +343,12 @@ class Auth {
           const trustToken = req.cookies[`trust_token-${user._id}`];
           if (!trustToken) return true;
 
-          const jwtPayload = await jwt.verify(trustToken, config.secret);
+          let jwtPayload;
+          try {
+            jwtPayload = await jwt.verify(trustToken, config.secret);
+          } catch (e) {
+            return true;
+          }
           const { error, value } = Joi.object({ __v: Joi.string().required() }).validate(jwtPayload, { stripUnknown: true });
           return error || !checkJwtTrustTokenVersion(value);
         } catch (e) {

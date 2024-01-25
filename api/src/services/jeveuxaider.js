@@ -27,19 +27,24 @@ router.get("/signin", async (req, res) => {
 
     const { token_jva } = value;
 
-    const jwtPayload = await jwt.verify(token_jva, config.secret);
-    if (!jwtPayload) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    let jwtPayload;
+    try {
+      jwtPayload = await jwt.verify(token_jva, config.secret);
+    } catch (error) {
+      return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+    }
+    if (!jwtPayload) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
     const { error_token, value_token } = Joi.object({
       __v: Joi.string().required(),
       _id: Joi.string().required(),
       passwordChangedAt: Joi.string(),
       lastLogoutAt: Joi.date(),
     }).validate(jwtPayload, { stripUnknown: true });
-    if (error_token || !checkJwtSigninVersion(value_token)) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    if (error_token || !checkJwtSigninVersion(value_token)) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
     delete value_token.__v;
 
     const user = await ReferentModel.find(value_token);
-    if (!user) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    if (!user) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
 
     const structure = await StructureModel.findById(user.structureId);
 
