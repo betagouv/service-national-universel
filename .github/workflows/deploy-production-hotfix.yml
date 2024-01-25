@@ -56,14 +56,19 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.target_branch }}
 
-      - name: Delete hotfix branch if exists
+      - name: Check if hotfix branch exists
+        id: check
+        continue-on-error: true
         run: |
-          git fetch origin ${{ env.hotfix_branch }} --prune
-          if [[ $? -eq 0 ]]; then
-            git push origin --delete ${{ env.hotfix_branch }}
+          if git fetch origin ${{ env.hotfix_branch }} --prune ; then
+            echo "branch_exists=1" >> $GITHUB_OUTPUT
           else
-            exit 0
+            echo "branch_exists=0" >> $GITHUB_OUTPUT
           fi
+
+      - name: Delete existing hotfix branch
+        if: steps.check.outputs.branch_exists == '1'
+        run: git push origin --delete ${{ env.hotfix_branch }}
 
       - name: Create hotfix branch from production
         run: git checkout -b ${{ env.hotfix_branch }}
