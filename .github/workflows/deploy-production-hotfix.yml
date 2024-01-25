@@ -61,6 +61,8 @@ jobs:
           git fetch origin ${{ env.hotfix_branch }} --prune
           if [[ $? -eq 0 ]]; then
             git push origin --delete ${{ env.hotfix_branch }}
+          else
+            exit 0
           fi
 
       - name: Create hotfix branch from production
