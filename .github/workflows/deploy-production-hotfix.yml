@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - production_hotfix
-      - gha-hotfix-workflow # TODO: remove
 
 concurrency:
   group: ${{ github.workflow }}
@@ -18,7 +17,7 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'production_hotfix' || github.ref_name == 'gha-hotfix-workflow' # TODO: remove
+    if: github.ref_name == 'production_hotfix'
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
@@ -45,44 +44,8 @@ jobs:
         with:
           sha: ${{ steps.commit_sha.outputs.commit_sha }}
 
-
-  test_delete_hotfix_branch:
-    runs-on: ubuntu-latest
-    needs: [prepare]
-    env:
-      hotfix_branch: "gha-hotfix-workflow-test"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.target_branch }}
-
-      - name: Check if hotfix branch exists
-        id: check
-        continue-on-error: true
-        run: |
-          if git fetch origin ${{ env.hotfix_branch }} --prune ; then
-            echo "branch_exists=1" >> $GITHUB_OUTPUT
-          else
-            echo "branch_exists=0" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Delete existing hotfix branch
-        if: steps.check.outputs.branch_exists == '1'
-        run: git push origin --delete ${{ env.hotfix_branch }}
-
-      - name: Create hotfix branch from production
-        run: git checkout -b ${{ env.hotfix_branch }}
-
-      - name: Push hotfix branch
-        run: git push origin ${{ env.hotfix_branch }}
-
-      - name: Fail
-        run: exit 1
-
-
   run_tests_api:
-    # needs: prepare
-    needs: [prepare, test_delete_hotfix_branch]
+    needs: prepare
     uses: ./.github/workflows/run-tests-api.yml
     with:
       branch_name: ${{ needs.prepare.outputs.target_branch }}
