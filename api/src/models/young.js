@@ -10,6 +10,9 @@ const { capture } = require("../sentry");
 const MODELNAME = "young";
 const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
 const StateManager = require("../states");
+require("./cohort");
+require("./cohesionCenter");
+require("./sessionPhase1");
 
 const File = new mongoose.Schema({
   name: String,
@@ -2019,6 +2022,27 @@ Schema.pre("save", function (next) {
   }
 });
 
+Schema.virtual("cohortData", {
+  ref: "cohort",
+  localField: "cohort",
+  foreignField: "name",
+  justOne: true,
+});
+
+Schema.virtual("cohesionCenter", {
+  ref: "cohesioncenter",
+  localField: "cohesionCenterId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+Schema.virtual("sessionPhase1", {
+  ref: "sessionphase1",
+  localField: "sessionPhase1Id",
+  foreignField: "_id",
+  justOne: true,
+});
+
 Schema.methods.comparePassword = async function (p) {
   const user = await OBJ.findById(this._id).select("password");
   return bcrypt.compare(p, user.password || "");
@@ -2112,6 +2136,9 @@ Schema.virtual("fromUser").set(function (fromUser) {
     this._user = { _id, role, department, region, email, firstName, lastName, model };
   }
 });
+
+Schema.set("toObject", { virtuals: true });
+Schema.set("toJSON", { virtuals: true });
 
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;

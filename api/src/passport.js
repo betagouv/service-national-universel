@@ -38,7 +38,7 @@ async function validateUser(Model, jwtPayload, done, role) {
     if (!checkJwtSigninVersion(value)) return done(null, false);
     delete value.__v;
 
-    const user = await Model.findOne(value);
+    const user = await Model.findOne(value).populate("cohortData").populate("cohesionCenter").populate("sessionPhase1");
     if (user && (!role || user.role === role)) return done(null, user);
   } catch (error) {
     capture(error);
