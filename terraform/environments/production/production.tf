@@ -96,6 +96,7 @@ resource "scaleway_container" "api" {
     "QPV_USERNAME"                          = local.secrets.QPV_USERNAME
     "SECRET"                                = local.secrets.SECRET
     "SENDINBLUEKEY"                         = local.secrets.SENDINBLUEKEY
+    "SENTRY_AUTH_TOKEN"                     = local.secrets.SENTRY_AUTH_TOKEN
     "SLACK_BOT_TOKEN"                       = local.secrets.SLACK_BOT_TOKEN
     "SUPPORT_APIKEY"                        = local.secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.secrets.PM2_SLACK_URL
