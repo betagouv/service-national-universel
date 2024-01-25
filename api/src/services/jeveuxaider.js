@@ -36,7 +36,7 @@ router.get("/signin", async (req, res) => {
       lastLogoutAt: Joi.date(),
     }).validate(jwtPayload, { stripUnknown: true });
     if (error_token || !checkJwtSigninVersion(value_token)) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
-    delete value.__v;
+    delete value_token.__v;
 
     const user = await ReferentModel.find(value_token);
     if (!user) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
