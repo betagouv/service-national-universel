@@ -1,3 +1,16 @@
+# [1.366.0](https://github.com/betagouv/service-national-universel/compare/v1.365.1...v1.366.0) (2024-01-26)
+
+
+### Bug Fixes
+
+* **api:** Export SENTRY_PROFILE_SAMPLE_RATE ([15befca](https://github.com/betagouv/service-national-universel/commit/15befcaf9db77dcd2d2e461940287dfe7d43a867))
+* **api:** fermer les invitations de chef d'etablissement avec le lien de decembre ([8d24f5a](https://github.com/betagouv/service-national-universel/commit/8d24f5acd1d30eeec78965e3a4d533815034fcb4))
+
+
+### Features
+
+* **api:** HTS > CLE keep phase2 open if phase has been DONE ([#3492](https://github.com/betagouv/service-national-universel/issues/3492)) ([2bdcb12](https://github.com/betagouv/service-national-universel/commit/2bdcb1272f942f77df14477ce3e154f60c442de8))
+
 ## [1.365.1](https://github.com/betagouv/service-national-universel/compare/v1.365.0...v1.365.1) (2024-01-25)
 
 
