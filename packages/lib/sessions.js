@@ -234,6 +234,7 @@ function shouldForceRedirectToInscription(young, isInscriptionModificationOpen =
 
 //@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
 function canApplyToPhase2(young, cohort) {
+  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const now = new Date();
   const dateEnd = getCohortEndDate(young, cohort);
   return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;
