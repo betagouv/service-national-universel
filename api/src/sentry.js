@@ -27,6 +27,8 @@ addGlobalEventProcessor((event) => {
 
 function initSentry(app) {
   if (ENVIRONMENT !== "development") {
+    console.log(`SENTRY_PROFILE_SAMPLE_RATE: ${SENTRY_PROFILE_SAMPLE_RATE}`);
+    console.log(` SENTRY_TRACING_SAMPLE_RATE: ${SENTRY_TRACING_SAMPLE_RATE}`);
     // Evite le spam sentry en local
     init({
       enabled: Boolean(SENTRY_URL),
