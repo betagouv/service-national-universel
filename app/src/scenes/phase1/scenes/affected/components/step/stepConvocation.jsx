@@ -19,7 +19,7 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [openConvocation, setOpenConvocation] = useState(false);
 
-  const viewFile = async () => {
+  const downloadConvocation = async () => {
     try {
       plausibleEvent("Phase1/telechargement convocation");
       await downloadPDF({
@@ -27,7 +27,7 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
         fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
         errorTitle: "Une erreur est survenue lors de l'édition de votre convocation",
       });
-      if (!young?.convocationFileDownload === "true") {
+      if (young?.convocationFileDownload === "false") {
         const { data } = await API.put(`/young/phase1/convocation`, { convocationFileDownload: "true" });
         plausibleEvent("affecté_step3");
         dispatch(setYoung(data));
@@ -72,7 +72,7 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
         </div>
         <div className="w-full md:w-auto mt-1 md:mt-0 flex flex-col md:flex-row-reverse gap-2">
           <button
-            onClick={viewFile}
+            onClick={downloadConvocation}
             className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
               isStepConvocationDone(young) ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}>
