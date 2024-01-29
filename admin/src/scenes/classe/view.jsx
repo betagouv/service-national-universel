@@ -391,7 +391,11 @@ export default function View() {
                 noOptionsMessage={"Aucun point de rassemblement ne correspond à cette recherche"}
                 isClearable={true}
                 closeMenuOnSelect={true}
-                value={classe.pointDeRassemblement?.name ? { label: classe.pointDeRassemblement.name } : null}
+                value={
+                  classe.pointDeRassemblement?.name && classe.pointDeRassemblement?.department
+                    ? { label: `${classe.pointDeRassemblement?.name}, ${classe.pointDeRassemblement?.department}` }
+                    : null
+                }
                 onChange={(option) => setClasse({ ...classe, pointDeRassemblement: option?.pointDeRassemblement, pointDeRassemblementId: option?._id })}
                 error={errors.pointDeRassemblement}
                 isActive={editStay && canEditStay}
@@ -575,6 +579,6 @@ const searchPointDeRassemblements = async ({ q, cohort }) => {
 
   const { responses } = await api.post(`/elasticsearch/pointderassemblement/search`, query);
   return responses[0].hits.hits.map((hit) => {
-    return { value: hit._source, _id: hit._id, label: hit._source.name, pointDeRassemblement: { ...hit._source, _id: hit._id } };
+    return { value: hit._source, _id: hit._id, label: `${hit._source.name}, ${hit._source.department}`, pointDeRassemblement: { ...hit._source, _id: hit._id } };
   });
 };
