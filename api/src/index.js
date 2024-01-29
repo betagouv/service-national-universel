@@ -13,7 +13,7 @@ const requestIp = require("request-ip"); // Import request-ip package
     originalConsoleError.apply(console, arguments);
   };
   console.log(`SENTRY_PROFILE_SAMPLE_RATE apijs: ${process.env.SENTRY_PROFILE_SAMPLE_RATE}`);
-  console.log(` SENTRY_TRACING_SAMPLE_RATE apijs: ${process.ev.SENTRY_TRACING_SAMPLE_RATE}`);
+  console.log(` SENTRY_TRACING_SAMPLE_RATE apijs: ${process.env.SENTRY_TRACING_SAMPLE_RATE}`);
   const { initSentry, capture } = require("./sentry");
 
   require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
