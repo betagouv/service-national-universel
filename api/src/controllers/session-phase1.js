@@ -44,12 +44,12 @@ const SessionPhase1 = require("../models/sessionPhase1");
 const FileType = require("file-type");
 const fs = require("fs");
 const config = require("../config");
-const NodeClam = require("clamscan");
 const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
 const { phase1 } = require("../../src/templates/certificate/index");
+const scanFile = require("../utils/virusScanner");
 
 const TIMEOUT_PDF_SERVICE = 15000;
 
@@ -578,18 +578,12 @@ router.post(
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-        try {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            capture(`File ${name} of user(${req.user.id})is infected`);
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          }
-        } catch {
-          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+      if (config.ENVIRONMENT === "production") {
+        const scanResult = await scanFile(tempFilePath, name, req.user.id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        } else if (scanResult.error) {
+          return res.status(500).send({ ok: false, code: scanResult.error });
         }
       }
 

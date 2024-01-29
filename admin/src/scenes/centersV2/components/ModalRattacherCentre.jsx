@@ -3,31 +3,17 @@ import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { translate, isSessionEditionOpen } from "snu-lib";
+import { Select } from "@snu/ds/admin";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import Field from "./Field";
+import { useSelector } from "react-redux";
 
 export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
-  const [availableCohorts, setAvailableCohorts] = React.useState([]);
-
-  useEffect(() => {
-    if (isOpen && !availableCohorts.length) {
-      (async () => {
-        try {
-          const { data, ok, code } = await api.get("/cohort");
-          if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des séjours", translate(code));
-          const filteredCohorts = data.filter((cohort) => isSessionEditionOpen(user, cohort) === true);
-          const availableCohorts = filteredCohorts.map((cohort) => cohort.name);
-          setAvailableCohorts(availableCohorts);
-        } catch (err) {
-          capture(err);
-          toastr.error("Erreur", translate("Une erreur est survenue"));
-        }
-      })();
-    }
-  }, [isOpen]);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const availableCohorts = isOpen ? cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name) : [];
 
   const refSelect = React.useRef(null);
   const refInput = React.useRef(null);
@@ -114,36 +100,24 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
 
   return (
     <ModalTailwind isOpen={isOpen} onClose={onCancel} className="w-[600px] rounded-lg bg-white shadow-xl">
-      <div className="flex h-[650px] w-full flex-col justify-between p-8">
+      <div className="flex w-full flex-col justify-between p-8">
         <div className="flex w-full flex-col">
           <div className="text-center text-xl font-medium leading-7 text-gray-800">Rattacher un centre à un séjour</div>
           <hr className="my-8" />
           <div className="text-sm font-medium leading-6 text-gray-800">Choisissez un séjour</div>
           <div className="flex flex-row flex-wrap gap-2 py-2">
-            {availableCohorts.map((cohort) => (
-              <React.Fragment key={cohort}>
-                {defaultCentre && !selectedCentre?.cohorts?.includes(cohort) ? (
-                  <div
-                    key={cohort}
-                    onClick={() => setSelectedCohort(cohort)}
-                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
-                      selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
-                    }`}>
-                    {cohort}
-                  </div>
-                ) : null}
-                {!defaultCentre ? (
-                  <div
-                    key={cohort}
-                    onClick={() => setSelectedCohort(cohort)}
-                    className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
-                      selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
-                    }`}>
-                    {cohort}
-                  </div>
-                ) : null}
-              </React.Fragment>
-            ))}
+            <Select
+              className="w-full"
+              placeholder={"Choisissez une cohorte"}
+              options={availableCohorts?.map((c) => ({ value: c, label: c }))}
+              isSearchable
+              isClearable
+              closeMenuOnSelect
+              value={selectedCohort ? { value: selectedCohort, label: selectedCohort } : null}
+              onChange={(options) => {
+                setSelectedCohort(options?.value);
+              }}
+            />
           </div>
           {selectedCohort ? (
             <>

@@ -1,23 +1,20 @@
 import { apiURL } from "@/config";
 import { STATUS_CLASSE, translateColoration } from "snu-lib";
-import { useQuery } from "@tanstack/react-query";
 
-const useClass = (classeId) => {
-  const getClass = () =>
-    fetch(`${apiURL}/cle/classe/${classeId}`)
-      .then((res) => res.json())
-      .then((res) => {
-        if (!res.ok) throw new Error(res.code);
-        return res.data;
-      });
-  const { isPending, isError, data, error } = useQuery({ queryKey: [`class-${classeId}`], queryFn: getClass, enabled: !!classeId });
-  if (!data) return { isPending, isError, error };
+export const fetchClass = (id) =>
+  fetch(`${apiURL}/cle/classe/${id}`)
+    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) throw new Error(res.code);
+      return formatClass(res.data);
+    });
 
+export function formatClass(data) {
   const { name, status, coloration, grade, isFull, referents, etablissement, cohort } = data;
   const [{ fullName: referent }] = referents;
   const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
   const classe = {
-    id: classeId,
+    id: data._id,
     name,
     coloration: translateColoration(coloration),
     cohort,
@@ -30,13 +27,5 @@ const useClass = (classeId) => {
     // TODO: update CLE cohort dates
     dateStart: "À venir",
   };
-
-  return {
-    classe,
-    isPending,
-    isError,
-    error,
-  };
-};
-
-export default useClass;
+  return classe;
+}

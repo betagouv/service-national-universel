@@ -155,13 +155,7 @@ async function loadSchemaGroups({ department, region, cohort }) {
       $unwind: "$center",
     },
     {
-      $addFields: {
-        centerAddress: "$center.address",
-        centerZip: "$center.zip",
-      },
-    },
-    {
-      $project: { gpIds: 0, center: 0, centerObjectId: 0 },
+      $project: { gpIds: 0, centerObjectId: 0 },
     },
   ]);
 }
@@ -856,8 +850,8 @@ router.get("/:region/:department/:cohort", passport.authenticate("referent", { s
       .exec();
     let youngValues = youngResult && youngResult.length > 0 ? youngResult[0] : { total: 0, intradepartmental: 0 };
 
-    // --- assigned
-    const schemas = await schemaRepartitionModel.find({ cohort, fromDepartment: department });
+    const schemas = await schemaRepartitionModel.find({ cohort, fromDepartment: department }).populate({ path: "cohesionCenter" }).lean();
+
     let groups = {
       intra: [],
       extra: [],

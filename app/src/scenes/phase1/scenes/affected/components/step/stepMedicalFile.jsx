@@ -36,7 +36,7 @@ export default function StepMedicalField({ young }) {
       const { ok } = await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`, {
         object: `Fiche sanitaire à compléter`,
         message: "Vous trouverez téléchargeable ci-dessous la fiche sanitaire à compléter.",
-        link: CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf" + "?utm_campaign=transactionnel+telecharger+docum&utm_source=notifauto&utm_medium=mail+410+telecharger",
+        link: CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf" + "?utm_campaign=transactionnel+telecharger+docum&utm_source=notifauto&utm_medium=mail+410+telecharger",
       });
       if (ok) toastr.success(`Document envoyé à ${young.email}`, "");
       else toastr.error("Erreur lors de l'envoie du document", "");
@@ -91,7 +91,7 @@ export default function StepMedicalField({ young }) {
                   <HiOutlineMail className="h-5 w-5 text-gray-600" />
                 </WithTooltip>
               </button>
-              <a target="blank" href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} onClick={handleDownload}>
+              <a target="blank" href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} onClick={handleDownload}>
                 <button
                   type="button"
                   className={`flex flex-row items-center justify-center rounded-lg px-4 py-2 ${

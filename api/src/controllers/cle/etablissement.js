@@ -2,7 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 const Joi = require("joi");
-const { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement } = require("snu-lib");
+const { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, canUpdateEtablissement, canViewEtablissement, isAdmin } = require("snu-lib");
 
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
@@ -95,6 +95,37 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     etablissement.set({
       ...value,
+    });
+    await etablissement.save({ fromUser: req.user });
+
+    return res.status(200).send({ ok: true, data: etablissement });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/referents", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      referentEtablissementIds: Joi.array().items(Joi.string()).required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!isAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const etablissement = await EtablissementModel.findById(value.id);
+    if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    etablissement.set({
+      referentEtablissementIds: value.referentEtablissementIds,
     });
     await etablissement.save({ fromUser: req.user });
 

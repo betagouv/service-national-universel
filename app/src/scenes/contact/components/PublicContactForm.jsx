@@ -5,7 +5,6 @@ import { department2region, translate } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
 import { categories, departmentOptions, getClasseIdFromLink, getQuestions, roleOptions } from "../contact.service";
-import useClass from "@/services/useClass";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
 import FileUpload, { useFileUpload } from "@/components/FileUpload";
@@ -15,6 +14,9 @@ import Select from "@/components/dsfr/forms/Select";
 import Textarea from "@/components/dsfr/forms/Textarea";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import MyClass from "@/scenes/cle/MyClass";
+import { useQuery } from "@tanstack/react-query";
+import { fetchClass } from "@/services/classe.service";
+import { validateId } from "@/utils";
 
 export default function PublicContactForm({ category, question, parcours }) {
   const history = useHistory();
@@ -33,7 +35,16 @@ export default function PublicContactForm({ category, question, parcours }) {
   const classeIdFromURL = params.get("classeId");
   const classeIdFromLink = getClasseIdFromLink(link);
   const classeId = classeIdFromURL || classeIdFromLink;
-  const { classe, isPending, isError } = useClass(classeId);
+
+  const {
+    isPending,
+    isError,
+    data: classe,
+  } = useQuery({
+    queryKey: ["class", classeId],
+    queryFn: () => fetchClass(classeId),
+    enabled: validateId(classeId),
+  });
 
   const questions = getQuestions(category, "public", parcours);
 

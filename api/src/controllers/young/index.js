@@ -6,7 +6,6 @@ const crypto = require("crypto");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
-const NodeClam = require("clamscan");
 const mime = require("mime-types");
 const fs = require("fs");
 const FileType = require("file-type");
@@ -23,6 +22,7 @@ const MissionModel = require("../../models/mission");
 const CohortModel = require("../../models/cohort");
 const AuthObject = require("../../auth");
 const LigneDeBusModel = require("../../models/PlanDeTransport/ligneBus");
+const ClasseModel = require("../../models/cle/classe");
 const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
@@ -40,7 +40,7 @@ const {
   updateSeatsTakenInBusLine,
 } = require("../../utils");
 const { sendTemplate, unsync } = require("../../sendinblue");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../../cookie-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
@@ -59,6 +59,7 @@ const {
   YOUNG_STATUS,
   ROLES,
   YOUNG_STATUS_PHASE2,
+  YOUNG_SOURCE,
   youngCanChangeSession,
   youngCanDeleteAccount,
 } = require("snu-lib");
@@ -66,7 +67,8 @@ const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
-const { JWT_SIGNIN_VERSION } = require("../../jwt-options");
+const { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } = require("../../jwt-options");
+const scanFile = require("../../utils/virusScanner");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
@@ -93,7 +95,7 @@ router.post("/signup_verify", async (req, res) => {
 
     const young = await YoungObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     return res.status(200).send({ ok: true, token, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
@@ -116,7 +118,6 @@ router.post("/signup_invite", async (req, res) => {
     }
 
     const { email, password, invitationToken } = value;
-
     const young = await YoungObject.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
@@ -130,8 +131,8 @@ router.post("/signup_invite", async (req, res) => {
     young.set({ invitationToken: "" });
     young.set({ invitationExpires: null });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
-    res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
     await young.save({ fromUser: req.user });
 
@@ -193,18 +194,12 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          try {
-            const clamscan = await new NodeClam().init({
-              removeInfected: true,
-            });
-            const { isInfected } = await clamscan.isInfected(tempFilePath);
-            if (isInfected) {
-              capture(`File ${name} of user(${user._id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-            }
-          } catch {
-            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+        if (config.ENVIRONMENT === "production") {
+          const scanResult = await scanFile(tempFilePath, name, req.user._id);
+          if (scanResult.infected) {
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          } else if (scanResult.error) {
+            return res.status(500).send({ ok: false, code: scanResult.error });
           }
         }
 
@@ -257,10 +252,16 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
     if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     obj.inscriptionDoneDate = new Date();
+    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(req.user.role)) {
+      obj.source = YOUNG_SOURCE.CLE;
+      const classe = await ClasseModel.findById(obj.classeId);
+      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      obj.etablissementId = classe.etablissementId;
+    }
     const young = await YoungObject.create({ ...obj, fromUser: req.user });
 
     const toName = `${young.firstName} ${young.lastName}`;
-    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}?utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
+    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}&utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
     const fromName = `${req.user.firstName} ${req.user.lastName}`;
     await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_YOUNG, {
       emailTo: [{ name: toName, email: young.email }],

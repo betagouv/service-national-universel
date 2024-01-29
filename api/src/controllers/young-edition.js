@@ -19,6 +19,7 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const YoungModel = require("../models/young");
+const ClasseModel = require("../models/cle/classe");
 const { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } = require("../utils");
 const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
@@ -34,6 +35,7 @@ const {
   canUserUpdateYoungStatus,
   YOUNG_STATUS,
   canEditYoung,
+  canAllowSNU,
 } = require("snu-lib");
 const { getDensity, getQPV } = require("../geo");
 const { sendTemplate } = require("../sendinblue");
@@ -42,6 +44,7 @@ const config = require("../config");
 const YoungObject = require("../models/young");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../models/sessionPhase1");
+const { APP_URL } = require("../config");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -408,6 +411,100 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    // --- validate data
+    const bodySchema = Joi.object().keys({
+      consent: Joi.boolean().required(),
+      imageRights: Joi.boolean().required(),
+    });
+    const result = bodySchema.validate(req.body, { stripUnknown: true });
+    const { error, value } = result;
+    if (error) {
+      console.log("joi error: ", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!canAllowSNU(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // --- get young
+    const young = await YoungModel.findById(id);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    const classe = await ClasseModel.findById(young.classeId).populate({
+      path: "etablissement",
+      options: { select: { coordinateurIds: 1, referentEtablissementIds: 1 } },
+    });
+
+    if (!classe) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    //check si le ref est bien lié au jeune
+    if (
+      !classe.referentClasseIds.includes(req.user._id) &&
+      !classe.etablissement.coordinateurIds.includes(req.user._id) &&
+      !classe.etablissement.referentEtablissementIds.includes(req.user._id)
+    ) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const changes = generateChanges(value, young);
+
+    young.set(changes);
+    await young.save({ fromUser: req.user });
+
+    if (value.consent) {
+      try {
+        const emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
+          emailTo,
+          params: {
+            cta: `${APP_URL}/`,
+            SOURCE: young.source,
+          },
+        });
+      } catch (e) {
+        capture(e);
+      }
+    }
+
+    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+  } catch (err) {
+    capture(err);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+function generateChanges(value, young) {
+  const changes = {};
+
+  const setIfTrue = (condition, field, value) => {
+    if (condition) {
+      changes[field] = value;
+    }
+  };
+
+  setIfTrue(value.consent, "parentAllowSNU", "true");
+  setIfTrue(value.consent, "status", YOUNG_STATUS.WAITING_VALIDATION);
+  setIfTrue(value.consent, "parent1AllowSNU", "true");
+  setIfTrue(value.consent, "parent1ValidationDate", new Date());
+
+  setIfTrue(value.imageRights, "parent1AllowImageRights", "true");
+
+  setIfTrue(young.parent2Status && value.consent, "parent2AllowSNU", "true");
+
+  setIfTrue(young.parent2Status && value.imageRights, "parent2AllowImageRights", "true");
+  setIfTrue(young.parent2Status && value.imageRights, "parent2ValidationDate", new Date());
+
+  return changes;
+}
 
 router.get("/:id/remider/:idParent", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

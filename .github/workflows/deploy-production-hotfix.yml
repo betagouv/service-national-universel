@@ -1,0 +1,205 @@
+name: Build and deploy Production Hotfix
+
+on:
+  push:
+    branches:
+      - production_hotfix
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  prod_directory: ./terraform/environments/production
+  staging_directory: ./terraform/environments/production/staging
+
+jobs:
+
+  prepare:
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'production_hotfix'
+    outputs:
+      target_branch: ${{ steps.target_branch.outputs.target_branch }}
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+
+    steps:
+      - name: Get target_branch
+        id: target_branch
+        run: |
+          echo "target_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.target_branch.outputs.target_branch }}
+
+      - name: Get last commit sha
+        id: commit_sha
+        run: |
+          commit_sha=$(git rev-parse HEAD)
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
+
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+
+  run_tests_api:
+    needs: prepare
+    uses: ./.github/workflows/run-tests-api.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.target_branch }}
+    secrets: inherit
+
+  build:
+    needs: [prepare, run_tests_api]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app_name: [admin, api, app]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.target_branch }}
+
+      - name: Check if image exists
+        id: check
+        uses: ./.github/actions/check_docker_image_tag
+        with:
+          registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
+          image_name: ${{ matrix.app_name }}
+          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          secret_key: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+
+      - name: Abort if image exists
+        if: steps.check.outputs.tag_exists != 0
+        run: |
+          echo "Image ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} already exists"
+          exit 1
+
+      - name: Docker Build & Publish
+        uses: ./.github/actions/build_docker_image
+        if: steps.check.outputs.tag_exists == 0
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+          registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
+          image_name: ${{ matrix.app_name }}
+          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
+          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_tag_stable: hotfix
+
+  deploy_staging:
+    runs-on: ubuntu-latest
+    needs: [prepare, build]
+    env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+      PG_CONN_STR: ${{ secrets.SCW_PROD_BACKEND_CONN_STR }}
+      PGUSER: ${{ secrets.SCW_PROD_BACKEND_USER }}
+      PGPASSWORD: ${{ secrets.SCW_PROD_BACKEND_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.target_branch }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Init terraform
+        working-directory: ${{ env.staging_directory }}
+        run: terraform init
+
+      - name: Staging - Terraform plan
+        id: plan
+        working-directory: ${{ env.staging_directory }}
+        run: |
+          terraform plan -no-color -input=false \
+            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+
+      - name: Staging - Terraform auto-apply
+        working-directory: ${{ env.staging_directory }}
+        run: |
+          terraform apply -no-color -input=false -auto-approve \
+            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+
+      - name: Staging - Healthcheck API
+        working-directory: ${{ env.staging_directory }}
+        run: curl -I "$(terraform output -raw api_endpoint)"
+
+      - name: Staging - Healthcheck Admin
+        working-directory: ${{ env.staging_directory }}
+        run: curl -I "$(terraform output -raw admin_endpoint)"
+
+      - name: Staging - Healthcheck App
+        working-directory: ${{ env.staging_directory }}
+        run: curl -I "$(terraform output -raw app_endpoint)"
+
+  plan_production:
+    runs-on: ubuntu-latest
+    needs: [prepare, deploy_staging]
+    env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+      PG_CONN_STR: ${{ secrets.SCW_PROD_BACKEND_CONN_STR }}
+      PGUSER: ${{ secrets.SCW_PROD_BACKEND_USER }}
+      PGPASSWORD: ${{ secrets.SCW_PROD_BACKEND_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.target_branch }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Init terraform
+        working-directory: ${{ env.prod_directory }}
+        run: terraform init
+
+      - name: Production - Terraform plan
+        id: plan
+        working-directory: ${{ env.prod_directory }}
+        run: |
+          terraform plan -no-color -input=false \
+            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+
+  deploy_production:
+    runs-on: ubuntu-latest
+    environment: production # Needed for manual approval before deploy
+    needs: [prepare, plan_production]
+    env:
+      SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
+      SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+      PG_CONN_STR: ${{ secrets.SCW_PROD_BACKEND_CONN_STR }}
+      PGUSER: ${{ secrets.SCW_PROD_BACKEND_USER }}
+      PGPASSWORD: ${{ secrets.SCW_PROD_BACKEND_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.target_branch }}
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Init terraform
+        working-directory: ${{ env.prod_directory }}
+        run: terraform init
+
+      - name: Production - Terraform apply
+        working-directory: ${{ env.prod_directory }}
+        run: |
+          terraform apply -no-color -input=false -auto-approve \
+            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+
+      - name: Production - Healthcheck API
+        working-directory: ${{ env.prod_directory }}
+        run: curl -I "$(terraform output -raw api_endpoint)"
+
+      - name: Production - Healthcheck Admin
+        working-directory: ${{ env.prod_directory }}
+        run: curl -I "$(terraform output -raw admin_endpoint)"
+
+      - name: Production - Healthcheck App
+        working-directory: ${{ env.prod_directory }}
+        run: curl -I "$(terraform output -raw app_endpoint)"

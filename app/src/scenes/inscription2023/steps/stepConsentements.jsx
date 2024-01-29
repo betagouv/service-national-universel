@@ -12,7 +12,6 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import InscriptionStepper from "../components/InscriptionStepper";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
@@ -59,7 +58,6 @@ export default function StepConsentements() {
 
   return (
     <>
-      <InscriptionStepper />
       <DSFRContainer
         title="Apporter mon consentement"
         supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-donne-mon-consentement" : "/base-de-connaissance/je-minscris-et-donne-mon-consentement"}`}

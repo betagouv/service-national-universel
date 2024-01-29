@@ -12,7 +12,6 @@ const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFi
 const { sendTemplate } = require("../../sendinblue");
 const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
 const config = require("../../config");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
@@ -21,6 +20,7 @@ const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
 const { getHtmlTemplate } = require("../../templates/utils");
 const mime = require("mime-types");
+const scanFile = require("../../utils/virusScanner");
 
 function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
@@ -278,19 +278,12 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          try {
-            const clamscan = await new NodeClam().init({
-              removeInfected: true,
-            });
-            const { isInfected } = await clamscan.isInfected(tempFilePath);
-            if (isInfected) {
-              capture(`File ${name} of user(${req.user.id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-            }
-          } catch (e) {
-            capture(e);
-            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+        if (config.ENVIRONMENT === "production") {
+          const scanResult = await scanFile(tempFilePath, name, req.user.id);
+          if (scanResult.infected) {
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          } else if (scanResult.error) {
+            return res.status(500).send({ ok: false, code: scanResult.error });
           }
         }
 

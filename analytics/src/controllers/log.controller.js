@@ -5,6 +5,7 @@ const Joi = require("joi");
 const { capture } = require("../sentry");
 const LogYoungModel = require("../models/log-youngs.model");
 const LogStructureModel = require("../models/log-structures.model");
+const LogClasseModel = require("../models/log-classes.model");
 const LogMissionModel = require("../models/log-missions.model");
 const LogApplicationModel = require("../models/log-applications.model");
 const LogMissionEquivalenceModel = require("../models/log-mission-equivalence.model");
@@ -40,12 +41,16 @@ router.post(
     user_region: Joi.string().allow(null, ""),
     user_cohorte: Joi.string().allow(null, ""),
     user_source: Joi.string().allow(null, ""),
-    user_classeId: Joi.string().allow(null, ""),
-    user_etablissementId: Joi.string().allow(null, ""),
+    user_classe_id: Joi.string().allow(null, ""),
+    user_etablissement_id: Joi.string().allow(null, ""),
     user_rural: Joi.string().valid("true", "false").allow(null),
     user_age: Joi.number(),
     date: Joi.string(),
     raw_data: Joi.object(),
+    evenement_valeur_originelle: Joi.string().allow(null),
+    modifier_user_id: Joi.string().allow(null),
+    modifier_user_role: Joi.string().allow(null),
+    modifier_user_first_name: Joi.string().allow(null),
   }),
   async ({ body }, res) => {
     try {
@@ -176,6 +181,32 @@ router.post(
       return res.status(200).send({ ok: true, data: log });
     } catch (error) {
       console.log("Error ", error);
+      capture(error);
+    }
+  },
+);
+
+router.post(
+  "/classe",
+  authMiddleware,
+  validationMiddleware({
+    evenement_nom: Joi.string().trim().required(),
+    evenement_valeur: Joi.string().allow(null, ""),
+    evenement_type: Joi.string().trim().required(),
+    classe_id: Joi.string().trim().required(),
+    classe_etablissement_id: Joi.string().trim().required(),
+    classe_name: Joi.string().allow(null, ""),
+    classe_type: Joi.string().allow(null, ""),
+    date: Joi.string(),
+    raw_data: Joi.object(),
+  }),
+  async ({ body }, res) => {
+    try {
+      body.date = new Date(body.date);
+      const log = await LogClasseModel.create(body);
+
+      return res.status(200).send({ ok: true, data: log });
+    } catch (error) {
       capture(error);
     }
   },

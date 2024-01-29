@@ -32,6 +32,7 @@ export default function Settings() {
   const [noChange, setNoChange] = useState(true);
   const history = useHistory();
   const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState({});
   const [data, setData] = useState({
     ...settings,
     ...uselessSettings,
@@ -84,6 +85,17 @@ export default function Settings() {
 
   const onSubmit = async () => {
     try {
+      let err = {};
+      if (!data.dateStart) err.dateStart = "La date de début est obligatoire";
+      if (!data.dateEnd) err.dateEnd = "La date de fin est obligatoire";
+      if (!data.inscriptionStartDate) err.inscriptionStartDate = "La date d'ouverture des inscriptions est obligatoire";
+      if (!data.inscriptionEndDate) err.inscriptionEndDate = "La date de fermeture des inscriptions est obligatoire";
+      if (!data.instructionEndDate) err.instructionEndDate = "La date de fermeture des inscriptions est obligatoire";
+      setError(err);
+      if (Object.values(err).length > 0) {
+        return toastr.warning("Veuillez corriger les erreurs dans le formulaire");
+      }
+
       setIsLoading(true);
       delete data.name;
       delete data.snuId;
@@ -170,11 +182,20 @@ export default function Settings() {
                         mode="single"
                         label="Début"
                         value={data.dateStart}
+                        error={error.dateStart}
                         onChange={(e) => setData({ ...data, dateStart: e })}
                         readOnly={readOnly}
                         disabled={isLoading}
                       />
-                      <DatePickerInput mode="single" label="Fin" value={data.dateEnd} onChange={(e) => setData({ ...data, dateEnd: e })} readOnly={readOnly} disabled={isLoading} />
+                      <DatePickerInput
+                        mode="single"
+                        label="Fin"
+                        value={data.dateEnd}
+                        error={error.dateEnd}
+                        onChange={(e) => setData({ ...data, dateEnd: e })}
+                        readOnly={readOnly}
+                        disabled={isLoading}
+                      />
                     </div>
                   </div>
                 </div>
@@ -262,6 +283,7 @@ export default function Settings() {
                       label="Ouverture"
                       placeholder="Date et heure"
                       value={data.inscriptionStartDate}
+                      error={error.inscriptionStartDate}
                       onChange={(e) => setData({ ...data, inscriptionStartDate: e })}
                       readOnly={readOnly}
                       disabled={isLoading}
@@ -478,7 +500,8 @@ export default function Settings() {
                       <MdInfoOutline data-tip data-for="téléchargement_schema" className="h-5 w-5 cursor-pointer text-gray-400" />
                       <ReactTooltip id="téléchargement_schema" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
                         <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Ouverture ou fermeture pour les utilisateurs de la possibilité de télécharger le schéma de répartition.
+                          Ouverture ou fermeture pour les utilisateurs de la possibilité de télécharger le schéma de répartition. L’ouverture active les notifications au
+                          transporteur lors des modifications sur le schéma de répartition.
                         </p>
                       </ReactTooltip>
                     </div>

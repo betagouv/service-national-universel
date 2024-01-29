@@ -12,6 +12,7 @@ exports.handler = async () => {
     const contacts = youngs.concat(referents);
     const contactsWithAttributes = [];
     for (const contact of contacts) {
+      contact.email = contact.email.toLowerCase();
       const attributes = await getUserAttributes(contact);
       contactsWithAttributes.push({ ...contact.toObject(), attributes });
     }

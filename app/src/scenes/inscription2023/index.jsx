@@ -23,6 +23,7 @@ import { environment, supportURL } from "../../config";
 import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
+import Stepper from "@/components/dsfr/ui/Stepper";
 
 function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
@@ -40,6 +41,7 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
   const { step } = useParams();
   const { isCLE } = useAuth();
   const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
+  const supportLink = `${supportURL}${isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"}`;
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
 
   const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
@@ -56,14 +58,25 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
 
   const updatedEligibleStepIndex = eligibleStepDetails.allowNext ? eligibleStepIndex + 1 : eligibleStepIndex;
 
+  let steps = [
+    { value: STEPS.COORDONNEES, label: "Dites-nous en plus sur vous", stepNumber: 1 },
+    { value: STEPS.CONSENTEMENTS, label: "Consentements", stepNumber: 2 },
+    { value: STEPS.REPRESENTANTS, label: "Mes représentants légaux", stepNumber: 3 },
+  ];
+
+  if (!isCLE) {
+    steps.push({ value: STEPS.DOCUMENTS, label: "Justifier de mon identité", stepNumber: 4 }, { value: STEPS.UPLOAD, label: "Justifier de mon identité", stepNumber: 4 });
+  }
+
   if (currentStepIndex > updatedEligibleStepIndex) {
     return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
   return (
     <DSFRLayout title={title}>
+      <Stepper steps={steps} stepValue={currentStep} />
       {renderStep(currentStep)}
-      <Help supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"}`} />
+      <Help supportLink={supportLink} />
     </DSFRLayout>
   );
 };

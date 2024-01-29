@@ -59,14 +59,15 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (!ligneBusCanCreateDemandeDeModification(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const cohort = await CohortModel.findOne({ name: req.user.cohort });
-    if (!cohort) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isLigneBusDemandeDeModificationOpen(cohort, req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const { lineId, message } = value;
 
     const line = await LigneBusModel.findById(lineId);
     if (!line) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const cohort = await CohortModel.findOne({ name: line.cohort });
+    if (!cohort) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log(cohort);
+    if (!isLigneBusDemandeDeModificationOpen(req.user, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const modificationBus = await ModificationBusModel.create({
       lineId: line._id.toString(),

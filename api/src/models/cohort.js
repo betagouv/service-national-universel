@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 const patchHistory = require("mongoose-patch-history").default;
+const { COHORT_TYPE, COHORT_TYPE_LIST } = require("snu-lib");
 
 const MODELNAME = "cohort";
 
@@ -262,6 +263,15 @@ const Schema = new mongoose.Schema({
     type: Number,
     documentation: {
       description: "Nombre de jours pour valider le séjour pour les jeunes étant en Terminale",
+    },
+  },
+
+  type: {
+    type: String,
+    enum: COHORT_TYPE_LIST,
+    default: COHORT_TYPE.VOLONTAIRE,
+    documentation: {
+      description: "Type de la cohorte",
     },
   },
 

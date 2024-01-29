@@ -30,7 +30,7 @@ router.get("/token/:token", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    const referent = await ReferentModel.findOne({ invitationToken: value.token });
+    const referent = await ReferentModel.findOne({ invitationToken: value.token, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let etablissement;
@@ -93,7 +93,7 @@ router.put("/request-confirmation-email", async (req, res) => {
 router.post("/confirm-email", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      code: Joi.string().required(),
+      code: Joi.string().required().trim(),
       invitationToken: Joi.string().required(),
     })
       .unknown()
@@ -145,10 +145,12 @@ router.post("/confirm-signup", async (req, res) => {
 
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (value.schoolId) {
+    if (referent.role === ROLES.ADMINISTRATEUR_CLE && referent.subRole === SUB_ROLES.referent_etablissement) {
       if (!canUpdateEtablissement(referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!value.schoolId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: "Une erreur est survenue lors de la création de votre établissement" });
 
       const ramsesSchool = await SchoolRamsesModel.findById(value.schoolId);
+      if (!ramsesSchool) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Une erreur est survenue lors de la création de votre établissement" });
       const body = {
         schoolId: value.schoolId,
         uai: ramsesSchool.uai,
@@ -162,15 +164,32 @@ router.post("/confirm-signup", async (req, res) => {
         country: ramsesSchool.country,
       };
 
-      await EtablissementModel.create([body]);
+      const etablissement = await EtablissementModel.create([body]);
+      if (!etablissement) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Une erreur est survenue lors de la création de votre établissement" });
       referent.set({
         region: ramsesSchool.region,
         department: ramsesSchool.departmentName,
+        invitationToken: null,
+        invitationExpires: null,
+        acceptCGU: true,
       });
-    }
+      await referent.save({ fromUser: referent });
+    } else {
+      //Check if user is already linked to an etablissement
+      let etablissement;
+      if (referent.role === ROLES.ADMINISTRATEUR_CLE) {
+        etablissement = await EtablissementModel.findOne({ coordinateurIds: referent._id });
+      }
+      if (referent.role === ROLES.REFERENT_CLASSE) {
+        const classe = await ClasseModel.findOne({ referentClasseIds: referent._id });
+        if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        etablissement = await EtablissementModel.findById(classe.etablissementId);
+      }
+      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Vous n'êtes lié à aucun établissement" });
 
-    referent.set({ invitationToken: null, acceptCGU: true });
-    await referent.save({ fromUser: referent });
+      referent.set({ invitationToken: null, invitationExpires: null, acceptCGU: true, region: etablissement.region, department: etablissement.department });
+      await referent.save({ fromUser: referent });
+    }
 
     if (referent.subRole === SUB_ROLES.coordinateur_cle) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_COORDINATEUR, referent);
     else if (referent.subRole === SUB_ROLES.referent_etablissement) emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CONFIRM_SIGNUP_REFERENT_ETABLISSEMENT, referent);

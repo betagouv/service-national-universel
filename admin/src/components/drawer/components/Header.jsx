@@ -35,13 +35,18 @@ export default function Header({ open, setOpen }) {
 }
 
 const Badge = ({ open }) => {
-  if (environment === "production") return <></>;
+  const isDev = Boolean(window.location.hostname.indexOf("localhost") > -1);
+  const isTest = Boolean(window.location.hostname.indexOf(".ci.") > -1);
+  const isProd = Boolean(window.location.hostname.indexOf("snu.gouv.fr") > -1);
+
+  if (isProd) return <></>;
   return (
     <div
-      className={`absolute top-[5px] ${open ? "right-[10px]" : "right-1/2 transform translate-x-1/2"} h-[18px] border-[1px] ${
-        environment === "development" ? "bg-blue-500" : "bg-red-500"
+      className={`absolute top-[5px] ${open ? "right-[10px]" : "right-1/2 transform translate-x-1/2"} h-[18px] border-[1px] ${isDev && "bg-blue-500"} ${
+        isTest && "bg-red-500"
       } border-white rounded-full text-white text-[10px] align-middle px-1 uppercase`}>
-      {environment === "development" ? "Dev" : "Test"}
+      {isDev && "Dev"}
+      {isTest && "Test"}
     </div>
   );
 };

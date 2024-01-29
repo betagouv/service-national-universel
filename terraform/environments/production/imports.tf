@@ -8,7 +8,3 @@ import {
   to = scaleway_secret.production
   id = "fr-par/87d1df33-5dce-498e-9930-37f892c56776"
 }
-import {
-  to = scaleway_secret.staging
-  id = "fr-par/f050e65a-b996-402d-ad16-389b52172927"
-}

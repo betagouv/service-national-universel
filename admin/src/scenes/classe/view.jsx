@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Badge, Label, InputText, Modal, Select, ModalConfirmation } from "@snu/ds/admin";
 import { HiOutlinePencil, HiOutlineOfficeBuilding } from "react-icons/hi";
+import { AiOutlinePlus } from "react-icons/ai";
 import { BsSend, BsTrash3 } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { useParams, useHistory } from "react-router-dom";
@@ -19,6 +20,7 @@ import {
   translateColoration,
   STATUS_CLASSE,
   translateStatusClasse,
+  COHORT_TYPE,
 } from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
@@ -28,8 +30,10 @@ import { MdContentCopy } from "react-icons/md";
 import Loader from "@/components/Loader";
 import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDangerous } from "react-icons/md";
+import plausibleEvent from "@/services/plausible";
+import dayjs from "dayjs";
 
-export default function view() {
+export default function View() {
   const [classe, setClasse] = useState({});
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState([]);
@@ -37,10 +41,20 @@ export default function view() {
   const [modalDelete, setModalDelete] = useState(false);
   const { id } = useParams();
   const [errors, setErrors] = useState({});
-  const user = useSelector((state) => state.Auth.user);
   const [edit, setEdit] = useState(false);
+  const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
+
   const history = useHistory();
+
+  const canEdit =
+    [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+    classe?.status !== STATUS_CLASSE.WITHDRAWN;
+  const canEditCohort = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role);
+  const canEditStay = [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user?.role);
 
   const colorOptions = Object.keys(CLE_COLORATION_LIST).map((value) => ({
     value: CLE_COLORATION_LIST[value],
@@ -58,7 +72,6 @@ export default function view() {
   const getClasse = async () => {
     try {
       const { ok, code, data: response } = await api.get(`/cle/classe/${id}`);
-
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
@@ -108,16 +121,14 @@ export default function view() {
         return;
       }
 
-      const { ok, code, data: response } = await api.put(`/cle/classe/${classe._id}`, classe);
+      const { ok, code } = await api.put(`/cle/classe/${classe._id}`, classe);
 
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification de la classe", translate(code));
         return setIsLoading(false);
       }
-      setClasse(response);
-      setEdit(!edit);
-      setIsLoading(false);
-      setErrors({});
+      await getClasse();
+      onCancel();
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la classe");
@@ -127,7 +138,9 @@ export default function view() {
   };
 
   const onCancel = () => {
-    setEdit(!edit);
+    setEdit(false);
+    setEditStay(false);
+    setIsLoading(false);
     setErrors({});
   };
 
@@ -148,17 +161,21 @@ export default function view() {
     }
   };
 
-  const actionList = edit
-    ? [
-        <div className="flex items-center justify-end ml-6">
-          <Button key="cancel" type="cancel" title="Annuler" onClick={onCancel} disabled={isLoading} />
-          <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
-        </div>,
-      ]
-    : [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-      classe?.status !== STATUS_CLASSE.WITHDRAWN
-    ? [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
-    : null;
+  const handleClick = () => {
+    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
+    history.push(`/volontaire/create?classeId=${classe._id}`);
+  };
+
+  const actionList = ({ edit, setEdit, canEdit }) => {
+    return edit ? (
+      <div className="flex items-center justify-end ml-6">
+        <Button key="cancel" type="cancel" title="Annuler" onClick={onCancel} disabled={isLoading} />
+        <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} loading={isLoading} disabled={isLoading} />
+      </div>
+    ) : canEdit ? (
+      [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
+    ) : null;
+  };
 
   if (!classe) return <Loader />;
 
@@ -170,15 +187,40 @@ export default function view() {
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
           ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [
+            <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
             <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
           ]
         }
       />
-      <Container title="Informations générales" actions={actionList}>
+      <Container title="Informations générales" actions={actionList({ edit, setEdit, canEdit })}>
         <div className="flex items-stretch justify-stretch">
           <div className="flex-1">
             <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la validation des dates d'affectation." />
-            <InputText className="mb-3" value={classe.cohort} disabled />
+            <Select
+              className="mb-3"
+              isActive={edit && canEditCohort}
+              readOnly={!edit || !canEditCohort}
+              disabled={!canEditCohort}
+              placeholder={"Choisissez une cohorte"}
+              options={cohorts?.map((c) => ({ value: c.name, label: c.name }))}
+              closeMenuOnSelect={true}
+              value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
+              onChange={(options) => {
+                setClasse({ ...classe, cohort: options.value });
+              }}
+              error={errors.cohort}
+            />
+            <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2 mb-3">
+              <p className="text-left text-sm  text-gray-800">Dates</p>
+              <div className="flex items-center">
+                <p className="text-left text-xs text-gray-500 flex-1">
+                  Début : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateStart).format("DD/MM/YYYY") : ""}</strong>
+                </p>
+                <p className="text-left text-xs text-gray-500 flex-1">
+                  Fin : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateEnd).format("DD/MM/YYYY") : ""}</strong>
+                </p>
+              </div>
+            </div>
             <Label title="Numéro d’identification" />
             <div className="flex items-center justify-between gap-3 mb-3">
               <InputText className="flex-1" value={classe.uniqueKey} disabled />
@@ -250,9 +292,9 @@ export default function view() {
             />
             {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
               <>
-                <InputText className="mb-3" value={classe.name} error={errors.name} readOnly={true} label="Établissement" />
+                <InputText className="mb-3" value={classe.etablissement?.name} readOnly={true} label="Établissement" />
                 <Link to={`/etablissement/${classe.etablissementId}`} className="w-full">
-                  <Button type="tertiary" title="Voir l'établissement" className="w-full" />
+                  <Button type="tertiary" title="Voir l'établissement" className="w-full max-w-none" />
                 </Link>
               </>
             )}
@@ -267,6 +309,116 @@ export default function view() {
           </div>
         </div>
       </Container>
+
+      {classe?.referents?.length && (
+        <Container title="Référent de classe" actions={[]}>
+          <div className="flex items-stretch justify-stretch">
+            <div className="flex-1">
+              <InputText className="mb-3" value={classe?.referents[0]?.lastName} label={"Nom"} disabled={true} />
+              <InputText className="mb-3" value={classe?.referents[0]?.firstName} label={"Prénom"} disabled={true} />
+            </div>
+            <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
+            <div className="flex-1">
+              <InputText className="mb-3" label={"Adresse Email"} value={classe.referents[0].email} disabled={true} />
+            </div>
+          </div>
+        </Container>
+      )}
+
+      {canEditStay && (
+        <Container title="Séjour" actions={actionList({ edit: editStay, setEdit: setEditStay, canEdit: canEditStay })}>
+          <div className="flex items-stretch justify-stretch">
+            <div className="flex-1">
+              <Label
+                title="Centre"
+                name="centre"
+                tooltip="vous devez indiquez la cohorte avant d'indiquer le centre, si la cohorte séléctionner est CLE 23 24, vous ne pourrez associer aucun centre"
+              />
+              <Select
+                isAsync
+                className="mb-3"
+                placeholder={"Choisissez un centre existant"}
+                loadOptions={(q) => searchSessions({ q, cohort: classe.cohort })}
+                defaultOptions={() => searchSessions({ q: "", cohort: classe.cohort })}
+                noOptionsMessage={"Aucun centre ne correspond à cette recherche"}
+                isClearable={true}
+                closeMenuOnSelect={true}
+                value={classe.cohesionCenter?.name ? { label: classe.cohesionCenter.name } : null}
+                onChange={(option) =>
+                  setClasse({
+                    ...classe,
+                    session: option?.session,
+                    sessionId: option?._id,
+                    cohesionCenter: option?.session.cohesionCenter,
+                    cohesionCenterId: option?.session.cohesionCenter._id,
+                  })
+                }
+                error={errors.session}
+                isActive={editStay && canEditStay}
+                readOnly={!editStay || !canEditStay}
+                disabled={!canEditStay || classe?.cohort === "CLE 23-24"}
+              />
+              {classe.cohesionCenter && (
+                <>
+                  <InputText className="mb-3" label="Numéro et nom de la voie" value={classe.cohesionCenter.address} disabled />
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <InputText className="flex-1" label="Code Postal" value={classe.cohesionCenter.zip} disabled />
+                    <InputText className="flex-1" label="Ville" value={classe.cohesionCenter.city} disabled />
+                  </div>
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <InputText className="flex-1" label="Département" value={classe.cohesionCenter.department} disabled />
+                    <InputText className="flex-1" label="Région" value={classe.cohesionCenter.region} disabled />
+                  </div>
+                  <Link to={`/centre/` + classe.cohesionCenter._id} className="w-full">
+                    <Button type="tertiary" title="Voir le centre" className="w-full max-w-none" />
+                  </Link>
+                </>
+              )}
+            </div>
+            <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
+            <div className="flex-1">
+              <Label
+                title="Point de rassemblement"
+                name="pdr"
+                tooltip="Le point de rassemblement est automatiquement pré rempli avec l'adresse de l'établissement, vous pouvez le modifier si besoin"
+              />
+              <Select
+                isAsync
+                className="mb-3"
+                placeholder={"Choisissez un point de rassemblement existant"}
+                loadOptions={(q) => searchPointDeRassemblements({ q, cohort: classe.cohort })}
+                defaultOptions={() => searchPointDeRassemblements({ q: classe.etablissement?.name, cohort: classe.cohort })}
+                noOptionsMessage={"Aucun point de rassemblement ne correspond à cette recherche"}
+                isClearable={true}
+                closeMenuOnSelect={true}
+                value={classe.pointDeRassemblement?.name ? { label: classe.pointDeRassemblement.name } : null}
+                onChange={(option) => setClasse({ ...classe, pointDeRassemblement: option?.pointDeRassemblement, pointDeRassemblementId: option?._id })}
+                error={errors.pointDeRassemblement}
+                isActive={editStay && canEditStay}
+                readOnly={!editStay || !canEditStay}
+                disabled={!canEditStay || classe?.cohort === "CLE 23-24"}
+              />
+              {classe.pointDeRassemblement && (
+                <>
+                  <InputText className="mb-3" label="Numéro et nom de la voie" value={classe.pointDeRassemblement?.address} disabled />
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <InputText className="flex-1" label="Code Postal" value={classe.pointDeRassemblement?.zip} disabled />
+                    <InputText className="flex-1" label="Ville" value={classe.pointDeRassemblement?.city} disabled />
+                  </div>
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <InputText className="flex-1" label="Département" value={classe.pointDeRassemblement?.department} disabled />
+                    <InputText className="flex-1" label="Région" value={classe.pointDeRassemblement?.region} disabled />
+                  </div>
+                  <Link to={`/point-de-rassemblement/` + classe.pointDeRassemblement._id} className="w-full">
+                    <Button type="tertiary" title="Voir le point de rassemblement" className="w-full max-w-none" />
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </Container>
+      )}
+
       {classe?.status !== STATUS_CLASSE.DRAFT ? (
         <Container
           title="Suivi de la classe"
@@ -390,3 +542,39 @@ export default function view() {
     </Page>
   );
 }
+
+const searchSessions = async ({ q, cohort }) => {
+  if (!cohort || cohort === "CLE 23-24") return [];
+
+  const query = {
+    filters: {
+      cohort: [cohort],
+    },
+    page: 0,
+    size: 10,
+  };
+  if (q) query.filters.searchbar = [q];
+
+  const { responses } = await api.post(`/elasticsearch/sessionphase1/search?needCohesionCenterInfo=true`, query);
+  return responses[0].hits.hits.map((hit) => {
+    return { value: hit._source, _id: hit._id, label: hit._source.cohesionCenter.name, session: { ...hit._source, _id: hit._id } };
+  });
+};
+
+const searchPointDeRassemblements = async ({ q, cohort }) => {
+  if (!cohort || cohort === "CLE 23-24") return [];
+
+  const query = {
+    filters: {
+      cohorts: [cohort],
+    },
+    page: 0,
+    size: 10,
+  };
+  if (q) query.filters.searchbar = [q];
+
+  const { responses } = await api.post(`/elasticsearch/pointderassemblement/search`, query);
+  return responses[0].hits.hits.map((hit) => {
+    return { value: hit._source, _id: hit._id, label: hit._source.name, pointDeRassemblement: { ...hit._source, _id: hit._id } };
+  });
+};

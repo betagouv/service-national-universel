@@ -37,6 +37,7 @@ const {
 const { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
 const { capture } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
+const dayjs = require("dayjs");
 
 // Timeout a promise in ms
 const timeout = (prom, time) => {
@@ -718,7 +719,7 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
         if (young?.departSejourMotif === "Exclusion") {
           young.set({ statusPhase1: "NOT_DONE" });
         } else {
-          young.set({ statusPhase1: "DONE" });
+          young.set({ statusPhase1: "DONE", statusPhase2OpenedAt: now });
         }
       } else {
         // Sinon on ne valide pas sa phase 1.
@@ -945,6 +946,14 @@ const STEPS2023 = {
   DONE: "DONE",
 };
 
+const validateBirthDate = (date) => {
+  const d = dayjs(date);
+  if (!d.isValid()) return false;
+  if (d.isBefore(dayjs(new Date(2000, 0, 1)))) return false;
+  if (d.isAfter(dayjs())) return false;
+  return true;
+};
+
 module.exports = {
   timeout,
   uploadFile,
@@ -992,4 +1001,5 @@ module.exports = {
   getTransporter,
   getMetaDataFile,
   deleteFilesByList,
+  validateBirthDate,
 };

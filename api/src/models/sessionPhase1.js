@@ -194,6 +194,13 @@ Schema.methods.anonymise = function () {
   return this;
 };
 
+Schema.virtual("cohesionCenter", {
+  ref: "cohesioncenter",
+  localField: "cohesionCenterId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 Schema.virtual("fromUser").set(function (fromUser) {
   if (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;

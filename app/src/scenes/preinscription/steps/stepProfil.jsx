@@ -26,6 +26,7 @@ import API from "@/services/api";
 import { setYoung } from "@/redux/auth/actions";
 import { capture } from "@/sentry";
 import { RiInformationLine } from "react-icons/ri";
+import { validateBirthDate } from "@/scenes/inscription2023/utils";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -50,7 +51,7 @@ export default function StepProfil() {
     if (isCLE && !data?.frenchNationality) {
       errors.frenchNationality = "Ce champ est obligatoire";
     }
-    if (isCLE && (!data?.birthDate || !dayjs(data.birthDate).isValid())) {
+    if (isCLE && (!data?.birthDate || !validateBirthDate(data?.birthDate))) {
       errors.birthDate = "Vous devez saisir une date de naissance valide";
     }
     if (data?.phone && !isPhoneNumberWellFormated(trimmedPhone, data?.phoneZone)) {
@@ -216,7 +217,7 @@ export default function StepProfil() {
 
           <label className="w-full">
             {isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
-            <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
+            <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })} />
             {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
           </label>
 

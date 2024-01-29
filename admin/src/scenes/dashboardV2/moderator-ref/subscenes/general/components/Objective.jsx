@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import queryString from "query-string";
 import { toastr } from "react-redux-toastr";
-import { getCohortNames, REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList } from "snu-lib";
+import { REFERENT_ROLES, ROLES, academyList, departmentToAcademy, region2department, regionList, COHORT_TYPE, getDepartmentNumber } from "snu-lib";
 import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 import api from "@/services/api";
 import { getNewLink } from "@/utils";
@@ -9,7 +9,6 @@ import { FilterDashBoard } from "@/scenes/dashboardV2/components/FilterDashBoard
 import { getDepartmentOptions, getFilteredDepartment } from "@/scenes/dashboardV2/components/common";
 import HorizontalBar from "@/scenes/dashboardV2/components/graphs/HorizontalBar";
 import VolontaireSection from "./VolontaireSection";
-import { getCohortNameList } from "@/services/cohort.service";
 import { useSelector } from "react-redux";
 
 export default function Index({ user }) {
@@ -19,13 +18,8 @@ export default function Index({ user }) {
   const [inAndOutCohort, setInAndOutCohort] = useState();
   const [departmentOptions, setDepartmentOptions] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({
-    cohort: [],
+    cohort: cohorts.filter((e) => e.type === COHORT_TYPE.VOLONTAIRE && e.name.match(/2024/)).map((e) => e.name),
   });
-
-  useEffect(() => {
-    const cohortsFilters = getCohortNameList(cohorts).filter((e) => e.match(/2024/));
-    setSelectedFilters({ cohort: cohortsFilters });
-  }, []);
 
   const regionOptions = user.role === ROLES.REFERENT_REGION ? [{ key: user.region, label: user.region }] : regionList?.map((r) => ({ key: r, label: r }));
   const academyOptions =
@@ -55,12 +49,13 @@ export default function Index({ user }) {
       name: "Département",
       fullValue: "Tous",
       options: departmentOptions,
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     {
       id: "cohort",
       name: "Cohorte",
       fullValue: "Toutes",
-      options: getCohortNames()?.map((cohort) => ({ key: cohort, label: cohort })),
+      options: cohorts.filter((e) => e.type === COHORT_TYPE.VOLONTAIRE)?.map((cohort) => ({ key: cohort.name, label: cohort.name })),
       sort: (e) => orderCohort(e),
     },
   ].filter((e) => e);

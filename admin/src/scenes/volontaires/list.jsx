@@ -23,6 +23,8 @@ import { getFilterArray, transformVolontaires, transformVolontairesSchool } from
 
 export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
+  if (user?.role === ROLES.ADMINISTRATEUR_CLE) return history.push("/mes-eleves");
 
   const [volontaire, setVolontaire] = useState(null);
   const [sessionsPhase1, setSessionsPhase1] = useState(null);
@@ -223,7 +225,6 @@ const Hit = ({ hit, onClick }) => {
         {hit.status === "DELETED" && <Badge minify text="Supprimé" color={YOUNG_STATUS_COLORS.DELETED} tooltipText={translate(hit.status)} />}
         <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} style={hit.status === "DELETED" ? "opacity-50" : ""} />
         <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} style={hit.status === "DELETED" ? "opacity-50" : ""} />
-        <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} style={hit.status === "DELETED" ? "opacity-50" : ""} />
       </td>
       <td onClick={(e) => e.stopPropagation()} className="w-[20%] pr-4 py-3">
         <Action hit={hit} />

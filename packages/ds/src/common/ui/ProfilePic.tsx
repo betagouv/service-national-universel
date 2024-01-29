@@ -12,6 +12,7 @@ type OwnProps = {
   icon?: ((props: ProfilePicIconProps) => React.ReactNode) | string;
   size?: number;
   className?: string;
+  onClick?: () => void;
 };
 
 export default function ProfilePic({
@@ -20,6 +21,7 @@ export default function ProfilePic({
   icon,
   size = 48,
   className,
+  onClick,
 }: OwnProps) {
   return (
     <div
@@ -38,6 +40,7 @@ export default function ProfilePic({
             }
           : {}),
       }}
+      onClick={() => onClick?.()}
     >
       {!image && !icon && initials && (
         <div

@@ -16,36 +16,43 @@ provider "scaleway" {
   region = "fr-par"
 }
 
-data "terraform_remote_state" "project" {
-  backend = "pg"
-}
-
 variable "image_tag" {
   type    = string
-  default = "latest"
+  nullable = false
 }
 
 locals {
   env            = "###___ENV_NAME___###"
-  api_hostname   = "api.${scaleway_domain_zone.main.id}"
-  admin_hostname = "admin.${scaleway_domain_zone.main.id}"
-  app_hostname   = "app.${scaleway_domain_zone.main.id}"
+  project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
+  domain         = "ci.beta-snu.dev"
+  api_hostname   = "api.${local.env}.${local.domain}"
+  admin_hostname = "admin.${local.env}.${local.domain}"
+  app_hostname   = "moncompte.${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
-  project        = data.terraform_remote_state.project.outputs
+}
+
+# Project
+data "scaleway_account_project" "main" {
+  project_id = local.project_id
+}
+
+# Registry
+data "scaleway_registry_namespace" "main" {
+  name = "snu-ci"
 }
 
 # DNS zone
 resource "scaleway_domain_zone" "main" {
-  project_id = local.project.project_id
-  domain     = local.project.domain
-  subdomain  = "${local.env}.${local.project.dns_zone}"
+  project_id = data.scaleway_account_project.main.id
+  domain     = "ci.beta-snu.dev"
+  subdomain  = "${local.env}"
 }
 
 
 # Secrets
 resource "scaleway_secret" "custom" {
   name        = "snu-${local.env}"
-  project_id  = local.project.project_id
+  project_id  = data.scaleway_account_project.main.id
   description = "Secrets for environment '${local.env}'"
 }
 
@@ -56,7 +63,7 @@ data "scaleway_secret_version" "main" {
 
 # Containers namespace
 resource "scaleway_container_namespace" "main" {
-  project_id  = local.project.project_id
+  project_id  = data.scaleway_account_project.main.id
   name        = "snu-${local.env}"
   description = "SNU container namespace for environment '${local.env}'"
 }
@@ -65,7 +72,7 @@ resource "scaleway_container_namespace" "main" {
 resource "scaleway_container" "api" {
   name            = "${local.env}-api"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${local.project.registry_endpoint}/api:${var.image_tag}"
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
   port            = 8080
   cpu_limit       = 768
   memory_limit    = 1024
@@ -125,7 +132,6 @@ resource "scaleway_container" "api" {
     "SUPPORT_APIKEY"                        = local.secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.secrets.PM2_SLACK_URL
     "TOKENLOADTEST"                         = local.secrets.TOKENLOADTEST
-    "ZAMMAD_TOKEN"                          = local.secrets.ZAMMAD_TOKEN
   }
 }
 
@@ -147,7 +153,7 @@ resource "scaleway_container_domain" "api" {
 resource "scaleway_container" "admin" {
   name            = "${local.env}-admin"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${local.project.registry_endpoint}/admin:${var.image_tag}"
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/admin:${var.image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -193,7 +199,7 @@ resource "scaleway_container_domain" "admin" {
 resource "scaleway_container" "app" {
   name            = "${local.env}-app"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${local.project.registry_endpoint}/app:${var.image_tag}"
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -218,14 +224,14 @@ resource "scaleway_container" "app" {
   }
 
   secret_environment_variables = {
-    "DOCKER_ENV_VITE_SENTRY_URL"        = local.secrets.SENTRY_URL
-    "DOCKER_ENV_VITE_SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
+    "DOCKER_ENV_VITE_SENTRY_URL" = local.secrets.SENTRY_URL
+    "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
   }
 }
 
 resource "scaleway_domain_record" "app" {
   dns_zone = scaleway_domain_zone.main.id
-  name     = "app"
+  name     = "moncompte"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
   ttl      = 300

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
-import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding, HiOutlineX } from "react-icons/hi";
 import { MdOutlineContentCopy } from "react-icons/md";
 import InstitutionIcon from "@/components/drawer/icons/Institution";
 import { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, translate } from "snu-lib";
@@ -11,11 +11,10 @@ import api from "@/services/api";
 import { IoAdd } from "react-icons/io5";
 import { capture } from "@/sentry";
 import { toastr } from "react-redux-toastr";
-import { copyToClipboard } from "@/utils";
+import { classNames, copyToClipboard } from "@/utils";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
 import Loader from "@/components/Loader";
-import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 
 export default function view() {
   const user = useSelector((state) => state.Auth.user);
@@ -27,6 +26,7 @@ export default function view() {
   const [etablissement, setEtablissement] = useState({});
   const [newCoordinator, setNewCoordinator] = useState({});
   const [contacts, setContacts] = useState([]);
+  const [contactsToUpdate, setContactsToUpdate] = useState([]);
   const [copied, setCopied] = useState([]);
   const typeOptions = Object.keys(CLE_TYPE_LIST).map((value) => ({
     value: CLE_TYPE_LIST[value],
@@ -40,6 +40,7 @@ export default function view() {
   const [modalClassReferent, setModalClassReferent] = useState(false);
   const [modalCoordinator, setModalCoordinator] = useState(false);
   const [modalAddCoordinator, setModalAddCoordinator] = useState(false);
+  const [modalChangeContacts, setModalChangeContacts] = useState(false);
 
   const history = useHistory();
   const firstLogin = localStorage.getItem("cle_referent_signup_first_time");
@@ -175,6 +176,59 @@ export default function view() {
     }
   };
 
+  const fetchReferentsEtablissement = async (search) => {
+    const q = {
+      filters: {
+        cohorts: [],
+        department: [],
+        region: [],
+        role: [ROLES.ADMINISTRATEUR_CLE],
+        subRole: [SUB_ROLES.referent_etablissement],
+      },
+      sort: {
+        field: "lastName.keyword",
+        order: "asc",
+      },
+      page: 0,
+      size: 10,
+    };
+    if (search) q.filters.searchbar = [search];
+    const { responses } = await api.post(`/elasticsearch/referent/search`, q);
+    return responses[0].hits.hits.map((hit) => ({
+      value: hit._id,
+      label: `${hit._source.firstName} ${hit._source.lastName}`,
+      referent: { ...hit._source, _id: hit._id },
+    }));
+  };
+
+  const saveContacts = async () => {
+    try {
+      setIsLoading(true);
+      setErrors({});
+      let errors = {};
+      if (!contactsToUpdate.length) errors.contacts = "Veuillez renseigner au moins un contact";
+
+      if (Object.keys(errors).length > 0) {
+        setErrors(errors);
+        setIsLoading(false);
+        return;
+      }
+
+      const { ok, code } = await api.put(`/cle/etablissement/${etablissement._id}/referents`, { referentEtablissementIds: contactsToUpdate.map((c) => c._id) });
+      if (!ok) throw new Error(translate(code));
+
+      await getEtablissement();
+      setModalChangeContacts(false);
+      setIsLoading(false);
+      setErrors({});
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la modification des contacts de l'établissement");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     getEtablissement();
   }, [edit]);
@@ -195,7 +249,7 @@ export default function view() {
 
   const actionList = edit
     ? [
-        <div className="flex items-center justify-end ml-6">
+        <div key="actions-list" className="flex items-center justify-end ml-6">
           <Button key="cancel" type="cancel" title="Annuler" onClick={cancel} disabled={isLoading} />
           <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} disabled={isLoading} />
         </div>,
@@ -226,6 +280,18 @@ export default function view() {
       <Container
         title="Contacts"
         actions={[
+          [ROLES.ADMIN].includes(user.role) && (
+            <Button
+              key="update-contacts"
+              type="change"
+              leftIcon={<HiOutlinePencil size={16} />}
+              title="Modifier"
+              onClick={() => {
+                setContactsToUpdate([...contacts.filter((c) => c.subRole === SUB_ROLES.referent_etablissement)]);
+                setModalChangeContacts(true);
+              }}
+            />
+          ),
           [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
             <Link key="list-users" to="/user">
               <Button type="tertiary" title="Voir mes contacts" />
@@ -236,9 +302,9 @@ export default function view() {
           {contacts.map((contact, index) => (
             <div key={contact.email} className="flex-1 shrink-0 flex items-stretch justify-between">
               <div>
-                <div className="text-base font-bold text-ds-gray-900">
+                <Link to={"/user/" + contact._id} className="text-base font-bold text-ds-gray-900 hover:underline hover:text-ds-gray-900">
                   {contact.firstName} {contact.lastName}
-                </div>
+                </Link>
                 <div className="mb-4 text-ds-gray-500">{translate(contact.subRole)}</div>
                 <div className="flex items-center justify-start mb-2">
                   <HiOutlinePhone size={20} className="mr-2" />
@@ -435,6 +501,53 @@ export default function view() {
         actions={[
           { title: "Annuler", isCancel: true },
           { title: "Valider", onClick: () => sendInvitation() },
+        ]}
+      />
+      {/* ADMIN - Change contacts */}
+      <ModalConfirmation
+        isOpen={modalChangeContacts}
+        onClose={() => {
+          setModalChangeContacts(false);
+          setErrors({});
+        }}
+        className="md:max-w-[700px]"
+        icon={<ProfilePic />}
+        title="Modifier les référents de l’établissement"
+        text={
+          <div className="mt-6 w-[636px] text-left text-ds-gray-900">
+            {errors.contacts && <div className="text-red-500 mb-2">{errors.contacts}</div>}
+            {contactsToUpdate.map((contact) => (
+              <div key={contact._id.toString()} className="flex items-center justify-between my-3">
+                <div>
+                  <div className="font-bold">
+                    {contact.firstName} {contact.lastName}
+                  </div>
+                  <p>{translate(contact.subRole)}</p>
+                </div>
+                <ProfilePic
+                  size={40}
+                  className="cursor-pointer"
+                  icon={({ size, className }) => <HiOutlineX size={size} className={className} />}
+                  onClick={() => setContactsToUpdate(contactsToUpdate.filter((c) => c._id !== contact._id))}
+                />
+              </div>
+            ))}
+            <Select
+              isAsync
+              className="my-6"
+              placeholder="Ajouter un référent"
+              loadOptions={fetchReferentsEtablissement}
+              isClearable={true}
+              noOptionsMessage={"Aucun référent d'établissement ne correspond à cette recherche"}
+              onChange={({ referent }) => {
+                if (!contactsToUpdate.some((c) => c._id === referent._id)) setContactsToUpdate([...contactsToUpdate, referent]);
+              }}
+            />
+          </div>
+        }
+        actions={[
+          { title: "Annuler", isCancel: true },
+          { title: "Valider", disabled: contactsToUpdate.length === 0, loading: isLoading, onClick: () => saveContacts() },
         ]}
       />
     </Page>

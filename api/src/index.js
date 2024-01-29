@@ -1,4 +1,7 @@
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
+const loggingMiddleware = require("./middlewares/loggingMiddleware");
+const { forceDomain } = require("forcedomain");
+const requestIp = require("request-ip"); // Import request-ip package
 
 (async () => {
   await require("./env-manager")();
@@ -20,7 +23,6 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   const express = require("express");
   const cookieParser = require("cookie-parser");
   const helmet = require("helmet");
-  const logger = require("morgan");
   const passport = require("passport");
   require("./mongo");
 
@@ -40,9 +42,23 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   const registerSentryErrorHandler = initSentry(app);
   app.use(helmet());
 
-  // if (ENVIRONMENT === "development") {
-  app.use(logger("dev"));
-  // }
+  if (process.env.PRODUCTION) {
+    app.use(
+      forceDomain({
+        hostname: "api.snu.gouv.fr",
+        protocol: "https",
+      }),
+    );
+  }
+
+  if (process.env.STAGING && !process.env.CLE) {
+    app.use(
+      forceDomain({
+        hostname: "api.beta-snu.dev",
+        protocol: "https",
+      }),
+    );
+  }
 
   // eslint-disable-next-line no-unused-vars
   function handleError(err, req, res, next) {
@@ -74,6 +90,12 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
+  app.use(function (req, res, next) {
+    req.ipInfo = requestIp.getClientIp(req);
+    next();
+  });
+  app.use(loggingMiddleware);
+
   require("./crons");
   app.use(cookieParser());
 
@@ -98,9 +120,9 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
   app.use("/elasticsearch", require("./controllers/elasticsearch"));
   app.use("/email", require("./controllers/email"));
-  app.use("/es", require("./controllers/es"));
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters"));
+  app.use("/gouv.fr", require("./controllers/gouv.fr"));
   app.use("/inscription-goal", require("./controllers/inscription-goal"));
   app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));

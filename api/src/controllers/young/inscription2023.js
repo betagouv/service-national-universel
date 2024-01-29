@@ -145,71 +145,60 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const isRequired = type !== "save";
-
-    const coordonneeSchema = {
-      gender: needRequired(Joi.string().trim().valid("female", "male"), isRequired),
-      birthCountry: needRequired(Joi.string().trim(), isRequired),
-      birthCity: needRequired(Joi.string().trim(), isRequired),
+    let coordonneeSchema = {
+      gender: Joi.string().trim().valid("female", "male").required(),
+      birthCountry: Joi.string().trim().required(),
+      birthCity: Joi.string().trim().required(),
       birthCityZip: Joi.string().trim().allow(null, ""),
-      livesInFrance: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      addressVerified: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      livesInFrance: Joi.string().trim().valid("true", "false").required(),
+      addressVerified: Joi.string().trim().valid("true", "false").required(),
       coordinatesAccuracyLevel: Joi.string().trim().valid("housenumber", "street", "locality", "municipality").allow(null, ""),
-      country: needRequired(Joi.string().trim(), isRequired),
-      city: needRequired(Joi.string().trim(), isRequired),
-      zip: needRequired(Joi.string().trim(), isRequired),
-      address: needRequired(Joi.string().trim(), isRequired),
-      location: Joi.object()
-        .keys({
-          lat: needRequired(Joi.number(), isRequired),
-          lon: needRequired(Joi.number(), isRequired),
-        })
-        .default({
-          lat: undefined,
-          lon: undefined,
-        })
-        .allow({}, null),
-      department: needRequired(Joi.string().trim(), isRequired),
-      region: needRequired(Joi.string().trim(), isRequired),
+      country: Joi.string().trim().required(),
+      city: Joi.string().trim().required(),
+      zip: Joi.string().trim().required(),
+      address: Joi.string().trim().required(),
+      location: Joi.object().keys({ lat: Joi.number().required(), lon: Joi.number().required() }).default({ lat: undefined, lon: undefined }).allow({}, null),
+      department: Joi.string().trim().required(),
+      region: Joi.string().trim().required(),
       cityCode: Joi.string().trim().default("").allow("", null),
-      foreignCountry: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      foreignCity: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      foreignZip: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
-      foreignAddress: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      foreignCountry: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      foreignCity: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      foreignZip: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
+      foreignAddress: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().trim().required(), otherwise: Joi.isError(new Error()) }),
       hostLastName: Joi.alternatives().conditional("livesInFrance", {
         is: "false",
-        then: needRequired(Joi.string().trim(), isRequired),
+        then: Joi.string().trim().required(),
         otherwise: Joi.isError(new Error()),
       }),
-      hostFirstName: Joi.alternatives().conditional("livesInFrance", { is: "false", then: needRequired(Joi.string().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+      hostFirstName: Joi.alternatives().conditional("livesInFrance", { is: "false", then: Joi.string().required().trim(), otherwise: Joi.isError(new Error()) }),
       hostRelationship: Joi.alternatives().conditional("livesInFrance", {
         is: "false",
-        then: needRequired(Joi.string().trim().valid("Parent", "Frere/Soeur", "Grand-parent", "Oncle/Tante", "Ami de la famille", "Autre"), isRequired),
+        then: Joi.string().trim().valid("Parent", "Frere/Soeur", "Grand-parent", "Oncle/Tante", "Ami de la famille", "Autre").required(),
         otherwise: Joi.isError(new Error()),
       }),
-      handicap: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      ppsBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      paiBeneficiary: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      allergies: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
-      moreInformation: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+      handicap: Joi.string().trim().valid("true", "false").required(),
+      ppsBeneficiary: Joi.string().trim().valid("true", "false").required(),
+      paiBeneficiary: Joi.string().trim().valid("true", "false").required(),
+      allergies: Joi.string().trim().valid("true", "false").required(),
+      moreInformation: Joi.string().trim().valid("true", "false").required(),
       specificAmenagment: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
       specificAmenagmentType: Joi.alternatives().conditional("specificAmenagment", {
         is: "true",
-        then: needRequired(Joi.string().trim(), isRequired),
+        then: Joi.string().trim().required(),
         otherwise: Joi.isError(new Error()),
       }),
       reducedMobilityAccess: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
       handicapInSameDepartment: Joi.alternatives().conditional("moreInformation", {
         is: "true",
-        then: needRequired(Joi.string().trim().valid("true", "false"), isRequired),
+        then: Joi.string().trim().valid("true", "false").required(),
         otherwise: Joi.isError(new Error()),
       }),
     };
@@ -217,18 +206,14 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
     if (!isCle(young)) {
       coordonneeSchema.situation = Joi.alternatives().conditional("schooled", {
         is: "true",
-        then: needRequired(
-          Joi.string()
-            .trim()
-            .valid(...youngSchooledSituationOptions),
-          isRequired,
-        ),
-        otherwise: needRequired(
-          Joi.string()
-            .trim()
-            .valid(...youngActiveSituationOptions),
-          isRequired,
-        ),
+        then: Joi.string()
+          .trim()
+          .valid(...youngSchooledSituationOptions)
+          .required(),
+        otherwise: Joi.string()
+          .trim()
+          .valid(...youngActiveSituationOptions)
+          .required(),
       });
     }
 
@@ -329,7 +314,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
     const { error: typeError, value: type } = checkParameter(req.params.type);
     if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    let { error, value } = validateParents(req.body, type !== "save");
+    let { error, value } = validateParents(req.body, true);
 
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -666,15 +651,10 @@ const validateCorrectionRequest = (young, keyList) => {
 };
 
 const checkParameter = (parameter) => {
-  const keys = ["next", "save", "correction"];
+  const keys = ["next", "correction"];
   return Joi.string()
     .valid(...keys)
     .validate(parameter, { stripUnknown: true });
-};
-
-const needRequired = (joi, isRequired) => {
-  if (isRequired) return joi.required();
-  else return joi.allow(null, "");
 };
 
 module.exports = router;

@@ -103,7 +103,7 @@ const Note = new mongoose.Schema({
     type: String,
     enum: ["INSCRIPTION", "PHASE_1", "PHASE_2", "PHASE_3", ""],
   },
-  note: { type: String, required: true, maxLength: 500 },
+  note: { type: String, required: true },
   referent: new mongoose.Schema({
     _id: { type: mongoose.Types.ObjectId, required: true },
     firstName: { type: String, required: true },
@@ -221,7 +221,6 @@ const Schema = new mongoose.Schema({
   },
   originalCohort: {
     type: String,
-    enum: getCohortNames(),
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },
@@ -310,6 +309,12 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date de dernière modification du statut lié à la seconde phase",
+    },
+  },
+  statusPhase2OpenedAt: {
+    type: Date,
+    documentation: {
+      description: "Date d'ouverture de la seconde phase",
     },
   },
   statusPhase2ValidatedAt: {

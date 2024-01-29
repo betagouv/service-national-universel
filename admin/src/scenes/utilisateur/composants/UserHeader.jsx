@@ -12,6 +12,7 @@ import API from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import Tab from "../../phase0/components/Tab";
 import { ROLES, translate } from "../../../utils";
+import { Badge } from "@snu/ds/admin";
 
 const getSubtitle = (user) => {
   const createdAt = new Date(user.createdAt);
@@ -44,6 +45,7 @@ export default function UserHeader({ user, tab, currentUser }) {
           <div className="mt-3 flex flex-col justify-between md:flex-row">
             <div className="mb-3 flex items-center md:mb-0">
               <span className="mr-2 text-2xl font-bold">{`${user.firstName} ${user.lastName}`}</span>
+              <Badge title={translate(user.role)} status="tertiary" className="border-gray-300 mr-2 mt-1" />
               <span className="text-xs">{getSubtitle(user)}</span>
             </div>
             <div className="flex items-center">

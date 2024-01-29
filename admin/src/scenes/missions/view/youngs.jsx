@@ -247,7 +247,6 @@ export default function Youngs({ mission, applications, updateMission }) {
       message: `Vous êtes sur le point de changer le statut des candidatures de ${youngSelected?.length} volontaire${isPlural ? "s" : ""}. Un email sera automatiquement envoyé.`,
       onSubmit: async () => {
         try {
-          console.log(status);
           const { ok, code } = await api.post(`/application/multiaction/change-status/${status}`, {
             ids: youngSelected.map((y) => y._id),
           });

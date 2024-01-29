@@ -9,9 +9,11 @@ const {
   ROLES,
   STATUS_CLASSE,
   STATUS_PHASE1_CLASSE,
+  YOUNG_STATUS_PHASE1,
   SENDINBLUE_TEMPLATES,
   canCreateClasse,
   canUpdateClasse,
+  canUpdateClasseStay,
   canViewClasse,
   canDeleteClasse,
 } = require("snu-lib");
@@ -97,6 +99,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       id: Joi.string().required(),
       name: Joi.string().required(),
       totalSeats: Joi.number().required(),
+      cohort: Joi.string().required(),
       coloration: Joi.string()
         .valid(...CLE_COLORATION_LIST)
         .required(),
@@ -106,6 +109,9 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       grade: Joi.string()
         .valid(...CLE_GRADE_LIST)
         .required(),
+      sessionId: Joi.string().allow(null),
+      cohesionCenterId: Joi.string().allow(null),
+      pointDeRassemblementId: Joi.string().allow(null),
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
@@ -125,10 +131,45 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
+    const oldCohort = classe.cohort;
+    classe.set({ ...value, sessionId: classe.sessionId || null });
 
-    classe.set({ ...value });
+    if (canUpdateClasseStay(req.user)) {
+      classe.set({
+        sessionId: value.sessionId,
+        cohesionCenterId: value.cohesionCenterId,
+        pointDeRassemblementId: value.pointDeRassemblementId,
+      });
+
+      if (classe.sessionId && classe.cohesionCenterId && classe.pointDeRassemblementId && classe.status === STATUS_CLASSE.VALIDATED) {
+        const youngs = await YoungModel.find({ classeId: classe._id });
+        await Promise.all(
+          youngs.map((y) => {
+            y.set({
+              sessionPhase1Id: value.sessionId,
+              cohesionCenterId: value.cohesionCenterId,
+              meetingPointId: value.pointDeRassemblementId,
+              statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+            });
+            return y.save({ fromUser: req.user });
+          }),
+        );
+      }
+    }
+
     classe = await classe.save({ fromUser: req.user });
     classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
+
+    if (oldCohort !== classe.cohort) {
+      const youngs = await YoungModel.find({ classeId: classe._id });
+      await Promise.all(
+        youngs.map((y) => {
+          y.set({ cohort: classe.cohort });
+          return y.save({ fromUser: req.user });
+        }),
+      );
+      emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
+    }
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
 
@@ -150,11 +191,15 @@ router.get("/:id", async (req, res) => {
     // We need to populate the model with the 2 virtuals etablissement and referents
     const data = await ClasseModel.findById(value)
       .populate({ path: "etablissement", options: { select: { referentEtablissementIds: 0, coordinateurIds: 0, createdAt: 0, updatedAt: 0 } } })
-      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1 } } });
+      .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1, role: 1, email: 1 } } })
+      .populate({ path: "cohesionCenter", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } })
+      .populate({ path: "session", options: { select: { _id: 1 } } })
+      .populate({ path: "pointDeRassemblement", options: { select: { name: 1, address: 1, zip: 1, city: 1, department: 1, region: 1 } } });
     if (!data) {
       captureMessage("Error finding classe with id : " + JSON.stringify(value));
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

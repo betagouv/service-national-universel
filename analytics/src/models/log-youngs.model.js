@@ -19,11 +19,15 @@ const OBJ = db.define(
     user_cohorte: DataTypes.TEXT,
     user_rural: DataTypes.TEXT,
     user_source: DataTypes.TEXT,
-    user_classeId: DataTypes.TEXT,
-    user_etablissementId: DataTypes.TEXT,
+    user_classe_id: DataTypes.TEXT,
+    user_etablissement_id: DataTypes.TEXT,
     user_age: DataTypes.INTEGER,
     date: DataTypes.DATE,
     raw_data: DataTypes.JSONB,
+    evenement_valeur_originelle: DataTypes.TEXT,
+    modifier_user_id: DataTypes.TEXT,
+    modifier_user_role: DataTypes.TEXT,
+    modifier_user_first_name: DataTypes.TEXT,
   },
   {
     defaultScope: {

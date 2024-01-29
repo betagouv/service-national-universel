@@ -37,7 +37,6 @@ import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "./commons";
 import Check from "../../assets/icons/Check";
-import RadioButton from "./components/RadioButton";
 import MiniSwitch from "./components/MiniSwitch";
 import FranceConnect from "../../assets/icons/FranceConnect";
 import SchoolEditor from "./components/SchoolEditor";
@@ -56,8 +55,10 @@ import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import PhoneField from "./components/PhoneField";
 import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import downloadPDF from "../../utils/download-pdf";
-import { Button } from "@snu/ds/admin";
 import { Link } from "react-router-dom";
+import { Button, ModalConfirmation } from "@snu/ds/admin";
+import { FaCheck } from "react-icons/fa6";
+import { IoShieldCheckmarkOutline } from "react-icons/io5";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -1755,11 +1756,11 @@ const PARENT_STATUS_NAME = {
 function SectionConsentements({ young, onChange, readonly = false, cohort }) {
   const [confirmModal, setConfirmModal] = useState(null);
   const [pdfDownloading, setPdfDownloading] = useState("");
-
-  const authorizationOptions = [
-    { value: "true", label: "J'autorise" },
-    { value: "false", label: "Je n'autorise pas" },
-  ];
+  const [modalConsent, setModalConsent] = useState(false);
+  const user = useSelector((state) => state.Auth.user);
+  const consent = young.parentAllowSNU === "true" ? "Autorise " : "N'autorise pas ";
+  const [imageRights, setImageRights] = useState(false);
+  const [participationConsent, setParticipationConsent] = useState(false);
 
   function parent2RejectSNU() {
     setConfirmModal({
@@ -1867,6 +1868,21 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
     setPdfDownloading("");
   }
 
+  async function onConfirmConsent() {
+    setModalConsent(false);
+    try {
+      setConfirmModal(null);
+      await api.put(`/young-edition/${young._id}/ref-allow-snu`, {
+        consent: participationConsent,
+        imageRights: imageRights,
+      });
+      toastr.success("Le consentement a été pris en compte. Le jeune a été notifié.");
+      onChange && onChange();
+    } catch (err) {
+      toastr.error("Nous n'avons pas pu enregistrer le consentement. Veuillez réessayer dans quelques instants.");
+    }
+  }
+
   return (
     <Section title="Consentements" collapsable>
       <div className="flex-[1_0_50%] pr-[56px]">
@@ -1903,11 +1919,10 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
             </span>
           </div>
           {young.parent1ValidationDate && (
-            <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent1ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
+            <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">Le {dayjs(young.parent1ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
           )}
         </div>
         <div className="flex items-center gap-8">
-          <RadioButton value={young.parentAllowSNU} options={authorizationOptions} readonly />
           {young.parentAllowSNU === "false" && (
             <button onClick={openParentsAllowSNUModal} className="mt-2 mb-6 text-blue-600 underline">
               Annuler le refus de consentement
@@ -1915,12 +1930,13 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
           )}
         </div>
         <div className="my-[16px] text-[14px] leading-[20px] text-[#161616]">
+          {consent}
           <b>
             {young.firstName} {young.lastName}
           </b>{" "}
           à s&apos;engager comme volontaire du Service National Universel et à participer à une session <b>{getCohortYear(cohort)}</b> du SNU.
         </div>
-        <div>
+        <div className="border-b border-[#E5E7EB] pb-6">
           <CheckRead value={young.parent1AllowSNU === "true"}>
             Confirme être titulaire de l&apos;autorité parentale/représentant(e) légal(e) de{" "}
             <b>
@@ -1951,24 +1967,34 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
             </b>
           </CheckRead>
         </div>
+        <div className="mb-[16px] mt-4 flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">
+          <div className="grow">
+            {PARENT_STATUS_NAME[young.parent1Status]}{" "}
+            <span className="font-normal text-[#6B7280]">
+              {young.parent1FirstName} {young.parent1LastName}
+            </span>
+          </div>
+          {young.parent1ValidationDate && (
+            <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">Le {dayjs(young.parent1ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
+          )}
+        </div>
         <div className="itemx-center mt-[16px] flex justify-between">
           <div className="grow text-[14px] leading-[20px] text-[#374151]">
-            <div className="font-bold">Droit à l&apos;image</div>
-            <div className="flex items-center">
-              <div>Accord : {translate(young.parent1AllowImageRights) || PENDING_ACCORD}</div>
-              {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && young.parent1Email && (
-                <a href="#" className="ml-4 block text-blue-600 underline" onClick={(e) => confirmImageRightsChange(1, e)}>
-                  Modifier
-                </a>
-              )}
-            </div>
-            {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && (
-              <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>
-                Télécharger le droit à l&apos;image {pdfDownloading}
-              </ButtonLight>
-            )}
+            <CheckRead value={young.parent1AllowImageRights === "true"}>
+              <b>Droit à l&apos;image : </b>
+              {translate(young.parent1AllowImageRights) || PENDING_ACCORD}
+            </CheckRead>
           </div>
-          {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && <MiniSwitch value={young.parent1AllowImageRights === "true"} />}
+          {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && young.parent1Email && (
+            <a href="#" className="mt-2 mr-2 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(1, e)}>
+              Modifier
+            </a>
+          )}
+          {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && (
+            <a href="#" className="mt-2 text-blue-600 underline" onClick={downloadImageRightDocument}>
+              Télécharger {pdfDownloading}
+            </a>
+          )}
         </div>
         {
           /* lien et relance du droit à l'image du parent 1 si parent1AllowImageRights n'a pas de valeur */
@@ -2010,10 +2036,11 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
         {young.parent1AllowSNU === "true" || young.parent1AllowSNU === "false" ? (
           <div className="itemx-center mt-[16px] flex justify-between">
             <div className="grow text-[14px] leading-[20px] text-[#374151]">
-              <div className="font-bold">Consentement à la participation</div>
-              <div>Accord : {translate(young.parent1AllowSNU) || PENDING_ACCORD}</div>
+              <CheckRead value={young.parent1AllowSNU === "true"}>
+                <b>Consentement à la participation : </b>
+                {translate(young.parent1AllowSNU) || PENDING_ACCORD}
+              </CheckRead>
             </div>
-            <MiniSwitch value={young.parent1AllowSNU === "true"} />
           </div>
         ) : (
           !readonly &&
@@ -2048,6 +2075,7 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
             </div>
           )
         )}
+
         {young.parent2Status && (
           <div className="mt-[24px] border-t-[1px] border-t-[#E5E7EB] pt-[24px]">
             <div className="mb-[16px] flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">
@@ -2058,29 +2086,28 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
                 </span>
               </div>
               {young.parent2ValidationDate && (
-                <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">{dayjs(young.parent2ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
+                <div className="whitespace-nowrap text-[13px] font-normal text-[#1F2937]">Le {dayjs(young.parent2ValidationDate).format("DD/MM/YYYY HH:mm")}</div>
               )}
             </div>
             {young.parent1AllowImageRights === "true" && (
               <>
                 <div className="mt-[16px] flex items-center justify-between">
                   <div className="grow text-[14px] leading-[20px] text-[#374151]">
-                    <div className="font-bold">Droit à l&apos;image</div>
-                    <div className="flex items-center">
-                      <div>Accord : {translate(young.parent2AllowImageRights) || PENDING_ACCORD}</div>
-                      {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && young.parent2Email && (
-                        <a href="#" className="ml-4 block text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
-                          Modifier
-                        </a>
-                      )}
-                    </div>
-                    {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
-                      <ButtonLight className="mt-2" onClick={downloadImageRightDocument}>
-                        Télécharger le droit à l&apos;image {pdfDownloading}
-                      </ButtonLight>
-                    )}
+                    <CheckRead value={young.parent2AllowImageRights === "true"}>
+                      <b>Droit à l&apos;image : </b>
+                      {translate(young.parent2AllowImageRights) || PENDING_ACCORD}
+                    </CheckRead>
                   </div>
-                  {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && <MiniSwitch value={young.parent2AllowImageRights === "true"} />}
+                  {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && young.parent2Email && (
+                    <a href="#" className="mt-2 mr-2 text-blue-600 underline" onClick={(e) => confirmImageRightsChange(2, e)}>
+                      Modifier
+                    </a>
+                  )}
+                  {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && (
+                    <a href="#" className="mt-2 text-blue-600 underline" onClick={downloadImageRightDocument}>
+                      Télécharger {pdfDownloading}
+                    </a>
+                  )}
                 </div>
                 {
                   /* lien et relance du droit à l'image du parent 2 si parent2AllowImageRights n'a pas de valeur  et que le droit à l'image a été réinitialisé
@@ -2181,6 +2208,49 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
             ) : null}
           </div>
         )}
+        {[YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS].includes(young.status) &&
+          [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) &&
+          young.parentAllowSNU !== "true" && (
+            <>
+              <div className="flex justify-end mt-4 border-t border-t-[#E5E7EB] p-4">
+                <Button title="Accepter à la place des représentants légaux" type="tertiary" leftIcon={<FaCheck />} onClick={() => setModalConsent(true)} />
+              </div>
+              <ModalConfirmation
+                isOpen={modalConsent}
+                onClose={() => {
+                  setModalConsent(false);
+                }}
+                className="md:max-w-[500px]"
+                icon={<IoShieldCheckmarkOutline size={40} />}
+                title="Consentements à la place des représentants légaux"
+                text={
+                  <div className="text-gray-900 text-sm">
+                    <p>
+                      Vous allez valider le consentements et le droit à l'image à la place des représentants légaux de{" "}
+                      <span className="font-bold">
+                        {young.firstName} {young.lastName}
+                      </span>
+                      . Conservez bien l’autorisation écrite dans le dossier des élèves au sein de l’établissement.
+                    </p>
+                    <div className="flex-col mt-4 w-[90%] mx-auto">
+                      <div className="flex justify-start mb-3">
+                        <input type="checkbox" className="mr-2 w-5 h-5 mt-0.5" checked={imageRights} onChange={(e) => setImageRights(e.target.checked)} />
+                        <p className="text-sm font-bold ml-5">Droit à l'image</p>
+                      </div>
+                      <div className="flex justify-start">
+                        <input type="checkbox" className="mr-2 w-5 h-5 mt-0.5" checked={participationConsent} onChange={(e) => setParticipationConsent(e.target.checked)} />
+                        <p className="text-sm font-bold ml-5">Consentement à la participation</p>
+                      </div>
+                    </div>
+                  </div>
+                }
+                actions={[
+                  { title: "Fermer", isCancel: true },
+                  { title: "Confirmer", onClick: onConfirmConsent },
+                ]}
+              />
+            </>
+          )}
       </div>
       {confirmModal && (
         <ConfirmationModal

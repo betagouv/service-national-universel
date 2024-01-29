@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Select, { components, GroupBase, StylesConfig } from "react-select";
 import AsyncSelect from "react-select/async";
 import { HiOutlineExclamation } from "react-icons/hi";
@@ -31,6 +31,10 @@ type OwnProps = {
     inputValue: string,
     callback: (options: GroupBase<string>[]) => void
   ) => void | Promise<GroupBase<string>[]>;
+  defaultOptions?:
+    | boolean
+    | GroupBase<string>[]
+    | (() => Promise<GroupBase<string>[]>);
 };
 
 export default function SelectButton({
@@ -55,6 +59,7 @@ export default function SelectButton({
   isAsync = false,
   noOptionsMessage,
   loadOptions,
+  defaultOptions = true,
 }: OwnProps) {
   const paddingStyle = label ? "16px 0 0 0" : "0";
 
@@ -91,10 +96,18 @@ export default function SelectButton({
     control: (styles, state) => ({
       ...styles,
       backgroundColor: disabled ? "#F9FAFB" : "white",
-      border: error ? "1px solid #EF4444" : isActive ? "1px solid #3B82F6" : "1px solid #E5E7EB",
+      border: error
+        ? "1px solid #EF4444"
+        : isActive
+          ? "1px solid #3B82F6"
+          : "1px solid #E5E7EB",
       boxShadow: "none",
       "&:hover": {
-        border: error ? "1px solid #EF4444" : isActive ? "1px solid #3B82F6" : "1px solid #E5E7EB",
+        border: error
+          ? "1px solid #EF4444"
+          : isActive
+            ? "1px solid #3B82F6"
+            : "1px solid #E5E7EB",
       },
       ...(state.isFocused && {
         outline: "solid",
@@ -172,6 +185,21 @@ export default function SelectButton({
     }),
   };
 
+  const [defaultOpts, setDefaultOpts] = useState<
+    boolean | GroupBase<string>[] | undefined
+  >(true);
+
+  useEffect(() => {
+    if (typeof defaultOptions === "function") {
+      (async () => {
+        const data = await defaultOptions();
+        setDefaultOpts(data);
+      })();
+    } else {
+      setDefaultOpts(defaultOptions);
+    }
+  }, [defaultOptions]);
+
   return (
     <div className={"flex flex-col gap-3 " + className}>
       <div className="relative">
@@ -186,12 +214,12 @@ export default function SelectButton({
           <AsyncSelect
             placeholder={placeholder}
             loadOptions={loadOptions}
-            defaultOptions
+            defaultOptions={defaultOpts}
             cacheOptions
             noOptionsMessage={() => noOptionsMessage}
             maxMenuHeight={maxMenuHeight}
             isMulti={isMulti}
-            isDisabled={disabled}
+            isDisabled={disabled || readOnly}
             closeMenuOnSelect={closeMenuOnSelect}
             hideSelectedOptions={hideSelectedOptions}
             isClearable={isClearable}
@@ -207,6 +235,7 @@ export default function SelectButton({
           <Select
             placeholder={placeholder}
             options={options}
+            noOptionsMessage={() => noOptionsMessage}
             defaultValue={defaultValue}
             maxMenuHeight={maxMenuHeight}
             isMulti={isMulti}

@@ -8,14 +8,24 @@ const sessions2024CohortNames = [
   "Février 2024 - C",
   "Février 2024 - A",
   "Février 2024 - B",
-  "Mars 2024 - La Réunion",
   "Avril 2024 - C",
   "Avril 2024 - A",
   "Avril 2024 - B",
-  "Juin 2024 - 1",
   "Juin 2024 - 2",
+  "Juin 2024 - Martinique",
+  "Juin 2024 - NC",
   "Juillet 2024",
+  "Juillet 2024 - Martinique",
   "CLE 23-24",
+  "CLE mars 2024 1",
+  "CLE mars 2024 2",
+  "CLE mai 2024",
+  "CLE juin 2024",
+  "CLE mai 2024 Martinique",
+  "CLE juin 2024 Martinique",
+  "CLE février 2024 Réunion",
+  "CLE GE1 2024",
+  "CLE GE2 2024",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
@@ -43,11 +53,9 @@ const COHESION_STAY_START = {
   "Février 2024 - C": new Date("02/12/2024"),
   "Février 2024 - A": new Date("02/19/2024"),
   "Février 2024 - B": new Date("02/26/2024"),
-  "Mars 2024 - La Réunion": new Date("03/04/2024"),
   "Avril 2024 - C": new Date("04/08/2024"),
   "Avril 2024 - A": new Date("04/15/2024"),
   "Avril 2024 - B": new Date("04/22/2024"),
-  "Juin 2024 - 1": new Date("06/03/2024"),
   "Juin 2024 - 2": new Date("06/17/2024"),
   "Juillet 2024": new Date("07/03/2024"),
 };
@@ -66,11 +74,9 @@ const START_DATE_SESSION_PHASE1 = {
   "Février 2024 - C": new Date("02/12/2024"),
   "Février 2024 - A": new Date("02/19/2024"),
   "Février 2024 - B": new Date("02/26/2024"),
-  "Mars 2024 - La Réunion": new Date("03/04/2024"),
   "Avril 2024 - C": new Date("04/08/2024"),
   "Avril 2024 - A": new Date("04/15/2024"),
   "Avril 2024 - B": new Date("04/22/2024"),
-  "Juin 2024 - 1": new Date("06/03/2024"),
   "Juin 2024 - 2": new Date("06/17/2024"),
   "Juillet 2024": new Date("07/03/2024"),
 };
@@ -92,11 +98,9 @@ const COHESION_STAY_END = {
   "Février 2024 - C": new Date("02/24/2024"),
   "Février 2024 - A": new Date("03/02/2024"),
   "Février 2024 - B": new Date("03/09/2024"),
-  "Mars 2024 - La Réunion": new Date("03/16/2024"),
   "Avril 2024 - C": new Date("04/20/2024"),
   "Avril 2024 - A": new Date("04/27/2024"),
   "Avril 2024 - B": new Date("05/04/2024"),
-  "Juin 2024 - 1": new Date("06/14/2024"),
   "Juin 2024 - 2": new Date("06/28/2024"),
   "Juillet 2024": new Date("07/15/2024"),
 };
@@ -183,8 +187,10 @@ const getCohortPeriodTemp = (young) => {
 };
 
 function inscriptionModificationOpenForYoungs(cohort) {
-  if (!cohort?.inscriptionModificationEndDate) return false;
-  return new Date() < new Date(cohort.inscriptionModificationEndDate);
+  // FIXME: remove this when all cohorts have inscriptionModificationEndDate
+  const date = cohort?.type === "CLE" ? cohort?.inscriptionEndDate : cohort?.inscriptionModificationEndDate;
+  if (!date) return false;
+  return new Date() < new Date(date);
 }
 
 function inscriptionCreationOpenForYoungs(cohort) {
@@ -228,6 +234,7 @@ function shouldForceRedirectToInscription(young, isInscriptionModificationOpen =
 
 //@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
 function canApplyToPhase2(young, cohort) {
+  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const now = new Date();
   const dateEnd = getCohortEndDate(young, cohort);
   return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;

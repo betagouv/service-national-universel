@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import queryString from "query-string";
-import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
@@ -9,11 +8,16 @@ import TitleImage from "../../assets/onboarding-cle.png";
 import MyClass from "./MyClass";
 import PrimaryButton from "@/components/dsfr/ui/buttons/PrimaryButton";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
-import { ModalContainer, Content } from "../../components/modals/Modal";
+import { ModalContainer } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
-import useClass from "@/services/useClass";
+import { fetchClass } from "@/services/classe.service";
+import { validateId } from "@/utils";
+import { useQuery } from "@tanstack/react-query";
+import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import Loader from "@/components/Loader";
+import { RiArrowLeftLine } from "react-icons/ri";
 
 const Title = () => (
   <div>
@@ -29,26 +33,35 @@ const Subtitle = ({ refName }) => (
 );
 
 const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
-  const history = useHistory();
-  const handleClick = (id) => {
-    plausibleEvent("CLE/CTA preinscription - contact support");
-    history.push(`/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE&classeId=${id}`);
-  };
-
   return (
-    <Modal centered isOpen={isOpen} toggle={onCancel || onChange}>
+    <Modal centered isOpen={isOpen} toggle={onCancel || onChange} size={"md"}>
       <ModalContainer>
         <CloseSvg className="close-icon" height={10} width={10} onClick={onCancel || onChange} />
-        <Content className="text-left">
-          <h1>→ Attention</h1>
-          <p>
-            Vous avez déjà un compte volontaire et vous souhaitez participer au SNU dans le cadre des classes engagées ? Contactez le support pour mettre à jour votre compte et
-            vous faire gagner du temps.
-          </p>
-          <InlineButton className="pt-2 md:pr-2" onClick={() => handleClick(id)}>
-            Contacter le support
-          </InlineButton>
-        </Content>
+        <div className="px-8 pb-8">
+          <div className="flex gap-6 text-2xl text-black font-semibold">
+            <p>→</p>
+            <p>J’ai déjà démarré mon inscription dans ma Classe engagée</p>
+          </div>
+          <Link to="/auth">
+            <p className="bg-blue-france-sun-113 hover:bg-blue-france-sun-113-hover text-white w-full p-2.5 text-center my-4">Me connecter</p>
+          </Link>
+          <hr />
+
+          <div className="flex gap-6 text-2xl text-black font-semibold my-4">
+            <p>→</p>
+            <p>Je suis inscrit(e) en tant que volontaire</p>
+          </div>
+
+          <p>Vous avez un compte hors Classes engagées ? Contactez le support pour mettre à jour votre compte et vous faire gagner du temps.</p>
+
+          <Link to={`/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE&classeId=${id}`}>
+            <p
+              onClick={() => plausibleEvent("CLE/CTA preinscription - contact support")}
+              className="bg-blue-france-sun-113 hover:bg-blue-france-sun-113-hover text-white w-full p-2.5 text-center my-4">
+              Contacter le support
+            </p>
+          </Link>
+        </div>
       </ModalContainer>
     </Modal>
   );
@@ -56,14 +69,32 @@ const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
 
 const OnBoarding = () => {
   const { isLoggedIn, logout } = useAuth();
+  if (isLoggedIn) logout({ redirect: false });
+  const { id } = queryString.parse(window.location.search);
+
+  if (!validateId(id)) {
+    plausibleEvent("CLE preinscription - id invalide dans l'url");
+    return <OnboardingError message="Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis." />;
+  }
+  return <OnboardingContent id={id} />;
+};
+
+const OnboardingContent = ({ id }) => {
   const history = useHistory();
   const [showContactSupport, setShowContactSupport] = useState(false);
-  const { id } = queryString.parse(location.search);
+  const {
+    isError,
+    isPending,
+    data: classe,
+  } = useQuery({
+    queryKey: ["class", id],
+    queryFn: () => fetchClass(id),
+    enabled: validateId(id),
+  });
 
-  if (isLoggedIn) logout({ redirect: false });
-  const { classe, isError } = useClass(id);
-  if (isError) toastr.error("Impossible de joindre le service.");
-
+  if (isPending) return <Loader />;
+  if (isError)
+    return <OnboardingError message="Impossible de joindre le service. Essayez de vérifier le lien d'inscription qui vous a été transmis. Sinon, veuillez réessayer plus tard." />;
   return (
     <DSFRLayout title="Inscription de l'élève">
       {classe && (
@@ -72,13 +103,8 @@ const OnBoarding = () => {
           <hr className="my-4 h-px border-0 bg-gray-200" />
           {classe.isInscriptionOpen && (
             <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-              <InlineButton
-                className="md:pr-4 pt-2 md:pr-2 pb-1"
-                onClick={() => {
-                  plausibleEvent("CLE/CTA preinscription - compte HTS");
-                  setShowContactSupport(true);
-                }}>
-                J'ai déjà un compte volontaire
+              <InlineButton className="md:pr-4 pt-2 pb-1" onClick={() => setShowContactSupport(true)}>
+                J'ai déjà un compte
               </InlineButton>
               <PrimaryButton
                 onClick={() => {
@@ -101,6 +127,22 @@ const OnBoarding = () => {
           <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={id}></ModalInfo>
         </DSFRContainer>
       )}
+    </DSFRLayout>
+  );
+};
+
+const OnboardingError = ({ message }) => {
+  return (
+    <DSFRLayout title="Inscription de l'élève">
+      <DSFRContainer title="Une erreur est survenue">
+        <ErrorMessage>{message}</ErrorMessage>
+        <Link to="/">
+          <div className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover underline underline-offset-4 my-4 flex gap-2 items-center">
+            <RiArrowLeftLine />
+            <p className="text-sm">Retour à l'accueil</p>
+          </div>
+        </Link>
+      </DSFRContainer>
     </DSFRLayout>
   );
 };

@@ -460,14 +460,19 @@ const canEditPresenceYoung = (actor) => {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 };
 
-const canSigninAs = (actor, target) => {
+const canSigninAs = (actor, target, source) => {
   if (isAdmin(actor)) return true;
   if (!isReferent(actor)) return false;
-  if (target.constructor.modelName !== "young") return false;
 
-  const isReferentRegionFromSameRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
-  const isReferentDepartmentFromSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
-  return isReferentRegionFromSameRegion || isReferentDepartmentFromSameDepartment;
+  if (source === "referent") {
+    const allowedTargetRoles = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];
+    if (!allowedTargetRoles.includes(target.role)) return false;
+    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.some((d) => target.department.includes(d))) return true;
+  } else {
+    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department)) return true;
+  }
+  if (actor.role === ROLES.REFERENT_REGION && actor.region === target.region) return true;
+  return false;
 };
 
 const canSendFileByMailToYoung = (actor, young) => {
@@ -595,7 +600,7 @@ function canDownloadYoungDocuments(actor, target, type = null) {
 }
 
 function canInviteYoung(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
 function canSendTemplateToYoung(actor, young) {
@@ -882,6 +887,10 @@ function canUpdateClasse(actor) {
   return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
+function canUpdateClasseStay(actor) {
+  return [ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+}
+
 function canViewClasse(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
@@ -903,6 +912,10 @@ function canSearchStudent(actor) {
 
 function canDeleteClasse(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
+}
+
+function canAllowSNU(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
 
 export {
@@ -1033,9 +1046,11 @@ export {
   canInviteCoordinateur,
   canCreateClasse,
   canUpdateClasse,
+  canUpdateClasseStay,
   canViewClasse,
   canUpdateEtablissement,
   canViewEtablissement,
   canSearchStudent,
   canDeleteClasse,
+  canAllowSNU,
 };

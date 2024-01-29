@@ -39,35 +39,21 @@ router.get("/available", passport.authenticate("young", { session: false, failWi
       return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    // get all meeting points to cohesion from schema de répartition center with bus
-    const schemaMeetingPoints = await SchemaDeRepartitionModel.aggregate([
-      { $match: { cohort: req.user.cohort, centerId: cohesionCenter._id.toString(), fromDepartment: req.user.department } },
-      { $unwind: "$gatheringPlaces" },
-      {
-        $addFields: { meetingPointId: { $toObjectId: "$gatheringPlaces" } },
-      },
-      {
-        $lookup: {
-          from: "pointderassemblements",
-          localField: "meetingPointId",
-          foreignField: "_id",
-          as: "meetingPoint",
-        },
-      },
-      { $unwind: "$meetingPoint" },
-      {
-        $replaceRoot: { newRoot: "$meetingPoint" },
-      },
-    ]);
+    // We need to get all the meetingPoints that:
+    // - are in a young's department
+    // - are in a bus line that is affected to the young's session
+    // - are in a bus line that still has available seats
+
+    const meetingPointsInSameDepartment = await PointDeRassemblementModel.find({ department: req.user.department });
 
     // get all buses to cohesion center using previous meeting points, find used meeting points with hours and get a new meeting point list
-    let schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
+    let meetingPointIds = meetingPointsInSameDepartment.map((m) => m._id.toString());
     // on ajoute le PDR choisi par le jeune pour être certain qu'il soit à l'arrivée.
     if (req.user.meetingPointId) {
-      schemaMeetingPointIds.push(req.user.meetingPointId);
+      meetingPointIds.push(req.user.meetingPointId);
     }
     const meetingPoints = await LigneToPointModel.aggregate([
-      { $match: { meetingPointId: { $in: schemaMeetingPointIds } } },
+      { $match: { meetingPointId: { $in: meetingPointIds } } },
       {
         $addFields: { lineId: { $toObjectId: "$lineId" } },
       },
@@ -453,49 +439,21 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     const { filter } = valueQuery;
     const regex = new RegExp(".*" + filter ? filter : "" + ".*", "gi");
 
-    // get all meeting points to cohesion from schema de répartition center with bus
-    const schemaMeetingPoints = await SchemaDeRepartitionModel.aggregate([
-      { $match: { cohort: cohort, centerId: centerId } },
-      { $unwind: "$gatheringPlaces" },
-      {
-        $addFields: { meetingPointId: { $toObjectId: "$gatheringPlaces" } },
-      },
-      {
-        $lookup: {
-          from: "pointderassemblements",
-          localField: "meetingPointId",
-          foreignField: "_id",
-          as: "meetingPoint",
-        },
-      },
-      { $unwind: "$meetingPoint" },
-      {
-        $replaceRoot: { newRoot: "$meetingPoint" },
-      },
-    ]);
-    const schemaMeetingPointIds = schemaMeetingPoints.map((m) => m._id.toString());
+    const ligneDeBus = await LigneBusModel.find({ cohort: cohort, centerId: centerId });
+    const ligneToPoint = await LigneToPointModel.find({ lineId: { $in: ligneDeBus.map((l) => l._id) } });
 
-    const ligneToPoint = await LigneToPointModel.find({ meetingPointId: { $in: schemaMeetingPointIds }, deletedAt: { $exists: false } });
-    const ligneBusIds = ligneToPoint.map((l) => l.lineId.toString());
-    let ligneBus = await LigneBusModel.find({ _id: { $in: ligneBusIds }, centerId, cohort });
-
-    const finalMeettingPoints = [];
-    ligneBus.map((l) => {
-      l.meetingPointsIds.map((m) => {
-        if (schemaMeetingPointIds.includes(m) && !finalMeettingPoints.includes(m)) finalMeettingPoints.push(m);
-      });
-    });
-
-    const finalMeettingPointsObjects = await PointDeRassemblementModel.find({
-      _id: { $in: finalMeettingPoints },
+    const meetingPointIds = ligneToPoint.map((l) => l.meetingPointId.toString());
+    const meetingPoints = await PointDeRassemblementModel.find({
+      _id: { $in: meetingPointIds },
       $or: [{ name: { $regex: regex } }, { city: { $regex: regex } }, { department: { $regex: regex } }, { region: { $regex: regex } }],
+      deletedAt: { $exists: false },
     });
 
     //build final Array since client wait for ligneToPoint + meetingPoint + ligneBus
     const data = [];
     ligneToPoint.map((ligne) => {
-      const meetingPointFiltered = finalMeettingPointsObjects.find((m) => m._id.toString() === ligne.meetingPointId);
-      const ligneBusFiltered = ligneBus.find((l) => l._id.toString() === ligne.lineId);
+      const meetingPointFiltered = meetingPoints.find((m) => m._id.toString() === ligne.meetingPointId);
+      const ligneBusFiltered = ligneDeBus.find((l) => l._id.toString() === ligne.lineId);
 
       // filter uniquement sur les bus avec des places dispos
       if (meetingPointFiltered && ligneBusFiltered && ligneBusFiltered.youngSeatsTaken < ligneBusFiltered.youngCapacity)
