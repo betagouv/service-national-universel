@@ -213,6 +213,7 @@ jobs:
     needs: [prepare, deploy_production]
     env:
       production_branch: "production"
+      hotfix_branch: "production_hotfix"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -226,3 +227,23 @@ jobs:
 
       - name: Remove RC branch
         run: git push origin --delete ${{ needs.prepare.outputs.target_branch }}
+
+      - name: Check if hotfix branch exists
+        id: check
+        continue-on-error: true
+        run: |
+          if git fetch origin ${{ env.hotfix_branch }} --prune ; then
+            echo "branch_exists=1" >> $GITHUB_OUTPUT
+          else
+            echo "branch_exists=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Delete existing hotfix branch
+        if: steps.check.outputs.branch_exists == '1'
+        run: git push origin --delete ${{ env.hotfix_branch }}
+
+      - name: Create hotfix branch from production
+        run: git checkout -b ${{ env.hotfix_branch }}
+
+      - name: Push hotfix branch
+        run: git push origin ${{ env.hotfix_branch }}

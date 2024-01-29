@@ -1,5 +1,5 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { isPhoneNumberWellFormated, PHONE_ZONES, translate, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
@@ -146,8 +146,21 @@ export default function StepProfil() {
               </div>
             </>
           )}
-          <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} label="Prénom" error={error.firstName} correction={corrections.firstName} />
-          <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} label="Nom" error={error.lastName} correction={corrections.lastName} />
+          <Input
+            value={data.firstName}
+            onChange={(e) => setData({ ...data, firstName: e })}
+            label="Prénom du volontaire"
+            error={error.firstName}
+            correction={corrections.firstName}
+          />
+          <Input
+            value={data.lastName}
+            onChange={(e) => setData({ ...data, lastName: e })}
+            label="Nom de famille du volontaire"
+            error={error.lastName}
+            correction={corrections.lastName}
+            onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })}
+          />
           {isCLE && (
             <label className="w-full">
               Date de naissance

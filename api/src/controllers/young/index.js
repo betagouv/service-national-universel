@@ -40,7 +40,7 @@ const {
   updateSeatsTakenInBusLine,
 } = require("../../utils");
 const { sendTemplate, unsync } = require("../../sendinblue");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../../cookie-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
@@ -67,7 +67,8 @@ const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
-const { JWT_SIGNIN_VERSION } = require("../../jwt-options");
+const { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } = require("../../jwt-options");
+const scanFile = require("../../utils/virusScanner");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
@@ -94,7 +95,7 @@ router.post("/signup_verify", async (req, res) => {
 
     const young = await YoungObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     return res.status(200).send({ ok: true, token, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
@@ -130,8 +131,8 @@ router.post("/signup_invite", async (req, res) => {
     young.set({ invitationToken: "" });
     young.set({ invitationExpires: null });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: "30d" });
-    res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
     await young.save({ fromUser: req.user });
 
@@ -191,6 +192,15 @@ router.post(
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+        }
+
+        if (config.ENVIRONMENT === "production") {
+          const scanResult = await scanFile(tempFilePath, name, req.user._id);
+          if (scanResult.infected) {
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          } else if (scanResult.error) {
+            return res.status(500).send({ ok: false, code: scanResult.error });
+          }
         }
 
         const data = fs.readFileSync(tempFilePath);

@@ -47,8 +47,8 @@ const {
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure, serializeClasse, serializeEtablissement } = require("../utils/serializer");
-const { JWT_SIGNIN_MAX_AGE, JWT_SIGNIN_VERSION } = require("../jwt-options");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../cookie-options");
+const { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION } = require("../jwt-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../cookie-options");
 const {
   ROLES_LIST,
   canInviteUser,
@@ -81,6 +81,7 @@ const {
   YOUNG_SOURCE_LIST,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
+const scanFile = require("../utils/virusScanner");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -168,8 +169,8 @@ router.post("/signup", async (req, res) => {
     const role = ROLES.RESPONSIBLE; // responsible by default
 
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
     //Create structure
     const { name, description, legalStatus, types, zip, region, department, sousType } = value;
@@ -214,14 +215,14 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     else if (type === "young") user = await YoungModel.findById(id);
     if (!user) return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
 
-    if (!canSigninAs(req.user, user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSigninAs(req.user, user, type)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
-      expiresIn: JWT_SIGNIN_MAX_AGE,
+      expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
-    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
     else if (type === "young") {
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       return res.status(200).send({ ok: true });
     }
 
@@ -357,7 +358,7 @@ router.post("/signup_verify", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     return res.status(200).send({ ok: true, token, data: serializeReferent(referent, referent) });
   } catch (error) {
     capture(error);
@@ -400,8 +401,8 @@ router.post("/signup_invite", async (req, res) => {
       acceptCGU,
     });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
@@ -988,6 +989,15 @@ router.post(
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+        }
+
+        if (config.ENVIRONMENT === "production") {
+          const scanResult = await scanFile(tempFilePath, name, req.user);
+          if (scanResult.infected) {
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          } else if (scanResult.error) {
+            return res.status(500).send({ ok: false, code: scanResult.error });
+          }
         }
 
         const data = fs.readFileSync(tempFilePath);

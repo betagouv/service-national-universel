@@ -36,6 +36,9 @@ const Dashboard = (props) => {
     } else if (user.role === ROLES.VISITOR) {
       setArticles(visitorArticles);
       setKbRole("visitor");
+    } else if (user.role === ROLES.TRANSPORTER) {
+      setArticles(visitorArticles);
+      setKbRole(ROLES.TRANSPORTER);
     } else if (user.role === ROLES.ADMINISTRATEUR_CLE) {
       setArticles(administrator_cleArticles);
       setKbRole(`${user.role}_${user.subRole}`);
@@ -411,7 +414,9 @@ const Articles = styled.div`
 
 const List = styled.div`
   background-color: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-radius: 0.5rem;
   overflow: hidden;
   .ticket {

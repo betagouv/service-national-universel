@@ -20,6 +20,7 @@ const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
 const { getHtmlTemplate } = require("../../templates/utils");
 const mime = require("mime-types");
+const scanFile = require("../../utils/virusScanner");
 
 function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
@@ -275,6 +276,15 @@ router.post(
           capture(`File ${name} of user(${req.user.id})is not a valid type: ${mimetype} ${mimeFromMagicNumbers}`);
           fs.unlinkSync(tempFilePath);
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+        }
+
+        if (config.ENVIRONMENT === "production") {
+          const scanResult = await scanFile(tempFilePath, name, req.user.id);
+          if (scanResult.infected) {
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          } else if (scanResult.error) {
+            return res.status(500).send({ ok: false, code: scanResult.error });
+          }
         }
 
         // align date

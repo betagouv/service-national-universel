@@ -23,16 +23,9 @@ const sessions2024CohortNames = [
   "CLE juin 2024",
   "CLE mai 2024 Martinique",
   "CLE juin 2024 Martinique",
-  "CLE mars 2024 Guadeloupe",
-  "CLE mai 2024 Guadeloupe",
-  "CLE mars 2024 Guyane",
-  "CLE avril 2024 Guyane",
-  "CLE mai 2024 Guyane",
   "CLE février 2024 Réunion",
-  "CLE mars 2024 Réunion",
-  "CLE avril 2024 Réunion",
-  "CLE mai 2024 Mayotte",
-  "CLE juin 2024 Mayotte",
+  "CLE GE1 2024",
+  "CLE GE2 2024",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
@@ -241,6 +234,7 @@ function shouldForceRedirectToInscription(young, isInscriptionModificationOpen =
 
 //@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
 function canApplyToPhase2(young, cohort) {
+  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const now = new Date();
   const dateEnd = getCohortEndDate(young, cohort);
   return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;

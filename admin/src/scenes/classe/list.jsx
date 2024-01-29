@@ -12,7 +12,7 @@ import { ROLES, translateStatusClasse } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
 
-export default function list() {
+export default function List() {
   const [classes, setClasses] = useState(null);
   const [data, setData] = useState([]);
   const pageId = "classe-list";
@@ -85,6 +85,8 @@ export default function list() {
     { title: "Type", name: "type", missingLabel: "Non renseigné" },
     { title: "Secteur", name: "sector", missingLabel: "Non renseigné" },
     { title: "Niveau", name: "grade", missingLabel: "Non renseigné" },
+    { title: "Département", name: "department", missingLabel: "Non renseigné" },
+    { title: "Région", name: "region", missingLabel: "Non renseigné" },
   ].filter(Boolean);
 
   if (classes === null) return null;

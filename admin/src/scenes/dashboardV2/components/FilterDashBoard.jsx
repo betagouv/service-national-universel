@@ -77,7 +77,8 @@ const ToolTipView = ({ selectedFilterValues, filter }) => {
     <ReactTooltip id={"tooltip-filtre" + filter.id} className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
       <div className="flex max-w-[600px] flex-row flex-wrap gap-2 rounded">
         {selectedFilterValues.map((item) => {
-          const label = filter.options.find((option) => option.key === item).label;
+          const found = filter.options.find((option) => option.key === item);
+          const label = found?.label;
           return (
             <div className="rounded bg-gray-100 py-1 px-2 text-xs text-gray-500" key={item}>
               {label}
@@ -183,8 +184,12 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                     <>
                       {optionsVisible
                         ?.sort((a, b) => {
+                          if (filter?.translate) {
+                            return filter.translate(a.key)?.toString().localeCompare(filter.translate(b.key)?.toString());
+                          }
                           a.key?.toString().localeCompare(b.key?.toString());
                         })
+
                         ?.map((option) => {
                           const optionSelected = filter?.fixed?.includes(option.key) || (selectedFilters[filter.id]?.length && selectedFilters[filter?.id]?.includes(option?.key));
                           return (
@@ -194,7 +199,7 @@ const DropDown = ({ filter, selectedFilters, setSelectedFilters, visible, setVis
                               onClick={() => handleSelect(option?.key)}>
                               <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
                                 <input type="checkbox" disabled={filter?.fixed?.includes(option.key)} checked={optionSelected} onChange={() => {}} />
-                                {option.label}
+                                {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
                               </div>
                             </div>
                           );

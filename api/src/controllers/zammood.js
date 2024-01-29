@@ -2,6 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const fileUpload = require("express-fileupload");
 const FileType = require("file-type");
+const NodeClam = require("clamscan");
 const fs = require("fs");
 const Joi = require("joi");
 const { v4: uuid } = require("uuid");
@@ -9,11 +10,11 @@ const { v4: uuid } = require("uuid");
 const { ROLES, SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 const slack = require("../slack");
-const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE } = require("../cookie-options");
+const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } = require("../cookie-options");
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
-const { ADMIN_URL, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
+const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
 const { sendTemplate } = require("../sendinblue");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
@@ -23,6 +24,7 @@ const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
 const optionalAuth = require("../middlewares/optionalAuth");
 const { serializeClasse } = require("../utils/serializer");
+const scanFile = require("../utils/virusScanner");
 
 const router = express.Router();
 
@@ -58,7 +60,7 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
     const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    res.cookie("jwtzamoud", token, cookieOptions(COOKIE_SNUPPORT_MAX_AGE));
+    res.cookie("jwtzamoud", token, cookieOptions(COOKIE_SNUPPORT_MAX_AGE_MS));
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -452,6 +454,15 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      }
+
+      if (ENVIRONMENT === "production") {
+        const scanResult = await scanFile(tempFilePath, name, req.user._id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        } else if (scanResult.error) {
+          return res.status(500).send({ ok: false, code: scanResult.error });
+        }
       }
 
       const data = fs.readFileSync(tempFilePath);

@@ -12,8 +12,8 @@ const YoungModel = require("../models/young");
 const ContractModel = require("../models/contract");
 const config = require("../config");
 const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2 } = require("snu-lib");
-const { JWT_SIGNIN_MAX_AGE, checkJwtSigninVersion, JWT_SIGNIN_VERSION } = require("../jwt-options");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../cookie-options");
+const { JWT_SIGNIN_MAX_AGE_SEC, checkJwtSigninVersion, JWT_SIGNIN_VERSION } = require("../jwt-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../cookie-options");
 const { ERRORS, checkStatusContract } = require("../utils");
 
 // ! Appelé par le front de JVA
@@ -27,19 +27,24 @@ router.get("/signin", async (req, res) => {
 
     const { token_jva } = value;
 
-    const jwtPayload = await jwt.verify(token_jva, config.secret);
-    if (!jwtPayload) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
-    const { error_token, value_token } = Joi.object({
+    let jwtPayload;
+    try {
+      jwtPayload = await jwt.verify(token_jva, config.secret);
+    } catch (error) {
+      return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+    }
+    if (!jwtPayload) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+    const { error: error_token, value: value_token } = Joi.object({
       __v: Joi.string().required(),
       _id: Joi.string().required(),
       passwordChangedAt: Joi.string(),
       lastLogoutAt: Joi.date(),
     }).validate(jwtPayload, { stripUnknown: true });
-    if (error_token || !checkJwtSigninVersion(value_token)) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
-    delete value.__v;
+    if (error_token || !checkJwtSigninVersion(value_token)) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+    delete value_token.__v;
 
-    const user = await ReferentModel.find(value_token);
-    if (!user) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_TOKEN_INVALID });
+    const user = await ReferentModel.findOne(value_token);
+    if (!user) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
 
     const structure = await StructureModel.findById(user.structureId);
 
@@ -52,9 +57,9 @@ router.get("/signin", async (req, res) => {
       await user.save();
 
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
-        expiresIn: JWT_SIGNIN_MAX_AGE,
+        expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
-      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
       return res.redirect(config.ADMIN_URL);
     }
@@ -85,7 +90,7 @@ router.get("/getToken", async (req, res) => {
     if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_API_KEY_INVALID });
 
     const token_jva = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user._id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
-      expiresIn: JWT_SIGNIN_MAX_AGE,
+      expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
 
     return res.status(200).send({ ok: true, data: { token_jva } });

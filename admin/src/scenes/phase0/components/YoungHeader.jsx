@@ -17,6 +17,7 @@ import {
   YOUNG_STATUS_PHASE2,
   YOUNG_STATUS_PHASE3,
 } from "snu-lib";
+import { Button as DsfrButton } from "@snu/ds/admin";
 import Bin from "@/assets/Bin";
 import ChevronDown from "@/assets/icons/ChevronDown";
 import History from "@/assets/icons/History";
@@ -107,8 +108,10 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     setWithdrawn({ reason: "", message: "", error: null });
     setConfirmModal({
       icon: <Warning className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-      title: "Modification de statut",
-      message: `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil? Un email sera automatiquement envoyé à l'utlisateur.`,
+      title: status === YOUNG_STATUS.WITHDRAWN ? "Désistement" : "Modification de statut",
+      message: `${
+        status === YOUNG_STATUS.WITHDRAWN ? `Êtes-vous sûr(e) de vouloir désister ce profil?` : `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?`
+      } Un email sera automatiquement envoyé à l'utlisateur.`,
       type: status,
     });
   };
@@ -249,6 +252,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               )}
             </Title>
             <AttestationDownloadButton young={young} />
+            {[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && young.status !== YOUNG_STATUS.WITHDRAWN && (
+              <>
+                <DsfrButton title="Désister" onClick={() => onSelectStatus(YOUNG_STATUS.WITHDRAWN)} />
+              </>
+            )}
           </div>
 
           {isStructure ? (

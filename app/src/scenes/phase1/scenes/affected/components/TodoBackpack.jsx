@@ -66,13 +66,6 @@ export default function TodoBackpack({ lunchBreak }) {
           </label>
         </div>
 
-        <div className="flex items-baseline gap-4">
-          <input type="checkbox" name="masques" id="masques" checked={todo.masques} onChange={handleCheck} />
-          <label htmlFor="masques">
-            Deux <strong>masques jetables</strong> à usage médical pour le transport en commun
-          </label>
-        </div>
-
         {lunchBreak && (
           <div className="flex items-baseline gap-4">
             <input type="checkbox" name="collation" id="collation" checked={todo.collation} onChange={handleCheck} />

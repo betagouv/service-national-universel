@@ -37,8 +37,8 @@ resource "scaleway_container" "api" {
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
   port            = 8080
   cpu_limit       = 768
-  memory_limit    = 1024
-  min_scale       = 1
+  memory_limit    = 4096
+  min_scale       = 4
   max_scale       = 20
   timeout         = 60
   max_concurrency = 50
@@ -96,6 +96,7 @@ resource "scaleway_container" "api" {
     "QPV_USERNAME"                          = local.secrets.QPV_USERNAME
     "SECRET"                                = local.secrets.SECRET
     "SENDINBLUEKEY"                         = local.secrets.SENDINBLUEKEY
+    "SENTRY_AUTH_TOKEN"                     = local.secrets.SENTRY_AUTH_TOKEN
     "SLACK_BOT_TOKEN"                       = local.secrets.SLACK_BOT_TOKEN
     "SUPPORT_APIKEY"                        = local.secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.secrets.PM2_SLACK_URL
@@ -103,11 +104,10 @@ resource "scaleway_container" "api" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "api" {
-#  container_id = scaleway_container.api.id
-#  hostname     = local.api_hostname
-#}
+resource "scaleway_container_domain" "api" {
+  container_id = scaleway_container.api.id
+  hostname     = local.api_hostname
+}
 
 
 
@@ -145,11 +145,10 @@ resource "scaleway_container" "admin" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "admin" {
-#  container_id = scaleway_container.admin.id
-#  hostname     = local.admin_hostname
-#}
+resource "scaleway_container_domain" "admin" {
+  container_id = scaleway_container.admin.id
+  hostname     = local.admin_hostname
+}
 
 resource "scaleway_container" "app" {
   name            = "production-app"
@@ -186,11 +185,10 @@ resource "scaleway_container" "app" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "app" {
-#  container_id = scaleway_container.app.id
-#  hostname     = local.app_hostname
-#}
+resource "scaleway_container_domain" "app" {
+  container_id = scaleway_container.app.id
+  hostname     = local.app_hostname
+}
 
 output "api_endpoint" {
   value = "https://${local.api_hostname}"

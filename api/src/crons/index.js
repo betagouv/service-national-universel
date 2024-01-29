@@ -21,6 +21,7 @@ const youngPatches = require("./patch/young");
 const classePatches = require("./patch/classe");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const parentConsentementReminder = require("./parentConsentementReminder");
+const reminderInscription = require("./reminderInscription");
 const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
 const dsnjExport = require("./dsnjExport");
 const clotureMissionReminder = require("./clotureInscriptionReminder");
@@ -74,8 +75,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     applicationPending.handler();
   });
 
-  // Une fois par mois, le 1er du mois à 9h30
-  cron.schedule("30 9 1 * *", () => {
+  cron.schedule("0 15 * * *", () => {
     deleteCNIAdnSpecificAmenagementType.handler();
   });
 
@@ -158,6 +158,11 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   cron.schedule("27 8 * * *", () => {
     parentConsentementReminder.handler();
+  });
+
+  // Every day at 11:00
+  cron.schedule("0 11 * * *", () => {
+    reminderInscription.handler();
   });
 
   // Every day at 10:00

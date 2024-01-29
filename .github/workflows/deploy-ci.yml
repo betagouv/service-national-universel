@@ -107,12 +107,13 @@ jobs:
 
       - name: Terraform plan
         working-directory: ${{ env.ci_directory }}
+        # add -lock-timeout option until https://github.com/hashicorp/terraform/issues/33217 is fixed
         run: |
-          terraform plan -no-color -input=false \
+          terraform plan -no-color -input=false  -lock-timeout=15m \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.ci_directory }}
         run: |
-          terraform apply -no-color -input=false -auto-approve \
+          terraform apply -no-color -input=false -auto-approve -lock-timeout=15m \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
