@@ -8,7 +8,7 @@ export default function SchoolOutOfFrance({ school, onSelectSchool, toggleVerify
   const [countries, setCountries] = useState([]);
   const [country, setCountry] = useState(school?.country);
   const [schools, setSchools] = useState([]);
-  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
+  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.city && school?.country != "FRANCE");
 
   const [errors, setErrors] = useState({});
 

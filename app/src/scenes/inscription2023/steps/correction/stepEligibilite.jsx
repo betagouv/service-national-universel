@@ -29,12 +29,13 @@ import useAuth from "@/services/useAuth";
 export default function StepEligibilite() {
   const { young, isCLE } = useAuth();
   function isInFranceOrOut(young) {
-    if (young.schoolCountry !== "France") {
+    if (young.schoolCountry !== "FRANCE") {
       return true;
     } else {
       return false;
     }
   }
+
   const [data, setData] = React.useState({
     frenchNationality: young?.frenchNationality,
     birthDate: new Date(young?.birthdateAt),
@@ -260,21 +261,9 @@ export default function StepEligibilite() {
 
               {data.scolarity !== "NOT_SCOLARISE" ? (
                 data.isAbroad ? (
-                  <SchoolOutOfFrance
-                    school={data.school}
-                    onSelectSchool={(school) => setData({ ...data, school: school })}
-                    resetManualFilling={data.isAbroad}
-                    toggleVerify={toggleVerify}
-                    corrections={corrections}
-                  />
+                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} corrections={corrections} />
                 ) : (
-                  <SchoolInFrance
-                    school={data.school}
-                    onSelectSchool={(school) => setData({ ...data, school: school })}
-                    resetManualFilling={data.isAbroad}
-                    errors={error}
-                    corrections={corrections}
-                  />
+                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} errors={error} corrections={corrections} />
                 )
               ) : !data.isAbroad ? (
                 <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} label="Code Postal" error={error.zip} correction={corrections.zip} />

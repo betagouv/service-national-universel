@@ -84,7 +84,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         data={manualSchool}
         updateData={(newData) => {
           setManualSchool({ ...manualSchool, ...newData });
-          onSelectSchool({ ...newData, fullName: manualSchool.fullName });
+          onSelectSchool({ ...newData, fullName: manualSchool.fullName, country: "FRANCE" });
         }}
         getOptions={getAddressOptions}
         label="Rechercher l'adresse de l'établissement"
