@@ -152,6 +152,10 @@ function serializeClasse(classe) {
   return classe.toObject();
 }
 
+function serializeEtablissement(etablissement) {
+  return etablissement.toObject();
+}
+
 // return only the initialValue's properties that are in the whitelist 'keys'
 const subObject = (initialValue, keys) =>
   keys.reduce((o, k) => {
@@ -175,4 +179,5 @@ module.exports = {
   serializeContract,
   serializeAlerteMessage,
   serializeClasse,
+  serializeEtablissement,
 };
