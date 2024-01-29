@@ -1,3 +1,18 @@
+# [1.367.0](https://github.com/betagouv/service-national-universel/compare/v1.366.0...v1.367.0) (2024-01-29)
+
+
+### Bug Fixes
+
+* **api:** fix populate referent [#3526](https://github.com/betagouv/service-national-universel/issues/3526) ([7f9f7a0](https://github.com/betagouv/service-national-universel/commit/7f9f7a05751e31870cf1d160d3f99fd53c34c71d))
+* **api:** Save email addresses only as lowercase ([#3398](https://github.com/betagouv/service-national-universel/issues/3398)) ([5845227](https://github.com/betagouv/service-national-universel/commit/58452270cde79411a13ba8424f2a29719ff5d2b1))
+
+
+### Features
+
+* **app:** 1488-schoolManualFilling ([#3419](https://github.com/betagouv/service-national-universel/issues/3419)) ([a0679fb](https://github.com/betagouv/service-national-universel/commit/a0679fb70761851aab5cf32f5859f5411ba0134e))
+* Create branch ([#3523](https://github.com/betagouv/service-national-universel/issues/3523)) ([9feda5d](https://github.com/betagouv/service-national-universel/commit/9feda5dac462ba0e4b751b833f96aca15bf1e2ad))
+* **api:** create token for parent2 ([#3519](https://github.com/betagouv/service-national-universel/issues/3519)) ([d80b199](https://github.com/betagouv/service-national-universel/commit/d80b199d315994240e36aab7628893dae94e7efc))
+
 # [1.366.0](https://github.com/betagouv/service-national-universel/compare/v1.365.1...v1.366.0) (2024-01-26)
 
 
