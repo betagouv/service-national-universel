@@ -1074,6 +1074,7 @@ const Schema = new mongoose.Schema({
   parent1Email: {
     type: String,
     lowercase: true,
+    trim: true,
     documentation: {
       description: "E-mail du parent 1",
     },
@@ -1226,6 +1227,7 @@ const Schema = new mongoose.Schema({
   parent2Email: {
     type: String,
     lowercase: true,
+    trim: true,
     documentation: {
       description: "E-mail du parent 2",
     },
@@ -2095,9 +2097,9 @@ Schema.methods.anonymise = function () {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
-  if (doc.source === YOUNG_SOURCE.CLE) { // doc.previousStatus !== doc.status is not working in post save hook...
-    StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) })
-      .catch((error) => capture(error));
+  if (doc.source === YOUNG_SOURCE.CLE) {
+    // doc.previousStatus !== doc.status is not working in post save hook...
+    StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) }).catch((error) => capture(error));
   }
 
   if (ENVIRONMENT === "testing") return;
