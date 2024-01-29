@@ -12,7 +12,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   const [loading, setLoading] = useState(false);
   const [city, setCity] = useState(getInitialSchoolValue());
   const [schoolOptions, setSchoolOptions] = useState([]);
-  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
+  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id && school?.country === "FRANCE");
   const [manualSchool, setManualSchool] = useState(school ?? {});
 
   function getInitialSchoolValue() {
