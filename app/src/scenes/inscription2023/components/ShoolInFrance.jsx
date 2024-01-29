@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
-import CreatableSelect from "../../../components/CreatableSelect";
 import Input from "./Input";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
-import GhostButton from "../../../components/dsfr/ui/buttons/GhostButton";
-import { FiChevronLeft } from "react-icons/fi";
+import { RiArrowGoBackLine } from "react-icons/ri";
 import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
 import { toastr } from "react-redux-toastr";
+import Select from "@/components/dsfr/forms/SearchableSelect";
 
 export default function SchoolInFrance({ school, onSelectSchool, errors, corrections = null }) {
   const [loading, setLoading] = useState(false);
   const [city, setCity] = useState(getInitialSchoolValue());
   const [schoolOptions, setSchoolOptions] = useState([]);
-  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id);
+  const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id && school?.country === "FRANCE");
   const [manualSchool, setManualSchool] = useState(school ?? {});
 
   function getInitialSchoolValue() {
@@ -60,12 +59,23 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
 
   return manualFilling ? (
     <>
+      <hr></hr>
+      <div className="flex items-center py-4">
+        <RiArrowGoBackLine className="font-bold mt-1 mr-2 text-[#000091]" />
+        <button
+          className="text-[#000091] cursor-pointer"
+          onClick={() => {
+            setManualFilling(false);
+            onSelectSchool(null);
+          }}>
+          Revenir à la liste des établissements
+        </button>
+      </div>
       <Input
         value={manualSchool.fullName}
-        label="Nom de l'établissement"
+        label="Saisir le nom de l'établissement"
         onChange={(value) => {
           setManualSchool({ ...manualSchool, fullName: value });
-          onSelectSchool(null);
         }}
         error={errors?.manualFullName}
         correction={corrections?.schoolName}
@@ -74,46 +84,52 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         data={manualSchool}
         updateData={(newData) => {
           setManualSchool({ ...manualSchool, ...newData });
-          onSelectSchool({ ...newData, fullName: manualSchool.fullName });
+          onSelectSchool({ ...newData, fullName: manualSchool.fullName, country: "FRANCE" });
         }}
         getOptions={getAddressOptions}
+        label="Rechercher l'adresse de l'établissement"
         error={errors?.school}
         correction={corrections?.schoolAddress}
-      />
-      <GhostButton
-        name={
-          <div className="flex items-center justify-center gap-1 text-center">
-            <FiChevronLeft className="font-bold text-[#000091]" />
-            Revenir à la liste des établissements
-          </div>
-        }
-        onClick={() => {
-          setManualFilling(false);
-        }}
       />
     </>
   ) : (
     <>
-      <AsyncCombobox label="Rechercher une commune" hint="Aucune commune trouvée." getOptions={getCities} value={city} onChange={handleChangeCity} error={errors.city} />
-      <CreatableSelect
+      <hr></hr>
+      <AsyncCombobox
+        label="Rechercher la commune de l'établissement"
+        hint="Aucune commune trouvée."
+        getOptions={getCities}
+        value={city}
+        onChange={handleChangeCity}
+        error={errors.city}
+      />
+      <Select
         label="Nom de l'établissement"
         value={formatSchoolName(school)}
-        options={schoolOptions
-          .map((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`)
-          .sort()
-          .map((c) => ({ value: c, label: c }))}
+        placeholder="Sélectionnez un établissement"
+        options={[
+          ...schoolOptions
+            .map((e) => ({
+              value: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
+              label: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label)),
+        ]}
         onChange={(value) => {
           onSelectSchool(schoolOptions.find((e) => `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}` === value));
-        }}
-        placeholder="Sélectionnez un établissement"
-        onCreateOption={(value) => {
-          setManualSchool({ fullName: value });
-          onSelectSchool(null);
-          setManualFilling(true);
         }}
         error={errors?.school}
         correction={corrections?.schoolName}
       />
+      <span
+        className="text-xs ml-2 text-gray-500 underline underline-offset-2 cursor-pointer"
+        onClick={() => {
+          setManualFilling(true);
+          setManualSchool({});
+          onSelectSchool(null);
+        }}>
+        Je n'ai pas trouvé mon établissement
+      </span>
     </>
   );
 }

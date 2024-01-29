@@ -92,10 +92,10 @@ export default function Select({
         <div
           className={`${open ? "block" : "hidden"}  absolute min-w-full rounded-lg bg-white transition ${
             alignItems === "right" ? "right-0" : "left-0"
-          } border-3 z-50 overflow-hidden border-red-600 shadow`}>
+          } border-3 z-50 border-red-600 shadow max-h-[200px] overflow-y-auto`}>
           {options.map((option, index) => (
             <div key={option?.key || index} onClick={() => handleChangeValue(option)} className={`${option.value === value && "bg-gray font-bold"}`}>
-              <div className="group flex cursor-pointer items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50">
+              <div className={`group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 hover:bg-gray-50`}>
                 <div>{option.label}</div>
                 {option.value === value ? <BsCheck2 /> : null}
               </div>
