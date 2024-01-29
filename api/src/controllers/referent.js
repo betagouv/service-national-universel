@@ -46,7 +46,7 @@ const {
   updateSeatsTakenInBusLine,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
-const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure, serializeClasse, serializeEtablissement } = require("../utils/serializer");
+const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } = require("../utils/serializer");
 const { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION } = require("../jwt-options");
 const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../cookie-options");
 const {
@@ -1063,26 +1063,26 @@ async function populateReferent(ref) {
     const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: ref._id }).lean();
     if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
     // Do not return res.status(404).send() in a helper function, only at the root of the route handler.
-    ref.etablissement = serializeEtablissement(etablissement);
+    ref.etablissement = etablissement;
   }
 
   if (ref.subRole === SUB_ROLES.coordinateur_cle) {
     const etablissement = await EtablissementModel.findOne({ coordinateurIds: ref._id }).lean();
     if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
-    ref.etablissement = serializeEtablissement(etablissement);
+    ref.etablissement = etablissement;
 
     const classes = await ClasseModel.find({ referentClasseIds: ref._id }).lean();
-    ref.classe = classes.map((e) => serializeClasse(e));
+    ref.classe = classes;
   }
 
   if (ref.role === ROLES.REFERENT_CLASSE) {
     const classes = await ClasseModel.find({ referentClasseIds: ref._id }).lean();
     if (!classes) throw new Error(ERRORS.NOT_FOUND);
-    ref.classe = classes.map((e) => serializeClasse(e));
+    ref.classe = classes;
 
     const etablissement = await EtablissementModel.findById(classes[0].etablissementId).lean();
     if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
-    ref.etablissement = serializeEtablissement(etablissement);
+    ref.etablissement = etablissement;
   }
 }
 
