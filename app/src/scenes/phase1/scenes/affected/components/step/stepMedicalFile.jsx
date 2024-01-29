@@ -36,7 +36,7 @@ export default function StepMedicalField({ young }) {
     if (ok) dispatch(setYoung(data));
   };
 
-  if (!isStepMedicalFieldDone(young)) {
+  if (!isStepConvocationDone(young)) {
     return (
       <StepCard state="disabled" stepNumber={4}>
         <p className="font-medium text-gray-400">Téléchargez votre fiche sanitaire</p>
