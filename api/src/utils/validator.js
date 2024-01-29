@@ -747,7 +747,7 @@ const representantSchema = (isRequired) => {
     parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
     parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
     parent1LastName: needRequired(Joi.string().trim(), isRequired),
-    parent1Email: needRequired(Joi.string().trim().email(), isRequired),
+    parent1Email: needRequired(Joi.string().trim().lowercase().email(), isRequired),
     parent1Phone: needRequired(Joi.string().trim(), isRequired),
     parent1PhoneZone: needRequired(
       Joi.string()
@@ -769,7 +769,7 @@ const representantSchema = (isRequired) => {
     }),
     parent2Email: Joi.alternatives().conditional("parent2", {
       is: true,
-      then: needRequired(Joi.string().trim().email(), isRequired),
+      then: needRequired(Joi.string().trim().lowercase().email(), isRequired),
       otherwise: Joi.isError(new Error()),
     }),
     parent2Phone: Joi.alternatives().conditional("parent2", {

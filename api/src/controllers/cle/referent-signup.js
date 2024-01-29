@@ -53,8 +53,8 @@ router.get("/token/:token", async (req, res) => {
 router.put("/request-confirmation-email", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      email: Joi.string().email().required(),
-      confirmEmail: Joi.string().email().required(),
+      email: Joi.string().trim().lowercase().email().required(),
+      confirmEmail: Joi.string().trim().lowercase().email().required(),
       invitationToken: Joi.string().required(),
     })
       .unknown()
