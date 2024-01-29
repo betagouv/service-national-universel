@@ -206,6 +206,7 @@ resource "scaleway_container" "admin" {
     "DOCKER_ENV_VITE_APP_URL"   = "https://${local.app_hostname}"
     "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" : "0.1"
     "DOCKER_ENV_VITE_SUPPORT_URL" : "https://support.beta-snu.dev"
+    "PLOP"                      = "true"
   }
 
   secret_environment_variables = {
