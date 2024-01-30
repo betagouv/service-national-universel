@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - release_candidate
-      - deploy_checks # TODO remove
 
 concurrency:
   group: ${{ github.workflow }}
@@ -20,7 +19,7 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'release_candidate' || github.ref_name == 'deploy_checks' # TODO remove
+    if: github.ref_name == 'release_candidate'
     env:
       ci_branch: "main"
     outputs:
@@ -67,9 +66,6 @@ jobs:
           git fetch origin ${{ env.production_branch }}
           git switch ${{ env.production_branch }}
           git merge --ff-only ${{ steps.target_branch.outputs.target_branch }}
-
-      - name: Break
-        run: exit 1
 
 
   copy_image:

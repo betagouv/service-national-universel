@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - production_hotfix
-      - deploy_checks # TODO remove
 
 concurrency:
   group: ${{ github.workflow }}
@@ -18,7 +17,7 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'production_hotfix' || github.ref_name == 'deploy_checks' # TODO remove
+    if: github.ref_name == 'production_hotfix' || github.ref_name == 'deploy_checks'
     env:
       production_branch: "production"
     outputs:
@@ -59,9 +58,6 @@ jobs:
             echo "No difference with ${{ env.production_branch }} branch. Aborting"
             exit 1
           fi
-
-      - name: Break
-        run: exit 1
 
   run_tests_api:
     needs: prepare
