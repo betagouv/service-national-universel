@@ -1,3 +1,10 @@
+# [1.368.0](https://github.com/betagouv/service-national-universel/compare/v1.367.0...v1.368.0) (2024-01-30)
+
+
+### Features
+
+* **admin:** 1731-Suppression du bouton "Créer une classe" pour les admin CLE ([a2e6f21](https://github.com/betagouv/service-national-universel/commit/a2e6f210be7e268a6fd9851f5b03405a69adfba8))
+
 # [1.367.0](https://github.com/betagouv/service-national-universel/compare/v1.366.0...v1.367.0) (2024-01-29)
 
 
