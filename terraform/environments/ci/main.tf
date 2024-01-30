@@ -198,6 +198,7 @@ resource "scaleway_container" "admin" {
   deploy          = true
 
   environment_variables = {
+    "BLOP"                      = "true"
     "APP_NAME"                  = "admin"
     "CLE"                       = "true"
     "STAGING"                   = "true"
