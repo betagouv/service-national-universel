@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - production_hotfix
+      - deploy_checks # TODO remove
 
 concurrency:
   group: ${{ github.workflow }}
@@ -17,7 +18,7 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'production_hotfix'
+    if: github.ref_name == 'production_hotfix' || github.ref_name == 'deploy_checks' # TODO remove
     env:
       production_branch: "production"
     outputs:
@@ -52,11 +53,15 @@ jobs:
           diff=$(git --no-pager diff --no-patch --raw origin/${{ env.production_branch }})
           if [[ "$diff" ]]
           then
+            echo "https://github.com/betagouv/service-national-universel/compare/${{ env.production_branch }}...${{ steps.target_branch.outputs.target_branch }}"
             echo "$diff"
           else
             echo "No difference with ${{ env.production_branch }} branch. Aborting"
             exit 1
           fi
+
+      - name: Break
+        run: exit 1
 
   run_tests_api:
     needs: prepare
