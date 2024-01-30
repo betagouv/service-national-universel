@@ -22,7 +22,7 @@ runs:
         env_name=$(
           echo ${{ inputs.branch_name }} |
           tr '[:upper:]' '[:lower:]' | # lowercase
-          tr "_" "-" | replace _ by -
+          tr "_" "-" | # replace _ by -
           tr -cd '[:alnum:]-' | # remove all except alnum + '-'
           tr -s '-' | # removes duplicated '-'
           cut -c 1-25 | # crop to 25 characters
