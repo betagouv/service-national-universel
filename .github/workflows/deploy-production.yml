@@ -20,8 +20,6 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     if: github.ref_name == 'release_candidate'
-    env:
-      ci_branch: "main"
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
@@ -50,14 +48,14 @@ jobs:
 
       - name: Check differences
         run: |
-          git fetch origin ${{ env.ci_branch }}
-          diff=$(git --no-pager diff --no-patch --raw origin/${{ env.ci_branch }})
+          git fetch origin ${{ env.production_branch }}
+          diff=$(git --no-pager diff --no-patch --raw origin/${{ env.production_branch }})
           if [[ "$diff" ]]
           then
-            echo "https://github.com/betagouv/service-national-universel/compare/${{ env.ci_branch }}...${{ steps.target_branch.outputs.target_branch }}"
+            echo "https://github.com/betagouv/service-national-universel/compare/${{ env.production_branch }}...${{ steps.target_branch.outputs.target_branch }}"
             echo "$diff"
           else
-            echo "No difference with ${{ env.ci_branch }} branch. Aborting"
+            echo "No difference with ${{ env.production_branch }} branch. Aborting"
             exit 1
           fi
 
