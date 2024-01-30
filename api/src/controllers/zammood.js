@@ -2,7 +2,6 @@ const express = require("express");
 const passport = require("passport");
 const fileUpload = require("express-fileupload");
 const FileType = require("file-type");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const Joi = require("joi");
 const { v4: uuid } = require("uuid");
@@ -461,6 +460,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         console.log("TEST REQ1", req?.user);
         console.log("TEST REQ2", req?.user?._id);
         console.log("TEST REQ3", tempFilePath);
+        console.log("TEST REQ33", name);
 
         const scanResult = await scanFile(tempFilePath, name, "testid");
         if (scanResult.infected) {

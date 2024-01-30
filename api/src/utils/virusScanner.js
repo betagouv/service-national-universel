@@ -5,6 +5,7 @@ const { ERRORS } = require("./index");
 
 async function scanFile(tempFilePath, name, userId) {
   try {
+    console.log("TTTTTT", tempFilePath, name, userId);
     const clamscan = await new NodeClam().init({
       removeInfected: true,
       clamdscan: {
