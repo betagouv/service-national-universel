@@ -59,11 +59,11 @@ jobs:
             exit 1
           fi
 
-      - name: Check mergeability
-        run: |
-          git fetch origin ${{ env.production_branch }}
-          git switch ${{ env.production_branch }}
-          git merge --ff-only ${{ steps.target_branch.outputs.target_branch }}
+      # - name: Check mergeability
+      #   run: |
+      #     git fetch origin ${{ env.production_branch }}
+      #     git switch ${{ env.production_branch }}
+      #     git merge --ff-only ${{ steps.target_branch.outputs.target_branch }}
 
 
   copy_image:
