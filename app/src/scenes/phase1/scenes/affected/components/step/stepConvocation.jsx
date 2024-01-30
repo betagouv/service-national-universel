@@ -7,13 +7,12 @@ import { translate } from "snu-lib";
 import { capture } from "@/sentry";
 import plausibleEvent from "@/services/plausible";
 import downloadPDF from "@/utils/download-pdf";
-import { isStepAgreementDone, isStepConvocationDone } from "../../utils/steps.utils";
 import { StepCard } from "../StepCard";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import ConvocationModal from "../modals/ConvocationModal";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
 
-export default function StepConvocation({ center, meetingPoint, departureDate, returnDate }) {
+export default function StepConvocation({ center, meetingPoint, departureDate, returnDate, enabled, isDone, stepNumber }) {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -55,7 +54,7 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
     }
   };
 
-  if (!isStepAgreementDone(young)) {
+  if (!enabled) {
     return (
       <StepCard state="disabled" stepNumber={3}>
         <p className="font-medium text-gray-400">Téléchargez votre convocation</p>
@@ -64,7 +63,7 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
   }
 
   return (
-    <StepCard state={isStepConvocationDone(young) ? "done" : "todo"} stepNumber={3}>
+    <StepCard state={isDone ? "done" : "todo"} stepNumber={stepNumber}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold">Téléchargez votre convocation</p>
@@ -74,7 +73,7 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
           <button
             onClick={downloadConvocation}
             className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
-              isStepConvocationDone(young) ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
+              isDone ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}>
             <HiOutlineDownload className="h-5 w-5" />
             Télécharger
