@@ -17,7 +17,7 @@ async function loadEnv() {
 
   const secret = await api.accessSecretVersionByName({ secretName: "snu-ci", revision: "latest_enabled" });
   const decodedData = Buffer.from(secret.data, "base64").toString("utf8");
-  const parsed = require("dotenv").parse(decodedData);
+  const parsed = JSON.parse(decodedData);
 
   for (const key in parsed) {
     process.env[key] = parsed[key];
