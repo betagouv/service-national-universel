@@ -13,12 +13,15 @@ concurrency:
 env:
   prod_directory: ./terraform/environments/production
   staging_directory: ./terraform/environments/production/staging
+  production_branch: "production"
 
 jobs:
 
   prepare:
     runs-on: ubuntu-latest
     if: github.ref_name == 'release_candidate'
+    env:
+      ci_branch: "main"
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
@@ -44,6 +47,26 @@ jobs:
         uses: ./.github/actions/get_image_tag
         with:
           sha: ${{ steps.commit_sha.outputs.commit_sha }}
+
+      - name: Check differences
+        run: |
+          git fetch origin ${{ env.ci_branch }}
+          diff=$(git --no-pager diff --no-patch --raw origin/${{ env.ci_branch }})
+          if [[ "$diff" ]]
+          then
+            echo "https://github.com/betagouv/service-national-universel/compare/${{ env.ci_branch }}...${{ steps.target_branch.outputs.target_branch }}"
+            echo "$diff"
+          else
+            echo "No difference with ${{ env.ci_branch }} branch. Aborting"
+            exit 1
+          fi
+
+      - name: Check mergeability
+        run: |
+          git fetch origin ${{ env.production_branch }}
+          git switch ${{ env.production_branch }}
+          git merge --ff-only ${{ steps.target_branch.outputs.target_branch }}
+
 
   copy_image:
     needs: prepare
@@ -212,7 +235,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prepare, deploy_production]
     env:
-      production_branch: "production"
       hotfix_branch: "production_hotfix"
     steps:
       - uses: actions/checkout@v4
