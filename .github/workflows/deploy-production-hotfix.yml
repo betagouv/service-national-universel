@@ -17,7 +17,7 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'production_hotfix' || github.ref_name == 'deploy_checks'
+    if: github.ref_name == 'production_hotfix'
     env:
       production_branch: "production"
     outputs:
