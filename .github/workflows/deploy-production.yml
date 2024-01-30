@@ -14,6 +14,7 @@ concurrency:
 env:
   prod_directory: ./terraform/environments/production
   staging_directory: ./terraform/environments/production/staging
+  production_branch: "production"
 
 jobs:
 
@@ -36,6 +37,18 @@ jobs:
         with:
           ref: ${{ steps.target_branch.outputs.target_branch }}
 
+      - name: Get last commit sha
+        id: commit_sha
+        run: |
+          commit_sha=$(git rev-parse HEAD)
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
+
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+
       - name: Check differences
         run: |
           git fetch origin ${{ env.ci_branch }}
@@ -48,21 +61,14 @@ jobs:
             exit 1
           fi
 
+      - name: Check mergeability
+        run: |
+          git switch ${{ env.production_branch }}
+          git merge --ff-only ${{ steps.target_branch.outputs.target_branch }}
 
       - name: Break
         run: exit 1
 
-      - name: Get last commit sha
-        id: commit_sha
-        run: |
-          commit_sha=$(git rev-parse HEAD)
-          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
-
-      - name: Get image tag
-        id: image_tag
-        uses: ./.github/actions/get_image_tag
-        with:
-          sha: ${{ steps.commit_sha.outputs.commit_sha }}
 
   copy_image:
     needs: prepare
@@ -231,7 +237,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prepare, deploy_production]
     env:
-      production_branch: "production"
       hotfix_branch: "production_hotfix"
     steps:
       - uses: actions/checkout@v4

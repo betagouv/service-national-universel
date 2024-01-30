@@ -35,6 +35,18 @@ jobs:
         with:
           ref: ${{ steps.target_branch.outputs.target_branch }}
 
+      - name: Get last commit sha
+        id: commit_sha
+        run: |
+          commit_sha=$(git rev-parse HEAD)
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
+
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+
       - name: Check differences
         run: |
           git fetch origin ${{ env.production_branch }}
@@ -49,18 +61,6 @@ jobs:
 
       - name: Break
         run: exit 1
-
-      - name: Get last commit sha
-        id: commit_sha
-        run: |
-          commit_sha=$(git rev-parse HEAD)
-          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
-
-      - name: Get image tag
-        id: image_tag
-        uses: ./.github/actions/get_image_tag
-        with:
-          sha: ${{ steps.commit_sha.outputs.commit_sha }}
 
   run_tests_api:
     needs: prepare
