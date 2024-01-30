@@ -460,7 +460,9 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         console.log("TEST REQ", req);
         console.log("TEST REQ1", req?.user);
         console.log("TEST REQ2", req?.user?._id);
-        const scanResult = await scanFile(tempFilePath, name, req?.user?._id);
+        console.log("TEST REQ3", tempFilePath);
+
+        const scanResult = await scanFile(tempFilePath, name, "testid");
         if (scanResult.infected) {
           return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         } else if (scanResult.error) {
