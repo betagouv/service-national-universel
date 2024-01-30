@@ -82,7 +82,7 @@ export default function StepsAffected({ center, session, meetingPoint, departure
       </article>
 
       {/* Map over the steps and inject computed props into the component */}
-      <div className="grid grid-cols-1 gap-4">{steps.map((step) => cloneElement(step.component, { ...step.component.props, ...step }))}</div>
+      <div className="grid grid-cols-1 gap-4">{steps.map((step) => cloneElement(step.component, { ...step.component.props, ...step, key: step.id }))}</div>
     </section>
   );
 }
