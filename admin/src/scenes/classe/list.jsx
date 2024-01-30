@@ -97,11 +97,12 @@ export default function List() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes" }]}
         actions={[
-          [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
+          //Bouton a afficher si la création des classes est ouverte
+          /*           [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
             <Link key="list" to="/classes/create" className="ml-2">
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
-          ),
+          ), */
           [ROLES.ADMIN].includes(user.role) && <Button rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} />,
         ].filter(Boolean)}
       />

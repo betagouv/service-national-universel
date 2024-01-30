@@ -2,17 +2,17 @@ import React, { useEffect, useState } from "react";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, Label, InputText, ModalConfirmation, Select } from "@snu/ds/admin";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate, canCreateClasse } from "snu-lib";
+import { translate, canCreateClasse, ROLES } from "snu-lib";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
 import Loader from "@/components/Loader";
 import { useSelector } from "react-redux";
 
-export default function create() {
+export default function Create() {
   const user = useSelector((state) => state.Auth.user);
   const [classe, setClasse] = useState({
     cohort: "CLE 23-24",
@@ -23,12 +23,13 @@ export default function create() {
   const [referentList, setReferentList] = useState([]);
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const history = useHistory();
+  const { id } = useParams();
 
   useEffect(() => {
     if (!canCreateClasse(user)) history.push("/classes");
   }, [user]);
 
-  const getEtablissement = async () => {
+  const getEtablissementForCLE = async () => {
     try {
       const { ok, code, data: response } = await api.get("/cle/etablissement/from-user");
 
@@ -40,6 +41,24 @@ export default function create() {
         etablissementId: response._id,
         coordinateurs: response.coordinateurs.map((referent) => ({ ...referent, value: referent._id, label: `${referent.firstName} ${referent.lastName}` })),
       });
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement");
+    }
+  };
+
+  const getEtablissementForAdmin = async () => {
+    try {
+      /*       const { ok, code, data: response } = await api.get("/cle/etablissement/from-user");
+
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
+      }
+      setClasse({ ...classe, uniqueKey: response.uai, etablissementId: response._id, etablissement: response });
+      getReferents({
+        etablissementId: response._id,
+        coordinateurs: response.coordinateurs.map((referent) => ({ ...referent, value: referent._id, label: `${referent.firstName} ${referent.lastName}` })),
+      }); */
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement");
@@ -77,7 +96,11 @@ export default function create() {
   };
 
   useEffect(() => {
-    getEtablissement();
+    if (user.role === ROLES.ADMINISTRATEUR_CLE) {
+      getEtablissementForCLE();
+    } else {
+      getEtablissementForAdmin();
+    }
   }, []);
 
   const validate = () => {

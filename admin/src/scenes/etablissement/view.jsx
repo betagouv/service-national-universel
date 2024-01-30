@@ -275,6 +275,9 @@ export default function view() {
               onClick={() => setModalAddCoordinator(true)}
             />
           ),
+          [ROLES.ADMIN].includes(user.role) && (
+            <Button leftIcon={<IoAdd size={22} className="mt-0.5" />} title="Ajouter une classe" onClick={() => history.push(`/classes/create/${etablissement?._id}`)} />
+          ),
         ]}
       />
       <Container
