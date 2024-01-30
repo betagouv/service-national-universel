@@ -37,7 +37,7 @@ jobs:
 
       - name: Check differences
         run: |
-          git --no-pager diff --no-patch --raw --exit-code origin/${{ env.production_branch }}
+          git --no-pager diff --no-patch --raw --exit-code ${{ env.production_branch }}
           if [[ $? != 1 ]]
           then
               echo "No difference with ${{ env.production_branch }} branch. Aborting"
