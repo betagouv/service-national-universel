@@ -93,6 +93,7 @@ export default function View() {
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération des élèves", translate(code));
       }
+      console.log(response);
       setStudentStatus(response);
     } catch (e) {
       capture(e);
