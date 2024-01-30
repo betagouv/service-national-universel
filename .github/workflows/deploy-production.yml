@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - release_candidate
+      - deploy_checks # TODO remove
 
 concurrency:
   group: ${{ github.workflow }}
@@ -18,7 +19,9 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'release_candidate'
+    if: github.ref_name == 'release_candidate' || github.ref_name == 'deploy_checks' # TODO remove
+    env:
+      ci_branch: "main"
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
@@ -32,6 +35,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.target_branch.outputs.target_branch }}
+
+      - name: Check differences
+        run: |
+          git --no-pager diff --no-patch --raw --exit-code origin/${{ env.ci_branch }}..${{ steps.target_branch.outputs.target_branch }}
+          if [[ $? != 1 ]]
+          then
+              echo "No difference with ${{ env.ci_branch }} branch. Aborting"
+              exit 1
+          fi
+
+      - name: Break
+        run: exit 1
 
       - name: Get last commit sha
         id: commit_sha
