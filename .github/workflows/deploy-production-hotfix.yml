@@ -38,13 +38,13 @@ jobs:
       - name: Check differences
         run: |
           git fetch origin ${{ env.production_branch }}
-          git --no-pager diff --no-patch --raw --exit-code origin/${{ env.production_branch }}
-          if [[ $? != 1 ]]
+          diff=$(git --no-pager diff --no-patch --raw origin/${{ env.production_branch }})
+          if [[ "$diff" ]]
           then
+            echo "$diff"
+          else
             echo "No difference with ${{ env.production_branch }} branch. Aborting"
             exit 1
-          else
-            exit 0
           fi
 
       - name: Break
