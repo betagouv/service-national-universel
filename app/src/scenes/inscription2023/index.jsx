@@ -13,6 +13,7 @@ import StepUpload from "./steps/stepUpload";
 
 import MobileCorrectionEligibilite from "./steps/correction/stepEligibilite";
 import MobileCorrectionProfil from "./steps/correction/stepProfil";
+import InscriptionClosedCLE from "./components/InscriptionCLosedCLE";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
@@ -104,7 +105,10 @@ const StepCorrection = () => {
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  const { isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
+
+  console.log(cohort);
 
   if (!young) return <Redirect to="/preinscription" />;
 
@@ -128,6 +132,10 @@ export default function Index() {
   //il a fini sa re-inscription
   if (young.reinscriptionStep2023 === "DONE" && young.status === "WAITING_VALIDATION" && young.hasStartedReinscription) {
     return <Redirect to={{ pathname: "/" }} />;
+  }
+
+  if (!inscriptionCreationOpenForYoungs(cohort) && isCLE && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+    return <InscriptionClosedCLE young={young} />;
   }
 
   // Si la periode de modification est finie, pour les volontaires en cours d'inscription qui n'ont pas encore été basculés sur "à venir"
