@@ -29,7 +29,7 @@ export default function Done() {
   const [center, setCenter] = React.useState(null);
   const [meetingPoint, setMeetingPoint] = React.useState(null);
   const [session, setSession] = React.useState(null);
-  const showJDM = young.country === "France";
+  const showJDM = young.frenchNationality;
 
   async function handleClickModal() {
     try {
