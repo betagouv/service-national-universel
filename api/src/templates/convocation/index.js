@@ -81,6 +81,7 @@ const render = async (young) => {
         .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
         .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
         .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
+        .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")))
         .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
         .replace(/{{TOP}}/g, sanitizeAll(getTop()))
         .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
