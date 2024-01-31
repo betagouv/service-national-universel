@@ -7,8 +7,7 @@ const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
-const EtablissementModel = require("../../../models/cle/etablissement");
-const { populateEtablissementWithNumber } = require("../populate/populateEtablissement");
+const { populateWithReferentInfo, populateEtablissementWithNumber } = require("../populate/populateEtablissement");
 
 async function buildEtablisssementContext(user) {
   const contextFilters = [];
@@ -58,8 +57,11 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       size,
     });
     if (req.params.action === "export") {
-      const response = await allRecords("etablissement", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data: response });
+      let etablissements = await allRecords("etablissement", hitsRequestBody.query, esClient, exportFields);
+      etablissements = await populateWithReferentInfo({ etablissements, isExport: true });
+      etablissements = await populateEtablissementWithNumber({ etablissements, index: "classe" });
+      etablissements = await populateEtablissementWithNumber({ etablissements, index: "young" });
+      return res.status(200).send({ ok: true, data: etablissements });
     } else {
       const esResponse = await esClient.msearch({ index: "etablissement", body: buildNdJson({ index: "etablissement", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       let body = esResponse.body;
