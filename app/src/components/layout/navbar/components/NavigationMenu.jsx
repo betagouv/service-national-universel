@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
+import { YOUNG_STATUS_PHASE3, FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { environment, supportURL } from "../../../../config";
 import { permissionPhase1, permissionPhase2, permissionPhase3 } from "../../../../utils";
 import plausibleEvent from "@/services/plausible";
@@ -18,13 +18,11 @@ import MenuLinkExternal from "./MenuLinkExternal";
 import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
 import { CiPalette } from "react-icons/ci";
 
-// WAITING FOR FINAL DECISION: What should we do with Phase 3?
-// Meanwhile we prevent 2024 cohorts' youngs from seeing the phase 3 in menu.
-const hasAccessToPhase3 = (cohort) => {
-  if (!cohort) return false;
-  if (cohort.indexOf("2024") !== -1) return false;
-  if (cohort.indexOf("à venir") !== -1) return false;
-  return true;
+// Only people who is already doing phase3 or has done phase3 has access to it.
+const hasAccessToPhase3 = (young) => {
+  const { WAITING_VALIDATION, VALIDATED } = YOUNG_STATUS_PHASE3;
+  if ([WAITING_VALIDATION, VALIDATED].includes(young.statusPhase3)) return true;
+  return false;
 };
 
 export default function NavigationMenu({ onClose = () => {} }) {
@@ -36,7 +34,7 @@ export default function NavigationMenu({ onClose = () => {} }) {
         <MenuLink to="/" icon={<IconHome />} text="Accueil" onClose={onClose} />
         <MenuLink to="/phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} onClose={onClose} />
         <MenuLink to="/phase2" icon={<IconPhase2 />} text="Phase 2 - Engagement" enabled={permissionPhase2(young)} status={young.statusPhase2} onClose={onClose} />
-        {hasAccessToPhase3(young?.cohort) && (
+        {hasAccessToPhase3(young) && (
           <MenuGroup to="/phase3" icon={<IconPhase3 />} text="Phase 3" enabled={permissionPhase3(young)} status={young.statusPhase3} onClose={onClose}>
             <MenuLink to="/les-programmes" text="Les programmes" onClose={onClose} />
             <MenuLink to="/phase3/mission" text="Trouver une mission" onClose={onClose} />
