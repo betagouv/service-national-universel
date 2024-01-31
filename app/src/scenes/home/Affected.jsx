@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import plausibleEvent from "../../services/plausible";
+import { isCle } from "snu-lib";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -18,9 +19,9 @@ export default function Affected() {
           <div className="flex items-center justify-between rounded-lg bg-white ">
             <div className="w-1/2 py-6 pl-10 pt-6">
               <div className="text-[48px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
+                <strong>{young.firstName},</strong> bienvenue sur votre compte {isCle(young) ? "élève" : "volontaire"}.
               </div>
-              <div className="left-7 mt-3 font-bold text-[#242526]">Bonne nouvelle vous avez été affecté à un lieu pour votre séjour de cohésion !</div>
+              <div className="left-7 mt-3 font-bold text-[#242526]">Bonne nouvelle, vous avez été affecté à un lieu pour votre séjour de cohésion&nbsp;!</div>
               <div className="flex w-fit flex-col items-stretch">
                 <button
                   className="mt-5 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"

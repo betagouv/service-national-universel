@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import api from "../../../../../../services/api";
 import { SENDINBLUE_TEMPLATES } from "../../../../../../utils";
-import { isStepConvocationDone, isStepMedicalFieldDone } from "../../utils/steps.utils";
 import { toastr } from "react-redux-toastr";
 import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
 
@@ -10,9 +9,10 @@ import MedicalFileModal from "../../../../components/MedicalFileModal";
 import { StepCard } from "../StepCard";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
 import { setYoung } from "@/redux/auth/actions";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-export default function StepMedicalField({ young }) {
+export default function StepMedicalField({ enabled, isDone, stepNumber }) {
+  const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const [isSendEmailConfirmationModalOpen, setSendEmailConfirmationModalOpen] = useState(false);
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
@@ -36,16 +36,16 @@ export default function StepMedicalField({ young }) {
     if (ok) dispatch(setYoung(data));
   };
 
-  if (!isStepConvocationDone(young)) {
+  if (!enabled) {
     return (
-      <StepCard state="disabled" stepNumber={4}>
+      <StepCard state="disabled" stepNumber={stepNumber}>
         <p className="font-medium text-gray-400">Téléchargez votre fiche sanitaire</p>
       </StepCard>
     );
   }
 
   return (
-    <StepCard state={isStepMedicalFieldDone(young) ? "done" : "todo"} stepNumber={4}>
+    <StepCard state={isDone ? "done" : "todo"} stepNumber={stepNumber}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold">Téléchargez votre fiche sanitaire</p>
@@ -58,7 +58,7 @@ export default function StepMedicalField({ young }) {
             target="_blank"
             rel="noopener noreferrer"
             className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
-              isStepConvocationDone(young) ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
+              isDone ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}>
             <HiOutlineDownload className="h-5 w-5" />
             Télécharger
