@@ -7,7 +7,7 @@ import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
 import ConfirmationModal from "../../../../../../components/ui/modals/ConfirmationModal";
 import MedicalFileModal from "../../../../components/MedicalFileModal";
 import { StepCard } from "../StepCard";
-import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
+import { HiEye, HiInformationCircle, HiMail, HiOutlineDownload, HiOutlineInformationCircle } from "react-icons/hi";
 import { setYoung } from "@/redux/auth/actions";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -72,7 +72,7 @@ export default function StepMedicalField({ enabled, isDone, stepNumber }) {
           </button>
 
           <button onClick={() => setMedicalFileModalOpen(true)} className="w-full text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
-            <HiEye className="h-5 w-5" />
+            <HiOutlineInformationCircle className="h-5 w-5" />
             <p className="md:hidden">Afficher le mode d'emploi</p>
           </button>
         </div>
