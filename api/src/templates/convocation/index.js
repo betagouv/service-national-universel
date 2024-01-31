@@ -67,8 +67,8 @@ const render = async (young) => {
     const departureDate = await getDepartureDateSession(meetingPoint, session, young, cohort);
     const returnDate = await getReturnDateSession(meetingPoint, session, young, cohort);
     if (young.source === "CLE") {
-      let html = fs.readFileSync(path.resolve(__dirname, "./cohesion-CLE.html"), "utf8");
-      html = html
+      const html = fs.readFileSync(path.resolve(__dirname, "./cohesion-CLE.html"), "utf8");
+      return html
         .replace(/{{DATE}}/g, sanitizeAll(formatStringDate(Date.now())))
         .replace(/{{FIRST_NAME}}/g, sanitizeAll(young.firstName))
         .replace(/{{LAST_NAME}}/g, sanitizeAll(young.lastName))
@@ -90,7 +90,6 @@ const render = async (young) => {
         .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
         .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()))
         .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
-      console.log("🚀 ~ render ~ html:", html);
     } else {
       const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
       return html
