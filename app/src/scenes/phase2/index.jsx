@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Switch, useHistory } from "react-router-dom";
 import { permissionPhase2, YOUNG_STATUS_PHASE2 } from "../../utils";
 import Mig from "./Mig";
-import Home from "./home";
+import Home from "./Home";
 import EditEquivalence from "./views/EditEquivalence";
 import ValidatedDesktop from "./desktop/Validated";
 import ValidatedMobile from "./mobile/Validated";
