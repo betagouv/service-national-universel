@@ -30,7 +30,7 @@ export default function List() {
 
   const exportData = async () => {
     try {
-      const res = await api.post(`/elasticsearch/cle/etablissement/export`, {
+      const res = await api.post(`/elasticsearch/cle/etablissement/export?needReferentInfo=true`, {
         filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
           return { ...e, [key]: value.filter };
         }, {}),

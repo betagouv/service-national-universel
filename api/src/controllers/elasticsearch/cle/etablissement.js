@@ -58,7 +58,9 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     });
     if (req.params.action === "export") {
       let etablissements = await allRecords("etablissement", hitsRequestBody.query, esClient, exportFields);
-      etablissements = await populateWithReferentInfo({ etablissements, isExport: true });
+      if (req.query.needReferentInfo) {
+        etablissements = await populateWithReferentInfo({ etablissements, isExport: true });
+      }
       etablissements = await populateEtablissementWithNumber({ etablissements, index: "classe" });
       etablissements = await populateEtablissementWithNumber({ etablissements, index: "young" });
       return res.status(200).send({ ok: true, data: etablissements });
