@@ -29,6 +29,7 @@ export default function Done() {
   const [center, setCenter] = React.useState(null);
   const [meetingPoint, setMeetingPoint] = React.useState(null);
   const [session, setSession] = React.useState(null);
+  const showJDM = young.country === "France";
 
   async function handleClickModal() {
     try {
@@ -176,7 +177,8 @@ export default function Done() {
                 Plus d’informations
               </a>
             </div>
-            {isCohortNeedJdm(young.cohort) ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone /> : <JDCNotDone />}
+            {showJDM &&
+              (isCohortNeedJdm(young.cohort) ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone /> : <JDCNotDone />)}
           </div>
         </div>
       </div>
@@ -254,7 +256,8 @@ export default function Done() {
             </div>
           </div>
         </div>
-        {isCohortNeedJdm(young.cohort) ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone /> : <JDCNotDone />}
+        {showJDM &&
+          (isCohortNeedJdm(young.cohort) ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone /> : <JDCNotDone />)}
       </div>
 
       <NextStep />
