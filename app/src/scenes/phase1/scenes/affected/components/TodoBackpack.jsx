@@ -79,8 +79,12 @@ export default function TodoBackpack({ lunchBreak }) {
             </label>
           </div>
         )}
-        <Arrow className="absolute left-80 top-10 hidden lg:block" />
-        <DontForget className="absolute left-80 top-20 hidden lg:block" />
+        {!isCLE && (
+          <>
+            <Arrow className="absolute left-80 top-10 hidden lg:block" />
+            <DontForget className="absolute left-80 top-20 hidden lg:block" />
+          </>
+        )}
       </div>
 
       <SnuBackPack className="mt-4 block flex-none md:hidden md:h-64 md:w-64 xl:block" />

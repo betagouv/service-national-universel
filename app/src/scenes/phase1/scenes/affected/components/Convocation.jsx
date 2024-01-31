@@ -138,10 +138,8 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
         ) : (
           <ConvocText>
             Le <b>retour de votre séjour </b>est prévu{" "}
-            <b>
-              le {dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")} à {getReturnHour(meetingPoint)}{" "}
-            </b>
-            , au même endroit que le jour du départ en centre.
+            <b>{`le ${dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")}${!isCLE ? ` à ${getReturnHour(meetingPoint)}` : ""}`}</b>, au même endroit que le jour du départ
+            en centre.
           </ConvocText>
         )}
         <ConvocText>
