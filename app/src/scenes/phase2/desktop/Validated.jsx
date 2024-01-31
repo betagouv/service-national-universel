@@ -95,7 +95,7 @@ export default function ValidatedDesktop() {
               <div className="ml-4 text-[44px] leading-tight ">
                 <strong>{young.firstName},</strong> vous avez validé
                 <br />
-                votre Phase 2&nbsp;!
+                votre phase Engagement&nbsp;!
               </div>
               <div className="ml-4 text-sm font-normal leading-5 text-gray-500">Bravo pour votre engagement.</div>
             </div>

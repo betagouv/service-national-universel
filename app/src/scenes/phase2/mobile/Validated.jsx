@@ -91,7 +91,7 @@ export default function ValidatedMobile() {
           <Trophy className="h-16" />
           <div className="flex flex-1 flex-col gap-3">
             <div className="ml-4 text-3xl leading-tight ">
-              <strong>{young.firstName},</strong> vous avez validé votre Phase 2&nbsp;!
+              <strong>{young.firstName},</strong> vous avez validé votre phase Engagement&nbsp;!
             </div>
             <div className="ml-4 text-sm font-normal leading-5 text-gray-500">Bravo pour votre engagement.</div>
           </div>

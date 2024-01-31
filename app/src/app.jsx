@@ -36,6 +36,7 @@ import NonEligible from "./scenes/noneligible";
 import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
+import AutresEngagements from "./scenes/phase3/home/waitingRealisation";
 import Echanges from "./scenes/echanges";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
@@ -58,8 +59,7 @@ import {
   FEATURES_NAME,
 } from "snu-lib";
 import { capture, history, initSentry, SentryRoute } from "./sentry";
-import { getAvailableSessions } from "./services/cohort.service";
-import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
+import { cohortsInit, getCohort } from "./utils/cohorts";
 
 initSentry();
 initApi();
@@ -248,6 +248,7 @@ const Espace = () => {
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
           <SentryRoute path="/phase3" component={Phase3} />
+          <SentryRoute path="/autres-engagements" component={AutresEngagements} />
           <SentryRoute path="/les-programmes" component={Engagement} />
           <SentryRoute path="/preferences" component={Preferences} />
           <SentryRoute path="/mission" component={Missions} />

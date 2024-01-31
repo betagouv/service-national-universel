@@ -34,8 +34,8 @@ export default function NavigationMenu({ onClose = () => {} }) {
         <MenuLink to="/" icon={<IconHome />} text="Accueil" onClose={onClose} />
         <MenuLink to="/phase1" icon={<IconPhase1 />} text="Phase 1 - Séjour" enabled={permissionPhase1(young)} status={young.statusPhase1} onClose={onClose} />
         <MenuGroup to="/phase2" icon={<IconPhase2 />} text="Phase 2 - Engagement" enabled={permissionPhase2(young)} status={young.statusPhase2} onClose={onClose}>
-          <MenuLink to="/phase2" text="Mission d’intérêt général" onClose={onClose} />
-          <MenuLink to="/phase3" text="Autres engagements" onClose={onClose} />
+          <MenuLink to="/phase2/mig" text="Mission d’intérêt général" onClose={onClose} />
+          <MenuLink to="/autres-engagements" text="Autres engagements" onClose={onClose} />
         </MenuGroup>
         {hasAccessToPhase3(young) && (
           <MenuGroup to="/phase3" icon={<IconPhase3 />} text="Phase 3" enabled={permissionPhase3(young)} status={young.statusPhase3} onClose={onClose}>
