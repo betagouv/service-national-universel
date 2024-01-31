@@ -39,7 +39,13 @@ router.get("/token", async (req, res) => {
     const token = getToken(req);
     if (!token) return res.status(401).send({ ok: false, user: { restriction: "public" } });
 
-    const jwtPayload = await jwt.verify(token, config.secret);
+    let jwtPayload;
+    try {
+      jwtPayload = await jwt.verify(token, config.secret);
+    } catch (error) {
+      return res.status(401).send({ ok: false, user: { restriction: "public" } });
+    }
+
     const { error, value } = Joi.object({
       __v: Joi.string().required(),
       _id: Joi.string().required(),

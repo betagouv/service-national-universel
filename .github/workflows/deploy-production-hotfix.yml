@@ -1,10 +1,9 @@
-name: Build and deploy Production
+name: Build and deploy Production Hotfix
 
 on:
-  workflow_dispatch:
   push:
     branches:
-      - release_candidate
+      - production_hotfix
 
 concurrency:
   group: ${{ github.workflow }}
@@ -13,13 +12,14 @@ concurrency:
 env:
   prod_directory: ./terraform/environments/production
   staging_directory: ./terraform/environments/production/staging
-  production_branch: "production"
 
 jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'release_candidate'
+    if: github.ref_name == 'production_hotfix'
+    env:
+      production_branch: "production"
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
       image_tag: ${{ steps.image_tag.outputs.image_tag }}
@@ -59,15 +59,15 @@ jobs:
             exit 1
           fi
 
-      # - name: Check mergeability
-      #   run: |
-      #     git fetch origin ${{ env.production_branch }}
-      #     git switch ${{ env.production_branch }}
-      #     git merge --ff-only ${{ steps.target_branch.outputs.target_branch }}
-
-
-  copy_image:
+  run_tests_api:
     needs: prepare
+    uses: ./.github/workflows/run-tests-api.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.target_branch }}
+    secrets: inherit
+
+  build:
+    needs: [prepare, run_tests_api]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -87,37 +87,27 @@ jobs:
           image_tag: ${{ needs.prepare.outputs.image_tag }}
           secret_key: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
 
-      - name: Login to Production registry
-        uses: docker/login-action@v2
+      - name: Abort if image exists
+        if: steps.check.outputs.tag_exists != 0
+        run: |
+          echo "Image ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} already exists"
+          exit 1
+
+      - name: Docker Build & Publish
+        uses: ./.github/actions/build_docker_image
         if: steps.check.outputs.tag_exists == 0
         with:
           username: nologin
           password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
           registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
-
-      - name: Pull CI image
-        if: steps.check.outputs.tag_exists == 0
-        run: docker pull ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
-
-      - name: Tag Production image (commit sha)
-        if: steps.check.outputs.tag_exists == 0
-        run: |
-          docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
-            ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
-
-      - name: Tag Production image (latest)
-        if: steps.check.outputs.tag_exists == 0
-        run: |
-          docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
-            ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:latest
-
-      - name: Push Production image
-        if: steps.check.outputs.tag_exists == 0
-        run: docker push --all-tags ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}
+          image_name: ${{ matrix.app_name }}
+          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
+          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_tag_stable: hotfix
 
   deploy_staging:
     runs-on: ubuntu-latest
-    needs: [prepare, copy_image]
+    needs: [prepare, build]
     env:
       SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
       SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
@@ -228,42 +218,3 @@ jobs:
       - name: Production - Healthcheck App
         working-directory: ${{ env.prod_directory }}
         run: curl -I "$(terraform output -raw app_endpoint)"
-
-  merge_branch:
-    runs-on: ubuntu-latest
-    needs: [prepare, deploy_production]
-    env:
-      hotfix_branch: "production_hotfix"
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.production_branch }}
-
-      - name: Pull & merge RC into production
-        run: git pull origin ${{ needs.prepare.outputs.target_branch }} --ff-only
-
-      - name: Push production
-        run: git push origin ${{ env.production_branch }}
-
-      - name: Remove RC branch
-        run: git push origin --delete ${{ needs.prepare.outputs.target_branch }}
-
-      - name: Check if hotfix branch exists
-        id: check
-        continue-on-error: true
-        run: |
-          if git fetch origin ${{ env.hotfix_branch }} --prune ; then
-            echo "branch_exists=1" >> $GITHUB_OUTPUT
-          else
-            echo "branch_exists=0" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Delete existing hotfix branch
-        if: steps.check.outputs.branch_exists == '1'
-        run: git push origin --delete ${{ env.hotfix_branch }}
-
-      - name: Create hotfix branch from production
-        run: git checkout -b ${{ env.hotfix_branch }}
-
-      - name: Push hotfix branch
-        run: git push origin ${{ env.hotfix_branch }}

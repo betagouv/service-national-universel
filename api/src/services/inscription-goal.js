@@ -4,7 +4,7 @@ const YoungModel = require("../models/young");
 const getFillingRate = async (department, cohort) => {
   const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments();
   const inscriptionGoal = await InscriptionGoalModel.findOne({ department, cohort });
-  const fillingRate = (youngCount || 0) / (inscriptionGoal.max || 1);
+  const fillingRate = (youngCount || 0) / (inscriptionGoal?.max || 1);
   return fillingRate;
 };
 

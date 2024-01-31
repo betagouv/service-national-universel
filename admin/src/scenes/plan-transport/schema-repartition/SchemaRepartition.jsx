@@ -274,9 +274,9 @@ export default function SchemaRepartition({ region, department }) {
         department: g.fromDepartment,
         youngsVolume: g.youngsVolume,
         centerId: g.centerId,
-        centerName: `${g.centerName} ${g.centerAddress} ${g.centerZip} ${g.centerCity}`,
-        centerDepartment: g.toDepartment,
-        centerRegion: g.toRegion,
+        centerName: `${g.center.name} ${g.center.address} ${g.center.zip} ${g.center.city}`,
+        centerDepartment: g.center.department,
+        centerRegion: g.center.region,
       };
       if (maxGatheringPlaces < g.gatheringPlaces.length) {
         maxGatheringPlaces = g.gatheringPlaces.length;

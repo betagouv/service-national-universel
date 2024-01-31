@@ -13,7 +13,7 @@ const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } = require("../cookie-options
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
-const { ADMIN_URL, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
+const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
 const { sendTemplate } = require("../sendinblue");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
@@ -23,6 +23,7 @@ const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
 const optionalAuth = require("../middlewares/optionalAuth");
 const { serializeClasse } = require("../utils/serializer");
+const scanFile = require("../utils/virusScanner");
 
 const router = express.Router();
 
@@ -453,6 +454,15 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
+
+      // if (ENVIRONMENT === "production") {
+      //   const scanResult = await scanFile(tempFilePath, name, req.user._id);
+      //   if (scanResult.infected) {
+      //     return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+      //   } else if (scanResult.error) {
+      //     return res.status(500).send({ ok: false, code: scanResult.error });
+      //   }
+      // }
 
       const data = fs.readFileSync(tempFilePath);
       const path = getS3Path(name);

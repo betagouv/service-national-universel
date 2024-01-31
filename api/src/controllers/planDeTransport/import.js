@@ -7,6 +7,7 @@ const Joi = require("joi");
 const { canSendPlanDeTransport, MIME_TYPES, PDT_IMPORT_ERRORS, departmentLookUp } = require("snu-lib");
 const FileType = require("file-type");
 const fs = require("fs");
+const config = require("../../config");
 const { parse: parseDate } = require("date-fns");
 const XLSX = require("xlsx");
 const fileUpload = require("express-fileupload");
@@ -18,6 +19,7 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+const scanFile = require("../../utils/virusScanner");
 
 function isValidDate(date) {
   return date.match(/^[0-9]{2}\/[0-9]{2}\/202[0-9]$/);
@@ -77,13 +79,22 @@ router.post(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      const { tempFilePath, mimetype } = file;
+      const { name, tempFilePath, mimetype } = file;
       const filetype = await FileType.fromFile(tempFilePath);
       const mimeFromMagicNumbers = filetype ? filetype.mime : MIME_TYPES.EXCEL;
       const validTypes = [MIME_TYPES.EXCEL];
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      }
+
+      if (config.ENVIRONMENT === "production") {
+        const scanResult = await scanFile(tempFilePath, name, req.user.id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        } else if (scanResult.error) {
+          return res.status(500).send({ ok: false, code: scanResult.error });
+        }
       }
 
       const workbook = XLSX.readFile(tempFilePath);
