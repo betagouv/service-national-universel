@@ -13,7 +13,6 @@ import StepUpload from "./steps/stepUpload";
 
 import MobileCorrectionEligibilite from "./steps/correction/stepEligibilite";
 import MobileCorrectionProfil from "./steps/correction/stepProfil";
-import InscriptionClosedCLE from "./components/InscriptionCLosedCLE";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIST, INSCRIPTION_STEPS as STEPS, INSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
@@ -108,8 +107,6 @@ export default function Index() {
   const { isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
 
-  console.log(cohort);
-
   if (!young) return <Redirect to="/preinscription" />;
 
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir" && environment === "production") {
@@ -134,13 +131,8 @@ export default function Index() {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  if (!inscriptionCreationOpenForYoungs(cohort) && isCLE && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
-    return <InscriptionClosedCLE young={young} />;
-  }
-
-  // Si la periode de modification est finie, pour les volontaires en cours d'inscription qui n'ont pas encore été basculés sur "à venir"
-  if (!inscriptionCreationOpenForYoungs(cohort) && young.status === YOUNG_STATUS.IN_PROGRESS) {
-    return <InscriptionClosed />;
+  if (!inscriptionCreationOpenForYoungs(cohort) && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+    return <InscriptionClosed young={young} isCLE={isCLE} />;
   }
 
   //si la periode de modification est finie
