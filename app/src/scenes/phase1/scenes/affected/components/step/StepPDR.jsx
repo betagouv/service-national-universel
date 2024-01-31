@@ -48,6 +48,15 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
     setOpen(!open);
   }
 
+  if (isCle(young)) {
+    return (
+      <StepCard state="done" stepNumber={stepNumber}>
+        <p className="font-semibold text-sm">Confirmation du point de rendez-vous : vous n'avez rien à faire</p>
+        <p className="leading-tight mt-1 text-sm text-gray-500">Vos informations de transport vers le centre vous seront transmises par votre établissement.</p>
+      </StepCard>
+    );
+  }
+
   if (young.meetingPointId) {
     return (
       <StepCard state="done" stepNumber={stepNumber}>
@@ -114,7 +123,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
     return (
       <StepCard state="done" stepNumber={stepNumber}>
         <p className="font-semibold">Confirmation du point de rendez-vous : vous n'avez rien à faire</p>
-        <p className="leading-tight my-2">Vos informations de transports vers le centre vous seront transmises par email.</p>
+        <p className="leading-tight my-2">Vos informations de transport vers le centre vous seront transmises par email.</p>
       </StepCard>
     );
   }
