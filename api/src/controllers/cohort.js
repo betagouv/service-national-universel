@@ -251,7 +251,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       manualAffectionOpenForAdmin: Joi.boolean().default(false),
       manualAffectionOpenForReferentRegion: Joi.boolean().default(false),
       manualAffectionOpenForReferentDepartment: Joi.boolean().default(false),
-      pdrChoiceLimitDate: Joi.date().allow(null, ""),
+      pdrChoiceLimitDate: Joi.date(),
       // --
       busListAvailability: Joi.boolean().default(false),
       youngCheckinForHeadOfCenter: Joi.boolean().default(false),
@@ -290,12 +290,11 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     cohort.set({
       dateStart: formatDateTimeZone(body.dateStart),
       dateEnd: formatDateTimeZone(body.dateEnd),
+      pdrChoiceLimitDate: formatDateTimeZone(body.pdrChoiceLimitDate),
+      validationDate: formatDateTimeZone(body.validationDate),
+      validationDateForTerminaleGrade: formatDateTimeZone(body.validationDateForTerminaleGrade),
       ...body,
     });
-
-    if (body.validationDate) cohort.validationDate = formatDateTimeZone(body.validationDate);
-    if (body.validationDateForTerminaleGrade) cohort.validationDateForTerminaleGrade = formatDateTimeZone(body.validationDateForTerminaleGrade);
-    if (body.pdrChoiceLimitDate) cohort.pdrChoiceLimitDate = formatDateTimeZone(body.pdrChoiceLimitDate);
 
     await cohort.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: cohort });
