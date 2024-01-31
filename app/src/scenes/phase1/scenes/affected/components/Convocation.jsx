@@ -47,20 +47,22 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
   return (
     <Hero>
       <Content style={{ width: "100%" }}>
-        <ConvocText style={{ fontWeight: "500", textDecoration: "underline" }}>
-          <div>Affaire suivie par :</div>
-          <div
-            dangerouslySetInnerHTML={{
-              __html: htmlCleaner(
-                contacts
-                  .map((contact) => {
-                    return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
-                  })
-                  .join(""),
-              ),
-            }}
-          />
-        </ConvocText>
+        {!isCLE && (
+          <ConvocText style={{ fontWeight: "500", textDecoration: "underline" }}>
+            <div>Affaire suivie par :</div>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: htmlCleaner(
+                  contacts
+                    .map((contact) => {
+                      return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
+                    })
+                    .join(""),
+                ),
+              }}
+            />
+          </ConvocText>
+        )}
 
         <ConvocText style={{ textAlign: "center" }}>
           <b>CONVOCATION</b>
@@ -80,18 +82,18 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
           <>
             <ConvocText>
               <div className="text-center">
-                Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
-                <div>
-                  <b>Le </b>
-                  {dayjs(departureDate).locale("fr").format("dddd DD MMMM YYYY")}
-                </div>
-                <div>
-                  <b>A </b> {getMeetingHour(meetingPoint)}
-                </div>
                 {isCLE ? (
                   <div>Les informations sur les modalités d'acheminement vers le centre et de retour vous seront transmises par votre établissement scolaire.</div>
                 ) : (
                   <>
+                    Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
+                    <div>
+                      <b>Le </b>
+                      {dayjs(departureDate).locale("fr").format("dddd DD MMMM YYYY")}
+                    </div>
+                    <div>
+                      <b>A </b> {getMeetingHour(meetingPoint)}
+                    </div>
                     <div>
                       <b>Au </b>
                       {getMeetingAddress()}
