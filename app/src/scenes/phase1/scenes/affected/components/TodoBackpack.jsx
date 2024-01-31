@@ -5,8 +5,10 @@ import Arrow from "../assets/Arrow";
 import DontForget from "../assets/DontForget";
 import SnuBackPack from "../assets/SnuBackPack";
 import { ModalConvocation } from "./ModalConvocation";
+import useAuth from "@/services/useAuth";
 
 export default function TodoBackpack({ lunchBreak }) {
+  const { isCLE } = useAuth();
   const [modalConvocationOpen, setModalConvocationOpen] = useState(false);
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
 
@@ -37,23 +39,26 @@ export default function TodoBackpack({ lunchBreak }) {
 
       <div className="relative p-4">
         <h1 className="mb-6 text-xl font-bold">Dans mon sac...</h1>
+        {!isCLE && (
+          <>
+            <div className="flex items-baseline gap-4">
+              <input type="checkbox" name="convocation" id="convocation" checked={todo.convocation} onChange={handleCheck} />
+              <label htmlFor="convocation">
+                Votre{" "}
+                <button onClick={() => setModalConvocationOpen(true)} className="h-6 font-semibold underline decoration-2 underline-offset-4">
+                  convocation
+                </button>
+              </label>
+            </div>
 
-        <div className="flex items-baseline gap-4">
-          <input type="checkbox" name="convocation" id="convocation" checked={todo.convocation} onChange={handleCheck} />
-          <label htmlFor="convocation">
-            Votre{" "}
-            <button onClick={() => setModalConvocationOpen(true)} className="h-6 font-semibold underline decoration-2 underline-offset-4">
-              convocation
-            </button>
-          </label>
-        </div>
-
-        <div className="flex items-baseline gap-4">
-          <input type="checkbox" name="identite" id="identite" checked={todo.identite} onChange={handleCheck} />
-          <label htmlFor="identite">
-            Votre <strong>pièce d&apos;identité</strong>
-          </label>
-        </div>
+            <div className="flex items-baseline gap-4">
+              <input type="checkbox" name="identite" id="identite" checked={todo.identite} onChange={handleCheck} />
+              <label htmlFor="identite">
+                Votre <strong>pièce d&apos;identité</strong>
+              </label>
+            </div>
+          </>
+        )}
 
         <div className="flex items-baseline gap-4">
           <input type="checkbox" name="sanitaire" id="sanitaire" checked={todo.sanitaire} onChange={handleCheck} />
