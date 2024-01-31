@@ -26,9 +26,9 @@ export default function StepsAffected({ center, session, meetingPoint, departure
     },
     {
       id: "CONVOCATION",
+      component: <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />,
       isDone: young?.convocationFileDownload === "true",
       parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
-      component: <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />,
     },
     {
       id: "MEDICAL_FILE",
@@ -38,13 +38,12 @@ export default function StepsAffected({ center, session, meetingPoint, departure
     },
   ];
 
-  // Filter steps based on young source and add enabled field based on the previous step isDone boolean attribute
-  steps = steps
-    .filter((s) => s.parcours.includes(young.source))
-    .map((s, i) => {
-      const enabled = i === 0 || steps[i - 1].isDone;
-      return { ...s, enabled, stepNumber: i + 1 };
-    });
+  // Filter steps based on young source and add enabled field based on the previous step isDone attribute
+  steps = steps.filter((s) => s.parcours.includes(young.source));
+  steps = steps.map((s, i) => {
+    const enabled = i === 0 || steps[i - 1].isDone;
+    return { ...s, enabled, stepNumber: i + 1 };
+  });
 
   const countOfStepsDone = steps.filter((s) => s.isDone).length;
   const areAllStepsDone = steps.every((s) => s.isDone);
@@ -82,7 +81,17 @@ export default function StepsAffected({ center, session, meetingPoint, departure
       </article>
 
       {/* Map over the steps and inject computed props into the component */}
-      <div className="grid grid-cols-1 gap-4">{steps.map((step) => cloneElement(step.component, { ...step.component.props, ...step, key: step.id }))}</div>
+      <div className="grid grid-cols-1 gap-4">
+        {steps.map((step) =>
+          cloneElement(step.component, {
+            key: step.id,
+            enabled: step.enabled,
+            isDone: step.isDone,
+            stepNumber: step.stepNumber,
+            ...step.component.props,
+          }),
+        )}
+      </div>
     </section>
   );
 }
