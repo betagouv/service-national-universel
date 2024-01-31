@@ -1,7 +1,7 @@
 const ENVIRONMENT = getEnvironment();
 const LOCAL = process.env.LOCAL === "true";
 const MONGO_URL = process.env.MONGO_URL;
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const secret = process.env.SECRET || "not-so-secret";
 
 let APP_URL = process.env.APP_URL || "http://localhost:8081";

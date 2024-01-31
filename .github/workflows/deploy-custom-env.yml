@@ -7,14 +7,16 @@ on:
       - main
 
 jobs:
-
   prepare:
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
         (contains(github.head_ref, '-ci-') ||
         startsWith(github.head_ref, 'ci-') ||
-        endsWith(github.head_ref, '-ci'))
+        endsWith(github.head_ref, '-ci') ||
+        contains(github.head_ref, '_ci_') ||
+        startsWith(github.head_ref, 'ci_') ||
+        endsWith(github.head_ref, '_ci'))
       )
     runs-on: ubuntu-latest
     outputs:

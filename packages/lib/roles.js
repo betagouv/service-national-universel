@@ -880,7 +880,7 @@ function canInviteCoordinateur(actor) {
 }
 
 function canCreateClasse(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE;
+  return [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
 function canUpdateClasse(actor) {

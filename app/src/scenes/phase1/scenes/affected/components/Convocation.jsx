@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
 import { supportURL } from "../../../../../config";
 import api from "../../../../../services/api";
 import { translate } from "../../../../../utils";
 import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner } from "snu-lib";
+import useAuth from "@/services/useAuth";
 
 import Loader from "../../../../../components/Loader";
 import { Hero, Content } from "../../../../../components/Content";
 
 export default function Convocation({ center, meetingPoint, departureDate, returnDate }) {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const history = useHistory();
   const [service, setService] = useState();
 
@@ -88,19 +88,25 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
                 <div>
                   <b>A </b> {getMeetingHour(meetingPoint)}
                 </div>
-                <div>
-                  <b>Au </b>
-                  {getMeetingAddress()}
-                </div>
-                <div>
-                  {meetingPoint?.bus ? (
-                    <>
-                      <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </div>
+                {isCLE ? (
+                  <div>Les informations sur les modalités d'acheminement vers le centre et de retour vous seront transmises par votre établissement scolaire.</div>
+                ) : (
+                  <>
+                    <div>
+                      <b>Au </b>
+                      {getMeetingAddress()}
+                    </div>
+                    <div>
+                      {meetingPoint?.bus ? (
+                        <>
+                          <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
+                        </>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </ConvocText>
             <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
@@ -112,8 +118,12 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
         <ConvocText>Il vous est demandé de vous présenter au point de rassemblement avec :</ConvocText>
         <ConvocText>
           <ul style={{ marginLeft: "1rem" }}>
-            <li>- votre convocation</li>
-            <li>- une pièce d&apos;identité</li>
+            {!isCLE && (
+              <>
+                <li>- votre convocation</li>
+                <li>- une pièce d&apos;identité</li>
+              </>
+            )}
             <li>- la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire,</li>
             {meetingPoint?.bus?.lunchBreak && <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>}
           </ul>

@@ -10,7 +10,7 @@ const loggingMiddleware = async (req, res, next) => {
 
       if (req.user) {
         const userRole = req.user.patches.modelName === "ReferentPatches" && "referent";
-        userlog = userRole ? ` User: ${userRole} | UserId: ${req.user.id} |` : ` UserId: ${req.user.id} |`;
+        userlog = userRole ? ` UserRole: ${req.user?.role} | UserId: ${req.user.id} |` : ` UserId: ${req.user.id} |`;
       }
 
       const ip = req.ipInfo;

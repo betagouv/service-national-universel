@@ -53,6 +53,8 @@ resource "scaleway_container" "api" {
     "CLE"        = "true"
     "PRODUCTION" = "true"
     "FOLDER_API" = "api"
+    "SENTRY_PROFILE_SAMPLE_RATE"        = 0.2
+    "SENTRY_TRACING_SAMPLE_RATE"        = 0.01
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
@@ -131,8 +133,8 @@ resource "scaleway_container" "admin" {
     "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.005"
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = "0.01"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.005
+    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.01
     "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
   }
 
@@ -170,8 +172,8 @@ resource "scaleway_container" "app" {
     "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.005"
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = "0.01"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.005
+    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.01
     "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
     "DOCKER_ENV_VITE_FRANCE_CONNECT_URL"         = "https://app.franceconnect.gouv.fr/api/v1"
     "FOLDER_APP"                                 = "app"
