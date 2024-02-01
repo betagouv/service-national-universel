@@ -34,7 +34,7 @@ export default function InscriptionClosed({young, isCLE}) {
         {!isCLE ? (
           <p className="mb-16">Les inscriptions pour le séjour {getCohortPeriod(getCohort(young?.cohort))} sont clôturées. Vous ne pourrez donc pas participer au séjour.</p>
         ) : (
-          <p>Les inscriptions ont été clôturées pour l'année scolaire 2023-2024.</p>
+          <p>Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023-2024.</p>
         )}
       </DSFRContainer>
     </DSFRLayout>
