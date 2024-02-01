@@ -22,12 +22,12 @@ export default function HomeDefault() {
         <p className="text-xl font-bold leading-loose text-gray-700">Votre parcours</p>
 
         <p className="leading-loose">
-          1. Un séjour de cohésion
+          <span className="mr-2">1. Un séjour de cohésion</span>
           <Badge text={translatePhase1(young.statusPhase1)} color={PHASE_STATUS_COLOR[young.statusPhase1]} />
         </p>
 
         <p className="leading-loose">
-          2. Une phase d&apos;engagement
+          <span className="mr-2">2. Une phase d&apos;engagement</span>
           <Badge text={translatePhase2(young.statusPhase2)} color={PHASE_STATUS_COLOR[young.statusPhase2]} />
         </p>
       </div>
