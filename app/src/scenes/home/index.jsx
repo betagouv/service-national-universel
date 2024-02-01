@@ -7,7 +7,7 @@ import { capture } from "@/sentry";
 import API from "@/services/api";
 import { toastr } from "react-redux-toastr";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToPhase2, hasAccessToReinscription } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToPhase2, hasAccessToReinscription, wasYoungExcluded } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
@@ -52,7 +52,9 @@ export default function Home() {
   const renderStep = () => {
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
-    if (!hasAccessToPhase2(young)) return <DelaiDepasse />;
+    if (["2019", "2020"].includes(young.cohort)) {
+      return <DelaiDepasse />;
+    }
 
     if (isReinscriptionOpen === false) {
       if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
