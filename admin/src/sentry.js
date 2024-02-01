@@ -35,7 +35,7 @@ function initSentry() {
         new ExtraErrorData({ depth: 16 }),
         new BrowserTracing({
           routingInstrumentation: reactRouterV5Instrumentation(history),
-          // Pass tracing info to this domain
+          // Pass the tracing info to this domain
           tracingOrigins: [apiURL].map((url) => new URL(url).host),
         }),
         new ReportingObserver({
