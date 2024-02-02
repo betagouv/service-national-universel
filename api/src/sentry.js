@@ -28,6 +28,7 @@ console.log("🚀 ~ SENTRY_TRACING_SAMPLE_RATE:", SENTRY_TRACING_SAMPLE_RATE);
 console.log("🚀 ~ parseFloat(SENTRY_TRACING_SAMPLE_RATE):", parseFloat(SENTRY_TRACING_SAMPLE_RATE));
 console.log("🚀 ~ Number(SENTRY_TRACING_SAMPLE_RATE || 0.01):", Number(SENTRY_TRACING_SAMPLE_RATE || 0.01));
 console.log("🚀 ~ Number(SENTRY_TRACING_SAMPLE_RATE):", Number(SENTRY_TRACING_SAMPLE_RATE));
+console.log("🚀 ~ LAST):", Number(SENTRY_TRACING_SAMPLE_RATE) || 0.01);
 
 function initSentry(app) {
   if (ENVIRONMENT !== "development") {
