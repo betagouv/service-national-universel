@@ -47,6 +47,7 @@ export default function View() {
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
+  const endInscriptionCle = new Date().valueOf() >= new Date("2024-02-01 23:59:59").valueOf();
 
   const history = useHistory();
 
@@ -187,8 +188,15 @@ export default function View() {
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
           ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [
-            <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
-            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
+            <Button
+              key="inscription"
+              leftIcon={<AiOutlinePlus size={20} className="mt-1" />}
+              title="Inscrire un élève"
+              disabled={endInscriptionCle}
+              className="mr-2"
+              onClick={handleClick}
+            />,
+            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" disabled={endInscriptionCle} onClick={() => setModalInvite(true)} />,
           ]
         }
       />
