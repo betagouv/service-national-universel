@@ -47,7 +47,7 @@ export default function View() {
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
-  const endInscriptionCle = new Date().valueOf() >= new Date("2024-02-01 23:59:59").valueOf();
+  const endInscriptionCle = new Date().valueOf() >= new Date("2024-02-08 23:59:59").valueOf();
 
   const history = useHistory();
 
