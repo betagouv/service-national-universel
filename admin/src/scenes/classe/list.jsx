@@ -289,7 +289,7 @@ function exportExcelSheet({ data: classes, type }) {
       "Région du centre",
       "ID du point de rassemblement",
       "Désignation du point de rassemblement",
-      "Addresse du point de rassemblement",
+      "Adresse du point de rassemblement",
     ];
   }
 
