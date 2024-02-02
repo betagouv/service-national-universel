@@ -534,20 +534,28 @@ export default function View() {
           <div className="flex flex-col items-center justify-center">
             <ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />
             <h1 className="text-xl leading-7 font-medium text-gray-900 mt-6">Invitez des élèves à rejoindre votre classe !</h1>
-            <p className="text-base leading-5 font-normal text-gray-900 mt-6">Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien : </p>
-            <a href={url} className="text-base leading-5 font-normal text-blue-600" rel="noreferrer" target="_blank">
-              {url}
-            </a>
-            <Button
-              type="secondary"
-              leftIcon={<MdContentCopy className="h-5 w-5" />}
-              title="Copier le lien"
-              className="mt-6 !w-80 flex items-center justify-center"
-              onClick={() => {
-                copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${url}`);
-                setModalInvite(false);
-              }}
-            />
+            {endInscriptionCle ? (
+              <>
+                <p className="text-base leading-5 font-normal text-gray-900 mt-6">Malheureusement les inscriptions pour les classe engagées sont terminées </p>
+              </>
+            ) : (
+              <>
+                <p className="text-base leading-5 font-normal text-gray-900 mt-6 mb-">Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien : </p>
+                <a href={url} className="text-base leading-5 font-normal text-blue-600" rel="noreferrer" target="_blank">
+                  {url}
+                </a>
+                <Button
+                  type="secondary"
+                  leftIcon={<MdContentCopy className="h-5 w-5" />}
+                  title="Copier le lien"
+                  className="mt-6 !w-80 flex items-center justify-center"
+                  onClick={() => {
+                    copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${url}`);
+                    setModalInvite(false);
+                  }}
+                />
+              </>
+            )}
           </div>
         }
       />
