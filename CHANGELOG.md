@@ -1,3 +1,15 @@
+# [1.371.0](https://github.com/betagouv/service-national-universel/compare/v1.370.0...v1.371.0) (2024-02-02)
+
+
+### Bug Fixes
+
+* **api:** bug env sentry sample rate ([#3554](https://github.com/betagouv/service-national-universel/issues/3554)) ([4b6c4f3](https://github.com/betagouv/service-national-universel/commit/4b6c4f3445b5216265aee6403e4346ad2b527b8d))
+
+
+### Features
+
+* **api:** 1767 - Add virtual fields in ES ([#3535](https://github.com/betagouv/service-national-universel/issues/3535)) ([0c18aab](https://github.com/betagouv/service-national-universel/commit/0c18aab15f41c637854750509a487e221a0cb708))
+
 # [1.370.0](https://github.com/betagouv/service-national-universel/compare/v1.369.0...v1.370.0) (2024-02-01)
 
 
