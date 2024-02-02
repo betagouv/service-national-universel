@@ -2,7 +2,6 @@ const express = require("express");
 const passport = require("passport");
 const fileUpload = require("express-fileupload");
 const FileType = require("file-type");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const Joi = require("joi");
 const { v4: uuid } = require("uuid");
@@ -456,14 +455,14 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      if (ENVIRONMENT === "production") {
-        const scanResult = await scanFile(tempFilePath, name, req.user._id);
-        if (scanResult.infected) {
-          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-        } else if (scanResult.error) {
-          return res.status(500).send({ ok: false, code: scanResult.error });
-        }
-      }
+      // if (ENVIRONMENT === "production") {
+      //   const scanResult = await scanFile(tempFilePath, name, req.user._id);
+      //   if (scanResult.infected) {
+      //     return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+      //   } else if (scanResult.error) {
+      //     return res.status(500).send({ ok: false, code: scanResult.error });
+      //   }
+      // }
 
       const data = fs.readFileSync(tempFilePath);
       const path = getS3Path(name);

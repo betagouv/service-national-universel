@@ -97,11 +97,12 @@ export default function List() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes" }]}
         actions={[
-          [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
+          //Bouton a activer si la création de classe est ouverte pour les admin CLE
+          /*           [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
             <Link key="list" to="/classes/create" className="ml-2">
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
-          ),
+          ), */
           [ROLES.ADMIN].includes(user.role) && <Button rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} />,
         ].filter(Boolean)}
       />
@@ -257,6 +258,7 @@ function exportExcelSheet({ data: classes, type }) {
       centerRegion: c.cohesionCenter?.region,
       pointDeRassemblementId: c.pointDeRassemblementId,
       pointDeRassemblementName: c.pointDeRassemblement?.name,
+      pointDeRassemblementAddress: c.pointDeRassemblement ? `${c.pointDeRassemblement?.address}, ${c.pointDeRassemblement?.zip} ${c.pointDeRassemblement?.city}` : "",
     }));
 
     // tri par centre
@@ -287,6 +289,7 @@ function exportExcelSheet({ data: classes, type }) {
       "Région du centre",
       "ID du point de rassemblement",
       "Désignation du point de rassemblement",
+      "Adresse du point de rassemblement",
     ];
   }
 

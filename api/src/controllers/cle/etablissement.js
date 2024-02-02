@@ -54,8 +54,19 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (!canViewEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const etablissement = await EtablissementModel.findById(id);
+    const etablissement = await EtablissementModel.findById(id).lean();
     if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const coordinateurs = await ReferentModel.find({ _id: { $in: etablissement.coordinateurIds } }).lean();
+    etablissement.coordinateurs = coordinateurs.map((c) => ({
+      _id: c._id,
+      firstName: c.firstName,
+      lastName: c.lastName,
+      role: c.role,
+      email: c.email,
+      phone: c.phone,
+    }));
+
     return res.status(200).send({ ok: true, data: etablissement });
   } catch (error) {
     capture(error);
