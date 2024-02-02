@@ -24,6 +24,10 @@ addGlobalEventProcessor((event) => {
   }
   return event;
 });
+console.log("🚀QQ FEWFEWFEWFEWSENTRY_TRACING_SAMPLE_RATE:", SENTRY_TRACING_SAMPLE_RATE);
+console.log("🚀 QQ~ 12321FEWFEWFEWSENTRY_TRACING_SAMPLE_RATE:", parseFloat(SENTRY_TRACING_SAMPLE_RATE));
+console.log("🚀QQ ~ 1NUMBERRRSENTRY_TRACING_SAMPLE_RATE:", Number(SENTRY_TRACING_SAMPLE_RATE || 0.01));
+console.log("🚀QQ ~ 12222NUMBERRRSENTRY_TRACING_SAMPLE_RATE:", Number(SENTRY_TRACING_SAMPLE_RATE));
 
 function initSentry(app) {
   if (ENVIRONMENT !== "development") {
