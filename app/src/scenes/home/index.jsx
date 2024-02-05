@@ -11,6 +11,7 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames,
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
+import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
 import WaitingReinscription from "./WaitingReinscription";
@@ -22,10 +23,11 @@ import WaitingValidation from "./waitingValidation";
 import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
+import useAuth from "@/services/useAuth";
 
 export default function Home() {
   useDocumentTitle("Accueil");
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
 
@@ -83,8 +85,11 @@ export default function Home() {
 
     if (getCohortNames(true, false, false).includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
-      if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
+      if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && new Date().valueOf() >= new Date("2024-02-08 23:59:59").valueOf()) {
+        return <InscriptionClosedCLE />;
+      }
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
+      if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
       if (young.status === YOUNG_STATUS.VALIDATED) {
         if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
           return <Affected />;

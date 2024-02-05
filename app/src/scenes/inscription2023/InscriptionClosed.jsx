@@ -5,15 +5,11 @@ import React from "react";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCohortPeriod } from "snu-lib";
 
-export default function InscriptionClosed({young, isCLE}) {
+export default function InscriptionClosed({ young, isCLE }) {
   const statusWording = (young, isCLE) => {
     if (isCLE) {
       if (young.status === YOUNG_STATUS.IN_PROGRESS) {
         return "Votre inscription n'a pas été complétée à temps.";
-      } else if (young.status === YOUNG_STATUS.WAITING_CORRECTION) {
-        return "Votre inscription n'a pas été corrigée à temps.";
-      } else if (young.status === YOUNG_STATUS.WAITING_VALIDATION) {
-        return "Votre inscription n'a pas été validée à temps.";
       }
     } else if (!isCLE && young.status === YOUNG_STATUS.IN_PROGRESS) {
       return "Vous n'avez pas complété votre dossier d'inscription à temps.";
