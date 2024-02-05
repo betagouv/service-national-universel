@@ -83,7 +83,7 @@ const requestIp = require("request-ip"); // Import request-ip package
     }),
   );
 
-  //Check custom header
+  // Check custom header
   app.use(validateCustomHeader);
 
   app.use(bodyParser.json({ limit: "50mb" }));
