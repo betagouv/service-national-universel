@@ -1,3 +1,41 @@
+# [1.371.0](https://github.com/betagouv/service-national-universel/compare/v1.370.0...v1.371.0) (2024-02-02)
+
+
+### Bug Fixes
+
+* **api:** bug env sentry sample rate ([#3554](https://github.com/betagouv/service-national-universel/issues/3554)) ([4b6c4f3](https://github.com/betagouv/service-national-universel/commit/4b6c4f3445b5216265aee6403e4346ad2b527b8d))
+
+
+### Features
+
+* **api:** 1767 - Add virtual fields in ES ([#3535](https://github.com/betagouv/service-national-universel/issues/3535)) ([0c18aab](https://github.com/betagouv/service-national-universel/commit/0c18aab15f41c637854750509a487e221a0cb708))
+
+# [1.370.0](https://github.com/betagouv/service-national-universel/compare/v1.369.0...v1.370.0) (2024-02-01)
+
+
+### Features
+
+* **api/admin:** permettre la prévisualisation des CNI des jeunes au lieu de DL ([#3514](https://github.com/betagouv/service-national-universel/issues/3514)) ([a605ddf](https://github.com/betagouv/service-national-universel/commit/a605ddf118ed0420e1322efc7c5e14c8bbdb2c08))
+* **app:** Update Home - status phase 2 Validated ([#3547](https://github.com/betagouv/service-national-universel/issues/3547)) ([8a691c3](https://github.com/betagouv/service-national-universel/commit/8a691c39ea5a0662cdb8bda7323cd514e3c421bf))
+
+# [1.369.0](https://github.com/betagouv/service-national-universel/compare/v1.368.0...v1.369.0) (2024-01-31)
+
+
+### Bug Fixes
+
+* **api:** Allow empty dates on cohort edition [#3541](https://github.com/betagouv/service-national-universel/issues/3541) ([e89a346](https://github.com/betagouv/service-national-universel/commit/e89a346f31c6dfc476cc9c0df9186eddab572528))
+* **api:** Fix CLE cohesion convocation ([eeb3eb6](https://github.com/betagouv/service-national-universel/commit/eeb3eb6c4659c354cebc64256ac5d37a99c549f9))
+* **app:** Fix medical file info icon ([c6c81c1](https://github.com/betagouv/service-national-universel/commit/c6c81c194d6d9c2db74626f0e3fbbf16d22df806))
+* etablissement export ([63c29a5](https://github.com/betagouv/service-national-universel/commit/63c29a5ed2d16d6c8b5c1a7c649737346f06e2e2))
+
+
+### Features
+
+* **api/admin:** 1558 - Liste établissement export ([#3542](https://github.com/betagouv/service-national-universel/issues/3542)) ([0366bba](https://github.com/betagouv/service-national-universel/commit/0366bba7c281e09b359e279f55b2518bf8ff27c6))
+* **api/admin:** 1731 - Admin create classe for etablissement ([#3545](https://github.com/betagouv/service-national-universel/issues/3545)) ([ca729de](https://github.com/betagouv/service-national-universel/commit/ca729de440eb09e41124910d6a4fdd5b79e25665))
+* **app:** 1679 - ConvocPreview For CLE ([#3521](https://github.com/betagouv/service-national-universel/issues/3521)) ([cd9ec60](https://github.com/betagouv/service-national-universel/commit/cd9ec60c4b22204f9c73c43db83bd000af53e5fa))
+* **app:** CLE - "Affected" screen ([#3537](https://github.com/betagouv/service-national-universel/issues/3537)) ([f135c84](https://github.com/betagouv/service-national-universel/commit/f135c8484babaa7040b106e6e15a3653a5921217))
+
 # [1.368.0](https://github.com/betagouv/service-national-universel/compare/v1.367.0...v1.368.0) (2024-01-30)
 
 

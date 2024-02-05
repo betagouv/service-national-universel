@@ -328,6 +328,19 @@ export default function Create() {
     }
   };
 
+  const getClasseCohort = async (classeId) => {
+    const { data, ok, code } = await api.get(`/classe/${classeId}`);
+    if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+    setValues((prevValues) => ({ ...prevValues, cohort: data.cohort }));
+  };
+
+  React.useEffect(() => {
+    //si CLE, le ref ne choisis pas la cohort du jeune, elle est lié a sa classe
+    if (classeId) {
+      getClasseCohort(classeId);
+    }
+  }, [classeId]);
+
   React.useEffect(() => {
     if (!values.temporaryDate) return;
     setFieldValue("birthdateAt", dayjs(values.temporaryDate).format("YYYY-MM-DD"));
@@ -431,7 +444,7 @@ export default function Create() {
         </div>
       </div>
 
-      {(cohorts.length > 0 || egibilityError !== "") && (
+      {![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (cohorts.length > 0 || egibilityError !== "") && (
         <div className="relative mb-4 rounded bg-white pt-4 shadow">
           <div className="ml-8 text-lg font-normal">Choisissez un séjour pour le volontaire</div>
           {egibilityError !== "" && <div className="ml-8 pb-4">{egibilityError}</div>}

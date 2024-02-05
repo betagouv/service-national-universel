@@ -1,0 +1,89 @@
+env:
+  SUBFOLDER_NAME: admin
+  APP_NAME: snu-admin
+  ENVIRONMENT_NAME: snu-admin-production
+
+name: Deploy admin
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - admin/**
+      - packages/**
+  pull_request:
+    paths:
+      - admin/**
+      - packages/**
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+
+      - name: Node 18.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      - name: Lint code
+        working-directory: ${{ env.SUBFOLDER_NAME }}
+        continue-on-error: true
+        run: npm run lint
+
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build lib
+        continue-on-error: false
+        run: |
+          npm ci
+          npm run build -w packages/ds
+          rm packages/ds/.gitignore
+
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          sudo chmod 600 ~/.ssh/id_ed25519
+          echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Change ssh key file permissions
+        run: |
+          chmod go-rwx ~/.ssh/id_ed25519
+
+      - name: Remove git folder
+        run: |
+          rm -rf .git
+
+      - name: Push
+        run: |
+          git init
+          git config user.email "github.deployer@gmail.com"
+          git config user.name "Github Deployer"
+          git remote add cloud "$CLEVER_CLOUD_GIT_REMOTE"
+          git add packages ${{ env.SUBFOLDER_NAME }}
+          find . -maxdepth 1 -type f -exec git add {} +  # Add first level files
+          git commit -m "For deploy"
+          git push -f -u cloud master
+        env:
+          CLEVER_CLOUD_GIT_REMOTE: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_ADMIN_PROD }}
