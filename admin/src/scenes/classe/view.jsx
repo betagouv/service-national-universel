@@ -21,6 +21,7 @@ import {
   STATUS_CLASSE,
   translateStatusClasse,
   COHORT_TYPE,
+  ENDINSCIRPTION_CLE
 } from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
@@ -47,7 +48,6 @@ export default function View() {
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
-  const endInscriptionCle = new Date().valueOf() >= new Date("2024-02-08 23:59:59").valueOf();
 
   const history = useHistory();
 
@@ -192,11 +192,11 @@ export default function View() {
               key="inscription"
               leftIcon={<AiOutlinePlus size={20} className="mt-1" />}
               title="Inscrire un élève"
-              disabled={endInscriptionCle}
+              disabled={ENDINSCIRPTION_CLE}
               className="mr-2"
               onClick={handleClick}
             />,
-            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" disabled={endInscriptionCle} onClick={() => setModalInvite(true)} />,
+            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" disabled={ENDINSCIRPTION_CLE} onClick={() => setModalInvite(true)} />,
           ]
         }
       />
@@ -534,7 +534,7 @@ export default function View() {
           <div className="flex flex-col items-center justify-center">
             <ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />
             <h1 className="text-xl leading-7 font-medium text-gray-900 mt-6">Invitez des élèves à rejoindre votre classe !</h1>
-            {endInscriptionCle ? (
+            {ENDINSCIRPTION_CLE ? (
               <>
                 <p className="text-base leading-5 font-normal text-gray-900 mt-6">Malheureusement les inscriptions pour les classe engagées sont terminées </p>
               </>
