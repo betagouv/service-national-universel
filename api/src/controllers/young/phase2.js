@@ -15,32 +15,35 @@ const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, 
 const { sendTemplate } = require("../../sendinblue");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
 
+const equivalenceSchema = {
+  id: Joi.string().required(),
+  type: Joi.string()
+    .trim()
+    .valid(...ENGAGEMENT_TYPES)
+    .required(),
+  sousType: Joi.string()
+    .trim()
+    .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
+  otherType: Joi.string().trim().when("type", { is: "Autre", then: Joi.required() }),
+  structureName: Joi.string().trim().required(),
+  address: Joi.string().trim().required(),
+  zip: Joi.string().trim().required(),
+  city: Joi.string().trim().required(),
+  startDate: Joi.string().trim().required(),
+  endDate: Joi.string().trim().required(),
+  frequency: Joi.object().keys({
+    nombre: Joi.string().trim().required(),
+    duree: Joi.string().trim().valid("Heure(s)", "Demi-journée(s)", "Jour(s)").required(),
+    frequence: Joi.string().valid("Par semaine", "Par mois", "Par an").trim().required(),
+  }),
+  contactFullName: Joi.string().trim().required(),
+  contactEmail: Joi.string().trim().required(),
+  files: Joi.array().items(Joi.string().required()).required().min(1),
+};
+
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      type: Joi.string()
-        .trim()
-        .valid(...ENGAGEMENT_TYPES)
-        .required(),
-      sousType: Joi.string()
-        .trim()
-        .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
-      structureName: Joi.string().trim().required(),
-      address: Joi.string().trim().required(),
-      zip: Joi.string().trim().required(),
-      city: Joi.string().trim().required(),
-      startDate: Joi.string().trim().required(),
-      endDate: Joi.string().trim().required(),
-      frequency: Joi.object().keys({
-        nombre: Joi.string().trim().required(),
-        duree: Joi.string().trim().valid("Heure(s)", "Demi-journée(s)", "Jour(s)").required(),
-        frequence: Joi.string().valid("Par semaine", "Par mois", "Par an").trim().required(),
-      }),
-      contactFullName: Joi.string().trim().required(),
-      contactEmail: Joi.string().trim().required(),
-      files: Joi.array().items(Joi.string().required()).required().min(1),
-    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    const { error, value } = Joi.object(equivalenceSchema).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
     if (error) {
       capture(error);
@@ -63,7 +66,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     const youngId = value.id;
     delete value.id;
-    await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
+    const data = await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
     if (isYoung) {
       young.set({ status_equivalence: "WAITING_VERIFICATION" });
     }
@@ -118,7 +121,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       });
     }
 
-    res.status(200).send({ ok: true });
+    res.status(201).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -128,30 +131,10 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      id: Joi.string().required(),
       idEquivalence: Joi.string().required(),
       status: Joi.string().valid("WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"),
-      type: Joi.string()
-        .trim()
-        .valid(...ENGAGEMENT_TYPES),
-      sousType: Joi.string()
-        .trim()
-        .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
-      structureName: Joi.string().trim(),
-      address: Joi.string().trim(),
-      zip: Joi.string().trim(),
-      city: Joi.string().trim(),
-      startDate: Joi.string().trim(),
-      endDate: Joi.string().trim(),
-      frequency: Joi.object().keys({
-        nombre: Joi.string().trim().required(),
-        duree: Joi.string().trim().valid("Heure(s)", "Demi-journée(s)", "Jour(s)").required(),
-        frequence: Joi.string().valid("Par semaine", "Par mois", "Par an").trim().required(),
-      }),
-      contactFullName: Joi.string().trim(),
-      contactEmail: Joi.string().trim(),
-      files: Joi.array().items(Joi.string()),
       message: Joi.string().trim(),
+      ...equivalenceSchema,
     }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
     if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(value.type)) {
@@ -212,7 +195,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       cc,
     });
 
-    res.status(200).send({ ok: true });
+    res.status(200).send({ ok: true, data: value });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
