@@ -1,3 +1,26 @@
+# [1.372.0](https://github.com/betagouv/service-national-universel/compare/v1.371.0...v1.372.0) (2024-02-05)
+
+
+### Bug Fixes
+
+* **api:** 1596 - Young CLE Academy ([#3560](https://github.com/betagouv/service-national-universel/issues/3560)) ([465f9c6](https://github.com/betagouv/service-national-universel/commit/465f9c6460ddaaeec97988b4004f3aa404aa8d71))
+* **api:** Reput clamav back ([074aa50](https://github.com/betagouv/service-national-universel/commit/074aa506612ab82b5e9e30d841134866f9c66c80))
+
+
+### Features
+
+* **admin:** 1582 - Alert messages for all ADMINs ([#3561](https://github.com/betagouv/service-national-universel/issues/3561)) ([d3fd23f](https://github.com/betagouv/service-national-universel/commit/d3fd23ff72f2fe035f2af8920e5d01384d53d665))
+* **api:** 1250 - Prénoms composés ([#3558](https://github.com/betagouv/service-national-universel/issues/3558)) ([fb8b46f](https://github.com/betagouv/service-national-universel/commit/fb8b46f74674aa001980abfd570e05f9995d2575))
+* **app:** 1417 - inscription closed screen for CLE ([#3534](https://github.com/betagouv/service-national-universel/issues/3534)) ([8cabc77](https://github.com/betagouv/service-national-universel/commit/8cabc775dd97d2d5c36f3390309af7a56bd01cca))
+* **app:** 1732 - Close inscription for CLE on app ([#3551](https://github.com/betagouv/service-national-universel/issues/3551)) ([72164b8](https://github.com/betagouv/service-national-universel/commit/72164b8484d417d7b3c3bfbf45062281df40b687))
+* **app:** 1746 - New screen for Young CLE when inscription is closed ([#3543](https://github.com/betagouv/service-national-universel/issues/3543)) ([1db69fc](https://github.com/betagouv/service-national-universel/commit/1db69fceada0b1e755f49c875a3310f60fcb1226))
+* **app:** 1784 - Phase 2 In_Progress new screen ([#3548](https://github.com/betagouv/service-national-universel/issues/3548)) ([a449472](https://github.com/betagouv/service-national-universel/commit/a44947250818ed74af0c675a1f7be42a7a2ae112))
+
+
+### Reverts
+
+* Revert "chore(github): Delete CleverCloud" ([fbe4728](https://github.com/betagouv/service-national-universel/commit/fbe47289f99532ea40c8fec2de1232cd37ee10a6))
+
 # [1.371.0](https://github.com/betagouv/service-national-universel/compare/v1.370.0...v1.371.0) (2024-02-02)
 
 
