@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
 import { RiArrowLeftLine } from "react-icons/ri";
+import { ENDINSCRIPTION_CLE } from "snu-lib";
 
 const Title = () => (
   <div>
@@ -72,10 +73,20 @@ const OnBoarding = () => {
   if (isLoggedIn) logout({ redirect: false });
   const { id } = queryString.parse(window.location.search);
 
+  if (ENDINSCRIPTION_CLE) {
+    return (
+      <DSFRLayout title="Inscription de l'élève">
+        <DSFRContainer title="Les inscriptions sont cloturées">
+          <p className="leading-relaxed">Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023 - 2024.</p>
+        </DSFRContainer>
+      </DSFRLayout>
+    );
+  }
+
   if (!validateId(id)) {
-    plausibleEvent("CLE preinscription - id invalide dans l'url");
     return <OnboardingError message="Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis." />;
   }
+
   return <OnboardingContent id={id} />;
 };
 
