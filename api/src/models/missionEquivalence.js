@@ -30,7 +30,7 @@ const Schema = new mongoose.Schema({
   desc: {
     type: String,
     documentation: {
-      description: "Champ libre si le type de mission sélectionné est 'Autre'",
+      description: "Description du type de mission si le type sélectionné est 'Autre'",
     },
   },
   sousType: {

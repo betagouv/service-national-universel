@@ -600,7 +600,7 @@ const ENGAGEMENT_TYPES = [
   "Engagements lycéens",
   "Préparation militaire hors offre MIG des armées",
   "Escadrilles Air Jeunesse (EAJ)",
-  "Autres",
+  "Autre",
 ];
 
 const UNSS_TYPE = [

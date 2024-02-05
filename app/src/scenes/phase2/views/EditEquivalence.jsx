@@ -127,7 +127,7 @@ export default function EditEquivalence() {
           error = true;
         }
       } else if (key === "desc") {
-        if (data.type === "Autres" && (data[key] === undefined || data[key] === "")) {
+        if (data.type === "Autre" && (data[key] === undefined || data[key] === "")) {
           error = true;
         }
       } else if (data[key] === undefined || data[key] === "") {
