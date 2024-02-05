@@ -102,10 +102,10 @@ export default function ModalEquivalenceInformations({ theme, equivalence, open,
               <div className="text-sm leading-relaxed">{equivalence.sousType}</div>
             </>
           ) : null}
-          {equivalence.otherType ? (
+          {equivalence.desc ? (
             <>
-              <div className="text-sm font-normal leading-relaxed text-gray-400 ">Autre :</div>
-              <div className="text-sm leading-relaxed">{equivalence.otherType}</div>
+              <div className="text-sm font-normal leading-relaxed text-gray-400 ">Descriptif :</div>
+              <div className="text-sm leading-relaxed">{equivalence.desc}</div>
             </>
           ) : null}
           <div className="text-sm font-normal leading-relaxed text-gray-400 ">Structure d’accueil :</div>

@@ -27,7 +27,7 @@ const Schema = new mongoose.Schema({
       description: "Type de mission",
     },
   },
-  otherType: {
+  desc: {
     type: String,
     documentation: {
       description: "Champ libre si le type de mission sélectionné est 'Autre'",
