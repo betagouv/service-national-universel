@@ -94,8 +94,11 @@ class Auth {
       formatedDate.setUTCHours(11, 0, 0);
       if (!validateBirthDate(formatedDate)) return res.status(400).send({ ok: false, user: null, code: ERRORS.INVALID_PARAMS });
 
-      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
-      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      const alreadyRegisteredUser = await this.model.findOne({ lastName, firstName, birthdateAt: formatedDate });
+      if (alreadyRegisteredUser) {
+        if (alreadyRegisteredUser.classeId) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED_CLE });
+        else return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      }
 
       let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
       if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
@@ -166,7 +169,13 @@ class Auth {
       });
     } catch (error) {
       console.log("Error ", error);
-      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      if (error.code === 11000) {
+        const [field] = error.message.match(/(?<=index: )([a-z]*)(?=_| dup key)/);
+        const [value] = error.message.match(/(?<={ : ")(.*)(?=" })/);
+        const alreadyRegisteredUser = await this.model.findOne({ [field]: value });
+        if (alreadyRegisteredUser && alreadyRegisteredUser.classeId) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED_CLE });
+        return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      }
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
@@ -209,8 +218,11 @@ class Auth {
       formatedDate.setUTCHours(11, 0, 0);
       if (!validateBirthDate(formatedDate)) return res.status(400).send({ ok: false, user: null, code: ERRORS.INVALID_PARAMS });
 
-      let countDocuments = await this.model.countDocuments({ lastName, firstName, birthdateAt: formatedDate });
-      if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      const alreadyRegisteredUser = await this.model.findOne({ lastName, firstName, birthdateAt: formatedDate });
+      if (alreadyRegisteredUser) {
+        if (alreadyRegisteredUser.classeId) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED_CLE });
+        else return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      }
 
       const classe = await ClasseEngagee.findOne({ _id: classeId });
       if (!classe) {
@@ -301,8 +313,13 @@ class Auth {
         user: serializeYoung(user, user),
       });
     } catch (error) {
-      console.log("Error ", error);
-      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      if (error.code === 11000) {
+        const [field] = error.message.match(/(?<=index: )([a-z]*)(?=_| dup key)/);
+        const [value] = error.message.match(/(?<={ : ")(.*)(?=" })/);
+        const alreadyRegisteredUser = await this.model.findOne({ [field]: value });
+        if (alreadyRegisteredUser && alreadyRegisteredUser.classeId) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED_CLE });
+        return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      }
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }

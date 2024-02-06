@@ -119,7 +119,9 @@ export default function StepConfirm() {
       }
     } catch (e) {
       setLoading(false);
-      if (e.code === "USER_ALREADY_REGISTERED") {
+      if (e.code === "USER_ALREADY_REGISTERED")
+        setError({ text: "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (identifiant, prénom, nom et date de naissance)." });
+      else if (e.code === "USER_ALREADY_REGISTERED_CLE") {
         history.push(`/je-suis-deja-inscrit`);
       } else {
         capture(e);
