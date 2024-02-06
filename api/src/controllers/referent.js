@@ -501,7 +501,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       const qpv = await getQPV(newYoung.zip, newYoung.city, newYoung.address);
       if (qpv === true) newYoung.qpv = "true";
       else if (qpv === false) newYoung.qpv = "false";
-      else newYoung.qpv = "";
+      else newYoung.qpv = undefined;
     }
 
     // Check quartier prioritaires.
