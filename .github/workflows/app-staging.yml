@@ -3,12 +3,12 @@ env:
   APP_NAME: snu-stag-app
   ENVIRONMENT_NAME: snu-app-staging
 
-name: Deploy staging app
+name: Build and deploy Staging (MonCompte CleverCloud)
 
 on:
   push:
     branches:
-      - main
+      - production
       - staging
   workflow_dispatch:
 

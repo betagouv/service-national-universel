@@ -3,12 +3,12 @@ env:
   APP_NAME: snu-app
   ENVIRONMENT_NAME: snu-app-production
 
-name: Deploy app
+name: Build and deploy Production (MonCompte CleverCloud)
 
 on:
   push:
     branches:
-      - main
+      - production
     paths:
       - app/**
       - packages/**
@@ -36,7 +36,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
     strategy:
       matrix:
         node-version: [18.x]
