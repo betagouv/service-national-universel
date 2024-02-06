@@ -134,7 +134,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       const qpv = await getQPV(value.zip, value.city, value.address);
       if (qpv === true) young.set({ qpv: "true" });
       else if (qpv === false) young.set({ qpv: "false" });
-      else young.set({ qpv: "" });
+      else young.set({ qpv: undefined });
       await young.save({ fromUser: req.user });
     }
 
