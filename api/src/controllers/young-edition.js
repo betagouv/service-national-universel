@@ -114,7 +114,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       const qpv = await getQPV(value.zip, value.city, value.address);
       if (qpv === true) value.qpv = "true";
       else if (qpv === false) value.qpv = "false";
-      else value.qpv = "";
+      else value.qpv = undefined;
     }
 
     // Check quartier prioritaires.
