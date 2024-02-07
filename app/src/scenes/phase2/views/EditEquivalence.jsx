@@ -317,10 +317,10 @@ export default function EditEquivalence() {
             </div>
           )}
 
-          {data?.type === "Autres" && (
+          {data?.type === "Autre" && (
             <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
               <input
-                placeholder="Précisez"
+                placeholder="Descriptif"
                 type="text"
                 value={data?.desc}
                 onChange={(e) => setData({ ...data, desc: e.target.value })}
