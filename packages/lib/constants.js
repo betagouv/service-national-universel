@@ -1,6 +1,6 @@
 import { ROLES, SUB_ROLES } from "./roles";
 
-const IS_INSCRIPTION_OPEN_CLE = new Date() <= new Date("2024-02-19 23:59:59");
+const IS_INSCRIPTION_OPEN_CLE = new Date() <= new Date("2024-02-19 23:59:0");
 
 const YOUNG_STATUS = {
   WAITING_VALIDATION: "WAITING_VALIDATION",
