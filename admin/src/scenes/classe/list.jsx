@@ -8,7 +8,7 @@ import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { HiPlus, HiUsers, HiOutlineOfficeBuilding, HiChevronDown } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, translateStatusClasse } from "snu-lib";
+import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
 
@@ -97,12 +97,11 @@ export default function List() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes" }]}
         actions={[
-          //Bouton a activer si la création de classe est ouverte pour les admin CLE
-          /*           [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
+          [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && IS_CREATION_CLASSE_OPEN_CLE && (
             <Link key="list" to="/classes/create" className="ml-2">
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
-          ), */
+          ),
           [ROLES.ADMIN].includes(user.role) && <Button rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} />,
         ].filter(Boolean)}
       />

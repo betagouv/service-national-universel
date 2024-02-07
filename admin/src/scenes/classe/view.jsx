@@ -187,16 +187,10 @@ export default function View() {
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status)} />}
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
-          ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [
-            <Button
-              key="inscription"
-              leftIcon={<AiOutlinePlus size={20} className="mt-1" />}
-              title="Inscrire un élève"
-              disabled={IS_INSCRIPTION_OPEN_CLE}
-              className="mr-2"
-              onClick={handleClick}
-            />,
-            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" disabled={IS_INSCRIPTION_OPEN_CLE} onClick={() => setModalInvite(true)} />,
+          ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) &&
+          IS_INSCRIPTION_OPEN_CLE && [
+            <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
+            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
           ]
         }
       />
@@ -534,28 +528,21 @@ export default function View() {
           <div className="flex flex-col items-center justify-center">
             <ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />
             <h1 className="text-xl leading-7 font-medium text-gray-900 mt-6">Invitez des élèves à rejoindre votre classe !</h1>
-            {IS_INSCRIPTION_OPEN_CLE ? (
-              <>
-                <p className="text-base leading-5 font-normal text-gray-900 mt-6">Malheureusement les inscriptions pour les classe engagées sont terminées </p>
-              </>
-            ) : (
-              <>
-                <p className="text-base leading-5 font-normal text-gray-900 mt-6 mb-">Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien : </p>
-                <a href={url} className="text-base leading-5 font-normal text-blue-600" rel="noreferrer" target="_blank">
-                  {url}
-                </a>
-                <Button
-                  type="secondary"
-                  leftIcon={<MdContentCopy className="h-5 w-5" />}
-                  title="Copier le lien"
-                  className="mt-6 !w-80 flex items-center justify-center"
-                  onClick={() => {
-                    copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${url}`);
-                    setModalInvite(false);
-                  }}
-                />
-              </>
-            )}
+
+            <p className="text-base leading-5 font-normal text-gray-900 mt-6 mb-">Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien : </p>
+            <a href={url} className="text-base leading-5 font-normal text-blue-600" rel="noreferrer" target="_blank">
+              {url}
+            </a>
+            <Button
+              type="secondary"
+              leftIcon={<MdContentCopy className="h-5 w-5" />}
+              title="Copier le lien"
+              className="mt-6 !w-80 flex items-center justify-center"
+              onClick={() => {
+                copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${url}`);
+                setModalInvite(false);
+              }}
+            />
           </div>
         }
       />
