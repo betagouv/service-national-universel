@@ -1,14 +1,11 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { isStepAgreementDone, isStepPDRDone } from "../../utils/steps.utils";
 import { StepCard } from "../StepCard";
 import { AgreementModal } from "../modals/AgreementModal";
 
-export default function StepAgreement({ departureDate, returnDate }) {
-  const young = useSelector((state) => state.Auth.young);
+export default function StepAgreement({ departureDate, returnDate, enabled, isDone, stepNumber }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  if (!isStepPDRDone(young)) {
+  if (!enabled) {
     return (
       <StepCard state="disabled" stepNumber={2}>
         <p className="font-medium text-gray-400">Confirmez votre participation au séjour</p>
@@ -16,9 +13,9 @@ export default function StepAgreement({ departureDate, returnDate }) {
     );
   }
 
-  if (isStepAgreementDone(young)) {
+  if (isDone) {
     return (
-      <StepCard state="done" stepNumber={2}>
+      <StepCard state="done" stepNumber={stepNumber}>
         <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
           <div>
             <p className="font-semibold">Confirmez de votre participation au séjour</p>
@@ -36,7 +33,7 @@ export default function StepAgreement({ departureDate, returnDate }) {
   }
 
   return (
-    <StepCard state="todo" stepNumber={2}>
+    <StepCard state="todo" stepNumber={stepNumber}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold text-gray-800">Confirmez votre participation au séjour</p>

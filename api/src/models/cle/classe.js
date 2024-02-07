@@ -218,7 +218,16 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
+Schema.plugin(
+  mongooseElastic(esClient, {
+    populate: ["etablissement"],
+    virtuals: [
+      { key: "region", type: "String" },
+      { key: "department", type: "String" },
+    ],
+  }),
+  MODELNAME,
+);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

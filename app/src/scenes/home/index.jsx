@@ -1,5 +1,4 @@
 import { React, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { Redirect } from "react-router-dom";
 
 import Loader from "@/components/Loader";
@@ -11,6 +10,7 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames,
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
+import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
 import WaitingReinscription from "./WaitingReinscription";
@@ -22,10 +22,12 @@ import WaitingValidation from "./waitingValidation";
 import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
+import useAuth from "@/services/useAuth";
+import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
 
 export default function Home() {
   useDocumentTitle("Accueil");
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
 
@@ -81,10 +83,13 @@ export default function Home() {
       return <Phase1NotDone />;
     }
 
-    if (getCohortNames(true, false, false).includes(young.cohort)) {
+    if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
-      if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
+      if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !IS_INSCRIPTION_OPEN_CLE) {
+        return <InscriptionClosedCLE />;
+      }
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
+      if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrectionV2 />;
       if (young.status === YOUNG_STATUS.VALIDATED) {
         if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
           return <Affected />;
