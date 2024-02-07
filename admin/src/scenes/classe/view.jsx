@@ -187,16 +187,10 @@ export default function View() {
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status)} />}
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
-          ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [
-            <Button
-              key="inscription"
-              leftIcon={<AiOutlinePlus size={20} className="mt-1" />}
-              title="Inscrire un élève"
-              disabled={IS_INSCRIPTION_OPEN_CLE}
-              className="mr-2"
-              onClick={handleClick}
-            />,
-            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" disabled={IS_INSCRIPTION_OPEN_CLE} onClick={() => setModalInvite(true)} />,
+          ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) &&
+          IS_INSCRIPTION_OPEN_CLE && [
+            <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
+            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
           ]
         }
       />
