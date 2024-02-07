@@ -5,11 +5,14 @@ import { Row, Col } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 
 import ProgramCard from "../../../components/programCard";
 import MissionCard from "../components/missionCard";
 import api from "../../../services/api";
 import { HeroContainer, Hero } from "../../../components/Content";
+import ButtonLinkPrimaryOutline from "@/components/ui/buttons/ButtonLinkPrimaryOutline";
+import ButtonLinkPrimary from "@/components/ui/buttons/ButtonLinkPrimary";
 const images = import.meta.globEager("../../../assets/programmes-engagement/*");
 
 export default function WaitingRealisation() {
@@ -40,18 +43,6 @@ export default function WaitingRealisation() {
 
   return (
     <HeroContainer>
-      <Hero>
-        <div className="content">
-          <h1>
-            <strong>{young.firstName},</strong> poursuivez votre engagement ! <span>Facultatif</span>
-          </h1>
-          <p>
-            A l’issue de la mission d’intérêt général, chaque volontaire peut poursuivre son engagement et sa participation à la création d’une société fraternelle, notamment en
-            réalisant la phase 3 du SNU. Cet engagement volontaire s’adresse aux jeunes de 16 ans à 25 ans, et dure de 3 mois à 1 an.
-          </p>
-        </div>
-        <div className="thumb" />
-      </Hero>
       <TransparentHero>
         <Heading>
           <h2>Parmi les possibilités d&apos;engagement</h2>
@@ -64,8 +55,10 @@ export default function WaitingRealisation() {
             </Col>
           ))}
         </Row>
-        <SeeMore to="/les-programmes">Tous les programmes d&apos;engagement →</SeeMore>
-        <hr style={{ margin: "40px 0", opacity: 0.8 }} />
+        <ButtonLinkPrimary to="/les-programmes" className="flex w-full justify-center">
+          Voir toutes les possibilités d'engagement
+        </ButtonLinkPrimary>
+        <hr style={{ margin: "80px 0", opacity: 0.8 }} />
       </TransparentHero>
       <TransparentHero>
         <Heading>
@@ -74,9 +67,33 @@ export default function WaitingRealisation() {
         </Heading>
         <Missions>
           {data?.total ? data?.hits.map((e) => <MissionCard mission={e._source} key={e._id} image={Img4} />) : null}
-          <SeeMore to="/phase3/mission">Toutes les missions →</SeeMore>
+          <ButtonLinkPrimary to="/phase3/mission" className="flex w-full justify-center">
+            Rechercher une mission
+          </ButtonLinkPrimary>
         </Missions>
       </TransparentHero>
+      <div className="mb-4 flex space-x-5 px-8">
+        <div className="flex w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+          <a
+            href="https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1"
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-1 items-start justify-between gap-1 p-3">
+            <div className="ml-3 flex-1 font-bold text-gray-800">J’ai des questions sur la phase 2</div>
+            <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
+          </a>
+        </div>
+        <div className="flex w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+          <a
+            href="https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1"
+            target="_blank"
+            rel="noreferrer"
+            className="flex flex-1 items-start justify-between gap-1 p-3">
+            <div className="ml-3 flex-1 font-bold text-gray-800">J’ai des questions sur reconnaissance d'engagement</div>
+            <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
+          </a>
+        </div>
+      </div>
     </HeroContainer>
   );
 }
@@ -108,7 +125,9 @@ const Missions = styled.div`
   padding: 40px;
   border-radius: 6px;
   background: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   .pagination {
     display: none;
   }
