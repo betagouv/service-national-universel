@@ -275,6 +275,29 @@ resource "scaleway_container_domain" "app" {
   hostname     = local.app_hostname
 }
 
+resource "scaleway_container" "pdf" {
+  name            = "${local.env}-pdf"
+  namespace_id    = scaleway_container_namespace.main.id
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/pdf:${var.image_tag}"
+  port            = 8080
+  cpu_limit       = 256 # Ajustez selon les besoins
+  memory_limit    = 512 # Ajustez selon les besoins
+  min_scale       = 1
+  max_scale       = 1
+  timeout         = 60
+  max_concurrency = 50
+  privacy         = "public"
+  protocol        = "http1"
+  deploy          = true
+
+  environment_variables = {
+    "APP_FOLDER"                  = "pdf"
+    "PORT"                        = "8080"
+    "SENTRY_TRACING_SAMPLE_RATE"  = "0.01"
+    "SENTRY_URL"                  = local.secrets.SENTRY_URL
+  }
+}
+
 
 output "project_id" {
   value = scaleway_account_project.main.id
@@ -293,4 +316,8 @@ output "app_endpoint" {
 }
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
+}
+
+output "pdf_endpoint" {
+  value = "https://${local.pdf_hostname}"
 }
