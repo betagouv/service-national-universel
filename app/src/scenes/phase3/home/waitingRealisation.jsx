@@ -10,8 +10,7 @@ import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import ProgramCard from "../../../components/programCard";
 import MissionCard from "../components/missionCard";
 import api from "../../../services/api";
-import { HeroContainer, Hero } from "../../../components/Content";
-import ButtonLinkPrimaryOutline from "@/components/ui/buttons/ButtonLinkPrimaryOutline";
+import { HeroContainer } from "../../../components/Content";
 import ButtonLinkPrimary from "@/components/ui/buttons/ButtonLinkPrimary";
 const images = import.meta.globEager("../../../assets/programmes-engagement/*");
 
