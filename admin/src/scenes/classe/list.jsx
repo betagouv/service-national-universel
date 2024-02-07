@@ -247,6 +247,8 @@ function exportExcelSheet({ data: classes, type }) {
     sheetData = classes.map((c) => ({
       cohort: c.cohort,
       id: c._id.toString(),
+      name: c.name,
+      coloration: c.coloration,
       updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
       region: c.etablissement?.region,
       department: c.etablissement?.department,
@@ -278,6 +280,8 @@ function exportExcelSheet({ data: classes, type }) {
     headers = [
       "Cohorte",
       "ID de la classe",
+      "Nom de la classe",
+      "Coloration",
       "Date de dernière modification",
       "Région des volontaires",
       "Département des volontaires",
