@@ -24,7 +24,7 @@ import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import { ENDINSCRIPTION_CLE } from "snu-lib";
+import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
 
 export default function Home() {
   useDocumentTitle("Accueil");
@@ -86,7 +86,7 @@ export default function Home() {
 
     if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
-      if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && ENDINSCRIPTION_CLE) {
+      if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !IS_INSCRIPTION_OPEN_CLE) {
         return <InscriptionClosedCLE />;
       }
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;

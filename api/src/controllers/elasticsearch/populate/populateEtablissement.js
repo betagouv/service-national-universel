@@ -1,6 +1,7 @@
 const { allRecords } = require("../../../es/utils");
 const { serializeReferents } = require("../../../utils/es-serializer");
 const esClient = require("../../../es");
+const { ES_NO_LIMIT } = require("snu-lib");
 
 const populateWithReferentInfo = async ({ etablissements, isExport }) => {
   const refIds = [...new Set(etablissements.map((item) => (isExport ? item.referentEtablissementIds : item._source.referentEtablissementIds)).filter(Boolean))];
@@ -25,7 +26,7 @@ const populateEtablissementWithNumber = async ({ etablissements, index }) => {
       },
       aggs: {
         group_by_etablissement: {
-          terms: { field: "etablissementId.keyword" },
+          terms: { field: "etablissementId.keyword", size: ES_NO_LIMIT },
         },
       },
       size: 0,

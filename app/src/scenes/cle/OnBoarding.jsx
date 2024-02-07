@@ -18,7 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
 import { RiArrowLeftLine } from "react-icons/ri";
-import { ENDINSCRIPTION_CLE } from "snu-lib";
+import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
 
 const Title = () => (
   <div>
@@ -73,7 +73,7 @@ const OnBoarding = () => {
   if (isLoggedIn) logout({ redirect: false });
   const { id } = queryString.parse(window.location.search);
 
-  if (ENDINSCRIPTION_CLE) {
+  if (!IS_INSCRIPTION_OPEN_CLE) {
     return (
       <DSFRLayout title="Inscription de l'élève">
         <DSFRContainer title="Les inscriptions sont cloturées">

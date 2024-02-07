@@ -3,12 +3,12 @@ env:
   APP_NAME: snu-stag-admin
   ENVIRONMENT_NAME: snu-admin-staging
 
-name: Deploy staging admin
+name: Build and deploy Staging (Admin CleverCloud)
 
 on:
   push:
     branches:
-      - main
+      - production
       - staging
   workflow_dispatch:
 

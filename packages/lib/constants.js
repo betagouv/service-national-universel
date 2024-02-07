@@ -1,6 +1,6 @@
 import { ROLES, SUB_ROLES } from "./roles";
 
-const ENDINSCRIPTION_CLE = new Date().valueOf() >= new Date("2024-02-19 23:59:59").valueOf();
+const IS_INSCRIPTION_OPEN_CLE = new Date() <= new Date("2024-02-19 23:59:59");
 
 const YOUNG_STATUS = {
   WAITING_VALIDATION: "WAITING_VALIDATION",
@@ -1009,7 +1009,7 @@ export {
   CLE_COLORATION,
   CLE_COLORATION_LIST,
   CLE_FILIERE_LIST,
-  ENDINSCRIPTION_CLE,
+  IS_INSCRIPTION_OPEN_CLE,
 };
 export default {
   YOUNG_STATUS,
@@ -1073,4 +1073,5 @@ export default {
   YOUNG_SOURCE_LIST,
   CLE_COLORATION,
   CLE_COLORATION_LIST,
+  IS_INSCRIPTION_OPEN_CLE,
 };
