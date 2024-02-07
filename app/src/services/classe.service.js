@@ -10,10 +10,9 @@ export const fetchClass = (id) =>
     });
 
 export function formatClass(data) {
-  console.log(IS_INSCRIPTION_OPEN_CLE);
   const { name, status, coloration, grade, isFull, referents, etablissement, cohort } = data;
   const [{ fullName: referent }] = referents;
-  const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull;
+  const isInscriptionOpen = [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.CREATED].includes(status) && !isFull && IS_INSCRIPTION_OPEN_CLE;
   const classe = {
     id: data._id,
     name,
