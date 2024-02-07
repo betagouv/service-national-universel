@@ -1,3 +1,21 @@
+# [1.374.0](https://github.com/betagouv/service-national-universel/compare/v1.373.0...v1.374.0) (2024-02-07)
+
+
+### Bug Fixes
+
+* is inscription open ([9d7ec30](https://github.com/betagouv/service-national-universel/commit/9d7ec30b68fafc19d9fe2983548b1978288000a7))
+* **admin:** Bouton inscription eleve disabled ([#3570](https://github.com/betagouv/service-national-universel/issues/3570)) ([4814da0](https://github.com/betagouv/service-national-universel/commit/4814da0a2eca80b1f6a98e9a3c5b7ecebb38cbf0))
+* **app:** 595 - Restore "Download" and "Send by mail" buttons in medical file modal [#3556](https://github.com/betagouv/service-national-universel/issues/3556) ([6c8d961](https://github.com/betagouv/service-national-universel/commit/6c8d961e0becac3a461fa0249fa2b90203ae9831))
+* **app:** CLE travel info component [#3546](https://github.com/betagouv/service-national-universel/issues/3546) ([9649911](https://github.com/betagouv/service-national-universel/commit/964991128f30e25e86c1b5fbe6d76af8277efc31))
+* **lib:** validated status color ([5a727e8](https://github.com/betagouv/service-national-universel/commit/5a727e8ee70cc091106ab9abd8a7ad4250d2093b))
+* **lib,app,admin:** fix inscription CLE Closed constants ([#3566](https://github.com/betagouv/service-national-universel/issues/3566)) ([1f74d16](https://github.com/betagouv/service-national-universel/commit/1f74d168e27b491cff6e0d643c108bf03fd01485))
+* **lib/admin:** 1810 - Dev mode & env by domain ([#3571](https://github.com/betagouv/service-national-universel/issues/3571)) ([dfd13a6](https://github.com/betagouv/service-national-universel/commit/dfd13a64e0bf90eff2b9b8b8f475fde0ef4e991c))
+
+
+### Features
+
+* **app:** Inscription CLE : Ecran de clôture globale des inscriptions ([#3562](https://github.com/betagouv/service-national-universel/issues/3562)) ([53f9dad](https://github.com/betagouv/service-national-universel/commit/53f9dadf0088eb80c3e0302915471d1dfe287d9d))
+
 # [1.373.0](https://github.com/betagouv/service-national-universel/compare/v1.372.0...v1.373.0) (2024-02-06)
 
 
