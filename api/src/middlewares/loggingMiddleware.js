@@ -16,9 +16,19 @@ const loggingMiddleware = async (req, res, next) => {
       const ip = req.ipInfo;
 
       const hasPayload = req.body && Object.keys(req.body).length > 0;
-      const payloadLog = hasPayload ? ` Payload: ${JSON.stringify(req.body)} |` : "";
 
-      console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${req.responseTimeMs}ms |${userlog}${payloadLog} IP: ${ip}`);
+      console.log(JSON.stringify({
+        method: req.method,
+        url: req.originalUrl,
+        statusCode: res.statusCode,
+        responseTimeMs: req.responseTimeMs,
+        user: req.user ? {
+          role: req.user?.role,
+          id: req.user.id
+        } : undefined,
+        payload: hasPayload ? req.body : undefined,
+        ip: ip
+      }));
     } catch (error) {
       console.error("Error in logging middleware:", error);
     }
