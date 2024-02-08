@@ -104,7 +104,7 @@ export default function ModalEquivalenceInformations({ theme, equivalence, open,
           ) : null}
           {equivalence.desc ? (
             <>
-              <div className="text-sm font-normal leading-relaxed text-gray-400 ">Descriptif :</div>
+              <div className="text-sm font-normal leading-relaxed text-gray-400 ">Engagement réalisé :</div>
               <div className="text-sm leading-relaxed">{equivalence.desc}</div>
             </>
           ) : null}

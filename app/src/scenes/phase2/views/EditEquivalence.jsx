@@ -130,6 +130,9 @@ export default function EditEquivalence() {
         if (data.type === "Autre" && (data[key] === undefined || data[key] === "")) {
           error = true;
         }
+        if (data.type !== "Autre") {
+          delete data.desc;
+        }
       } else if (data[key] === undefined || data[key] === "") {
         error = true;
       }
@@ -319,14 +322,15 @@ export default function EditEquivalence() {
 
           {data?.type === "Autre" && (
             <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
+              {data?.desc ? <div className="text-xs font-normal leading-4 text-gray-500">Engagement réalisé</div> : null}
               <input
-                placeholder="Descriptif"
+                placeholder="Engagement réalisé"
                 type="text"
                 value={data?.desc}
                 onChange={(e) => setData({ ...data, desc: e.target.value })}
                 className="w-full text-sm font-normal leading-5"
               />
-              {error?.desc && <div className="text-xs font-normal leading-4 text-red-500">{error.sousType}</div>}
+              {error?.desc && <div className="text-xs font-normal leading-4 text-red-500">{error.desc}</div>}
             </div>
           )}
 
