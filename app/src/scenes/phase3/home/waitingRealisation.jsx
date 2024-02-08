@@ -40,21 +40,9 @@ export default function WaitingRealisation() {
 
   return (
     <HeroContainer>
-      <Hero>
-        <div className="content">
-          <h1>
-            <strong>{young.firstName},</strong> poursuivez votre engagement ! <span>Facultatif</span>
-          </h1>
-          <p>
-            A l’issue de la mission d’intérêt général, chaque volontaire peut poursuivre son engagement et sa participation à la création d’une société fraternelle, notamment en
-            réalisant la phase 3 du SNU. Cet engagement volontaire s’adresse aux jeunes de 16 ans à 25 ans, et dure de 3 mois à 1 an.
-          </p>
-        </div>
-        <div className="thumb" />
-      </Hero>
       <TransparentHero>
         <Heading>
-          <h2>Parmi les possibilités d&apos;engagement</h2>
+          <h2>Les autres programmes d&apos;engagement</h2>
           <p>Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
         </Heading>
         <Row>
@@ -108,7 +96,9 @@ const Missions = styled.div`
   padding: 40px;
   border-radius: 6px;
   background: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   .pagination {
     display: none;
   }
