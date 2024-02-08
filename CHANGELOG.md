@@ -1,3 +1,11 @@
+# [1.375.0](https://github.com/betagouv/service-national-universel/compare/v1.374.0...v1.375.0) (2024-02-08)
+
+
+### Features
+
+* **app:** 1720, 1728, 1783 - Blocking phase3 + Phase 2 Home +  Phase 2 Navbar ([#3544](https://github.com/betagouv/service-national-universel/issues/3544)) ([d5ad65f](https://github.com/betagouv/service-national-universel/commit/d5ad65f38c37ea1ffea37bf8aa8aeb1e4b24d446))
+* **app, lib:** 1715 - Adapt Phase1NotDone screen for CLE. ([#3512](https://github.com/betagouv/service-national-universel/issues/3512)) ([6656820](https://github.com/betagouv/service-national-universel/commit/6656820304e14de5fd70eee3a3723016099ba166))
+
 # [1.374.0](https://github.com/betagouv/service-national-universel/compare/v1.373.0...v1.374.0) (2024-02-07)
 
 
