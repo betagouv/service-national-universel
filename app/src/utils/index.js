@@ -63,7 +63,6 @@ export function hasAccessToPhase2(young) {
   if (!young) return false;
   if (young.statusPhase2 === "VALIDATED") return true;
   if (young.status === YOUNG_STATUS.WITHDRAWN) return false;
-  if (wasYoungExcluded(young)) return false;
   const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
   const cohortIsTooOld = ["2019", "2020"].includes(young.cohort);
   if (cohortIsTooOld && !userIsDoingAMission) {
@@ -74,6 +73,7 @@ export function hasAccessToPhase2(young) {
 
 export function permissionPhase2(y) {
   if (!hasAccessToPhase2(y)) return false;
+  if (wasYoungExcluded(y)) return false;
 
   // If young has validated phase 2
   if (y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return true;
