@@ -8,7 +8,7 @@ name: Build and deploy Production (Admin CleverCloud)
 on:
   push:
     branches:
-      - production
+      - release_candidate_cc
     paths:
       - admin/**
       - packages/**
