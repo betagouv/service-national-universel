@@ -44,7 +44,7 @@ export default function WaitingRealisation() {
     <HeroContainer>
       <TransparentHero>
         <Heading>
-          <h2>Parmi les possibilités d&apos;engagement</h2>
+          <h2>Les autres programmes d&apos;engagement</h2>
           <p>Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
         </Heading>
         <Row>
@@ -57,48 +57,48 @@ export default function WaitingRealisation() {
         <ButtonLinkPrimary to="/les-programmes" className="flex w-full justify-center">
           Voir toutes les possibilités d'engagement
         </ButtonLinkPrimary>
-        <hr style={{ margin: "80px 0", opacity: 0.8 }} />
-      </TransparentHero>
-      <TransparentHero>
-        <Heading>
-          <h2>Trouvez une mission de bénévolat à distance ou près de chez vous</h2>
-          <p>Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
-        </Heading>
+        <hr style={{ margin: "100px 0 0 0", opacity: 0.8 }} />
+        <div className="mb-2">
+          <h2 className="text-[#161e2e] text-4xl font-bold">Trouvez une mission de bénévolat ou de volontariat</h2>
+          <p className="text-gray-500 text-xl">Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
+        </div>
         <Missions>
           {data?.total ? data?.hits.map((e) => <MissionCard mission={e._source} key={e._id} image={Img4} />) : null}
           <ButtonLinkPrimary to="/phase3/mission" className="flex w-full justify-center">
             Rechercher une mission
           </ButtonLinkPrimary>
         </Missions>
+        <hr className="pb-2 mt-4" />
+        <div className="mb-4 mt-4 pb-8 flex space-x-5 px-1">
+          <div className="flex w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+            <a
+              href="https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1"
+              target="_blank"
+              rel="noreferrer"
+              className="flex flex-1 items-start justify-between gap-1 p-3">
+              <div className="ml-3 flex-1 font-bold text-gray-800">J’ai des questions sur la phase 2</div>
+              <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
+            </a>
+          </div>
+          <div className="flex w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+            <a
+              href="https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise-1"
+              target="_blank"
+              rel="noreferrer"
+              className="flex flex-1 items-start justify-between gap-1 p-3">
+              <div className="ml-3 flex-1 font-bold text-gray-800">J’ai des questions sur reconnaissance d'engagement</div>
+              <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
+            </a>
+          </div>
+        </div>
       </TransparentHero>
-      <div className="mb-4 flex space-x-5 px-8">
-        <div className="flex w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
-          <a
-            href="https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1"
-            target="_blank"
-            rel="noreferrer"
-            className="flex flex-1 items-start justify-between gap-1 p-3">
-            <div className="ml-3 flex-1 font-bold text-gray-800">J’ai des questions sur la phase 2</div>
-            <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
-          </a>
-        </div>
-        <div className="flex w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
-          <a
-            href="https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1"
-            target="_blank"
-            rel="noreferrer"
-            className="flex flex-1 items-start justify-between gap-1 p-3">
-            <div className="ml-3 flex-1 font-bold text-gray-800">J’ai des questions sur reconnaissance d'engagement</div>
-            <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
-          </a>
-        </div>
-      </div>
     </HeroContainer>
   );
 }
 
 const Heading = styled.div`
   margin-top: 40px;
+  padding-top: 15px;
   margin-bottom: 30px;
   h2 {
     color: #161e2e;
@@ -111,22 +111,8 @@ const Heading = styled.div`
   }
 `;
 
-const SeeMore = styled(Link)`
-  :hover {
-    color: #372f78;
-  }
-  cursor: pointer;
-  color: #5145cd;
-  font-size: 16px;
-`;
-
 const Missions = styled.div`
   padding: 40px;
-  border-radius: 6px;
-  background: #fff;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   .pagination {
     display: none;
   }
@@ -134,6 +120,8 @@ const Missions = styled.div`
 
 const TransparentHero = styled.div`
   padding: 0 2rem;
+  border-radius: 6px;
   max-width: 80rem;
   margin: 1rem auto;
+  background: #fff;
 `;

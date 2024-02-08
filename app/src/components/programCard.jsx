@@ -22,11 +22,22 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
             <Detail title="C'est pour ?" value={program.descriptionFor} />
             <Detail title="Est-ce indemnisé ?" value={program.descriptionMoney} />
             <Detail title="Quelle durée d'engagement ?" value={program.descriptionDuration} />
-            <ToogleText onClick={toggleDetails}>réduire</ToogleText>
+            <div className="mt-2 mb-2 flex flex-row justify-between">
+              <ToogleText onClick={toggleDetails}>Réduire</ToogleText>
+              <SeeMore href={urlWithScheme(program.url)} target="_blank" rel="noreferrer">
+                →
+              </SeeMore>
+            </div>
           </>
         ) : (
           <>
-            {preview} ...<ToogleText onClick={toggleDetails}>lire plus</ToogleText>
+            {preview} ...
+            <div className="mt-2 mb-2 flex flex-row justify-between">
+              <ToogleText onClick={toggleDetails}>Lire plus</ToogleText>
+              <SeeMore href={urlWithScheme(program.url)} target="_blank" rel="noreferrer">
+                →
+              </SeeMore>
+            </div>
           </>
         )}
       </>
@@ -34,7 +45,7 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
   };
 
   // eslint-disable-next-line prettier/prettier
-  const handleClick = () => { };
+  const handleClick = () => {};
 
   return (
     <Card onClick={handleClick}>
@@ -44,11 +55,11 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
       </a>
       <h4>{program.name}</h4>
       <div className="desc">{renderText()}</div>
-      <div style={{ marginTop: "1rem" }}>
+      {/* <div style={{ marginTop: "1rem" }}>
         <SeeMore href={urlWithScheme(program.url)} target="_blank" rel="noreferrer">
-          DÉCOUVRIR
+          DÉCOUVRIR →
         </SeeMore>
-      </div>
+      </div> */}
     </Card>
   );
 }
@@ -64,25 +75,30 @@ const Detail = ({ title, value }) => {
 
 const Card = styled.div`
   margin-bottom: 50px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
   .thumb {
     margin-bottom: 20px;
     img {
       margin-bottom: 20px;
-      border-radius: 6px;
       width: 100%;
       height: 200px;
       object-fit: cover;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
   }
   h4 {
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    padding: 0 15px;
   }
   .desc {
     color: #6b7280;
     font-weight: 400;
+    padding: 0 15px;
   }
 `;
 
@@ -97,10 +113,9 @@ const SeeMore = styled.a`
 `;
 
 const ToogleText = styled.span`
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #333;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 400;
+  color: #666666;
   cursor: pointer;
 `;
 
@@ -114,5 +129,7 @@ const Badge = styled.div`
   top: 0;
   right: 0;
   margin: 0.5rem 1.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;

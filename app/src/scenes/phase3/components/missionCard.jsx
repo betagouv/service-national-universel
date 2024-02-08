@@ -41,9 +41,17 @@ export default function MissionCard({ mission, image }) {
 
 const Card = styled(Row)`
   margin-bottom: 30px;
+  padding-top: 20px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   padding-bottom: 30px;
   border-bottom: 1px solid #e5e7eb;
   .inner {
@@ -76,7 +84,9 @@ const Card = styled(Row)`
           width: 18px;
         }
         object-fit: cover;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
       }
     }
     h4 {
@@ -98,7 +108,9 @@ const Card = styled(Row)`
 const Button = styled.a`
   background-color: #31c48d;
   border-radius: 30px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   color: #fff;
   font-size: 13px;
   padding: 10px 15px 8px;
