@@ -8,8 +8,8 @@ name: Build and deploy Staging (MonCompte CleverCloud)
 on:
   push:
     branches:
-      - production
-      - staging
+      - production_cc
+      - staging_cc
   workflow_dispatch:
 
 jobs:

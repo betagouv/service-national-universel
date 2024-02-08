@@ -8,7 +8,7 @@ name: Build and deploy Production (MonCompte CleverCloud)
 on:
   push:
     branches:
-      - production
+      - production_cc
     paths:
       - app/**
       - packages/**
