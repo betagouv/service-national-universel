@@ -74,5 +74,7 @@ runs:
           > tags_ids
         while read tag_id
         do
-            echo "$tag_id"
+          echo "$tag_id"
+          curl -sX DELETE -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/tags/$tag_id"
         done < tags_ids
