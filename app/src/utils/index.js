@@ -84,6 +84,7 @@ export function hasAccessToPhase2(young) {
   if (cohortIsTooOld && !userIsDoingAMission) {
     return false;
   }
+  if (wasYoungExcluded(young)) return false;
   return true;
 }
 

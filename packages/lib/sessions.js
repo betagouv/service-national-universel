@@ -1,5 +1,6 @@
 import { regionsListDROMS } from "./region-and-departments";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
+import { isCle } from "./young";
 const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "2022" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
 
 const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
@@ -205,6 +206,8 @@ function shouldForceRedirectToReinscription(young) {
 }
 
 function hasAccessToReinscription(young) {
+  if (isCle(young)) return false;
+
   if (shouldForceRedirectToReinscription(young)) return true;
 
   if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && !(young.departSejourMotif === "Exclusion")) {
