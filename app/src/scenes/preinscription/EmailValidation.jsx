@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useHistory, Redirect, useLocation } from "react-router-dom";
 import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
@@ -15,6 +15,7 @@ import { capture } from "../../sentry";
 import InlineButton from "../../components/dsfr/ui/buttons/InlineButton";
 import DidNotReceiveActivationCodeModal from "./components/DidNotReceiveActivationCodeModal";
 import ModifyEmailModal from "./components/ModifyEmailModal";
+import useAuth from "@/services/useAuth";
 
 //@todo:
 // - move from preinscription folder to be reused for "class engagee" also /preinscription/email-validation => /email-validation
@@ -24,7 +25,7 @@ export default function StepEmailValidation() {
   const history = useHistory();
   const { search } = useLocation();
   const { token } = queryString.parse(search);
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const [error, setError] = useState("");
   const [emailValidationToken, setEmailValidationToken] = useState(token || "");
   const [isDidNotReceiveCodeModalOpen, setDidNotReceiveCodeModalOpen] = useState(false);
@@ -43,7 +44,8 @@ export default function StepEmailValidation() {
       }
       if (token) api.setToken(token);
       if (user) dispatch(setYoung(user));
-      plausibleEvent("Phase0/CTA preinscription - validation email");
+      const eventName = isCLE ? "CLE/CTA preinscription - validation email" : "Phase0/CTA preinscription - validation email";
+      plausibleEvent(eventName);
       history.push("/preinscription/done");
     } catch (e) {
       capture(e);

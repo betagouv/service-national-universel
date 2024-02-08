@@ -2,7 +2,7 @@ import { ERRORS } from "snu-lib/errors";
 import api from "./api";
 import { download, translate } from "snu-lib";
 
-export const logoutYoung = () => api.post("/young/logout");
+export const logoutYoung = async () => await api.post("/young/logout");
 
 export const deleteYoungAccount = (youngId) => api.put(`/young/${youngId}/soft-delete`);
 export const withdrawYoungAccount = ({ withdrawnMessage, withdrawnReason }) => api.put(`/young/withdraw`, { withdrawnMessage, withdrawnReason });

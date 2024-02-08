@@ -12,8 +12,10 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ModalRecap from "../components/ModalRecap";
+import { PaddedContainer } from "@snu/ds/dsfr";
 
 import IconFrance from "../../../assets/IconFrance";
+import School from "../../../assets/school.png";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import Input from "../../../components/dsfr/forms/input";
 import Toggle from "../../../components/dsfr/forms/toggle";
@@ -26,6 +28,8 @@ import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupBut
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
+import { validateBirthDate } from "@/scenes/inscription2023/utils";
 
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -67,7 +71,7 @@ export default function StepEligibilite() {
       errors.scolarity = "Choisissez un niveau de scolarité";
     }
     // Birthdate
-    if (!data?.birthDate || !dayjs(data.birthDate).isValid()) {
+    if (!data?.birthDate || !validateBirthDate(data?.birthDate)) {
       errors.birthDate = "Vous devez saisir une date de naissance valide";
     }
 
@@ -86,7 +90,6 @@ export default function StepEligibilite() {
         }
       }
     }
-
     function validateSchool(data) {
       if (data.isAbroad) {
         if (!data?.school?.fullName) return false;
@@ -187,6 +190,25 @@ export default function StepEligibilite() {
   return (
     <>
       <ProgressBar isReinscription={isLoggedIn} />
+      {!isLoggedIn && (
+        <PaddedContainer className="flex py-4 sm:flex-row-reverse md:flex-row">
+          <div className="pt-3 md:pr-4 sm:w-80 md:w-40">
+            <img src={School} alt="" />
+          </div>
+          <div>
+            <p className="mb-2 text-xl font-bold">Classes engagées</p>
+            <p className="text-sm sm:mr-4 md:mr-0">
+              Si vous envisagez une participation au SNU dans le cadre des classes engagées, vous ne pouvez pas vous inscrire ici. Veuillez attendre que votre référent classe vous
+              indique la procédure à suivre.
+            </p>
+            <InlineButton className="text-sm md:pr-4 pt-2 md:pr-2 pb-1">
+              <a rel="noreferrer noopener" target="blank" href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
+                En savoir plus →
+              </a>
+            </InlineButton>
+          </div>
+        </PaddedContainer>
+      )}
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
         <div className="space-y-5">
           {!isLoggedIn && (
@@ -215,7 +237,7 @@ export default function StepEligibilite() {
               />
               {error.scolarity ? <span className="text-sm text-red-500">{error.scolarity}</span> : null}
             </div>
-            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#666666]"}`}>
+            <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
               Date de naissance
               <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} disabled={isBirthdayModificationDisabled} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}

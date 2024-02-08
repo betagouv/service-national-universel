@@ -251,6 +251,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
             emailTo,
             params: {
               cta: `${APP_URL}/`,
+              SOURCE: young.source,
             },
           });
         } else {

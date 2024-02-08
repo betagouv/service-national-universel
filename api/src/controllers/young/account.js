@@ -1,6 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const passport = require("passport");
+const crypto = require("crypto");
 const { ERRORS, notifDepartmentChange, YOUNG_STATUS_PHASE1, YOUNG_STATUS } = require("../../utils");
 const { getQPV, getDensity } = require("../../geo");
 const router = express.Router({ mergeParams: true });
@@ -133,7 +134,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       const qpv = await getQPV(value.zip, value.city, value.address);
       if (qpv === true) young.set({ qpv: "true" });
       else if (qpv === false) young.set({ qpv: "false" });
-      else young.set({ qpv: "" });
+      else young.set({ qpv: undefined });
       await young.save({ fromUser: req.user });
     }
 
@@ -178,6 +179,8 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
     if (value.parent2Email && !validator.isEmail(value.parent2Email)) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    if (value.parent2Email) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
 
     if (value.parent2PhoneZone === "") delete value.parent2PhoneZone;
 

@@ -1,65 +1,53 @@
 const passport = require("passport");
 const express = require("express");
+const fetch = require("node-fetch");
 const router = express.Router();
 const { canSearchAssociation } = require("snu-lib");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
-const { allRecords } = require("../../es/utils");
-const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
-const { API_ASSOCIATION_ES_ENDPOINT } = require("../../config");
+const { API_ENGAGEMENT_URL, API_ENGAGEMENT_KEY } = require("../../config");
+
+const apiEngagement = async ({ path = "/", body }) => {
+  try {
+    const myHeaders = new fetch.Headers();
+    myHeaders.append("X-API-KEY", API_ENGAGEMENT_KEY);
+    myHeaders.append("Content-Type", "application/json");
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(body),
+    };
+    const res = await fetch(`${API_ENGAGEMENT_URL}${path}`, requestOptions);
+    return await res.json();
+  } catch (e) {
+    capture(e, { extra: { path: path } });
+  }
+};
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    // Configuration
-    const searchFields = [
-      "identite_nom^10",
-      "identite_sigle^5",
-      "coordonnees_adresse_commune^4",
-      "description^4",
-      "coordonnees_adresse_region^3",
-      "activites_objet^2",
-      "activites_lib_famille1^2",
-      "coordonnees_adresse_departement^1",
-    ];
-    const filterFields = ["coordonnees_adresse_region.keyword", "coordonnees_adresse_departement.keyword", "activites_lib_theme1.keyword"];
-    const sortFields = [];
-
     const { user, body } = req;
-
-    const options = {
-      node: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
-    };
-    const es = new (require("@elastic/elasticsearch").Client)(options);
 
     if (!canSearchAssociation(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    // Body params validation
-    const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields, sortFields, body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    // Context filters
-    let contextFilters = [];
-
-    // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
-
-    const should = ["url", "linkedin", "facebook", "twitter", "donation", "coordonnees_courriel", "coordonnees_telephone"].map((e) => ({
-      exists: {
-        field: e,
-        boost: 2,
-      },
-    }));
-
-    hitsRequestBody.query.bool.should = should;
-    aggsRequestBody.query.bool.should = should;
-
     if (req.params.action === "export") {
-      const response = await allRecords("association", hitsRequestBody.query, es);
-      return res.status(200).send({ ok: true, data: response });
-    } else {
-      const response = await es.msearch({ index: "association", body: buildNdJson({ index: "association", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      const associations = [];
+      let total;
+      let maxIteration = 1000;
+      let page = 0;
+      while (associations.length < (total ?? 200) && maxIteration > 0) {
+        const response = await apiEngagement({ path: `/v0/association/snu`, body: { ...body, page, size: 100 } });
+        if (!response.responses[0]?.hits?.hits?.length) break;
+        if (!total) total = response.responses[0].hits.total.value;
+        associations.push(...response.responses[0].hits.hits.map((hit) => ({ _id: hit._id, ...hit._source })));
+        maxIteration--;
+        page++;
+      }
+      return res.status(200).send({ ok: true, data: associations });
     }
+
+    const response = await apiEngagement({ path: `/v0/association/snu`, body });
+    return res.status(200).send(response);
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

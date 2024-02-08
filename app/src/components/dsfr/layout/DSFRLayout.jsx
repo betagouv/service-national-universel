@@ -1,13 +1,14 @@
 import React from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import { Page } from "@snu/ds/dsfr";
 
 export default function DSFRLayout({ children, title = "" }) {
   return (
-    <div className="flex flex-col justify-between bg-beige-gris-galet-975">
+    <Page className="flex min-h-screen flex-col justify-between">
       <Header title={title} />
       {children}
       <Footer />
-    </div>
+    </Page>
   );
 }

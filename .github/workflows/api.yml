@@ -3,12 +3,12 @@ env:
   APP_NAME: snu-api
   ENVIRONMENT_NAME: snu-api
 
-name: Test & Deploy API
+name: Build and deploy Production (API CleverCloud)
 
 on:
   push:
     branches:
-      - main
+      - production
     paths:
       - api/**
       - packages/**
@@ -58,7 +58,7 @@ jobs:
 
   deploy:
     needs: [test]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
     runs-on: ubuntu-latest
 
     steps:
@@ -76,6 +76,10 @@ jobs:
           npm ci -w packages/lib
           npm run build -w packages/lib
           rm packages/lib/.gitignore
+
+      - name: Remove DSFR
+        run: |
+          rm -Rf packages/ds
 
       - name: Create SSH key
         run: |

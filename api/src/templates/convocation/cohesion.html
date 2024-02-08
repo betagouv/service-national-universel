@@ -52,6 +52,10 @@
 		min-width: 50%;
 	}
 
+	.center-text {
+      text-align: center;
+    }
+
 	#convocation-cohesion>.head-infos>.referent>.title {
 		font-size: 0.8rem;
 		font-weight: bold;
@@ -103,9 +107,11 @@
 	}
 
 	#convocation-cohesion>.infos-center {
-		font-size: 0.75rem;
+		text-align: center;
+		font-size: 0.8rem;
 		padding-left: 50px;
 		width: 85%;
+		margin-top: 3px;
 		margin-bottom: 8px;
 	}
 
@@ -180,16 +186,14 @@
     <div class="text">Article R.113-1 du code du service national</div>
   </div>
   <div class="infos-center">
-    Je suis heureux de vous informer que votre candidature pour participer au séjour de cohésion, phase 1 du service
-    national universel, {{COHESION_STAY_DATE_STRING}}, a été
-    retenue. </br>
+	Je suis heureuse de vous confirmer votre participation au séjour de cohésion du service national universel, {{COHESION_STAY_DATE_STRING}}. </br>
     Votre séjour se déroulera au: {{COHESION_CENTER_NAME}}, {{COHESION_CENTER_ADDRESS}} {{COHESION_CENTER_ZIP}}
     {{COHESION_CENTER_CITY}}.
   </div>
   <!-- <div class="center">{{COHESION_CENTER_NAME}}, {{COHESION_CENTER_ADDRESS}} {{COHESION_CENTER_ZIP}}
     {{COHESION_CENTER_CITY}}</div> -->
   <div class="meeting-point">
-    <div>Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants:</div>
+    <div class="center-text">Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants:</div>
     <div class="info">
       <div>{{MEETING_DATE}}</div>
       <div>{{MEETING_HOURS}}</div>
@@ -202,14 +206,13 @@
     cohésion. Votre représentant légal doit rester jusqu'à votre prise en charge par les accompagnateurs.
   </div>
   <div class="stuff">
-    <div>Il vous est demandé de confirmer votre participation en amont du départ via votre compte volontaire et de vous présenter au
-      point de rassemblement avec :
-      </div>
+    <div>
+		Il vous est demandé de vous présenter au point de rassemblement avec :
+    </div>
     <div class="list">
       <li>votre convocation,</li>
-      <li>votre pièce d'identité,</li>
+      <li>une pièce d'identité,</li>
       <li>la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire,</li>
-      	{{SANITARY_INSTRUCTIONS}}
 		{{LUNCH_BREAK}}
       </div>
     <div class="info">
@@ -219,7 +222,7 @@
 
   <div class="meeting-point-date-return">
     <br/>
-    Le <b>retour de votre séjour</b> est prévu le <b>{{MEETING_DATE_RETURN}} à {{MEETING_HOURS_RETURN}}</b>, au même endroit que le jour du départ en centre SNU.
+    Le <b>retour de votre séjour</b> est prévu le <b>{{MEETING_DATE_RETURN}} à {{MEETING_HOURS_RETURN}}</b>, au même endroit que le jour du départ en centre.
     <br />
     <br />
     <b>Votre représentant légal veillera à bien respecter ces modalités de retour (horaire, lieu de prise en charge).

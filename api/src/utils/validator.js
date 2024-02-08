@@ -198,7 +198,16 @@ function validateContract(program) {
 }
 
 function validateFirstName() {
-  return Joi.string().custom((value) => (value ? value.replace(/(?<=^|\s)\S+/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null));
+  const formatPart = (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+
+  return Joi.string().custom((value) =>
+    value
+      ? value.replace(/(?<=^|\s)\S+/g, (txt) => {
+          const parts = txt.split("-");
+          return parts.length > 1 ? parts.map(formatPart).join("-") : formatPart(txt);
+        })
+      : null,
+  );
 }
 
 const applicationKeys = {
@@ -574,6 +583,7 @@ function validateYoung(young, user) {
     statusMilitaryPreparationFiles: Joi.string().allow(null, ""),
     militaryPreparationCorrectionMessage: Joi.string().allow(null, ""),
     missionsInMail: Joi.array().items(Joi.any().allow(null, "")),
+    classeId: Joi.string().allow(null, ""),
   };
 
   if (!isYoung(user)) {
@@ -746,7 +756,7 @@ const representantSchema = (isRequired) => {
     parent1Status: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
     parent1FirstName: needRequired(validateFirstName().trim(), isRequired),
     parent1LastName: needRequired(Joi.string().trim(), isRequired),
-    parent1Email: needRequired(Joi.string().trim().email(), isRequired),
+    parent1Email: needRequired(Joi.string().trim().lowercase().email(), isRequired),
     parent1Phone: needRequired(Joi.string().trim(), isRequired),
     parent1PhoneZone: needRequired(
       Joi.string()
@@ -768,7 +778,7 @@ const representantSchema = (isRequired) => {
     }),
     parent2Email: Joi.alternatives().conditional("parent2", {
       is: true,
-      then: needRequired(Joi.string().trim().email(), isRequired),
+      then: needRequired(Joi.string().trim().lowercase().email(), isRequired),
       otherwise: Joi.isError(new Error()),
     }),
     parent2Phone: Joi.alternatives().conditional("parent2", {

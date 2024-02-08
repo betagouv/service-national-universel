@@ -61,7 +61,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
 
     young.set({
       notes,
-      hasNotes: notes.length > 0 ? "true" : "false",
+      hasNotes: "true",
     });
     await young.save({ fromUser: req.user });
 

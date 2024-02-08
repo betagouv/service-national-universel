@@ -5,6 +5,7 @@ import { useHistory } from "react-router-dom";
 import {
   canViewEmailHistory,
   canViewNotes,
+  isCle,
   ROLES,
   SENDINBLUE_TEMPLATES,
   translate,
@@ -16,6 +17,7 @@ import {
   YOUNG_STATUS_PHASE2,
   YOUNG_STATUS_PHASE3,
 } from "snu-lib";
+import { Button as DsfrButton } from "@snu/ds/admin";
 import Bin from "@/assets/Bin";
 import ChevronDown from "@/assets/icons/ChevronDown";
 import History from "@/assets/icons/History";
@@ -106,8 +108,10 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     setWithdrawn({ reason: "", message: "", error: null });
     setConfirmModal({
       icon: <Warning className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-      title: "Modification de statut",
-      message: `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil? Un email sera automatiquement envoyé à l'utlisateur.`,
+      title: status === YOUNG_STATUS.WITHDRAWN ? "Désistement" : "Modification de statut",
+      message: `${
+        status === YOUNG_STATUS.WITHDRAWN ? `Êtes-vous sûr(e) de vouloir désister ce profil?` : `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?`
+      } Un email sera automatiquement envoyé à l'utlisateur.`,
       type: status,
     });
   };
@@ -185,9 +189,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
+      const validationTemplate = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED;
+
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
         if (prevStatus === "WITHDRAWN") await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED}`);
-        else await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
+        else await api.post(`/young/${young._id}/email/${validationTemplate}`);
       }
       if (status === YOUNG_STATUS.WAITING_LIST) {
         await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
@@ -246,6 +252,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               )}
             </Title>
             <AttestationDownloadButton young={young} />
+            {[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && young.status !== YOUNG_STATUS.WITHDRAWN && (
+              <>
+                <DsfrButton title="Désister" onClick={() => onSelectStatus(YOUNG_STATUS.WITHDRAWN)} />
+              </>
+            )}
           </div>
 
           {isStructure ? (
@@ -276,7 +287,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                   )}
                 </div>
               </Tab>
-              {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && (
+              {![YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS].includes(young.status) && (
                 <>
                   <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
                     <div className="flex items-center">
@@ -290,11 +301,13 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                           Phase 2{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_2)} />}
                         </div>
                       </Tab>
-                      <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
-                        <div className="flex items-center">
-                          Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_3)} />}
-                        </div>
-                      </Tab>
+                      {[YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED].includes(young.statusPhase3) && (
+                        <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
+                          <div className="flex items-center">
+                            Phase 3{getNotesByPhase(PHASE_3).length > 0 && <NoteIcon id={PHASE_3} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_3)} />}
+                          </div>
+                        </Tab>
+                      )}
                     </>
                   )}
                 </>
@@ -338,7 +351,8 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               onChange={onSelectStatus}
               className={young.status === YOUNG_STATUS.DELETED ? "my-[15px]" : ""}
             />
-            {young.status !== YOUNG_STATUS.DELETED && (
+
+            {young.status !== YOUNG_STATUS.DELETED && ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
               <div className="my-[15px] flex items-center justify-between">
                 <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
                   Supprimer

@@ -8,6 +8,8 @@ import { toastr } from "react-redux-toastr";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import Select from "react-select";
+import { Select as SelectDS } from "@snu/ds/admin";
+import { Label } from "reactstrap";
 
 export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contacts, cohorts, getService }) {
   const [currentTab, setCurrentTab] = useState();
@@ -16,6 +18,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   const [edit, setEdit] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [proposedContact, setProposedContact] = useState([]);
+  const cohortList = cohorts.map((cohort) => ({ value: cohort, label: cohort }));
 
   const resetState = () => {
     setEdit(null);
@@ -83,7 +86,7 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   }, [newContact, hit]);
 
   useEffect(() => {
-    if (cohorts && contacts) {
+    if (cohorts && contacts && !currentTab) {
       setCurrentTab(cohorts[0]);
     }
   }, [cohorts]);
@@ -136,8 +139,8 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
   if (!contacts || !cohorts || !currentTab) return null;
 
   return (
-    <ModalForm classNameModal="max-w-3xl" isOpen={isOpen} onCancel={onCancel}>
-      <div className="flex w-full flex-col pt-2">
+    <ModalForm classNameModal="max-w-4xl" isOpen={isOpen} onCancel={onCancel}>
+      <div className="flex w-full flex-col pt-2 ">
         <div className="mb-4 flex flex-row items-center justify-center gap-2">
           <span className="text-xl font-medium text-black">Mes contacts convocation</span>
           <MdInfoOutline data-tip data-for="inscriptions" className="h-5 w-5 cursor-pointer text-gray-400" />
@@ -145,13 +148,18 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
             Renseigner le contact local de votre département disponible le jour du départ
           </ReactTooltip>
         </div>
-        <div className="mb-4 flex flex-1 flex-col border-b lg:flex-row">
-          <nav className="flex flex-1 px-3 ">
-            {cohorts.map((cohort) => (
-              <TabItem name={cohort} key={cohort} setCurrentTab={setCurrentTab} active={currentTab === cohort}>
-                {cohort}
-              </TabItem>
-            ))}
+        <div className="mb-4 flex flex-1 flex-col lg:flex-row">
+          <nav className="flex-col flex-1 px-3 ">
+            <Label className="text-xs leading-5 text-gray-900">Séjour</Label>
+            <SelectDS
+              options={cohortList}
+              className="m-auto w-[100%]"
+              defaultValue={cohortList.find((cohort) => cohort.value === currentTab)}
+              closeMenuOnSelect={true}
+              onChange={(options) => {
+                setCurrentTab(options.value);
+              }}
+            />
           </nav>
         </div>
         {!edit ? (
@@ -163,19 +171,19 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
                 ))}
                 {contacts[currentTab].length < 4 && (
                   <div
-                    className="border-grey-200 mr-4 flex flex-row items-center justify-center rounded-lg border-[1px] border-dashed border-indigo-700 bg-white px-2 shadow-sm hover:cursor-pointer"
+                    className="border-grey-200 mr-4 flex flex-row items-center justify-center bg-gray-50 px-2 shadow-sm hover:cursor-pointer hover:bg-blue-50"
                     onClick={() => setNewContact(true)}>
-                    <HiPlus className="text-indigo-300" />
-                    <div className="pl-2 text-lg text-indigo-700">Ajouter un contact</div>
+                    <HiPlus className="text-blue-600" size={20} />
+                    <div className="pl-2 text-lg text-blue-600">Ajouter un contact</div>
                   </div>
                 )}
               </div>
             ) : (
               <div
-                className="border-grey-200 mx-auto mb-4 flex items-center justify-center rounded-lg border-[1px] border-dashed border-indigo-700 bg-white px-8 py-4 shadow-sm hover:cursor-pointer"
+                className="mx-auto mb-4 mt-[150px] flex items-center justify-center bg-gray-50 px-8 py-4 shadow-sm hover:cursor-pointer hover:bg-blue-50"
                 onClick={() => setNewContact(true)}>
-                <HiPlus className="text-indigo-300" />
-                <div className="pl-2 text-lg text-indigo-700">Ajouter un contact</div>
+                <HiPlus className="text-blue-600 mt-1" size={20} />
+                <div className="pl-2 text-lg text-blue-600">Ajouter un contact</div>
               </div>
             )}
           </>
@@ -247,16 +255,6 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
                     </div>
                   </div>
                 </div>
-                {!newContact ? (
-                  <div className="flex w-full flex-row justify-center">
-                    <button disabled={isLoading} className="pt-2 hover:border-b-[1px] hover:border-red-500" type="button" onClick={handleDelete}>
-                      <div className="flex w-full flex-row items-center justify-center text-red-500">
-                        <HiOutlineTrash className="text-lg text-red-300 " />
-                        Supprimer le contact
-                      </div>
-                    </button>
-                  </div>
-                ) : null}
 
                 <div className="mt-4 flex w-full flex-row justify-center">
                   <button
@@ -266,12 +264,22 @@ export default function ModalContacts({ isOpen, setIsOpen, idServiceDep, contact
                     Annuler
                   </button>
                   <button
-                    className="m-2 flex flex-1 items-center justify-center rounded-lg border-[1px] border-indigo-700 bg-indigo-600 py-2 px-8 text-white shadow-sm hover:opacity-90"
+                    className="m-2 flex flex-1 items-center justify-center rounded-lg border-[1px] bg-blue-600 py-2 px-8 text-white shadow-sm hover:opacity-90"
                     type="submit"
                     disabled={isLoading}>
                     {newContact ? "Ajouter un contact" : "Enregistrer"}
                   </button>
                 </div>
+                {!newContact ? (
+                  <div className="flex w-full flex-row justify-center mt-1">
+                    <button disabled={isLoading} className="pt-2" type="button" onClick={handleDelete}>
+                      <div className="flex w-full flex-row items-center justify-center text-red-600 border !border-red-600 p-2 rounded-lg hover:bg-red-50">
+                        <HiOutlineTrash className="text-lg text-red-300 " />
+                        Supprimer le contact
+                      </div>
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </form>
           </div>
@@ -326,15 +334,6 @@ const Contact = ({ contact, setHit }) => {
     </div>
   );
 };
-
-const TabItem = ({ name, active, setCurrentTab, children }) => (
-  <div
-    onClick={() => setCurrentTab(name)}
-    className={`cursor-pointer px-3 py-2 text-coolGray-500  hover:border-b-[3px] hover:border-snu-purple-800 hover:text-snu-purple-800
-      ${active && "border-b-[3px] border-snu-purple-800 text-snu-purple-800"}`}>
-    {children}
-  </div>
-);
 
 const getInitials = (word) =>
   (word || "UK")

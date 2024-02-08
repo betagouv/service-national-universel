@@ -2,12 +2,14 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames } = require("snu-lib");
+const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 const { ENVIRONMENT } = require("../config");
+const { capture } = require("../sentry");
 const MODELNAME = "young";
 const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
+const StateManager = require("../states");
 
 const File = new mongoose.Schema({
   name: String,
@@ -101,7 +103,7 @@ const Note = new mongoose.Schema({
     type: String,
     enum: ["INSCRIPTION", "PHASE_1", "PHASE_2", "PHASE_3", ""],
   },
-  note: { type: String, required: true, maxLength: 500 },
+  note: { type: String, required: true },
   referent: new mongoose.Schema({
     _id: { type: mongoose.Types.ObjectId, required: true },
     firstName: { type: String, required: true },
@@ -167,6 +169,7 @@ const Schema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
+    lowercase: true,
     documentation: {
       description: "E-mail du volontaire",
     },
@@ -218,7 +221,6 @@ const Schema = new mongoose.Schema({
   },
   originalCohort: {
     type: String,
-    enum: getCohortNames(),
     documentation: {
       description: "Cohorte d'origine du volontaire, dans le cas ou il a changé de cohorte après sa validation",
     },
@@ -307,6 +309,12 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date de dernière modification du statut lié à la seconde phase",
+    },
+  },
+  statusPhase2OpenedAt: {
+    type: Date,
+    documentation: {
+      description: "Date d'ouverture de la seconde phase",
     },
   },
   statusPhase2ValidatedAt: {
@@ -638,6 +646,30 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "La convacation a été telechargée",
+    },
+  },
+
+  //Phase 0 classe engagée
+  classeId: {
+    type: String,
+    documentation: {
+      description: "Id de la classe engagée",
+    },
+  },
+
+  etablissementId: {
+    type: String,
+    documentation: {
+      description: "Id de l'établissement CLE",
+    },
+  },
+
+  source: {
+    type: String,
+    enum: YOUNG_SOURCE_LIST,
+    default: YOUNG_SOURCE.VOLONTAIRE,
+    documentation: {
+      description: "Type de parcours d'un jeune",
     },
   },
 
@@ -1046,6 +1078,8 @@ const Schema = new mongoose.Schema({
   },
   parent1Email: {
     type: String,
+    lowercase: true,
+    trim: true,
     documentation: {
       description: "E-mail du parent 1",
     },
@@ -1197,6 +1231,8 @@ const Schema = new mongoose.Schema({
   },
   parent2Email: {
     type: String,
+    lowercase: true,
+    trim: true,
     documentation: {
       description: "E-mail du parent 2",
     },
@@ -1469,6 +1505,15 @@ const Schema = new mongoose.Schema({
       description: "Structure dans laquelle le volontaire est engagée en dehors du SNU",
     },
   },
+
+  sameSchoolCLE: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "savoir si le volontaire vient de la même école que sa classe engagée",
+    },
+  },
+
   specificAmenagment: {
     type: String,
     enum: ["true", "false"],
@@ -2057,6 +2102,11 @@ Schema.methods.anonymise = function () {
 
 //Sync with sendinblue
 Schema.post("save", function (doc) {
+  if (doc.source === YOUNG_SOURCE.CLE) {
+    // doc.previousStatus !== doc.status is not working in post save hook...
+    StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) }).catch((error) => capture(error));
+  }
+
   if (ENVIRONMENT === "testing") return;
   sendinblue.sync(doc, MODELNAME);
 });
@@ -2077,6 +2127,7 @@ Schema.virtual("fromUser").set(function (fromUser) {
 Schema.pre("save", function (next, params) {
   this.fromUser = params?.fromUser;
   this.updatedAt = Date.now();
+  this.previousStatus = this.status; // Used to compute classe if a young CLE has a change in status (see post save hook)
   next();
 });
 

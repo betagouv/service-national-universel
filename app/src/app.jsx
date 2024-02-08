@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
+import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
 
 import { setYoung } from "./redux/auth/actions";
 import { toastr } from "react-redux-toastr";
@@ -19,6 +20,7 @@ import Contact from "./scenes/contact";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
+import DesignSystemPage from "./scenes/develop/DesignSystemPage";
 import Diagoriente from "./scenes/diagoriente";
 import Engagement from "./scenes/engagement";
 import Footer from "./components/footer";
@@ -38,6 +40,8 @@ import Echanges from "./scenes/echanges";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
 import ReInscription from "./scenes/reinscription";
+import OnBoarding from "./scenes/cle/OnBoarding";
+import AccountAlreadyExists from "./scenes/account/AccountAlreadyExists";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import Thanks from "./scenes/contact/Thanks";
 import ViewMessage from "./scenes/echanges/View";
@@ -53,7 +57,7 @@ import {
   isFeatureEnabled,
   FEATURES_NAME,
 } from "snu-lib";
-import { history, initSentry, SentryRoute } from "./sentry";
+import { capture, history, initSentry, SentryRoute } from "./sentry";
 import { getAvailableSessions } from "./services/cohort.service";
 import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
 
@@ -66,32 +70,40 @@ function FallbackComponent() {
 
 const myFallback = <FallbackComponent />;
 
+const queryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: (error) => capture(error) }),
+});
+
 export default function App() {
   return (
     <Sentry.ErrorBoundary fallback={myFallback}>
-      <Router history={history}>
-        <ScrollToTop />
-        <div className="flex h-screen flex-col justify-between">
-          {maintenance ? (
-            <Switch>
-              <SentryRoute path="/" component={Maintenance} />
-            </Switch>
-          ) : (
-            <Switch>
-              {/* Aucune authentification nécessaire */}
-              <SentryRoute path="/noneligible" component={NonEligible} />
-              <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-              <SentryRoute path="/validate-contract/done" component={ContractDone} />
-              <SentryRoute path="/validate-contract" component={Contract} />
-              <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-              {/* Authentification accessoire */}
-              <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci", "/preinscription"]} component={() => <OptionalLogIn />} />
-              {/* Authentification nécessaire */}
-              <SentryRoute path="/" component={() => <MandatoryLogIn />} />
-            </Switch>
-          )}
-        </div>
-      </Router>
+      <QueryClientProvider client={queryClient}>
+        <Router history={history}>
+          <ScrollToTop />
+          <div className="flex h-screen flex-col justify-between">
+            {maintenance ? (
+              <Switch>
+                <SentryRoute path="/" component={Maintenance} />
+              </Switch>
+            ) : (
+              <Switch>
+                {/* Aucune authentification nécessaire */}
+                <SentryRoute path="/noneligible" component={NonEligible} />
+                <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+                <SentryRoute path="/validate-contract/done" component={ContractDone} />
+                <SentryRoute path="/validate-contract" component={Contract} />
+                <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
+                <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+                <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
+                {/* Authentification accessoire */}
+                <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci", "/preinscription"]} component={() => <OptionalLogIn />} />
+                {/* Authentification nécessaire */}
+                <SentryRoute path="/" component={() => <MandatoryLogIn />} />
+              </Switch>
+            )}
+          </div>
+        </Router>
+      </QueryClientProvider>
     </Sentry.ErrorBoundary>
   );
 }
@@ -215,7 +227,6 @@ const Espace = () => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
     }
-
   }, [young]);
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
@@ -241,7 +252,8 @@ const Espace = () => {
           <SentryRoute path="/preferences" component={Preferences} />
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
-          {environment === "development" && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
           {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={ChangeSejour} /> : null}
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}

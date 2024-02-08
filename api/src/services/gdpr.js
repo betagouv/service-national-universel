@@ -1,4 +1,5 @@
 const YoungModel = require("../models/young");
+const CohortModel = require("../models/cohort");
 const { deleteFilesByList, listFiles } = require("../utils/index");
 
 async function deleteSensitiveData(youngId, mode = "save") {
@@ -28,6 +29,19 @@ async function deleteSensitiveData(youngId, mode = "save") {
   return { young, copyOfYoung, fileStatus };
 }
 
+async function getCohortsFinishedSinceYesterday() {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(23, 59, 59, 999); // Inclure toute la journée d'hier
+
+  const finishedCohorts = await CohortModel.find({
+    dateEnd: { $lte: yesterday },
+  }).select("name"); // Sélectionner seulement le nom de la cohorte
+
+  return finishedCohorts.map((cohort) => cohort.name);
+}
+
 module.exports = {
   deleteSensitiveData,
+  getCohortsFinishedSinceYesterday,
 };

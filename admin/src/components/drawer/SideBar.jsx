@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { connect, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom/cjs/react-router-dom.min";
-import { ROLES, totalClosedTickets, totalNewTickets, totalOpenedTickets } from "snu-lib";
+import { useLocation } from "react-router-dom";
+import { FEATURES_NAME, ROLES, isFeatureEnabled, totalClosedTickets, totalNewTickets, totalOpenedTickets } from "snu-lib";
 import Header from "./components/Header";
 import MultiNavItem from "./components/MultiNavItem";
 import SimpleNavItem from "./components/SimpleNavItem";
@@ -23,7 +23,11 @@ import GlobeIcon from "./icons/Globe";
 import InviteHeader from "./components/invite";
 import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
-import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, volontaireHeadCenterRegex } from "./utils";
+import InstitutionIcon from "./icons/Institution";
+import StudentIcon from "./icons/Student";
+import { HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiOutlineCommandLine } from "react-icons/hi2";
+import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, itemsDev, volontaireHeadCenterRegex } from "./utils";
 import useDevice from "../../hooks/useDevice";
 
 //Css !important becuse of bootstrap override
@@ -168,6 +172,26 @@ const SideBar = (props) => {
       setCurrentOpen={setDropDownOpen}
     />
   );
+  const Institution = () => (
+    <SimpleNavItem
+      sideBarOpen={open}
+      Icon={InstitutionIcon}
+      title="Mon établissement"
+      link="/mon-etablissement"
+      active={path.includes("mon-etablissement")}
+      setCurrentOpen={setDropDownOpen}
+    />
+  );
+  const Classe = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={HiOutlineOfficeBuilding} title="Mes classes" link="/classes" active={path.includes("classes")} setCurrentOpen={setDropDownOpen} />
+  );
+
+  const VolontaireCle = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={StudentIcon} title="Mes élèves" link="/mes-eleves" active={path.includes("mes-eleves")} setCurrentOpen={setDropDownOpen} />
+  );
+  const Contact = () => (
+    <SimpleNavItem sideBarOpen={open} Icon={AdminIcon} title="Mes contacts" link="/user" active={path.includes("mes-contacts")} setCurrentOpen={setDropDownOpen} />
+  );
 
   //MultiNavLinks
   const SejoursGod = () => (
@@ -185,10 +209,14 @@ const SideBar = (props) => {
   const Admisnistrateur = () => (
     <MultiNavItem sideBarOpen={open} Icon={AdminIcon} title="Administrateurs" items={itemsAdministrateur} path={path} currentOpen={dropDownOpen} setCurrentOpen={setDropDownOpen} />
   );
+  const Dev = () => (
+    <MultiNavItem sideBarOpen={open} Icon={HiOutlineCommandLine} title="Dev" items={itemsDev} path={path} currentOpen={dropDownOpen} setCurrentOpen={setDropDownOpen} />
+  );
 
   //Components to display depending on user role
-  const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs];
+  const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs, Dev];
   const adminItems = [Dashboard, Volontaire, Inscriptions, SejoursAdmin, Engagement, Utilisateurs];
+  isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) && adminItems.push(Dev);
   const refItems = [Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
   const headCenterItems = [Dashboard, VolontaireHeadCenter, CentresHeadCenter, PlanDeTransport, Contenus, Utilisateurs];
   const transporteurItems = [Point, Centre, Schema, PlanDeTransport];
@@ -196,6 +224,7 @@ const SideBar = (props) => {
   const supervisorItems = [Dashboard, Candidature, Network, StructureSupervisor, Missions, Utilisateurs];
   const visitorItems = [Dashboard];
   const dsnjItems = [ExportDsnj];
+  const institutionItems = [Institution, Classe, VolontaireCle, Contact];
 
   const getItems = () => {
     switch (user?.role) {
@@ -216,6 +245,9 @@ const SideBar = (props) => {
         return visitorItems;
       case ROLES.DSNJ:
         return dsnjItems;
+      case ROLES.ADMINISTRATEUR_CLE:
+      case ROLES.REFERENT_CLASSE:
+        return institutionItems;
       default:
         return [];
     }

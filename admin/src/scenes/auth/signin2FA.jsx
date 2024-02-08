@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Redirect } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
@@ -21,6 +21,7 @@ export default function Signin() {
   const { redirect, unauthorized, email } = params;
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const history = useHistory();
 
   const [token2FA, setToken2FA] = useState("");
 
@@ -36,6 +37,7 @@ export default function Signin() {
       if (response.user) {
         plausibleEvent("2FA / Connexion réussie");
         dispatch(setUser(response.user));
+        if (!redirect) return history.push("/");
         const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
         if (!redirectionApproved) {
           captureMessage("Invalid redirect url", { extra: { redirect } });

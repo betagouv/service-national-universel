@@ -4,12 +4,12 @@ const YoungModel = require("../models/young");
 const getFillingRate = async (department, cohort) => {
   const youngCount = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort }).countDocuments();
   const inscriptionGoal = await InscriptionGoalModel.findOne({ department, cohort });
-  const fillingRate = (youngCount || 0) / (inscriptionGoal.max || 1);
+  const fillingRate = (youngCount || 0) / (inscriptionGoal?.max || 1);
   return fillingRate;
 };
 
 //@TODO: move to snu-lib and use it in the admin as well
-const FILLING_RATE_LIMIT = 1.05;
+const FILLING_RATE_LIMIT = 1;
 
 module.exports = {
   getFillingRate,

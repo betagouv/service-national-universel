@@ -47,7 +47,7 @@ const EngagementsProgramMobile = () => {
           return (
             <div key={item._id} className="mb-4">
               <div className="h-[195px] w-full">
-                <img src={images[`../../assets/programmes-engagement/${item.imageString}`]?.default} className="h-full w-full object-cover" />
+                <img src={images[`../../../assets/programmes-engagement/${item.imageString}`]?.default} className="h-full w-full object-cover" />
               </div>
 
               <div className={`min-h-min border border-[#E5E5E5] pl-4 pr-1 pb-2 ${!isOpen[clickId] && "h-[250px]"}`}>

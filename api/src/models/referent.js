@@ -30,13 +30,28 @@ const Schema = new mongoose.Schema({
       description: "Nom de l'utilisateur",
     },
   },
+
   email: {
     type: String,
     required: true,
     unique: true,
     trim: true,
+    lowercase: true,
     documentation: {
       description: "Email de l'utilisateur",
+    },
+  },
+  emailValidatedAt: {
+    type: Date,
+    documentation: {
+      description: "[CLE] Date à laquelle l'email a été validé",
+    },
+  },
+  emailWaitingValidation: {
+    type: String,
+    trim: true,
+    documentation: {
+      description: "[CLE] Email renseigné par l'utilisateur pendant l'inscription mais pas encore validé (code envoyé)",
     },
   },
 
@@ -224,9 +239,22 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  mobile: {
+    type: String,
+    documentation: {
+      description: "Numéro de portable",
+    },
+  },
+
   deletedAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+});
+
+Schema.virtual("fullName").get(function () {
+  const { firstName, lastName } = this;
+  if (firstName && lastName) return `${firstName} ${lastName}`;
+  else return firstName || lastName;
 });
 
 Schema.pre("save", async function (next) {
@@ -244,6 +272,7 @@ Schema.methods.comparePassword = async function (p) {
 
 Schema.methods.anonymise = function () {
   this.phone && (this.phone = generateNewPhoneNumber());
+  this.mobile && (this.mobile = generateNewPhoneNumber());
   this.email && (this.email = generateRandomEmail());
   this.firstName && (this.firstName = generateRandomName());
   this.lastName && (this.lastName = generateRandomName());
@@ -323,6 +352,9 @@ Schema.plugin(
   }),
   MODELNAME,
 );
+
+Schema.set("toObject", { virtuals: true });
+Schema.set("toJSON", { virtuals: true });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 

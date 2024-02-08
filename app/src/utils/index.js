@@ -60,7 +60,9 @@ export function permissionPhase1(y) {
 }
 
 export function permissionPhase2(y) {
-  if (!permissionPhase1(y)) return false;
+  if (!y) return false;
+  if (y.statusPhase2OpenedAt && new Date(y.statusPhase2OpenedAt) < new Date()) return true;
+  if (!hasAccessToPhase2(y)) return false;
   return (
     (y.status !== YOUNG_STATUS.WITHDRAWN &&
       (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) ||
@@ -75,8 +77,19 @@ export function permissionPhase3(y) {
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
 }
 
+export function hasAccessToPhase2(young) {
+  if (young.statusPhase2 === "VALIDATED") return true;
+  const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
+  const cohortIsTooOld = ["2019", "2020"].includes(young.cohort);
+  if (cohortIsTooOld && !userIsDoingAMission) {
+    return false;
+  }
+  return true;
+}
+
 // from the end of the cohort's last day
 export function isYoungCanApplyToPhase2Missions(young) {
+  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
   return isCohortDone(young.cohort, 1) && hasYoungPhase1DoneOrExempted;
 }
@@ -142,6 +155,11 @@ export const debounce = (fn, delay) => {
       fn(...args);
     }, delay);
   };
+};
+
+export const validateId = (id) => {
+  const idRegex = /^[0-9a-fA-F]{24}$/;
+  return idRegex.test(id);
 };
 
 export const desktopBreakpoint = 768;

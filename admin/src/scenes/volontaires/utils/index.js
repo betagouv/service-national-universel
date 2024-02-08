@@ -18,17 +18,19 @@ import {
   translateInscriptionStatus,
   translatePhase1,
   translatePhase2,
+  translateYoungSource,
   translateStatusMilitaryPreparationFiles,
 } from "snu-lib";
 import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
 import api from "../../../services/api";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
-export const getFilterArray = (user, bus, session) => {
+export const getFilterArray = (user, bus, session, classes, etablissements) => {
   return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
     { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus, defaultValue: ["VALIDATED"] },
+    { title: "Source", name: "source", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateYoungSource },
     { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     { title: "Académie", name: "academy", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     {
@@ -158,6 +160,30 @@ export const getFilterArray = (user, bus, session) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: translatePhase1,
+    },
+    {
+      title: "Classe Engagée ID",
+      name: "classeId",
+      parentGroup: "Phase 1",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !classes.length) return item;
+        const res = classes.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.uniqueKeyAndId;
+      },
+    },
+    {
+      title: "Etablissement CLE",
+      name: "etablissementId",
+      parentGroup: "Phase 1",
+      missingLabel: "Non renseigné",
+      translate: (item) => {
+        if (item === "N/A" || !etablissements.length) return item;
+        const res = etablissements.find((option) => option._id.toString() === item);
+        if (!res) return "N/A - Supprimé";
+        return res?.name;
+      },
     },
     {
       title: "Centre",

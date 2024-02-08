@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
-import { BsCheck2, BsChevronDown } from "react-icons/bs";
-import { GoPrimitiveDot } from "react-icons/go";
+import { BsCheck2, BsChevronDown, BsCircleFill } from "react-icons/bs";
 import Bell from "../../../assets/icons/Bell";
 import CheckCircle from "../../../assets/icons/CheckCircle";
 import ChevronDown from "../../../assets/icons/ChevronDown";
@@ -234,7 +233,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
                           className="flex min-w-[200px] cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
                           onClick={() => setOpen((e) => !e)}>
                           <div className="flex items-center gap-2">
-                            <GoPrimitiveDot className={theme[young.statusMilitaryPreparationFiles]} />
+                            <BsCircleFill className={theme[young.statusMilitaryPreparationFiles]} />
                             <span className="text-sm font-normal leading-5">{translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}</span>
                           </div>
                           <ChevronDown className="ml-2 cursor-pointer text-gray-400" />

@@ -10,6 +10,8 @@ const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const StructureObject = require("../../models/structure");
 const Joi = require("joi");
 const { serializeReferents } = require("../../utils/es-serializer");
+const EtablissementModel = require("../../models/cle/etablissement");
+const ClasseModel = require("../../models/cle/classe");
 
 async function buildReferentContext(user) {
   const contextFilters = [];
@@ -38,7 +40,19 @@ async function buildReferentContext(user) {
     contextFilters.push({
       bool: {
         should: [
-          { terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.REFERENT_REGION] } },
+          {
+            terms: {
+              "role.keyword": [
+                ROLES.REFERENT_DEPARTMENT,
+                ROLES.SUPERVISOR,
+                ROLES.RESPONSIBLE,
+                ROLES.HEAD_CENTER,
+                ROLES.REFERENT_REGION,
+                ROLES.REFERENT_CLASSE,
+                ROLES.ADMINISTRATEUR_CLE,
+              ],
+            },
+          },
           { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { terms: { "department.keyword": user.department } }] } },
         ],
       },
@@ -48,7 +62,7 @@ async function buildReferentContext(user) {
     contextFilters.push({
       bool: {
         should: [
-          { terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER] } },
+          { terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE] } },
           { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "region.keyword": user.region } }] } },
           { bool: { must: [{ term: { "role.keyword": ROLES.VISITOR } }, { term: { "region.keyword": user.region } }] } },
         ],
@@ -63,6 +77,48 @@ async function buildReferentContext(user) {
     });
   }
 
+  if (user.role === ROLES.ADMINISTRATEUR_CLE) {
+    /*
+      Can see:
+      - all referents dep of the department of his etablissement
+      - all ref ADMIN CLE of his etablissement
+      - all ref Classe of his etablissement
+    */
+    const refIds = [];
+    const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
+    if (!etablissement) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id });
+    refIds.push(...classes.flatMap((c) => c.referentClasseIds), ...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds);
+    contextFilters.push({
+      bool: {
+        should: [
+          { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "department.keyword": etablissement.department } }] } },
+          { bool: { must: { ids: { values: refIds } } } },
+        ],
+      },
+    });
+  }
+
+  if (user.role === ROLES.REFERENT_CLASSE) {
+    /*
+      Can see:
+      - all referents dep of the department of his etablissement
+      - all ref ADMIN CLE of his etablissement
+      - all ref Classe of his etablissement and all ref of hiis departement
+    */
+    const classes = await ClasseModel.findOne({ referentClasseIds: user._id });
+    if (!classes) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
+    const etablissement = await EtablissementModel.findOne({ _id: classes.etablissementId });
+    const refIds = [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds];
+    contextFilters.push({
+      bool: {
+        should: [
+          { bool: { must: [{ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE] } }, { term: { "department.keyword": etablissement.department } }] } },
+          { bool: { must: { ids: { values: refIds } } } },
+        ],
+      },
+    });
+  }
   return { referentContextFilters: contextFilters };
 }
 

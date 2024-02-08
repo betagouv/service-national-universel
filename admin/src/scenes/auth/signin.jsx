@@ -67,7 +67,7 @@ export default function Signin() {
                     if (user) {
                       plausibleEvent("Connexion réussie");
                       dispatch(setUser(user));
-                      if (isFeatureEnabled(FEATURES_NAME.FLEXIBLE_REDIRECT, undefined, environment) ? redirect : isValidRedirectUrl(redirect))
+                      if (isFeatureEnabled(FEATURES_NAME.FORCE_REDIRECT, undefined, environment) ? redirect : isValidRedirectUrl(redirect))
                         return (window.location.href = redirect);
                       if (redirect) {
                         captureMessage("Invalid redirect url", { extra: { redirect } });

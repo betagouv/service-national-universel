@@ -13,7 +13,7 @@ const ProgressBar = ({ isReinscription = false }) => {
   }
   const currentStep = getStepFromUrlParam(step, STEPS_LIST);
   const device = useDevice();
-  const STEPS = isReinscription ? ["ELIGIBILITE", "SEJOUR", "PROFIL"] : ["ELIGIBILITE", "SEJOUR"];
+  const STEPS = isReinscription ? ["ELIGIBILITE", "SEJOUR"] : ["ELIGIBILITE", "SEJOUR", "PROFIL"];
   const NEXT_STEP = {
     ELIGIBILITE: "Séjour de cohésion",
     SEJOUR: !isReinscription && "Mon compte volontaire SNU",

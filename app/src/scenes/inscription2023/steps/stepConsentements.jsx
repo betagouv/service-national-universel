@@ -1,6 +1,7 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
+import useAuth from "@/services/useAuth";
 import { getCohortPeriod, getCohortYear } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import Error from "../../../components/error";
@@ -11,12 +12,11 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
-import Navbar from "../components/Navbar";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 export default function StepConsentements() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const history = useHistory();
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
@@ -37,7 +37,8 @@ export default function StepConsentements() {
         return;
       }
       dispatch(setYoung(responseData));
-      plausibleEvent("Phase0/CTA inscription - consentement");
+      const eventName = isCLE ? "CLE/CTA inscription - consentement" : "Phase0/CTA inscription - consentement";
+      plausibleEvent(eventName);
       history.push("/inscription2023/representants");
     } catch (e) {
       capture(e);
@@ -57,10 +58,9 @@ export default function StepConsentements() {
 
   return (
     <>
-      <Navbar />
       <DSFRContainer
         title="Apporter mon consentement"
-        supportLink={`${supportURL}/base-de-connaissance/je-minscris-et-donne-mon-consentement`}
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-donne-mon-consentement" : "/base-de-connaissance/je-minscris-et-donne-mon-consentement"}`}
         supportEvent="Phase0/aide inscription - consentement">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
         <div className="mt-4 flex flex-col gap-4 pb-2">
@@ -75,14 +75,20 @@ export default function StepConsentements() {
             <CheckBox checked={data.consentment1} onChange={(e) => setData({ ...data, consentment1: e })} />
             <div className="flex-1 text-sm text-[#3A3A3A]">
               Me porte volontaire pour participer à la session <strong>{getCohortYear(getCohort(young.cohort))}</strong> du Service National Universel qui comprend la participation
-              à un séjour de cohésion puis la réalisation d&apos;une mission d&apos;intérêt général dans l&apos;année qui suit le séjour de cohésion.
+              à un séjour de cohésion puis la réalisation d'une phase d'engagement.
             </div>
           </div>
           <div className="flex items-center gap-4">
             <CheckBox checked={data.consentment2} onChange={(e) => setData({ ...data, consentment2: e })} />
             <div className="flex-1 text-sm text-[#3A3A3A]">
-              M&apos;inscris pour le séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles et m&apos;engage à en
-              respecter le{" "}
+              {isCLE ? (
+                <>M&apos;inscris au séjour de cohésion </>
+              ) : (
+                <>
+                  M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles{" "}
+                </>
+              )}
+              et m&apos;engage à en respecter le{" "}
               <a
                 href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/snu-reglement-interieur.pdf"
                 target="_blank"

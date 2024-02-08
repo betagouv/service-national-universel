@@ -10,11 +10,13 @@ import WithdrawFormModalContent from "./WithdrawFormModalContent";
 import WithdrawOrChangeDateModalContent from "./WithdrawOrChangeDateModalContent";
 import ConfirmationModalContent from "./ConfirmationModalContent";
 import Close from "../../../assets/Close";
-import { abandonYoungAccount, deleteYoungAccount, logoutYoung, withdrawYoungAccount } from "../../../services/young.service";
+import { abandonYoungAccount, deleteYoungAccount, withdrawYoungAccount } from "../../../services/young.service";
+import useAuth from "@/services/useAuth";
 
 const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
   const history = useHistory();
   const dispatch = useDispatch();
+  const { logout } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
@@ -52,8 +54,7 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
         const { ok, code } = await deleteYoungAccount(young._id);
         if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
         toastr.success("Compte supprimé:", "Votre compte a été suppromé avec succès.");
-        await logoutYoung();
-        dispatch(setYoung(null));
+        await logout();
       }
 
       if (action === ACTION_WITHDRAW) {

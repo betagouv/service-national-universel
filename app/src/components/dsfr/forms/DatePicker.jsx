@@ -34,7 +34,7 @@ export default function DatePicker({ value, onChange, disabled = false, displayE
   const handleMonthChange = (e) => setMonth(e.target.value);
   const handleYearChange = (e) => setYear(e.target.value);
 
-  const textColor = disabled ? "text-[#929292]" : "text-[#666666]";
+  const textColor = disabled ? "text-[#929292]" : "text-[#161616]";
   const borderColor = disabled ? "border-[#929292]" : "border-black";
 
   return (
@@ -46,7 +46,7 @@ export default function DatePicker({ value, onChange, disabled = false, displayE
           </label>
           <input
             id="day"
-            className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
+            className={`w-full bg-[#EEEEEE] rounded-t-md border-b-2 ${borderColor} px-4 py-2`}
             type="number"
             min="1"
             max="31"
@@ -64,7 +64,7 @@ export default function DatePicker({ value, onChange, disabled = false, displayE
           </label>
           <input
             id="month"
-            className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
+            className={`w-full bg-[#EEEEEE] rounded-t-md border-b-2 ${borderColor} px-4 py-2`}
             type="number"
             min="1"
             max="12"
@@ -82,7 +82,7 @@ export default function DatePicker({ value, onChange, disabled = false, displayE
           </label>
           <input
             id="year"
-            className={`w-full  bg-[#EEEEEE] rounded-tl-md rounded-tr-md border-b-[2px] ${borderColor} px-4 py-2`}
+            className={`w-full bg-[#EEEEEE] rounded-t-md border-b-2 ${borderColor} px-4 py-2`}
             type="number"
             min={minYear}
             max={maxYear}

@@ -1,5 +1,5 @@
 import React from "react";
-import { getDepartureDate, getReturnDate, getCohortPeriod, transportDatesToString, youngCanChangeSession } from "snu-lib";
+import { getCohortPeriod, youngCanChangeSession } from "snu-lib";
 import hero2 from "../../assets/hero-2.png";
 import heroBanner from "../../assets/hero-banner.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
@@ -12,34 +12,30 @@ import FaqSection from "./components/FaqWaitingAffectation";
 import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
-import { getCohort } from "../../utils/cohorts";
-import { useSelector } from "react-redux";
-import BannerTermJuly from "./components/BannerTermJuly";
+import useAuth from "@/services/useAuth";
+import { RiInformationFill } from "react-icons/ri";
+import { getCohort } from "@/utils/cohorts";
 
 export default function WaitingAffectation() {
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
-  const departureDate = cohort ? getDepartureDate(young, {}, cohort) : null;
-  const returnDate = cohort ? getReturnDate(young, {}, cohort) : null;
-  const allowedGrades = ["TermGT", "TermPro"];
+  const { young, isCLE } = useAuth();
+  const shouldShowChangeStayLink = !isCLE && youngCanChangeSession(young);
 
+  const cohort = getCohort(young.cohort);
+  const cohortDate = getCohortPeriod(cohort);
   return (
     <>
       <div className="relative z-[1] -mb-4 block bg-white md:hidden">
         <img src={heroBanner} />
       </div>
       <Container>
-        <section className="mb-8 flex flex-col-reverse items-center justify-between lg:mb-11 lg:flex-row lg:items-center">
-          <article>
-            <h1 className="mb-4 flex flex-col text-2xl leading-7 md:gap-3 md:text-[44px] md:text-5xl md:leading-12">
-              <span>Mon séjour de cohésion</span>
-              <strong className="flex items-center">{cohort ? transportDatesToString(departureDate, returnDate) : getCohortPeriod(young.cohort)}</strong>
-            </h1>
-            {youngCanChangeSession(young) ? <ChangeStayLink className="mb-7 md:mb-[42px]" /> : null}
-            {allowedGrades.includes(young.grade) && (
-              <BannerTermJuly responsive={"flex items-start justify-center max-w-[688px] mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:items-center"} />
-            )}
-            <div className="flex max-w-[688px] items-center gap-4 rounded-lg border-[1px] border-gray-200 bg-white p-[22px] drop-shadow">
+        <section className="flex justify-between">
+          <div className="mb-10 max-w-3xl">
+            <header className="md:mt-12 mb-12">
+              <h1 className="text-[44px] mt-0 mb-1">Mon séjour de cohésion</h1>
+              <h2 className="text-[44px] mt-0 mb-3 font-bold">{young.cohort.includes("CLE") ? "à venir" : cohortDate}</h2>
+              {shouldShowChangeStayLink && <ChangeStayLink />}
+            </header>
+            <div className="flex my-4 items-center gap-4 rounded-xl border-[1px] border-gray-200 bg-white p-3">
               <div className="hidden h-[42px] w-[42px] md:block">
                 <WaitFor />
               </div>
@@ -51,18 +47,32 @@ export default function WaitingAffectation() {
                   <h2 className="m-0 text-lg font-bold">Vous êtes en attente d&apos;affectation à un centre</h2>
                 </div>
                 <p className="text-sm">
-                  Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
-                  préparer votre fiche sanitaire ci-dessous !
+                  {isCLE ? (
+                    <>Votre affectation vous sera communiquée par votre établissement scolaire.</>
+                  ) : (
+                    <>
+                      Votre affectation vous sera communiquée <strong className="font-bold">dans les semaines qui précèdent le départ</strong> par mail. En attendant, commencez à
+                      préparer votre fiche sanitaire ci-dessous !
+                    </>
+                  )}
                 </p>
               </div>
             </div>
-          </article>
-          <img src={hero2} className="-mr-4 hidden md:block" width={344} />
+            {isCLE && (
+              <div className="bg-[#EFF6FF] rounded-xl flex items-center p-3 mt-4">
+                <RiInformationFill className="text-[50px] md:text-xl text-[#60A5FA]" />
+                <p className="text-sm text-[#1E40AF] ml-2">Vous n’êtes plus disponible pour le séjour de cohésion ? Prévenez au plus vite votre référent classe.</p>
+              </div>
+            )}
+          </div>
+          <div className="flex-none hidden md:block">
+            <img src={hero2} width={344} />
+          </div>
         </section>
         <Files young={young} />
         <hr className="mx-auto mt-12 mb-7 w-full" />
         <CheckYourSpamSection />
-        <FaqSection />
+        {!isCLE ?? <FaqSection />}
         <TestimonialsSection />
         <section className="mt-12 pb-32 md:mt-32">
           <h2 className="mb-8 text-center text-xl font-bold">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>

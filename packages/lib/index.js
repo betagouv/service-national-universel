@@ -2,6 +2,7 @@ import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants
 import translation from "./translation";
 import { ROLES } from "./roles";
 import sanitizeHtml from "sanitize-html";
+import { YOUNG_SOURCE } from "./constants";
 
 const isInRuralArea = (v) => {
   if (!v.populationDensity) return null;
@@ -9,6 +10,7 @@ const isInRuralArea = (v) => {
 };
 
 // See: https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai
+
 function isEndOfInscriptionManagement2021() {
   return new Date() > new Date(2021, 4, 7); // greater than 7 mai 2021 morning
 }
@@ -125,8 +127,9 @@ function canUserUpdateYoungStatus(actor) {
 
 const SESSIONPHASE1ID_CANCHANGESESSION = ["627cd8b873254d073af93147", "6274e6359ea0ba074acf6557"];
 
-const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
+const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id, source }) => {
   //   console.log([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(status), "alorss?");
+  if (source === YOUNG_SOURCE.CLE) return false;
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(status)) return true;
   if ([YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(statusPhase1) && status === YOUNG_STATUS.VALIDATED) {
     return true;
@@ -139,9 +142,14 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id }) => {
   return false;
 };
 
+const youngCanDeleteAccount = (young) => {
+  if (young.source === YOUNG_SOURCE.CLE) return false;
+  return true;
+};
+
 const isYoungInReinscription = (young) => {
   return young.hasStartedReinscription || false;
-}
+};
 
 const formatPhoneNumberFR = (tel) => {
   if (!tel) return "";
@@ -154,6 +162,8 @@ const formatPhoneNumberFR = (tel) => {
   const formatted = `${global[1]} ${rest.join(" ")}`;
   return formatted;
 };
+
+const patternEmailAcademy = "^[a-zA-Z0-9._+-]+@ac-[a-zA-Z]{1,}.fr$";
 
 const htmlCleaner = (text) => {
   return sanitizeHtml(text, {
@@ -180,9 +190,11 @@ export {
   canUpdateYoungStatus,
   canUserUpdateYoungStatus,
   youngCanChangeSession,
+  youngCanDeleteAccount,
   isYoungInReinscription,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
+  patternEmailAcademy,
   htmlCleaner,
 };
 
@@ -200,5 +212,6 @@ export * from "./roles";
 export * from "./sessions";
 export * from "./todo.constants";
 export * from "./translation";
-export * from "./zammood";
 export * from "./transport-info";
+export * from "./young";
+export * from "./zammood";

@@ -21,7 +21,7 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
 import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
-import { getCohortByName, getCohorts } from "../../../services/cohort.service";
+import { getCohortByName } from "../../../services/cohort.service";
 import ReactTooltip from "react-tooltip";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import Puzzle from "../../../assets/icons/Puzzle";
@@ -47,7 +47,7 @@ export default function SchemaRepartition({ region, department }) {
     toRegions: [],
   });
   const [data, setData] = useState({ rows: getDefaultRows() });
-  const [cohortList, setCohortList] = useState(null);
+  const cohortList = useSelector((state) => state.Cohorts);
   const [cohortOptions, setCohortOptions] = useState([]);
 
   if (region) useDocumentTitle(`Schéma de répartition - ${region}`);
@@ -75,10 +75,6 @@ export default function SchemaRepartition({ region, department }) {
       return cohortOptions && cohortOptions.length > 0 ? cohortOptions[0].value : null;
     }
   }
-
-  useEffect(() => {
-    loadCohorts();
-  }, []);
 
   useEffect(() => {
     if (cohortList !== null) {
@@ -162,7 +158,7 @@ export default function SchemaRepartition({ region, department }) {
         from = start.format("Do MMMM YYYY");
       }
       const to = end.format("Do MMMM YYYY");
-      return `Séjour du ${from} au ${to}`;
+      return `${cohort.name} (du ${from} au ${to})`;
     } else {
       return "";
     }
@@ -186,18 +182,6 @@ export default function SchemaRepartition({ region, department }) {
       intradepartmental: 0,
       intradepartmentalAssigned: 0,
     };
-  }
-
-  async function loadCohorts() {
-    try {
-      setLoading(true);
-      const cohorts = await getCohorts();
-      setCohortList(cohorts);
-      setLoading(false);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des données");
-    }
   }
 
   async function loadData() {
@@ -290,9 +274,9 @@ export default function SchemaRepartition({ region, department }) {
         department: g.fromDepartment,
         youngsVolume: g.youngsVolume,
         centerId: g.centerId,
-        centerName: `${g.centerName} ${g.centerAddress} ${g.centerZip} ${g.centerCity}`,
-        centerDepartment: g.toDepartment,
-        centerRegion: g.toRegion,
+        centerName: `${g.center.name} ${g.center.address} ${g.center.zip} ${g.center.city}`,
+        centerDepartment: g.center.department,
+        centerRegion: g.center.region,
       };
       if (maxGatheringPlaces < g.gatheringPlaces.length) {
         maxGatheringPlaces = g.gatheringPlaces.length;

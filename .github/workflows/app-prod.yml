@@ -3,12 +3,12 @@ env:
   APP_NAME: snu-app
   ENVIRONMENT_NAME: snu-app-production
 
-name: Deploy app
+name: Build and deploy Production (MonCompte CleverCloud)
 
 on:
   push:
     branches:
-      - main
+      - production
     paths:
       - app/**
       - packages/**
@@ -36,7 +36,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
     strategy:
       matrix:
         node-version: [18.x]
@@ -48,6 +48,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Build lib
+        continue-on-error: false
+        run: |
+          npm ci
+          npm run build -w packages/ds
+          rm packages/ds/.gitignore
 
       - name: Create SSH key
         run: |

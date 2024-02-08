@@ -1,7 +1,7 @@
 const ENVIRONMENT = getEnvironment();
 const LOCAL = process.env.LOCAL === "true";
 const MONGO_URL = process.env.MONGO_URL;
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const secret = process.env.SECRET || "not-so-secret";
 
 let APP_URL = process.env.APP_URL || "http://localhost:8081";
@@ -36,6 +36,7 @@ const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "";
 const QPV_USERNAME = process.env.QPV_USERNAME || "";
 const QPV_PASSWORD = process.env.QPV_PASSWORD || "";
 
+const API_ENGAGEMENT_URL = process.env.API_ENGAGEMENT_URL || "https://api.api-engagement.beta.gouv.fr";
 const API_ENGAGEMENT_KEY = process.env.API_ENGAGEMENT_KEY || "";
 
 const API_ASSOCIATION_ES_ENDPOINT = process.env.API_ASSOCIATION_ES_ENDPOINT || "";
@@ -50,6 +51,8 @@ const JVA_TOKEN = process.env.JVA_TOKEN || "";
 const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
 const REDIS_URL = process.env.REDIS_URL || "";
+
+const SCALEWAY_CLAMSCAN = process.env.SCALEWAY_CLAMSCAN || "";
 
 module.exports = {
   LOCAL,
@@ -76,9 +79,11 @@ module.exports = {
   FILE_ENCRYPTION_SECRET,
   SENTRY_URL,
   SENTRY_TRACING_SAMPLE_RATE,
+  SENTRY_PROFILE_SAMPLE_RATE,
   QPV_USERNAME,
   QPV_PASSWORD,
   API_ENGAGEMENT_KEY,
+  API_ENGAGEMENT_URL,
   API_ASSOCIATION_ES_ENDPOINT,
   API_ASSOCIATION_CELLAR_ENDPOINT,
   API_ASSOCIATION_CELLAR_KEYID,
@@ -91,6 +96,7 @@ module.exports = {
   API_ANALYTICS_ENDPOINT,
   API_ANALYTICS_API_KEY,
   REDIS_URL,
+  SCALEWAY_CLAMSCAN,
 };
 
 function getEnvironment() {

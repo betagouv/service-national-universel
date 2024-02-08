@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { transportDatesToString, youngCanChangeSession } from "snu-lib";
+import { isCle, transportDatesToString, youngCanChangeSession } from "snu-lib";
 import { getCohort } from "../../../../utils/cohorts";
-import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
 import { AlertBoxInformation } from "../../../../components/Content";
@@ -17,7 +16,6 @@ import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
 import { getDepartureDate, getReturnDate } from "snu-lib/transport-info";
-import BannerTermJuly from "../../components/BannerTermJuly";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -30,7 +28,8 @@ export default function Affected() {
   const cohort = getCohort(young.cohort);
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
-  const allowedGrades = ["TermGT", "TermPro"];
+
+  const isStepMedicalFieldDone = (young) => young?.cohesionStayMedicalFileDownload === "true";
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -85,16 +84,10 @@ export default function Affected() {
               <strong>{transportDatesToString(departureDate, returnDate)}</strong>
             </h1>
             {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
-            {allowedGrades.includes(young.grade) && (
-              <BannerTermJuly responsive={"flex items-start justify-center mb-2 border-[1px] bg-white border-gray-200 rounded-lg shadow-sm lg:hidden"} />
-            )}
           </div>
 
           <CenterInfo center={center} />
         </header>
-        {allowedGrades.includes(young.grade) && (
-          <BannerTermJuly responsive="hidden lg:flex order-2 items-center justify-start mb-4 bg-white border-[1px] border-gray-200 shadow-sm rounded-lg mx-[5%]" />
-        )}
         {isStepMedicalFieldDone(young) && (
           <div className="order-3 flex-none gap-6 grid grid-cols-1 md:grid-cols-3">
             <div>
@@ -107,7 +100,7 @@ export default function Affected() {
         )}
 
         <StepsAffected center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-        <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
+        {!isCle(young) && <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />}
       </div>
 
       <div className="flex justify-end py-4 pr-8">

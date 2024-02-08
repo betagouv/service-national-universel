@@ -12,12 +12,18 @@ export default function MenuItem({ to, enabled = true, icon, text, status, onClo
           onClick={onClose}
           to={to}
           exact
-          className="my-[2px] flex w-full items-center gap-3 rounded-md px-2 py-3 text-[#D1DAEF] transition-colors duration-200 hover:bg-[#1B243D] hover:text-[#D1DAEF]"
+          className="my-[2px] flex-col w-full flex-col gap-3 rounded-md px-2 py-3 text-[#D1DAEF] transition-colors duration-200 hover:bg-[#1B243D] hover:text-[#D1DAEF]"
           activeClassName="bg-[#344264] text-[#67A4FF] hover:bg-[#344264] hover:text-[#67A4FF]">
-          {icon && <div className={`w-5 ${isActive ? "text-[#67A4FF]" : "text-[#7A90C3]"}`}>{icon}</div>}
-          {text && <span>{text}</span>}
-          {ticketCount > 0 && <span className="text-xs leading-5 text-white bg-blue-600 px-2 py-0 rounded-full font-medium mr-4">{ticketCount}</span>}
-          {status && <StatusPill status={status} />}
+          <div className="flex items-center">
+            {icon && <div className={`w-5 mr-2 ${isActive ? "text-[#67A4FF]" : "text-[#7A90C3]"}`}>{icon}</div>}
+            {text && <span>{text}</span>}
+            {ticketCount > 0 && <span className="text-xs leading-5 text-white bg-blue-600 px-2 py-0 rounded-full font-medium mr-4">{ticketCount}</span>}
+          </div>
+          {status && (
+            <div className="ml-4 mt-2">
+              <StatusPill status={status} />
+            </div>
+          )}
         </NavLink>
       </li>
     );

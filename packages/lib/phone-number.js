@@ -117,7 +117,7 @@ const PHONE_ZONES = {
     code: null,
     numberLength: null,
     errorMessage: null,
-    example: null,
+    example: "Numéro de téléphone",
   },
 };
 
@@ -177,12 +177,4 @@ const concatPhoneNumberWithZone = (phoneNumber, zoneKey) => {
   return `(${phoneZone.code}) ${phoneNumber}`;
 };
 
-export {
-  PHONE_ZONES,
-  PHONE_ZONES_NAMES,
-  PHONE_ZONES_NAMES_ARR,
-  formatPhoneNumberFromPhoneZone,
-  isPhoneZoneKnown,
-  isPhoneNumberWellFormated,
-  concatPhoneNumberWithZone,
-};
+export { PHONE_ZONES, PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone, isPhoneZoneKnown, isPhoneNumberWellFormated, concatPhoneNumberWithZone };

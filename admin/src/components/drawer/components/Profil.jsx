@@ -86,6 +86,9 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                       <div className="!ml-3 flex flex-col">
                         <span className=" text-left text-xs leading-5 font-semibold h-[20px] truncate uppercase text-[#EEEFF5] w-[150px]">{translate(user.role)}</span>
                         {getDepRegion(user) && <span className=" text-left text-xs leading-5 font-normal h-[20px] truncate text-[#EEEFF5]/80 w-[150px]">{getDepRegion(user)}</span>}
+                        {user.role === ROLES.ADMINISTRATEUR_CLE && (
+                          <span className=" text-left text-xs leading-5 font-normal h-[20px] truncate text-[#EEEFF5]/80 w-[150px]">{translate(user.subRole)}</span>
+                        )}
                       </div>
                     )}
                     <div className="flex items-center justify-center !ml-1 w-[20px] h-[20px]">
@@ -127,8 +130,8 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                           <NavItem Icon={AddUser} title="Inviter un nouveau responsable" link={`/structure/${user.structureId}?prompt=team`} />
                         )}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />}
-                        {[ROLES.ADMIN].includes(user.role) && user.subRole === "god" && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
-                        <NavItem Icon={Support} title="Besoin d'aide ?" link={`/besoin-d-aide?from=${from}`} />
+                        {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
+                        {<NavItem Icon={Support} title="Besoin d'aide ?" link={`/besoin-d-aide?from=${from}`} />}
                         {/* <NavItem />
                     <NavItem />
                     <NavItem /> */}

@@ -3,6 +3,7 @@ import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
+import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
 import CGU from "./scenes/CGU";
@@ -12,6 +13,7 @@ import Auth from "./scenes/auth";
 import Center from "./scenes/centersV2";
 import Content from "./scenes/content";
 import DevelopAssetsPresentationPage from "./scenes/develop/AssetsPresentationPage";
+import DesignSystemPage from "./scenes/develop/DesignSystemPage";
 import DSNJExport from "./scenes/dsnj-export";
 import EditTransport from "./scenes/edit-transport";
 import Goal from "./scenes/goal";
@@ -24,7 +26,7 @@ import TableDeRepartition from "./scenes/plan-transport/table-repartition";
 import PointDeRassemblement from "./scenes/pointDeRassemblement";
 import Profil from "./scenes/profil";
 import PublicSupport from "./scenes/public-support-center";
-import Etablissement from "./scenes/school";
+import School from "./scenes/school";
 import SessionShareIndex from "./scenes/session-phase1/index";
 import Settings from "./scenes/settings";
 import Structure from "./scenes/structure";
@@ -34,6 +36,11 @@ import Validate from "./scenes/validate";
 import Volontaires from "./scenes/volontaires";
 import VolontairesHeadCenter from "./scenes/volontaires-head-center";
 import VolontairesResponsible from "./scenes/volontaires-responsible";
+import Etablissement from "./scenes/etablissement";
+import Classe from "./scenes/classe";
+import VolontaireCle from "./scenes/volontaire-cle";
+import Contact from "./scenes/contact";
+import Signup from "./scenes/signup";
 
 //DashboardV2
 import DashboardHeadCenterV2 from "./scenes/dashboardV2/head-center";
@@ -79,6 +86,7 @@ export default function App() {
             <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
             <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
             <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+            <SentryRoute path="/creer-mon-compte" component={Signup} />
             {/* Authentification accessoire */}
             <SentryRoute path="/auth" component={Auth} />
             {/* Authentification nécessaire */}
@@ -111,7 +119,7 @@ const Home = (props) => {
   const renderVolontaire = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <VolontairesResponsible />;
     if (user?.role === ROLES.HEAD_CENTER) return <VolontairesHeadCenter />;
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <Volontaires />;
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user?.role)) return <Volontaires />;
     return null;
   };
 
@@ -210,7 +218,7 @@ const Home = (props) => {
               <RestrictedRoute path="/alerte" component={Alerte} />
               <RestrictedRoute path="/profil" component={Profil} />
               <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-              <RestrictedRoute path="/etablissement" component={Etablissement} />
+              <RestrictedRoute path="/school" component={School} />
               <RestrictedRoute path="/mission" component={Missions} />
               <RestrictedRoute path="/inscription" component={Inscription} />
               <RestrictedRoute path="/user" component={Utilisateur} />
@@ -233,8 +241,16 @@ const Home = (props) => {
               <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
               <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
               <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
+              {/* Institution */}
+              <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
+              <RestrictedRoute path="/etablissement" component={Etablissement} />
+
+              <RestrictedRoute path="/classes" component={Classe} />
+              <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
+              <RestrictedRoute path="/mes-contacts" component={Contact} />
               {/* Only for developper eyes... */}
-              {environment === "development" && <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
+              {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} /> : null}
+              {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
               {/* DASHBOARD */}
               <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
               <RestrictedRoute path="/" component={renderDashboardV2} />
@@ -262,7 +278,16 @@ const Home = (props) => {
 
 const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
-  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
+  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
+  // FIXME [CLE]: remove dev routes when
+  [ROLES.ADMINISTRATEUR_CLE]: {
+    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
+    default: "/mon-etablissement",
+  },
+  [ROLES.REFERENT_CLASSE]: {
+    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
+    default: "/mon-etablissement",
+  },
 };
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {

@@ -1,0 +1,33 @@
+name: "Get custom environment name"
+description: "Get the environment name corresponding to a branch"
+
+inputs:
+  branch_name:
+    description: "Name of the branch"
+    required: true
+
+outputs:
+  env_name:
+    description: "Custom environment name"
+    value: ${{ steps.env_name.outputs.env_name }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get environment name
+      id: env_name
+      shell: bash
+      run: |
+        # slugify and crop to 25 characters
+        env_name=$(
+          echo ${{ inputs.branch_name }} |
+          tr '[:upper:]' '[:lower:]' | # lowercase
+          tr "_" "-" | # replace _ by -
+          tr -cd '[:alnum:]-' | # remove all except alnum + '-'
+          tr -s '-' | # removes duplicated '-'
+          cut -c 1-25 | # crop to 25 characters
+          sed 's/^[-]*//' | # left trim '-'
+          sed 's/[-]*$//' # right trim '-'
+        )
+        echo "Environment name: $env_name"
+        echo "env_name=$env_name" >> $GITHUB_OUTPUT

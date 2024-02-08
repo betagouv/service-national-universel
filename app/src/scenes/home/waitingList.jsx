@@ -1,6 +1,7 @@
 import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
 import React from "react";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getCohort } from "../../utils/cohorts";
 import Clock from "../../assets/icons/Clock";
@@ -42,6 +43,9 @@ export default function WaitingList() {
                 </div>
               </div>
               <hr className="text-gray-200" />
+              <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">
+                Changer de séjour &gt;
+              </Link>
             </div>
             <img className="w-1/2 object-fill" src={Img3} />
           </div>

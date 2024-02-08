@@ -18,12 +18,10 @@ import Loader from "../../components/Loader";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 import { capture } from "../../sentry";
 import api from "../../services/api";
-import plausibleEvent from "../../services/plausible";
 import {
   APPLICATION_STATUS,
   copyToClipboard,
   formatStringDateTimezoneUTC,
-  isYoungCanApplyToPhase2Missions,
   SENDINBLUE_TEMPLATES,
   translate,
   translateAddFilePhase2WithoutPreposition,
@@ -34,11 +32,10 @@ import DocumentsPM from "../militaryPreparation/components/DocumentsPM";
 import FileCard from "../militaryPreparation/components/FileCard";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import ApplyModal from "./components/ApplyModal";
+import ApplyButton from "./components/ApplyButton";
 import IconDomain from "./components/IconDomain";
 import ModalPJ from "./components/ModalPJ";
 import House from "./components/HouseIcon";
-import AlertPrimary from "../../components/ui/alerts/AlertPrimary";
-import InformationCircle from "../../assets/icons/InformationCircle";
 import { htmlCleaner } from "snu-lib";
 
 export default function viewMobile() {
@@ -517,130 +514,6 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
     {children}
   </div>
 );
-
-const ApplyButton = ({
-  placesLeft,
-  setModal,
-  disabledAge,
-  disabledIncomplete,
-  disabledPmRefused,
-  scrollToBottom,
-  duration,
-  young,
-  isMilitaryPreparation,
-  hebergement,
-  hebergementPayant,
-}) => {
-  const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => {
-    return obj.includes("WAITING_VALIDATION" || "WAITING_VERIFICATION");
-  }).length;
-
-  if (applicationsCount >= 15)
-    return (
-      <div className="flex flex-col items-center justify-center gap-4">
-        <AlertPrimary>
-          <div className="my-1 text-blue-400">
-            <InformationCircle />
-          </div>
-          <span>Vous ne pouvez candidater qu&apos;à 15 missions différentes.</span>
-        </AlertPrimary>
-        <div className="flex flex-col items-stretch gap-4">
-          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
-            Candidater
-          </button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
-        </div>
-      </div>
-    );
-
-  if (!isYoungCanApplyToPhase2Missions(young)) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-4">
-        <AlertPrimary>
-          <div className="my-1 text-blue-400">
-            <InformationCircle />
-          </div>
-          <span>Pour candidater, vous devez avoir terminé votre séjour de cohésion.</span>
-        </AlertPrimary>
-        <div className="flex flex-col items-stretch gap-4">
-          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
-            Candidater
-          </button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
-        </div>
-      </div>
-    );
-  }
-  if (disabledAge)
-    return (
-      <div className="flex flex-col items-center justify-center gap-4">
-        <AlertPrimary>
-          <div className="my-1 text-blue-400">
-            <InformationCircle />
-          </div>
-          <span>Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie).</span>
-        </AlertPrimary>
-        <div className="flex flex-col items-stretch gap-4">
-          <button disabled className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2 text-sm text-white disabled:bg-blue-600/60">
-            Candidater
-          </button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
-        </div>
-      </div>
-    );
-
-  if (disabledPmRefused)
-    return (
-      <div className="flex flex-col items-center justify-center gap-4">
-        <AlertPrimary>
-          <div className="my-1 text-blue-400">
-            <InformationCircle />
-          </div>
-          <span>Vous n&apos;êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater.</span>
-        </AlertPrimary>
-        <div className="flex flex-col items-stretch gap-4">
-          <button className="cursor-pointer rounded-lg bg-blue-600/60 px-12 py-2  text-sm text-white">Candidater</button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
-        </div>
-      </div>
-    );
-
-  if (disabledIncomplete)
-    return (
-      <div className="flex flex-col items-center justify-center gap-4">
-        <AlertPrimary>
-          <div className="my-1 text-blue-400">
-            <InformationCircle />
-          </div>
-          <span>Pour candidater, veuillez téléverser le dossier d&apos;égibilité présent en bas de page.</span>
-        </AlertPrimary>
-        <div className="flex flex-col items-stretch gap-4">
-          <button className="cursor-pointer rounded-lg bg-blue-600 px-12 py-2  text-sm text-white" onClick={() => scrollToBottom()}>
-            Candidater
-          </button>
-          <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
-        </div>
-      </div>
-    );
-
-  return (
-    <div className="flex flex-col items-stretch gap-4">
-      <button
-        className="cursor-pointer rounded-lg bg-blue-600 py-2 text-sm text-white "
-        onClick={() => {
-          if (isMilitaryPreparation === "true") {
-            plausibleEvent("Phase 2/CTA - PM - Candidater");
-          } else {
-            plausibleEvent("Phase2/CTA missions - Candidater");
-          }
-          setModal("APPLY");
-        }}>
-        Candidater
-      </button>
-      <HoursAndPlaces duration={duration} placesLeft={placesLeft} hebergement={hebergement} hebergementPayant={hebergementPayant} />
-    </div>
-  );
-};
 
 const ApplicationStatus = ({
   application,

@@ -30,7 +30,8 @@ export default function Presentation({ step, parentId }) {
     if (status === "REFUSED") return "est refusé";
   };
 
-  const sejourDate = getCohortPeriod(young.cohort);
+  const isCLE = young?.cohort.name.includes("CLE");
+  const sejourDate = young?.cohort.name === "CLE 23-24" ? "À venir" : getCohortPeriod(young.cohort);
   const title = parentId === 2 ? `${young.firstName} s'est inscrit(e) au SNU !` : `${young.firstName} souhaite s'inscrire au SNU !`;
 
   function onSubmit() {
@@ -92,10 +93,15 @@ export default function Presentation({ step, parentId }) {
                 <CalendarBig />
                 <CheckCircleStroke stroke="#E1000F" className="absolute bottom-[-5px] right-[-5px] h-[21px] w-[21px]" />
               </div>
-              {sejourDate && (
+              {isCLE ? (
+                <p className="font-400 mt-3 text-center text-[15px] leading-[19px]">
+                  {young.firstName} effectuera le séjour <br />
+                  <strong>à venir</strong>.
+                </p>
+              ) : (
                 <p className="font-400 mt-3 text-center text-[15px] leading-[19px]">
                   {young.firstName} a choisi le séjour <br />
-                  <span className="font-bold">{sejourDate}</span>
+                  <strong>{sejourDate}</strong>.
                 </p>
               )}
             </div>

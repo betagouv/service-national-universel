@@ -12,7 +12,6 @@ import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import Input from "../components/Input";
 import Select from "../../../components/dsfr/forms/Select";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
-import Navbar from "../components/Navbar";
 import {
   youngSchooledSituationOptions,
   youngActiveSituationOptions,
@@ -36,6 +35,7 @@ import { apiAdress, getAddressOptions } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
+import useAuth from "@/services/useAuth";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -57,12 +57,11 @@ const addressFields = ["address", "zip", "city", "cityCode", "region", "departme
 const foreignAddressFields = ["foreignCountry", "foreignAddress", "foreignCity", "foreignZip", "hostFirstName", "hostLastName", "hostRelationship"];
 const moreInformationFields = ["specificAmenagment", "reducedMobilityAccess", "handicapInSameDepartment"];
 
-const commonFields = [...birthPlaceFields, ...addressFields, "gender", "situation", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
+const commonFields = [...birthPlaceFields, ...addressFields, "gender", "livesInFrance", "handicap", "allergies", "ppsBeneficiary", "paiBeneficiary"];
 
 const commonRequiredFields = [
   ...birthPlaceFields,
   "gender",
-  "situation",
   "livesInFrance",
   "address",
   "addressVerified",
@@ -129,6 +128,7 @@ export default function StepCoordonnees() {
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
+  const { isCLE } = useAuth();
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
 
   const {
@@ -288,6 +288,7 @@ export default function StepCoordonnees() {
     debounce(async (value) => {
       try {
         const response = await apiAdress(value, { type: "municipality" });
+        if (!response || !response.features) return;
         const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
         setBirthCityZipSuggestions(suggestions);
       } catch (error) {
@@ -333,6 +334,11 @@ export default function StepCoordonnees() {
       requiredFields.push("specificAmenagmentType");
     }
 
+    if (!isCLE) {
+      fieldToUpdate.push("situation");
+      requiredFields.push("situation");
+    }
+
     if (hasSpecialSituation === null) {
       errors.hasSelectedSpecialSituation = "Ce champ est obligatoire";
     }
@@ -375,7 +381,8 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
-        plausibleEvent("Phase0/CTA inscription - profil");
+        const eventName = isCLE ? "CLE/CTA inscription - profil" : "Phase0/CTA inscription - profil";
+        plausibleEvent(eventName);
         dispatch(setYoung(responseData));
         history.push("/inscription2023/consentement");
       } catch (e) {
@@ -393,7 +400,6 @@ export default function StepCoordonnees() {
     let errors = {};
     const fieldToUpdate = [...commonFields];
     const requiredFields = [...commonRequiredFields];
-
     if (!isFrenchResident) {
       fieldToUpdate.push(...foreignAddressFields);
       requiredFields.push(...requiredFieldsForeigner);
@@ -407,6 +413,11 @@ export default function StepCoordonnees() {
     if (specificAmenagment === "true") {
       fieldToUpdate.push("specificAmenagmentType");
       requiredFields.push("specificAmenagmentType");
+    }
+
+    if (!isCLE) {
+      fieldToUpdate.push("situation");
+      requiredFields.push("situation");
     }
 
     for (const key of requiredFields) {
@@ -436,7 +447,8 @@ export default function StepCoordonnees() {
           setLoading(false);
           return;
         }
-        plausibleEvent("Phase0/CTA demande correction - Corriger Coordonnees");
+        const eventName = isCLE ? "CLE/CTA demande correction - Corriger Coordonnees" : "Phase0/CTA demande correction - Corriger Coordonnees";
+        plausibleEvent(eventName);
         dispatch(setYoung(responseData));
         history.push("/");
       } catch (e) {
@@ -449,53 +461,11 @@ export default function StepCoordonnees() {
     setLoading(false);
   };
 
-  const onSave = async () => {
-    setLoading(true);
-
-    const fieldToUpdate = [...commonFields];
-    if (!isFrenchResident) {
-      fieldToUpdate.push(...foreignAddressFields);
-    }
-
-    if (moreInformation) {
-      fieldToUpdate.push(...moreInformationFields);
-    }
-
-    if (moreInformation && specificAmenagment === "true") {
-      fieldToUpdate.push("specificAmenagmentType");
-    }
-
-    const updates = {};
-
-    fieldToUpdate.forEach((field) => {
-      updates[field] = data[field];
-    });
-
-    updates.country = FRANCE;
-    updates.moreInformation = moreInformation.toString();
-    updates.addressVerified = "true";
-
-    try {
-      const { ok, code, data: responseData } = await api.put("/young/inscription2023/coordinates/save", updates);
-      if (!ok) {
-        setErrors({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setLoading(false);
-        return;
-      }
-      toastr.success("Vos modifications ont bien été enregistrees !", "");
-      dispatch(setYoung(responseData));
-    } catch (e) {
-      capture(e);
-      toastr.error("Une erreur s'est produite :", translate(e.code));
-    }
-  };
-
-  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-remplis-mon-profil`;
-
   return (
     <>
-      <Navbar onSave={onSave} />
-      <DSFRContainer title="Mon profil volontaire" supportLink={supportLink} supportEvent="Phase0/aide inscription - coordonnees">
+      <DSFRContainer
+        title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}        supportEvent="Phase0/aide inscription - coordonnees">
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect
@@ -541,14 +511,16 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        <Select
-          label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
-          options={situationOptions}
-          value={situation}
-          onChange={updateData("situation")}
-          error={errors.situation}
-          correction={corrections?.situation}
-        />
+        {!isCLE && (
+          <Select
+            label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
+            options={situationOptions}
+            value={situation}
+            onChange={updateData("situation")}
+            error={errors.situation}
+            correction={corrections?.situation}
+          />
+        )}
         <hr className="my-2 h-px border-0 bg-gray-200" />
         <div className="flex mt-4 items-center gap-3 mb-6">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Adresse de résidence</h2>
@@ -562,13 +534,7 @@ export default function StepCoordonnees() {
           correction={corrections?.livesInFrance}
         />
         {isFrenchResident ? (
-          <AddressForm
-            data={data}
-            updateData={(newData) => setData({ ...data, ...newData })}
-            getOptions={getAddressOptions}
-            error={errors.address}
-            correction={corrections?.address}
-          />
+          <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} correction={corrections} />
         ) : (
           <>
             <SearchableSelect

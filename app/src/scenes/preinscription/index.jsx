@@ -18,7 +18,9 @@ import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import Loader from "@/components/Loader";
 import { toastr } from "react-redux-toastr";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
+import { YOUNG_SOURCE } from "snu-lib/constants";
 import { environment } from "@/config";
+import useAuth from "@/services/useAuth";
 
 function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
@@ -59,7 +61,8 @@ const Step = () => {
   const eligibleStepIndex = STEP_LIST.findIndex((element) => element.name === data.step);
   const currentStepIndex = STEP_LIST.findIndex((element) => element.name === currentStep);
 
-  if (currentStepIndex > eligibleStepIndex) {
+  const isCLE = new URLSearchParams(window.location.search).get("parcours")?.toUpperCase() === YOUNG_SOURCE.CLE;
+  if (!isCLE && currentStepIndex > eligibleStepIndex) {
     return <Redirect to={`/preinscription/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
@@ -96,9 +99,12 @@ const PreInscriptionPrivate = () => {
 };
 
 export default function PreInscription() {
+  const { isCLE } = useAuth();
+  const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
+
   return (
     <PreInscriptionContextProvider>
-      <DSFRLayout title="Inscription du volontaire">
+      <DSFRLayout title={title}>
         <Switch>
           <SentryRoute path={["/preinscription/email-validation", "/preinscription/done"]} component={PreInscriptionPrivate} />;
           <SentryRoute path="/preinscription/" component={PreInscriptionPublic} />;

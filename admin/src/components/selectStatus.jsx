@@ -25,7 +25,7 @@ import ModalWithdrawn from "./modals/ModalWithdrawn";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
 import ModalConfirmMultiAction from "./modals/ModalConfirmMultiAction";
-import { translateInscriptionStatus } from "snu-lib";
+import { isCle, translateInscriptionStatus } from "snu-lib";
 
 const lookUpAuthorizedStatus = ({ status, role }) => {
   switch (status) {
@@ -155,9 +155,11 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
       });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
+      const validationTemplate = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED;
+
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
         if (prevStatus === "WITHDRAWN") await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED}`);
-        else await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
+        else await api.post(`/young/${young._id}/email/${validationTemplate}`);
       }
       if (status === YOUNG_STATUS.WAITING_LIST) {
         await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);

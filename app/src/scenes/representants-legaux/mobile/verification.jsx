@@ -14,6 +14,7 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import { supportURL } from "../../../config";
 import plausibleEvent from "@/services/plausible";
+import { YOUNG_SOURCE } from "snu-lib";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
@@ -206,6 +207,7 @@ function specialSituations(young) {
 }
 
 function sectionsData(young) {
+  const isCLE = YOUNG_SOURCE.CLE === young?.source;
   // --- foreign address
   let foreignAddress = [];
   let titleAddress = [];
@@ -235,14 +237,18 @@ function sectionsData(young) {
       situation.push({ label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
     }
   } else {
-    situation.push({ separator: true, subtitle: "Situation" });
+    if (!isCLE) {
+      situation.push({ separator: true, subtitle: "Situation" });
+    }
     if (young.schooled === "true") {
       situation.push(
-        { label: "Situation scolaire", value: translate(young.situation) },
         { label: "Pays de l'établissement", value: young.schoolCountry },
         { label: "Ville de l'établissement", value: young.schoolCity },
         { label: "Nom de l'établissement", value: young.schoolName },
       );
+      if (!isCLE) {
+        situation.push({ label: "Situation scolaire", value: translate(young.situation) });
+      }
     } else {
       situation.push({ label: "Situation", value: translate(young.situation) }, { label: "Code postal", value: young.zip }, { label: "Pays de résidence", value: young.country });
     }
@@ -269,20 +275,25 @@ function sectionsData(young) {
       { label: "Son téléphone", value: young.parent2Phone },
     );
   }
+
+  let personalInfoFields = [
+    { label: "Prénom", value: young.firstName },
+    { label: "Nom", value: young.lastName },
+    { label: "Email", value: young.email },
+    { label: "Date de naissance", value: dayjs(young.birthdateAt).locale("fr").format("DD/MM/YYYY") },
+  ];
+  if (!isCLE) {
+    personalInfoFields.push({ label: "Niveau de scolarité", value: translateGrade(young.grade) });
+  }
+
   return [
     {
       title: "Ses informations personnelles",
-      fields: [
-        { label: "Prénom", value: young.firstName },
-        { label: "Nom", value: young.lastName },
-        { label: "Email", value: young.email },
-        { label: "Niveau de scolarité", value: translateGrade(young.grade) },
-        { label: "Date de naissance", value: dayjs(young.birthdateAt).locale("fr").format("DD/MM/YYYY") },
-      ],
+      fields: personalInfoFields,
     },
     {
       title: "Séjour de cohésion",
-      subtitle: getCohortPeriod(young.cohort),
+      subtitle: young.cohort.name === "CLE 23-24" ? "À venir" : getCohortPeriod(young.cohort),
     },
     {
       title: "Son profil",

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import validator from "validator";
-
+import { MdOutlineRemoveRedEye } from "react-icons/md";
 import Pencil from "../../../assets/icons/Pencil";
 import { Box } from "../../../components/box";
 import Loader from "../../../components/Loader";
@@ -22,7 +22,8 @@ import {
   ROLES,
   translate,
   VISITOR_SUBROLES,
-} from "../../../utils";
+} from "@/utils";
+import dayjs from "@/utils/dayjs.utils";
 import UserHeader from "../composants/UserHeader";
 import { Session, CohortSelect, AddButton, SubRoleAndRegionOrDep } from "../composants";
 import Field from "../../phase0/components/Field";
@@ -32,6 +33,7 @@ import CustomSelect from "../composants/CustomSelect";
 import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRoleOptions } from "../utils";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
+import { Container, Button, Badge, Label, InputText } from "@snu/ds/admin";
 
 export default function Details({ user, setUser, currentUser }) {
   const [structures, setStructures] = useState([]);
@@ -51,7 +53,6 @@ export default function Details({ user, setUser, currentUser }) {
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
   const [modalReferentDeleted, setModalReferentDeleted] = useState({ isOpen: false });
-
   const history = useHistory();
 
   useEffect(() => {
@@ -321,6 +322,12 @@ export default function Details({ user, setUser, currentUser }) {
     }
   };
 
+  const getSubtitle = (user) => {
+    const createdAt = new Date(user.createdAt);
+    const diff = dayjs(createdAt).fromNow();
+    return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
+  };
+
   const structure = data.structureId ? structures.find((struct) => struct._id === data.structureId) : undefined;
 
   const roleMode = canUpdateReferent({
@@ -328,7 +335,7 @@ export default function Details({ user, setUser, currentUser }) {
     originalTarget: user,
     structure,
   })
-    ? mode
+    ? MODE_EDITION
     : MODE_DEFAULT;
 
   return (
@@ -350,7 +357,7 @@ export default function Details({ user, setUser, currentUser }) {
         <Box className="p-6">
           <div className="mb-6 flex justify-between">
             <div className="text-lg font-medium">Informations générales</div>
-            {!isSaving && (
+            {!isSaving && roleMode !== MODE_DEFAULT && (
               <>
                 {mode === MODE_EDITION ? (
                   <div className="flex items-center">
@@ -521,6 +528,50 @@ export default function Details({ user, setUser, currentUser }) {
             </div>
           </div>
         </Box>
+
+        {data?.etablissement && (
+          <Container title="Détails" actions={[]}>
+            <div className="flex items-stretch justify-stretch">
+              <div className="flex-1">
+                <Label title="Établissement" name="etablissement" />
+                <InputText className="mb-3" value={data?.etablissement.name} label={"Nom"} readOnly={true} />
+                <InputText className="mb-3" value={data?.etablissement.uai} label={"UAI"} readOnly={true} />
+                <Button
+                  type="tertiary"
+                  title="Voir l'établissement"
+                  className="w-full max-w-full"
+                  onClick={() => {
+                    history.push(`/etablissement/${data?.etablissement._id}`);
+                  }}></Button>
+              </div>
+              <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
+              <div className="flex-1">
+                {data?.classe && (
+                  <>
+                    <Label title="Classe" name="classe" />
+                    {data.classe.map((classe) => (
+                      <div key={classe._id} className="flex justify-between border-b border-gray-200 pb-2.5 mb-2.5">
+                        <div className="flex-col">
+                          <p className="text-gray-900 text-base font-bold leading-5">{classe.name}</p>
+                          <p className="text-gray-500 text-xs font-medium leading-5">id: {classe.uniqueKeyAndId}</p>
+                        </div>
+                        <Badge
+                          mode="editable"
+                          status="primary"
+                          title={<MdOutlineRemoveRedEye size={18} />}
+                          className="rounded-[50%] !p-0 !w-8"
+                          onClick={() => {
+                            history.push(`/classes/${classe._id}`);
+                          }}></Badge>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+          </Container>
+        )}
+
         {canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && (
           <div className="flex items-center justify-center">
             <BorderButton mode="red" className="mt-3" onClick={onClickDelete}>

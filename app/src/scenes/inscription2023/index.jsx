@@ -19,8 +19,11 @@ import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIS
 import { YOUNG_STATUS, inscriptionCreationOpenForYoungs, inscriptionModificationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
-import { environment } from "../../config";
+import { environment, supportURL } from "../../config";
 import { getCohort } from "@/utils/cohorts";
+import useAuth from "@/services/useAuth";
+import Help from "./components/Help";
+import Stepper from "@/components/dsfr/ui/Stepper";
 
 function renderStep(step) {
   if (step === STEPS.COORDONNEES) return <StepCoordonnees />;
@@ -36,7 +39,9 @@ function renderStep(step) {
 
 const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscriptionStep2023 } }) => {
   const { step } = useParams();
-
+  const { isCLE } = useAuth();
+  const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
+  const supportLink = `${supportURL}${isCLE ? "/base-de-connaissance/les-classes-engagees" : "/base-de-connaissance/phase-0-les-inscriptions"}`;
   const requestedStep = getStepFromUrlParam(step, STEP_LIST);
 
   const eligibleStep = hasStartedReinscription ? reinscriptionStep2023 : inscriptionStep2023 || STEPS.COORDONNEES;
@@ -53,11 +58,27 @@ const Step = ({ young: { hasStartedReinscription, reinscriptionStep2023, inscrip
 
   const updatedEligibleStepIndex = eligibleStepDetails.allowNext ? eligibleStepIndex + 1 : eligibleStepIndex;
 
+  let steps = [
+    { value: STEPS.COORDONNEES, label: "Dites-nous en plus sur vous", stepNumber: 1 },
+    { value: STEPS.CONSENTEMENTS, label: "Consentements", stepNumber: 2 },
+    { value: STEPS.REPRESENTANTS, label: "Mes représentants légaux", stepNumber: 3 },
+  ];
+
+  if (!isCLE) {
+    steps.push({ value: STEPS.DOCUMENTS, label: "Justifier de mon identité", stepNumber: 4 }, { value: STEPS.UPLOAD, label: "Justifier de mon identité", stepNumber: 4 });
+  }
+
   if (currentStepIndex > updatedEligibleStepIndex) {
     return <Redirect to={`/inscription2023/${STEP_LIST[eligibleStepIndex].url}`} />;
   }
 
-  return <DSFRLayout title="Inscription du volontaire">{renderStep(currentStep)}</DSFRLayout>;
+  return (
+    <DSFRLayout title={title}>
+      <Stepper steps={steps} stepValue={currentStep} />
+      {renderStep(currentStep)}
+      <Help supportLink={supportLink} />
+    </DSFRLayout>
+  );
 };
 
 function renderStepCorrection(step) {
@@ -72,16 +93,18 @@ function renderStepCorrection(step) {
 
 const StepCorrection = () => {
   const { step } = useParams();
-
+  const { isCLE } = useAuth();
+  const title = isCLE ? "Inscription de l'élève" : "Inscription du volontaire";
   if (renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST)) === false) {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  return <DSFRLayout title="Inscription du volontaire">{renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST))}</DSFRLayout>;
+  return <DSFRLayout title={title}>{renderStepCorrection(getStepFromUrlParam(step, CORRECTION_STEPS_LIST))}</DSFRLayout>;
 };
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  const { isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
 
   if (!young) return <Redirect to="/preinscription" />;
@@ -108,9 +131,8 @@ export default function Index() {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  // Si la periode de modification est finie, pour les volontaires en cours d'inscription qui n'ont pas encore été basculés sur "à venir"
-  if (!inscriptionCreationOpenForYoungs(cohort) && young.status === YOUNG_STATUS.IN_PROGRESS) {
-    return <InscriptionClosed />;
+  if (!inscriptionCreationOpenForYoungs(cohort) && [YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
+    return <InscriptionClosed young={young} isCLE={isCLE} />;
   }
 
   //si la periode de modification est finie

@@ -323,7 +323,7 @@ function ConsentementForm({ young, token, step, parentId }) {
                     </Check>
                     <Check checked={data.healthForm} onChange={(e) => setData({ ...data, healthForm: e })} className="mt-[24px]" error={errors.healthForm}>
                       M&apos;engage à communiquer la fiche sanitaire de <b>{youngFullname}</b> au responsable du séjour de cohésion (
-                      <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2023.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      <a href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Télécharger la fiche sanitaire ici
                       </a>
                       ).

@@ -3,12 +3,12 @@ env:
   APP_NAME: snu-stag-admin
   ENVIRONMENT_NAME: snu-admin-staging
 
-name: Deploy staging admin
+name: Build and deploy Staging (Admin CleverCloud)
 
 on:
   push:
     branches:
-      - main
+      - production
       - staging
   workflow_dispatch:
 
@@ -26,6 +26,13 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+
+      - name: Build lib
+        continue-on-error: false
+        run: |
+          npm ci
+          npm run build -w packages/ds
+          rm packages/ds/.gitignore
 
       - name: Create SSH key
         run: |

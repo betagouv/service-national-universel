@@ -2,7 +2,6 @@ const express = require("express");
 const passport = require("passport");
 const fileUpload = require("express-fileupload");
 const FileType = require("file-type");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const Joi = require("joi");
 const { v4: uuid } = require("uuid");
@@ -10,7 +9,7 @@ const { v4: uuid } = require("uuid");
 const { ROLES, SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 const slack = require("../slack");
-const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE } = require("../cookie-options");
+const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } = require("../cookie-options");
 const { capture } = require("../sentry");
 const zammood = require("../zammood");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
@@ -18,10 +17,13 @@ const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../c
 const { sendTemplate } = require("../sendinblue");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
+const ClasseObject = require("../models/cle/classe");
 const { validateId } = require("../utils/validator");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
 const optionalAuth = require("../middlewares/optionalAuth");
+const { serializeClasse } = require("../utils/serializer");
+const scanFile = require("../utils/virusScanner");
 
 const router = express.Router();
 
@@ -57,7 +59,7 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
     const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    res.cookie("jwtzamoud", token, cookieOptions(COOKIE_SNUPPORT_MAX_AGE));
+    res.cookie("jwtzamoud", token, cookieOptions(COOKIE_SNUPPORT_MAX_AGE_MS));
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -118,11 +120,16 @@ router.get("/ticketscount", passport.authenticate("referent", { session: false, 
       query = {
         department: user.department,
         subject: "J'ai une question",
-        role: { $in: ["young", "young exterior", "parent", "responsible"] },
+        role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
         canal: { $in: ["PLATFORM", "MAIL"] },
       };
     if (user.role === ROLES.REFERENT_REGION)
-      query = { region: user.region, subject: "J'ai une question", role: { $in: ["young", "young exterior", "parent", "responsible"] }, canal: { $in: ["PLATFORM", "MAIL"] } };
+      query = {
+        region: user.region,
+        subject: "J'ai une question",
+        role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
+        canal: { $in: ["PLATFORM", "MAIL"] },
+      };
 
     const { ok, data } = await zammood.api(`/v0/ticket/count`, {
       method: "POST",
@@ -163,6 +170,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const obj = {
       subject: req.body.subject,
       message: req.body.message,
+      parcours: req.body.parcours,
       fromPage: req.body.fromPage,
       author: req.body.subjectStep0,
       formSubjectStep1: req.body.subjectStep1,
@@ -173,6 +181,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const { error, value } = Joi.object({
       subject: Joi.string().required(),
       message: Joi.string().required(),
+      parcours: Joi.string(),
       fromPage: Joi.string().allow(null),
       author: Joi.string(),
       formSubjectStep1: Joi.string(),
@@ -191,7 +200,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { subject, message, author, formSubjectStep1, formSubjectStep2, files } = value;
+    const { subject, message, author, formSubjectStep1, formSubjectStep2, files, parcours } = value;
     const userAttributes = await getUserAttributes(req.user);
     const response = await zammood.api("/v0/message", {
       method: "POST",
@@ -203,6 +212,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
         firstName: req.user.firstName,
         lastName: req.user.lastName,
         source: "PLATFORM",
+        parcours,
         author,
         formSubjectStep1,
         formSubjectStep2,
@@ -244,6 +254,8 @@ router.post("/ticket/form", async (req, res) => {
       message: req.body.message,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
+      parcours: req.body.parcours,
+      classeId: req.body.classeId,
       department: req.body.department,
       region: req.body.region,
       formSubjectStep1: req.body.subjectStep1,
@@ -258,6 +270,8 @@ router.post("/ticket/form", async (req, res) => {
       message: Joi.string().required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
+      parcours: Joi.string(),
+      classeId: Joi.string().allow(null),
       department: Joi.string().required(),
       region: Joi.string().required(),
       formSubjectStep1: Joi.string().required(),
@@ -278,7 +292,7 @@ router.post("/ticket/form", async (req, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files } = value;
+    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours, classeId } = value;
 
     const userAttributes = [
       { name: "departement", value: department },
@@ -287,23 +301,32 @@ router.post("/ticket/form", async (req, res) => {
       { name: "page précédente", value: fromPage },
     ];
 
+    let body = {
+      message,
+      email,
+      parcours,
+      clientId,
+      subject,
+      firstName,
+      lastName,
+      source: "FORM",
+      attributes: userAttributes,
+      formSubjectStep1,
+      formSubjectStep2,
+      files,
+      author,
+    };
+
+    if (classeId) {
+      const classe = await ClasseObject.findById(classeId);
+      if (!classe) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      body = { ...body, classe: serializeClasse(classe) };
+    }
+
     const response = await zammood.api("/v0/message", {
       method: "POST",
       credentials: "include",
-      body: JSON.stringify({
-        message,
-        email,
-        clientId,
-        subject,
-        firstName,
-        lastName,
-        source: "FORM",
-        attributes: userAttributes,
-        formSubjectStep1,
-        formSubjectStep2,
-        files,
-        author,
-      }),
+      body: JSON.stringify(body),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
     return res.status(200).send({ ok: true, data: response });
@@ -432,20 +455,14 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      if (ENVIRONMENT === "staging" || ENVIRONMENT === "production") {
-        try {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            capture(`File ${name} is infected`);
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          }
-        } catch {
-          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
-        }
-      }
+      // if (ENVIRONMENT === "production") {
+      //   const scanResult = await scanFile(tempFilePath, name, req.user._id);
+      //   if (scanResult.infected) {
+      //     return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+      //   } else if (scanResult.error) {
+      //     return res.status(500).send({ ok: false, code: scanResult.error });
+      //   }
+      // }
 
       const data = fs.readFileSync(tempFilePath);
       const path = getS3Path(name);

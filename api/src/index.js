@@ -1,4 +1,7 @@
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
+const loggingMiddleware = require("./middlewares/loggingMiddleware");
+const { forceDomain } = require("forcedomain");
+const requestIp = require("request-ip"); // Import request-ip package
 
 (async () => {
   await require("./env-manager")();
@@ -12,14 +15,14 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
 
   const { initSentry, capture } = require("./sentry");
 
-  require("events").EventEmitter.defaultMaxListeners = 30; // Fix warning node (Caused by ElasticMongoose-plugin)
+  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
   const bodyParser = require("body-parser");
   const cors = require("cors");
+
   const express = require("express");
   const cookieParser = require("cookie-parser");
   const helmet = require("helmet");
-  const logger = require("morgan");
   const passport = require("passport");
   require("./mongo");
 
@@ -39,9 +42,23 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   const registerSentryErrorHandler = initSentry(app);
   app.use(helmet());
 
-  // if (ENVIRONMENT === "development") {
-  app.use(logger("dev"));
-  // }
+  if (process.env.PRODUCTION) {
+    app.use(
+      forceDomain({
+        hostname: "api.snu.gouv.fr",
+        protocol: "https",
+      }),
+    );
+  }
+
+  if (process.env.STAGING && !process.env.CLE) {
+    app.use(
+      forceDomain({
+        hostname: "api.beta-snu.dev",
+        protocol: "https",
+      }),
+    );
+  }
 
   // eslint-disable-next-line no-unused-vars
   function handleError(err, req, res, next) {
@@ -73,6 +90,12 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
   app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
+  app.use(function (req, res, next) {
+    req.ipInfo = requestIp.getClientIp(req);
+    next();
+  });
+  app.use(loggingMiddleware);
+
   require("./crons");
   app.use(cookieParser());
 
@@ -80,43 +103,45 @@ const validateCustomHeader = require("./middlewares/validateCustomHeader");
 
   app.use(passport.initialize());
 
-  app.use("/es", require("./controllers/es"));
-  app.use("/mission", require("./controllers/mission"));
-  app.use("/structure", require("./controllers/structure"));
-  app.use("/young", require("./controllers/young/index"));
-  app.use("/referent", require("./controllers/referent"));
+  app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
   app.use("/application", require("./controllers/application"));
-  app.use("/contract", require("./controllers/contract"));
-  app.use("/program", require("./controllers/program"));
-  app.use("/event", require("./controllers/event"));
-  app.use("/inscription-goal", require("./controllers/inscription-goal"));
-  app.use("/cohort-session", require("./controllers/cohort-session"));
-  app.use("/department-service", require("./controllers/department-service"));
-  app.use("/waiting-list", require("./controllers/waiting-list"));
-  app.use("/cohesion-center", require("./controllers/cohesion-center"));
-  app.use("/session-phase1", require("./controllers/session-phase1"));
-  app.use("/email", require("./controllers/email"));
-  app.use("/diagoriente", require("./controllers/diagoriente"));
   app.use("/bus", require("./controllers/bus"));
-  app.use("/zammood", require("./controllers/zammood"));
-  app.use("/signin", require("./controllers/signin"));
-  app.use("/representants-legaux", require("./controllers/representants-legaux"));
+  app.use("/classe", require("./controllers/cle/classe"));
+  app.use("/cle", require("./controllers/cle"));
+  app.use("/cohesion-center", require("./controllers/cohesion-center"));
+  app.use("/cohort", require("./controllers/cohort"));
+  app.use("/cohort-session", require("./controllers/cohort-session"));
+  app.use("/contract", require("./controllers/contract"));
   app.use("/correction-request", require("./controllers/correction-request"));
-  app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de-repartition"));
-  app.use("/schema-de-repartition", require("./controllers/planDeTransport/schema-de-repartition"));
-  app.use("/point-de-rassemblement", require("./controllers/planDeTransport/point-de-rassemblement"));
+  app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
+  app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
+  app.use("/department-service", require("./controllers/department-service"));
+  app.use("/diagoriente", require("./controllers/diagoriente"));
+  app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
+  app.use("/elasticsearch", require("./controllers/elasticsearch"));
+  app.use("/email", require("./controllers/email"));
+  app.use("/event", require("./controllers/event"));
+  app.use("/filters", require("./controllers/filters"));
+  app.use("/gouv.fr", require("./controllers/gouv.fr"));
+  app.use("/inscription-goal", require("./controllers/inscription-goal"));
   app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
-  app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
-  app.use("/young-edition", require("./controllers/young-edition"));
-  app.use("/tags", require("./controllers/tags"));
-  app.use("/cohort", require("./controllers/cohort"));
-  app.use("/filters", require("./controllers/filters"));
+  app.use("/mission", require("./controllers/mission"));
   app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
-  app.use("/elasticsearch", require("./controllers/elasticsearch"));
-  app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
-  app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
-  app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
+  app.use("/point-de-rassemblement", require("./controllers/planDeTransport/point-de-rassemblement"));
+  app.use("/program", require("./controllers/program"));
+  app.use("/referent", require("./controllers/referent"));
+  app.use("/representants-legaux", require("./controllers/representants-legaux"));
+  app.use("/schema-de-repartition", require("./controllers/planDeTransport/schema-de-repartition"));
+  app.use("/session-phase1", require("./controllers/session-phase1"));
+  app.use("/signin", require("./controllers/signin"));
+  app.use("/structure", require("./controllers/structure"));
+  app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de-repartition"));
+  app.use("/tags", require("./controllers/tags"));
+  app.use("/waiting-list", require("./controllers/waiting-list"));
+  app.use("/young", require("./controllers/young/index"));
+  app.use("/young-edition", require("./controllers/young-edition"));
+  app.use("/zammood", require("./controllers/zammood"));
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));

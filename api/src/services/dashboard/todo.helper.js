@@ -1,4 +1,4 @@
-const { ROLES } = require("snu-lib");
+const { ROLES, YOUNG_SOURCE } = require("snu-lib");
 const helpers = {};
 const sessionPhase1Model = require("../../models/sessionPhase1");
 
@@ -10,6 +10,7 @@ helpers.queryFromFilter = (role, region, department, filter, { regionField = "re
   };
   if (role === ROLES.REFERENT_REGION) body.query.bool.filter.push({ term: { [regionField]: region } });
   if (role === ROLES.REFERENT_DEPARTMENT) body.query.bool.filter.push({ terms: { [departmentField]: department } });
+  if (role === ROLES.REFERENT_DEPARTMENT) body.query.bool.filter.push({ bool: { must_not: { term: { "source.keyword": YOUNG_SOURCE.CLE } } } });
   return body;
 };
 

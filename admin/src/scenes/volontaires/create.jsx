@@ -5,9 +5,10 @@ import { translate } from "@/utils";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriodTemp, getCohortPeriod, getCohortYear } from "snu-lib";
+import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, ROLES } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -16,7 +17,6 @@ import { Spinner } from "reactstrap";
 
 //Identite
 import Field from "@/components/ui/forms/Field";
-import { CniField } from "../phase0/components/CniField";
 import SchoolEditor from "../phase0/components/SchoolEditor";
 import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
@@ -27,13 +27,14 @@ import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 
 export default function Create() {
   const history = useHistory();
+  const location = useLocation();
   const [selectedRepresentant, setSelectedRepresentant] = useState(1);
-  const [uploadError, setUploadError] = useState("");
-  const [youngId, setYoungId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [cohorts, setCohorts] = useState([]);
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
+  const user = useSelector((state) => state.Auth.user);
+  const classeId = new URLSearchParams(location.search).get("classeId");
 
   const [errors, setErrors] = useState({});
   const [values, setValues] = useState({
@@ -46,9 +47,6 @@ export default function Create() {
     gender: "",
     grade: "",
     birthCountry: "",
-    filesToUpload: [],
-    latestCNIFileExpirationDate: new Date(),
-    latestCNIFileCategory: "",
     email: "",
     expirationDate: null,
     phone: "",
@@ -117,6 +115,7 @@ export default function Create() {
     parent2Zip: "",
     parent2City: "",
     parent2Country: "",
+    frenchNationality: "",
   });
 
   const cohort = cohorts.find(({ name }) => name === values?.cohort);
@@ -137,7 +136,6 @@ export default function Create() {
       "region",
       "phone",
       "cohort",
-      "parentStatementOfHonorInvalidId",
       "parent1Status",
       "parent1LastName",
       "parent1FirstName",
@@ -145,7 +143,11 @@ export default function Create() {
       "address",
       "city",
       "zip",
+      "frenchNationality",
     ];
+
+    if (classeId) values.classeId = classeId;
+
     for (const key of required) {
       if (values[key] === null || !values[key] || validator.isEmpty(values[key], { ignore_whitespace: true })) {
         errors[key] = errorEmpty;
@@ -155,9 +157,7 @@ export default function Create() {
     if (values.temporaryDate === null) {
       errors.temporaryDate = errorEmpty;
     }
-    if (values.latestCNIFileExpirationDate === "" || values.latestCNIFileExpirationDate === null) {
-      errors.latestCNIFileExpirationDate = errorEmpty;
-    }
+
     // check email volontaire
     if (!validator.isEmail(values.email)) {
       errors.email = errorEmail;
@@ -270,40 +270,11 @@ export default function Create() {
       errors.rulesParent1 = errorEmpty;
     }
 
-    if (values.filesToUpload.length === 0) {
-      errors.filesToUpload = errorEmpty;
-      toastr.error("Vous devez ajouter une pièce d'identité");
-    }
-    if (validator.isEmpty(values.latestCNIFileCategory)) {
-      errors.latestCNIFileCategory = errorEmpty;
-      toastr.error("Vous devez spécifier une catégorie pour le document d'identité");
-    }
     if (Object.keys(errors).length > 0) {
       console.log(errors);
       toastr.error("Le formulaire n'est pas complet");
     }
     return errors;
-  };
-
-  const uploadFiles = async (id, filesToUpload, latestCNIFileCategory, latestCNIFileExpirationDate) => {
-    setLoading(true);
-    const res = await api.uploadFiles(`/young/${id}/documents/cniFiles`, Array.from(filesToUpload), {}, latestCNIFileCategory, latestCNIFileExpirationDate);
-    if (res.code === "FILE_CORRUPTED") {
-      setUploadError(
-        "Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-      );
-      setLoading(false);
-      return "err";
-    }
-    if (!res.ok) {
-      capture(res.code);
-      setLoading(false);
-      setUploadError("Une erreur s'est produite lors du téléversement de votre fichier.");
-      return "err";
-    }
-    setLoading(false);
-    toastr.success("Volontaire créé !");
-    return history.push(`/volontaire/${id}`);
   };
 
   const handleChange = (event) => {
@@ -324,13 +295,17 @@ export default function Create() {
     const receivedErrors = validate();
     setErrors(receivedErrors);
     if (Object.keys(receivedErrors).length !== 0) return;
-    const res = await api.get(`/inscription-goal/${cohort?.name}/department/${values.department}`);
-    if (!res.ok) throw new Error(res);
-    const fillingRate = res.data;
-    if (fillingRate >= 1.05) {
-      setComplememtaryListModalOpen(true);
-    } else {
+    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)) {
       sendData();
+    } else {
+      const res = await api.get(`/inscription-goal/${cohort?.name}/department/${values.department}`);
+      if (!res.ok) throw new Error(res);
+      const fillingRate = res.data;
+      if (fillingRate >= 1) {
+        setComplememtaryListModalOpen(true);
+      } else {
+        sendData();
+      }
     }
   };
 
@@ -340,16 +315,31 @@ export default function Create() {
       values.addressVerified = values.addressVerified.toString();
       // necessaire ?
       const { ok, code, young } = await api.post("/young/invite", { ...values, status });
-      if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-      const res = await uploadFiles(young._id, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate);
-      setYoungId(young._id);
-      if (res === "err") return toastr.error("Une erreur s'est produite avec le téléversement de vos fichiers");
+      if (!ok) {
+        toastr.error("Une erreur s'est produite :", translate(code));
+      } else {
+        toastr.success("Le volontaire a bien été créé");
+        history.push(`/volontaire/${young._id}`);
+      }
     } catch (e) {
       setLoading(false);
       console.log(e);
       toastr.error("Oups, une erreur est survenue pendant la création du volontaire :", translate(e.code));
     }
   };
+
+  const getClasseCohort = async (classeId) => {
+    const { data, ok, code } = await api.get(`/classe/${classeId}`);
+    if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+    setValues((prevValues) => ({ ...prevValues, cohort: data.cohort }));
+  };
+
+  React.useEffect(() => {
+    //si CLE, le ref ne choisis pas la cohort du jeune, elle est lié a sa classe
+    if (classeId) {
+      getClasseCohort(classeId);
+    }
+  }, [classeId]);
 
   React.useEffect(() => {
     if (!values.temporaryDate) return;
@@ -380,12 +370,12 @@ export default function Create() {
           const res = await api.post(`/cohort-session/eligibility/2023`, body);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
-            setEgibilityError("Il n'y a malheureusement plus de place dans votre département.");
+            setEgibilityError("Il n'y a malheureusement plus de séjour disponible.");
           } else {
             setEgibilityError("");
           }
 
-          setCohorts(res.data.filter((c) => !["Juin 2024 - 1", "Mars 2024 - La Réunion"].includes(c.name)));
+          setCohorts(res.data);
         } catch (e) {
           capture(e);
 
@@ -405,7 +395,7 @@ export default function Create() {
         isOpen={isComplememtaryListModalOpen}
         title={
           <span>
-            L&apos;objectif d&apos;inscription de votre département a été atteint à 105%. Le dossier d&apos;inscription de {values.firstName} {values.lastName} va être{" "}
+            L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {values.firstName} {values.lastName} va être{" "}
             <strong className="text-bold">validé sur liste complémentaire</strong>.
           </span>
         }
@@ -454,7 +444,7 @@ export default function Create() {
         </div>
       </div>
 
-      {(cohorts.length > 0 || egibilityError !== "") && (
+      {![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (cohorts.length > 0 || egibilityError !== "") && (
         <div className="relative mb-4 rounded bg-white pt-4 shadow">
           <div className="ml-8 text-lg font-normal">Choisissez un séjour pour le volontaire</div>
           {egibilityError !== "" && <div className="ml-8 pb-4">{egibilityError}</div>}
@@ -499,20 +489,9 @@ export default function Create() {
         )}
       {egibilityError === "" && (
         <div className="w-100 flex items-center justify-center">
-          {uploadError === "" ? (
-            <div onClick={handleSubmit} className="w-80 cursor-pointer self-center rounded-md bg-[#2563EB] py-2 px-4 text-center text-white">
-              {!loading ? "Créer l'inscription" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
-            </div>
-          ) : (
-            <div className="flex-column flex">
-              <div>{uploadError}</div>
-              <div
-                onClick={() => uploadFiles(youngId, values.filesToUpload, values.latestCNIFileCategory, values.latestCNIFileExpirationDate)}
-                className="w-80 cursor-pointer self-center rounded-md bg-[#2563EB] py-2 px-4 text-center text-white">
-                {!loading ? "Réessayer de téleverser les fichiers" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
-              </div>
-            </div>
-          )}
+          <div onClick={handleSubmit} className="w-80 cursor-pointer self-center rounded-md bg-[#2563EB] py-2 px-4 text-center text-white">
+            {!loading ? "Créer l'inscription" : <Spinner size="sm" style={{ borderWidth: "0.1em", color: "white" }} />}
+          </div>
         </div>
       )}
     </div>
@@ -991,14 +970,14 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
     { value: "male", label: "Homme" },
     { value: "female", label: "Femme" },
   ];
+  const nationalityOptions = [
+    { value: "true", label: translate("true") },
+    { value: "false", label: translate("false") },
+  ];
+  const user = useSelector((state) => state.Auth.user);
   const handleChangeBool = (e, value) => {
     e.target.value = value;
     handleChange(e);
-  };
-  const handleCniChange = (young) => {
-    setFieldValue("latestCNIFileExpirationDate", young.latestCNIFileExpirationDate);
-    setFieldValue("filesToUpload", young.filesToUpload);
-    setFieldValue("latestCNIFileCategory", young.latestCNIFileCategory);
   };
 
   const handlePhoneChange = (name) => (value) => {
@@ -1064,57 +1043,23 @@ function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
         onChangeZone={handlePhoneChange("phoneZone")}
       />
       <div className="mt-8 ">
-        <CniField
-          name="cniFile"
-          label="Pièce d'identité"
-          young={values}
+        <Field
+          name="frenchNationality"
+          label="Nationalité Française"
+          value={values.frenchNationality}
+          error={errors?.frenchNationality}
           mode="edition"
-          className={(errors.filesToUpload || errors.latestCNIFileCategory) && "border-[1px] border-red-500"}
-          blockUpload={true}
-          onStartRequest={null}
-          currentRequest={null}
-          correctionRequest={false}
-          onCorrectionRequestChange={null}
-          onInscriptionChange={(young) => handleCniChange(young)}
+          className="mb-[16px]"
+          type="select"
+          options={nationalityOptions}
+          transformer={translate}
+          onChange={(value, key) => setFieldValue(key, value)}
         />
       </div>
-      {values.filesToUpload.length > 0 && (
-        <>
-          <Field
-            name="latestCNIFileExpirationDate"
-            label="Date d'expiration de la pièce d'identité"
-            type="date"
-            error={errors?.latestCNIFileExpirationDate}
-            value={values.latestCNIFileExpirationDate}
-            transformer={translate}
-            className="mb-4"
-            onChange={(date, key) => setFieldValue(key, date)}
-          />
-          {values.latestCNIFileExpirationDate !== null && cohort?.dateStart && new Date(values.latestCNIFileExpirationDate).getTime() < new Date(cohort?.dateStart).getTime() && (
-            <div className="w-100 flew-row mt-4 flex items-center justify-between">
-              <div>Attestation sur l&apos;honneur</div>
-              {values.parentStatementOfHonorInvalidId === "true" ? (
-                <a
-                  onClick={(e) => handleChangeBool(e, "false")}
-                  name="parentStatementOfHonorInvalidId"
-                  className="py cursor-pointer rounded-3xl border border-[#D1D5DB] bg-[#3B82F6] p-2 text-center leading-5 text-white">
-                  Validée
-                </a>
-              ) : (
-                <a
-                  onClick={(e) => handleChangeBool(e, "true")}
-                  name="parentStatementOfHonorInvalidId"
-                  className="py text-whit cursor-pointer rounded-3xl  border border-[#D1D5DB] p-2 text-center leading-5">
-                  Non validée
-                </a>
-              )}
-            </div>
-          )}
-        </>
-      )}
     </>
   );
 }
+
 const PARENT_STATUS_NAME = {
   father: "Le père",
   mother: "La mère",

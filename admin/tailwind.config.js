@@ -3,7 +3,8 @@ const colors = require("tailwindcss/colors");
 
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
-  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  presets: [require("@snu/ds/tailwind.config")],
+  content: ["./src/**/*.{js,ts,jsx,tsx}", "../packages/ds/dist/**/*.{js,jsx}"],
   darkMode: Media, // or 'media' or 'class'
   theme: {
     minWidth: {

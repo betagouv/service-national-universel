@@ -1,6 +1,5 @@
 import React from "react";
 import useDevice from "../../../hooks/useDevice";
-import save from "../../../assets/save.svg";
 
 const index = {
   PRESENTATION: "1",
@@ -29,7 +28,7 @@ const next = {
   CONSENTEMENT_PARENT2: null,
 };
 
-const Navbar = ({ step, onSave }) => {
+const Navbar = ({ step }) => {
   const desktop = useDevice() === "desktop";
   return (
     <div className="w-full bg-[#f9f6f2] px-3  py-[1rem] md:pt-[2rem] md:pb-[0rem] text-[#161616]">
@@ -39,7 +38,6 @@ const Navbar = ({ step, onSave }) => {
             <div className="text-sm">Étape {index[step]} sur 3</div>
             <div className="mt-2 text-lg font-bold">{wording[step]}</div>
           </div>
-          {onSave && <img src={save} onClick={onSave} className="cursor-pointer" alt="save" />}
         </div>
 
         <div className="mt-2 flex w-full space-x-2">
