@@ -18,7 +18,7 @@ export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
-  const keyList = ["type", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
+  const keyList = ["type", "desc", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
   const [data, setData] = useState();
   const [openType, setOpenType] = useState(false);
   const [openSousType, setOpenSousType] = React.useState(false);

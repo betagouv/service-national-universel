@@ -184,7 +184,7 @@ export default function CardEquivalence({ young, equivalence }) {
                 <div className="flex flex-col gap-y-4 text-sm font-medium leading-none">
                   <span>{equivalence.type}</span>
                   {equivalence.sousType ? <span>{equivalence.sousType}</span> : null}
-                  {equivalence.desc ? <span>{equivalence.otherType}</span> : null}
+                  {equivalence.desc ? <span>{equivalence.desc}</span> : null}
                   <span>{equivalence.structureName}</span>
                   <span>
                     Du {formatDateFR(equivalence.startDate)} au {formatDateFR(equivalence.endDate)}
