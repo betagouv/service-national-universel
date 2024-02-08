@@ -67,7 +67,7 @@ runs:
         SCW_SECRET_KEY: ${{ inputs.secret_key }}
       run: |
         curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
-          "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?name=${{ inputs.image_tag }}" \
+          "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?order_by=created_at_asc" \
         | jq -r ".tags[] | select(.updated_at < \"$(date -I --date='-${{ inputs.lifetime }}')\") | .id" \
         > tags_ids
         while read tag_id
