@@ -114,7 +114,7 @@ export default function ValidatedPhase2() {
           <div className="relative flex flex-col-reverse md:flex-row sm:pb-4 md:py-0  justify-between rounded-lg bg-gray-600">
             <div className="sm:px-4  md:px-0 md:w-1/2 md:py-12 md:pl-10">
               <div className="text-[40px] font-medium leading-tight tracking-tight text-white">
-                👏 <b>{young.firstName}</b>,
+                <b>{young.firstName}</b>,
                 <br />
                 vous avez validé votre phase Engagement !
               </div>

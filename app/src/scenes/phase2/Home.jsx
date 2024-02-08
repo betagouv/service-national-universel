@@ -23,7 +23,7 @@ const CardEquivalence = (props) => (
 const WelcomeBlockValidated = ({ young }) => (
   <>
     <div className="text-[40px] font-medium leading-tight tracking-tight">
-      <b>{young.firstName}</b>,
+      👏 <b>{young.firstName}</b>,
       <br />
       vous avez validé votre phase Engagement !
     </div>
