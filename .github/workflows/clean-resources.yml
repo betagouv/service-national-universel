@@ -2,11 +2,8 @@ name: Clean resources
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: "02 00 * * *"
-  push: # TODO : remove
-    branches:
-      - scw_clean_cron
+  schedule:
+    - cron: "01 37 * * *"
 
 jobs:
   clean_image_tags:

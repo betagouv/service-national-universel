@@ -1,7 +1,5 @@
 name: Clean images tags
 
-on:
-  workflow_call:
 inputs:
   registry:
     description: "Registry endpoint"
