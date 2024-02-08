@@ -8,8 +8,8 @@ name: Build and deploy Staging (Admin CleverCloud)
 on:
   push:
     branches:
-      - release_candidate_cc
-      - staging
+      - production_cc
+      - staging_cc
   workflow_dispatch:
 
 jobs:
