@@ -27,6 +27,7 @@ locals {
   domain         = "ci.beta-snu.dev"
   api_hostname   = "api.${local.env}.${local.domain}"
   admin_hostname = "admin.${local.env}.${local.domain}"
+  pdf_hostname   = "pdf.${local.env}.${local.domain}"
   app_hostname   = "moncompte.${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
@@ -97,7 +98,7 @@ resource "scaleway_container" "api" {
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"      = local.secrets.API_ASSOCIATION_CELLAR_KEYID
-    "API_PDF_ENDPOINT"                  = local.secrets.API_PDF_ENDPOINT
+    "API_PDF_ENDPOINT"                  = local.pdf_hostname
     "BUCKET_NAME"                       = local.secrets.BUCKET_NAME
     "CELLAR_ENDPOINT"                   = local.secrets.CELLAR_ENDPOINT
     "CELLAR_ENDPOINT_SUPPORT"           = local.secrets.CELLAR_ENDPOINT_SUPPORT
@@ -245,7 +246,7 @@ resource "scaleway_container_domain" "app" {
 resource "scaleway_container" "pdf" {
   name            = "${local.env}-pdf"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/pdf:${var.image_tag}"
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/pdf:latest"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 512
@@ -263,6 +264,19 @@ resource "scaleway_container" "pdf" {
     "SENTRY_TRACING_SAMPLE_RATE" = "0.01"
     "SENTRY_URL"                 = local.secrets.SENTRY_URL
   }
+}
+
+resource "scaleway_domain_record" "pdf" {
+  dns_zone = scaleway_domain_zone.main.id
+  name     = "pdf"
+  type     = "CNAME"
+  data     = "${scaleway_container.pdf.domain_name}."
+  ttl      = 300
+}
+
+resource "scaleway_container_domain" "pdf" {
+  container_id = scaleway_container.pdf.id
+  hostname     = local.pdf_hostname
 }
 
 
