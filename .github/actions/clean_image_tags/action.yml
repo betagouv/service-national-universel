@@ -66,7 +66,7 @@ runs:
       env:
         SCW_SECRET_KEY: ${{ inputs.secret_key }}
       run: |
-        valid_until="$(date -I --date='-${{ inputs.lifetime }}')"
+        valid_until=\"$(date -I --date='-${{ inputs.lifetime }}')\"
         echo $valid_until
         curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
           "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?order_by=created_at_asc" \
