@@ -16,6 +16,9 @@ jobs:
         app_name: [admin, api, app]
 
     steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+
       - name: Clean CI
         uses: ./.github/actions/clean_image_tags
         with:
