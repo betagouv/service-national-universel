@@ -66,12 +66,12 @@ runs:
       env:
         SCW_SECRET_KEY: ${{ inputs.secret_key }}
       run: |
-        valid_until=\"$(date -I --date='-${{ inputs.lifetime }}')\"
+        valid_until=$(date -I --date="-${{ inputs.lifetime }}")
         echo $valid_until
         $test=$(
           curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
             "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?order_by=created_at_asc" \
-          | jq -r '.tags[] | select(.updated_at < $valid_until) | .id'
+          | jq -r --arg valid_until "$valid_until" '.tags[] | select(.updated_at < $valid_until) | .id'
         )
         echo $test
         while read tag_id
