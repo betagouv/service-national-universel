@@ -15,7 +15,6 @@ on:
       api_endpoint:
         description: "Stable tag for the image"
         default: "https://api.scaleway.com/registry/v1/regions"
-    secrets:
       secret_key:
         description: "Secret key"
         required: true
@@ -41,7 +40,7 @@ jobs:
         id: registry_id
         shell: bash
         env:
-          SCW_SECRET_KEY: ${{ secrets.secret_key }}
+          SCW_SECRET_KEY: ${{ inputs.secret_key }}
         run: |
           registry_id=$(
             curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
@@ -55,7 +54,7 @@ jobs:
         id: image_id
         shell: bash
         env:
-          SCW_SECRET_KEY: ${{ secrets.secret_key }}
+          SCW_SECRET_KEY: ${{ inputs.secret_key }}
         run: |
           image_id=$(
             curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
@@ -68,7 +67,7 @@ jobs:
       - name: Check tag existence
         shell: bash
         env:
-          SCW_SECRET_KEY: ${{ secrets.secret_key }}
+          SCW_SECRET_KEY: ${{ inputs.secret_key }}
         run: |
           curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
             "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?name=${{ inputs.image_tag }}" \
