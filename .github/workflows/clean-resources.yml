@@ -15,17 +15,18 @@ jobs:
       matrix:
         app_name: [admin, api, app]
 
-    - name: Clean CI
-      uses: ./.github/actions/clean_image_tags
-      with:
-        registry: "${{ secrets.SCW_CI_IMAGE_REGISTRY }}"
-        secret_key: "${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}"
-        image_name: ${{ matrix.app_name }}
+    steps:
+      - name: Clean CI
+        uses: ./.github/actions/clean_image_tags
+        with:
+          registry: "${{ secrets.SCW_CI_IMAGE_REGISTRY }}"
+          secret_key: "${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}"
+          image_name: ${{ matrix.app_name }}
 
-    - name: Clean Prod
-      uses: ./.github/actions/clean_image_tags
-      with:
-        registry: "${{ secrets.SCW_PROD_IMAGE_REGISTRY }}"
-        secret_key: "${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}"
-        image_name: ${{ matrix.app_name }}
-        lifetime: "2m"
+      - name: Clean Prod
+        uses: ./.github/actions/clean_image_tags
+        with:
+          registry: "${{ secrets.SCW_PROD_IMAGE_REGISTRY }}"
+          secret_key: "${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}"
+          image_name: ${{ matrix.app_name }}
+          lifetime: "2m"
