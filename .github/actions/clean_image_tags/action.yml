@@ -11,7 +11,7 @@ inputs:
     required: true
   lifetime:
     description: "Lifetime of image tag"
-    default: "1m"
+    default: "1 month" # https://www.gnu.org/software/coreutils/manual/html_node/Relative-items-in-date-strings.html
   region:
     description: "Region of the registry"
     default: "fr-par"
@@ -68,7 +68,7 @@ runs:
       run: |
         curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
           "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?name=${{ inputs.image_tag }}" \
-        | jq -r ".tags[] | select(.updated_at < \"$(date -I -v-${{ inputs.lifetime }})\") | .id" \
+        | jq -r ".tags[] | select(.updated_at < \"$(date -I --date='-${{ inputs.lifetime }}')\") | .id" \
         > tags_ids
         while read tag_id
         do
