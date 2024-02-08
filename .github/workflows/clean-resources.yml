@@ -1,0 +1,25 @@
+name: Clean resources
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "23 00 * * *"
+  push: # TODO : remove
+    branches:
+      - scw_clean_cron
+
+jobs:
+  clean_ci_image_tags:
+    uses: ./.github/workflows/clean-image-tags.yml
+    with:
+      registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
+    secrets:
+      secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+
+  clean_prod_image_tags:
+    uses: ./.github/workflows/clean-image-tags.yml
+    with:
+      registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
+      lifetime: "2m"
+    secrets:
+      secret_key: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
