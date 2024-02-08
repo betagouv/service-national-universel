@@ -79,7 +79,6 @@ export function permissionPhase2(y) {
   if (y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return true;
   // If young has done phase 1 or was exempted.
   if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1)) return true;
-  if (y.cohesionStayPresence === "true") return true;
 
   return false;
 }
