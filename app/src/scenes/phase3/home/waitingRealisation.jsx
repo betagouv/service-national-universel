@@ -60,7 +60,7 @@ export default function WaitingRealisation() {
         <hr style={{ margin: "100px 0 0 0", opacity: 0.8 }} />
         <div className="mb-2">
           <h2 className="text-[#161e2e] text-4xl font-bold">Trouvez une mission de bénévolat ou de volontariat</h2>
-          <p className="text-gray-500 text-xl">Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
+          <p className="text-gray-500 text-xl mt-2">Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
         </div>
         <Missions>
           {data?.total ? data?.hits.map((e) => <MissionCard mission={e._source} key={e._id} image={Img4} />) : null}
@@ -68,25 +68,25 @@ export default function WaitingRealisation() {
             Rechercher une mission
           </ButtonLinkPrimary>
         </Missions>
-        <hr className="pb-2 mt-4" />
-        <div className="mb-4 mt-4 pb-8 flex space-x-5 px-1">
-          <div className="flex w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+        <hr className="pb-2 mt-4 hidden md:block" />
+        <div className="mb-4 mt-4 pb-8 flex flex-col md:flex-row space-x-5 px-1">
+          <div className="flex md:w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
             <a
               href="https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1"
               target="_blank"
               rel="noreferrer"
               className="flex flex-1 items-start justify-between gap-1 p-3">
-              <div className="ml-3 flex-1 font-bold text-gray-800">J’ai des questions sur la phase 2</div>
+              <div className="flex-1 font-bold text-gray-800">J’ai des questions sur la phase 2</div>
               <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
             </a>
           </div>
-          <div className="flex w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+          <div className="flex md:w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
             <a
               href="https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise-1"
               target="_blank"
               rel="noreferrer"
-              className="flex flex-1 items-start justify-between gap-1 p-3">
-              <div className="ml-3 flex-1 font-bold text-gray-800">J’ai des questions sur reconnaissance d'engagement</div>
+              className="flex flex-1 items-start justify-between gap-1 ml-0 p-3">
+              <div className="flex-1 font-bold text-gray-800">J’ai des questions sur la reconnaissance d'engagement</div>
               <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
             </a>
           </div>
