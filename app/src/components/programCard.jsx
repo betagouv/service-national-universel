@@ -51,15 +51,11 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
     <Card onClick={handleClick}>
       <a href={urlWithScheme(program.url)} className="thumb">
         <img src={image} />
-        <Badge>{program.type}</Badge>
+        {/* <Badge>{program.type}</Badge> */}
       </a>
       <h4>{program.name}</h4>
       <div className="desc">{renderText()}</div>
-      {/* <div style={{ marginTop: "1rem" }}>
-        <SeeMore href={urlWithScheme(program.url)} target="_blank" rel="noreferrer">
-          DÉCOUVRIR →
-        </SeeMore>
-      </div> */}
+
     </Card>
   );
 }

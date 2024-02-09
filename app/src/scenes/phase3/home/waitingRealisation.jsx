@@ -1,7 +1,5 @@
 import Img4 from "../../../assets/observe.svg";
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Row, Col } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -42,18 +40,21 @@ export default function WaitingRealisation() {
 
   return (
     <HeroContainer>
-      <TransparentHero>
+      <div className="pt-2 pb-4 px-4 md:px-10 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
         <Heading>
           <h2>Les autres programmes d&apos;engagement</h2>
           <p>Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
         </Heading>
-        <Row>
-          {programs.slice(0, 3).map((p, i) => (
-            <Col key={i}>
-              <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../../assets/programmes-engagement/${p.imageString}`]?.default} />
-            </Col>
-          ))}
-        </Row>
+        <div className="overflow-x-auto">
+          <div className="flex flex-row gap-4">
+            {programs.slice(0, 3).map((p, i) => (
+              <div key={i} className="w-full md:w-1/3">
+                <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../../assets/programmes-engagement/${p.imageString}`]?.default} />
+              </div>
+            ))}
+          </div>
+        </div>
+
         <ButtonLinkPrimary to="/les-programmes" className="flex w-full justify-center">
           Voir toutes les possibilités d'engagement
         </ButtonLinkPrimary>
@@ -62,15 +63,13 @@ export default function WaitingRealisation() {
           <h2 className="text-[#161e2e] text-4xl font-bold">Trouvez une mission de bénévolat ou de volontariat</h2>
           <p className="text-gray-500 text-xl mt-2">Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
         </div>
-        <Missions>
-          {data?.total ? data?.hits.map((e) => <MissionCard mission={e._source} key={e._id} image={Img4} />) : null}
-          <ButtonLinkPrimary to="/phase3/mission" className="flex w-full justify-center">
-            Rechercher une mission
-          </ButtonLinkPrimary>
-        </Missions>
-        <hr className="pb-2 mt-4 hidden md:block" />
-        <div className="mb-4 mt-4 pb-8 flex flex-col md:flex-row space-x-5 px-1">
-          <div className="flex md:w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+        <div className="mt-8 px-3">{data?.total ? data?.hits.map((e) => <MissionCard mission={e._source} key={e._id} image={Img4} />) : null}</div>
+        <ButtonLinkPrimary to="/phase3/mission" className="flex w-full justify-center mb-8 md:mb-0">
+          Rechercher une mission
+        </ButtonLinkPrimary>
+        <hr className="pb-8 mt-12 hidden md:block" />
+        <div className="mb-4 pb-8 flex flex-col md:flex-row md:space-x-5 px-1">
+          <div className="flex mb-2 md:mb-0 md:w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
             <a
               href="https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1"
               target="_blank"
@@ -80,7 +79,7 @@ export default function WaitingRealisation() {
               <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
             </a>
           </div>
-          <div className="flex md:w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+          <div className="flex md:w-1/2 mb-2 md:mb-0 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
             <a
               href="https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise-1"
               target="_blank"
@@ -91,14 +90,12 @@ export default function WaitingRealisation() {
             </a>
           </div>
         </div>
-      </TransparentHero>
+      </div>
     </HeroContainer>
   );
 }
 
 const Heading = styled.div`
-  margin-top: 40px;
-  padding-top: 15px;
   margin-bottom: 30px;
   h2 {
     color: #161e2e;
@@ -109,24 +106,4 @@ const Heading = styled.div`
     color: #6b7280;
     font-size: 18px;
   }
-`;
-
-const Missions = styled.div`
-  padding: 40px;
-  border-radius: 6px;
-  background: #fff;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  .pagination {
-    display: none;
-  }
-`;
-
-const TransparentHero = styled.div`
-  padding: 0 2rem;
-  border-radius: 6px;
-  max-width: 80rem;
-  margin: 1rem auto;
-  background: #fff;
 `;
