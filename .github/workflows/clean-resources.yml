@@ -1,0 +1,32 @@
+name: Clean resources
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "01 37 * * *"
+
+jobs:
+  clean_image_tags:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app_name: [admin, api, app]
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+
+      - name: Clean CI
+        uses: ./.github/actions/clean_image_tags
+        with:
+          registry: "${{ secrets.SCW_CI_IMAGE_REGISTRY }}"
+          secret_key: "${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}"
+          image_name: ${{ matrix.app_name }}
+
+      - name: Clean Prod
+        uses: ./.github/actions/clean_image_tags
+        with:
+          registry: "${{ secrets.SCW_PROD_IMAGE_REGISTRY }}"
+          secret_key: "${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}"
+          image_name: ${{ matrix.app_name }}
+          lifetime: "2 month"
