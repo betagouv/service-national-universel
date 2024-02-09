@@ -11,7 +11,7 @@ const loggingMiddleware = async (req, res, next) => {
 
       const ip = req.ipInfo;
 
-      log = {
+      let log = {
         method: req.method,
         url: req.originalUrl,
         status: res.statusCode,
