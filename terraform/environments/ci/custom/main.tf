@@ -260,7 +260,6 @@ resource "scaleway_container" "pdf" {
 
   environment_variables = {
     "APP_FOLDER"                 = "pdf"
-    "PORT"                       = "8080"
     "SENTRY_TRACING_SAMPLE_RATE" = "0.01"
     "SENTRY_URL"                 = local.secrets.SENTRY_URL
   }
