@@ -3,7 +3,7 @@ name: Clean resources
 on:
   workflow_dispatch:
   schedule:
-    - cron: "01 37 * * *"
+    - cron: "37 01 * * *"
 
 jobs:
   clean_image_tags:
