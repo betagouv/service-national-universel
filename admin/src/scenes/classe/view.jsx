@@ -21,6 +21,7 @@ import {
   STATUS_CLASSE,
   translateStatusClasse,
   COHORT_TYPE,
+  IS_INSCRIPTION_OPEN_CLE,
 } from "snu-lib";
 import { useSelector } from "react-redux";
 import { statusClassForBadge } from "./utils";
@@ -186,7 +187,8 @@ export default function View() {
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status)} />}
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
-          ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && [
+          ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) &&
+          IS_INSCRIPTION_OPEN_CLE && [
             <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
             <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
           ]
@@ -526,7 +528,7 @@ export default function View() {
           <div className="flex flex-col items-center justify-center">
             <ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />
             <h1 className="text-xl leading-7 font-medium text-gray-900 mt-6">Invitez des élèves à rejoindre votre classe !</h1>
-            <p className="text-base leading-5 font-normal text-gray-900 mt-6">Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien : </p>
+            <p className="text-base leading-5 font-normal text-gray-900 mt-6 mb-">Vous pouvez inviter des élèves à rejoindre votre classe en leur partageant ce lien : </p>
             <a href={url} className="text-base leading-5 font-normal text-blue-600" rel="noreferrer" target="_blank">
               {url}
             </a>

@@ -11,12 +11,12 @@ import api from "@/services/api";
 import { IoAdd } from "react-icons/io5";
 import { capture } from "@/sentry";
 import { toastr } from "react-redux-toastr";
-import { classNames, copyToClipboard } from "@/utils";
+import { copyToClipboard } from "@/utils";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
 import Loader from "@/components/Loader";
 
-export default function view() {
+export default function View() {
   const user = useSelector((state) => state.Auth.user);
   const { id } = useParams();
   const [edit, setEdit] = useState(false);
@@ -266,6 +266,14 @@ export default function view() {
         title={etablissement.name}
         breadcrumb={[{ title: <InstitutionIcon className="scale-[65%]" /> }, { title: "Fiche de mon établissement" }]}
         actions={[
+          [ROLES.ADMIN].includes(user.role) && (
+            <Button
+              key="create-classe"
+              title="Créer une classe"
+              leftIcon={<HiPlus size={20} />}
+              onClick={() => history.push("/classes/create?etablissementId=" + etablissement._id)}
+            />
+          ),
           user.subRole === SUB_ROLES.referent_etablissement && (
             <Button
               key="modal-coordinator"

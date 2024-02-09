@@ -53,6 +53,7 @@ resource "scaleway_container" "api" {
     "CLE"        = "true"
     "PRODUCTION" = "true"
     "FOLDER_API" = "api"
+    "SCALEWAY_CLAMSCAN" = "true"
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.2
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.01
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT

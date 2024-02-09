@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
 import { supportURL } from "../../../../../config";
 import api from "../../../../../services/api";
 import { translate } from "../../../../../utils";
 import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner } from "snu-lib";
+import useAuth from "@/services/useAuth";
 
 import Loader from "../../../../../components/Loader";
 import { Hero, Content } from "../../../../../components/Content";
 
 export default function Convocation({ center, meetingPoint, departureDate, returnDate }) {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const history = useHistory();
   const [service, setService] = useState();
 
@@ -47,20 +47,22 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
   return (
     <Hero>
       <Content style={{ width: "100%" }}>
-        <ConvocText style={{ fontWeight: "500", textDecoration: "underline" }}>
-          <div>Affaire suivie par :</div>
-          <div
-            dangerouslySetInnerHTML={{
-              __html: htmlCleaner(
-                contacts
-                  .map((contact) => {
-                    return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
-                  })
-                  .join(""),
-              ),
-            }}
-          />
-        </ConvocText>
+        {!isCLE && (
+          <ConvocText style={{ fontWeight: "500", textDecoration: "underline" }}>
+            <div>Affaire suivie par :</div>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: htmlCleaner(
+                  contacts
+                    .map((contact) => {
+                      return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
+                    })
+                    .join(""),
+                ),
+              }}
+            />
+          </ConvocText>
+        )}
 
         <ConvocText style={{ textAlign: "center" }}>
           <b>CONVOCATION</b>
@@ -80,27 +82,33 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
           <>
             <ConvocText>
               <div className="text-center">
-                Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
-                <div>
-                  <b>Le </b>
-                  {dayjs(departureDate).locale("fr").format("dddd DD MMMM YYYY")}
-                </div>
-                <div>
-                  <b>A </b> {getMeetingHour(meetingPoint)}
-                </div>
-                <div>
-                  <b>Au </b>
-                  {getMeetingAddress()}
-                </div>
-                <div>
-                  {meetingPoint?.bus ? (
-                    <>
-                      <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </div>
+                {isCLE ? (
+                  <div>Les informations sur les modalités d'acheminement vers le centre et de retour vous seront transmises par votre établissement scolaire.</div>
+                ) : (
+                  <>
+                    Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants :
+                    <div>
+                      <b>Le </b>
+                      {dayjs(departureDate).locale("fr").format("dddd DD MMMM YYYY")}
+                    </div>
+                    <div>
+                      <b>A </b> {getMeetingHour(meetingPoint)}
+                    </div>
+                    <div>
+                      <b>Au </b>
+                      {getMeetingAddress()}
+                    </div>
+                    <div>
+                      {meetingPoint?.bus ? (
+                        <>
+                          <b>Numéro de transport</b> {`: ${meetingPoint?.bus?.busId}`}
+                        </>
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </ConvocText>
             <ConvocText style={{ border: "solid 1px #666", padding: "1rem", margin: "1rem" }}>
@@ -112,8 +120,12 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
         <ConvocText>Il vous est demandé de vous présenter au point de rassemblement avec :</ConvocText>
         <ConvocText>
           <ul style={{ marginLeft: "1rem" }}>
-            <li>- votre convocation</li>
-            <li>- une pièce d&apos;identité</li>
+            {!isCLE && (
+              <>
+                <li>- votre convocation</li>
+                <li>- une pièce d&apos;identité</li>
+              </>
+            )}
             <li>- la fiche sanitaire complétée, sous enveloppe destinée au référent sanitaire,</li>
             {meetingPoint?.bus?.lunchBreak && <li>- une collation ou un déjeuner froid, selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>}
           </ul>
@@ -126,10 +138,8 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
         ) : (
           <ConvocText>
             Le <b>retour de votre séjour </b>est prévu{" "}
-            <b>
-              le {dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")} à {getReturnHour(meetingPoint)}{" "}
-            </b>
-            , au même endroit que le jour du départ en centre.
+            <b>{`le ${dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")}${!isCLE ? ` à ${getReturnHour(meetingPoint)}` : ""}`}</b>, au même endroit que le jour du départ
+            en centre.
           </ConvocText>
         )}
         <ConvocText>

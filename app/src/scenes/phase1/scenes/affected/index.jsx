@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { transportDatesToString, youngCanChangeSession } from "snu-lib";
+import { isCle, transportDatesToString, youngCanChangeSession } from "snu-lib";
 import { getCohort } from "../../../../utils/cohorts";
-import { isStepMedicalFieldDone } from "./utils/steps.utils";
 import api from "../../../../services/api";
 
 import { AlertBoxInformation } from "../../../../components/Content";
@@ -29,6 +28,8 @@ export default function Affected() {
   const cohort = getCohort(young.cohort);
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
+
+  const isStepMedicalFieldDone = (young) => young?.cohesionStayMedicalFileDownload === "true";
 
   if (isStepMedicalFieldDone(young)) {
     window.scrollTo(0, 0);
@@ -99,7 +100,7 @@ export default function Affected() {
         )}
 
         <StepsAffected center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-        <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />
+        {!isCle(young) && <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />}
       </div>
 
       <div className="flex justify-end py-4 pr-8">
