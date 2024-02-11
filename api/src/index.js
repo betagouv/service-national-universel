@@ -1,5 +1,7 @@
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
+const loggingMiddleware = require("./middlewares/loggingMiddleware");
 const { forceDomain } = require("forcedomain");
+const requestIp = require("request-ip"); // Import request-ip package
 
 (async () => {
   await require("./env-manager")();
@@ -21,7 +23,6 @@ const { forceDomain } = require("forcedomain");
   const express = require("express");
   const cookieParser = require("cookie-parser");
   const helmet = require("helmet");
-  const logger = require("morgan");
   const passport = require("passport");
   require("./mongo");
 
@@ -59,10 +60,6 @@ const { forceDomain } = require("forcedomain");
     );
   }
 
-  // if (ENVIRONMENT === "development") {
-  app.use(logger("dev"));
-  // }
-
   // eslint-disable-next-line no-unused-vars
   function handleError(err, req, res, next) {
     const output = {
@@ -93,6 +90,12 @@ const { forceDomain } = require("forcedomain");
   app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
+  app.use(function (req, res, next) {
+    req.ipInfo = requestIp.getClientIp(req);
+    next();
+  });
+  app.use(loggingMiddleware);
+
   require("./crons");
   app.use(cookieParser());
 
@@ -117,9 +120,9 @@ const { forceDomain } = require("forcedomain");
   app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
   app.use("/elasticsearch", require("./controllers/elasticsearch"));
   app.use("/email", require("./controllers/email"));
-  app.use("/es", require("./controllers/es"));
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters"));
+  app.use("/gouv.fr", require("./controllers/gouv.fr"));
   app.use("/inscription-goal", require("./controllers/inscription-goal"));
   app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));

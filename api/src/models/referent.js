@@ -36,6 +36,7 @@ const Schema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
+    lowercase: true,
     documentation: {
       description: "Email de l'utilisateur",
     },
@@ -238,6 +239,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  mobile: {
+    type: String,
+    documentation: {
+      description: "Numéro de portable",
+    },
+  },
+
   deletedAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -264,6 +272,7 @@ Schema.methods.comparePassword = async function (p) {
 
 Schema.methods.anonymise = function () {
   this.phone && (this.phone = generateNewPhoneNumber());
+  this.mobile && (this.mobile = generateNewPhoneNumber());
   this.email && (this.email = generateRandomEmail());
   this.firstName && (this.firstName = generateRandomName());
   this.lastName && (this.lastName = generateRandomName());

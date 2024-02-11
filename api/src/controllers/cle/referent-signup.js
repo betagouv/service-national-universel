@@ -30,7 +30,7 @@ router.get("/token/:token", async (req, res) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    const referent = await ReferentModel.findOne({ invitationToken: value.token });
+    const referent = await ReferentModel.findOne({ invitationToken: value.token, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let etablissement;
@@ -53,8 +53,8 @@ router.get("/token/:token", async (req, res) => {
 router.put("/request-confirmation-email", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      email: Joi.string().email().required(),
-      confirmEmail: Joi.string().email().required(),
+      email: Joi.string().trim().lowercase().email().required(),
+      confirmEmail: Joi.string().trim().lowercase().email().required(),
       invitationToken: Joi.string().required(),
     })
       .unknown()
@@ -93,7 +93,7 @@ router.put("/request-confirmation-email", async (req, res) => {
 router.post("/confirm-email", async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      code: Joi.string().required(),
+      code: Joi.string().required().trim(),
       invitationToken: Joi.string().required(),
     })
       .unknown()
@@ -170,6 +170,7 @@ router.post("/confirm-signup", async (req, res) => {
         region: ramsesSchool.region,
         department: ramsesSchool.departmentName,
         invitationToken: null,
+        invitationExpires: null,
         acceptCGU: true,
       });
       await referent.save({ fromUser: referent });
@@ -186,7 +187,7 @@ router.post("/confirm-signup", async (req, res) => {
       }
       if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Vous n'êtes lié à aucun établissement" });
 
-      referent.set({ invitationToken: null, acceptCGU: true, region: etablissement.region, department: etablissement.department });
+      referent.set({ invitationToken: null, invitationExpires: null, acceptCGU: true, region: etablissement.region, department: etablissement.department });
       await referent.save({ fromUser: referent });
     }
 

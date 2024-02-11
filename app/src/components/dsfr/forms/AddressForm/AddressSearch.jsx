@@ -5,7 +5,7 @@ import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { useQuery } from "@tanstack/react-query";
 import { sortOptions } from "@/services/api-adresse";
 
-export default function AddressSearch({ updateData, error }) {
+export default function AddressSearch({ updateData, label, error }) {
   const [query, setQuery] = useState("");
   const dropdownRef = useRef(null);
   const controllerRef = useRef(null);
@@ -59,7 +59,7 @@ export default function AddressSearch({ updateData, error }) {
   return (
     <div ref={dropdownRef}>
       <label className="flex flex-col gap-1">
-        Rechercher une adresse
+        {label}
         <span className="text-[#666666] text-xs mb-1">Si l'adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
         <div className="relative">
           <input

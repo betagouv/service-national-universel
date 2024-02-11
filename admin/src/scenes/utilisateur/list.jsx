@@ -8,7 +8,7 @@ import dayjs from "@/utils/dayjs.utils";
 import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
 import { BsDownload } from "react-icons/bs";
 import { IoFlashOutline } from "react-icons/io5";
-import { canViewReferent, formatLongDateFR, getDepartmentNumber } from "snu-lib";
+import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs } from "snu-lib";
 import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
@@ -331,6 +331,7 @@ const Action = ({ hit, structure }) => {
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
   };
+
   return (
     <>
       <DropdownButton
@@ -352,7 +353,7 @@ const Action = ({ hit, structure }) => {
                   </Link>
                 ),
               },
-              user.role === ROLES.ADMIN ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
+              canSigninAs(user, hit, "referent") ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
               canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? { key: "delete", render: <p>Supprimer le profil</p>, action: onClickDelete } : null,
             ].filter(Boolean),
           },

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import ChevronRight from "../../../assets/icons/ChevronRight";
-import { translate, translatePhase1 } from "snu-lib";
+import { YOUNG_STATUS_PHASE3, translate, translatePhase1 } from "snu-lib";
 import Check from "../../../assets/icons/Check";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
@@ -129,15 +129,17 @@ export default function PhaseStatusSelector({ young, onChange }) {
               <div className="grow text-[12px] text-[#6B7280]">{translate(young.statusPhase2)}</div>
               <ChevronRight className="ml-[9px] text-[#1F2937]" />
             </div>
-            <div
-              className={`flex items-center whitespace-nowrap rounded-b-[6px] px-[16px] py-[8px] ${
-                statusOpened === 3 ? "bg-[#F3F4F6]" : "cursor-pointer bg-[#FFFFFF] hover:bg-[#F3F4F6]"
-              }`}
-              onClick={() => setStatusOpened(3)}>
-              <div className="mr-[9px] text-[14px] text-[#111827]">Phase 3</div>
-              <div className="grow text-[12px] text-[#6B7280]">{translate(young.statusPhase3)}</div>
-              <ChevronRight className="ml-[9px] text-[#1F2937]" />
-            </div>
+            {[YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED].includes(young.statusPhase3) && (
+              <div
+                className={`flex items-center whitespace-nowrap rounded-b-[6px] px-[16px] py-[8px] ${
+                  statusOpened === 3 ? "bg-[#F3F4F6]" : "cursor-pointer bg-[#FFFFFF] hover:bg-[#F3F4F6]"
+                }`}
+                onClick={() => setStatusOpened(3)}>
+                <div className="mr-[9px] text-[14px] text-[#111827]">Phase 3</div>
+                <div className="grow text-[12px] text-[#6B7280]">{translate(young.statusPhase3)}</div>
+                <ChevronRight className="ml-[9px] text-[#1F2937]" />
+              </div>
+            )}
             {statusOpened > 0 && (
               <div className="absolute top-[0px] right-[100%] z-10 mr-[4px] overflow-hidden rounded-[6px] border-[1px] border-[#E5E7EB] bg-[#FFFFFF] text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
                 {phaseStatuses}

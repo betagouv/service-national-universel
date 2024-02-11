@@ -9,25 +9,32 @@ const FileType = require("file-type");
 const fs = require("fs");
 const config = require("../../config");
 const { parse: parseDate } = require("date-fns");
-const NodeClam = require("clamscan");
 const XLSX = require("xlsx");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const PdrModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const SchemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const ImportPlanTransportModel = require("../../models/PlanDeTransport/importPlanTransport");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+const scanFile = require("../../utils/virusScanner");
 
 function isValidDate(date) {
   return date.match(/^[0-9]{2}\/[0-9]{2}\/202[0-9]$/);
 }
 
+function formatTime(time) {
+  let [hours, minutes] = time.split(":");
+  hours = hours.length === 1 ? "0" + hours : hours;
+  return `${hours}:${minutes}`;
+}
+
 function isValidTime(time) {
-  return time.match(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/);
+  const test = formatTime(time);
+  console.log(test);
+  return test.match(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/);
 }
 
 function isValidNumber(number) {
@@ -81,18 +88,12 @@ router.post(
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-        try {
-          const clamscan = await new NodeClam().init({
-            removeInfected: true,
-          });
-          const { isInfected } = await clamscan.isInfected(tempFilePath);
-          if (isInfected) {
-            capture(`File ${name} of user(${req.user.id})is infected`);
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          }
-        } catch {
-          return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+      if (config.ENVIRONMENT === "production") {
+        const scanResult = await scanFile(tempFilePath, name, req.user.id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        } else if (scanResult.error) {
+          return res.status(500).send({ ok: false, code: scanResult.error });
         }
       }
 
@@ -287,7 +288,7 @@ router.post(
         if (!line["TEMPS DE ROUTE"]) {
           errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
         }
-        if (line["TEMPS DE ROUTE"] && !isValidNumber(line["TEMPS DE ROUTE"])) {
+        if (line["TEMPS DE ROUTE"] && !isValidTime(line["TEMPS DE ROUTE"])) {
           errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
         }
       }
@@ -367,26 +368,13 @@ router.post(
         }
       }
 
-      // Volume errors.
-      // Check if the sum of "CAPACITÉ VOLONTAIRE TOTALE" group by "ID CENTRE" is superior or equal to SchemaRepartitionModel sum for a cohort and a center
+      // Count total unique centers
       const centers = lines.reduce((acc, line) => {
         if (line["ID CENTRE"]) {
           acc[line["ID CENTRE"]] = (acc[line["ID CENTRE"]] || 0) + parseInt(line["CAPACITÉ VOLONTAIRE TOTALE"]);
         }
         return acc;
       }, {});
-      for (const [centerId, total] of Object.entries(centers)) {
-        const groups = await SchemaRepartitionModel.find({ cohort, center: centerId });
-        const sum = groups.reduce((acc, group) => acc + group.youngsVolume, 0);
-        if (total < sum) {
-          for (const [i, line] of lines.entries()) {
-            const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
-            if (line["ID CENTRE"] === centerId) {
-              errors["CAPACITÉ VOLONTAIRE TOTALE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_VOLUME });
-            }
-          }
-        }
-      }
 
       const hasError = Object.values(errors).some((error) => error.length > 0);
 
@@ -453,15 +441,15 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         departuredDate: parseDate(line["DATE DE TRANSPORT ALLER"], "dd/MM/yyyy", new Date()),
         returnDate: parseDate(line["DATE DE TRANSPORT RETOUR"], "dd/MM/yyyy", new Date()),
         centerId: line["ID CENTRE"],
-        centerArrivalTime: line["HEURE D'ARRIVEE AU CENTRE"],
-        centerDepartureTime: line["HEURE DE DÉPART DU CENTRE"],
+        centerArrivalTime: formatTime(line["HEURE D'ARRIVEE AU CENTRE"]),
+        centerDepartureTime: formatTime(line["HEURE DE DÉPART DU CENTRE"]),
         followerCapacity: line["TOTAL ACCOMPAGNATEURS"],
         youngCapacity: line["CAPACITÉ VOLONTAIRE TOTALE"],
         totalCapacity: line["CAPACITE TOTALE LIGNE"],
         youngSeatsTaken: 0,
         lunchBreak: (line["PAUSE DÉJEUNER ALLER"] || "").toLowerCase() === "oui",
         lunchBreakReturn: line["PAUSE DÉJEUNER RETOUR" || ""].toLowerCase() === "oui",
-        travelTime: line["TEMPS DE ROUTE"],
+        travelTime: formatTime(line["TEMPS DE ROUTE"]),
         sessionId: session?._id.toString(),
         meetingPointsIds: pdrIds,
       };
@@ -475,10 +463,10 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             lineId: busLine._id.toString(),
             meetingPointId: line[`ID PDR ${pdrNumber}`],
             transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
-            busArrivalHour: line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`],
-            departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
-            meetingHour: getPDRMeetingHour(line[`HEURE DEPART DU PDR ${pdrNumber}`]),
-            returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+            busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`]),
+            departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]),
+            meetingHour: getPDRMeetingHour(formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`])),
+            returnHour: formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`]),
             stepPoints: [],
           });
         } else {
@@ -488,7 +476,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             acc[acc.length - 1].stepPoints.push({
               type: "aller",
               address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
-              departureHour: line[`HEURE DEPART DU PDR ${pdrNumber}`],
+              departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]),
               returnHour: "",
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
             });
@@ -496,15 +484,15 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               type: "retour",
               address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
               departureHour: "",
-              returnHour: line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+              returnHour: formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`]),
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
             });
           } else {
             acc[acc.length - 1].stepPoints.push({
               type: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "aller" : "retour",
               address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`],
-              departureHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? line[`HEURE DEPART DU PDR ${pdrNumber}`] : "",
-              returnHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "" : line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`],
+              departureHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`]) : "",
+              returnHour: line[`ID PDR ${pdrNumber}`].toLowerCase() === "correspondance aller" ? "" : formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`]),
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`].toLowerCase(),
             });
           }
@@ -569,7 +557,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
   }
 });
 
-// Add one hour to departure hour
+// Remove 30 mins to departure hour
 function getPDRMeetingHour(departureHour) {
   const [hour, minute] = departureHour.split(":");
   const date = new Date();
@@ -577,7 +565,7 @@ function getPDRMeetingHour(departureHour) {
   date.setMinutes(minute);
   date.setSeconds(0);
   date.setMilliseconds(0);
-  date.setHours(date.getHours() - 1);
+  date.setMinutes(date.getMinutes() - 30); // Subtract 30 minutes
   let meetingHour = date.toTimeString().split(" ")[0];
   meetingHour = meetingHour.substring(0, meetingHour.length - 3);
   return meetingHour;

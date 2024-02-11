@@ -7,14 +7,16 @@ on:
       - main
 
 jobs:
-
   prepare:
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
         (contains(github.head_ref, '-ci-') ||
         startsWith(github.head_ref, 'ci-') ||
-        endsWith(github.head_ref, '-ci'))
+        endsWith(github.head_ref, '-ci') ||
+        contains(github.head_ref, '_ci_') ||
+        startsWith(github.head_ref, 'ci_') ||
+        endsWith(github.head_ref, '_ci'))
       )
     runs-on: ubuntu-latest
     outputs:
@@ -182,14 +184,15 @@ jobs:
 
       - name: Terraform plan
         working-directory: ${{ env.custom_directory }}
+        # add -lock-timeout option until https://github.com/hashicorp/terraform/issues/33217 is fixed
         run: |
-          terraform plan -no-color -input=false \
+          terraform plan -no-color -input=false -lock-timeout=15m \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
         run: |
-          terraform apply -no-color -input=false -auto-approve \
+          terraform apply -no-color -input=false -auto-approve -lock-timeout=15m \
             -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
 
       - name: Add comment to PR

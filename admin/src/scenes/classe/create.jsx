@@ -6,12 +6,14 @@ import { Link, useHistory } from "react-router-dom";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "snu-lib";
+import { translate, canCreateClasse } from "snu-lib";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
 import Loader from "@/components/Loader";
+import { useSelector } from "react-redux";
 
-export default function create() {
+export default function Create() {
+  const user = useSelector((state) => state.Auth.user);
   const [classe, setClasse] = useState({
     cohort: "CLE 23-24",
     uniqueId: "",
@@ -22,9 +24,14 @@ export default function create() {
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const history = useHistory();
 
+  useEffect(() => {
+    if (!canCreateClasse(user)) history.push("/classes");
+  }, [user, history]);
+
   const getEtablissement = async () => {
     try {
-      const { ok, code, data: response } = await api.get("/cle/etablissement/from-user");
+      const etablissementId = new URLSearchParams(history.location.search).get("etablissementId");
+      const { ok, code, data: response } = await api.get(etablissementId ? `/cle/etablissement/${etablissementId}` : "/cle/etablissement/from-user");
 
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de l'établissement", translate(code));
@@ -48,11 +55,13 @@ export default function create() {
       }
 
       const refList = classes.flatMap((classe) =>
-        classe.referent.map((referent) => ({
-          ...referent,
-          value: referent._id,
-          label: `${referent.firstName} ${referent.lastName}`,
-        })),
+        classe.referent
+          .filter((r) => Boolean(r))
+          .map((referent) => ({
+            ...referent,
+            value: referent._id,
+            label: `${referent.firstName} ${referent.lastName}`,
+          })),
       );
       const uniqueIds = new Set();
 
@@ -95,12 +104,12 @@ export default function create() {
 
   const sendValue = async () => {
     try {
-      const { ok, code } = await api.post("/cle/classe", classe);
+      const { ok, code, data } = await api.post("/cle/classe", classe);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la création de la classe", translate(code));
       }
       toastr.success("La classe a bien été créée");
-      history.push("/classes");
+      history.push("/classes/" + data._id);
     } catch (e) {
       capture(e);
       if (e.code === ERRORS.USER_ALREADY_REGISTERED)

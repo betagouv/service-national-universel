@@ -19,7 +19,7 @@ const { serializeMission, serializeApplication } = require("../utils/serializer"
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
-const { putLocation } = require("../services/api-adresse");
+const { putLocation } = require("../services/gouv.fr/api-adresse");
 
 //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
 const fixDate = (dateString) => {

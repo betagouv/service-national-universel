@@ -25,7 +25,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^7.14.0",
     "@scaleway/sdk": "^1.38.1",
-    "@selego/mongoose-elastic": "^1.5.0",
+    "@selego/mongoose-elastic": "^1.6.0",
     "@sentry/integrations": "^7.58.1",
     "@sentry/node": "^7.58.1",
     "@sentry/profiling-node": "^1.2.1",
@@ -50,7 +50,6 @@
     "mime-types": "^2.1.35",
     "mongoose": "^5.13.9",
     "mongoose-patch-history": "^2.0.0",
-    "morgan": "^1.10.0",
     "nanoid": "^2.1.11",
     "netmask": "^2.0.2",
     "node-cron": "^3.0.2",

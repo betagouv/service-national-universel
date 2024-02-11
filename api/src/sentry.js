@@ -41,8 +41,8 @@ function initSentry(app) {
         new ProfilingIntegration(),
         ...autoDiscoverNodePerformanceMonitoringIntegrations(),
       ],
-      tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE || 0.01),
-      profilesSampleRate: Number(SENTRY_PROFILE_SAMPLE_RATE || 0.1), // Percent of Transactions profiled
+      tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE) || 0.01,
+      profilesSampleRate: Number(SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
       ignoreErrors: [
         /^No error$/,
         /__show__deepen/,

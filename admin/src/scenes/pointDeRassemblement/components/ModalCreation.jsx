@@ -3,6 +3,7 @@ import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { ES_NO_LIMIT, isPdrEditionOpen } from "snu-lib";
+import { Select } from "@snu/ds/admin";
 import ModalTailwind from "../../../components/modals/ModalTailwind";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
@@ -68,7 +69,7 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
   React.useEffect(() => {
     if (selectedCohort) {
       (async () => {
-        const { ok, data } = await api.post("/elasticsearch/pointderassemblement/export", { filters: { cohorts: [selectedCohort], searchbar: [search] } });
+        const { ok, data } = await api.post("/elasticsearch/pointderassemblement/export", { filters: { searchbar: [search] } });
         if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des points de rassemblement");
         setListPDR(data);
       })();
@@ -116,23 +117,25 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
 
   return (
     <ModalTailwind isOpen={isOpen} onClose={onClose} className="w-[600px] rounded-lg bg-white shadow-xl">
-      <div className="flex h-[600px] w-full flex-col justify-between p-8">
+      <div className="flex w-full flex-col justify-between p-8">
         <div className="flex w-full flex-col">
           <div className="text-center text-xl font-medium leading-7 text-gray-800">Rattacher un point à un séjour</div>
           <hr className="my-8" />
           <div className="text-sm font-medium leading-6 text-gray-800">Choisissez un séjour</div>
           <div className="flex flex-row flex-wrap gap-2 py-2">
-            {availableCohorts.map((cohort) => (
-              <div
-                key={cohort}
-                onClick={() => setSelectedCohort(cohort)}
-                className={`cursor-pointer rounded-full border-[1px] px-3 py-1 text-xs font-medium leading-5 ${
-                  selectedCohort === cohort ? "border-blue-600 bg-blue-600 text-white" : "border-[#66A7F4] bg-[#F9FCFF] text-[#0C7CFF] "
-                }`}>
-                {cohort}
-              </div>
-            ))}
-            {availableCohorts.length === 0 && <div className="text-xs font-medium leading-5 text-gray-500">Aucun séjour disponible</div>}
+            <Select
+              className="w-full"
+              placeholder={"Choisissez une cohorte"}
+              options={availableCohorts?.map((c) => ({ value: c, label: c }))}
+              noOptionsMessage="Aucun séjour disponible"
+              isSearchable
+              isClearable
+              closeMenuOnSelect
+              value={selectedCohort ? { value: selectedCohort, label: selectedCohort } : null}
+              onChange={(options) => {
+                setSelectedCohort(options?.value);
+              }}
+            />
           </div>
           {selectedCohort ? (
             <>
@@ -207,7 +210,7 @@ export default function ModalCreation({ isOpen, onCancel, defaultPDR = null, edi
             </>
           ) : null}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="mt-4 flex items-center gap-4">
           <button onClick={onClose} className="w-1/2 rounded-lg border-[1px] border-gray-300 py-2 hover:shadow-ninaButton ">
             Annuler
           </button>

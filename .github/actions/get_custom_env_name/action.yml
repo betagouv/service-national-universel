@@ -22,11 +22,12 @@ runs:
         env_name=$(
           echo ${{ inputs.branch_name }} |
           tr '[:upper:]' '[:lower:]' | # lowercase
-          tr -cd '[:alnum:]_-' | # remove all except alnum + '_-'
-          tr -s '_-' | # removes duplicated '_-'
+          tr "_" "-" | # replace _ by -
+          tr -cd '[:alnum:]-' | # remove all except alnum + '-'
+          tr -s '-' | # removes duplicated '-'
           cut -c 1-25 | # crop to 25 characters
-          sed 's/^[_-]*//' | # left trim '_-'
-          sed 's/[_-]*$//' # right trim '_-'
+          sed 's/^[-]*//' | # left trim '-'
+          sed 's/[-]*$//' # right trim '-'
         )
         echo "Environment name: $env_name"
         echo "env_name=$env_name" >> $GITHUB_OUTPUT

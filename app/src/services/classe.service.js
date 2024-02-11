@@ -1,5 +1,5 @@
 import { apiURL } from "@/config";
-import { STATUS_CLASSE, translateColoration } from "snu-lib";
+import { STATUS_CLASSE, translateColoration, IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
 
 export const fetchClass = (id) =>
   fetch(`${apiURL}/cle/classe/${id}`)

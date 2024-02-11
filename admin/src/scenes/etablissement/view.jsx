@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
 import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding, HiOutlineX } from "react-icons/hi";
@@ -11,13 +11,12 @@ import api from "@/services/api";
 import { IoAdd } from "react-icons/io5";
 import { capture } from "@/sentry";
 import { toastr } from "react-redux-toastr";
-import { classNames, copyToClipboard } from "@/utils";
+import { copyToClipboard } from "@/utils";
 import validator from "validator";
 import { ERRORS } from "snu-lib/errors";
 import Loader from "@/components/Loader";
-import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 
-export default function view() {
+export default function View() {
   const user = useSelector((state) => state.Auth.user);
   const { id } = useParams();
   const [edit, setEdit] = useState(false);
@@ -267,6 +266,14 @@ export default function view() {
         title={etablissement.name}
         breadcrumb={[{ title: <InstitutionIcon className="scale-[65%]" /> }, { title: "Fiche de mon établissement" }]}
         actions={[
+          [ROLES.ADMIN].includes(user.role) && (
+            <Button
+              key="create-classe"
+              title="Créer une classe"
+              leftIcon={<HiPlus size={20} />}
+              onClick={() => history.push("/classes/create?etablissementId=" + etablissement._id)}
+            />
+          ),
           user.subRole === SUB_ROLES.referent_etablissement && (
             <Button
               key="modal-coordinator"

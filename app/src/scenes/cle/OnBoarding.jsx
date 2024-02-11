@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Redirect, useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import queryString from "query-string";
 import { Modal } from "reactstrap";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -8,7 +8,7 @@ import TitleImage from "../../assets/onboarding-cle.png";
 import MyClass from "./MyClass";
 import PrimaryButton from "@/components/dsfr/ui/buttons/PrimaryButton";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
-import { ModalContainer, Content } from "../../components/modals/Modal";
+import { ModalContainer } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
 import { RiArrowLeftLine } from "react-icons/ri";
+import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
 
 const Title = () => (
   <div>
@@ -33,26 +34,35 @@ const Subtitle = ({ refName }) => (
 );
 
 const ModalInfo = ({ isOpen, onCancel, onChange, id }) => {
-  const history = useHistory();
-  const handleClick = (id) => {
-    plausibleEvent("CLE/CTA preinscription - contact support");
-    history.push(`/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE&classeId=${id}`);
-  };
-
   return (
-    <Modal centered isOpen={isOpen} toggle={onCancel || onChange}>
+    <Modal centered isOpen={isOpen} toggle={onCancel || onChange} size={"md"}>
       <ModalContainer>
         <CloseSvg className="close-icon" height={10} width={10} onClick={onCancel || onChange} />
-        <Content className="text-left">
-          <h1>→ Attention</h1>
-          <p>
-            Vous avez déjà un compte volontaire et vous souhaitez participer au SNU dans le cadre des classes engagées ? Contactez le support pour mettre à jour votre compte et
-            vous faire gagner du temps.
-          </p>
-          <InlineButton className="pt-2 md:pr-2" onClick={() => handleClick(id)}>
-            Contacter le support
-          </InlineButton>
-        </Content>
+        <div className="px-8 pb-8">
+          <div className="flex gap-6 text-2xl text-black font-semibold">
+            <p>→</p>
+            <p>J’ai déjà démarré mon inscription dans ma Classe engagée</p>
+          </div>
+          <Link to="/auth">
+            <p className="bg-blue-france-sun-113 hover:bg-blue-france-sun-113-hover text-white w-full p-2.5 text-center my-4">Me connecter</p>
+          </Link>
+          <hr />
+
+          <div className="flex gap-6 text-2xl text-black font-semibold my-4">
+            <p>→</p>
+            <p>Je suis inscrit(e) en tant que volontaire</p>
+          </div>
+
+          <p>Vous avez un compte hors Classes engagées ? Contactez le support pour mettre à jour votre compte et vous faire gagner du temps.</p>
+
+          <Link to={`/besoin-d-aide?parcours=CLE&q=HTS_TO_CLE&classeId=${id}`}>
+            <p
+              onClick={() => plausibleEvent("CLE/CTA preinscription - contact support")}
+              className="bg-blue-france-sun-113 hover:bg-blue-france-sun-113-hover text-white w-full p-2.5 text-center my-4">
+              Contacter le support
+            </p>
+          </Link>
+        </div>
       </ModalContainer>
     </Modal>
   );
@@ -63,10 +73,20 @@ const OnBoarding = () => {
   if (isLoggedIn) logout({ redirect: false });
   const { id } = queryString.parse(window.location.search);
 
+  if (!IS_INSCRIPTION_OPEN_CLE) {
+    return (
+      <DSFRLayout title="Inscription de l'élève">
+        <DSFRContainer title="Les inscriptions sont cloturées">
+          <p className="leading-relaxed">Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023 - 2024.</p>
+        </DSFRContainer>
+      </DSFRLayout>
+    );
+  }
+
   if (!validateId(id)) {
-    plausibleEvent("CLE preinscription - id invalide dans l'url");
     return <OnboardingError message="Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis." />;
   }
+
   return <OnboardingContent id={id} />;
 };
 
@@ -94,13 +114,8 @@ const OnboardingContent = ({ id }) => {
           <hr className="my-4 h-px border-0 bg-gray-200" />
           {classe.isInscriptionOpen && (
             <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-              <InlineButton
-                className="md:pr-4 pt-2 md:pr-2 pb-1"
-                onClick={() => {
-                  plausibleEvent("CLE/CTA preinscription - compte HTS");
-                  setShowContactSupport(true);
-                }}>
-                J'ai déjà un compte volontaire
+              <InlineButton className="md:pr-4 pt-2 pb-1" onClick={() => setShowContactSupport(true)}>
+                J'ai déjà un compte
               </InlineButton>
               <PrimaryButton
                 onClick={() => {
@@ -113,12 +128,17 @@ const OnboardingContent = ({ id }) => {
           )}
 
           {!classe.isInscriptionOpen && (
-            <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
-              <PrimaryButton className="sm:w-full md:w-52 md:self-end" disabled>
-                {classe.isFull ? "☹ Classe complète" : "Inscriptions désactivées"}
-              </PrimaryButton>
-              <span className="text-[13px] md:self-end">Pour plus d'informations contactez votre référent.</span>
-            </div>
+            <>
+              <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
+                <InlineButton className="md:pr-4 pt-2 pb-1" onClick={() => setShowContactSupport(true)}>
+                  J'ai déjà un compte
+                </InlineButton>
+                <PrimaryButton className="sm:w-full md:w-52 md:self-end" disabled>
+                  {classe.isFull ? "☹ Classe complète" : "☹ Inscriptions désactivées"}
+                </PrimaryButton>
+              </div>
+              {classe.isFull && <p className="text-[13px] w-full text-end mt-2">Pour plus d'informations contactez votre référent.</p>}
+            </>
           )}
           <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={id}></ModalInfo>
         </DSFRContainer>

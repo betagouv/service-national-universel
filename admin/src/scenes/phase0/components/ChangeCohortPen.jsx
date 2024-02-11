@@ -108,6 +108,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 className="mt-6 mb-4 text-left"
                 placeholder="Motif de changement de cohorte"
                 options={motifs.map((e) => ({ label: e, value: e }))}
+                closeMenuOnSelect
                 isClearable={true}
                 value={motif}
                 onChange={setMotif}
@@ -118,6 +119,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   placeholder="Choix de la nouvelle cohorte"
                   options={cohorts?.map((c) => ({ ...c, label: `Cohorte ${c.name}${!c.isEligible ? " (non éligible)" : null}`, value: c.name }))}
                   noOptionsMessage={"Aucune cohorte éligible n'est disponible."}
+                  closeMenuOnSelect
                   isClearable={true}
                   value={cohort}
                   onChange={setCohort}
@@ -194,14 +196,16 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   &nbsp;a été pris en compte, veuillez lui envoyer un message en précisant un motif si besoin.
                 </p>
               </div>
-              <div className="flex items-center justify-between my-4 text-red-600">
-                <HiExclamationCircle size={24} className="shrink-0 mr-6 text-red-500" />
-                <p className="flex-1 text-lg text-left">
-                  {Array.isArray(young.cniFiles) && young.cniFiles.length > 0
-                    ? "Pensez à vérifier la validité de sa CNI pour ce nouveau séjour !"
-                    : "Il doit ajouter sa CNI pour ce nouveau séjour !"}
-                </p>
-              </div>
+              {!young.cniFiles?.length && !young.files?.cniFiles?.length && (
+                <div className="flex items-center justify-between my-4 text-red-600">
+                  <HiExclamationCircle size={24} className="shrink-0 mr-6 text-red-500" />
+                  <p className="flex-1 text-lg text-left">
+                    {Array.isArray(young.cniFiles) && young.cniFiles.length > 0
+                      ? "Pensez à vérifier la validité de sa CNI pour ce nouveau séjour !"
+                      : "Il doit ajouter sa CNI pour ce nouveau séjour !"}
+                  </p>
+                </div>
+              )}
               <div className="my-6 p-8 bg-gray-50">
                 <p className="text-base -mx-4">
                   Bonjour&nbsp;
@@ -209,7 +213,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                     {young.firstName} <span className="uppercase">{young.lastName}</span>
                   </span>
                   , votre changement de séjour pour le Service National Universel a bien été pris en compte. Vous êtes maintenant positionné(e) sur le séjour de{" "}
-                  <span className="font-medium">{cohort.name}</span>. Veuillez ajouter votre CNI dans votre compte.
+                  <span className="font-medium">{cohort.name}</span>.{!young.cniFiles?.length && !young.files?.cniFiles?.length && " Veuillez ajouter votre CNI dans votre compte."}
                 </p>
                 <textarea
                   className="my-6 px-[10px] py-[6px] w-full min-h-[88px] rounded-md border-[1px] border-gray-300 bg-white"
@@ -269,6 +273,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 className="my-6 text-left"
                 placeholder="Rechercher un établissement"
                 loadOptions={(q) => searchEtablissement(user, q)}
+                closeMenuOnSelect
                 isClearable={true}
                 noOptionsMessage={"Aucun établissement ne correspond à cette recherche"}
                 value={etablissement ? { label: etablissement.name } : null}
@@ -305,6 +310,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 className="my-6 text-left"
                 placeholder="Classe"
                 options={classes}
+                closeMenuOnSelect
                 isClearable={true}
                 value={classe ? { label: classe.label } : null}
                 onChange={({ classe }) => setClasse(classe)}
@@ -437,7 +443,8 @@ const searchEtablissement = async (user, q) => {
 
   const { responses } = await api.post(`/elasticsearch/cle/etablissement/search`, query);
   return responses[0].hits.hits.map((hit) => {
-    return { value: hit._source, _id: hit._id, label: hit._source.name, etablissement: { ...hit._source, _id: hit._id } };
+    const label = hit._source.name + (hit._source.city ? ` (${hit._source.city})` : "");
+    return { value: hit._source, _id: hit._id, label, etablissement: { ...hit._source, _id: hit._id } };
   });
 };
 
@@ -454,7 +461,7 @@ const getClasses = async (etablissementId) => {
 
   const { responses } = await api.post(`/elasticsearch/cle/classe/search`, query);
   return responses[0].hits.hits
-    .filter((hit) => hit._source.status !== STATUS_CLASSE.DRAFT)
+    .filter((hit) => ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN].includes(hit._source.status))
     .map((hit) => {
       const label = `${hit._source.uniqueKeyAndId} - ${hit._source.name ?? "(Nom à renseigner)"}`;
       return { value: hit._source, _id: hit._id, label, classe: { ...hit._source, _id: hit._id, label } };

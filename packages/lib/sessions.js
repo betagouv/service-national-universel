@@ -1,5 +1,6 @@
 import { regionsListDROMS } from "./region-and-departments";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
+import { isCle } from "./young";
 const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "2022" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
 
 const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
@@ -13,6 +14,7 @@ const sessions2024CohortNames = [
   "Avril 2024 - B",
   "Juin 2024 - 2",
   "Juin 2024 - Martinique",
+  "Juin 2024 - NC",
   "Juillet 2024",
   "Juillet 2024 - Martinique",
   "CLE 23-24",
@@ -22,16 +24,9 @@ const sessions2024CohortNames = [
   "CLE juin 2024",
   "CLE mai 2024 Martinique",
   "CLE juin 2024 Martinique",
-  "CLE mars 2024 Guadeloupe",
-  "CLE mai 2024 Guadeloupe",
-  "CLE mars 2024 Guyane",
-  "CLE avril 2024 Guyane",
-  "CLE mai 2024 Guyane",
   "CLE février 2024 Réunion",
-  "CLE mars 2024 Réunion",
-  "CLE avril 2024 Réunion",
-  "CLE mai 2024 Mayotte",
-  "CLE juin 2024 Mayotte",
+  "CLE GE1 2024",
+  "CLE GE2 2024",
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
@@ -211,6 +206,8 @@ function shouldForceRedirectToReinscription(young) {
 }
 
 function hasAccessToReinscription(young) {
+  if (isCle(young)) return false;
+
   if (shouldForceRedirectToReinscription(young)) return true;
 
   if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && !(young.departSejourMotif === "Exclusion")) {
@@ -240,6 +237,7 @@ function shouldForceRedirectToInscription(young, isInscriptionModificationOpen =
 
 //@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
 function canApplyToPhase2(young, cohort) {
+  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const now = new Date();
   const dateEnd = getCohortEndDate(young, cohort);
   return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;

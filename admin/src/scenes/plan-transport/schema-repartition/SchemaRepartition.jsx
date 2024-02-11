@@ -158,7 +158,7 @@ export default function SchemaRepartition({ region, department }) {
         from = start.format("Do MMMM YYYY");
       }
       const to = end.format("Do MMMM YYYY");
-      return `Séjour du ${from} au ${to}`;
+      return `${cohort.name} (du ${from} au ${to})`;
     } else {
       return "";
     }
@@ -274,9 +274,9 @@ export default function SchemaRepartition({ region, department }) {
         department: g.fromDepartment,
         youngsVolume: g.youngsVolume,
         centerId: g.centerId,
-        centerName: `${g.centerName} ${g.centerAddress} ${g.centerZip} ${g.centerCity}`,
-        centerDepartment: g.toDepartment,
-        centerRegion: g.toRegion,
+        centerName: `${g.center.name} ${g.center.address} ${g.center.zip} ${g.center.city}`,
+        centerDepartment: g.center.department,
+        centerRegion: g.center.region,
       };
       if (maxGatheringPlaces < g.gatheringPlaces.length) {
         maxGatheringPlaces = g.gatheringPlaces.length;

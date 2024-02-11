@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 const mime = require("mime-types");
 const FileType = require("file-type");
 const Joi = require("joi");
-const NodeClam = require("clamscan");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 
@@ -48,8 +47,8 @@ const {
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } = require("../utils/serializer");
-const { JWT_SIGNIN_MAX_AGE, JWT_SIGNIN_VERSION } = require("../jwt-options");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE } = require("../cookie-options");
+const { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION } = require("../jwt-options");
+const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../cookie-options");
 const {
   ROLES_LIST,
   canInviteUser,
@@ -82,6 +81,7 @@ const {
   YOUNG_SOURCE_LIST,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
+const scanFile = require("../utils/virusScanner");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -169,8 +169,8 @@ router.post("/signup", async (req, res) => {
     const role = ROLES.RESPONSIBLE; // responsible by default
 
     const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU, phone, mobile: phone });
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
     //Create structure
     const { name, description, legalStatus, types, zip, region, department, sousType } = value;
@@ -215,14 +215,14 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     else if (type === "young") user = await YoungModel.findById(id);
     if (!user) return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
 
-    if (!canSigninAs(req.user, user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canSigninAs(req.user, user, type)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
-      expiresIn: JWT_SIGNIN_MAX_AGE,
+      expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
-    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+    if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
     else if (type === "young") {
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       return res.status(200).send({ ok: true });
     }
 
@@ -358,7 +358,7 @@ router.post("/signup_verify", async (req, res) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     return res.status(200).send({ ok: true, token, data: serializeReferent(referent, referent) });
   } catch (error) {
     capture(error);
@@ -401,8 +401,8 @@ router.post("/signup_invite", async (req, res) => {
       acceptCGU,
     });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: "30d" });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE));
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
@@ -501,7 +501,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       const qpv = await getQPV(newYoung.zip, newYoung.city, newYoung.address);
       if (qpv === true) newYoung.qpv = "true";
       else if (qpv === false) newYoung.qpv = "false";
-      else newYoung.qpv = "";
+      else newYoung.qpv = undefined;
     }
 
     // Check quartier prioritaires.
@@ -632,7 +632,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     }
 
     young.set({
-      status: YOUNG_STATUS.WAITING_VALIDATION,
+      status: getYoungStatus(young),
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
       cohort,
       originalCohort: previousYoung.cohort,
@@ -642,7 +642,22 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     });
 
     if (value.source === YOUNG_SOURCE.CLE) {
-      young.set({ source: YOUNG_SOURCE.CLE, etablissementId: value.etablissementId, classeId: value.classeId, cniFiles: [] });
+      young.set({
+        source: YOUNG_SOURCE.CLE,
+        etablissementId: value.etablissementId,
+        classeId: value.classeId,
+        cniFiles: [],
+        "files.cniFiles": [],
+        cohesionCenterId: classe.cohesionCenterId,
+        sessionPhase1Id: classe.sessionId,
+        meetingPointId: classe.pointDeRassemblementId,
+      });
+      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
+        young.set({
+          hasMeetingInformation: "true",
+          statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+        });
+      }
     } else {
       young.set({
         // Init if young was previously CLE
@@ -650,6 +665,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         etablissementId: undefined,
         classeId: undefined,
         cniFiles: [],
+        "files.cniFiles": [],
       });
     }
 
@@ -709,6 +725,19 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+const getYoungStatus = (young) => {
+  switch (young.status) {
+    case YOUNG_STATUS.IN_PROGRESS:
+      return YOUNG_STATUS.IN_PROGRESS;
+    case YOUNG_STATUS.WAITING_VALIDATION:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    case YOUNG_STATUS.WAITING_CORRECTION:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+    default:
+      return YOUNG_STATUS.WAITING_VALIDATION;
+  }
+};
 
 router.post("/:tutorId/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -962,18 +991,12 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "production") {
-          try {
-            const clamscan = await new NodeClam().init({
-              removeInfected: true,
-            });
-            const { isInfected } = await clamscan.isInfected(tempFilePath);
-            if (isInfected) {
-              capture(`File ${name} of user(${req.user.id})is infected`);
-              return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-            }
-          } catch {
-            return res.status(500).send({ ok: false, code: ERRORS.FILE_SCAN_DOWN });
+        if (config.ENVIRONMENT === "production") {
+          const scanResult = await scanFile(tempFilePath, name, req.user);
+          if (scanResult.infected) {
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          } else if (scanResult.error) {
+            return res.status(500).send({ ok: false, code: scanResult.error });
           }
         }
 
@@ -1035,6 +1058,34 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, ReferentModel));
 
+async function populateReferent(ref) {
+  if (ref.subRole === SUB_ROLES.referent_etablissement) {
+    const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: ref._id }).lean();
+    if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
+    // Do not return res.status(404).send() in a helper function, only at the root of the route handler.
+    ref.etablissement = etablissement;
+  }
+
+  if (ref.subRole === SUB_ROLES.coordinateur_cle) {
+    const etablissement = await EtablissementModel.findOne({ coordinateurIds: ref._id }).lean();
+    if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
+    ref.etablissement = etablissement;
+
+    const classes = await ClasseModel.find({ referentClasseIds: ref._id }).lean();
+    ref.classe = classes;
+  }
+
+  if (ref.role === ROLES.REFERENT_CLASSE) {
+    const classes = await ClasseModel.find({ referentClasseIds: ref._id }).lean();
+    if (!classes) throw new Error(ERRORS.NOT_FOUND);
+    ref.classe = classes;
+
+    const etablissement = await EtablissementModel.findById(classes[0].etablissementId).lean();
+    if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
+    ref.etablissement = etablissement;
+  }
+}
+
 router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
@@ -1043,14 +1094,20 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const referent = await ReferentModel.findById(checkedId);
+    let referent = await ReferentModel.findById(checkedId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    return res.status(200).send({ ok: true, data: serializeReferent(referent, req.user) });
+    referent = serializeReferent(referent, req.user);
+
+    await populateReferent(referent);
+
+    return res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    if (error === ERRORS.NOT_FOUND) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

@@ -17,6 +17,7 @@ import {
   regionList,
   translateInscriptionStatus,
   translatePhase1,
+  getDepartmentNumber,
 } from "snu-lib";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
@@ -93,6 +94,7 @@ export default function Index() {
         name: "Département",
         fullValue: "Tous",
         options: departmentOptions,
+        translate: (e) => getDepartmentNumber(e) + " - " + e,
       },
       {
         id: "cohort",

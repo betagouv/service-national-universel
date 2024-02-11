@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Select, { components, GroupBase, StylesConfig } from "react-select";
 import AsyncSelect from "react-select/async";
 import { HiOutlineExclamation } from "react-icons/hi";
@@ -29,8 +29,12 @@ type OwnProps = {
   noOptionsMessage?: string;
   loadOptions?: (
     inputValue: string,
-    callback: (options: GroupBase<string>[]) => void,
+    callback: (options: GroupBase<string>[]) => void
   ) => void | Promise<GroupBase<string>[]>;
+  defaultOptions?:
+    | boolean
+    | GroupBase<string>[]
+    | (() => Promise<GroupBase<string>[]>);
 };
 
 export default function SelectButton({
@@ -55,6 +59,7 @@ export default function SelectButton({
   isAsync = false,
   noOptionsMessage,
   loadOptions,
+  defaultOptions = true,
 }: OwnProps) {
   const paddingStyle = label ? "16px 0 0 0" : "0";
 
@@ -180,6 +185,21 @@ export default function SelectButton({
     }),
   };
 
+  const [defaultOpts, setDefaultOpts] = useState<
+    boolean | GroupBase<string>[] | undefined
+  >(true);
+
+  useEffect(() => {
+    if (typeof defaultOptions === "function") {
+      (async () => {
+        const data = await defaultOptions();
+        setDefaultOpts(data);
+      })();
+    } else {
+      setDefaultOpts(defaultOptions);
+    }
+  }, [defaultOptions]);
+
   return (
     <div className={"flex flex-col gap-3 " + className}>
       <div className="relative">
@@ -194,12 +214,12 @@ export default function SelectButton({
           <AsyncSelect
             placeholder={placeholder}
             loadOptions={loadOptions}
-            defaultOptions
+            defaultOptions={defaultOpts}
             cacheOptions
             noOptionsMessage={() => noOptionsMessage}
             maxMenuHeight={maxMenuHeight}
             isMulti={isMulti}
-            isDisabled={disabled}
+            isDisabled={disabled || readOnly}
             closeMenuOnSelect={closeMenuOnSelect}
             hideSelectedOptions={hideSelectedOptions}
             isClearable={isClearable}

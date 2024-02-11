@@ -249,10 +249,8 @@ const Home = (props) => {
               <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
               <RestrictedRoute path="/mes-contacts" component={Contact} />
               {/* Only for developper eyes... */}
-              {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? (
-                <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />
-              ) : null}
-              {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
+              {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} /> : null}
+              {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
               {/* DASHBOARD */}
               <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
               <RestrictedRoute path="/" component={renderDashboardV2} />
@@ -280,7 +278,7 @@ const Home = (props) => {
 
 const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil"], default: "/dsnj-export" },
-  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement"], default: "/schema-repartition" },
+  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {
     authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],

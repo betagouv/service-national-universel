@@ -97,9 +97,6 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     }
     let query = {};
     if (value.type) query.type = value.type;
-    // TODO: fix this
-    // else query = { $or: [{ type: COHORT_TYPE.VOLONTAIRE }, { type: { $exists: false } }, { type: null }] };
-    else if (isReferent(req.user)) query = { $or: [{ type: COHORT_TYPE.VOLONTAIRE }, { type: { $exists: false } }, { type: null }] };
     const cohorts = await CohortModel.find(query);
     return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
@@ -226,39 +223,48 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { error: bodyError, value: body } = Joi.object({
+      // Informations générales
       dateStart: Joi.date().required(),
       dateEnd: Joi.date().required(),
-      pdrChoiceLimitDate: Joi.date().required(),
-      validationDate: Joi.date().allow(null, ""),
-      validationDateForTerminaleGrade: Joi.date().allow(null, ""),
-      manualAffectionOpenForAdmin: Joi.boolean().required(),
-      manualAffectionOpenForReferentRegion: Joi.boolean().required(),
-      manualAffectionOpenForReferentDepartment: Joi.boolean().required(),
-      isAssignmentAnnouncementsOpenForYoung: Joi.boolean().required(),
-      youngCheckinForAdmin: Joi.boolean().required(),
-      youngCheckinForHeadOfCenter: Joi.boolean().required(),
-      youngCheckinForRegionReferent: Joi.boolean().required(),
-      youngCheckinForDepartmentReferent: Joi.boolean().required(),
-      busListAvailability: Joi.boolean().required(),
+      // Inscriptions (phase 0)
+      inscriptionStartDate: Joi.date().required(),
+      inscriptionEndDate: Joi.date().required(),
+      // --
+      inscriptionModificationEndDate: Joi.date(),
+      instructionEndDate: Joi.date().required(),
+      // Préparation des affectations et des transports (phase 1)
       sessionEditionOpenForReferentRegion: Joi.boolean(),
       sessionEditionOpenForReferentDepartment: Joi.boolean(),
       sessionEditionOpenForTransporter: Joi.boolean(),
+      repartitionSchemaCreateAndEditGroupAvailability: Joi.boolean().default(false),
       pdrEditionOpenForReferentRegion: Joi.boolean(),
       pdrEditionOpenForReferentDepartment: Joi.boolean(),
       pdrEditionOpenForTransporter: Joi.boolean(),
-      repartitionSchemaCreateAndEditGroupAvailability: Joi.boolean().required(),
-      repartitionSchemaDownloadAvailability: Joi.boolean(),
-      isTransportPlanCorrectionRequestOpen: Joi.boolean(),
+      // --
       schemaAccessForReferentRegion: Joi.boolean(),
       schemaAccessForReferentDepartment: Joi.boolean(),
+      repartitionSchemaDownloadAvailability: Joi.boolean(),
       busEditionOpenForTransporter: Joi.boolean(),
-      uselessInformation: Joi.object().allow(null),
+      isTransportPlanCorrectionRequestOpen: Joi.boolean(),
+      // Affectation et pointage (phase 1)
+      isAssignmentAnnouncementsOpenForYoung: Joi.boolean().default(false),
+      manualAffectionOpenForAdmin: Joi.boolean().default(false),
+      manualAffectionOpenForReferentRegion: Joi.boolean().default(false),
+      manualAffectionOpenForReferentDepartment: Joi.boolean().default(false),
+      pdrChoiceLimitDate: Joi.date().allow(null, ""),
+      // --
+      busListAvailability: Joi.boolean().default(false),
+      youngCheckinForHeadOfCenter: Joi.boolean().default(false),
+      youngCheckinForAdmin: Joi.boolean().default(false),
+      youngCheckinForRegionReferent: Joi.boolean().default(false),
+      youngCheckinForDepartmentReferent: Joi.boolean().default(false),
       daysToValidate: Joi.number().allow(null, ""),
+      // Autres variables ?!
+      uselessInformation: Joi.object().allow(null),
+      // Non utilisées dans le formulaire
+      validationDate: Joi.date().allow(null, ""),
+      validationDateForTerminaleGrade: Joi.date().allow(null, ""),
       daysToValidateForTerminalGrade: Joi.number().allow(null, ""),
-      inscriptionStartDate: Joi.date().required(),
-      inscriptionEndDate: Joi.date().required(),
-      instructionEndDate: Joi.date().required(),
-      inscriptionModificationEndDate: Joi.date(),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {
       capture(bodyError);
@@ -284,11 +290,12 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     cohort.set({
       dateStart: formatDateTimeZone(body.dateStart),
       dateEnd: formatDateTimeZone(body.dateEnd),
-      pdrChoiceLimitDate: formatDateTimeZone(body.pdrChoiceLimitDate),
-      validationDate: formatDateTimeZone(body.validationDate),
-      validationDateForTerminaleGrade: formatDateTimeZone(body.validationDateForTerminaleGrade),
       ...body,
     });
+
+    if (body.pdrChoiceLimitDate) cohort.pdrChoiceLimitDate = formatDateTimeZone(body.pdrChoiceLimitDate);
+    if (body.validationDate) cohort.validationDate = formatDateTimeZone(body.validationDate);
+    if (body.validationDateForTerminaleGrade) cohort.validationDateForTerminaleGrade = formatDateTimeZone(body.validationDateForTerminaleGrade);
 
     await cohort.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: cohort });

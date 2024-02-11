@@ -101,6 +101,27 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  cohesionCenterId: {
+    type: String,
+    documentation: {
+      description: "ID du centre de cohésion",
+    },
+  },
+
+  sessionId: {
+    type: String,
+    documentation: {
+      description: "ID de la session",
+    },
+  },
+
+  pointDeRassemblementId: {
+    type: String,
+    documentation: {
+      description: "ID du point de rassemblement",
+    },
+  },
+
   status: {
     type: String,
     required: true,
@@ -137,8 +158,37 @@ Schema.virtual("referents", {
   foreignField: "_id",
 });
 
+Schema.virtual("cohesionCenter", {
+  ref: "cohesioncenter",
+  localField: "cohesionCenterId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+Schema.virtual("session", {
+  ref: "sessionphase1",
+  localField: "sessionId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+Schema.virtual("pointDeRassemblement", {
+  ref: "pointderassemblement",
+  localField: "pointDeRassemblementId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 Schema.virtual("isFull").get(function () {
   return this.totalSeats - this.seatsTaken <= 0;
+});
+
+Schema.virtual("department").get(function () {
+  return this.etablissement?.department ?? null;
+});
+
+Schema.virtual("region").get(function () {
+  return this.etablissement?.region ?? null;
 });
 
 Schema.virtual("user").set(function (user) {
@@ -168,7 +218,16 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
+Schema.plugin(
+  mongooseElastic(esClient, {
+    populate: ["etablissement"],
+    virtuals: [
+      { key: "region", type: "String" },
+      { key: "department", type: "String" },
+    ],
+  }),
+  MODELNAME,
+);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

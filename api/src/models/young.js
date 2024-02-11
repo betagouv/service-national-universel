@@ -169,6 +169,7 @@ const Schema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
+    lowercase: true,
     documentation: {
       description: "E-mail du volontaire",
     },
@@ -308,6 +309,12 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date de dernière modification du statut lié à la seconde phase",
+    },
+  },
+  statusPhase2OpenedAt: {
+    type: Date,
+    documentation: {
+      description: "Date d'ouverture de la seconde phase",
     },
   },
   statusPhase2ValidatedAt: {
@@ -1071,6 +1078,8 @@ const Schema = new mongoose.Schema({
   },
   parent1Email: {
     type: String,
+    lowercase: true,
+    trim: true,
     documentation: {
       description: "E-mail du parent 1",
     },
@@ -1222,6 +1231,8 @@ const Schema = new mongoose.Schema({
   },
   parent2Email: {
     type: String,
+    lowercase: true,
+    trim: true,
     documentation: {
       description: "E-mail du parent 2",
     },
