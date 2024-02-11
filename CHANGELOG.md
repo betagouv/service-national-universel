@@ -1,3 +1,10 @@
+## [1.375.1](https://github.com/betagouv/service-national-universel/compare/v1.375.0...v1.375.1) (2024-02-11)
+
+
+### Bug Fixes
+
+* **app:** Minor fixes to Phase1/Affected page ([451dcfc](https://github.com/betagouv/service-national-universel/commit/451dcfcd9a0b70d3b9e11a7cc4061a280c23787c))
+
 # [1.375.0](https://github.com/betagouv/service-national-universel/compare/v1.374.0...v1.375.0) (2024-02-08)
 
 
