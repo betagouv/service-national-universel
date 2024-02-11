@@ -119,7 +119,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       });
     }
 
-    res.status(201).send({ ok: true, data });
+    res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
