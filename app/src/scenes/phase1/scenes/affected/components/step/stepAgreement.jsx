@@ -18,7 +18,7 @@ export default function StepAgreement({ departureDate, returnDate, enabled, isDo
       <StepCard state="done" stepNumber={stepNumber}>
         <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
           <div>
-            <p className="font-semibold">Confirmez de votre participation au séjour</p>
+            <p className="font-semibold">Confirmez votre participation au séjour</p>
             <p className="mt-[0.75rem] md:mt-[0.25rem] text-gray-500">Vous devez confirmer votre participation au séjour avant votre départ.</p>
           </div>
           <div className="w-full md:w-auto mt-1 md:mt-0">

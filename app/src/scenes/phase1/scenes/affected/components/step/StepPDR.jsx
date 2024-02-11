@@ -60,7 +60,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
   if (young.meetingPointId) {
     return (
       <StepCard state="done" stepNumber={stepNumber}>
-        <div className="flex flex-col md:flex-row gap-3 justify-between">
+        <div className="flex flex-col md:flex-row gap-3 justify-between text-sm">
           <div>
             <p className="font-semibold">Point de rassemblement</p>
             <p className="leading-tight my-2">{addressOf(meetingPoint)}</p>
@@ -76,11 +76,9 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
             </div>
           </div>
           <div>
-            {!isCle(young) && (
-              <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
-                Modifier
-              </button>
-            )}
+            <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
+              Modifier
+            </button>
           </div>
         </div>
         <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired} />
@@ -107,11 +105,9 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
             </div>
           </div>
           <div>
-            {!isCle(young) && (
-              <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
-                Modifier
-              </button>
-            )}
+            <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
+              Modifier
+            </button>
           </div>
         </div>
         <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired} />
