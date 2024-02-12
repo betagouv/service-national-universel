@@ -4,6 +4,7 @@ import { Modal } from "reactstrap";
 import { IoWarningOutline } from "react-icons/io5";
 import { ModalContainer } from "../../../components/modals/Modal";
 import ModalButton from "../../../components/buttons/ModalButton";
+import { ROLES } from "@/utils";
 
 export default function ModalUniqueResponsable({ isOpen, onConfirm, responsable }) {
   if (!responsable) return null;
@@ -15,7 +16,16 @@ export default function ModalUniqueResponsable({ isOpen, onConfirm, responsable 
         <div className="flex w-[80%] flex-col items-center justify-center gap-2">
           <h1 className="text-xl font-bold">Le compte ne peut pas être supprimé</h1>
           <div className="text-center">
-            {responsable.firstName} {responsable.lastName} est le seul responsable de la structure. Par conséquent, son compte ne peut pas être supprimé.
+            {responsable.role === ROLES.RESPONSIBLE ? (
+              <p>
+                {responsable.firstName} {responsable.lastName} est le seul responsable de la structure. Par conséquent, son compte ne peut pas être supprimé.
+              </p>
+            ) : (
+              <p>
+                {responsable.firstName} {responsable.lastName} est référent de classe. Pour supprimer son compte, veuillez supprimer la classe ou le remplacer par un autre
+                référent.
+              </p>
+            )}
           </div>
         </div>
 

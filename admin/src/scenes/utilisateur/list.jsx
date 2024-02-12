@@ -9,6 +9,7 @@ import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
 import { BsDownload } from "react-icons/bs";
 import { IoFlashOutline } from "react-icons/io5";
 import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs } from "snu-lib";
+import { ERRORS } from "snu-lib/errors";
 import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
@@ -321,9 +322,10 @@ const Action = ({ hit, structure }) => {
   const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/referent/${hit._id}`);
-      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(user);
-      if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(hit);
+      if (!ok && code === ERRORS.OPERATION_UNAUTHORIZED) return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === ERRORS.LINKED_STRUCTURE) return onUniqueResponsible(hit);
+      if (!ok && code === ERRORS.LINKED_MISSIONS) return onDeleteTutorLinked(hit);
+      if (!ok && code === ERRORS.LINKED_CLASSES) return onUniqueResponsible(hit);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       return onReferentDeleted();
     } catch (e) {
