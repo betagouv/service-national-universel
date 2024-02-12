@@ -11,7 +11,7 @@ const loggingMiddleware = async (req, res, next) => {
 
       const ip = req.ipInfo;
 
-      let log = {
+      const log = {
         method: req.method,
         url: req.originalUrl,
         status: res.statusCode,
@@ -21,14 +21,14 @@ const loggingMiddleware = async (req, res, next) => {
 
       const hasPayload = req.body && Object.keys(req.body).length > 0;
       if (hasPayload) {
-        log["payload"] = JSON.stringify(req.body)
+        log.payload = JSON.stringify(req.body)
       }
 
       if (req.user) {
-        log["userID"] = req.user.id
+        log.userID = req.user.id
         const userRole = req.user.patches.modelName === "ReferentPatches" && "referent";
         if (userRole) {
-          log["userRole"] = req.user?.role
+          log.userRole = req.user?.role
         }
       }
 
