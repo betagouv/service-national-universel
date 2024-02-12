@@ -2,31 +2,52 @@ name: Clean resources
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "37 01 * * *"
+  # schedule:
+  #   - cron: "37 01 * * *"
+  push: # TODO : Remove
+    branches:
+      - clean-custom-env
+
+env:
+  REGION: fr-par
 
 jobs:
-  clean_image_tags:
+  # clean_image_tags:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       app_name: [admin, api, app]
+
+  #   steps:
+  #     - name: Git checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Clean CI
+  #       uses: ./.github/actions/clean_image_tags
+  #       with:
+  #         registry: "${{ secrets.SCW_CI_IMAGE_REGISTRY }}"
+  #         secret_key: "${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}"
+  #         image_name: ${{ matrix.app_name }}
+
+  #     - name: Clean Prod
+  #       uses: ./.github/actions/clean_image_tags
+  #       with:
+  #         registry: "${{ secrets.SCW_PROD_IMAGE_REGISTRY }}"
+  #         secret_key: "${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}"
+  #         image_name: ${{ matrix.app_name }}
+  #         lifetime: "2 month"
+
+  clean_ci_environments:
+    # needs: clean_image_tags # TODO: uncomment
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app_name: [admin, api, app]
-
+    env:
+      SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+      REGION: fr-par
     steps:
-      - name: Git checkout
-        uses: actions/checkout@v4
-
-      - name: Clean CI
-        uses: ./.github/actions/clean_image_tags
-        with:
-          registry: "${{ secrets.SCW_CI_IMAGE_REGISTRY }}"
-          secret_key: "${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}"
-          image_name: ${{ matrix.app_name }}
-
-      - name: Clean Prod
-        uses: ./.github/actions/clean_image_tags
-        with:
-          registry: "${{ secrets.SCW_PROD_IMAGE_REGISTRY }}"
-          secret_key: "${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}"
-          image_name: ${{ matrix.app_name }}
-          lifetime: "2 month"
+      - name: Clean environments using deleted image
+        run: |
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "https://api.scaleway.com/containers/v1beta1/regions/${{env.REGION}}/containers?project_id=1b29c5d9-9723-400a-aa8b-0c85ae3567f7" \
+            | jq -r '.containers[]|"\(.registry_image) \(.name)"' \
+            | sed -e 's/.*:\(.*\) \(.*\)-.*/\2 \1/g' \
+            | uniq
