@@ -1,13 +1,12 @@
 import React from "react";
+import { Content, Hero, HeroContainer, Separator, VioletButton } from "@/components/Content";
+import useAuth from "@/services/useAuth";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { HeroContainer, Hero, Content, Separator, VioletButton } from "../../components/Content";
-import { translate } from "../../utils";
-import plausibleEvent from "../../services/plausible";
+import plausibleEvent from "@/services/plausible";
+import { isCle, translate } from "snu-lib";
 
-export default function Withdrawn() {
-  const young = useSelector((state) => state.Auth.young);
-
+export default function Leaving() {
+  const { young } = useAuth();
   return (
     <HeroContainer>
       <Hero>
@@ -15,7 +14,7 @@ export default function Withdrawn() {
           <h1>
             <strong>{young.firstName},</strong> dommage que vous nous quittiez !
           </h1>
-          <p>Votre désistement du SNU a bien été pris en compte.</p>
+          <p>Votre désistement du SNU {isCle(young) && "dans le cadre des classes engagées "}a bien été pris en compte.</p>
           <p>Si l&apos;engagement vous donne envie, vous trouverez ci-dessous des dispositifs qui pourront vous intéresser.</p>
           <p>
             Bonne continuation, <br />

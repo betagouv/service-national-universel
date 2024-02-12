@@ -1,26 +1,21 @@
-import { React, useEffect, useState } from "react";
+import { React } from "react";
 import { Redirect } from "react-router-dom";
 
-import Loader from "@/components/Loader";
-import { capture } from "@/sentry";
-import API from "@/services/api";
-import { toastr } from "react-redux-toastr";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToPhase2, hasAccessToReinscription, wasYoungExcluded } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
-import WaitingReinscription from "./WaitingReinscription";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
 import ValidatedV2 from "./validatedV2";
 import WaitingCorrectionV2 from "./waitingCorrectionV2";
 import WaitingValidation from "./waitingValidation";
 import WaitingList from "./waitingList";
-import Withdrawn from "./withdrawn";
+import Withdrawn from "./Withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
 import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
@@ -28,26 +23,6 @@ import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
-  const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
-  const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
-
-  const fetchInscriptionOpen = async () => {
-    try {
-      const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      setReinscriptionOpen(data);
-      setReinscriptionOpenLoading(false);
-    } catch (e) {
-      setReinscriptionOpenLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchInscriptionOpen();
-  }, []);
 
   if (!young) return <Redirect to="/auth" />;
 
@@ -58,17 +33,8 @@ export default function Home() {
       return <DelaiDepasse />;
     }
 
-    if (isReinscriptionOpen === false) {
-      if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
-      if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
-    }
-
-    if (hasAccessToReinscription(young)) {
-      if (isReinscriptionOpenLoading) return <Loader />;
-      if (young.status === YOUNG_STATUS.WITHDRAWN && ["DONE", "EXEMPTED"].includes(young.statusPhase1)) {
-        return <Withdrawn />;
-      }
-      return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
+    if ([YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status)) {
+      return <Withdrawn />;
     }
 
     if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
