@@ -70,7 +70,7 @@ function FallbackComponent() {
 
 const myFallback = <FallbackComponent />;
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   queryCache: new QueryCache({ onError: (error) => capture(error) }),
 });
 

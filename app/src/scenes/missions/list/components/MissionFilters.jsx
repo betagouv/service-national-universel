@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { capture } from "../../../../sentry";
 import API from "../../../../services/api";
-import { putLocation } from "../../../../services/api-adresse";
 
 import Sante from "../../../../assets/mission-domaines/sante";
 import Solidarite from "../../../../assets/mission-domaines/solidarite";
@@ -38,7 +37,7 @@ import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 import Select from "./Select.jsx";
 import Toggle from "./Toggle";
 import Modal from "../../../../components/ui/modals/Modal";
-import { toastr } from "react-redux-toastr";
+import useAddress from "@/services/useAddress";
 
 export default function MissionFilters({ filters, setFilters }) {
   const young = useSelector((state) => state.Auth.young);
@@ -53,8 +52,15 @@ export default function MissionFilters({ filters, setFilters }) {
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
 
-  const [youngLocation, setYoungLocation] = useState(young?.location || null);
-  const [relativeLocation, setRelativeLocation] = useState();
+  const { location: youngLocation } = useAddress({
+    query: `${young?.address} ${young?.zip}`,
+    options: { postcode: young?.zip, limit: 1 },
+  });
+
+  const { location: relativeLocation } = useAddress({
+    query: `${young?.mobilityNearRelativeAddress} ${young?.mobilityNearRelativeCity}`,
+    options: { postcode: young?.mobilityNearRelativeZip, limit: 1 },
+  });
 
   const DISTANCE_MAX = 100;
   const marginDistance = getMarginDistance(document.getElementById("distanceKm"));
@@ -86,7 +92,6 @@ export default function MissionFilters({ filters, setFilters }) {
   useEffect(() => {
     if (!young) return;
 
-    const abortController = new AbortController();
     const getManagerPhase2 = async () => {
       try {
         const { ok, data } = await API.get(`/referent/manager_phase2/${young.department}`);
@@ -95,30 +100,8 @@ export default function MissionFilters({ filters, setFilters }) {
         capture(e);
       }
     };
-    const getYoungLocation = async () => {
-      try {
-        const res = await putLocation(young?.address, young?.zip, abortController.signal);
-        if (!res) return toastr.error("Erreur avec la base adresse nationale", "Impossible de trouver les coordonnées du volontaire.", { timeOut: 10_000 });
-        if (res) setYoungLocation(res);
-      } catch (e) {
-        capture(e);
-      }
-    };
-    const getRelativeLocation = async () => {
-      try {
-        const res = await putLocation(`${young?.mobilityNearRelativeAddress} ${young?.mobilityNearRelativeCity}`, young?.mobilityNearRelativeZip, abortController.signal);
-        if (!res) return toastr.error("Erreur avec la base adresse nationale", "Impossible de trouver les coordonnées du proche.", { timeOut: 10_000 });
-        if (res) setRelativeLocation(res);
-      } catch (e) {
-        capture(e);
-      }
-    };
 
     getManagerPhase2();
-    if (!youngLocation) getYoungLocation();
-    if (young.mobilityNearRelativeZip) getRelativeLocation();
-
-    return () => abortController.abort();
   }, [young]);
 
   function getMarginDistance(ele) {

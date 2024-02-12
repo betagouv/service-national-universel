@@ -36,6 +36,7 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
+import useAddress from "@/services/useAddress";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -119,7 +120,7 @@ export default function StepCoordonnees() {
   const [errors, setErrors] = useState({});
   const [corrections, setCorrections] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
-  const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);
+  // const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -127,6 +128,7 @@ export default function StepCoordonnees() {
   const { step } = useParams();
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
+  const [birthCityOpen, setBirthCityOpen] = useState(true);
 
   const { isCLE } = useAuth();
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
@@ -241,7 +243,7 @@ export default function StepCoordonnees() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
-        setBirthCityZipSuggestions([]);
+        setBirthCityOpen(false);
       }
     };
     document.addEventListener("click", handleClickOutside);
@@ -284,17 +286,7 @@ export default function StepCoordonnees() {
     }
   };
 
-  useQuery({
-    queryKey: ["cityOfBirth", birthCity],
-    queryFn: async ({ signal }) => {
-      const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(birthCity)}&type=municipality`, { signal });
-      if (!res.ok) throw new Error(res.statusText);
-      const response = await res.json();
-      const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
-      setBirthCityZipSuggestions(suggestions);
-    },
-    enabled: birthCity.trim().length > 2,
-  });
+  const { results: birthCityZipSuggestions } = useAddress({ query: birthCity, options: { type: "municipality" } });
 
   const updateBirthCity = async (value) => {
     setData({ ...data, birthCity: value });
@@ -302,7 +294,6 @@ export default function StepCoordonnees() {
 
   const onClickBirthCitySuggestion = (birthCity, birthCityZip) => {
     setData({ ...data, birthCity, birthCityZip });
-    setBirthCityZipSuggestions([]);
   };
 
   const onSubmit = async () => {
@@ -483,7 +474,7 @@ export default function StepCoordonnees() {
             />
             {wasBornInFranceBool && (
               <div ref={ref} className="border-3 absolute z-[100] mt-[-24px] w-full overflow-hidden border-red-600 bg-white shadow">
-                {birthCityZipSuggestions.map(({ city, postcode }, index) => (
+                {birthCityZipSuggestions?.map(({ city, zip: postcode }, index) => (
                   <div
                     onClick={() => {
                       onClickBirthCitySuggestion(city, postcode);

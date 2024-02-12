@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import AddressDropdown from "./AddressDropdown";
 import { RiSearchLine } from "react-icons/ri";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
-import { useQuery } from "@tanstack/react-query";
-import { sortOptions } from "@/services/api-adresse";
+import useAddress from "@/services/useAddress";
+import { queryClient } from "@/app";
 
 export default function AddressSearch({ updateData, label, error }) {
   const [query, setQuery] = useState("");
@@ -12,18 +12,10 @@ export default function AddressSearch({ updateData, label, error }) {
 
   // Will execute on every change to the query state variable
   // TODO: debounce
-  const { data, isPending } = useQuery({
-    queryKey: ["address", query],
-    queryFn: async ({ signal }) => {
-      const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}`, { signal });
-      if (!res.ok) throw new Error(res.statusText);
-      return res.json();
-    },
-    enabled: query.trim().length > 2,
-  });
+  const { results, isPending } = useAddress({ query });
 
   // Derived from the data returned by useQuery: format and group results to use in our dropdown
-  const sortedOptions = sortOptions(data?.features || []);
+  const sortedOptions = sortOptions(results || []);
 
   useEffect(() => {
     return () => {
@@ -51,6 +43,11 @@ export default function AddressSearch({ updateData, label, error }) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const handleChange = (e) => {
+    queryClient.cancelQueries("address");
+    setQuery(e.target.value);
+  };
+
   const handleSelect = (option) => {
     updateData(option);
     setQuery("");
@@ -62,12 +59,7 @@ export default function AddressSearch({ updateData, label, error }) {
         {label}
         <span className="text-[#666666] text-xs mb-1">Si l'adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
         <div className="relative">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5"
-          />
+          <input type="text" value={query} onChange={handleChange} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />
           <span className="material-icons absolute right-5 mt-[12px] text-lg">
             <RiSearchLine />
           </span>
@@ -93,4 +85,19 @@ export default function AddressSearch({ updateData, label, error }) {
       <ErrorMessage>{error}</ErrorMessage>
     </div>
   );
+}
+
+function sortOptions(options) {
+  const housenumbers = options.filter((option) => option.coordinatesAccuracyLevel === "housenumber");
+  const streets = options.filter((option) => option.coordinatesAccuracyLevel === "street");
+  const localities = options.filter((option) => option.coordinatesAccuracyLevel === "locality");
+  const municipalities = options.filter((option) => option.coordinatesAccuracyLevel === "municipality");
+
+  const res = [];
+  if (housenumbers.length > 0) res.push({ label: "Numéro", options: housenumbers });
+  if (streets.length > 0) res.push({ label: "Voie", options: streets });
+  if (localities.length > 0) res.push({ label: "Lieu-dit", options: localities });
+  if (municipalities.length > 0) res.push({ label: "Commune", options: municipalities });
+
+  return res;
 }
