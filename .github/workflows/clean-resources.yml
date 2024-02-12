@@ -46,6 +46,7 @@ jobs:
       registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
     steps:
 
+      - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
 
       - name: Get registry ID
