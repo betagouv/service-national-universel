@@ -84,12 +84,13 @@ jobs:
           PG_CONN_STR: ${{ secrets.SCW_CI_BACKEND_CONN_STR }}
           PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
           PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
+          project_id: 1b29c5d9-9723-400a-aa8b-0c85ae3567f7
         working-directory: terraform/environments/ci
         continue-on-error: true
         run: |
           # Get all CI containers
           curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
-            "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/containers?project_id=1b29c5d9-9723-400a-aa8b-0c85ae3567f7" \
+            "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/containers?project_id=${{env.project_id}}" \
             | jq -r '.containers[]|"\(.registry_image) \(.name)"' \
             | sed -e 's/.*:\(.*\) \(.*\)-.*/\2 \1/g' \
             | uniq \
