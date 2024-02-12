@@ -4,9 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "37 01 * * *"
-  push: # TODO : Remove
-    branches:
-      - clean-custom-env
 
 env:
   REGION: fr-par
@@ -124,7 +121,7 @@ jobs:
             terraform init
             # See destroy-custom-env.yml - Hack to continue on error
             terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest" || true
-                        terraform state rm scaleway_domain_zone.main || true
+            terraform state rm scaleway_domain_zone.main || true
             terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest" || true
             cd ..
           done < envs
