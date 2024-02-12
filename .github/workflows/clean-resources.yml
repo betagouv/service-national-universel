@@ -52,7 +52,7 @@ jobs:
             | sed -e 's/.*:\(.*\) \(.*\)-.*/\2 \1/g' \
             | uniq \
             > envs
-        while read env
-        do
-          echo "$env"
-        done < envs
+          while read env
+          do
+            echo "$env"
+          done < envs
