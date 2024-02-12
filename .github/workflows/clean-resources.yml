@@ -96,6 +96,11 @@ jobs:
           do
             env_name=$(echo "$env" | cut -d " " -f 1)
             echo $env_name
+            if [[ $env_name == "ci" ]]
+            then
+                echo "Skipping deletion for $env_name environment"
+                continue
+            fi
             image_tag=$(echo "$env" | cut -d " " -f 2)
             echo $image_tag
             tag_exists=$(
