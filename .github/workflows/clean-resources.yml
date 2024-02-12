@@ -83,7 +83,7 @@ jobs:
           PG_CONN_STR: ${{ secrets.SCW_CI_BACKEND_CONN_STR }}
           PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
           PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
-        working-directory: ./terraform/environments/ci
+        working-directory: terraform/environments/ci
         run: |
           curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
             "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/containers?project_id=1b29c5d9-9723-400a-aa8b-0c85ae3567f7" \
