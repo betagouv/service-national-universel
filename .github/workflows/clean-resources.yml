@@ -50,4 +50,9 @@ jobs:
             "https://api.scaleway.com/containers/v1beta1/regions/${{env.REGION}}/containers?project_id=1b29c5d9-9723-400a-aa8b-0c85ae3567f7" \
             | jq -r '.containers[]|"\(.registry_image) \(.name)"' \
             | sed -e 's/.*:\(.*\) \(.*\)-.*/\2 \1/g' \
-            | uniq
+            | uniq \
+            > envs
+        while read env
+        do
+          echo "$env"
+        done < envs
