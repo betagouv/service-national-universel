@@ -112,7 +112,7 @@ jobs:
             cp -R custom $env_name
             cd $env_name
             rm imports.tf
-            sed -I".bak" "s|###___ENV_NAME___###|$branch_name|g" main.tf
+            sed -i".bak" "s|###___ENV_NAME___###|$branch_name|g" main.tf
             terraform init
             # See destroy-custom-env.yml
             # terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest"
