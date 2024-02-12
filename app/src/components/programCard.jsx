@@ -23,7 +23,7 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
             <Detail title="Est-ce indemnisé ?" value={program.descriptionMoney} />
             <Detail title="Quelle durée d'engagement ?" value={program.descriptionDuration} />
             <div className="mt-2 mb-2 flex flex-row justify-between">
-              <ToogleText onClick={toggleDetails}>Réduire</ToogleText>
+              <ToggleText onClick={toggleDetails}>Réduire</ToggleText>
               <SeeMore href={urlWithScheme(program.url)} target="_blank" rel="noreferrer">
                 →
               </SeeMore>
@@ -33,7 +33,7 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
           <>
             {preview} ...
             <div className="mt-2 mb-2 flex flex-row justify-between">
-              <ToogleText onClick={toggleDetails}>Lire plus</ToogleText>
+              <ToggleText onClick={toggleDetails}>Lire plus</ToggleText>
               <SeeMore href={urlWithScheme(program.url)} target="_blank" rel="noreferrer">
                 →
               </SeeMore>
@@ -44,18 +44,15 @@ export default function ProgramCard({ program, image, enableToggle = true }) {
     );
   };
 
-  // eslint-disable-next-line prettier/prettier
   const handleClick = () => {};
 
   return (
     <Card onClick={handleClick}>
       <a href={urlWithScheme(program.url)} className="thumb">
         <img src={image} />
-        {/* <Badge>{program.type}</Badge> */}
       </a>
       <h4>{program.name}</h4>
       <div className="desc">{renderText()}</div>
-
     </Card>
   );
 }
@@ -108,24 +105,9 @@ const SeeMore = styled.a`
   font-weight: 600;
 `;
 
-const ToogleText = styled.span`
+const ToggleText = styled.span`
   font-size: 12px;
   font-weight: 400;
   color: #666666;
   cursor: pointer;
-`;
-
-const Badge = styled.div`
-  font-size: 0.8rem;
-  color: #222;
-  background: #fff;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  position: absolute;
-  top: 0;
-  right: 0;
-  margin: 0.5rem 1.5rem;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;

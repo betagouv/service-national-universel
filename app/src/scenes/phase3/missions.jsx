@@ -54,7 +54,7 @@ export default function MissionsComponent() {
 
   return (
     <HeroContainer>
-      <div className="pt-2 pb-4 px-4 md:px-10 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
+      <div className="pt-2 pb-4 sm:px-4 md:px-16 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
         <Link to="/autres-engagements">
           <button className="mt-4 mb-6 flex py-2 px-2 border rounded-lg text-xs leading-4 font-medium">
             <RiArrowLeftSLine className="mr-2 text-lg" />

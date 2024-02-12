@@ -70,9 +70,10 @@ const Card = styled(Row)`
       justify-content: center;
       align-items: center;
       @media (max-width: 1000px) {
-        height: 30px;
-        width: 30px;
+        height: 40px;
+        width: 40px;
         margin-right: 10px;
+        padding: 8px;
       }
       img {
         border-radius: 6px;

@@ -40,15 +40,15 @@ export default function WaitingRealisation() {
 
   return (
     <HeroContainer>
-      <div className="pt-2 pb-4 px-4 md:px-10 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
-        <Heading>
-          <h2>Les autres programmes d&apos;engagement</h2>
-          <p>Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
-        </Heading>
+      <div className="pt-2 pb-4 sm:px-4 md:px-16 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
+        <div className="mb-8">
+          <h2 className="text-gray-900 text-2xl md:text-3xl font-bold mb-2">Les autres programmes d&apos;engagement</h2>
+          <p className="text-gray-600 text-lg">Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
+        </div>
         <div className="overflow-x-auto">
           <div className="flex flex-row gap-4">
             {programs.slice(0, 3).map((p, i) => (
-              <div key={i} className="w-full md:w-1/3">
+              <div key={i} className="flex-shrink-0 w-full md:w-1/3">
                 <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../../assets/programmes-engagement/${p.imageString}`]?.default} />
               </div>
             ))}
@@ -68,7 +68,7 @@ export default function WaitingRealisation() {
           Rechercher une mission
         </ButtonLinkPrimary>
         <hr className="pb-8 mt-12 hidden md:block" />
-        <div className="mb-4 pb-8 flex flex-col md:flex-row md:space-x-5 px-1">
+        <div className="mb-2 flex flex-col md:flex-row md:space-x-5 px-1">
           <div className="flex mb-2 md:mb-0 md:w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
             <a
               href="https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1"
@@ -95,15 +95,15 @@ export default function WaitingRealisation() {
   );
 }
 
-const Heading = styled.div`
-  margin-bottom: 30px;
-  h2 {
-    color: #161e2e;
-    font-size: 34px;
-    font-weight: 700;
-  }
-  p {
-    color: #6b7280;
-    font-size: 18px;
-  }
-`;
+// const Heading = styled.div`
+//   margin-bottom: 30px;
+//   h2 {
+//     color: #161e2e;
+//     font-size: 34px;
+//     font-weight: 700;
+//   }
+//   p {
+//     color: #6b7280;
+//     font-size: 18px;
+//   }
+// `;

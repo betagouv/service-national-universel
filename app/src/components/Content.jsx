@@ -32,7 +32,9 @@ const AlertBoxStyle = styled(Container)`
   display: flex;
   align-items: center;
   background-color: #5949d0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   margin-bottom: 20px;
   padding: 10px 20px;
   .text {
@@ -61,7 +63,9 @@ const HeroStyle = styled.div`
   }
   margin: 0 auto;
   max-width: 80rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -143,7 +147,7 @@ export const HeroContainer = styled.div`
   flex: 1;
   padding: 1rem;
   @media (max-width: 768px) {
-    padding: 0 0;
+    padding: 0 0rem;
   }
 `;
 
@@ -178,7 +182,9 @@ const AlertStyle = styled.div`
   align-items: center;
   justify-content: center;
   background-color: ${({ color }) => (color ? color : "#5145cd")};
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   margin-bottom: 20px;
   padding: 10px 20px;
   position: absolute;
@@ -227,7 +233,9 @@ export const WhiteButton = styled.button`
   font-size: 1rem;
   display: inline-block;
   outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 2;
   :hover {
@@ -247,7 +255,9 @@ export const VioletButton = styled.button`
   border-radius: 30px;
   border: 1px solid #5145cd;
   border: none;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+  box-shadow:
+    rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+    rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   :hover {
     opacity: 0.9;
   }
