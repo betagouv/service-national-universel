@@ -13,7 +13,7 @@ export default function EngagementCard({ program }) {
       </div>
       <div className={`min-h-min border border-[#E5E5E5] p-4 ${!isOpen && "h-[250px]"} flex flex-col`}>
         <h3 className="text-lg min-h-[40px] font-semibold">{program.name}</h3>
-        <div className={`mt-3 text-[13px] leading-6 ${!isOpen && "h-[70px] overflow-hidden text-ellipsis"}`}>{program.description}</div>
+        <div className={`mt-3 text-[14px] text-[#4B5563] leading-6 ${!isOpen && "h-[70px] overflow-hidden text-ellipsis"}`}>{program.description}</div>
         <div className="flex items-center justify-between mt-auto">
           <button
             className="text-gray-500 text-sm"

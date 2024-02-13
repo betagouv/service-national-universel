@@ -36,14 +36,14 @@ export default function WaitingRealisation() {
   }, []);
 
   return (
-    <div className="pt-2 pb-4 sm:px-4 md:px-16 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
+    <div className="mb-4 pt-2 pb-4 sm:px-4 md:px-16 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
       <div className="mb-8">
         <h2 className="text-gray-900 text-2xl md:text-3xl font-bold mb-2">Les autres programmes d&apos;engagement</h2>
         <p className="text-gray-600 text-lg">Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
       </div>
       <div className="overflow-x-auto">
         <div className="flex flex-row gap-4 mb-4">
-          {programs.slice(0, 3).map((p, i) => (
+          {programs.slice(0, 3).map((p) => (
             <EngagementCard program={p} key={p.name} />
           ))}
         </div>
@@ -52,7 +52,7 @@ export default function WaitingRealisation() {
       <ButtonLinkPrimary to="/les-programmes" className="flex w-full justify-center">
         Voir toutes les possibilités d'engagement
       </ButtonLinkPrimary>
-      <hr style={{ margin: "100px 0 0 0", opacity: 0.8 }} />
+      <hr className=" md:mt-24 h-px border-0 bg-gray-200" />
       <div className="mb-2">
         <h2 className="text-[#161e2e] text-4xl font-bold">Trouvez une mission de bénévolat ou de volontariat</h2>
         <p className="text-gray-500 text-xl mt-2">Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
