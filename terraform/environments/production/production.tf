@@ -56,7 +56,7 @@ resource "scaleway_container" "api" {
     "SCALEWAY_CLAMSCAN" = "true"
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.2
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.01
-    "SENTRY_ENVIRONMENT"                = production
+    "SENTRY_ENVIRONMENT"                = "production"
     "SENTRY_RELEASE"                    = var.image_tag
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
