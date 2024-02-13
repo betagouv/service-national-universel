@@ -8,7 +8,7 @@ export default function EngagementCard({ program }) {
     <article className="h-min-[700px] min-w-[16rem] md:w-full">
       <div className="h-[155px] w-full ">
         <a href={program.url} target="_blank" rel="noreferrer">
-          <img src={"/src/assets/programmes-engagement/" + program.imageString} className="h-full w-full object-cover" />
+          <img src={"src/assets/programmes-engagement/" + program.imageString} className="h-full w-full object-cover" />
         </a>
       </div>
       <div className={`min-h-min border border-[#E5E5E5] p-4 ${!isOpen && "h-[250px]"} flex flex-col`}>
