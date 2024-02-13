@@ -9,8 +9,8 @@
     "ignoreLabels" : ["bypass title", "meta"]
   },
   "MESSAGES": {
-    "success": "All OK",
-    "failure": "Failing CI test",
+    "success": "Title is compliant",
+    "failure": "Title is not respecting the guidelines.",
     "notice": ""
   }
 }
