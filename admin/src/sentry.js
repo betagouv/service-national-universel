@@ -27,7 +27,6 @@ function initSentry() {
       dsn: SENTRY_URL,
       environment: "admin",
       normalizeDepth: 16,
-      debug: true,
       transport: makeBrowserOfflineTransport(makeFetchTransport),
       transportOptions: {
         maxQueueSize: 50,

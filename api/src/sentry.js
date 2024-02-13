@@ -33,7 +33,6 @@ function initSentry(app) {
       dsn: SENTRY_URL,
       environment: "api",
       normalizeDepth: 16,
-      debug: true,
       integrations: [
         new ExtraErrorData({ depth: 16 }),
         new RewriteFrames({ root: process.cwd() }),
