@@ -156,6 +156,7 @@ resource "scaleway_container" "admin" {
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
     "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.1
+    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.1
     "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
   }
 
@@ -194,6 +195,7 @@ resource "scaleway_container" "app" {
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
     "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.1
+    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.1
     "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
     "FOLDER_APP"                                 = "app"
   }
