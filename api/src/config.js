@@ -17,7 +17,9 @@ const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
 const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
 const SENTRY_URL = process.env.SENTRY_URL || "";
+console.log(process.env.SENTRY_TRACING_SAMPLE_RATE)
 const SENTRY_TRACING_SAMPLE_RATE = process.env.SENTRY_TRACING_SAMPLE_RATE || "";
+console.log(SENTRY_TRACING_SAMPLE_RATE)
 const SENTRY_PROFILE_SAMPLE_RATE = process.env.SENTRY_PROFILE_SAMPLE_RATE || "";
 
 const CELLAR_ENDPOINT = process.env.CELLAR_ENDPOINT || "";
