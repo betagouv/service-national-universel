@@ -81,8 +81,10 @@ resource "scaleway_container" "api" {
     "CLE"        = "true"
     "STAGING"    = "true"
     "FOLDER_API" = "api"
-    "SENTRY_PROFILE_SAMPLE_RATE" : 0.8
-    "SENTRY_TRACING_SAMPLE_RATE" : 0.1
+    "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
+    "SENTRY_TRACING_SAMPLE_RATE"        = 0.1
+    "SENTRY_ENVIRONMENT"                = staging
+    "SENTRY_RELEASE"                    = var.image_tag
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
