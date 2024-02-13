@@ -1270,12 +1270,20 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     const classes = await ClasseModel.find({ referentClasseIds: { $in: [referent._id] } });
     if (classes.length > 0) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSES });
-    const etablissement = await EtablissementModel.findOne({
-      coordinateurIds: { $in: [referent._id] },
-    });
-    const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
-    etablissement.set({ coordinateurIds: coordinateur });
-    await etablissement.save({ fromUser: req.user });
+
+    if (referent.subRole === SUB_ROLES.referent_etablissement && referent.role === ROLES.ADMINISTRATEUR_CLE) {
+      const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [referent._id] } });
+      if (etablissement) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+    }
+
+    if (referent.subRole === SUB_ROLES.coordinateur_cle && referent.role === ROLES.ADMINISTRATEUR_CLE) {
+      const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: [referent._id] } });
+      if (etablissement) {
+        const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
+        etablissement.set({ coordinateurIds: coordinateur });
+        await etablissement.save({ fromUser: req.user });
+      }
+    }
 
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);

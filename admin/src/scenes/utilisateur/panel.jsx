@@ -92,6 +92,8 @@ export default function UserPanel({ onChange, value }) {
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(value);
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(value);
+      if (!ok && code === "LINKED_CLASSES") return onUniqueResponsible(value);
+      if (!ok && code === "LINKED_ETABLISSEMENT") return onUniqueResponsible(value);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       return onReferentDeleted();
     } catch (e) {
