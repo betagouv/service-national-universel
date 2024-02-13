@@ -30,3 +30,95 @@ jobs:
           secret_key: "${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}"
           image_name: ${{ matrix.app_name }}
           lifetime: "2 month"
+
+  clean_ci_environments:
+    runs-on: ubuntu-latest
+    needs: clean_image_tags
+    env:
+      SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+      region: fr-par
+      registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
+    steps:
+
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Get registry ID
+        id: registry_id
+        shell: bash
+        run: |
+          registry_name=$(echo "${{ env.registry }}" | cut -d "/" -f 2)
+          echo $registry_name
+          registry_id=$(
+            curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+              "https://api.scaleway.com/registry/v1/regions/${{ env.region }}/namespaces?name=${{ steps.registry_name.outputs.registry_name }}" \
+            | jq -r ".namespaces[0].id"
+          )
+          echo $registry_id
+          echo "registry_id=$registry_id" >> $GITHUB_OUTPUT
+
+      - name: Get image ID
+        id: image_id
+        shell: bash
+        env:
+          image_name: api
+        run: |
+          image_id=$(
+            curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+              "https://api.scaleway.com/registry/v1/regions/${{ env.region }}/images?namespace_id=${{ steps.registry_id.outputs.registry_id }}&name=${{ env.image_name }}" \
+            | jq -r ".images[0].id"
+          )
+          echo $image_id
+          echo "image_id=$image_id" >> $GITHUB_OUTPUT
+
+      - name: Clean environments using deleted image
+        env:
+          SCW_ACCESS_KEY: ${{ secrets.SCW_CI_DEPLOY_ACCESS_KEY }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+          PG_CONN_STR: ${{ secrets.SCW_CI_BACKEND_CONN_STR }}
+          PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
+          PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
+          project_id: 1b29c5d9-9723-400a-aa8b-0c85ae3567f7
+        working-directory: terraform/environments/ci
+        continue-on-error: true
+        run: |
+          # Get all CI containers
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/containers?project_id=${{env.project_id}}" \
+            | jq -r '.containers[]|"\(.registry_image) \(.name)"' \
+            | sed -e 's/.*:\(.*\) \(.*\)-.*/\2 \1/g' \
+            | uniq \
+            > envs.txt
+          while read env
+          do
+            env_name=$(echo "$env" | cut -d " " -f 1)
+            echo $env_name
+            if [[ $env_name == "ci" ]]
+            then
+                echo "Skipping deletion for $env_name environment"
+                continue
+            fi
+            image_tag=$(echo "$env" | cut -d " " -f 2)
+            echo $image_tag
+            tag_exists=$(
+              curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+                "https://api.scaleway.com/registry/v1/regions/${{ env.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?name=$image_tag" \
+              | jq -r ".total_count"
+            )
+            if [[ $tag_exists != 0 ]]
+            then
+                echo "Image $image_tag exists for environment $env_name. Skipping deletion"
+                continue
+            fi
+            echo "Image $image_tag does not exist for environment $env_name. Deleting it"
+            cp -R custom $env_name
+            cd $env_name
+            rm imports.tf
+            sed -i".bak" "s|###___ENV_NAME___###|$env_name|g" main.tf
+            terraform init
+            # See destroy-custom-env.yml - Hack to continue on error
+            terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest" || true
+            terraform state rm scaleway_domain_zone.main || true
+            terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest" || true
+            cd ..
+          done < envs.txt
