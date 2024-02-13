@@ -1,4 +1,4 @@
-const logfmt = require('logfmt');
+const logfmt = require("logfmt");
 
 const loggingMiddleware = async (req, res, next) => {
   const startTime = new Date();
@@ -16,22 +16,21 @@ const loggingMiddleware = async (req, res, next) => {
         url: req.originalUrl,
         status: res.statusCode,
         responseTime: `${req.responseTimeMs}ms`,
-        ip: ip
-      }
+        ip,
+      };
 
       const hasPayload = req.body && Object.keys(req.body).length > 0;
       if (hasPayload) {
-        log.payload = JSON.stringify(req.body)
+        log.payload = JSON.stringify(req.body);
       }
 
       if (req.user) {
-        log.userID = req.user.id
+        log.userID = req.user.id;
         const userRole = req.user.patches.modelName === "ReferentPatches" && "referent";
         if (userRole) {
-          log.userRole = req.user?.role
+          log.userRole = req.user?.role;
         }
       }
-
       console.log(logfmt.stringify(log));
     } catch (error) {
       console.error("Error in logging middleware:", error);
