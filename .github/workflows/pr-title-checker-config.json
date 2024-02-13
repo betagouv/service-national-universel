@@ -1,0 +1,16 @@
+{
+  "LABEL": {
+    "name": "Pull request title validation",
+    "color": "EEEEEE"
+  },
+  "CHECKS": {
+    "prefixes": ["fix: ", "feat: ", "chore: ", "feat(", "fix(", "chore("],
+    "ignoreLabels" : ["notitle", "meta"]
+  },
+  "MESSAGES": {
+    "success": "All OK",
+    "failure": "Title does not respect the convention.",
+    "notice": ""
+  }
+}
+
