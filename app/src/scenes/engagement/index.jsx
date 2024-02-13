@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { HeroContainer } from "../../components/Content";
-import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { RiArrowLeftSLine } from "react-icons/ri";
 
-// import ProgramCard from "../phase3/components/programCard";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import EngagementCard from "@/scenes/preinscription/components/EngagementCard";
@@ -28,10 +25,10 @@ export default function Index() {
           Retour
         </button>
       </Link>
-      <Heading>
-        <h1>Tous les autres programmes d&apos;engagement</h1>
-        <p>Rejoignez plus 100 000 jeunes français déjà engagés dans de grandes causes</p>
-      </Heading>
+      <div className="mb-8">
+        <h2 className="text-gray-900 text-2xl md:text-3xl font-bold mb-2">Tous les autres programmes d&apos;engagement</h2>
+        <p className="text-gray-600 text-lg">Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
+      </div>
       <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-3">
         {programs.map((program, index) => (
           <EngagementCard program={program} key={index} />
@@ -40,22 +37,3 @@ export default function Index() {
     </div>
   );
 }
-
-const Heading = styled.div`
-  margin-bottom: 40px;
-  h1 {
-    color: #161e2e;
-    font-size: 3rem;
-    font-weight: 700;
-    @media (max-width: 768px) {
-      font-size: 1.2rem;
-    }
-  }
-  p {
-    color: #6b7280;
-    font-size: 1rem;
-    @media (max-width: 768px) {
-      font-size: 0.9rem;
-    }
-  }
-`;
