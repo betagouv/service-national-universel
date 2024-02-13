@@ -81,8 +81,9 @@ resource "scaleway_container" "api" {
     "CLE"        = "true"
     "STAGING"    = "true"
     "FOLDER_API" = "api"
-    "SENTRY_PROFILE_SAMPLE_RATE" : 0.8
-    "SENTRY_TRACING_SAMPLE_RATE" : 0.1
+    "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
+    "SENTRY_TRACING_SAMPLE_RATE"        = 0.1
+    "SENTRY_RELEASE"                    = var.image_tag
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
@@ -155,6 +156,7 @@ resource "scaleway_container" "admin" {
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
     "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.1
+    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.1
     "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
   }
 
@@ -193,6 +195,7 @@ resource "scaleway_container" "app" {
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
     "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.1
+    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.1
     "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
     "FOLDER_APP"                                 = "app"
   }
