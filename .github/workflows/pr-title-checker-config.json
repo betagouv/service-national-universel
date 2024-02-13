@@ -4,12 +4,13 @@
     "color": "EEEEEE"
   },
   "CHECKS": {
-    "prefixes": ["fix: ", "feat: ", "chore: ", "feat(", "fix(", "chore("],
-    "ignoreLabels" : ["notitle", "meta"]
+    "regexp": "^(chore\\(|feat\\(|fix\\()(release,? ?|app,? ?|admin,? ?|misc,? ?|api,? ?)+\\) ?:.*$",
+    "regexpFlags": "i",
+    "ignoreLabels" : ["dont-check-PRs-with-this-label", "meta"]
   },
   "MESSAGES": {
     "success": "All OK",
-    "failure": "Title does not respect the convention.",
+    "failure": "Failing CI test",
     "notice": ""
   }
 }
