@@ -24,8 +24,8 @@ npm run dev
 Les pull requests sont toujours squashées dans `main`, il est donc particulièrement important de respecter la convention de nommage suivante:
 Pour une feature, préfixer par `feat`, pour un fix, par `fix`, suivi, entre parentheses, du domaine d'impact. Enfin, vous devez si il y en a un ajouter l'ID du ticket Notion.
 
-Valeurs autorisées pour le préfixe: `fix | feat | chore`
-Valeurs autorisées pour le domaine d'impact: `admin | api | app | lib | misc`
+Valeurs autorisées pour le préfixe: `fix`, `feat`, `chore`
+Valeurs autorisées pour le domaine d'impact: `admin`, `api`, `app`, `lib`, `misc`
 
 Exemples:
 
