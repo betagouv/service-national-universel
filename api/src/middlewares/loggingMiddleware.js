@@ -16,7 +16,7 @@ const loggingMiddleware = async (req, res, next) => {
         url: req.originalUrl,
         status: res.statusCode,
         responseTime: `${req.responseTimeMs}ms`,
-        ip: ip,
+        ip,
       };
 
       const hasPayload = req.body && Object.keys(req.body).length > 0;
