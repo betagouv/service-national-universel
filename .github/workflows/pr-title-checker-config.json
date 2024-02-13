@@ -6,7 +6,7 @@
   "CHECKS": {
     "regexp": "^(chore\\(|feat\\(|fix\\()(release,? ?|app,? ?|admin,? ?|misc,? ?|api,? ?)+\\) ?:.*$",
     "regexpFlags": "i",
-    "ignoreLabels" : ["dont-check-PRs-with-this-label", "meta"]
+    "ignoreLabels" : ["bypass title", "meta"]
   },
   "MESSAGES": {
     "success": "All OK",
