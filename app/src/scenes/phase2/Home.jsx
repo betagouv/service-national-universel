@@ -8,6 +8,7 @@ import Equivalence from "./Equivalence";
 import CardEquivalenceMobile from "./mobile/components/CardEquivalence";
 import CardEquivalenceDesktop from "./desktop/components/CardEquivalence";
 import { YOUNG_STATUS_PHASE2 } from "../../utils";
+
 const CardEquivalence = (props) => (
   <>
     <div className="w-full hidden flex-1 md:flex">

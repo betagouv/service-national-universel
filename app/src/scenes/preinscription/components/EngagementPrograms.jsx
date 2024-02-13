@@ -1,48 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import serviceCivique from "@/assets/programmes-engagement/service-civique.jpg";
-import jeVeuxAider from "@/assets/programmes-engagement/je-veux-aider.jpg";
-import reserveGendarmerie from "@/assets/programmes-engagement/reserve-gendarmerie.jpg";
-import reserveArmee from "@/assets/programmes-engagement/reserve-armees.jpg";
 import EngagementCard from "./EngagementCard";
+import { toastr } from "react-redux-toastr";
+import API from "@/services/api";
 
 export default function EngagementPrograms() {
-  const engagementPrograms = [
-    {
-      title: "Service civique",
-      description:
-        "Un engagement volontaire au service de l’intérêt général, en France ou à l’étranger, auprès d’organisations à but non lucratif ou publiques, dans 9 domaines d’actions jugés « prioritaires pour la Nation » : solidarité, santé, éducation pour tous, culture et loisirs, sport, environnement, mémoire et citoyenneté, développement international et action humanitaire, intervention d’urgence. Il permet de développer sa citoyenneté comme ses compétences professionnelles.",
-      picture: serviceCivique,
-      link: "https://www.service-civique.gouv.fr/",
-    },
-    {
-      title: "JeVeuxAider.gouv.fr par la Réserve Civique",
-      description:
-        "Un dispositif d’engagement civique accessible à tous, auprès d’organisations publiques ou associatives, dans dix domaines d’action : santé, éducation, protection de l’environnement, culture, sport, protection ... la liste complète est disponible ici.)",
-      picture: jeVeuxAider,
-      link: "https://www.jeveuxaider.gouv.fr/",
-    },
-    {
-      title: "Réserve de la Gendarmerie nationale",
-      description:
-        "La réserve opérationnelle de la gendarmerie renforce l'action des unités d’active et les structures de commandement. Les réservistes contribuent directement, à la production de sécurité et à la bonne exécution des lois.",
-      picture: reserveGendarmerie,
-      link: "https://www.gendarmerie.interieur.gouv.fr/recrutement/recrutements-et-conditions-d-acces/reserviste-dans-la-reserve-operationnelle",
-    },
-    {
-      title: "Réserve des Armées",
-      description:
-        "Un engagement permettant de contribuer à la sécurité du pays en consacrant une partie de son temps à la défense de la France, notamment en participant à des missions de protection de la population.",
-      picture: reserveArmee,
-      link: "https://www.reservistes.defense.gouv.fr/",
-    },
-  ];
+  const [programs, setPrograms] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data, ok } = await API.get("/program/public/engagements");
+      if (!ok) return toastr.error("Une erreur est survenue.");
+      setPrograms(data);
+    })();
+  }, []);
 
   return (
     <>
       <h2 className="my-4 text-lg font-bold">Découvrez d’autres formes d’engagement</h2>
       <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
-        {engagementPrograms.map((program, index) => (
+        {programs.slice(0, 4).map((program, index) => (
           <EngagementCard program={program} key={index} />
         ))}
       </div>
