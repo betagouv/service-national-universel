@@ -21,6 +21,7 @@ import plausibleEvent from "../../services/plausible";
 import { ROLES, canDeleteReferent, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
+import { signinAs } from "@/utils/signinAs";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -279,10 +280,8 @@ const Action = ({ hit, structure }) => {
   const handleImpersonate = async () => {
     try {
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
-      const { ok, data, token } = await api.post(`/referent/signin_as/referent/${hit._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
-      if (token) api.setToken(token);
-      if (data) dispatch(setUser(data));
+      const data = await signinAs("referent", hit._id);
+      dispatch(setUser(data));
       history.push("/dashboard");
     } catch (e) {
       console.log(e);

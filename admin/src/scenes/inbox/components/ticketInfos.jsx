@@ -8,8 +8,8 @@ import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import api from "../../../services/api";
 import { copyToClipboard, translate, getAge, formatDateFRTimezoneUTC, translatePhase1, translatePhase2 } from "../../../utils";
 import { appURL } from "../../../config";
-import copy from "../../../assets/copy.svg";
 import plausibleEvent from "../../../services/plausible";
+import { signinAs } from "@/utils/signinAs";
 
 export default function TicketInfos({ ticket }) {
   const [user, setUser] = useState([]);
@@ -53,9 +53,12 @@ export default function TicketInfos({ ticket }) {
   const onPrendreLaPlace = async (young_id) => {
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
-    plausibleEvent("Volontaires/CTA - Prendre sa place");
-    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    try {
+      plausibleEvent("Volontaires/CTA - Prendre sa place");
+      await signinAs("young", young_id);
+    } catch (error) {
+      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    }
   };
 
   const renderInfos = () => {
