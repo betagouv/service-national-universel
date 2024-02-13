@@ -24,7 +24,7 @@ import {
   IS_INSCRIPTION_OPEN_CLE,
 } from "snu-lib";
 import { useSelector } from "react-redux";
-import { statusClassForBadge } from "./utils";
+import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
 import { copyToClipboard } from "@/utils";
 import { MdContentCopy } from "react-icons/md";
@@ -35,7 +35,6 @@ import plausibleEvent from "@/services/plausible";
 import dayjs from "dayjs";
 
 export default function View() {
-  const [classe, setClasse] = useState({});
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState([]);
   const [modalInvite, setModalInvite] = useState(false);
@@ -45,11 +44,13 @@ export default function View() {
   const [edit, setEdit] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [cohort, setCohort] = useState(null);
-  const [rights, setRights] = useState({});
 
+  const [classe, setClasse] = useState({});
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
+  const cohort = cohorts.find((c) => c.name === classe?.cohort);
+  console.log("🚀 ~ View ~ cohort:", cohort);
+  const rights = getRights(classe, cohort, user);
 
   const history = useHistory();
 
@@ -99,43 +100,7 @@ export default function View() {
 
   useEffect(() => {
     getClasse();
-  }, [edit]);
-
-  useEffect(() => {
-    if (cohorts?.length && classe.cohort) {
-      setCohort(cohorts.find((c) => c.name == classe.cohort));
-    }
-  }, [cohorts, classe]);
-
-  useEffect(() => {
-    if (user?.role) {
-      getRights();
-    }
-  }, [user, cohort, classe]);
-
-  const getRights = () => {
-    setRights({
-      canEdit:
-        [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-        classe?.status !== STATUS_CLASSE.WITHDRAWN,
-      canEditCohort:
-        [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT].includes(user?.role) || (user?.role === ROLES.REFERENT_REGION && (cohort ? cohort.cleUpdateCohortForReferentRegion : true)),
-      canEditCenter: user?.role === ROLES.ADMIN || (user?.role === ROLES.REFERENT_REGION && (cohort ? cohort.cleUpdateCentersForReferentRegion : true)),
-      canEditPDR: user?.role === ROLES.ADMIN,
-      showCohort:
-        [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user?.role) ||
-        (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayCohortsForAdminCLE) ||
-        (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayCohortsForReferentClasse),
-      showCenter:
-        [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user?.role) ||
-        (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayCentersForAdminCLE) ||
-        (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayCentersForReferentClasse),
-      showPDR:
-        user?.role === ROLES.ADMIN ||
-        (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayPDRForAdminCLE) ||
-        (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayPDRForReferentClasse),
-    });
-  };
+  }, [id]);
 
   const sendInfo = async () => {
     try {
