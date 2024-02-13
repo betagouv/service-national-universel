@@ -38,7 +38,7 @@ export default function WaitingRealisation() {
   return (
     <div className="mb-4 pt-2 pb-4 sm:px-4 md:px-16 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
       <div className="mb-8">
-        <h2 className="text-gray-900 text-2xl md:text-3xl font-bold mb-2">Les autres programmes d&apos;engagement</h2>
+        <h2 className="text-gray-900 text-2xl md:text-4xl font-bold mb-2">Les autres programmes d&apos;engagement</h2>
         <p className="text-gray-600 text-lg">Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
       </div>
       <div className="overflow-x-auto">
