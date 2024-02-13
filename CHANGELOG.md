@@ -1,3 +1,11 @@
+## [1.375.2](https://github.com/betagouv/service-national-universel/compare/v1.375.1...v1.375.2) (2024-02-13)
+
+
+### Bug Fixes
+
+* **api:** Fix class populate on ticket creation  ([#3585](https://github.com/betagouv/service-national-universel/issues/3585)) ([b0d7410](https://github.com/betagouv/service-national-universel/commit/b0d7410aef6f35e4395109d98a2e40c32edf24e3))
+* **api,admin:** test pipeline + logic on delete ref ([#3586](https://github.com/betagouv/service-national-universel/issues/3586)) ([03dfe99](https://github.com/betagouv/service-national-universel/commit/03dfe99f30fb91ac8d6d50b820bd0859e5e3cba2))
+
 ## [1.375.1](https://github.com/betagouv/service-national-universel/compare/v1.375.0...v1.375.1) (2024-02-11)
 
 
