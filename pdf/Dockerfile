@@ -1,29 +1,38 @@
 FROM node:18.16.0-alpine as build
 
+ENV APP_NAME pdf
+
 WORKDIR /build
 
 COPY . .
 
-RUN npm install
+RUN --mount=type=cache,target=/build/.npm/cache \
+    npx turbo prune --scope=$APP_NAME --out-dir ./out && \
+    cd out && \
+    npm install && \
+    rm -rf node_modules/.cache .npm/cache
 
 FROM node:18.16.0-alpine as runtime
 
-RUN apk --no-cache add \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    libstdc++
+ENV APP_NAME pdf
+ENV PORT 8087
+ENV HOST 0.0.0.0
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-WORKDIR /service-national-universel/pdf
+WORKDIR /service-national-universel
 
-COPY --from=build /build .
+# RUN apk add --no-cache \
+#       chromium \
+#       nss \
+#       freetype \
+#       harfbuzz \
+#       ca-certificates
 
-EXPOSE 8080
+COPY --chown=node:node --from=build /build/out .
 
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel"
 
-CMD ["node", "index.js"]
+EXPOSE $PORT
+
+CMD npm start

@@ -18,7 +18,8 @@
     "app",
     "admin",
     "api",
-    "analytics"
+    "analytics",
+    "pdf"
   ],
   "engines": {
     "node": "^18.16.0",
