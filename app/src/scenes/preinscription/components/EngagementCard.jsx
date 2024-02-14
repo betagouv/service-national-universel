@@ -4,11 +4,14 @@ import { RiArrowRightLine } from "react-icons/ri";
 export default function EngagementCard({ program }) {
   const [isOpen, setIsOpen] = useState(false);
 
+  const images = import.meta.globEager("../../../assets/programmes-engagement/*");
+  const image = program.imageFile ? program.imageFile : images[`../../../assets/programmes-engagement/${program.imageString}`]?.default;
+
   return (
     <article className="h-min-[700px] min-w-[16rem] md:w-full">
-      <div className="h-[155px] w-full ">
+      <div className="h-[155px] w-full">
         <a href={program.url} target="_blank" rel="noreferrer">
-          <img src={"/assets/programmes-engagement/" + program.imageString} className="h-full w-full object-cover" />
+          <img src={image} alt={program.name} className="h-full w-full object-cover" />
         </a>
       </div>
       <div className={`min-h-min border border-[#E5E5E5] p-4 ${!isOpen && "h-[250px]"} flex flex-col`}>
