@@ -73,8 +73,9 @@ export function hasAccessToPhase2(young) {
 }
 
 export function permissionPhase2(y) {
-  if (!hasAccessToPhase2(y)) return false;
   if (wasYoungExcluded(y)) return false;
+  if (y.statusPhase2OpenedAt && new Date(y.statusPhase2OpenedAt) < new Date()) return true;
+  if (!hasAccessToPhase2(y)) return false;
 
   // If young has validated phase 2
   if (y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return true;
