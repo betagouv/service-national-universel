@@ -1,3 +1,10 @@
+# [1.376.0](https://github.com/betagouv/service-national-universel/compare/v1.375.2...v1.376.0) (2024-02-14)
+
+
+### Features
+
+* **api, app, admin:** 1704 - Add "Other" type and text input to equivalence request ([#3559](https://github.com/betagouv/service-national-universel/issues/3559)) ([ad6d6b4](https://github.com/betagouv/service-national-universel/commit/ad6d6b475eb6e076a661fa22fb202789d957352b))
+
 ## [1.375.2](https://github.com/betagouv/service-national-universel/compare/v1.375.1...v1.375.2) (2024-02-13)
 
 
