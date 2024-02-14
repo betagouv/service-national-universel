@@ -212,6 +212,9 @@ function hasAccessToReinscription(young) {
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
+  if (new Date(young.createdAt) > new Date("2023-09-01T00:00:00.000Z")) {
+    return false;
+  }
 
   if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
     return true;
