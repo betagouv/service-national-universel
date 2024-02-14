@@ -1,4 +1,5 @@
 import api from "@/services/api";
+import plausibleEvent from "@/services/plausible";
 import store from "@/redux/store";
 import { setUser, setPreviousSignin } from "@/redux/auth/actions";
 
@@ -26,6 +27,7 @@ const restorePreviousSignin = async () => {
     api.setToken(token);
     store.dispatch(setPreviousSignin(null));
     store.dispatch(setUser(data));
+    plausibleEvent("Admin - Reprendre sa place");
   } catch (e) {
     console.log(e);
   }
