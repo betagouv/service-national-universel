@@ -206,19 +206,20 @@ function shouldForceRedirectToReinscription(young) {
 }
 
 function hasAccessToReinscription(young) {
-  if (isCle(young)) return false;
-
-  if (shouldForceRedirectToReinscription(young)) return true;
-
-  if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && !(young.departSejourMotif === "Exclusion")) {
-    return true;
+  if (isCle(young)) {
+    return false;
+  }
+  if (young.departSejourMotif === "Exclusion") {
+    return false;
   }
 
-  if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
+  if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
     return true;
   }
-
-  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") {
+  if (young.cohort === "à venir" && ![YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) {
+    return true;
+  }
+  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
     return true;
   }
 

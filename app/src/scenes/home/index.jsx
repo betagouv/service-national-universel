@@ -28,26 +28,6 @@ import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
-  const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
-  const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
-
-  const fetchInscriptionOpen = async () => {
-    try {
-      const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      setReinscriptionOpen(data);
-      setReinscriptionOpenLoading(false);
-    } catch (e) {
-      setReinscriptionOpenLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchInscriptionOpen();
-  }, []);
 
   if (!young) return <Redirect to="/auth" />;
 
@@ -58,17 +38,12 @@ export default function Home() {
       return <DelaiDepasse />;
     }
 
-    if (isReinscriptionOpen === false) {
-      if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
-      if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
+    if (hasAccessToReinscription(young)) {
+      return <WaitingReinscription />;
     }
 
-    if (hasAccessToReinscription(young)) {
-      if (isReinscriptionOpenLoading) return <Loader />;
-      if (young.status === YOUNG_STATUS.WITHDRAWN && ["DONE", "EXEMPTED"].includes(young.statusPhase1)) {
-        return <Withdrawn />;
-      }
-      return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
+    if ([YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status)) {
+      return <Withdrawn />;
     }
 
     if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
@@ -81,7 +56,7 @@ export default function Home() {
       return <HomePhase2 />;
     }
 
-    if ([YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
+    if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
       return <Phase1NotDone />;
     }
 
