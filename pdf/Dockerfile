@@ -22,12 +22,12 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 WORKDIR /service-national-universel
 
-# RUN apk add --no-cache \
-#       chromium \
-#       nss \
-#       freetype \
-#       harfbuzz \
-#       ca-certificates
+RUN apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates
 
 COPY --chown=node:node --from=build /build/out .
 
