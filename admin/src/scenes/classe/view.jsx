@@ -45,11 +45,11 @@ export default function View() {
   const [edit, setEdit] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [cohort, setCohort] = useState(null);
-  const [rights, setRights] = useState({});
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
+  const cohort = cohorts.find((c) => c.name === classe?.cohort);
+  const rights = getRights();
 
   const history = useHistory();
 
@@ -101,20 +101,8 @@ export default function View() {
     getClasse();
   }, [edit]);
 
-  useEffect(() => {
-    if (cohorts?.length && classe.cohort) {
-      setCohort(cohorts.find((c) => c.name == classe.cohort));
-    }
-  }, [cohorts, classe]);
-
-  useEffect(() => {
-    if (user?.role) {
-      getRights();
-    }
-  }, [user, cohort, classe]);
-
   const getRights = () => {
-    setRights({
+    return {
       canEdit:
         [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
         classe?.status !== STATUS_CLASSE.WITHDRAWN,
@@ -134,7 +122,7 @@ export default function View() {
         user?.role === ROLES.ADMIN ||
         (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayPDRForAdminCLE) ||
         (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayPDRForReferentClasse),
-    });
+    };
   };
 
   const sendInfo = async () => {
