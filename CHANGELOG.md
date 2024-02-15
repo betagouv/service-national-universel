@@ -1,3 +1,15 @@
+# [1.377.0](https://github.com/betagouv/service-national-universel/compare/v1.376.0...v1.377.0) (2024-02-15)
+
+
+### Bug Fixes
+
+* **admin:** Classe view ([46bb8af](https://github.com/betagouv/service-national-universel/commit/46bb8af87294687882483184a1f85346af832b1c))
+
+
+### Features
+
+* **api/admin:** 1750 & 1755 - Dynamic settings for CLE ([#3579](https://github.com/betagouv/service-national-universel/issues/3579)) ([e032260](https://github.com/betagouv/service-national-universel/commit/e0322600198858d93b545e2bcaf43ca92a0bdeaf))
+
 # [1.376.0](https://github.com/betagouv/service-national-universel/compare/v1.375.2...v1.376.0) (2024-02-14)
 
 
