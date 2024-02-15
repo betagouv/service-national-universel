@@ -3,12 +3,12 @@ env:
   APP_NAME: snu-admin
   ENVIRONMENT_NAME: snu-admin-production
 
-name: Deploy admin
+name: Build and deploy Production (Admin CleverCloud)
 
 on:
   push:
     branches:
-      - main
+      - production_cc
     paths:
       - admin/**
       - packages/**
@@ -36,7 +36,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
     strategy:
       matrix:
         node-version: [18.x]

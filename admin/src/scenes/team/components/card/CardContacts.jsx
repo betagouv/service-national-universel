@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import ModalContacts from "../modal/ModalContacts";
-import { oldSessions } from "snu-lib";
 import API from "@/services/api";
 import { capture } from "@/sentry";
 
@@ -46,7 +45,7 @@ export default function CardContacts({ contacts, idServiceDep, getService }) {
       let tempContact = {};
 
       //TODO update this when we will have the new cohort or change completely this part
-      const newCohorts = sessions2023.filter((cohort) => cohort.name.match(/2024|Juillet 2023|Juin 2023/)).map((cohort) => cohort.name);
+      const newCohorts = sessions2023.filter((cohort) => cohort.name.match(/^(?!.*CLE).*2024/)).map((cohort) => cohort.name);
       setCohorts(newCohorts);
 
       contacts.forEach((contact) => {

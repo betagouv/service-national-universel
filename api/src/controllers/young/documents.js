@@ -20,6 +20,7 @@ const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
 const { getHtmlTemplate } = require("../../templates/utils");
 const mime = require("mime-types");
+const scanFile = require("../../utils/virusScanner");
 
 function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
@@ -277,6 +278,15 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
+        if (config.ENVIRONMENT === "production") {
+          const scanResult = await scanFile(tempFilePath, name, req.user.id);
+          if (scanResult.infected) {
+            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+          } else if (scanResult.error) {
+            return res.status(500).send({ ok: false, code: scanResult.error });
+          }
+        }
+
         // align date
         const formatedDate = body.expirationDate;
         formatedDate?.setUTCHours(11, 0, 0, 0);
@@ -463,11 +473,6 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
 
     // * Recalculate mimetype for reupload
     const decryptedBuffer = decrypt(downloaded.Body);
-    try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-    } catch (e) {
-      capture(e);
-    }
 
     // Send to app
     return res.status(200).send({

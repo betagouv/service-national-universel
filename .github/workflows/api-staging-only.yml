@@ -8,7 +8,7 @@ name: Deploy API (Staging)
 on:
   push:
     branches:
-      - staging
+      - staging_cc
 
 jobs:
   deploy:

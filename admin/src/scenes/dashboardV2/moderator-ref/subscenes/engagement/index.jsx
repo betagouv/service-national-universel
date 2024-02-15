@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
-import { getCohortNames, departmentList, regionList, ROLES, translateInscriptionStatus } from "snu-lib";
+import { getCohortNames, departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
 import { YOUNG_STATUS } from "snu-lib/constants";
 import { useSelector } from "react-redux";
 import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib/academy";
@@ -62,6 +62,7 @@ export default function Index() {
         name: "Département",
         fullValue: "Tous",
         options: departmentOptions,
+        translate: (e) => getDepartmentNumber(e) + " - " + e,
       },
       {
         id: "cohorts",

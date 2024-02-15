@@ -1,5 +1,7 @@
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
+const loggingMiddleware = require("./middlewares/loggingMiddleware");
 const { forceDomain } = require("forcedomain");
+const requestIp = require("request-ip"); // Import request-ip package
 
 (async () => {
   await require("./env-manager")();
@@ -21,7 +23,6 @@ const { forceDomain } = require("forcedomain");
   const express = require("express");
   const cookieParser = require("cookie-parser");
   const helmet = require("helmet");
-  const logger = require("morgan");
   const passport = require("passport");
   require("./mongo");
 
@@ -59,10 +60,6 @@ const { forceDomain } = require("forcedomain");
     );
   }
 
-  // if (ENVIRONMENT === "development") {
-  app.use(logger("dev"));
-  // }
-
   // eslint-disable-next-line no-unused-vars
   function handleError(err, req, res, next) {
     const output = {
@@ -92,6 +89,12 @@ const { forceDomain } = require("forcedomain");
   app.use(bodyParser.json({ limit: "50mb" }));
   app.use(bodyParser.text({ limit: "50mb", type: "application/x-ndjson" }));
   app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+
+  app.use(function (req, res, next) {
+    req.ipInfo = requestIp.getClientIp(req);
+    next();
+  });
+  app.use(loggingMiddleware);
 
   require("./crons");
   app.use(cookieParser());

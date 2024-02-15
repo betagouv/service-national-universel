@@ -880,7 +880,7 @@ function canInviteCoordinateur(actor) {
 }
 
 function canCreateClasse(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE;
+  return [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
 function canUpdateClasse(actor) {
@@ -912,6 +912,10 @@ function canSearchStudent(actor) {
 
 function canDeleteClasse(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
+}
+
+function canAllowSNU(actor) {
+  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
 
 export {
@@ -1048,4 +1052,5 @@ export {
   canViewEtablissement,
   canSearchStudent,
   canDeleteClasse,
+  canAllowSNU,
 };

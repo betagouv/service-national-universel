@@ -1,7 +1,5 @@
 import React from "react";
-import { Redirect, Switch, useHistory } from "react-router-dom";
-import { permissionPhase3 } from "../../utils";
-import { useSelector } from "react-redux";
+import { Switch } from "react-router-dom";
 
 import Home from "./home";
 import Missions from "./missions";
@@ -11,10 +9,6 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 export default function Index() {
   useDocumentTitle("Phase 3 - Engagement");
-
-  const young = useSelector((state) => state.Auth.young);
-  const history = useHistory();
-  if (!young || !permissionPhase3(young)) history.push("/");
 
   return (
     <div>

@@ -1,20 +1,23 @@
-import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
-import { AddButton, DeleteButton, DownloadButton, MiniTitle, MoreButton } from "./commons";
+import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
+import { AddButton, DeleteButton, MiniTitle, MoreButton } from "./commons";
 import React, { useEffect, useState } from "react";
-import api from "../../../services/api";
-import { download, translate } from "snu-lib";
+import api from "@/services/api";
+import { translate, download } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import CorrectionRequest from "./CorrectionRequest";
-import PencilAlt from "../../../assets/icons/PencilAlt";
+import PencilAlt from "@/assets/icons/PencilAlt";
 import CorrectedRequest from "./CorrectedRequest";
 import { Modal } from "reactstrap";
 import { BorderButton, PlainButton } from "./Buttons";
 import ConfirmationModal from "./ConfirmationModal";
-import Warning from "../../../assets/icons/Warning";
-import { capture } from "../../../sentry";
+import Warning from "@/assets/icons/Warning";
+import { capture } from "@/sentry";
 import Field from "./Field";
 import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import { resizeImage } from "../../../services/file.service";
+import Eye from "../../../assets/icons/Eye";
+import { Spinner } from "reactstrap";
+import Download from "../../../assets/icons/Download";
 
 export function CniField({
   young,
@@ -122,6 +125,8 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   const [date, setDate] = useState(young?.latestCNIFileExpirationDate ? new Date(young?.latestCNIFileExpirationDate) : new Date());
   const [category, setCategory] = useState(young?.latestCNIFileCategory || null);
   const [loading, setLoading] = useState(false);
+  const [loadingPreviewStates, setLoadingPreviewStates] = useState({});
+  const [loadingDLStates, setLoadingDLStates] = useState({});
 
   useEffect(() => {
     if (filesToUpload) young.filesToUpload = filesToUpload;
@@ -131,20 +136,30 @@ function CniModal({ young, onClose, mode, blockUpload }) {
   }, [filesToUpload, category, date]);
 
   useEffect(() => {
-    if (blockUpload) return setFilesToUpload(young.filesToUpload);
-    if (young && young.files && young.files.cniFiles) {
-      setCniFiles(young.files.cniFiles);
-    } else {
-      setCniFiles([]);
-    }
+    (async () => {
+      if (blockUpload) return setFilesToUpload(young.filesToUpload);
+      setCniFiles(young?.files?.cniFiles || []);
+    })();
   }, [young]);
 
   async function downloadCni(cniFile) {
     try {
+      setLoadingDLStates((prevLoadingPreviewStates) => ({
+        ...prevLoadingPreviewStates,
+        [cniFile._id]: true,
+      }));
       const result = await api.get("/young/" + young._id + "/documents/cniFiles/" + cniFile._id);
       const blob = new Blob([new Uint8Array(result.data.data)], { type: result.mimeType });
       download(blob, result.fileName);
+      setLoadingDLStates((prevLoadingPreviewStates) => ({
+        ...prevLoadingPreviewStates,
+        [cniFile._id]: false,
+      }));
     } catch (err) {
+      setLoadingDLStates((prevLoadingPreviewStates) => ({
+        ...prevLoadingPreviewStates,
+        [cniFile._id]: false,
+      }));
       toastr.error("Impossible de télécharger la pièce. Veuillez réessayer dans quelques instants.");
     }
   }
@@ -232,23 +247,70 @@ function CniModal({ young, onClose, mode, blockUpload }) {
     setFilesToUpload(array);
   };
 
+  const handlePreview = async (file) => {
+    try {
+      setLoadingPreviewStates((prevLoadingPreviewStates) => ({
+        ...prevLoadingPreviewStates,
+        [file._id]: true,
+      }));
+      const response = await api.get(`/young/${young._id}/documents/cniFiles/${file._id}`);
+      const arrayBuffer = new Uint8Array(response.data.data).buffer;
+      const blob = new Blob([arrayBuffer], { type: response.mimeType });
+      const imageUrl = URL.createObjectURL(blob);
+      setLoadingPreviewStates((prevLoadingPreviewStates) => ({
+        ...prevLoadingPreviewStates,
+        [file._id]: false,
+      }));
+      window.open(imageUrl, "_blank");
+    } catch (error) {
+      console.error("Error fetching preview:", error);
+      setLoadingPreviewStates((prevLoadingPreviewStates) => ({
+        ...prevLoadingPreviewStates,
+        [file._id]: false,
+      }));
+    }
+  };
+
   return (
     <Modal size="md" centered isOpen={true} toggle={() => onClose(changes, cniFiles)}>
       <div className="rounded-[8px] bg-white">
         <div className="p-[24px]">
           {cniFiles.length > 0 || (blockUpload && filesToUpload?.length > 0) ? (
             cniFiles.map((file) => (
-              <div key={file._id} className="mt-[8px] flex items-center justify-between border-b-[1px] border-b-[#E5E7EB] py-[12px] text-[12px] last:border-b-[0px]">
-                <div className="">
-                  <p>{file.name}</p>
-                  <p className="truncate text-xs text-gray-500">
-                    {translate(file.category)}
-                    {file.side && ` - ${file.side}`}
-                  </p>
-                </div>
-                <div className="flex items-center">
-                  <DownloadButton className="ml-[8px] flex-[0_0_32px]" onClick={() => downloadCni(file)} />
-                  <DeleteButton className="ml-[8px] flex-[0_0_32px]" onClick={() => deleteCni(file)} />
+              <div key={file._id} className="border-b-[1px] border-b-[#E5E7EB] py-[12px]">
+                <div className="mt-[8px] flex items-center justify-between text-[12px] last:border-b-[0px]">
+                  <div className="">
+                    <p>{file.name}</p>
+                    <p className="truncate text-xs text-gray-500">
+                      {translate(file.category)}
+                      {file.side && ` - ${file.side}`}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <button
+                      className={`group flex h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-[100px] bg-[#2563EB] hover:bg-[#DBEAFE]`}
+                      onClick={() => {
+                        handlePreview(file);
+                      }}>
+                      {loadingPreviewStates[file._id] ? (
+                        <Spinner size="sm" key={"loading"} style={{ borderWidth: "0.1em", color: "white" }} />
+                      ) : (
+                        <Eye className="h-[14px] w-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
+                      )}
+                    </button>
+                    <button
+                      className={`group flex ml-2 h-[32px] w-[32px] cursor-pointer items-center justify-center rounded-[100px] bg-[#2563EB] hover:bg-[#DBEAFE]`}
+                      onClick={() => {
+                        downloadCni(file);
+                      }}>
+                      {loadingDLStates[file._id] ? (
+                        <Spinner size="sm" key={"loading"} style={{ borderWidth: "0.1em", color: "white" }} />
+                      ) : (
+                        <Download className="h-[14px] w-[14px] text-[#DBEAFE] group-hover:text-[#2563EB]" />
+                      )}
+                    </button>
+                    <DeleteButton className="ml-[8px] flex-[0_0_32px]" onClick={() => deleteCni(file)} />
+                  </div>
                 </div>
               </div>
             ))

@@ -8,7 +8,7 @@ const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
 const { JWT_SIGNIN_MAX_AGE_SEC, JWT_TRUST_TOKEN_MAX_AGE_SEC, JWT_SIGNIN_VERSION, JWT_TRUST_TOKEN_VERSION, checkJwtTrustTokenVersion } = require("./jwt-options");
 const { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_JWT_MAX_AGE_MS, cookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate } = require("./utils");
-const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME, YOUNG_SOURCE, YOUNG_SOURCE_LIST } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, PHONE_ZONES_NAMES_ARR, isFeatureEnabled, FEATURES_NAME, YOUNG_SOURCE, YOUNG_SOURCE_LIST, departmentToAcademy } = require("snu-lib");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 const { validateFirstName } = require("./utils/validator");
 const { getFilteredSessions } = require("./utils/cohort");
@@ -257,6 +257,7 @@ class Auth {
         schoolCountry: etablissement.country,
         schoolId: etablissement.schoolId,
         zip: etablissement.zip,
+        academy: departmentToAcademy[etablissement.department],
         classeId: classe._id,
         etablissementId: etablissement._id,
         cohort: classe.cohort,
@@ -343,7 +344,12 @@ class Auth {
           const trustToken = req.cookies[`trust_token-${user._id}`];
           if (!trustToken) return true;
 
-          const jwtPayload = await jwt.verify(trustToken, config.secret);
+          let jwtPayload;
+          try {
+            jwtPayload = await jwt.verify(trustToken, config.secret);
+          } catch (e) {
+            return true;
+          }
           const { error, value } = Joi.object({ __v: Joi.string().required() }).validate(jwtPayload, { stripUnknown: true });
           return error || !checkJwtTrustTokenVersion(value);
         } catch (e) {

@@ -4,7 +4,7 @@ import { RiSearchLine } from "react-icons/ri";
 import { toastr } from "react-redux-toastr";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 
-export default function AddressSearch({ getOptions, updateData, error }) {
+export default function AddressSearch({ getOptions, updateData, label, error }) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
   const dropdownRef = useRef(null);
@@ -59,7 +59,7 @@ export default function AddressSearch({ getOptions, updateData, error }) {
   return (
     <div ref={dropdownRef}>
       <label className="flex flex-col gap-1">
-        Rechercher une adresse
+        {label}
         <span className="text-[#666666] text-xs mb-1">Si l'adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
         <div className="relative">
           <input type="text" value={query} onChange={handleChangeQuery} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />

@@ -37,8 +37,8 @@ resource "scaleway_container" "api" {
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
   port            = 8080
   cpu_limit       = 768
-  memory_limit    = 1024
-  min_scale       = 1
+  memory_limit    = 4096
+  min_scale       = 4
   max_scale       = 20
   timeout         = 60
   max_concurrency = 50
@@ -53,8 +53,10 @@ resource "scaleway_container" "api" {
     "CLE"        = "true"
     "PRODUCTION" = "true"
     "FOLDER_API" = "api"
-    "SENTRY_PROFILE_SAMPLE_RATE" : "0.2"
-    "SENTRY_TRACING_SAMPLE_RATE" : "0.01"
+    "SCALEWAY_CLAMSCAN" = "true"
+    "SENTRY_PROFILE_SAMPLE_RATE"        = 0.2
+    "SENTRY_TRACING_SAMPLE_RATE"        = 0.01
+    "SENTRY_RELEASE"                    = var.image_tag
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
@@ -96,6 +98,7 @@ resource "scaleway_container" "api" {
     "QPV_USERNAME"                          = local.secrets.QPV_USERNAME
     "SECRET"                                = local.secrets.SECRET
     "SENDINBLUEKEY"                         = local.secrets.SENDINBLUEKEY
+    "SENTRY_AUTH_TOKEN"                     = local.secrets.SENTRY_AUTH_TOKEN
     "SLACK_BOT_TOKEN"                       = local.secrets.SLACK_BOT_TOKEN
     "SUPPORT_APIKEY"                        = local.secrets.SUPPORT_APIKEY
     "PM2_SLACK_URL"                         = local.secrets.PM2_SLACK_URL
@@ -103,11 +106,10 @@ resource "scaleway_container" "api" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "api" {
-#  container_id = scaleway_container.api.id
-#  hostname     = local.api_hostname
-#}
+resource "scaleway_container_domain" "api" {
+  container_id = scaleway_container.api.id
+  hostname     = local.api_hostname
+}
 
 
 
@@ -133,8 +135,8 @@ resource "scaleway_container" "admin" {
     "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.005"
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = "0.01"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.005
+    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.01
     "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
   }
 
@@ -145,11 +147,10 @@ resource "scaleway_container" "admin" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "admin" {
-#  container_id = scaleway_container.admin.id
-#  hostname     = local.admin_hostname
-#}
+resource "scaleway_container_domain" "admin" {
+  container_id = scaleway_container.admin.id
+  hostname     = local.admin_hostname
+}
 
 resource "scaleway_container" "app" {
   name            = "production-app"
@@ -173,8 +174,8 @@ resource "scaleway_container" "app" {
     "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
     "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
     "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = "0.005"
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = "0.01"
+    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.005
+    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.01
     "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
     "DOCKER_ENV_VITE_FRANCE_CONNECT_URL"         = "https://app.franceconnect.gouv.fr/api/v1"
     "FOLDER_APP"                                 = "app"
@@ -186,11 +187,10 @@ resource "scaleway_container" "app" {
   }
 }
 
-# TODO: Uncomment when switching DNS
-#resource "scaleway_container_domain" "app" {
-#  container_id = scaleway_container.app.id
-#  hostname     = local.app_hostname
-#}
+resource "scaleway_container_domain" "app" {
+  container_id = scaleway_container.app.id
+  hostname     = local.app_hostname
+}
 
 output "api_endpoint" {
   value = "https://${local.api_hostname}"

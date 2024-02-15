@@ -1,7 +1,7 @@
 const ENVIRONMENT = getEnvironment();
 const LOCAL = process.env.LOCAL === "true";
 const MONGO_URL = process.env.MONGO_URL;
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const secret = process.env.SECRET || "not-so-secret";
 
 let APP_URL = process.env.APP_URL || "http://localhost:8081";
@@ -52,6 +52,8 @@ const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
 const REDIS_URL = process.env.REDIS_URL || "";
 
+const SCALEWAY_CLAMSCAN = process.env.SCALEWAY_CLAMSCAN || "";
+
 module.exports = {
   LOCAL,
   PORT,
@@ -77,6 +79,7 @@ module.exports = {
   FILE_ENCRYPTION_SECRET,
   SENTRY_URL,
   SENTRY_TRACING_SAMPLE_RATE,
+  SENTRY_PROFILE_SAMPLE_RATE,
   QPV_USERNAME,
   QPV_PASSWORD,
   API_ENGAGEMENT_KEY,
@@ -93,6 +96,7 @@ module.exports = {
   API_ANALYTICS_ENDPOINT,
   API_ANALYTICS_API_KEY,
   REDIS_URL,
+  SCALEWAY_CLAMSCAN,
 };
 
 function getEnvironment() {
