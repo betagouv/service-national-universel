@@ -55,13 +55,13 @@ export default function MissionFilters({ filters, setFilters }) {
   const { location: youngLocation } = useAddress({
     query: `${young?.address} ${young?.zip}`,
     options: { postcode: young?.zip, limit: 1 },
-    enabled: young?.address && young?.zip,
+    enabled: Boolean(young?.address && young?.zip),
   });
 
   const { location: relativeLocation } = useAddress({
     query: `${young?.mobilityNearRelativeAddress} ${young?.mobilityNearRelativeCity}`,
     options: { postcode: young?.mobilityNearRelativeZip, limit: 1 },
-    enabled: young?.mobilityNearRelativeAddress && young?.mobilityNearRelativeZip,
+    enabled: Boolean(young?.mobilityNearRelativeAddress && young?.mobilityNearRelativeZip),
   });
 
   const DISTANCE_MAX = 100;
