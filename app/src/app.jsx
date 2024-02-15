@@ -214,9 +214,6 @@ const Espace = () => {
 
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
-  if (shouldReAcceptRI(young, cohort)) {
-    console.log("SHOULD ReAccept");
-  }
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
