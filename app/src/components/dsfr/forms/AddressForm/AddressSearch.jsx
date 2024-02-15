@@ -4,11 +4,10 @@ import { RiSearchLine } from "react-icons/ri";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import useAddress from "@/services/useAddress";
 import { useDebounce } from "@uidotdev/usehooks";
-import { queryClient } from "@/services/react-query";
 
 export default function AddressSearch({ updateData, label, error }) {
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 400);
+  const debouncedQuery = useDebounce(query, 10);
   const { results, isPending } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
   const housenumberOptions = { label: "Numéro", options: results?.filter((o) => o.coordinatesAccuracyLevel === "housenumber") };
   const streetOptions = { label: "Voie", options: results?.filter((o) => o.coordinatesAccuracyLevel === "street") };
@@ -38,7 +37,6 @@ export default function AddressSearch({ updateData, label, error }) {
   }, []);
 
   const handleChangeQuery = (e) => {
-    queryClient.cancelQueries("address");
     setQuery(e.target.value);
   };
 

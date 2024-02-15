@@ -1,30 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import { departmentLookUp } from "snu-lib";
 
-const baseURL = "https://api-adresse.data.gouv.fr/search/";
+const baseURL = "https://api-adresse.data.gouv.fr/search/?q=";
 
 export default function useAddress({ query, options = {}, enabled = true }) {
+  let url = baseURL + encodeURIComponent(query);
+  for (const [key, value] of Object.entries(options)) {
+    url += `&${key}=${encodeURIComponent(value)}`;
+  }
   const { data, error, isPending, refetch } = useQuery({
     queryKey: ["address", query],
-    queryFn: ({ signal }) => fetchAddress({ signal, query, options }),
+    queryFn: async ({ signal }) => {
+      const res = await fetch(url, { signal });
+      if (!res.ok) throw new Error(res.statusText);
+      return res.json();
+    },
     enabled,
     refetchOnWindowFocus: false,
   });
 
   const results = data?.features?.map((result) => formatResult(result));
-  const location = results?.length > 0 ? { lon: results[0].location.lon, lat: results[0].location.lat } : null;
+  const location = results?.length > 0 ? results[0].location : null;
 
   return { location, results, error, isPending, refetch };
-}
-
-async function fetchAddress({ signal, query, options = {} }) {
-  let url = baseURL + "?q=" + encodeURIComponent(query);
-  for (const [key, value] of Object.entries(options)) {
-    url += `&${key}=${encodeURIComponent(value)}`;
-  }
-  const res = await fetch(url, { signal });
-  if (!res.ok) throw new Error(res.statusText);
-  return res.json();
 }
 
 function formatResult(option) {
