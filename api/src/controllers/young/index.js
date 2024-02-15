@@ -62,6 +62,7 @@ const {
   YOUNG_SOURCE,
   youngCanChangeSession,
   youngCanDeleteAccount,
+  REGLEMENT_INTERIEUR_VERSION,
 } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
@@ -429,6 +430,21 @@ router.put("/accept-cgu", passport.authenticate("young", { session: false, failW
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.set({ acceptCGU: "true" });
+    await young.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true, data: serializeYoung(young, young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/accept-ri", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
     await young.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });

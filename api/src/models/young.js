@@ -569,6 +569,12 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire a accepté les CGU",
     },
   },
+  acceptRI: {
+    type: String,
+    documentation: {
+      description: "Version du reglement intérieur acceptée.",
+    },
+  },
   cniFiles: {
     type: [String],
     default: [],
@@ -2008,6 +2014,13 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.virtual("fromUser").set(function (fromUser) {
+  if (fromUser) {
+    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
+    this._user = { _id, role, department, region, email, firstName, lastName, model };
+  }
+});
+
 Schema.pre("save", function (next) {
   if (this.isModified("password") || this.isNew) {
     bcrypt.hash(this.password, 10, (e, hash) => {
@@ -2104,13 +2117,6 @@ Schema.post("findOneAndUpdate", function (doc) {
 });
 Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
-});
-
-Schema.virtual("fromUser").set(function (fromUser) {
-  if (fromUser) {
-    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
-  }
 });
 
 Schema.pre("save", function (next, params) {
