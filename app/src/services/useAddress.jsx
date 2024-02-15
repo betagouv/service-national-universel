@@ -3,11 +3,11 @@ import { departmentLookUp } from "snu-lib";
 
 const baseURL = "https://api-adresse.data.gouv.fr/search/";
 
-export default function useAddress({ query, options = {} }) {
+export default function useAddress({ query, options = {}, enabled = true }) {
   const { data, error, isPending, refetch } = useQuery({
     queryKey: ["address", query],
     queryFn: ({ signal }) => fetchAddress({ signal, query, options }),
-    enabled: query.trim().length > 2,
+    enabled,
     refetchOnWindowFocus: false,
   });
 

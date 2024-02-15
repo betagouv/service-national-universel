@@ -4,24 +4,20 @@ import { RiSearchLine } from "react-icons/ri";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import useAddress from "@/services/useAddress";
 import { queryClient } from "@/app";
+import { useDebounce } from "@uidotdev/usehooks";
 
 export default function AddressSearch({ updateData, label, error }) {
-  const [query, setQuery] = useState("");
   const dropdownRef = useRef(null);
-  const controllerRef = useRef(null);
 
-  // Will execute on every change to the query state variable
-  // TODO: debounce
-  const { results, isPending } = useAddress({ query });
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 400);
+  const { results, isPending } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
 
-  // Derived from the data returned by useQuery: format and group results to use in our dropdown
-  const sortedOptions = sortOptions(results || []);
-
-  useEffect(() => {
-    return () => {
-      if (controllerRef.current) controllerRef.current.abort();
-    };
-  }, []);
+  const housenumberOptions = { label: "Numéro", options: results?.filter((o) => o.coordinatesAccuracyLevel === "housenumber") };
+  const streetOptions = { label: "Voie", options: results?.filter((o) => o.coordinatesAccuracyLevel === "street") };
+  const localityOptions = { label: "Lieu-dit", options: results?.filter((o) => o.coordinatesAccuracyLevel === "locality") };
+  const municipalityOptions = { label: "Commune", options: results?.filter((o) => o.coordinatesAccuracyLevel === "municipality") };
+  const sortedOptions = [housenumberOptions, streetOptions, localityOptions, municipalityOptions].filter((o) => o.options?.length);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -85,19 +81,4 @@ export default function AddressSearch({ updateData, label, error }) {
       <ErrorMessage>{error}</ErrorMessage>
     </div>
   );
-}
-
-function sortOptions(options) {
-  const housenumbers = options.filter((option) => option.coordinatesAccuracyLevel === "housenumber");
-  const streets = options.filter((option) => option.coordinatesAccuracyLevel === "street");
-  const localities = options.filter((option) => option.coordinatesAccuracyLevel === "locality");
-  const municipalities = options.filter((option) => option.coordinatesAccuracyLevel === "municipality");
-
-  const res = [];
-  if (housenumbers.length > 0) res.push({ label: "Numéro", options: housenumbers });
-  if (streets.length > 0) res.push({ label: "Voie", options: streets });
-  if (localities.length > 0) res.push({ label: "Lieu-dit", options: localities });
-  if (municipalities.length > 0) res.push({ label: "Commune", options: municipalities });
-
-  return res;
 }

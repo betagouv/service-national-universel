@@ -1,7 +1,6 @@
 import Img2 from "../../../assets/infoSquared.svg";
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useQuery } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
@@ -37,6 +36,7 @@ import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonCont
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
 import useAddress from "@/services/useAddress";
+import { useDebounce } from "@uidotdev/usehooks";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -120,7 +120,7 @@ export default function StepCoordonnees() {
   const [errors, setErrors] = useState({});
   const [corrections, setCorrections] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
-  // const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);
+  const [birthCitySuggestionsOpen, setBirthCitySuggestionsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -128,7 +128,6 @@ export default function StepCoordonnees() {
   const { step } = useParams();
   const ref = useRef(null);
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
-  const [birthCityOpen, setBirthCityOpen] = useState(true);
 
   const { isCLE } = useAuth();
   const [hasSpecialSituation, setSpecialSituation] = useState(null);
@@ -160,6 +159,8 @@ export default function StepCoordonnees() {
     reducedMobilityAccess,
     handicapInSameDepartment,
   } = data;
+
+  const debouncedBirthCity = useDebounce(birthCity, 200);
 
   const wasBornInFranceBool = wasBornInFrance === "true";
   const isFrenchResident = livesInFrance === "true";
@@ -243,7 +244,7 @@ export default function StepCoordonnees() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
-        setBirthCityOpen(false);
+        setBirthCitySuggestionsOpen(false);
       }
     };
     document.addEventListener("click", handleClickOutside);
@@ -286,13 +287,19 @@ export default function StepCoordonnees() {
     }
   };
 
-  const { results: birthCityZipSuggestions } = useAddress({ query: birthCity, options: { type: "municipality" } });
+  const { results: birthCityZipSuggestions } = useAddress({
+    query: debouncedBirthCity,
+    options: { type: "municipality" },
+    enabled: wasBornInFranceBool && debouncedBirthCity.length > 2,
+  });
 
   const updateBirthCity = async (value) => {
+    setBirthCitySuggestionsOpen(true);
     setData({ ...data, birthCity: value });
   };
 
   const onClickBirthCitySuggestion = (birthCity, birthCityZip) => {
+    setBirthCitySuggestionsOpen(false);
     setData({ ...data, birthCity, birthCityZip });
   };
 
@@ -472,15 +479,15 @@ export default function StepCoordonnees() {
               error={errors.birthCity}
               correction={corrections?.birthCity}
             />
-            {wasBornInFranceBool && (
+            {wasBornInFranceBool && birthCitySuggestionsOpen && (
               <div ref={ref} className="border-3 absolute z-[100] mt-[-24px] w-full overflow-hidden border-red-600 bg-white shadow">
                 {birthCityZipSuggestions?.map(({ city, zip: postcode }, index) => (
-                  <div
+                  <button
                     onClick={() => {
                       onClickBirthCitySuggestion(city, postcode);
                     }}
-                    className="group flex cursor-pointer items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50"
-                    key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</div>
+                    className="group flex items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50"
+                    key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</button>
                 ))}
               </div>
             )}
