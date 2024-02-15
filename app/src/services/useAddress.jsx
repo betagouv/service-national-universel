@@ -4,7 +4,6 @@ import { departmentLookUp } from "snu-lib";
 const baseURL = "https://api-adresse.data.gouv.fr/search/";
 
 export default function useAddress({ query, options = {}, enabled = true }) {
-  console.log("🚀 ~ file: useAddress.jsx:7 ~ useAddress ~ enabled:", enabled);
   const { data, error, isPending, refetch } = useQuery({
     queryKey: ["address", query],
     queryFn: ({ signal }) => fetchAddress({ signal, query, options }),
