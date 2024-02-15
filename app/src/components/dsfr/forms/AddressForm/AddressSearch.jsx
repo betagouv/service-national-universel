@@ -3,21 +3,19 @@ import AddressDropdown from "./AddressDropdown";
 import { RiSearchLine } from "react-icons/ri";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import useAddress from "@/services/useAddress";
-import { queryClient } from "@/app";
 import { useDebounce } from "@uidotdev/usehooks";
+import { queryClient } from "@/services/react-query";
 
 export default function AddressSearch({ updateData, label, error }) {
-  const dropdownRef = useRef(null);
-
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 400);
   const { results, isPending } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
-
   const housenumberOptions = { label: "Numéro", options: results?.filter((o) => o.coordinatesAccuracyLevel === "housenumber") };
   const streetOptions = { label: "Voie", options: results?.filter((o) => o.coordinatesAccuracyLevel === "street") };
   const localityOptions = { label: "Lieu-dit", options: results?.filter((o) => o.coordinatesAccuracyLevel === "locality") };
   const municipalityOptions = { label: "Commune", options: results?.filter((o) => o.coordinatesAccuracyLevel === "municipality") };
-  const sortedOptions = [housenumberOptions, streetOptions, localityOptions, municipalityOptions].filter((o) => o.options?.length);
+  const options = [housenumberOptions, streetOptions, localityOptions, municipalityOptions].filter((o) => o.options?.length);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -39,7 +37,7 @@ export default function AddressSearch({ updateData, label, error }) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleChange = (e) => {
+  const handleChangeQuery = (e) => {
     queryClient.cancelQueries("address");
     setQuery(e.target.value);
   };
@@ -55,7 +53,7 @@ export default function AddressSearch({ updateData, label, error }) {
         {label}
         <span className="text-[#666666] text-xs mb-1">Si l'adresse est introuvable, sélectionnez uniquement une commune ou un code postal.</span>
         <div className="relative">
-          <input type="text" value={query} onChange={handleChange} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />
+          <input type="text" value={query} onChange={handleChangeQuery} className="w-[100%] border-b-2 border-gray-800 bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 pr-5" />
           <span className="material-icons absolute right-5 mt-[12px] text-lg">
             <RiSearchLine />
           </span>
@@ -67,8 +65,8 @@ export default function AddressSearch({ updateData, label, error }) {
           <div className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
             {isPending ? (
               <p className="animate-pulse p-3 text-gray-800 text-center">Chargement</p>
-            ) : sortedOptions.length ? (
-              <AddressDropdown optionGroups={sortedOptions} handleSelect={handleSelect} />
+            ) : options.length ? (
+              <AddressDropdown optionGroups={options} handleSelect={handleSelect} />
             ) : (
               <p className="p-3 text-gray-800 text-center">
                 L'adresse ne s'affiche pas ? Renseignez une <strong>commune</strong> ou un <strong>code postal</strong>.

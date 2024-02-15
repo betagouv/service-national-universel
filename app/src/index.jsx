@@ -10,12 +10,12 @@ import store from "./redux/store";
 import App from "./app";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // <React.StrictMode>
-  <Provider store={store}>
-    <CookiesProvider>
-      <App />
-    </CookiesProvider>
-    <ReduxToastr timeOut={1500} transitionIn="fadeIn" transitionOut="fadeOut" />
-  </Provider>,
-  // </React.StrictMode>,
+  <React.StrictMode>
+    <Provider store={store}>
+      <CookiesProvider>
+        <App />
+      </CookiesProvider>
+      <ReduxToastr timeOut={1500} transitionIn="fadeIn" transitionOut="fadeOut" />
+    </Provider>
+  </React.StrictMode>,
 );
