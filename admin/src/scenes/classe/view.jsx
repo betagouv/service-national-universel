@@ -48,14 +48,10 @@ export default function View() {
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
+  const cohort = cohorts.find((c) => c.name === classe?.cohort);
+  const rights = getRights();
 
   const history = useHistory();
-
-  const canEdit =
-    [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-    classe?.status !== STATUS_CLASSE.WITHDRAWN;
-  const canEditCohort = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role);
-  const canEditStay = [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user?.role);
 
   const colorOptions = Object.keys(CLE_COLORATION_LIST).map((value) => ({
     value: CLE_COLORATION_LIST[value],
@@ -104,6 +100,30 @@ export default function View() {
   useEffect(() => {
     getClasse();
   }, [edit]);
+
+  const getRights = () => {
+    return {
+      canEdit:
+        [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+        classe?.status !== STATUS_CLASSE.WITHDRAWN,
+      canEditCohort:
+        [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT].includes(user?.role) || (user?.role === ROLES.REFERENT_REGION && (cohort ? cohort.cleUpdateCohortForReferentRegion : true)),
+      canEditCenter: user?.role === ROLES.ADMIN || (user?.role === ROLES.REFERENT_REGION && (cohort ? cohort.cleUpdateCentersForReferentRegion : true)),
+      canEditPDR: user?.role === ROLES.ADMIN,
+      showCohort:
+        [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user?.role) ||
+        (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayCohortsForAdminCLE) ||
+        (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayCohortsForReferentClasse),
+      showCenter:
+        [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user?.role) ||
+        (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayCentersForAdminCLE) ||
+        (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayCentersForReferentClasse),
+      showPDR:
+        user?.role === ROLES.ADMIN ||
+        (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayPDRForAdminCLE) ||
+        (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayPDRForReferentClasse),
+    };
+  };
 
   const sendInfo = async () => {
     try {
@@ -194,35 +214,39 @@ export default function View() {
           ]
         }
       />
-      <Container title="Informations générales" actions={actionList({ edit, setEdit, canEdit })}>
+      <Container title="Informations générales" actions={actionList({ edit, setEdit, canEdit: rights.canEdit })}>
         <div className="flex items-stretch justify-stretch">
           <div className="flex-1">
-            <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la validation des dates d'affectation." />
-            <Select
-              className="mb-3"
-              isActive={edit && canEditCohort}
-              readOnly={!edit || !canEditCohort}
-              disabled={!canEditCohort}
-              placeholder={"Choisissez une cohorte"}
-              options={cohorts?.map((c) => ({ value: c.name, label: c.name }))}
-              closeMenuOnSelect={true}
-              value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
-              onChange={(options) => {
-                setClasse({ ...classe, cohort: options.value });
-              }}
-              error={errors.cohort}
-            />
-            <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2 mb-3">
-              <p className="text-left text-sm  text-gray-800">Dates</p>
-              <div className="flex items-center">
-                <p className="text-left text-xs text-gray-500 flex-1">
-                  Début : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateStart).format("DD/MM/YYYY") : ""}</strong>
-                </p>
-                <p className="text-left text-xs text-gray-500 flex-1">
-                  Fin : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateEnd).format("DD/MM/YYYY") : ""}</strong>
-                </p>
-              </div>
-            </div>
+            {rights.showCohort && (
+              <>
+                <Label title="Cohorte" name="Cohorte" tooltip="La cohorte sera mise à jour lors de la validation des dates d'affectation." />
+                <Select
+                  className="mb-3"
+                  isActive={edit && rights.canEditCohort}
+                  readOnly={!edit || !rights.canEditCohort}
+                  disabled={!rights.canEditCohort}
+                  placeholder={"Choisissez une cohorte"}
+                  options={cohorts?.map((c) => ({ value: c.name, label: c.name }))}
+                  closeMenuOnSelect={true}
+                  value={classe?.cohort ? { value: classe?.cohort, label: classe?.cohort } : null}
+                  onChange={(options) => {
+                    setClasse({ ...classe, cohort: options.value });
+                  }}
+                  error={errors.cohort}
+                />
+                <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2 mb-3">
+                  <p className="text-left text-sm  text-gray-800">Dates</p>
+                  <div className="flex items-center">
+                    <p className="text-left text-xs text-gray-500 flex-1">
+                      Début : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateStart).format("DD/MM/YYYY") : ""}</strong>
+                    </p>
+                    <p className="text-left text-xs text-gray-500 flex-1">
+                      Fin : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateEnd).format("DD/MM/YYYY") : ""}</strong>
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
             <Label title="Numéro d’identification" />
             <div className="flex items-center justify-between gap-3 mb-3">
               <InputText className="flex-1" value={classe.uniqueKey} disabled />
@@ -312,7 +336,7 @@ export default function View() {
         </div>
       </Container>
 
-      {classe?.referents?.length && (
+      {classe?.referents?.length > 0 && (
         <Container title="Référent de classe" actions={[]}>
           <div className="flex items-stretch justify-stretch">
             <div className="flex-1">
@@ -327,100 +351,104 @@ export default function View() {
         </Container>
       )}
 
-      {canEditStay && (
-        <Container title="Séjour" actions={actionList({ edit: editStay, setEdit: setEditStay, canEdit: canEditStay })}>
+      {(rights.showCenter || rights.showPDR) && (
+        <Container title="Séjour" actions={actionList({ edit: editStay, setEdit: setEditStay, canEdit: rights.canEditCenter || rights.canEditPDR })}>
           <div className="flex items-stretch justify-stretch">
-            <div className="flex-1">
-              <Label
-                title="Centre"
-                name="centre"
-                tooltip="vous devez indiquez la cohorte avant d'indiquer le centre, si la cohorte séléctionner est CLE 23 24, vous ne pourrez associer aucun centre"
-              />
-              <Select
-                isAsync
-                className="mb-3"
-                placeholder={"Choisissez un centre existant"}
-                loadOptions={(q) => searchSessions({ q, cohort: classe.cohort })}
-                defaultOptions={() => searchSessions({ q: "", cohort: classe.cohort })}
-                noOptionsMessage={"Aucun centre ne correspond à cette recherche"}
-                isClearable={true}
-                closeMenuOnSelect={true}
-                value={classe.cohesionCenter?.name ? { label: classe.cohesionCenter.name } : null}
-                onChange={(option) =>
-                  setClasse({
-                    ...classe,
-                    session: option?.session,
-                    sessionId: option?._id,
-                    cohesionCenter: option?.session.cohesionCenter,
-                    cohesionCenterId: option?.session.cohesionCenter._id,
-                  })
-                }
-                error={errors.session}
-                isActive={editStay && canEditStay}
-                readOnly={!editStay || !canEditStay}
-                disabled={!canEditStay || classe?.cohort === "CLE 23-24"}
-              />
-              {classe.cohesionCenter && (
-                <>
-                  <InputText className="mb-3" label="Numéro et nom de la voie" value={classe.cohesionCenter.address} disabled />
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <InputText className="flex-1" label="Code Postal" value={classe.cohesionCenter.zip} disabled />
-                    <InputText className="flex-1" label="Ville" value={classe.cohesionCenter.city} disabled />
-                  </div>
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <InputText className="flex-1" label="Département" value={classe.cohesionCenter.department} disabled />
-                    <InputText className="flex-1" label="Région" value={classe.cohesionCenter.region} disabled />
-                  </div>
-                  <Link to={`/centre/` + classe.cohesionCenter._id} className="w-full">
-                    <Button type="tertiary" title="Voir le centre" className="w-full max-w-none" />
-                  </Link>
-                </>
-              )}
-            </div>
-            <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
-            <div className="flex-1">
-              <Label
-                title="Point de rassemblement"
-                name="pdr"
-                tooltip="Le point de rassemblement est automatiquement pré rempli avec l'adresse de l'établissement, vous pouvez le modifier si besoin"
-              />
-              <Select
-                isAsync
-                className="mb-3"
-                placeholder={"Choisissez un point de rassemblement existant"}
-                loadOptions={(q) => searchPointDeRassemblements({ q, cohort: classe.cohort })}
-                defaultOptions={() => searchPointDeRassemblements({ q: classe.etablissement?.name, cohort: classe.cohort })}
-                noOptionsMessage={"Aucun point de rassemblement ne correspond à cette recherche"}
-                isClearable={true}
-                closeMenuOnSelect={true}
-                value={
-                  classe.pointDeRassemblement?.name && classe.pointDeRassemblement?.department
-                    ? { label: `${classe.pointDeRassemblement?.name}, ${classe.pointDeRassemblement?.department}` }
-                    : null
-                }
-                onChange={(option) => setClasse({ ...classe, pointDeRassemblement: option?.pointDeRassemblement, pointDeRassemblementId: option?._id })}
-                error={errors.pointDeRassemblement}
-                isActive={editStay && canEditStay}
-                readOnly={!editStay || !canEditStay}
-                disabled={!canEditStay || classe?.cohort === "CLE 23-24"}
-              />
-              {classe.pointDeRassemblement && (
-                <>
-                  <InputText className="mb-3" label="Numéro et nom de la voie" value={classe.pointDeRassemblement?.address} disabled />
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <InputText className="flex-1" label="Code Postal" value={classe.pointDeRassemblement?.zip} disabled />
-                    <InputText className="flex-1" label="Ville" value={classe.pointDeRassemblement?.city} disabled />
-                  </div>
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <InputText className="flex-1" label="Département" value={classe.pointDeRassemblement?.department} disabled />
-                    <InputText className="flex-1" label="Région" value={classe.pointDeRassemblement?.region} disabled />
-                  </div>
-                  <Link to={`/point-de-rassemblement/` + classe.pointDeRassemblement._id} className="w-full">
-                    <Button type="tertiary" title="Voir le point de rassemblement" className="w-full max-w-none" />
-                  </Link>
-                </>
-              )}
-            </div>
+            {rights.showCenter && (
+              <div className="flex-1">
+                <Label
+                  title="Centre"
+                  name="centre"
+                  tooltip="vous devez indiquez la cohorte avant d'indiquer le centre, si la cohorte séléctionner est CLE 23 24, vous ne pourrez associer aucun centre"
+                />
+                <Select
+                  isAsync
+                  className="mb-3"
+                  placeholder={"Choisissez un centre existant"}
+                  loadOptions={(q) => searchSessions({ q, cohort: classe.cohort })}
+                  defaultOptions={() => searchSessions({ q: "", cohort: classe.cohort })}
+                  noOptionsMessage={"Aucun centre ne correspond à cette recherche"}
+                  isClearable={true}
+                  closeMenuOnSelect={true}
+                  value={classe.cohesionCenter?.name ? { label: classe.cohesionCenter.name } : null}
+                  onChange={(option) =>
+                    setClasse({
+                      ...classe,
+                      session: option?.session,
+                      sessionId: option?._id,
+                      cohesionCenter: option?.session.cohesionCenter,
+                      cohesionCenterId: option?.session.cohesionCenter._id,
+                    })
+                  }
+                  error={errors.session}
+                  isActive={editStay && rights.canEditCenter}
+                  readOnly={!editStay || !rights.canEditCenter}
+                  disabled={!rights.canEditCenter || classe?.cohort === "CLE 23-24"}
+                />
+                {classe.cohesionCenter && (
+                  <>
+                    <InputText className="mb-3" label="Numéro et nom de la voie" value={classe.cohesionCenter.address} disabled />
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <InputText className="flex-1" label="Code Postal" value={classe.cohesionCenter.zip} disabled />
+                      <InputText className="flex-1" label="Ville" value={classe.cohesionCenter.city} disabled />
+                    </div>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <InputText className="flex-1" label="Département" value={classe.cohesionCenter.department} disabled />
+                      <InputText className="flex-1" label="Région" value={classe.cohesionCenter.region} disabled />
+                    </div>
+                    <Link to={`/centre/` + classe.cohesionCenter._id} className="w-full">
+                      <Button type="tertiary" title="Voir le centre" className="w-full max-w-none" />
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
+            {rights.showCenter && rights.showPDR && <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>}
+            {rights.showPDR && (
+              <div className="flex-1">
+                <Label
+                  title="Point de rassemblement"
+                  name="pdr"
+                  tooltip="Le point de rassemblement est automatiquement pré rempli avec l'adresse de l'établissement, vous pouvez le modifier si besoin"
+                />
+                <Select
+                  isAsync
+                  className="mb-3"
+                  placeholder={"Choisissez un point de rassemblement existant"}
+                  loadOptions={(q) => searchPointDeRassemblements({ q, cohort: classe.cohort })}
+                  defaultOptions={() => searchPointDeRassemblements({ q: classe.etablissement?.name, cohort: classe.cohort })}
+                  noOptionsMessage={"Aucun point de rassemblement ne correspond à cette recherche"}
+                  isClearable={true}
+                  closeMenuOnSelect={true}
+                  value={
+                    classe.pointDeRassemblement?.name && classe.pointDeRassemblement?.department
+                      ? { label: `${classe.pointDeRassemblement?.name}, ${classe.pointDeRassemblement?.department}` }
+                      : null
+                  }
+                  onChange={(option) => setClasse({ ...classe, pointDeRassemblement: option?.pointDeRassemblement, pointDeRassemblementId: option?._id })}
+                  error={errors.pointDeRassemblement}
+                  isActive={editStay && rights.canEditPDR}
+                  readOnly={!editStay || !rights.canEditPDR}
+                  disabled={!rights.canEditPDR || classe?.cohort === "CLE 23-24"}
+                />
+                {classe.pointDeRassemblement && (
+                  <>
+                    <InputText className="mb-3" label="Numéro et nom de la voie" value={classe.pointDeRassemblement?.address} disabled />
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <InputText className="flex-1" label="Code Postal" value={classe.pointDeRassemblement?.zip} disabled />
+                      <InputText className="flex-1" label="Ville" value={classe.pointDeRassemblement?.city} disabled />
+                    </div>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <InputText className="flex-1" label="Département" value={classe.pointDeRassemblement?.department} disabled />
+                      <InputText className="flex-1" label="Région" value={classe.pointDeRassemblement?.region} disabled />
+                    </div>
+                    <Link to={`/point-de-rassemblement/` + classe.pointDeRassemblement._id} className="w-full">
+                      <Button type="tertiary" title="Voir le point de rassemblement" className="w-full max-w-none" />
+                    </Link>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </Container>
       )}

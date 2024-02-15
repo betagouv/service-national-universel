@@ -105,6 +105,16 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // CLE
+  cleUpdateCohortForReferentRegion: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForReferentClasse: { type: Boolean, default: false, required: false },
+  cleUpdateCentersForReferentRegion: { type: Boolean, default: false, required: false },
+  cleDisplayCentersForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayCentersForReferentClasse: { type: Boolean, default: false, required: false },
+  cleDisplayPDRForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayPDRForReferentClasse: { type: Boolean, default: false, required: false },
+
   validationDate: {
     type: Date,
     documentation: {
