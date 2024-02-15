@@ -51,6 +51,18 @@ module.exports = {
         warmGray: colors.stone,
         trueGray: colors.neutral,
         coolGray: colors.gray,
+        "deep-blue": {
+          900: "#0C1035",
+          800: "#1B1F42",
+          700: "#25294F",
+          600: "#2A2E56",
+          500: "#30345B",
+          400: "#3E426A",
+          300: "#7F83A7",
+          200: "#B3B5CD",
+          100: "#D0D2E2",
+          50: "#EEEFF5",
+        },
         brand: {
           black: "#111111",
           darkBlue: "#00008b",

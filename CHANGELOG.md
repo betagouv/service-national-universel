@@ -1,3 +1,25 @@
+# [1.376.0](https://github.com/betagouv/service-national-universel/compare/v1.375.2...v1.376.0) (2024-02-14)
+
+
+### Features
+
+* **api, app, admin:** 1704 - Add "Other" type and text input to equivalence request ([#3559](https://github.com/betagouv/service-national-universel/issues/3559)) ([ad6d6b4](https://github.com/betagouv/service-national-universel/commit/ad6d6b475eb6e076a661fa22fb202789d957352b))
+
+## [1.375.2](https://github.com/betagouv/service-national-universel/compare/v1.375.1...v1.375.2) (2024-02-13)
+
+
+### Bug Fixes
+
+* **api:** Fix class populate on ticket creation  ([#3585](https://github.com/betagouv/service-national-universel/issues/3585)) ([b0d7410](https://github.com/betagouv/service-national-universel/commit/b0d7410aef6f35e4395109d98a2e40c32edf24e3))
+* **api,admin:** test pipeline + logic on delete ref ([#3586](https://github.com/betagouv/service-national-universel/issues/3586)) ([03dfe99](https://github.com/betagouv/service-national-universel/commit/03dfe99f30fb91ac8d6d50b820bd0859e5e3cba2))
+
+## [1.375.1](https://github.com/betagouv/service-national-universel/compare/v1.375.0...v1.375.1) (2024-02-11)
+
+
+### Bug Fixes
+
+* **app:** Minor fixes to Phase1/Affected page ([451dcfc](https://github.com/betagouv/service-national-universel/commit/451dcfcd9a0b70d3b9e11a7cc4061a280c23787c))
+
 # [1.375.0](https://github.com/betagouv/service-national-universel/compare/v1.374.0...v1.375.0) (2024-02-08)
 
 
