@@ -1,3 +1,10 @@
+# [1.378.0](https://github.com/betagouv/service-national-universel/compare/v1.377.0...v1.378.0) (2024-02-16)
+
+
+### Features
+
+* **app:** 1873 - update permission accessPhase2 for HTS->CLE ([#3590](https://github.com/betagouv/service-national-universel/issues/3590)) ([be0c447](https://github.com/betagouv/service-national-universel/commit/be0c44794a2b474d84c6a0a10cfa9b85628608f3))
+
 # [1.377.0](https://github.com/betagouv/service-national-universel/compare/v1.376.0...v1.377.0) (2024-02-15)
 
 
