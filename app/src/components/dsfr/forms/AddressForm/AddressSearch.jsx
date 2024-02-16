@@ -9,11 +9,6 @@ export default function AddressSearch({ updateData, label, error }) {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 10);
   const { results, isPending } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
-  const housenumberOptions = { label: "Numéro", options: results?.filter((o) => o.coordinatesAccuracyLevel === "housenumber") };
-  const streetOptions = { label: "Voie", options: results?.filter((o) => o.coordinatesAccuracyLevel === "street") };
-  const localityOptions = { label: "Lieu-dit", options: results?.filter((o) => o.coordinatesAccuracyLevel === "locality") };
-  const municipalityOptions = { label: "Commune", options: results?.filter((o) => o.coordinatesAccuracyLevel === "municipality") };
-  const options = [housenumberOptions, streetOptions, localityOptions, municipalityOptions].filter((o) => o.options?.length);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -22,18 +17,17 @@ export default function AddressSearch({ updateData, label, error }) {
         setQuery("");
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
     function handleKeyDown(event) {
       if (event.key === "Escape") {
         setQuery("");
       }
     }
+    document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
   const handleChangeQuery = (e) => {
@@ -63,8 +57,8 @@ export default function AddressSearch({ updateData, label, error }) {
           <div className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
             {isPending ? (
               <p className="animate-pulse p-3 text-gray-800 text-center">Chargement</p>
-            ) : options.length ? (
-              <AddressDropdown optionGroups={options} handleSelect={handleSelect} />
+            ) : results.length ? (
+              <AddressDropdown options={results} handleSelect={handleSelect} />
             ) : (
               <p className="p-3 text-gray-800 text-center">
                 L'adresse ne s'affiche pas ? Renseignez une <strong>commune</strong> ou un <strong>code postal</strong>.

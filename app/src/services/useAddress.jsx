@@ -8,11 +8,14 @@ export default function useAddress({ query, options = {}, enabled = true }) {
   for (const [key, value] of Object.entries(options)) {
     url += `&${key}=${encodeURIComponent(value)}`;
   }
+
   const { data, error, isPending, refetch } = useQuery({
     queryKey: ["address", query],
     queryFn: async ({ signal }) => {
       const res = await fetch(url, { signal });
-      if (!res.ok) throw new Error(res.statusText);
+      if (!res.ok) {
+        throw new Error("Error with api-adresse: " + res.statusText);
+      }
       return res.json();
     },
     enabled,
