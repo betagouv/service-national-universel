@@ -1,7 +1,5 @@
 import React, { useCallback, useEffect } from "react";
 import Img4 from "../../assets/observe.svg";
-import Img3 from "../../assets/left.svg";
-import Img2 from "../../assets/right.svg";
 import styled from "styled-components";
 import api from "../../services/api";
 import { debounce } from "../../utils";
@@ -9,11 +7,12 @@ import { JVA_MISSION_DOMAINS } from "snu-lib";
 import { capture } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
-import { Col, Container, CustomInput, Row } from "reactstrap";
+import { Col, CustomInput, Row } from "reactstrap";
 import MissionCard from "./components/missionCard";
 import Pagination from "../../components/nav/Pagination";
 import { Link } from "react-router-dom";
 import { HeroContainer } from "@/components/Content";
+import { RiArrowLeftSLine } from "react-icons/ri";
 
 export default function MissionsComponent() {
   const young = useSelector((state) => state.Auth.young);
@@ -55,7 +54,13 @@ export default function MissionsComponent() {
 
   return (
     <HeroContainer>
-      <Missions>
+      <div className="pt-2 pb-4 sm:px-4 md:px-16 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
+        <Link to="/autres-engagements">
+          <button className="mt-4 mb-6 flex py-2 px-2 border rounded-lg text-xs leading-4 font-medium">
+            <RiArrowLeftSLine className="mr-2 text-lg" />
+            Retour
+          </button>
+        </Link>
         <Heading>
           <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
           <h1>Missions disponibles près de chez vous ou à distance</h1>
@@ -117,9 +122,11 @@ export default function MissionsComponent() {
                 <option value="recent">La plus récente</option>
               </select>
             </div>
-            {data?.hits.map((e) => (
-              <MissionCard mission={e._source} key={e._id} image={Img4} />
-            ))}
+            <div className="px-3">
+              {data?.hits.map((e) => (
+                <MissionCard mission={e._source} key={e._id} image={Img4} />
+              ))}
+            </div>
             <Pagination
               currentPageNumber={page}
               setCurrentPageNumber={setPage}
@@ -130,7 +137,7 @@ export default function MissionsComponent() {
             />
           </>
         ) : null}
-      </Missions>
+      </div>
     </HeroContainer>
   );
 }
@@ -138,58 +145,6 @@ export default function MissionsComponent() {
 const Filters = styled(Row)`
   > * {
     margin-bottom: 0.5rem;
-  }
-`;
-
-const Missions = styled(Container)`
-  padding: 20px 40px;
-  border-radius: 6px;
-  background: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  position: relative;
-  @media (max-width: 1000px) {
-    font-size: 1.5rem;
-    padding: 10px 15px;
-  }
-  .info {
-    flex: 1;
-    text-align: center;
-    font-size: 0.8rem;
-    color: #767a83;
-  }
-  .pagination {
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 25px;
-    margin: 0;
-    background: #fff;
-    a {
-      background: #f7fafc;
-      color: #242526;
-      padding: 3px 10px;
-      font-size: 12px;
-      margin: 0 5px;
-    }
-    a.active {
-      font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
-    }
-    a:first-child {
-      background-image: url(${Img3});
-    }
-    a:last-child {
-      background-image: url(${Img2});
-    }
-    a:first-child,
-    a:last-child {
-      font-size: 0;
-      height: 24px;
-      width: 30px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 8px;
-    }
   }
 `;
 
@@ -243,6 +198,8 @@ const DomainsFilter = styled(Col)`
     background-clip: padding-box;
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+      border-color 0.15s ease-in-out,
+      box-shadow 0.15s ease-in-out;
   }
 `;
