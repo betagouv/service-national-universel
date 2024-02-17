@@ -213,10 +213,13 @@ function hasAccessToReinscription(young) {
     return false;
   }
 
-  if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
+  if (young.cohort === "à venir" && ![YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) {
     return true;
   }
-  if (young.cohort === "à venir" && ![YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) {
+  if (young.status === YOUNG_STATUS.ABANDONED) {
+    return true;
+  }
+  if (young.status === YOUNG_STATUS.WITHDRAWN && ![YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
     return true;
   }
   if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
