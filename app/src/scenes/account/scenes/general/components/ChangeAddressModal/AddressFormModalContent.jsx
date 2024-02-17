@@ -10,7 +10,7 @@ const emptyAddress = { address: "", zip: "", city: "" };
 
 const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
   const [formValues, setFormValues] = useState(emptyAddress);
-  const { results, error, refetch } = useAddress({
+  const { results, isError, refetch } = useAddress({
     query: `${formValues.address} ${formValues.zip} ${formValues.city}`,
     options: { limit: 1, postcode: formValues.zip },
     enabled: false,
@@ -98,7 +98,7 @@ const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
           </div>
         )}
 
-        {error && (
+        {isError && (
           <div className="flex justify-center">
             <div className="text-sm text-red-500 flex-1 pr-2">Une erreur est survenue lors de la recherche de l&apos;adresse.</div>
             <ButtonLight onClick={() => setFormValues(emptyAddress)}>Réessayer</ButtonLight>

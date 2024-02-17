@@ -7,8 +7,8 @@ import { useDebounce } from "@uidotdev/usehooks";
 
 export default function AddressSearch({ updateData, label, error }) {
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 10);
-  const { results, isPending } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const debouncedQuery = useDebounce(query, 300);
+  const { results, isError, isPending } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -57,6 +57,8 @@ export default function AddressSearch({ updateData, label, error }) {
           <div className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
             {isPending ? (
               <p className="animate-pulse p-3 text-gray-800 text-center">Chargement</p>
+            ) : isError ? (
+              <p className="p-3 text-red-500 text-center">Erreur lors de la recherche</p>
             ) : results.length ? (
               <AddressDropdown options={results} handleSelect={handleSelect} />
             ) : (

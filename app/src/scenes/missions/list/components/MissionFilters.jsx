@@ -52,17 +52,19 @@ export default function MissionFilters({ filters, setFilters }) {
   const refDropdownControlDistance = React.useRef(null);
   const refDropdownControlWhen = React.useRef(null);
 
-  const { location: youngLocation } = useAddress({
-    query: `${young?.address} ${young?.zip}`,
+  const { results: youngResults } = useAddress({
+    query: `${young?.address} ${young?.city}`,
     options: { postcode: young?.zip, limit: 1 },
-    enabled: Boolean(young?.address && young?.zip),
+    enabled: Boolean(young?.address && young?.zip && !young?.location),
   });
+  const youngLocation = young?.location || youngResults?.[0].location;
 
-  const { location: relativeLocation } = useAddress({
+  const { results: relativeResults } = useAddress({
     query: `${young?.mobilityNearRelativeAddress} ${young?.mobilityNearRelativeCity}`,
     options: { postcode: young?.mobilityNearRelativeZip, limit: 1 },
     enabled: Boolean(young?.mobilityNearRelativeAddress && young?.mobilityNearRelativeZip),
   });
+  const relativeLocation = relativeResults?.[0].location;
 
   const DISTANCE_MAX = 100;
   const marginDistance = getMarginDistance(document.getElementById("distanceKm"));

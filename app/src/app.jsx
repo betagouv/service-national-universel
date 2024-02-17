@@ -49,6 +49,7 @@ import ViewMessage from "./scenes/echanges/View";
 
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
+import { queryClient } from "./services/react-query";
 import { ENABLE_PM, YOUNG_STATUS } from "./utils";
 import {
   youngCanChangeSession,
@@ -60,7 +61,6 @@ import {
 } from "snu-lib";
 import { history, initSentry, SentryRoute } from "./sentry";
 import { cohortsInit, getCohort } from "./utils/cohorts";
-import { queryClient } from "./services/react-query";
 
 initSentry();
 initApi();

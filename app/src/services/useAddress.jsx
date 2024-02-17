@@ -9,7 +9,7 @@ export default function useAddress({ query, options = {}, enabled = true }) {
     url += `&${key}=${encodeURIComponent(value)}`;
   }
 
-  const { data, error, isPending, refetch } = useQuery({
+  const { data, isError, isPending, refetch } = useQuery({
     queryKey: ["address", query],
     queryFn: async ({ signal }) => {
       const res = await fetch(url, { signal });
@@ -23,9 +23,8 @@ export default function useAddress({ query, options = {}, enabled = true }) {
   });
 
   const results = data?.features?.map((result) => formatResult(result));
-  const location = results?.length > 0 ? results[0].location : null;
 
-  return { location, results, error, isPending, refetch };
+  return { results, isError, isPending, refetch };
 }
 
 function formatResult(option) {

@@ -5,6 +5,7 @@ export default function AddressDropdown({ options, handleSelect }) {
   const streetOptions = { label: "Voie", options: options?.filter((o) => o.coordinatesAccuracyLevel === "street") };
   const localityOptions = { label: "Lieu-dit", options: options?.filter((o) => o.coordinatesAccuracyLevel === "locality") };
   const municipalityOptions = { label: "Commune", options: options?.filter((o) => o.coordinatesAccuracyLevel === "municipality") };
+
   const optionGroups = [housenumberOptions, streetOptions, localityOptions, municipalityOptions].filter((o) => o.options?.length);
 
   return optionGroups.map((optionGroup) => (
