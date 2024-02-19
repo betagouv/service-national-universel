@@ -1,3 +1,20 @@
+# [1.379.0](https://github.com/betagouv/service-national-universel/compare/v1.378.0...v1.379.0) (2024-02-19)
+
+
+### Bug Fixes
+
+* **admin:** Filter not editable cohort from cohort list ([#3596](https://github.com/betagouv/service-national-universel/issues/3596)) ([458c806](https://github.com/betagouv/service-national-universel/commit/458c806d5edecbb712d68141c773ca17880cbf26))
+* **api:** Imports should be used after sentry setup ([6b9af05](https://github.com/betagouv/service-national-universel/commit/6b9af050040ea088a2aae410e825221c2a93f80b))
+* **api:** Wrong convocation downloaded + clean unused domtom convocation ([#3578](https://github.com/betagouv/service-national-universel/issues/3578)) ([4b35be8](https://github.com/betagouv/service-national-universel/commit/4b35be8115be083d3080562a7d9cc7383475a3c3))
+* **lib:** Fix constants for cohorts ([0105827](https://github.com/betagouv/service-national-universel/commit/01058271cb04a802c3730805523492ebd7b2d56b))
+
+
+### Features
+
+* **admin:** 1785 - New attestations for 2024 Cohorte ([#3594](https://github.com/betagouv/service-national-universel/issues/3594)) ([37c2b72](https://github.com/betagouv/service-national-universel/commit/37c2b723763cd3bf641e6952fba6c3b39b432353))
+* **misc:** 1905 - Granular build & deploy / app ([#3595](https://github.com/betagouv/service-national-universel/issues/3595)) ([93e241f](https://github.com/betagouv/service-national-universel/commit/93e241fcdbe34bc8aa20637f1b86c31fbd12f26e))
+* **misc:** 1905 - run_test_api action ([#3597](https://github.com/betagouv/service-national-universel/issues/3597)) ([07000ed](https://github.com/betagouv/service-national-universel/commit/07000ed97dda16b1186d94ede2e95aa2080c3b5b))
+
 # [1.378.0](https://github.com/betagouv/service-national-universel/compare/v1.377.0...v1.378.0) (2024-02-16)
 
 
