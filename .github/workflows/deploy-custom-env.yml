@@ -89,6 +89,7 @@ jobs:
         if: needs.prepare.outputs.run_api_tests == '1'
         with:
           branch_name: ${{ needs.prepare.outputs.branch_name }}
+          reporter_id: ${{ secrets.CC_TEST_REPORTER_ID }}
 
 
 

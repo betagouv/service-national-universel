@@ -4,6 +4,9 @@ inputs:
   branch_name:
     required: true
     type: string
+  reporter_id:
+    required: true
+    type: string
 
 runs:
   using: "composite"
@@ -41,7 +44,7 @@ runs:
     - name: Test and Send coverage
       uses: paambaati/codeclimate-action@v2.7.5
       env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        CC_TEST_REPORTER_ID: ${{ inputs.reporter_id }}
         CI: true
         MONGO_URL: mongodb://localhost:27017/SampleDB
       with:
