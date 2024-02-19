@@ -54,19 +54,15 @@ jobs:
           env_name=$(./get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
           echo $env_name
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
-
           api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
           echo $api_image_tag
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
-
           admin_image_tag=$(git log --max-count=1 --oneline -- admin packages | cut -d " " -f 1)
           echo $admin_image_tag
           echo "admin_image_tag=$admin_image_tag" >> $GITHUB_OUTPUT
-
           app_image_tag=$(git log --max-count=1 --oneline -- app packages | cut -d " " -f 1)
           echo $app_image_tag
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
-
           build_matrix="[{\"name\":\"api\",\"tag\":\"$api_image_tag\"},{\"name\":\"admin\",\"tag\":\"$admin_image_tag\"},{\"name\":\"app\",\"tag\":\"$app_image_tag\"}]"
           echo $build_matrix
           echo "build_matrix=$build_matrix" >> $GITHUB_OUTPUT
