@@ -47,7 +47,7 @@ export default function View() {
   const [isLoading, setIsLoading] = useState(false);
 
   const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts).filter((c) => c.type === COHORT_TYPE.CLE);
+  const cohorts = useSelector((state) => state.Cohorts).filter((c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort));
   const cohort = cohorts.find((c) => c.name === classe?.cohort);
   const rights = getRights(user, classe, cohort);
 
