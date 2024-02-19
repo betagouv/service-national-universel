@@ -18,7 +18,6 @@ function addOneDay(date) {
 export function shouldReAcceptRI(young, cohort) {
   const newRiDate = new Date(REGLEMENT_INTERIEUR_VERSION);
   const cohortStartDate = new Date(cohort?.dateStart);
-  console.log(young?.acceptRI != REGLEMENT_INTERIEUR_VERSION);
   if (cohortStartDate >= newRiDate && young?.acceptRI != REGLEMENT_INTERIEUR_VERSION) {
     return true;
   }
@@ -75,29 +74,16 @@ export function permissionPhase1(y) {
   );
 }
 
-export function hasAccessToPhase2(young) {
-  if (!young) return false;
-  if (young.statusPhase2 === "VALIDATED") return true;
-  if (young.status === YOUNG_STATUS.WITHDRAWN) return false;
-  const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
-  const cohortIsTooOld = ["2019", "2020"].includes(young.cohort);
-  if (cohortIsTooOld && !userIsDoingAMission) {
-    return false;
-  }
-  if (wasYoungExcluded(young)) return false;
-  return true;
-}
-
 export function permissionPhase2(y) {
+  if (!permissionPhase1(y)) return false;
   if (!hasAccessToPhase2(y)) return false;
-  if (wasYoungExcluded(y)) return false;
-
-  // If young has validated phase 2
-  if (y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return true;
-  // If young has done phase 1 or was exempted.
-  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1)) return true;
-
-  return false;
+  return (
+    (y.status !== YOUNG_STATUS.WITHDRAWN &&
+      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) ||
+        [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1) ||
+        y.cohesionStayPresence === "true")) ||
+    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED
+  );
 }
 
 export function permissionPhase3(y) {
@@ -105,9 +91,18 @@ export function permissionPhase3(y) {
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
 }
 
+export function hasAccessToPhase2(young) {
+  if (young.statusPhase2 === "VALIDATED") return true;
+  const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
+  const cohortIsTooOld = ["2019", "2020"].includes(young.cohort);
+  if (cohortIsTooOld && !userIsDoingAMission) {
+    return false;
+  }
+  return true;
+}
+
 // from the end of the cohort's last day
 export function isYoungCanApplyToPhase2Missions(young) {
-  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
   return isCohortDone(young.cohort, 1) && hasYoungPhase1DoneOrExempted;
 }
