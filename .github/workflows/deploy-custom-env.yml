@@ -70,9 +70,9 @@ jobs:
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
           if [[ $api_image_tag == $current_tag ]] ; then
-              echo "run_api_test=1" >> $GITHUB_OUTPUT
+              echo "run_api_tests=1" >> $GITHUB_OUTPUT
           else
-              echo "run_api_test=0" >> $GITHUB_OUTPUT
+              echo "run_api_tests=0" >> $GITHUB_OUTPUT
           fi
 
 
