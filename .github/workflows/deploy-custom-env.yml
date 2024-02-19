@@ -283,14 +283,23 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: terraform validate -no-color
 
-      - name: Terraform auto-apply
+
+      - name: Terraform plan
+        working-directory: ${{ env.custom_directory }}
         # add -lock-timeout option until https://github.com/hashicorp/terraform/issues/33217 is fixed
+        run: |
+          terraform plan -no-color -input=false -lock-timeout=15m \
+            -var="api_image_tag=${{ needs.build_api.outputs.image_tag }}" \
+            -var="admin_image_tag=${{ needs.build_app.outputs.image_tag }}" \
+            -var="app_image_tag=${{ needs.build_admin.outputs.image_tag }}"
+
+      - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
         run: |
           terraform apply -no-color -input=false -auto-approve -lock-timeout=15m \
             -var="api_image_tag=${{ needs.build_api.outputs.image_tag }}" \
             -var="admin_image_tag=${{ needs.build_app.outputs.image_tag }}" \
-            -var="app_image_tag=${{ needs.build_admin.outputs.image_tag }}" \
+            -var="app_image_tag=${{ needs.build_admin.outputs.image_tag }}"
 
       - name: Add comment to PR
         if: github.event_name == 'pull_request' && steps.check_secret.outputs.has_secret == '0'
