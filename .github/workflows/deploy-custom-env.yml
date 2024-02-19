@@ -49,8 +49,10 @@ jobs:
 
       - name: Prepare
         id: prepare
-        working-directory: .github/scripts
         run : |
+          env_name=$(.github/scripts/get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
+          echo $env_name
+          echo "env_name=$env_name" >> $GITHUB_OUTPUT
           api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
           echo $api_image_tag
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
@@ -63,9 +65,6 @@ jobs:
           build_matrix="[{\"name\":\"api\",\"tag\":\"$api_image_tag\"},{\"name\":\"admin\",\"tag\":\"$admin_image_tag\"},{\"name\":\"app\",\"tag\":\"$app_image_tag\"}]"
           echo $build_matrix
           echo "build_matrix=$build_matrix" >> $GITHUB_OUTPUT
-          env_name=$(./get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
-          echo $env_name
-          echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
 
 
