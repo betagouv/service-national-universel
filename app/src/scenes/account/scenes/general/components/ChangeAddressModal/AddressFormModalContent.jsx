@@ -77,21 +77,20 @@ const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
         <Input label="Adresse" name="address" value={formValues.address} onChange={handleChangeValue("address")} error={errors.address} />
         <Input label="Code Postal" name="zip" value={formValues.zip} onChange={handleChangeValue("zip")} error={errors.zip} />
         <Input label="Ville" name="city" value={formValues.city} onChange={handleChangeValue("city")} error={errors.city} />
+        <Modal.Buttons
+          isLoading={isLoading}
+          onCancel={onCancel}
+          onConfirm={onAddressVerify}
+          cancelText="Annuler"
+          confirmText={
+            <>
+              <LocationMarker />
+              <span>Vérifier mon adresse</span>
+            </>
+          }
+        />
+
         {!suggestion && (
-          <Modal.Buttons
-            isLoading={isLoading}
-            onCancel={onCancel}
-            onConfirm={onAddressVerify}
-            cancelText="Annuler"
-            confirmText={
-              <>
-                <LocationMarker />
-                <span>Vérifier mon adresse</span>
-              </>
-            }
-          />
-        )}
-        {suggestion?.length === 0 && (
           <div className="flex justify-center">
             <div className="text-sm text-red-500 flex-1 pr-2">L&apos;adresse saisie n&apos;a pas été trouvée.</div>
             <ButtonLight onClick={() => setFormValues(emptyAddress)}>Réessayer</ButtonLight>
