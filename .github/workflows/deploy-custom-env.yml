@@ -25,6 +25,7 @@ jobs:
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
+      run_api_tests: ${{ steps.prepare.outputs.run_api_tests }}
 
     steps:
       - name: Check branch name
@@ -49,6 +50,9 @@ jobs:
       - name: Prepare
         id: prepare
         run : |
+          current_tag=$(git log --max-count=1 --oneline | cut -d " " -f 1)
+          echo "current_tag: $current_tag"
+
           env_name=$(.github/scripts/get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
@@ -65,10 +69,24 @@ jobs:
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
+          if [[ $api_image_tag == $current_tag ]] ; then
+              echo "run_api_test=1" >> $GITHUB_OUTPUT
+          else
+              echo "run_api_test=0" >> $GITHUB_OUTPUT
+          fi
+
+
+  run_tests_api:
+    needs: prepare
+    uses: ./.github/workflows/run-tests-api.yml
+    if: needs.prepare.outputs.run_api_tests == '1'
+    with:
+      branch_name: ${{ needs.prepare.outputs.target_branch }}
+    secrets: inherit
 
 
   build:
-    needs: prepare
+    needs: [prepare, run_tests_api]
     runs-on: ubuntu-latest
     strategy:
       matrix:
