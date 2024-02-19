@@ -61,6 +61,12 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
 
+      - name: Debug
+        id: commit_sha
+        run: |
+          git log --help
+          git log -- ${{env.app_name}} packages
+
       - name: Get last modified commit sha
         id: commit_sha
         run: |
@@ -82,6 +88,9 @@ jobs:
           image_name: ${{env.app_name}}
           image_tag: ${{ steps.image_tag.outputs.image_tag }}
           secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+
+      - name: Break
+        run: exit 1
 
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
@@ -108,10 +117,15 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
 
+      - name: Debug
+        id: commit_sha
+        run: |
+          git log --help
+          git log -- ${{env.app_name}} packages
+
       - name: Get last modified commit sha
         id: commit_sha
         run: |
-          git log --max-count=1 --oneline -- ${{env.app_name}} packages
           commit_sha=$(git log --max-count=1 --oneline -- ${{env.app_name}} packages | cut -d " " -f 1)
           echo $commit_sha
           echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
@@ -159,6 +173,13 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
 
+
+      - name: Debug
+        id: commit_sha
+        run: |
+          git log --help
+          git log -- ${{env.app_name}} packages
+
       - name: Get last modified commit sha
         id: commit_sha
         run: |
@@ -180,6 +201,9 @@ jobs:
           image_name: ${{env.app_name}}
           image_tag: ${{ steps.image_tag.outputs.image_tag }}
           secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+
+      - name: Break
+        run: exit 1
 
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
