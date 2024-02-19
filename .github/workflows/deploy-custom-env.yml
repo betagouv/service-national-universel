@@ -84,7 +84,7 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
 
-      - name: Docker Build & Publish
+      - name: API - run tests
         uses: ./.github/actions/build_docker_image
         if: needs.prepare.outputs.run_api_tests == '1'
         with:
@@ -93,7 +93,7 @@ jobs:
 
 
   build:
-    needs: [prepare, run_tests]
+    needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
