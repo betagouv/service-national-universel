@@ -6,8 +6,6 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-set -e
-
 if [[ $1 == "" ]]
 then
     echo "You must specify the branch name"
