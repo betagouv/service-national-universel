@@ -17,6 +17,7 @@ const sessions2024CohortNames = [
   "Juin 2024 - NC",
   "Juillet 2024",
   "Juillet 2024 - Martinique",
+  "Juillet 2024 - PF",
   "CLE 23-24",
   "CLE mars 2024 1",
   "CLE mars 2024 2",
@@ -58,7 +59,11 @@ const COHESION_STAY_START = {
   "Avril 2024 - A": new Date("04/15/2024"),
   "Avril 2024 - B": new Date("04/22/2024"),
   "Juin 2024 - 2": new Date("06/17/2024"),
+  "Juin 2024 - Martinique": new Date("06/13/2024"),
+  "Juin 2024 - NC": new Date("06/03/2024"),
   "Juillet 2024": new Date("07/03/2024"),
+  "Juillet 2024 - Martinique": new Date("07/01/2024"),
+  "Juillet 2024 - PF": new Date("07/08/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -79,7 +84,11 @@ const START_DATE_SESSION_PHASE1 = {
   "Avril 2024 - A": new Date("04/15/2024"),
   "Avril 2024 - B": new Date("04/22/2024"),
   "Juin 2024 - 2": new Date("06/17/2024"),
+  "Juin 2024 - Martinique": new Date("06/13/2024"),
+  "Juin 2024 - NC": new Date("06/03/2024"),
   "Juillet 2024": new Date("07/03/2024"),
+  "Juillet 2024 - Martinique": new Date("07/01/2024"),
+  "Juillet 2024 - PF": new Date("07/08/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -103,7 +112,11 @@ const COHESION_STAY_END = {
   "Avril 2024 - A": new Date("04/27/2024"),
   "Avril 2024 - B": new Date("05/04/2024"),
   "Juin 2024 - 2": new Date("06/28/2024"),
+  "Juin 2024 - Martinique": new Date("06/24/2024"),
+  "Juin 2024 - NC": new Date("06/14/2024"),
   "Juillet 2024": new Date("07/15/2024"),
+  "Juillet 2024 - Martinique": new Date("07/12/2024"),
+  "Juillet 2024 - PF": new Date("07/20/2024"),
 };
 
 // @todo: to be removed after adding old cohorts in bd
