@@ -87,7 +87,6 @@ jobs:
 
   build:
     needs: [prepare]
-    if: ${{ ! failure() && ! cancelled() }}
     runs-on: ubuntu-latest
     strategy:
       matrix:

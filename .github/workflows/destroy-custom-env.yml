@@ -51,9 +51,10 @@ jobs:
 
       - name: Get custom-env name
         id: env_name
-        uses: ./.github/actions/get_custom_env_name
-        with:
-          branch_name: ${{ steps.check.outputs.branch_name }}
+        run : |
+          env_name=$(.github/scripts/get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
+          echo "env_name: $env_name"
+          echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
   destroy:
     runs-on: ubuntu-latest
