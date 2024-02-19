@@ -85,7 +85,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.branch_name }}
 
       - name: API - run tests
-        uses: ./.github/actions/build_docker_image
+        uses: ./.github/actions/run_api_tests
         if: needs.prepare.outputs.run_api_tests == '1'
         with:
           branch_name: ${{ needs.prepare.outputs.branch_name }}
