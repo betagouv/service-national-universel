@@ -94,8 +94,14 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         continue-on-error: true
         run: |
-          terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest"
+          terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy \
+            -var="api_image_tag=latest" \
+            -var="admin_image_tag=latest" \
+            -var="app_image_tag=latest"
           # Handle deletion of DNS zone not properly handled by destroy (scaleway bug ?) avoiding action failure
           # Remove the next lines when the bug will be fixed
           terraform state rm scaleway_domain_zone.main # Clean state (DNS zone are actually destroyed)
-          terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest" # Clean backend
+          terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest" \
+            -var="api_image_tag=latest" \
+            -var="admin_image_tag=latest" \
+            -var="app_image_tag=latest"
