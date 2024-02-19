@@ -569,7 +569,7 @@ const MINISTRES = [
     template: "certificates/certificateTemplate2023.png",
   },
   {
-    date_end: "08-18-2100", // ! Changer ici à l'ajout d'un nouveau
+    date_end: "02-15-2024",
     ministres: [
       "Gabriel Attal, Ministre de l’Éducation Nationale et de la Jeunesse",
       "Sébastien Lecornu, Ministre des Armées",
@@ -577,6 +577,11 @@ const MINISTRES = [
       chargée de la Jeunesse et du Service national universel",
     ],
     template: "certificates/certificateTemplate2023-08-18.png",
+  },
+  {
+    date_end: "02-16-2050", // ! Changer ici à l'ajout d'un nouveau
+    ministres: ["Corinne Orzechowski, Déléguée générale au Service Nationale Universel"],
+    template: "certificates/certificateTemplate_2024.png",
   },
 ];
 
