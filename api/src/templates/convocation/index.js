@@ -128,7 +128,6 @@ const render = async (young) => {
         .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
     }
   } catch (e) {
-    console.log("🚀 ~ file: index.js:132 ~ render ~ e:", e);
     capture(e);
     throw e;
   }
@@ -210,7 +209,6 @@ const renderLocalTransport = async (young) => {
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
       .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()));
   } catch (e) {
-    console.log("🚀 ~ file: index.js:213 ~ renderLocalTransport ~ e:", e);
     capture(e);
     throw e;
   }
