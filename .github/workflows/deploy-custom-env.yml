@@ -21,11 +21,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.check.outputs.branch_name }}
-      env_name: ${{ steps.prepare.outputs.env_name }}
-      api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
-      admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
-      app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
-      build_matrix: ${{ steps.prepare.outputs.build_matrix }}
+      env_name: ${{ steps.env_name.outputs.env_name }}
+      api_image_tag: ${{ steps.api.outputs.image_tag }}
+      admin_image_tag: ${{ steps.admin.outputs.image_tag }}
+      app_image_tag: ${{ steps.app.outputs.image_tag }}
+      build_matrix: ${{ steps.build_matrix.outputs.build_matrix }}
 
     steps:
       - name: Check branch name
@@ -47,23 +47,42 @@ jobs:
           ref: ${{ steps.check.outputs.branch_name }}
           fetch-depth: 0
 
-      - name: Prepare
-        id: prepare
+      - name: Environment name
+        id: env_name
         working-directory: .github/scripts
         run : |
           env_name=$(./get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
           echo $env_name
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
-          git log --max-count=1 --oneline -- api packages | cut -d " " -f 1
-          api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
-          echo $api_image_tag
-          echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
-          admin_image_tag=$(git log --max-count=1 --oneline -- admin packages | cut -d " " -f 1)
-          echo $admin_image_tag
-          echo "admin_image_tag=$admin_image_tag" >> $GITHUB_OUTPUT
-          app_image_tag=$(git log --max-count=1 --oneline -- app packages | cut -d " " -f 1)
-          echo $app_image_tag
-          echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
+
+      - name: API
+        id: api
+        working-directory: .github/scripts
+        run : |
+          image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
+          echo $image_tag
+          echo "image_tag=$image_tag" >> $GITHUB_OUTPUT
+
+      - name: Admin
+        id: admin
+        working-directory: .github/scripts
+        run : |
+          image_tag=$(git log --max-count=1 --oneline -- admin packages | cut -d " " -f 1)
+          echo $image_tag
+          echo "image_tag=$image_tag" >> $GITHUB_OUTPUT
+
+      - name: App image_tag
+        id: app
+        working-directory: .github/scripts
+        run : |
+          image_tag=$(git log --max-count=1 --oneline -- app packages | cut -d " " -f 1)
+          echo $image_tag
+          echo "image_tag=$image_tag" >> $GITHUB_OUTPUT
+
+      - name: Build matrix
+        id: build_matrix
+        working-directory: .github/scripts
+        run : |
           build_matrix="[{\"name\":\"api\",\"tag\":\"$api_image_tag\"},{\"name\":\"admin\",\"tag\":\"$admin_image_tag\"},{\"name\":\"app\",\"tag\":\"$app_image_tag\"}]"
           echo $build_matrix
           echo "build_matrix=$build_matrix" >> $GITHUB_OUTPUT
