@@ -21,8 +21,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.check.outputs.branch_name }}
-      image_tag: ${{ steps.image_tag.outputs.image_tag }}
-      env_name: ${{ steps.env_name.outputs.env_name }}
+      env_name: ${{ steps.prepare.outputs.env_name }}
+      api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
+      admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
+      app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
+      run_api_tests: ${{ steps.prepare.outputs.run_api_tests }}
 
     steps:
       - name: Check branch name
@@ -30,40 +33,68 @@ jobs:
         run: |
           if [[ ${{ github.event_name }} == 'pull_request' ]] ; then
             branch_name=${{ github.head_ref }}
-            commit_sha=${{ github.event.pull_request.head.sha }}
           else
             branch_name=${{ github.ref_name }}
-            commit_sha=${{ github.sha }}
           fi
           if [[ $branch_name == 'main' ]] || [[ $branch_name == 'production' ]] ; then
             echo "This action is not available on the branch $branch_name"
             exit 1
           fi
           echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
-          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.check.outputs.branch_name }}
+          fetch-depth: 0
 
-      - name: Get image tag
-        id: image_tag
-        uses: ./.github/actions/get_image_tag
-        with:
-          sha: ${{ steps.check.outputs.commit_sha }}
+      - name: Prepare
+        id: prepare
+        run : |
+          current_tag=$(git log --max-count=1 --oneline | cut -d " " -f 1)
+          echo "current_tag: $current_tag"
 
-      - name: Get custom-env name
-        id: env_name
-        uses: ./.github/actions/get_custom_env_name
-        with:
-          branch_name: ${{ steps.check.outputs.branch_name }}
+          env_name=$(.github/scripts/get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
+          echo "env_name: $env_name"
+          echo "env_name=$env_name" >> $GITHUB_OUTPUT
+
+          api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
+          echo "api_image_tag: $api_image_tag"
+          echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
+
+          admin_image_tag=$(git log --max-count=1 --oneline -- admin packages | cut -d " " -f 1)
+          echo "admin_image_tag: $admin_image_tag"
+          echo "admin_image_tag=$admin_image_tag" >> $GITHUB_OUTPUT
+
+          app_image_tag=$(git log --max-count=1 --oneline -- app packages | cut -d " " -f 1)
+          echo "app_image_tag: $app_image_tag"
+          echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
+
+          if [[ $api_image_tag == $current_tag ]] ; then
+              echo "run_api_test=1" >> $GITHUB_OUTPUT
+          else
+              echo "run_api_test=0" >> $GITHUB_OUTPUT
+          fi
+
+
+  run_tests_api:
+    needs: prepare
+    uses: ./.github/workflows/run-tests-api.yml
+    if: needs.prepare.outputs.run_api_tests == '1'
+    with:
+      branch_name: ${{ needs.prepare.outputs.target_branch }}
+    secrets: inherit
+
 
   build:
-    needs: prepare
+    needs: [prepare]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app_name: [admin, api, app]
+        app: [
+          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+        ]
 
     steps:
       - uses: actions/checkout@v4
@@ -75,8 +106,8 @@ jobs:
         uses: ./.github/actions/check_docker_image_tag
         with:
           registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_name: ${{matrix.app.name}}
+          image_tag: ${{matrix.app.tag}}
           secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
 
       - name: Docker Build & Publish
@@ -86,9 +117,9 @@ jobs:
           username: nologin
           password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
           registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_name: ${{matrix.app.name}}
+          dockerfile_path: ${{matrix.app.name}}/Dockerfile
+          image_tag: ${{matrix.app.tag}}
 
   deploy:
     runs-on: ubuntu-latest
@@ -182,18 +213,23 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: terraform validate -no-color
 
+
       - name: Terraform plan
         working-directory: ${{ env.custom_directory }}
         # add -lock-timeout option until https://github.com/hashicorp/terraform/issues/33217 is fixed
         run: |
           terraform plan -no-color -input=false -lock-timeout=15m \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
         run: |
           terraform apply -no-color -input=false -auto-approve -lock-timeout=15m \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Add comment to PR
         if: github.event_name == 'pull_request' && steps.check_secret.outputs.has_secret == '0'

@@ -14,8 +14,16 @@ provider "scaleway" {
   region = "fr-par"
 }
 
-variable "image_tag" {
-  type     = string
+variable "api_image_tag" {
+  type    = string
+  nullable = false
+}
+variable "admin_image_tag" {
+  type    = string
+  nullable = false
+}
+variable "app_image_tag" {
+  type    = string
   nullable = false
 }
 
@@ -104,7 +112,7 @@ resource "scaleway_domain_zone" "main" {
 resource "scaleway_container" "api" {
   name            = "${local.env}-api"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port            = 8080
   cpu_limit       = 768
   memory_limit    = 1024
@@ -125,7 +133,7 @@ resource "scaleway_container" "api" {
     "FOLDER_API" = "api"
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.1
-    "SENTRY_RELEASE"                    = var.image_tag
+    "SENTRY_RELEASE"                    = var.api_image_tag
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
@@ -186,7 +194,7 @@ resource "scaleway_container_domain" "api" {
 resource "scaleway_container" "admin" {
   name            = "${local.env}-admin"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.admin_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -234,7 +242,7 @@ resource "scaleway_container_domain" "admin" {
 resource "scaleway_container" "app" {
   name            = "${local.env}-app"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -291,9 +299,18 @@ output "registry_endpoint" {
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
 }
+output "api_image_tag" {
+  value = split(":", scaleway_container.api.registry_image)[1]
+}
 output "app_endpoint" {
   value = "https://${local.app_hostname}"
 }
+output "app_image_tag" {
+  value = split(":", scaleway_container.app.registry_image)[1]
+}
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
+}
+output "admin_image_tag" {
+  value = split(":", scaleway_container.admin.registry_image)[1]
 }

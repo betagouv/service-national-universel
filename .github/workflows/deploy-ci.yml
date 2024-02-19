@@ -13,7 +13,10 @@ jobs:
     if: github.ref_name == 'main'
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
-      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+      api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
+      admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
+      app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
+      run_api_tests: ${{ steps.prepare.outputs.run_api_tests }}
 
     steps:
       - name: Get target_branch
@@ -24,32 +27,51 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.target_branch.outputs.target_branch }}
+          fetch-depth: 0
 
-      - name: Get last commit sha
-        id: commit_sha
-        run: |
-          commit_sha=$(git rev-parse HEAD)
-          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
+      - name: Prepare
+        id: prepare
+        run : |
+          current_tag=$(git log --max-count=1 --oneline | cut -d " " -f 1)
+          echo "current_tag: $current_tag"
 
-      - name: Get image tag
-        id: image_tag
-        uses: ./.github/actions/get_image_tag
-        with:
-          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+          api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
+          echo "api_image_tag: $api_image_tag"
+          echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
+
+          admin_image_tag=$(git log --max-count=1 --oneline -- admin packages | cut -d " " -f 1)
+          echo "admin_image_tag: $admin_image_tag"
+          echo "admin_image_tag=$admin_image_tag" >> $GITHUB_OUTPUT
+
+          app_image_tag=$(git log --max-count=1 --oneline -- app packages | cut -d " " -f 1)
+          echo "app_image_tag: $app_image_tag"
+          echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
+
+          if [[ $api_image_tag == $current_tag ]] ; then
+              echo "run_api_test=1" >> $GITHUB_OUTPUT
+          else
+              echo "run_api_test=0" >> $GITHUB_OUTPUT
+          fi
 
   run_tests_api:
     needs: prepare
     uses: ./.github/workflows/run-tests-api.yml
+    if: needs.prepare.outputs.run_api_tests == '1'
     with:
       branch_name: ${{ needs.prepare.outputs.target_branch }}
     secrets: inherit
 
   build:
     needs: [prepare, run_tests_api]
+    if: ${{ ! failure() && ! cancelled() }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app_name: [admin, api, app]
+        app: [
+          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+        ]
 
     steps:
       - uses: actions/checkout@v4
@@ -61,8 +83,8 @@ jobs:
         uses: ./.github/actions/check_docker_image_tag
         with:
           registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_name: ${{ matrix.app.name }}
+          image_tag: ${{ matrix.app.tag }}
           secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
 
       - name: Docker Build & Publish
@@ -72,9 +94,9 @@ jobs:
           username: nologin
           password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
           registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_name: ${{ matrix.app.name }}
+          dockerfile_path: ${{ matrix.app.name }}/Dockerfile
+          image_tag: ${{ matrix.app.tag }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -110,10 +132,14 @@ jobs:
         # add -lock-timeout option until https://github.com/hashicorp/terraform/issues/33217 is fixed
         run: |
           terraform plan -no-color -input=false  -lock-timeout=15m \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.ci_directory }}
         run: |
           terraform apply -no-color -input=false -auto-approve -lock-timeout=15m \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
