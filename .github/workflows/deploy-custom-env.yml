@@ -73,9 +73,9 @@ jobs:
     strategy:
       matrix:
         app: [
-          {name: api, tag: ${{needs.prepare.outputs.api_image_tag}} },
-          {name: app, tag: ${{needs.prepare.outputs.app_image_tag}} },
-          {name: admin, tag: ${{needs.prepare.outputs.admin_image_tag}} },
+          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
         ]
 
     steps:
