@@ -209,7 +209,6 @@ const renderLocalTransport = async (young) => {
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
       .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()));
   } catch (e) {
-    console.log("🚀 ~ file: index.js:213 ~ renderLocalTransport ~ e:", e);
     capture(e);
     throw e;
   }
