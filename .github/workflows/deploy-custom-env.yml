@@ -76,17 +76,24 @@ jobs:
           fi
 
 
-  run_tests_api:
+  run_tests:
     needs: prepare
-    uses: ./.github/workflows/run-tests-api.yml
-    if: needs.prepare.outputs.run_api_tests == '1'
-    with:
-      branch_name: ${{ needs.prepare.outputs.target_branch }}
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.branch_name }}
+
+      - name: Docker Build & Publish
+        uses: ./.github/actions/build_docker_image
+        if: needs.prepare.outputs.run_api_tests == '1'
+        with:
+          branch_name: ${{ needs.prepare.outputs.branch_name }}
+
 
 
   build:
-    needs: [prepare]
+    needs: [prepare, run_tests]
     runs-on: ubuntu-latest
     strategy:
       matrix:
