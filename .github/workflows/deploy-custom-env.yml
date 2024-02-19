@@ -48,8 +48,9 @@ jobs:
 
       - name: Prepare
         id: prepare
+        working-directory: .github/scripts
         run : |
-          env_name=$(.github/scripts/get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
+          env_name=$(./get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
           echo $env_name
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
@@ -70,10 +71,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app:
-          - { name: api, image_tag: ${{ needs.prepare.outputs.api_image_tag }} }
-          - { name: app, image_tag: ${{ needs.prepare.outputs.app_image_tag }} }
-          - { name: admin, image_tag: ${{ needs.prepare.outputs.admin_image_tag }} }
+        app: [
+          { name: api, image_tag: ${{ needs.prepare.outputs.api_image_tag }} },
+          { name: app, image_tag: ${{ needs.prepare.outputs.app_image_tag }} },
+          { name: admin, image_tag: ${{ needs.prepare.outputs.admin_image_tag }} }
+        ]
 
     steps:
       - uses: actions/checkout@v4
