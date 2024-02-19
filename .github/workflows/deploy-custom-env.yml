@@ -70,23 +70,31 @@ jobs:
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
           if [[ $api_image_tag == $current_tag ]] ; then
-              echo "run_api_test=1" >> $GITHUB_OUTPUT
+              echo "run_api_tests=1" >> $GITHUB_OUTPUT
           else
-              echo "run_api_test=0" >> $GITHUB_OUTPUT
+              echo "run_api_tests=0" >> $GITHUB_OUTPUT
           fi
 
 
-  run_tests_api:
+  run_tests:
     needs: prepare
-    uses: ./.github/workflows/run-tests-api.yml
-    if: needs.prepare.outputs.run_api_tests == '1'
-    with:
-      branch_name: ${{ needs.prepare.outputs.target_branch }}
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.branch_name }}
+
+      - name: API - run tests
+        uses: ./.github/actions/run_api_tests
+        if: needs.prepare.outputs.run_api_tests == '1'
+        with:
+          branch_name: ${{ needs.prepare.outputs.branch_name }}
+          reporter_id: ${{ secrets.CC_TEST_REPORTER_ID }}
+
 
 
   build:
-    needs: [prepare]
+    needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
