@@ -87,6 +87,7 @@ jobs:
 
   build:
     needs: [prepare, run_tests_api]
+    if: ${{ ! failure() && ! cancelled() }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
