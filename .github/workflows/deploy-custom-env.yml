@@ -21,7 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.check.outputs.branch_name }}
-      image_tag: ${{ steps.image_tag.outputs.image_tag }}
       env_name: ${{ steps.env_name.outputs.env_name }}
 
     steps:
@@ -30,27 +29,18 @@ jobs:
         run: |
           if [[ ${{ github.event_name }} == 'pull_request' ]] ; then
             branch_name=${{ github.head_ref }}
-            commit_sha=${{ github.event.pull_request.head.sha }}
           else
             branch_name=${{ github.ref_name }}
-            commit_sha=${{ github.sha }}
           fi
           if [[ $branch_name == 'main' ]] || [[ $branch_name == 'production' ]] ; then
             echo "This action is not available on the branch $branch_name"
             exit 1
           fi
           echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
-          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.check.outputs.branch_name }}
-
-      - name: Get image tag
-        id: image_tag
-        uses: ./.github/actions/get_image_tag
-        with:
-          sha: ${{ steps.check.outputs.commit_sha }}
 
       - name: Get custom-env name
         id: env_name
@@ -58,25 +48,39 @@ jobs:
         with:
           branch_name: ${{ steps.check.outputs.branch_name }}
 
-  build:
+  build_api:
     needs: prepare
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app_name: [admin, api, app]
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+    env:
+      app_name: api
 
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
 
+      - name: Get last modified commit sha
+        id: commit_sha
+        run: |
+          commit_sha=$(git log --max-count=1 --oneline -- ${{env.app_name}} packages | cut -d " " -f 1)
+          echo $commit_sha
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
+
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+
       - name: Check if image exists
         id: check
         uses: ./.github/actions/check_docker_image_tag
         with:
           registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_name: ${{env.app_name}}
+          image_tag: ${{ steps.image_tag.outputs.image_tag }}
           secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
 
       - name: Docker Build & Publish
@@ -86,13 +90,107 @@ jobs:
           username: nologin
           password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
           registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_name: ${{env.app_name}}
+          dockerfile_path: ${{env.app_name}}/Dockerfile
+          image_tag: ${{ steps.image_tag.outputs.image_tag }}
+
+
+  build_app:
+    needs: prepare
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+    env:
+      app_name: app
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.branch_name }}
+
+      - name: Get last modified commit sha
+        id: commit_sha
+        run: |
+          commit_sha=$(git log --max-count=1 --oneline -- ${{env.app_name}} packages | cut -d " " -f 1)
+          echo $commit_sha
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
+
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+
+      - name: Check if image exists
+        id: check
+        uses: ./.github/actions/check_docker_image_tag
+        with:
+          registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
+          image_name: ${{env.app_name}}
+          image_tag: ${{ steps.image_tag.outputs.image_tag }}
+          secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+
+      - name: Docker Build & Publish
+        uses: ./.github/actions/build_docker_image
+        if: steps.check.outputs.tag_exists == 0
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+          registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
+          image_name: ${{env.app_name}}
+          dockerfile_path: ${{env.app_name}}/Dockerfile
+          image_tag: ${{ steps.image_tag.outputs.image_tag }}
+
+
+  build_admin:
+    needs: prepare
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+    env:
+      app_name: admin
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.branch_name }}
+
+      - name: Get last modified commit sha
+        id: commit_sha
+        run: |
+          commit_sha=$(git log --max-count=1 --oneline -- ${{env.app_name}} packages | cut -d " " -f 1)
+          echo $commit_sha
+          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
+
+      - name: Get image tag
+        id: image_tag
+        uses: ./.github/actions/get_image_tag
+        with:
+          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+
+      - name: Check if image exists
+        id: check
+        uses: ./.github/actions/check_docker_image_tag
+        with:
+          registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
+          image_name: ${{env.app_name}}
+          image_tag: ${{ steps.image_tag.outputs.image_tag }}
+          secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+
+      - name: Docker Build & Publish
+        uses: ./.github/actions/build_docker_image
+        if: steps.check.outputs.tag_exists == 0
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+          registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
+          image_name: ${{env.app_name}}
+          dockerfile_path: ${{env.app_name}}/Dockerfile
+          image_tag: ${{ steps.image_tag.outputs.image_tag }}
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [prepare, build]
+    needs: [prepare, build_api, build_admin, build_app]
     concurrency:
       group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
       cancel-in-progress: false
@@ -182,18 +280,14 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: terraform validate -no-color
 
-      - name: Terraform plan
-        working-directory: ${{ env.custom_directory }}
-        # add -lock-timeout option until https://github.com/hashicorp/terraform/issues/33217 is fixed
-        run: |
-          terraform plan -no-color -input=false -lock-timeout=15m \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
-
       - name: Terraform auto-apply
+        # add -lock-timeout option until https://github.com/hashicorp/terraform/issues/33217 is fixed
         working-directory: ${{ env.custom_directory }}
         run: |
           terraform apply -no-color -input=false -auto-approve -lock-timeout=15m \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.build_api.outputs.image_tag }}" \
+            -var="admin_image_tag=${{ needs.build_app.outputs.image_tag }}" \
+            -var="app_image_tag=${{ needs.build_admin.outputs.image_tag }}" \
 
       - name: Add comment to PR
         if: github.event_name == 'pull_request' && steps.check_secret.outputs.has_secret == '0'
