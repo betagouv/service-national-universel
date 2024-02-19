@@ -176,8 +176,6 @@
     res.status(200).send(response);
   });
 
-  console.log("lll");
-
   app.get("/error_for_baleen", async (req, res) => {
     res.status(403).send("SNU TEST");
   });
