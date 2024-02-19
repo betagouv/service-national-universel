@@ -60,6 +60,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
+          fetch-depth: 0
 
       - name: Debug
         run: |
@@ -114,6 +115,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
+          fetch-depth: 0
 
       - name: Debug
         run: |
@@ -168,6 +170,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
+          fetch-depth: 0
 
 
       - name: Debug
