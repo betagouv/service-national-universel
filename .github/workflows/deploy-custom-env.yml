@@ -25,6 +25,7 @@ jobs:
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
+      build_matrix: ${{ steps.prepare.outputs.build_matrix }}
 
     steps:
       - name: Check branch name
@@ -66,21 +67,26 @@ jobs:
           echo $app_image_tag
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
+          build_matrix="[{\"name\":\"api\",\"tag\":\"$api_image_tag\"},{\"name\":\"admin\",\"tag\":\"$admin_image_tag\"},{\"name\":\"app\",\"tag\":\"$app_image_tag\"}]"
+          echo $build_matrix
+          echo "build_matrix=$build_matrix" >> $GITHUB_OUTPUT
+
+
+
   build:
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [
-          { name: api, image_tag: "${{ needs.prepare.outputs.api_image_tag }}" },
-          { name: app, image_tag: "${{ needs.prepare.outputs.app_image_tag }}" },
-          { name: admin, image_tag: "${{ needs.prepare.outputs.admin_image_tag }}" }
-        ]
+        app: ${{ fromJson(needs.prepare.outputs.build_matrix) }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare.outputs.branch_name }}
+
+      - name: Break
+        run: exit 1
 
       - name: Check if image exists
         id: check
@@ -88,7 +94,7 @@ jobs:
         with:
           registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
           image_name: ${{matrix.app.name}}
-          image_tag: ${{matrix.app.image_tag}}
+          image_tag: ${{matrix.app.tag}}
           secret_key: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
 
       - name: Docker Build & Publish
@@ -100,7 +106,7 @@ jobs:
           registry: ${{ secrets.SCW_CI_IMAGE_REGISTRY }}
           image_name: ${{matrix.app.name}}
           dockerfile_path: ${{matrix.app.name}}/Dockerfile
-          image_tag: ${{matrix.app.image_tag}}
+          image_tag: ${{matrix.app.tag}}
 
   deploy:
     runs-on: ubuntu-latest
