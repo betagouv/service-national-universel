@@ -86,7 +86,7 @@ jobs:
 
 
   build:
-    needs: [prepare, run_tests_api]
+    needs: [prepare]
     if: ${{ ! failure() && ! cancelled() }}
     runs-on: ubuntu-latest
     strategy:
