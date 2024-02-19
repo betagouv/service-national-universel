@@ -75,15 +75,16 @@ export function permissionPhase1(y) {
 }
 
 export function permissionPhase2(y) {
-  if (!permissionPhase1(y)) return false;
+  if (wasYoungExcluded(y)) return false;
+  if (y.statusPhase2OpenedAt && new Date(y.statusPhase2OpenedAt) < new Date()) return true;
   if (!hasAccessToPhase2(y)) return false;
-  return (
-    (y.status !== YOUNG_STATUS.WITHDRAWN &&
-      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) ||
-        [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1) ||
-        y.cohesionStayPresence === "true")) ||
-    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED
-  );
+
+  // If young has validated phase 2
+  if (y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return true;
+  // If young has done phase 1 or was exempted.
+  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1)) return true;
+
+  return false;
 }
 
 export function permissionPhase3(y) {
