@@ -491,17 +491,17 @@ function generateChanges(value, young) {
     }
   };
 
-  setIfTrue(value.consent, "parentAllowSNU", "true");
   setIfTrue(value.consent, "status", YOUNG_STATUS.WAITING_VALIDATION);
-  setIfTrue(value.consent, "parent1AllowSNU", "true");
-  setIfTrue(value.consent, "parent1ValidationDate", new Date());
   setIfTrue(value.consent && young.inscriptionStep2023 === "WAITING_CONSENT", "inscriptionStep2023", "DONE");
   setIfTrue(value.consent && young.reinscriptionStep2023 === "WAITING_CONSENT", "reinscriptionStep2023", "DONE");
+  setIfTrue(value.consent, "parentAllowSNU", "true");
 
+  //Parent 1
+  setIfTrue(value.consent, "parent1AllowSNU", "true");
+  setIfTrue(value.consent, "parent1ValidationDate", new Date());
   setIfTrue(value.imageRights, "parent1AllowImageRights", "true");
-
+  //Parent 2
   setIfTrue(young.parent2Status && value.consent, "parent2AllowSNU", "true");
-
   setIfTrue(young.parent2Status && value.imageRights, "parent2AllowImageRights", "true");
   setIfTrue(young.parent2Status && value.imageRights, "parent2ValidationDate", new Date());
 
