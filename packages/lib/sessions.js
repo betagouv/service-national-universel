@@ -64,6 +64,16 @@ const COHESION_STAY_START = {
   "Juillet 2024": new Date("07/03/2024"),
   "Juillet 2024 - Martinique": new Date("07/01/2024"),
   "Juillet 2024 - PF": new Date("07/08/2024"),
+  "CLE 23-24": new Date("01/01/2024"),
+  "CLE mars 2024 1": new Date("03/11/2024"),
+  "CLE mars 2024 2": new Date("03/25/2024"),
+  "CLE mai 2024": new Date("05/13/2024"),
+  "CLE juin 2024": new Date("06/03/2024"),
+  "CLE mai 2024 Martinique": new Date("05/08/2024"),
+  "CLE juin 2024 Martinique": new Date("05/26/2024"),
+  "CLE février 2024 Réunion": new Date("02/12/2024"),
+  "CLE GE1 2024": new Date("04/22/2024"),
+  "CLE GE2 2024": new Date("06/17/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -89,6 +99,16 @@ const START_DATE_SESSION_PHASE1 = {
   "Juillet 2024": new Date("07/03/2024"),
   "Juillet 2024 - Martinique": new Date("07/01/2024"),
   "Juillet 2024 - PF": new Date("07/08/2024"),
+  "CLE 23-24": new Date("01/01/2024"),
+  "CLE février 2024 Réunion": new Date("02/12/2024"),
+  "CLE mars 2024 1": new Date("03/11/2024"),
+  "CLE mars 2024 2": new Date("03/25/2024"),
+  "CLE mai 2024": new Date("05/13/2024"),
+  "CLE mai 2024 Martinique": new Date("05/08/2024"),
+  "CLE juin 2024": new Date("06/03/2024"),
+  "CLE juin 2024 Martinique": new Date("05/26/2024"),
+  "CLE GE1 2024": new Date("04/22/2024"),
+  "CLE GE2 2024": new Date("06/17/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -117,6 +137,16 @@ const COHESION_STAY_END = {
   "Juillet 2024": new Date("07/15/2024"),
   "Juillet 2024 - Martinique": new Date("07/12/2024"),
   "Juillet 2024 - PF": new Date("07/20/2024"),
+  "CLE 23-24": new Date("31/12/2024"),
+  "CLE février 2024 Réunion": new Date("02/24/2024"),
+  "CLE mars 2024 1": new Date("03/23/2024"),
+  "CLE mars 2024 2": new Date("04/06/2024"),
+  "CLE mai 2024": new Date("05/25/2024"),
+  "CLE mai 2024 Martinique": new Date("05/20/2024"),
+  "CLE juin 2024": new Date("06/14/2024"),
+  "CLE juin 2024 Martinique": new Date("06/07/2024"),
+  "CLE GE1 2024": new Date("05/04/2024"),
+  "CLE GE2 2024": new Date("06/28/2024"),
 };
 
 // @todo: to be removed after adding old cohorts in bd
