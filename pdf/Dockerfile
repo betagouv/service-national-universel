@@ -27,7 +27,9 @@ RUN apk add --no-cache \
       nss \
       freetype \
       harfbuzz \
-      ca-certificates
+      ca-certificates \
+      ttf-freefont \
+      libstdc++
 
 COPY --chown=node:node --from=build /build/out .
 
