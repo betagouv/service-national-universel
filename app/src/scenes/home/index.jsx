@@ -39,9 +39,9 @@ export default function Home() {
       return <Withdrawn />;
     }
 
-    const isActiveInPhase2 = [YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.WAITING_REALISATION].includes(young.statusPhase2);
+    const hasCompletedPhase2 = [YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(young.statusPhase2);
 
-    if (isCohortExpired(young) && isActiveInPhase2) {
+    if (isCohortExpired(young) && !hasCompletedPhase2) {
       return <DelaiDepasse />;
     }
 
