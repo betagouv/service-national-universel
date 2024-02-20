@@ -416,6 +416,10 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
 const AttestationDownloadButton = ({ young }) => {
   const [modal, setModal] = useState({ isOpen: false });
   const handleSendAttestationByEmail = async (phase) => {
+    console.log(`Sending request for phase ${phase} to /young/${young._id}/documents/certificate/${phase}/send-email`, {
+      fileName: `${young.firstName} ${young.lastName} - certificate ${phase}.pdf`,
+    });
+
     try {
       const { ok, code } = await api.post(`/young/${young._id}/documents/certificate/${phase}/send-email`, {
         fileName: `${young.firstName} ${young.lastName} - certificate ${phase}.pdf`,
@@ -430,6 +434,10 @@ const AttestationDownloadButton = ({ young }) => {
   };
 
   const handleDownloadAttestationPdfFile = async (phase) => {
+    console.log(`Downloading PDF for /young/${young._id}/documents/certificate/${phase}`, {
+      fileName: `${young.firstName} ${young.lastName} - attestation ${phase}.pdf`,
+    });
+
     await downloadPDF({
       url: `/young/${young._id}/documents/certificate/${phase}`,
       fileName: `${young.firstName} ${young.lastName} - attestation ${phase}.pdf`,

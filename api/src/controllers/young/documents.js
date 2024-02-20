@@ -64,6 +64,7 @@ const TIMEOUT_PDF_SERVICE = 15000;
 
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    console.log("CALLING PDF 1");
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
       .validate(req.params, { stripUnknown: true });
