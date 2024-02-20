@@ -74,6 +74,19 @@ export function permissionPhase1(y) {
   );
 }
 
+export function hasAccessToPhase2(young) {
+  if (!young) return false;
+  if (young.statusPhase2 === "VALIDATED") return true;
+  if (young.status === YOUNG_STATUS.WITHDRAWN) return false;
+  const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
+  const cohortIsTooOld = ["2019", "2020"].includes(young.cohort);
+  if (cohortIsTooOld && !userIsDoingAMission) {
+    return false;
+  }
+  if (wasYoungExcluded(young)) return false;
+  return true;
+}
+
 export function permissionPhase2(y) {
   if (wasYoungExcluded(y)) return false;
   if (y.statusPhase2OpenedAt && new Date(y.statusPhase2OpenedAt) < new Date()) return true;
@@ -90,16 +103,6 @@ export function permissionPhase2(y) {
 export function permissionPhase3(y) {
   if (!permissionApp(y)) return false;
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
-}
-
-export function hasAccessToPhase2(young) {
-  if (young.statusPhase2 === "VALIDATED") return true;
-  const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
-  const cohortIsTooOld = ["2019", "2020"].includes(young.cohort);
-  if (cohortIsTooOld && !userIsDoingAMission) {
-    return false;
-  }
-  return true;
 }
 
 // from the end of the cohort's last day
