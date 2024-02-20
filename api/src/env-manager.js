@@ -15,7 +15,7 @@ async function loadEnv() {
 
   const api = new Secret.v1alpha1.API(client);
 
-  const secret = await api.accessSecretVersionByName({ secretName: "api-staging", revision: "latest_enabled" });
+  const secret = await api.accessSecretVersionByName({ secretName: "api-prod", revision: "latest_enabled" });
   const decodedData = Buffer.from(secret.data, "base64").toString("utf8");
   const parsed = require("dotenv").parse(decodedData);
 
