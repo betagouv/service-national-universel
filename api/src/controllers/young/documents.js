@@ -111,6 +111,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
           "content-type": "application/pdf",
           "cache-control": "public, max-age=1",
         });
+        console.log("7");
         response.body.pipe(res);
         if (res.statusCode !== 200) throw new Error("Error with PDF service");
         response.body.on("error", (e) => {

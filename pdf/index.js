@@ -71,6 +71,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/render", async (req, res) => {
+  console.log("Rendering PDF with body:", req.body);
   try {
     const random = Math.random();
     console.time("RENDERING " + random);
