@@ -238,11 +238,7 @@ const Espace = () => {
   useEffect(() => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
-    }
-  }, [young]);
-
-  useEffect(() => {
-    if (shouldReAcceptRI(young, cohort)) {
+    } else if (shouldReAcceptRI(young, cohort)) {
       setIsModalRIOpen(true);
     }
   }, [young, cohort]);
