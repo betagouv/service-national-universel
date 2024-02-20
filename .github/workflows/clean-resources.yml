@@ -117,8 +117,14 @@ jobs:
             sed -i".bak" "s|###___ENV_NAME___###|$env_name|g" main.tf
             terraform init
             # See destroy-custom-env.yml - Hack to continue on error
-            terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest" || true
+            terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy \
+              -var="api_image_tag=latest" \
+              -var="admin_image_tag=latest" \
+              -var="app_image_tag=latest" || true
             terraform state rm scaleway_domain_zone.main || true
-            terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy -var="image_tag=latest" || true
+            terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy \
+              -var="api_image_tag=latest" \
+              -var="admin_image_tag=latest" \
+              -var="app_image_tag=latest" || true
             cd ..
           done < envs.txt

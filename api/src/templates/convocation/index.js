@@ -3,6 +3,9 @@ const fs = require("fs");
 const path = require("path");
 const dayjs = require("dayjs");
 require("dayjs/locale/fr");
+
+const { capture } = require("../../sentry");
+
 const { getSignedUrl, getBaseUrl, sanitizeAll } = require("../../utils");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const SessionPhase1 = require("../../models/sessionPhase1");
@@ -42,7 +45,7 @@ const render = async (young) => {
 
   try {
     if (!["AFFECTED", "DONE", "NOT_DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
-    if (!young.sessionPhase1Id || (!young.meetingPointId && young.deplacementPhase1Autonomous !== "true")) throw `young ${young.id} unauthorized`;
+    if (!young.sessionPhase1Id || (!young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.source !== "CLE")) throw `young ${young.id} unauthorized`;
     const session = await SessionPhase1.findById(young.sessionPhase1Id);
     if (!session) throw `session ${young.sessionPhase1Id} not found for young ${young._id}`;
     const center = await CohesionCenterModel.findById(session.cohesionCenterId);
@@ -125,6 +128,7 @@ const render = async (young) => {
         .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
     }
   } catch (e) {
+    capture(e);
     throw e;
   }
 };
@@ -205,13 +209,13 @@ const renderLocalTransport = async (young) => {
       .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
       .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()));
   } catch (e) {
+    capture(e);
     throw e;
   }
 };
 
 const cohesion = async (young) => {
-  // if (isFromDOMTOM(young)) return renderDOMTOM(young);
-  if (young?.transportInfoGivenByLocal === "true") return renderLocalTransport(young);
+  if (young?.transportInfoGivenByLocal === "true" && young.source !== "CLE") return renderLocalTransport(young);
   return render(young);
 };
 
