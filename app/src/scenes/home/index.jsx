@@ -1,10 +1,5 @@
-import { React, useEffect, useState } from "react";
+import { React } from "react";
 import { Redirect } from "react-router-dom";
-
-import Loader from "@/components/Loader";
-import { capture } from "@/sentry";
-import API from "@/services/api";
-import { toastr } from "react-redux-toastr";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToPhase2, hasAccessToReinscription, wasYoungExcluded } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
@@ -23,7 +18,7 @@ import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
+import { IS_INSCRIPTION_OPEN_CLE, isCohortExpired } from "snu-lib";
 
 export default function Home() {
   useDocumentTitle("Accueil");
@@ -34,16 +29,20 @@ export default function Home() {
   const renderStep = () => {
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
-    if (["2019", "2020"].includes(young.cohort)) {
-      return <DelaiDepasse />;
-    }
-
     if (hasAccessToReinscription(young)) {
       return <WaitingReinscription />;
     }
 
-    if ([YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status)) {
+    const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
+
+    if (hasWithdrawn) {
       return <Withdrawn />;
+    }
+
+    const isActiveInPhase2 = [YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.WAITING_REALISATION].includes(young.statusPhase2);
+
+    if (isCohortExpired(young) && isActiveInPhase2) {
+      return <DelaiDepasse />;
     }
 
     if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
