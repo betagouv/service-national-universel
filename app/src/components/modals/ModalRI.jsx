@@ -12,13 +12,11 @@ const ModalRI = ({ isOpen = false, onAccept: handleAccept = () => {} }) => {
       </Modal.Header>
       <Modal.Content>
         Dans le cadre de votre participation au SNU, nous vous demandons de bien vouloir accepter le nouveau{" "}
-        <a
-          className="text-blue-800 underline"
-          href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf"
-          target="_blank"
-          rel="noreferrer">
+        <span
+          className="text-blue-800 underline cursor-pointer"
+          onClick={() => window.open("https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf", "_blank").focus()}>
           règlement intérieur
-        </a>
+        </span>
         .
       </Modal.Content>
       <Modal.Footer>
