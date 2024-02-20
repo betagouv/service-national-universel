@@ -107,6 +107,7 @@ export function permissionPhase3(y) {
 
 // from the end of the cohort's last day
 export function isYoungCanApplyToPhase2Missions(young) {
+  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
   return isCohortDone(young.cohort, 1) && hasYoungPhase1DoneOrExempted;
 }
