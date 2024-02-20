@@ -25,10 +25,12 @@ const DEFAULT_OPTIONS = {
 };
 
 const renderFromHtml = async (html, options) => {
+  console.log("Rendering HTML to PDF with options:", options);
   try {
     const { browser, page } = await getBrowserAndPage(options);
     await page.setContent(html, options?.navigation ?? {});
     const pdfOptions = options ?? {};
+    console.log("Generating PDF with options:", pdfOptions);
     const buffer = await page.pdf({
       ...DEFAULT_OPTIONS,
       ...pdfOptions,
@@ -38,13 +40,14 @@ const renderFromHtml = async (html, options) => {
 
     return buffer;
   } catch (error) {
-    console.log(error);
+    console.log("Error rendering HTML to PDF:", error);
     capture(error);
   }
 };
 
 const getBrowserAndPage = async (options) => {
   try {
+    console.log("Launching browser with options:", options?.launch);
     const browser = await puppeteer.launch(
       options?.launch ?? { headless: "new" }
     );
@@ -56,7 +59,7 @@ const getBrowserAndPage = async (options) => {
 
     return { browser, page };
   } catch (error) {
-    console.log(error);
+    console.log("Error launching browser:", error);
     capture(error);
   }
 };
