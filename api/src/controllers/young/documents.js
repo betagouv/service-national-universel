@@ -95,30 +95,31 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     console.log("6");
+    const testURL = `https://` + config.API_PDF_ENDPOINT;
+    console.log("TESTURL", testURL);
+    const getPDF = async () =>
+      await fetch(testURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+      }).then((response) => {
+        // ! On a retravaillé pour faire passer les tests
+        if (response.status && response.status !== 200) throw new Error("Error with PDF service");
+        res.set({
+          "content-length": response.headers.get("content-length"),
+          "content-disposition": `inline; filename="test.pdf"`,
+          "content-type": "application/pdf",
+          "cache-control": "public, max-age=1",
+        });
+        response.body.pipe(res);
+        if (res.statusCode !== 200) throw new Error("Error with PDF service");
+        response.body.on("error", (e) => {
+          console.log("ERRaaaaa", e);
 
-    const getPDF = async () => console.log("Calling PDF service at URL:", config.API_PDF_ENDPOINT);
-    await fetch(config.API_PDF_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-      body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
-    }).then((response) => {
-      // ! On a retravaillé pour faire passer les tests
-      if (response.status && response.status !== 200) throw new Error("Error with PDF service");
-      res.set({
-        "content-length": response.headers.get("content-length"),
-        "content-disposition": `inline; filename="test.pdf"`,
-        "content-type": "application/pdf",
-        "cache-control": "public, max-age=1",
+          capture(e);
+          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+        });
       });
-      response.body.pipe(res);
-      if (res.statusCode !== 200) throw new Error("Error with PDF service");
-      response.body.on("error", (e) => {
-        console.log("ERRaaaaa", e);
-
-        capture(e);
-        res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-      });
-    });
     try {
       await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
     } catch (e) {
