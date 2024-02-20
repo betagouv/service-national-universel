@@ -48,9 +48,11 @@ const renderFromHtml = async (html, options) => {
 const getBrowserAndPage = async (options) => {
   try {
     console.log("Launching browser with options:", options?.launch);
-    const browser = await puppeteer.launch(
-      options?.launch ?? { headless: "new" }
-    );
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      ...options?.launch,
+    });
     const page = await browser.newPage();
 
     if (options?.emulateMedia) {
