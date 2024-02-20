@@ -334,7 +334,7 @@ function ConsentementForm({ young, token, step, parentId }) {
                     </Check>
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
                       Reconnais avoir pris connaissance du{" "}
-                      <a href={CDN_BASE_URL + "/file/snu-reglement-interieur.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      <a href={CDN_BASE_URL + "/file/SNU-reglement-interieur-2024.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Règlement Intérieur du séjour de cohésion
                       </a>
                       .

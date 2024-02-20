@@ -1,12 +1,27 @@
 import PasswordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, REGLEMENT_INTERIEUR_VERSION } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
+
 function addOneDay(date) {
   const newDate = new Date(date);
   newDate.setDate(newDate.getDate() + 1);
   return newDate;
+}
+
+/*  
+  Un jeune doit réaccepter le Reglement intérieur si le départ de sa cohorte est 
+  apres la date de mise en place du dernier reglement (et s'il ne l'a pas déja 
+  accepté).
+*/
+export function shouldReAcceptRI(young, cohort) {
+  const newRiDate = new Date(REGLEMENT_INTERIEUR_VERSION);
+  const cohortStartDate = new Date(cohort?.dateStart);
+  if (cohortStartDate >= newRiDate && young?.acceptRI != REGLEMENT_INTERIEUR_VERSION) {
+    return true;
+  }
+  return false;
 }
 
 export function getPasswordErrorMessage(v) {

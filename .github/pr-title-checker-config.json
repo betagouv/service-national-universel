@@ -4,7 +4,7 @@
     "color": "EEEEEE"
   },
   "CHECKS": {
-    "regexp": "^(chore\\(|feat\\(|fix\\()(release,? ?|app,? ?|admin,? ?|misc,? ?|api,? ?)+\\) ?:.*$",
+    "regexp": "^(chore\\(|feat\\(|fix\\()(release,? ?|app,? ?|admin,? ?|misc,? ?|api,? ?|lib,? ?)+\\) ?:.*$",
     "regexpFlags": "i",
     "ignoreLabels" : ["bypass title", "meta"]
   },
