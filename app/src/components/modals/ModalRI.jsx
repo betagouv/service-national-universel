@@ -11,7 +11,7 @@ const ModalRI = ({ isOpen = false, onAccept: handleAccept = () => {} }) => {
         <h2 className="my-0 text-xl font-bold">Le règlement intérieur a été mis à jour</h2>
       </Modal.Header>
       <Modal.Content>
-        Dans le cadre du SNU, nous vous demandons de bien vouloir accepter le nouveau{" "}
+        Dans le cadre de votre participation au SNU, nous vous demandons de bien vouloir accepter le nouveau{" "}
         <a
           className="text-blue-800 underline"
           href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf"
