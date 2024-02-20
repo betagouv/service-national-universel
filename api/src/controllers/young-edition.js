@@ -495,6 +495,8 @@ function generateChanges(value, young) {
   setIfTrue(value.consent, "status", YOUNG_STATUS.WAITING_VALIDATION);
   setIfTrue(value.consent, "parent1AllowSNU", "true");
   setIfTrue(value.consent, "parent1ValidationDate", new Date());
+  setIfTrue(value.consent && young.inscriptionStep2023 === "WAITING_CONSENT", "inscriptionStep2023", "DONE");
+  setIfTrue(value.consent && young.reinscriptionStep2023 === "WAITING_CONSENT", "reinscriptionStep2023", "DONE");
 
   setIfTrue(value.imageRights, "parent1AllowImageRights", "true");
 
