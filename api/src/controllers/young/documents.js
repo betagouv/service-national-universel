@@ -65,6 +65,7 @@ const TIMEOUT_PDF_SERVICE = 15000;
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     console.log("CALLING PDF 1");
+    console.log("PDF ENDPOINT", config.API_PDF_ENDPOINT);
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
       .validate(req.params, { stripUnknown: true });
@@ -73,22 +74,27 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { id, type, template } = value;
-
+    console.log("2");
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log("3");
 
     // A young can only download their own documents.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
+    console.log("4");
 
     const applications = await ApplicationObject.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, type, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
+    console.log("5");
+
     // Create html
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log("6");
 
     const getPDF = async () => console.log("Calling PDF service at URL:", config.API_PDF_ENDPOINT);
     await fetch(config.API_PDF_ENDPOINT, {
@@ -107,6 +113,8 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
       response.body.pipe(res);
       if (res.statusCode !== 200) throw new Error("Error with PDF service");
       response.body.on("error", (e) => {
+        console.log("ERRaaaaa", e);
+
         capture(e);
         res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
       });
@@ -114,6 +122,8 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     try {
       await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
     } catch (e) {
+      console.log("EEEEERR", e);
+
       res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
       capture(e);
     }
