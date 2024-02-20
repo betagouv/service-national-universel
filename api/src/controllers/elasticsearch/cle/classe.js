@@ -151,10 +151,8 @@ const populateWithPdrInfo = async (classes) => {
 };
 
 const populateWithYoungsInfo = async (classes) => {
-  const batchSize = 20;
+  const batchSize = 50;
   const numBatches = Math.ceil(classes.length / batchSize);
-
-  let count = 0;
 
   for (let i = 0; i < numBatches; i++) {
     const batchStart = i * batchSize;
@@ -182,7 +180,6 @@ const populateWithYoungsInfo = async (classes) => {
     });
 
     const updatedClasses = await Promise.all(classesPromises);
-    console.log("🚀 ~ file: classe.js:184 ~ populateWithYoungsInfo ~ updatedClasses:", count++);
     for (let j = batchStart, k = 0; j < batchEnd; j++, k++) {
       classes[j] = updatedClasses[k];
     }
