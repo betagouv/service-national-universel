@@ -367,6 +367,7 @@ function validateYoung(young, user) {
     invitationExpires: Joi.string().allow(null, ""),
     cniFiles: Joi.array().items(Joi.string().allow(null, "")),
     acceptCGU: Joi.string().allow(null, ""),
+    acceptRI: Joi.string().allow(null, ""),
     cohesionStayPresence: Joi.string().allow(null, ""),
     presenceJDM: Joi.string().allow(null, ""),
     departSejourAt: Joi.string().allow(null, ""),

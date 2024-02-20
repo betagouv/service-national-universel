@@ -238,6 +238,8 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 
     const obj = { ...value };
 
+    obj.acceptRI = REGLEMENT_INTERIEUR_VERSION;
+
     const formatedDate = new Date(obj.birthdateAt).setUTCHours(11, 0, 0);
     obj.birthdateAt = formatedDate;
 
