@@ -15,6 +15,7 @@ async function scanFile(tempFilePath, name, userId) {
               port: 3310,
               timeout: 30000,
               socket: null,
+              tls: true,
             },
           }
         : {
