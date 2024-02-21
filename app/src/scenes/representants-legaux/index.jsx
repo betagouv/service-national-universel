@@ -11,6 +11,7 @@ import MobileCniInvalideDone from "./mobile/cni-invalide-done";
 import MobileTokenInvalide from "./mobile/token-invalide";
 import MobileImageRights from "./mobile/image-rights";
 import MobileImageRightsDone from "./mobile/image-rights-done";
+import RiConsentement from "./mobile/RiConsentement";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import FranceConnectCallback from "./components/FranceConnectCallback";
@@ -32,6 +33,7 @@ const STEPS = {
   IMAGE_RIGHTS_DONE: "IMAGE_RIGHTS_DONE",
   IMAGE_RIGHTS_PARENT2: "IMAGE_RIGHTS_PARENT2",
   IMAGE_RIGHTS_DONE_PARENT2: "IMAGE_RIGHTS_DONE_PARENT2",
+  RI_CONSENTEMENT: "RI_CONSENTEMENT",
 };
 
 const Step = ({ step }) => {
@@ -43,6 +45,7 @@ const Step = ({ step }) => {
     if (step === STEPS.PRESENTATION) return <MobilePresentation step={step} parentId={1} />;
     if (step === STEPS.VERIFICATION) return <MobileVerification step={step} parentId={1} />;
     if (step === STEPS.CONSENTEMENT) return <MobileConsentement step={step} parentId={1} />;
+    if (step === STEPS.RI_CONSENTEMENT) return <MobileImageRightsDone step={step} parentId={1} />;
     if (step === STEPS.DONE) return <MobileDone step={step} parentId={1} />;
 
     if (step === STEPS.PRESENTATION_PARENT2) return <MobilePresentation step={step} parentId={2} />;
@@ -77,6 +80,7 @@ export default function Index() {
           "/representants-legaux/done",
           "/representants-legaux/droits-image",
           "/representants-legaux/droits-image-done",
+          "/representants-legaux/ri-consentement",
         ]}
         component={() => (
           <Switch>
@@ -89,6 +93,7 @@ export default function Index() {
               <SentryRoute path="/representants-legaux/done" component={() => <Step step={STEPS.DONE} />} />
               <SentryRoute path="/representants-legaux/droits-image" component={() => <Step step={STEPS.IMAGE_RIGHTS} />} />
               <SentryRoute path="/representants-legaux/droits-image-done" component={() => <Step step={STEPS.IMAGE_RIGHTS_DONE} />} />
+              <SentryRoute path="/representants-legaux/ri-consentement" component={() => <RiConsentement step={STEPS.RI_CONSENTEMENT} />} />
             </RepresentantsLegauxContextProvider>
           </Switch>
         )}
