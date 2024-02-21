@@ -3,16 +3,34 @@ import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegaux
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import Loader from "@/components/Loader";
 import { useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import { API_RI } from "../commons";
+import api from "../../../services/api";
 
-export default function RiConsentement() {
+export default function RiConsentement({ parentId }) {
   const history = useHistory();
   const { young, token } = useContext(RepresentantsLegauxContext);
 
-  function onSubmit() {
-    history.push(`/representants-legaux/done?token=${token}&fromRI=true`);
-  }
+  const handleAcceptRI = async () => {
+    const body = { _id: young._id };
+    try {
+      const { ok, code } = await api.post(API_RI + `?token=${token}&parent=${parentId}`, body);
+      if (!ok) {
+        throw new Error(`Erreur lors de l'envoi de la requête : ${code}`);
+      }
+
+      history.push(`/representants-legaux/done?token=${token}&fromRI=true`);
+    } catch (error) {
+      console.error("Erreur lors de l'envoi de la requête", error);
+      toastr.error(error.message);
+    }
+  };
+
+  const onSubmit = () => {
+    handleAcceptRI();
+  };
   //   J’accepte le règlement intérieur
   if (!young) return <Loader />;
 

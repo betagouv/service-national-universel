@@ -93,7 +93,7 @@ export default function Index() {
               <SentryRoute path="/representants-legaux/done" component={() => <Step step={STEPS.DONE} />} />
               <SentryRoute path="/representants-legaux/droits-image" component={() => <Step step={STEPS.IMAGE_RIGHTS} />} />
               <SentryRoute path="/representants-legaux/droits-image-done" component={() => <Step step={STEPS.IMAGE_RIGHTS_DONE} />} />
-              <SentryRoute path="/representants-legaux/ri-consentement" component={() => <RiConsentement step={STEPS.RI_CONSENTEMENT} />} />
+              <SentryRoute path="/representants-legaux/ri-consentement" component={() => <RiConsentement step={STEPS.RI_CONSENTEMENT} parentId={1} />} />
             </RepresentantsLegauxContextProvider>
           </Switch>
         )}
