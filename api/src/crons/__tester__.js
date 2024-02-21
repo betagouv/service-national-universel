@@ -19,6 +19,9 @@
     case "reminder/inscription":
       await require("./reminderInscription").handler();
       break;
+    case "parent-revalidate-ri":
+      await require("./parentRevalidateRI").handler();
+      break;
   }
   process.exit(0);
 })();
