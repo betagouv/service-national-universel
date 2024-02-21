@@ -151,29 +151,28 @@ const populateWithPdrInfo = async (classes) => {
 };
 
 const populateWithYoungsInfo = async (classes) => {
-  return Promise.all(
-    classes.map(async (item) => {
-      const students = await allRecords("young", {
-        bool: {
-          must: [
-            {
-              match: {
-                classeId: item._id,
-              },
-            },
-          ],
-        },
-      });
+  const classesIds = classes.map((item) => item._id);
+  const students = await allRecords("young", { bool: { must: [{ terms: { classeId: classesIds } }] } });
 
-      item.studentInProgress = students.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length;
-      item.studentWaiting = students.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length;
-      item.studentValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length;
-      item.studentAbandoned = students.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length;
-      item.studentNotAutorized = students.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length;
-      item.studentWithdrawn = students.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length;
-      return item;
-    }),
-  );
+  //count students by class
+  const result = students.reduce((acc, cur) => {
+    if (!acc[cur.classeId]) {
+      acc[cur.classeId] = [];
+    }
+    acc[cur.classeId].push(cur);
+    return acc;
+  }, {});
+
+  //populate classes with students count
+  return classes.map((item) => {
+    item.studentInProgress = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length;
+    item.studentWaiting = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length;
+    item.studentValidated = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length;
+    item.studentAbandoned = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length;
+    item.studentNotAutorized = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length;
+    item.studentWithdrawn = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length;
+    return item;
+  });
 };
 
 module.exports = router;
