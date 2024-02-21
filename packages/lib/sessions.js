@@ -248,7 +248,7 @@ function shouldForceRedirectToReinscription(young) {
   );
 }
 
-const isCohortExpired = (young) => ["2019", "2020"].includes(young.cohort);
+const isCohortTooOld = (young) => ["2019", "2020"].includes(young.cohort);
 
 function hasAccessToReinscription(young) {
   if (isCle(young)) {
@@ -260,7 +260,7 @@ function hasAccessToReinscription(young) {
   if (new Date(young.createdAt) > new Date(2023, 9, 1)) {
     return false;
   }
-  if (isCohortExpired(young)) {
+  if (isCohortTooOld(young)) {
     return false;
   }
 
@@ -310,7 +310,7 @@ export {
   shouldForceRedirectToReinscription,
   shouldForceRedirectToInscription,
   hasAccessToReinscription,
-  isCohortExpired,
+  isCohortTooOld,
   canApplyToPhase2,
   getCohortStartDate,
   getCohortEndDate,

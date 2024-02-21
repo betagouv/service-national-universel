@@ -1,7 +1,7 @@
 import { React } from "react";
 import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToPhase2, hasAccessToReinscription, wasYoungExcluded } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription } from "../../utils";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
@@ -18,7 +18,7 @@ import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import { IS_INSCRIPTION_OPEN_CLE, isCohortExpired } from "snu-lib";
+import { IS_INSCRIPTION_OPEN_CLE, isCohortTooOld } from "snu-lib";
 
 export default function Home() {
   useDocumentTitle("Accueil");
@@ -40,8 +40,9 @@ export default function Home() {
     }
 
     const hasCompletedPhase2 = [YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(young.statusPhase2);
+    const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
 
-    if (isCohortExpired(young) && !hasCompletedPhase2) {
+    if (isCohortTooOld(young) && !hasCompletedPhase2 && !hasMission) {
       return <DelaiDepasse />;
     }
 
