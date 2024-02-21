@@ -18,7 +18,8 @@
     "app",
     "admin",
     "api",
-    "analytics"
+    "analytics",
+    "antivirus"
   ],
   "engines": {
     "node": "^18.16.0",
