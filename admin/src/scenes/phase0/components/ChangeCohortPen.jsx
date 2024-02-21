@@ -117,7 +117,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 <Select
                   className="text-left"
                   placeholder="Choix de la nouvelle cohorte"
-                  options={cohorts?.map((c) => ({ ...c, label: `Cohorte ${c.name}${!c.isEligible ? " (non éligible)" : null}`, value: c.name }))}
+                  options={cohorts?.map((c) => ({ ...c, label: `Cohorte ${c.name}${!c.isEligible ? " (non éligible)" : " (éligible)"}`, value: c.name }))}
                   noOptionsMessage={"Aucune cohorte éligible n'est disponible."}
                   closeMenuOnSelect
                   isClearable={true}

@@ -73,7 +73,6 @@ import Tabrulesyoungpng_6 from "../../assets/tabRulesYoung.png";
 import Toolspng_7 from "../../assets/tools.png";
 import Trophysvg_7 from "../../assets/trophy.svg";
 import Validatedphase2png_7 from "../../assets/validatedPhase2.png";
-import Validatedphase2mobilepng_7 from "../../assets/validatedPhase2Mobile.png";
 import Warningpng_7 from "../../assets/warning.png";
 import Cninewbackjpg_2 from "../../assets/IDProof/cniNewBack.jpg";
 import Cninewdatejpg_2 from "../../assets/IDProof/cniNewDate.jpg";
@@ -417,10 +416,6 @@ export default function AssetsPresentationPage() {
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="validatedphase2.png">
             <img src={Validatedphase2png_7} alt="validatedPhase2.png" crossOrigin="anonymous" className="" />
             <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">validatedPhase2.png</div>
-          </div>
-          <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="validatedphase2mobile.png">
-            <img src={Validatedphase2mobilepng_7} alt="validatedPhase2Mobile.png" crossOrigin="anonymous" className="" />
-            <div className="absolute top-[100%] left-[0] right-[0] mt-1 text-sm font-regular text-[#808080]">validatedPhase2Mobile.png</div>
           </div>
           <div className="border-[1px] border-[#AAAAAA] bg-[#DDDDDD] p-4 relative mb-8 rounded-md flex items-center justify-center" data-name="warning.png">
             <img src={Warningpng_7} alt="warning.png" crossOrigin="anonymous" className="" />

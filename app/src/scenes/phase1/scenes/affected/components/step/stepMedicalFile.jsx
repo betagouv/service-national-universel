@@ -7,7 +7,7 @@ import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
 import ConfirmationModal from "../../../../../../components/ui/modals/ConfirmationModal";
 import MedicalFileModal from "../../../../components/MedicalFileModal";
 import { StepCard } from "../StepCard";
-import { HiEye, HiInformationCircle, HiMail, HiOutlineDownload, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiMail, HiOutlineDownload, HiOutlineInformationCircle } from "react-icons/hi";
 import { setYoung } from "@/redux/auth/actions";
 import { useDispatch, useSelector } from "react-redux";
 

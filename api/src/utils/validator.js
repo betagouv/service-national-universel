@@ -198,7 +198,16 @@ function validateContract(program) {
 }
 
 function validateFirstName() {
-  return Joi.string().custom((value) => (value ? value.replace(/(?<=^|\s)\S+/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null));
+  const formatPart = (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+
+  return Joi.string().custom((value) =>
+    value
+      ? value.replace(/(?<=^|\s)\S+/g, (txt) => {
+          const parts = txt.split("-");
+          return parts.length > 1 ? parts.map(formatPart).join("-") : formatPart(txt);
+        })
+      : null,
+  );
 }
 
 const applicationKeys = {
@@ -358,6 +367,7 @@ function validateYoung(young, user) {
     invitationExpires: Joi.string().allow(null, ""),
     cniFiles: Joi.array().items(Joi.string().allow(null, "")),
     acceptCGU: Joi.string().allow(null, ""),
+    acceptRI: Joi.string().allow(null, ""),
     cohesionStayPresence: Joi.string().allow(null, ""),
     presenceJDM: Joi.string().allow(null, ""),
     departSejourAt: Joi.string().allow(null, ""),

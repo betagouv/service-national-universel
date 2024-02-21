@@ -8,7 +8,7 @@ import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
 import { HiPlus, HiUsers, HiOutlineOfficeBuilding, HiChevronDown } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, translateStatusClasse } from "snu-lib";
+import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
 
@@ -97,12 +97,11 @@ export default function List() {
         title="Liste de mes classes"
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes" }]}
         actions={[
-          //Bouton a activer si la création de classe est ouverte pour les admin CLE
-          /*           [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
+          [ROLES.ADMINISTRATEUR_CLE].includes(user.role) && IS_CREATION_CLASSE_OPEN_CLE && (
             <Link key="list" to="/classes/create" className="ml-2">
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
-          ), */
+          ),
           [ROLES.ADMIN].includes(user.role) && <Button rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} />,
         ].filter(Boolean)}
       />
@@ -248,10 +247,18 @@ function exportExcelSheet({ data: classes, type }) {
     sheetData = classes.map((c) => ({
       cohort: c.cohort,
       id: c._id.toString(),
+      name: c.name,
+      coloration: c.coloration,
       updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
       region: c.etablissement?.region,
       department: c.etablissement?.department,
       youngsVolume: c.totalSeats ?? 0,
+      studentInProgress: c.studentInProgress,
+      studentWaiting: c.studentWaiting,
+      studentValidated: c.studentValidated,
+      studentAbandoned: c.studentAbandoned,
+      studentNotAutorized: c.studentNotAutorized,
+      studentWithdrawn: c.studentWithdrawn,
       centerId: c.cohesionCenterId,
       centerName: c.cohesionCenter ? `${c.cohesionCenter?.name}, ${c.cohesionCenter?.address}, ${c.cohesionCenter?.zip} ${c.cohesionCenter?.city}` : "",
       centerDepartment: c.cohesionCenter?.department,
@@ -279,10 +286,18 @@ function exportExcelSheet({ data: classes, type }) {
     headers = [
       "Cohorte",
       "ID de la classe",
+      "Nom de la classe",
+      "Coloration",
       "Date de dernière modification",
       "Région des volontaires",
       "Département des volontaires",
-      "Nombre d'élèves",
+      "Nombre de places total",
+      "Nombre d'élèves en cours",
+      "Nombre d'élèves en attente",
+      "Nombre d'élèves validés",
+      "Nombre d'élèves abandonnés",
+      "Nombre d'élèves non autorisés",
+      "Nombre d'élèves désistés",
       "ID centre",
       "Désignation du centre",
       "Département du centre",
