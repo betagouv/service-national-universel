@@ -64,6 +64,7 @@ const {
   youngCanDeleteAccount,
   REGLEMENT_INTERIEUR_VERSION,
 } = require("snu-lib");
+const { APP_URL } = require("../../config");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
@@ -458,6 +459,15 @@ router.put("/accept-ri", passport.authenticate("young", { session: false, failWi
 
     young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
     await young.save({ fromUser: req.user });
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: {
+        cta: `${APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
