@@ -2,7 +2,7 @@ import { React } from "react";
 import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription } from "../../utils";
-import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
+import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
@@ -18,11 +18,12 @@ import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import { IS_INSCRIPTION_OPEN_CLE, isCohortTooOld } from "snu-lib";
+import { isCohortTooOld } from "snu-lib";
 
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
+  const cohort = getCohort(young.cohort);
 
   if (!young) return <Redirect to="/auth" />;
 
@@ -62,7 +63,8 @@ export default function Home() {
 
     if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
-      if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !IS_INSCRIPTION_OPEN_CLE) {
+      const isCohortInstructionOpen = new Date() < new Date(cohort.instructionEndDate);
+      if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !isCohortInstructionOpen) {
         return <InscriptionClosedCLE />;
       }
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
