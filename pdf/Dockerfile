@@ -27,13 +27,17 @@ RUN apk add --no-cache \
       nss \
       freetype \
       harfbuzz \
-      ca-certificates \
-      ttf-freefont \
-      libstdc++
+      ca-certificates
+
 
 COPY --chown=node:node --from=build /build/out .
 
 LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel"
+
+# Create a non-root user and switch to it
+RUN adduser -D appuser
+USER appuser
+
 
 EXPOSE $PORT
 
