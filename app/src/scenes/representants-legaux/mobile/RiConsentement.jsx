@@ -19,7 +19,7 @@ export default function RiConsentement() {
   return (
     <>
       <DSFRLayout>
-        <DSFRContainer className="sm:m-0 sm:pt-0">
+        <DSFRContainer>
           <div className="flex flex-col gap-4">
             <hr className="my-2 h-px border-0 bg-gray-200 md:hidden" />
             <div className="flex items-center gap-4">
