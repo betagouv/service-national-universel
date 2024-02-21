@@ -1,3 +1,16 @@
+# [1.381.0](https://github.com/betagouv/service-national-universel/compare/v1.380.0...v1.381.0) (2024-02-21)
+
+
+### Bug Fixes
+
+* **api, admin:** export classe schema de repartition ([#3603](https://github.com/betagouv/service-national-universel/issues/3603)) ([b46dc3b](https://github.com/betagouv/service-national-universel/commit/b46dc3b7770ff40ab034bb9749a0a7057fb7915d))
+
+
+### Features
+
+* **api:** block some jvaStructure ([#3604](https://github.com/betagouv/service-national-universel/issues/3604)) ([0f14788](https://github.com/betagouv/service-national-universel/commit/0f147884d53cb02ff593a4223c122ff2f7807dfb))
+* **app:** 1769 - Ecran "Désisté" pour les CLE ([#3589](https://github.com/betagouv/service-national-universel/issues/3589)) ([03a6f22](https://github.com/betagouv/service-national-universel/commit/03a6f22b35bf743b070a9feaabd9f6cca4c30864))
+
 # [1.380.0](https://github.com/betagouv/service-national-universel/compare/v1.379.0...v1.380.0) (2024-02-20)
 
 
