@@ -569,7 +569,7 @@ const MINISTRES = [
     template: "certificates/certificateTemplate2023.png",
   },
   {
-    date_end: "08-18-2100", // ! Changer ici à l'ajout d'un nouveau
+    date_end: "02-15-2024",
     ministres: [
       "Gabriel Attal, Ministre de l’Éducation Nationale et de la Jeunesse",
       "Sébastien Lecornu, Ministre des Armées",
@@ -577,6 +577,11 @@ const MINISTRES = [
       chargée de la Jeunesse et du Service national universel",
     ],
     template: "certificates/certificateTemplate2023-08-18.png",
+  },
+  {
+    date_end: "02-16-2050", // ! Changer ici à l'ajout d'un nouveau
+    ministres: ["Corinne Orzechowski, Déléguée générale au Service Nationale Universel"],
+    template: "certificates/certificateTemplate_2024.png",
   },
 ];
 
@@ -603,6 +608,7 @@ const ENGAGEMENT_TYPES = [
   "Engagements lycéens",
   "Préparation militaire hors offre MIG des armées",
   "Escadrilles Air Jeunesse (EAJ)",
+  "Autre",
 ];
 
 const UNSS_TYPE = [
@@ -934,6 +940,9 @@ const COHORT_TYPE = {
   CLE: "CLE",
 };
 
+// Version courante du reglement intérieur, au format date, cela permet de vérifier si un jeune doit le revalider avant son départ en séjour.
+const REGLEMENT_INTERIEUR_VERSION = "2024-03-01";
+
 const CLE_TYPE_LIST = Object.values(CLE_TYPE);
 const CLE_SECTOR_LIST = Object.values(CLE_SECTOR);
 const CLE_GRADE_LIST = Object.values(CLE_GRADE);
@@ -1012,6 +1021,7 @@ export {
   CLE_FILIERE_LIST,
   IS_INSCRIPTION_OPEN_CLE,
   IS_CREATION_CLASSE_OPEN_CLE,
+  REGLEMENT_INTERIEUR_VERSION,
 };
 export default {
   YOUNG_STATUS,
@@ -1077,4 +1087,5 @@ export default {
   CLE_COLORATION_LIST,
   IS_INSCRIPTION_OPEN_CLE,
   IS_CREATION_CLASSE_OPEN_CLE,
+  REGLEMENT_INTERIEUR_VERSION,
 };

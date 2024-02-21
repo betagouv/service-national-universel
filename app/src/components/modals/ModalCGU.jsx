@@ -3,12 +3,12 @@ import Modal from "../ui/modals/Modal";
 import ButtonPrimary from "../ui/buttons/ButtonPrimary";
 import ExternalLinkPrimary from "../ui/links/ExternalLinkPrimary";
 import { appURL } from "../../config";
-import Danger from "../../assets/icons/Danger";
+import DangerCircled from "../../assets/icons/DangerCircled";
 
 const ModalCGU = ({ isOpen = false, onAccept: handleAccept = () => {} }) => (
   <Modal isOpen={isOpen} className="w-[512px] rounded-xl bg-white p-6">
     <Modal.Header>
-      <Danger />
+      <DangerCircled />
       <h2 className="my-0 text-xl font-bold">Conditions générales d&apos;utilisation</h2>
     </Modal.Header>
     <Modal.Content>
