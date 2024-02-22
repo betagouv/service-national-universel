@@ -31,6 +31,7 @@ export default function RiConsentement({ parentId }) {
   const onSubmit = () => {
     handleAcceptRI();
   };
+  
   //   J’accepte le règlement intérieur
   if (!young) return <Loader />;
 
