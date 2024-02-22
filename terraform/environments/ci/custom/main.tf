@@ -80,7 +80,7 @@ resource "scaleway_container_namespace" "main" {
 resource "scaleway_container" "antivirus" {
   name            = "${local.env}-antivirus"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = clamav/clamav:1.2
+  registry_image  = "clamav/clamav:1.2"
   port            = 3310
   cpu_limit       = 512
   memory_limit    = 2048
