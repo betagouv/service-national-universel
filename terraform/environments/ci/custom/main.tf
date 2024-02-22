@@ -89,7 +89,6 @@ resource "scaleway_container" "antivirus" {
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"
-  protocol        = "unknown_protocol"
 }
 
 resource "scaleway_domain_record" "antivirus" {
