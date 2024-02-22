@@ -3,26 +3,32 @@ const esClient = require("../es");
 // Variables should be renamed to avoid confusion.
 async function* scrollSearch(params, client) {
   let response = await client.search(params);
+  let scrollId = response.body._scroll_id; // Capture the initial scroll ID
 
-  while (true) {
-    const sourceHits = response.body.hits.hits;
+  try {
+    while (true) {
+      const sourceHits = response.body.hits.hits;
 
-    if (sourceHits.length === 0) {
-      break;
+      if (sourceHits.length === 0) {
+        break;
+      }
+
+      for (const hit of sourceHits) {
+        yield hit;
+      }
+
+      response = await client.scroll({
+        scrollId,
+        scroll: params.scroll,
+      });
+
+      scrollId = response.body._scroll_id; // Update the scroll ID if needed
     }
-
-    for (const hit of sourceHits) {
-      yield hit;
+  } finally {
+    // Ensure the scroll context is closed even if there's an error
+    if (scrollId) {
+      await client.clearScroll({ scrollId: scrollId });
     }
-
-    if (!response.body._scroll_id) {
-      break;
-    }
-
-    response = await client.scroll({
-      scrollId: response.body._scroll_id,
-      scroll: params.scroll,
-    });
   }
 }
 
