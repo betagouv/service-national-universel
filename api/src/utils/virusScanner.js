@@ -11,10 +11,11 @@ async function scanFile(tempFilePath, name, userId) {
         ? {
             removeInfected: true,
             clamdscan: {
-              host: "127.0.0.1",
+              host: SCALEWAY_CLAMSCAN,
               port: 3310,
               timeout: 30000,
               socket: null,
+              tls: true,
             },
           }
         : {

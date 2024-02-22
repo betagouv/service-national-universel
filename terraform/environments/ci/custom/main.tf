@@ -36,6 +36,7 @@ locals {
   api_hostname   = "api.${local.env}.${local.domain}"
   admin_hostname = "admin.${local.env}.${local.domain}"
   app_hostname   = "moncompte.${local.env}.${local.domain}"
+  antivirus_hostname   = "antivirus.${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -76,6 +77,33 @@ resource "scaleway_container_namespace" "main" {
   description = "SNU container namespace for environment '${local.env}'"
 }
 
+resource "scaleway_container" "antivirus" {
+  name            = "${local.env}-antivirus"
+  namespace_id    = scaleway_container_namespace.main.id
+  registry_image  = clamav/clamav:1.2
+  port            = 3310
+  cpu_limit       = 512
+  memory_limit    = 2048
+  min_scale       = 1
+  max_scale       = 1
+  timeout         = 60
+  max_concurrency = 50
+  privacy         = "public"
+}
+
+resource "scaleway_domain_record" "antivirus" {
+  dns_zone = scaleway_domain_zone.main.id
+  name     = "api"
+  type     = "CNAME"
+  data     = "${scaleway_container.antivirus.domain_name}."
+  ttl      = 300
+}
+
+resource "scaleway_container_domain" "antivirus" {
+  container_id = scaleway_container.antivirus.id
+  hostname     = local.antivirus_hostname
+}
+
 # Containers
 resource "scaleway_container" "api" {
   name            = "${local.env}-api"
@@ -99,6 +127,7 @@ resource "scaleway_container" "api" {
     "CLE"        = "true"
     "STAGING"    = "true"
     "FOLDER_API" = "api"
+    "SCALEWAY_CLAMSCAN" = local.antivirus_hostname
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.1
     "SENTRY_RELEASE"                    = var.api_image_tag
