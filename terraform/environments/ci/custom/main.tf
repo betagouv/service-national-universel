@@ -83,7 +83,7 @@ resource "scaleway_container" "antivirus" {
   registry_image  = "clamav/clamav:1.2"
   port            = 3310
   cpu_limit       = 512
-  memory_limit    = 2048
+  memory_limit    = 4096
   min_scale       = 1
   max_scale       = 1
   timeout         = 60
