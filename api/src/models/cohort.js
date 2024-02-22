@@ -31,6 +31,7 @@ const Schema = new mongoose.Schema({
   snuId: {
     type: String,
     required: true,
+    unique: true,
     documentation: {
       description: "Cohorte id (defined in snu lib)",
     },
