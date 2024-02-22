@@ -1,3 +1,17 @@
+# [1.382.0](https://github.com/betagouv/service-national-universel/compare/v1.381.0...v1.382.0) (2024-02-22)
+
+
+### Bug Fixes
+
+* **api:** Optimise ES scroll ([#3600](https://github.com/betagouv/service-national-universel/issues/3600)) ([ce39769](https://github.com/betagouv/service-national-universel/commit/ce39769385fe15de3936ba7101e9eee531080ccb))
+* **api:** snuId should be unique ([7ed8513](https://github.com/betagouv/service-national-universel/commit/7ed85134463d025c402105a016edb3ea6f9a4497))
+* **lib:** Ajout cohort 2024 mayotte ([d957f24](https://github.com/betagouv/service-national-universel/commit/d957f240a9a885e69835668ab1b9acf45e38b233))
+
+
+### Features
+
+* **admin:** CLE - Disable young validation after instruction end date [#3605](https://github.com/betagouv/service-national-universel/issues/3605) ([22902f7](https://github.com/betagouv/service-national-universel/commit/22902f7f7c2583f41fe619cba36f9deee7ef46df))
+
 # [1.381.0](https://github.com/betagouv/service-national-universel/compare/v1.380.0...v1.381.0) (2024-02-21)
 
 
