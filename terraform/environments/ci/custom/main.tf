@@ -93,7 +93,7 @@ resource "scaleway_container" "antivirus" {
 
 resource "scaleway_domain_record" "antivirus" {
   dns_zone = scaleway_domain_zone.main.id
-  name     = "api"
+  name     = "antivirus"
   type     = "CNAME"
   data     = "${scaleway_container.antivirus.domain_name}."
   ttl      = 300
