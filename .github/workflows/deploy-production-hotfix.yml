@@ -67,7 +67,7 @@ jobs:
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
           # We need to run api tests only if api has been modified in hotfix branch
-          diff=$(git log --oneline ${{ env.production_branch }}...${{ steps.target_branch.outputs.target_branch }} -- api packages | cut -d " " -f 1 | grep $api_image_tag)
+          diff=$(git log --oneline origin/${{ env.production_branch }}...${{ steps.target_branch.outputs.target_branch }} -- api packages | cut -d " " -f 1 | grep $api_image_tag)
           if [[ $diff ]] ; then
               echo "run_api_tests=1" >> $GITHUB_OUTPUT
           else

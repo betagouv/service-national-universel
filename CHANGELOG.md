@@ -1,3 +1,31 @@
+# [1.381.0](https://github.com/betagouv/service-national-universel/compare/v1.380.0...v1.381.0) (2024-02-21)
+
+
+### Bug Fixes
+
+* **api, admin:** export classe schema de repartition ([#3603](https://github.com/betagouv/service-national-universel/issues/3603)) ([b46dc3b](https://github.com/betagouv/service-national-universel/commit/b46dc3b7770ff40ab034bb9749a0a7057fb7915d))
+
+
+### Features
+
+* **api:** block some jvaStructure ([#3604](https://github.com/betagouv/service-national-universel/issues/3604)) ([0f14788](https://github.com/betagouv/service-national-universel/commit/0f147884d53cb02ff593a4223c122ff2f7807dfb))
+* **app:** 1769 - Ecran "Désisté" pour les CLE ([#3589](https://github.com/betagouv/service-national-universel/issues/3589)) ([03a6f22](https://github.com/betagouv/service-national-universel/commit/03a6f22b35bf743b070a9feaabd9f6cca4c30864))
+
+# [1.380.0](https://github.com/betagouv/service-national-universel/compare/v1.379.0...v1.380.0) (2024-02-20)
+
+
+### Bug Fixes
+
+* **api:** Do not import prod in files ([caa2cee](https://github.com/betagouv/service-national-universel/commit/caa2ceef3a8714c30990f2853b5c14cfec8878f4))
+* **api:** Le volontaire ne passe pas “en attente de validation” lorsque le consentement est donné depuis admin → Compte élève CLE bloqué sur en cours ([#3598](https://github.com/betagouv/service-national-universel/issues/3598)) ([b24890c](https://github.com/betagouv/service-national-universel/commit/b24890c1214861b6fa2a638462c0cde0a4b68f59))
+* **api/admin:** Add student status to export ([#3599](https://github.com/betagouv/service-national-universel/issues/3599)) ([4e97d56](https://github.com/betagouv/service-national-universel/commit/4e97d56a4402ff1b584a3f074203dadca2136e0a))
+* **lib:** Add sessions CLE to list ([40ea549](https://github.com/betagouv/service-national-universel/commit/40ea54904daae9778da3bfc0a3bf498f9aa8f031))
+
+
+### Features
+
+* **app, misc:** 1702, 1696 - Reglement intérieur popin + version ([#3592](https://github.com/betagouv/service-national-universel/issues/3592)) ([3ee9a95](https://github.com/betagouv/service-national-universel/commit/3ee9a9538427a5892502e83abf47f94a82133340))
+
 # [1.379.0](https://github.com/betagouv/service-national-universel/compare/v1.378.0...v1.379.0) (2024-02-19)
 
 

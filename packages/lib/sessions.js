@@ -248,20 +248,32 @@ function shouldForceRedirectToReinscription(young) {
   );
 }
 
+const isCohortTooOld = (young) => ["2019", "2020"].includes(young.cohort);
+
 function hasAccessToReinscription(young) {
-  if (isCle(young)) return false;
-
-  if (shouldForceRedirectToReinscription(young)) return true;
-
-  if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && !(young.departSejourMotif === "Exclusion")) {
-    return true;
+  if (isCle(young)) {
+    return false;
+  }
+  if (young.departSejourMotif === "Exclusion") {
+    return false;
+  }
+  if (new Date(young.createdAt) > new Date(2023, 9, 1)) {
+    return false;
+  }
+  if (isCohortTooOld(young)) {
+    return false;
   }
 
-  if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
+  if (young.cohort === "à venir" && ![YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) {
     return true;
   }
-
-  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") {
+  if (young.status === YOUNG_STATUS.ABANDONED) {
+    return true;
+  }
+  if (young.status === YOUNG_STATUS.WITHDRAWN && ![YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+    return true;
+  }
+  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
     return true;
   }
 
@@ -298,6 +310,7 @@ export {
   shouldForceRedirectToReinscription,
   shouldForceRedirectToInscription,
   hasAccessToReinscription,
+  isCohortTooOld,
   canApplyToPhase2,
   getCohortStartDate,
   getCohortEndDate,
