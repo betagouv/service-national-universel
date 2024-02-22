@@ -151,13 +151,8 @@ const populateWithPdrInfo = async (classes) => {
 };
 
 const populateWithYoungsInfo = async (classes) => {
-  const batchSize = 50;
-  const numBatches = Math.ceil(classes.length / batchSize);
-
-  for (let i = 0; i < numBatches; i++) {
-    const batchStart = i * batchSize;
-    const batchEnd = Math.min(batchStart + batchSize, classes.length);
-    const classesPromises = classes.slice(batchStart, batchEnd).map(async (item) => {
+  return Promise.all(
+    classes.map(async (item) => {
       const students = await allRecords("young", {
         bool: {
           must: [
@@ -177,14 +172,8 @@ const populateWithYoungsInfo = async (classes) => {
       item.studentNotAutorized = students.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length;
       item.studentWithdrawn = students.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length;
       return item;
-    });
-
-    const updatedClasses = await Promise.all(classesPromises);
-    for (let j = batchStart, k = 0; j < batchEnd; j++, k++) {
-      classes[j] = updatedClasses[k];
-    }
-  }
-  return classes;
+    }),
+  );
 };
 
 module.exports = router;
