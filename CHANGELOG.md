@@ -1,3 +1,10 @@
+## [1.382.1](https://github.com/betagouv/service-national-universel/compare/v1.382.0...v1.382.1) (2024-02-23)
+
+
+### Bug Fixes
+
+* **pdf:** add retry for failed promise ([#3608](https://github.com/betagouv/service-national-universel/issues/3608)) ([11be6cc](https://github.com/betagouv/service-national-universel/commit/11be6ccbe0e5555940e0470bd24855f8e241503c))
+
 # [1.382.0](https://github.com/betagouv/service-national-universel/compare/v1.381.0...v1.382.0) (2024-02-22)
 
 
