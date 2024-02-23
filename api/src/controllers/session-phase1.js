@@ -294,10 +294,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
         }
       });
 
-      console.log("pdfPromises", pdfPromises.length);
       const pdfs = await Promise.all(pdfPromises);
-
-      console.log(pdfs.length, "pdfs created");
 
       pdfs.forEach((pdf) => {
         if (pdf?.name && pdf?.body) zip.addFile(pdf.name, pdf.body);
