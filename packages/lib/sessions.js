@@ -31,8 +31,6 @@ const sessions2024CohortNames = [
   "CLE GE2 2024",
 ];
 
-console.log("Test Sessions2024CohortNames", sessions2024CohortNames);
-
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
   let cohortNames = [];
   if (withNew) cohortNames = [...cohortNames, ...sessions2023CohortNames, ...sessions2024CohortNames];
