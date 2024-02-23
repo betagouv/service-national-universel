@@ -272,11 +272,8 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     let zip = new Zip();
     const batchSize = 10;
     const numBatches = Math.ceil(youngs.length / batchSize);
-    console.log("numBatches", numBatches);
 
     for (let i = 0; i < numBatches; i++) {
-      console.log("batch", i);
-
       const batchStart = i * batchSize;
       const batchEnd = Math.min(batchStart + batchSize, youngs.length);
 
