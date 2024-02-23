@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const CohortModel = require("../models/cohort");
@@ -279,16 +279,16 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
       const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
         const maxRetries = 3;
-        for (let attempt = 0; attempt < maxRetries; attempt++) {
+        for (let attempt = 1; attempt < maxRetries; attempt++) {
           try {
             const html = await phase1(young);
             const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
             return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
           } catch (e) {
             console.log(`Attempt ${attempt + 1} failed for Young ID: ${young._id}`);
-            if (attempt === maxRetries - 1) {
-              console.log(`Failed to generate PDF after ${maxRetries} attempts for Young ID: ${young._id}, Name: ${young.firstName} ${young.lastName}`);
-              capture(e);
+            if (attempt === maxRetries) {
+              captureMessage("Failed to generate PDF", { extras: { youngId: young._id, name: `${young.firstName} ${young.lastName}`, error: e.message } });
+              return res.status(500).send({ ok: false, code: ERRORS.INTERNAL_SERVER_ERROR });
             }
           }
         }
@@ -297,7 +297,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       const pdfs = await Promise.all(pdfPromises);
 
       pdfs.forEach((pdf) => {
-        if (pdf?.name && pdf?.body) zip.addFile(pdf.name, pdf.body);
+        zip.addFile(pdf.name, pdf.body);
       });
     }
     const noticePdf = await getFile(`file/noticeImpression.pdf`);
