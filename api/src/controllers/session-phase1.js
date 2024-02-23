@@ -272,17 +272,38 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     let zip = new Zip();
     const batchSize = 10;
     const numBatches = Math.ceil(youngs.length / batchSize);
+    console.log("numBatches", numBatches);
+
     for (let i = 0; i < numBatches; i++) {
+      console.log("batch", i);
+
       const batchStart = i * batchSize;
       const batchEnd = Math.min(batchStart + batchSize, youngs.length);
+
       const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-        const html = await phase1(young);
-        const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
-        return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
+        const maxRetries = 3;
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+          try {
+            const html = await phase1(young);
+            const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
+            return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
+          } catch (e) {
+            console.log(`Attempt ${attempt + 1} failed for Young ID: ${young._id}`);
+            if (attempt === maxRetries - 1) {
+              console.log(`Failed to generate PDF after ${maxRetries} attempts for Young ID: ${young._id}, Name: ${young.firstName} ${young.lastName}`);
+              capture(e);
+            }
+          }
+        }
       });
+
+      console.log("pdfPromises", pdfPromises.length);
       const pdfs = await Promise.all(pdfPromises);
+
+      console.log(pdfs.length, "pdfs created");
+
       pdfs.forEach((pdf) => {
-        zip.addFile(pdf.name, pdf.body);
+        if (pdf?.name && pdf?.body) zip.addFile(pdf.name, pdf.body);
       });
     }
     const noticePdf = await getFile(`file/noticeImpression.pdf`);
@@ -297,6 +318,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     });
     res.status(200).end(zip.toBuffer());
   } catch (error) {
+    console.log("error", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
