@@ -14,6 +14,7 @@ export default function Done({ parentId }) {
   const text = getText();
 
   function getTitle() {
+    if (fromRI) return "Merci, nous avons bien enregistré votre réponse.";
     if (parentId === 1) return young?.parentAllowSNU === "true" ? "Merci, nous avons bien enregistré votre consentement." : "Merci, nous avons bien enregistré votre refus.";
     return young?.parent2AllowImageRights === "true"
       ? "Merci, nous avons bien enregistré votre accord de droit à l'image."
