@@ -1,3 +1,11 @@
+# [1.383.0](https://github.com/betagouv/service-national-universel/compare/v1.382.1...v1.383.0) (2024-02-24)
+
+
+### Features
+
+* **admin:** update export classe ([c89d51f](https://github.com/betagouv/service-national-universel/commit/c89d51f029969ff5d114526e9a73325d3c544d89))
+* **app, api:** 1705 - New screen and logic for ParentAcceptRI ([#3601](https://github.com/betagouv/service-national-universel/issues/3601)) ([89161d0](https://github.com/betagouv/service-national-universel/commit/89161d0336ad8a613239184945d8a47a5880e845))
+
 ## [1.382.1](https://github.com/betagouv/service-national-universel/compare/v1.382.0...v1.382.1) (2024-02-23)
 
 
