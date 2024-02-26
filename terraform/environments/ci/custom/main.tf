@@ -28,6 +28,10 @@ variable "app_image_tag" {
   type    = string
   nullable = false
 }
+variable "antivirus_image_tag" {
+  type    = string
+  nullable = false
+}
 
 locals {
   env            = "###___ENV_NAME___###"
