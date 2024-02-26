@@ -249,7 +249,6 @@ async function generateBatchPDF(batchHtmlContent, batchIndex) {
       const context = await timeout(getPDF(newhtml, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
       return { name: `batch_${batchIndex}_certificat.pdf`, body: context };
     } catch (e) {
-      console.log(e);
       console.log(`Attempt ${attempt} failed for batch ${batchIndex}`);
       if (attempt === maxRetries) {
         captureMessage("Failed to generate PDF", { extras: { batchIndex, error: e.message } });
