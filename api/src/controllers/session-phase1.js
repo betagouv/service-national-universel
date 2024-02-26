@@ -36,7 +36,7 @@ const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/se
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
-
+const path = require("path");
 const datefns = require("date-fns");
 const { fr } = require("date-fns/locale");
 const fileUpload = require("express-fileupload");
@@ -244,19 +244,8 @@ async function generateBatchPDF(batchHtmlContent, batchIndex) {
   const maxRetries = 3;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const body = `<!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <title>Attestation phase 1 - SNU</title>
-          <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
-        </head>
-        <body style="margin: 0; font-family: Marianne, Helvetica, Arial, sans-serif">
-          {{BODY}}
-        </body>
-    </html>`;
-
-      const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()));
+      const body = fs.readFileSync(path.resolve(__dirname, "../templates/certificate/bodyBatch.html"), "utf8");
+      const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll("https://api.snu.gouv.fr"));
       const context = await timeout(getPDF(newhtml, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
       return { name: `batch_${batchIndex}_certificat.pdf`, body: context };
     } catch (e) {
@@ -303,17 +292,17 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     // const batchSize = 10;
     // const numBatches = Math.ceil(youngs.length / batchSize);
 
-    const zip = new Zip();
+    let zip = new Zip();
     const batchSize = 20;
     const batchOperations = [];
 
     for (let i = 0; i < youngs.length; i += batchSize) {
       const batch = youngs.slice(i, i + batchSize);
 
+      console.log("batch", batch.length, i / batchSize + 1, youngs.length);
+
       // Generate HTML content for each young in the batch
-      const batchHtml = await Promise.all(batch.map((young) => phase1(young)));
-      console.log("batchHtml", batchHtml);
-      // const batchHtmlContent = batchHtml.join('<div style="page-break-after: always;"></div>');
+      const batchHtml = await Promise.all(batch.map((young) => phase1(young, true)));
 
       // Add the PDF generation promise for the batch to the operations array
       batchOperations.push(generateBatchPDF(batchHtml, i / batchSize + 1));
@@ -321,37 +310,12 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
     const pdfs = await Promise.all(batchOperations);
 
+    console.log("pdfs", pdfs.length);
+
     pdfs.forEach((pdf) => {
       zip.addFile(pdf.name, pdf.body);
     });
 
-    // for (let i = 0; i < numBatches; i++) {
-    //   const batchStart = i * batchSize;
-    //   const batchEnd = Math.min(batchStart + batchSize, youngs.length);
-
-    //   const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-    //     const maxRetries = 3;
-    //     for (let attempt = 1; attempt < maxRetries; attempt++) {
-    //       try {
-    //         const html = await phase1(young);
-    //         const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
-    //         return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
-    //       } catch (e) {
-    //         console.log(`Attempt ${attempt + 1} failed for Young ID: ${young._id}`);
-    //         if (attempt === maxRetries) {
-    //           captureMessage("Failed to generate PDF", { extras: { youngId: young._id, name: `${young.firstName} ${young.lastName}`, error: e.message } });
-    //           return res.status(500).send({ ok: false, code: ERRORS.INTERNAL_SERVER_ERROR });
-    //         }
-    //       }
-    //     }
-    //   });
-
-    //   const pdfs = await Promise.all(pdfPromises);
-
-    //   pdfs.forEach((pdf) => {
-    //     zip.addFile(pdf.name, pdf.body);
-    //   });
-    // }
     const noticePdf = await getFile(`file/noticeImpression.pdf`);
     if (noticePdf) {
       zip.addFile("01-notice-d'impression.pdf", noticePdf.Body);
@@ -915,7 +879,7 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
 });
 
 async function getPDF(html, options) {
-  const response = await fetch(config.API_PDF_ENDPOINT, {
+  const response = await fetch("https://pdf.beta-snu.dev/render", {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/pdf" },
     body: JSON.stringify({ html, options }),
