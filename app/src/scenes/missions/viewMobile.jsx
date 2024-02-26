@@ -38,7 +38,7 @@ import ModalPJ from "./components/ModalPJ";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
 
-export default function viewMobile() {
+export default function ViewMobile() {
   const [mission, setMission] = useState();
   const [modal, setModal] = useState(null);
   const [disabledAge, setDisabledAge] = useState(false);
@@ -201,19 +201,18 @@ export default function viewMobile() {
                 young={young}
               />
             ) : (
-              <ApplyButton
-                placesLeft={mission.placesLeft}
-                setModal={setModal}
-                young={young}
-                disabledAge={disabledAge}
-                disabledIncomplete={disabledIncomplete}
-                disabledPmRefused={disabledPmRefused}
-                scrollToBottom={scrollToBottom}
-                duration={mission?.duration}
-                isMilitaryPreparation={mission?.isMilitaryPreparation}
-                hebergement={mission?.hebergement}
-                hebergementPayant={mission?.hebergementPayant}
-              />
+              <>
+                <ApplyButton
+                  setModal={setModal}
+                  disabledAge={disabledAge}
+                  disabledIncomplete={disabledIncomplete}
+                  disabledPmRefused={disabledPmRefused}
+                  scrollToBottom={scrollToBottom}
+                  duration={mission?.duration}
+                  isMilitaryPreparation={mission?.isMilitaryPreparation}
+                />
+                <p className="text-xs font-normal leading-none text-gray-500">{mission.placesLeft} places restantes</p>
+              </>
             )}
           </div>
         </div>

@@ -6,7 +6,6 @@ import DoubleDayTile from "../../components/DoubleDayTile";
 import Loader from "../../components/Loader";
 import WithTooltip from "../../components/WithTooltip";
 import api from "../../services/api";
-import plausibleEvent from "../../services/plausible";
 import {
   formatStringDateTimezoneUTC,
   translate,
@@ -40,7 +39,7 @@ import { capture } from "../../sentry";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
 
-export default function viewDesktop() {
+export default function ViewDesktop() {
   const [mission, setMission] = useState();
   const [modal, setModal] = useState(null);
   const [disabledAge, setDisabledAge] = useState(false);
@@ -240,16 +239,17 @@ export default function viewDesktop() {
                 young={young}
               />
             ) : (
-              <ApplyButton
-                placesLeft={mission.placesLeft}
-                setModal={setModal}
-                disabledAge={disabledAge}
-                disabledIncomplete={disabledIncomplete}
-                disabledPmRefused={disabledPmRefused}
-                scrollToBottom={scrollToBottom}
-                young={young}
-                isMilitaryPreparation={mission?.isMilitaryPreparation}
-              />
+              <>
+                <ApplyButton
+                  setModal={setModal}
+                  disabledAge={disabledAge}
+                  disabledIncomplete={disabledIncomplete}
+                  disabledPmRefused={disabledPmRefused}
+                  scrollToBottom={scrollToBottom}
+                  isMilitaryPreparation={mission?.isMilitaryPreparation}
+                />
+                <p className="text-xs font-normal leading-none text-gray-500">{mission.placesLeft} places restantes</p>
+              </>
             )}
           </div>
         </div>
