@@ -30,7 +30,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production_cc'
     strategy:
       matrix:
         node-version: [18.x]
