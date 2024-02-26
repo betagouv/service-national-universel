@@ -9,13 +9,7 @@ on:
   push:
     branches:
       - production_cc
-    paths:
-      - app/**
-      - packages/**
-  pull_request:
-    paths:
-      - app/**
-      - packages/**
+  workflow_dispatch:
 
 jobs:
   lint:
