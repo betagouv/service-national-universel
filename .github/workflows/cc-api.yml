@@ -52,7 +52,7 @@ jobs:
 
   deploy:
     needs: [test]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production_cc'
     runs-on: ubuntu-latest
 
     steps:
