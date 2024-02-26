@@ -36,6 +36,7 @@ locals {
   api_hostname   = "api.${local.env}.${local.domain}"
   admin_hostname = "admin.${local.env}.${local.domain}"
   app_hostname   = "moncompte.${local.env}.${local.domain}"
+  antivirus_hostname   = "antivirus.${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -253,6 +254,39 @@ resource "scaleway_container_domain" "app" {
   hostname     = local.app_hostname
 }
 
+resource "scaleway_container" "antivirus" {
+  name            = "${local.env}-antivirus"
+  namespace_id    = scaleway_container_namespace.main.id
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/antivirus:${var.antivirus_image_tag}"
+  port            = 8089
+  cpu_limit       = 512
+  memory_limit    = 4096
+  min_scale       = 1
+  max_scale       = 1
+  timeout         = 60
+  max_concurrency = 50
+  privacy         = "public"
+  protocol        = "http1"
+  deploy          = true
+
+  environment_variables = {
+    "APP_NAME"   = "antivirus"
+  }
+}
+
+resource "scaleway_domain_record" "antivirus" {
+  dns_zone = scaleway_domain_zone.main.id
+  name     = "antivirus"
+  type     = "CNAME"
+  data     = "${scaleway_container.antivirus.domain_name}."
+  ttl      = 300
+}
+
+resource "scaleway_container_domain" "antivirus" {
+  container_id = scaleway_container.antivirus.id
+  hostname     = local.antivirus_hostname
+}
+
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
 }
@@ -270,4 +304,10 @@ output "admin_endpoint" {
 }
 output "admin_image_tag" {
   value = split(":", scaleway_container.admin.registry_image)[1]
+}
+output "antivirus_endpoint" {
+  value = "https://${local.antivirus_hostname}"
+}
+output "antivirus_image_tag" {
+  value = split(":", scaleway_container.antivirus.registry_image)[1]
 }

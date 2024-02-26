@@ -8,7 +8,7 @@ const NodeClam = require("clamscan");
 
 const { initSentry, capture } = require("./sentry");
 
-const { PORT: port, RELEASE } = require("./config.js");
+const { PORT: port, RELEASE, CLAMSCAN_CONFIG } = require("./config.js");
 
 const app = express();
 
@@ -51,21 +51,12 @@ app.post("/scan",
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const clamscan = await new NodeClam().init();
+      const clamscan = await new NodeClam().init(CLAMSCAN_CONFIG);
       const { isInfected } = await clamscan.isInfected(files.file.tempFilePath);
       if (isInfected) {
-        console.error(`File ${name} of user(${userId}) is infected`);
+        console.error(`File ${tempFilePath} is infected`);
         return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-        return { infected: true, error: null };
       }
-
-      const scanResult = await scanFile(tempFilePath, name, user._id);
-      if (scanResult.infected) {
-        return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-      } else if (scanResult.error) {
-        return res.status(500).send({ ok: false, code: scanResult.error });
-      }
-      console.log(files)
 
       return res.status(200).send({ ok: true });
     } catch (error) {
