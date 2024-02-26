@@ -135,14 +135,15 @@ function getDiffYear(a, b) {
 }
 
 const getAuthorizationToApply = async (mission, young) => {
+  let arr = [];
   if (isCohortTooOld(young?.cohort)) {
-    return { canApply: false, message: "Le délai pour candidater est dépassé." };
+    arr.push("Le délai pour candidater est dépassé.");
   }
 
   const cohort = await CohortModel.findOne({ name: young.cohort });
 
   if (!canApplyToPhase2(young, cohort)) {
-    return { canApply: false, message: "Pour candidater, vous devez avoir terminé votre séjour de cohésion" };
+    arr.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
   }
 
   const applicationsCount = await ApplicationModel.countDocuments({
@@ -151,34 +152,34 @@ const getAuthorizationToApply = async (mission, young) => {
   });
 
   if (applicationsCount >= 15) {
-    return { canApply: false, message: "Vous ne pouvez candidater qu'à 15 missions différentes." };
+    arr.push("Vous ne pouvez candidater qu'à 15 missions différentes.");
   }
 
   const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
 
   if (ageAtStart < 15) {
-    return { canApply: false, message: "Vous devez avoir plus de 15 ans pour candidater." };
+    arr.push("Vous devez avoir plus de 15 ans pour candidater.");
   }
 
   // Military preparations have special rules
   const isMilitaryPreparation = mission?.isMilitaryPreparation === "true";
 
   if (isMilitaryPreparation && ageAtStart < 16) {
-    return { canApply: false, message: "Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)" };
+    arr.push("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
   }
 
   if (isMilitaryPreparation && young.statusMilitaryPreparationFiles === "REFUSED") {
-    return { canApply: false, message: "Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater" };
+    arr.push("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
   }
 
   const isMilitaryApplicationIncomplete =
     !young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length;
 
   if (isMilitaryPreparation && isMilitaryApplicationIncomplete) {
-    return { canApply: false, message: "Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page" };
+    arr.push("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");
   }
 
-  return { canApply: true, message: "" };
+  return { canApply: arr.length === 0, message: arr.join("\n") };
 };
 
 module.exports = {

@@ -165,8 +165,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const { canApply } = await getAuthorizationToApply(mission, young);
-    if (!canApply) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const { canApply, message } = await getAuthorizationToApply(mission, young);
+    if (!canApply) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
