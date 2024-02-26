@@ -1,21 +1,15 @@
 env:
-  SUBFOLDER_NAME: admin
-  APP_NAME: snu-admin
-  ENVIRONMENT_NAME: snu-admin-production
+  SUBFOLDER_NAME: app
+  APP_NAME: snu-app
+  ENVIRONMENT_NAME: snu-app-production
 
-name: Deploy admin
+name: Build and deploy Production (MonCompte CleverCloud)
 
 on:
   push:
     branches:
-      - main
-    paths:
-      - admin/**
-      - packages/**
-  pull_request:
-    paths:
-      - admin/**
-      - packages/**
+      - production_cc
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -36,7 +30,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production_cc'
     strategy:
       matrix:
         node-version: [18.x]
@@ -86,4 +80,4 @@ jobs:
           git commit -m "For deploy"
           git push -f -u cloud master
         env:
-          CLEVER_CLOUD_GIT_REMOTE: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_ADMIN_PROD }}
+          CLEVER_CLOUD_GIT_REMOTE: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_APP_PROD }}

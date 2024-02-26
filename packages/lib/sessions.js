@@ -1,5 +1,6 @@
 import { regionsListDROMS } from "./region-and-departments";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
+import { isCle } from "./young";
 const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "2022" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
 
 const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
@@ -16,6 +17,8 @@ const sessions2024CohortNames = [
   "Juin 2024 - NC",
   "Juillet 2024",
   "Juillet 2024 - Martinique",
+  "Juillet 2024 - Mayotte",
+  "Juillet 2024 - PF",
   "CLE 23-24",
   "CLE mars 2024 1",
   "CLE mars 2024 2",
@@ -57,7 +60,22 @@ const COHESION_STAY_START = {
   "Avril 2024 - A": new Date("04/15/2024"),
   "Avril 2024 - B": new Date("04/22/2024"),
   "Juin 2024 - 2": new Date("06/17/2024"),
+  "Juin 2024 - Martinique": new Date("06/13/2024"),
+  "Juin 2024 - NC": new Date("06/03/2024"),
   "Juillet 2024": new Date("07/03/2024"),
+  "Juillet 2024 - Martinique": new Date("07/01/2024"),
+  "Juillet 2024 - Mayotte": new Date("07/01/2024"),
+  "Juillet 2024 - PF": new Date("07/08/2024"),
+  "CLE 23-24": new Date("01/01/2024"),
+  "CLE mars 2024 1": new Date("03/11/2024"),
+  "CLE mars 2024 2": new Date("03/25/2024"),
+  "CLE mai 2024": new Date("05/13/2024"),
+  "CLE juin 2024": new Date("06/03/2024"),
+  "CLE mai 2024 Martinique": new Date("05/08/2024"),
+  "CLE juin 2024 Martinique": new Date("05/26/2024"),
+  "CLE février 2024 Réunion": new Date("02/12/2024"),
+  "CLE GE1 2024": new Date("04/22/2024"),
+  "CLE GE2 2024": new Date("06/17/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -78,7 +96,22 @@ const START_DATE_SESSION_PHASE1 = {
   "Avril 2024 - A": new Date("04/15/2024"),
   "Avril 2024 - B": new Date("04/22/2024"),
   "Juin 2024 - 2": new Date("06/17/2024"),
+  "Juin 2024 - Martinique": new Date("06/13/2024"),
+  "Juin 2024 - NC": new Date("06/03/2024"),
   "Juillet 2024": new Date("07/03/2024"),
+  "Juillet 2024 - Martinique": new Date("07/01/2024"),
+  "Juillet 2024 - Mayotte": new Date("07/01/2024"),
+  "Juillet 2024 - PF": new Date("07/08/2024"),
+  "CLE 23-24": new Date("01/01/2024"),
+  "CLE février 2024 Réunion": new Date("02/12/2024"),
+  "CLE mars 2024 1": new Date("03/11/2024"),
+  "CLE mars 2024 2": new Date("03/25/2024"),
+  "CLE mai 2024": new Date("05/13/2024"),
+  "CLE mai 2024 Martinique": new Date("05/08/2024"),
+  "CLE juin 2024": new Date("06/03/2024"),
+  "CLE juin 2024 Martinique": new Date("05/26/2024"),
+  "CLE GE1 2024": new Date("04/22/2024"),
+  "CLE GE2 2024": new Date("06/17/2024"),
 };
 
 // @todo: to be removed @hlecourt
@@ -102,7 +135,22 @@ const COHESION_STAY_END = {
   "Avril 2024 - A": new Date("04/27/2024"),
   "Avril 2024 - B": new Date("05/04/2024"),
   "Juin 2024 - 2": new Date("06/28/2024"),
+  "Juin 2024 - Martinique": new Date("06/24/2024"),
+  "Juin 2024 - NC": new Date("06/14/2024"),
   "Juillet 2024": new Date("07/15/2024"),
+  "Juillet 2024 - Martinique": new Date("07/12/2024"),
+  "Juillet 2024 - Mayotte": new Date("07/12/2024"),
+  "Juillet 2024 - PF": new Date("07/20/2024"),
+  "CLE 23-24": new Date("31/12/2024"),
+  "CLE février 2024 Réunion": new Date("02/24/2024"),
+  "CLE mars 2024 1": new Date("03/23/2024"),
+  "CLE mars 2024 2": new Date("04/06/2024"),
+  "CLE mai 2024": new Date("05/25/2024"),
+  "CLE mai 2024 Martinique": new Date("05/20/2024"),
+  "CLE juin 2024": new Date("06/14/2024"),
+  "CLE juin 2024 Martinique": new Date("06/07/2024"),
+  "CLE GE1 2024": new Date("05/04/2024"),
+  "CLE GE2 2024": new Date("06/28/2024"),
 };
 
 // @todo: to be removed after adding old cohorts in bd
@@ -204,18 +252,32 @@ function shouldForceRedirectToReinscription(young) {
   );
 }
 
+const isCohortTooOld = (young) => ["2019", "2020"].includes(young.cohort);
+
 function hasAccessToReinscription(young) {
-  if (shouldForceRedirectToReinscription(young)) return true;
-
-  if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && !(young.departSejourMotif === "Exclusion")) {
-    return true;
+  if (isCle(young)) {
+    return false;
+  }
+  if (young.departSejourMotif === "Exclusion") {
+    return false;
+  }
+  if (new Date(young.createdAt) > new Date(2023, 9, 1)) {
+    return false;
+  }
+  if (isCohortTooOld(young)) {
+    return false;
   }
 
-  if (young.cohort === "à venir" && (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)) {
+  if (young.cohort === "à venir" && ![YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status)) {
     return true;
   }
-
-  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") {
+  if (young.status === YOUNG_STATUS.ABANDONED) {
+    return true;
+  }
+  if (young.status === YOUNG_STATUS.WITHDRAWN && ![YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)) {
+    return true;
+  }
+  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
     return true;
   }
 
@@ -234,6 +296,7 @@ function shouldForceRedirectToInscription(young, isInscriptionModificationOpen =
 
 //@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
 function canApplyToPhase2(young, cohort) {
+  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
   const now = new Date();
   const dateEnd = getCohortEndDate(young, cohort);
   return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;
@@ -251,6 +314,7 @@ export {
   shouldForceRedirectToReinscription,
   shouldForceRedirectToInscription,
   hasAccessToReinscription,
+  isCohortTooOld,
   canApplyToPhase2,
   getCohortStartDate,
   getCohortEndDate,

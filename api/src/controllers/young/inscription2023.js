@@ -20,6 +20,7 @@ const {
   getCohortNames,
   isYoungInReinscription,
   isCle,
+  REGLEMENT_INTERIEUR_VERSION,
 } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
 const config = require("../../config");
@@ -252,7 +253,8 @@ router.put("/coordinates/:type", passport.authenticate("young", { session: false
       try {
         const qpv = await getQPV(value.zip, value.city, value.address);
         if (qpv === true) young.set({ qpv: "true" });
-        if (qpv === false) young.set({ qpv: "false" });
+        else if (qpv === false) value.qpv = "false";
+        else value.qpv = undefined;
       } catch (error) {
         // Continue
       }
@@ -291,8 +293,9 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
-      acceptCGU: "true",
       consentment: "true",
+      acceptCGU: "true",
+      acceptRI: REGLEMENT_INTERIEUR_VERSION,
     });
 
     if (isYoungInReinscription(young)) {

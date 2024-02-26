@@ -1,4 +1,5 @@
 const environment = import.meta.env.MODE;
+
 let apiURL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
 let appURL = import.meta.env.VITE_APP_URL ?? "http://localhost:8081";
 let adminURL = import.meta.env.VITE_ADMIN_URL ?? "http://localhost:8082";

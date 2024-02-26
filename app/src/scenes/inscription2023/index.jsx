@@ -104,6 +104,7 @@ const StepCorrection = () => {
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  const { isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
 
   if (!young) return <Redirect to="/preinscription" />;
@@ -130,9 +131,8 @@ export default function Index() {
     return <Redirect to={{ pathname: "/" }} />;
   }
 
-  // Si la periode de modification est finie, pour les volontaires en cours d'inscription qui n'ont pas encore été basculés sur "à venir"
-  if (!inscriptionCreationOpenForYoungs(cohort) && young.status === YOUNG_STATUS.IN_PROGRESS) {
-    return <InscriptionClosed />;
+  if (!inscriptionCreationOpenForYoungs(cohort) && [YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
+    return <InscriptionClosed young={young} isCLE={isCLE} />;
   }
 
   //si la periode de modification est finie

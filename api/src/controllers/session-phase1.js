@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const CohortModel = require("../models/cohort");
@@ -49,6 +49,7 @@ const { encrypt, decrypt } = require("../cryptoUtils");
 const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
 const { phase1 } = require("../../src/templates/certificate/index");
+const scanFile = require("../utils/virusScanner");
 
 const TIMEOUT_PDF_SERVICE = 15000;
 
@@ -271,15 +272,30 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     let zip = new Zip();
     const batchSize = 10;
     const numBatches = Math.ceil(youngs.length / batchSize);
+
     for (let i = 0; i < numBatches; i++) {
       const batchStart = i * batchSize;
       const batchEnd = Math.min(batchStart + batchSize, youngs.length);
+
       const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-        const html = await phase1(young);
-        const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
-        return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
+        const maxRetries = 3;
+        for (let attempt = 1; attempt < maxRetries; attempt++) {
+          try {
+            const html = await phase1(young);
+            const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
+            return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
+          } catch (e) {
+            console.log(`Attempt ${attempt + 1} failed for Young ID: ${young._id}`);
+            if (attempt === maxRetries) {
+              captureMessage("Failed to generate PDF", { extras: { youngId: young._id, name: `${young.firstName} ${young.lastName}`, error: e.message } });
+              return res.status(500).send({ ok: false, code: ERRORS.INTERNAL_SERVER_ERROR });
+            }
+          }
+        }
       });
+
       const pdfs = await Promise.all(pdfPromises);
+
       pdfs.forEach((pdf) => {
         zip.addFile(pdf.name, pdf.body);
       });
@@ -296,6 +312,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     });
     res.status(200).end(zip.toBuffer());
   } catch (error) {
+    console.log("error", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
@@ -575,6 +592,15 @@ router.post(
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      }
+
+      if (config.ENVIRONMENT === "production") {
+        const scanResult = await scanFile(tempFilePath, name, req.user.id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        } else if (scanResult.error) {
+          return res.status(500).send({ ok: false, code: scanResult.error });
+        }
       }
 
       const newFile = {

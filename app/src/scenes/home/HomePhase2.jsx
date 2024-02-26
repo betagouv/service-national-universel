@@ -19,11 +19,11 @@ export default function HomePhase2() {
                 <strong>{young.firstName},</strong>
                 <br />
                 {young.gender === "female" ? "prête " : "prêt "}
-                pour la phase 2 ?
+                pour la phase engagement?
               </div>
               <div className="left-7 mt-5 text-base text-gray-800">
-                Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
-                d&apos;intérêt général !
+                Mettez votre énergie au service d&apos;une société plus solidaire et découvrez votre talent pour l&apos;engagement en réalisant une mission d&apos;intérêt général
+                ou en rejoignant un programme d’engagement.
               </div>
               <div className="flex w-fit flex-col items-stretch">
                 <button
@@ -32,7 +32,7 @@ export default function HomePhase2() {
                     plausibleEvent("Phase 2/CTA - Realiser ma mission");
                     history.push("/phase2");
                   }}>
-                  Réaliser ma mission d&apos;intérêt général
+                  Je m&apos;engage
                 </button>
                 <button
                   className="mt-3 rounded-[10px] border-[1px] border-blue-600  bg-white py-2.5 px-3 text-sm font-medium leading-5 text-blue-600 transition duration-150 ease-in-out hover:!bg-blue-600 hover:!text-white"
@@ -53,11 +53,11 @@ export default function HomePhase2() {
               <strong>{young.firstName},</strong>
               <br />
               {young.gender === "female" ? "prête " : "prêt "}
-              pour la phase 2 ?
+              pour la phase engagement?
             </div>
             <div className="left-7 mt-5 text-sm text-gray-800">
-              Mettez votre énergie au service d&apos;une société plus solidaire et découvrez <strong>votre talent pour l&apos;engagement</strong> en réalisant une mission
-              d&apos;intérêt général !
+              Mettez votre énergie au service d&apos;une société plus solidaire et découvrez votre talent pour l&apos;engagement en réalisant une mission d&apos;intérêt général ou
+              en rejoignant un programme d’engagement.
             </div>
             <button
               className="mt-5 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
@@ -65,7 +65,7 @@ export default function HomePhase2() {
                 plausibleEvent("Phase 2/CTA - Realiser ma mission");
                 history.push("/phase2");
               }}>
-              Réaliser ma mission d&apos;intérêt général
+              Je m&apos;engage
             </button>
             <button
               className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-white py-2.5 px-3 text-sm font-medium leading-5 text-blue-600 transition duration-150 ease-in-out hover:!bg-blue-600 hover:!text-white"

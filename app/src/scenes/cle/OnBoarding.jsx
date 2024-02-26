@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
 import { RiArrowLeftLine } from "react-icons/ri";
+import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
 
 import { Button } from "@snu/ds/dsfr";
 
@@ -72,10 +73,20 @@ const OnBoarding = () => {
   if (isLoggedIn) logout({ redirect: false });
   const { id } = queryString.parse(window.location.search);
 
+  if (!IS_INSCRIPTION_OPEN_CLE) {
+    return (
+      <DSFRLayout title="Inscription de l'élève">
+        <DSFRContainer title="Les inscriptions sont cloturées">
+          <p className="leading-relaxed">Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023 - 2024.</p>
+        </DSFRContainer>
+      </DSFRLayout>
+    );
+  }
+
   if (!validateId(id)) {
-    plausibleEvent("CLE preinscription - id invalide dans l'url");
     return <OnboardingError message="Identifiant invalide. Veuillez vérifier le lien d'inscription qui vous a été transmis." />;
   }
+
   return <OnboardingContent id={id} />;
 };
 
@@ -121,7 +132,7 @@ const OnboardingContent = ({ id }) => {
               <Button className="sm:w-full md:w-52 md:self-end" disabled>
                 {classe.isFull ? "☹ Classe complète" : "Inscriptions désactivées"}
               </Button>
-              <span className="text-[13px] md:self-end">Pour plus d'informations contactez votre référent.</span>
+              {classe.isFull && <p className="text-[13px] w-full text-end mt-2">Pour plus d'informations contactez votre référent.</p>}
             </div>
           )}
           <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={id}></ModalInfo>

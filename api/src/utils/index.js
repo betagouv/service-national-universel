@@ -719,7 +719,7 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
         if (young?.departSejourMotif === "Exclusion") {
           young.set({ statusPhase1: "NOT_DONE" });
         } else {
-          young.set({ statusPhase1: "DONE" });
+          young.set({ statusPhase1: "DONE", statusPhase2OpenedAt: now });
         }
       } else {
         // Sinon on ne valide pas sa phase 1.
@@ -888,6 +888,8 @@ const ERRORS = {
   USER_NOT_FOUND: "USER_NOT_FOUND",
   LINKED_OBJECT: "LINKED_OBJECT",
   LINKED_MISSIONS: "LINKED_MISSIONS",
+  LINKED_CLASSES: "LINKED_CLASSES",
+  LINKED_ETABLISSEMENT: "LINKED_ETABLISSEMENT",
   LINKED_STRUCTURE: "LINKED_STRUCTURE",
   PDF_ERROR: "PDF_ERROR",
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",

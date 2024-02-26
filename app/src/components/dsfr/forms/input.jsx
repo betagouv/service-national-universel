@@ -15,6 +15,7 @@ export default function Input({
   type = "text",
   autocomplete = "off",
   className = "",
+  onBlur = null,
   ...otherProps
 }) {
   return (
@@ -29,6 +30,8 @@ export default function Input({
       disabled={disabled}
       nativeInputProps={{ value, name, placeholder, type, autoComplete: autocomplete, onChange: (e) => onChange(e.target.value), ...otherProps }}
       textArea={type == "textarea"}
+      autoComplete={autocomplete}
+      onBlur={onBlur}
     />
   );
 }

@@ -1,3 +1,280 @@
+# [1.383.0](https://github.com/betagouv/service-national-universel/compare/v1.382.1...v1.383.0) (2024-02-24)
+
+
+### Features
+
+* **admin:** update export classe ([c89d51f](https://github.com/betagouv/service-national-universel/commit/c89d51f029969ff5d114526e9a73325d3c544d89))
+* **app, api:** 1705 - New screen and logic for ParentAcceptRI ([#3601](https://github.com/betagouv/service-national-universel/issues/3601)) ([89161d0](https://github.com/betagouv/service-national-universel/commit/89161d0336ad8a613239184945d8a47a5880e845))
+
+## [1.382.1](https://github.com/betagouv/service-national-universel/compare/v1.382.0...v1.382.1) (2024-02-23)
+
+
+### Bug Fixes
+
+* **pdf:** add retry for failed promise ([#3608](https://github.com/betagouv/service-national-universel/issues/3608)) ([11be6cc](https://github.com/betagouv/service-national-universel/commit/11be6ccbe0e5555940e0470bd24855f8e241503c))
+
+# [1.382.0](https://github.com/betagouv/service-national-universel/compare/v1.381.0...v1.382.0) (2024-02-22)
+
+
+### Bug Fixes
+
+* **api:** Optimise ES scroll ([#3600](https://github.com/betagouv/service-national-universel/issues/3600)) ([ce39769](https://github.com/betagouv/service-national-universel/commit/ce39769385fe15de3936ba7101e9eee531080ccb))
+* **api:** snuId should be unique ([7ed8513](https://github.com/betagouv/service-national-universel/commit/7ed85134463d025c402105a016edb3ea6f9a4497))
+* **lib:** Ajout cohort 2024 mayotte ([d957f24](https://github.com/betagouv/service-national-universel/commit/d957f240a9a885e69835668ab1b9acf45e38b233))
+
+
+### Features
+
+* **admin:** CLE - Disable young validation after instruction end date [#3605](https://github.com/betagouv/service-national-universel/issues/3605) ([22902f7](https://github.com/betagouv/service-national-universel/commit/22902f7f7c2583f41fe619cba36f9deee7ef46df))
+
+# [1.381.0](https://github.com/betagouv/service-national-universel/compare/v1.380.0...v1.381.0) (2024-02-21)
+
+
+### Bug Fixes
+
+* **api, admin:** export classe schema de repartition ([#3603](https://github.com/betagouv/service-national-universel/issues/3603)) ([b46dc3b](https://github.com/betagouv/service-national-universel/commit/b46dc3b7770ff40ab034bb9749a0a7057fb7915d))
+
+
+### Features
+
+* **api:** block some jvaStructure ([#3604](https://github.com/betagouv/service-national-universel/issues/3604)) ([0f14788](https://github.com/betagouv/service-national-universel/commit/0f147884d53cb02ff593a4223c122ff2f7807dfb))
+* **app:** 1769 - Ecran "Désisté" pour les CLE ([#3589](https://github.com/betagouv/service-national-universel/issues/3589)) ([03a6f22](https://github.com/betagouv/service-national-universel/commit/03a6f22b35bf743b070a9feaabd9f6cca4c30864))
+
+# [1.380.0](https://github.com/betagouv/service-national-universel/compare/v1.379.0...v1.380.0) (2024-02-20)
+
+
+### Bug Fixes
+
+* **api:** Do not import prod in files ([caa2cee](https://github.com/betagouv/service-national-universel/commit/caa2ceef3a8714c30990f2853b5c14cfec8878f4))
+* **api:** Le volontaire ne passe pas “en attente de validation” lorsque le consentement est donné depuis admin → Compte élève CLE bloqué sur en cours ([#3598](https://github.com/betagouv/service-national-universel/issues/3598)) ([b24890c](https://github.com/betagouv/service-national-universel/commit/b24890c1214861b6fa2a638462c0cde0a4b68f59))
+* **api/admin:** Add student status to export ([#3599](https://github.com/betagouv/service-national-universel/issues/3599)) ([4e97d56](https://github.com/betagouv/service-national-universel/commit/4e97d56a4402ff1b584a3f074203dadca2136e0a))
+* **lib:** Add sessions CLE to list ([40ea549](https://github.com/betagouv/service-national-universel/commit/40ea54904daae9778da3bfc0a3bf498f9aa8f031))
+
+
+### Features
+
+* **app, misc:** 1702, 1696 - Reglement intérieur popin + version ([#3592](https://github.com/betagouv/service-national-universel/issues/3592)) ([3ee9a95](https://github.com/betagouv/service-national-universel/commit/3ee9a9538427a5892502e83abf47f94a82133340))
+
+# [1.379.0](https://github.com/betagouv/service-national-universel/compare/v1.378.0...v1.379.0) (2024-02-19)
+
+
+### Bug Fixes
+
+* **admin:** Filter not editable cohort from cohort list ([#3596](https://github.com/betagouv/service-national-universel/issues/3596)) ([458c806](https://github.com/betagouv/service-national-universel/commit/458c806d5edecbb712d68141c773ca17880cbf26))
+* **api:** Imports should be used after sentry setup ([6b9af05](https://github.com/betagouv/service-national-universel/commit/6b9af050040ea088a2aae410e825221c2a93f80b))
+* **api:** Wrong convocation downloaded + clean unused domtom convocation ([#3578](https://github.com/betagouv/service-national-universel/issues/3578)) ([4b35be8](https://github.com/betagouv/service-national-universel/commit/4b35be8115be083d3080562a7d9cc7383475a3c3))
+* **lib:** Fix constants for cohorts ([0105827](https://github.com/betagouv/service-national-universel/commit/01058271cb04a802c3730805523492ebd7b2d56b))
+
+
+### Features
+
+* **admin:** 1785 - New attestations for 2024 Cohorte ([#3594](https://github.com/betagouv/service-national-universel/issues/3594)) ([37c2b72](https://github.com/betagouv/service-national-universel/commit/37c2b723763cd3bf641e6952fba6c3b39b432353))
+* **misc:** 1905 - Granular build & deploy / app ([#3595](https://github.com/betagouv/service-national-universel/issues/3595)) ([93e241f](https://github.com/betagouv/service-national-universel/commit/93e241fcdbe34bc8aa20637f1b86c31fbd12f26e))
+* **misc:** 1905 - run_test_api action ([#3597](https://github.com/betagouv/service-national-universel/issues/3597)) ([07000ed](https://github.com/betagouv/service-national-universel/commit/07000ed97dda16b1186d94ede2e95aa2080c3b5b))
+
+# [1.378.0](https://github.com/betagouv/service-national-universel/compare/v1.377.0...v1.378.0) (2024-02-16)
+
+
+### Features
+
+* **app:** 1873 - update permission accessPhase2 for HTS->CLE ([#3590](https://github.com/betagouv/service-national-universel/issues/3590)) ([be0c447](https://github.com/betagouv/service-national-universel/commit/be0c44794a2b474d84c6a0a10cfa9b85628608f3))
+
+# [1.377.0](https://github.com/betagouv/service-national-universel/compare/v1.376.0...v1.377.0) (2024-02-15)
+
+
+### Bug Fixes
+
+* **admin:** Classe view ([46bb8af](https://github.com/betagouv/service-national-universel/commit/46bb8af87294687882483184a1f85346af832b1c))
+
+
+### Features
+
+* **api/admin:** 1750 & 1755 - Dynamic settings for CLE ([#3579](https://github.com/betagouv/service-national-universel/issues/3579)) ([e032260](https://github.com/betagouv/service-national-universel/commit/e0322600198858d93b545e2bcaf43ca92a0bdeaf))
+
+# [1.376.0](https://github.com/betagouv/service-national-universel/compare/v1.375.2...v1.376.0) (2024-02-14)
+
+
+### Features
+
+* **api, app, admin:** 1704 - Add "Other" type and text input to equivalence request ([#3559](https://github.com/betagouv/service-national-universel/issues/3559)) ([ad6d6b4](https://github.com/betagouv/service-national-universel/commit/ad6d6b475eb6e076a661fa22fb202789d957352b))
+
+## [1.375.2](https://github.com/betagouv/service-national-universel/compare/v1.375.1...v1.375.2) (2024-02-13)
+
+
+### Bug Fixes
+
+* **api:** Fix class populate on ticket creation  ([#3585](https://github.com/betagouv/service-national-universel/issues/3585)) ([b0d7410](https://github.com/betagouv/service-national-universel/commit/b0d7410aef6f35e4395109d98a2e40c32edf24e3))
+* **api,admin:** test pipeline + logic on delete ref ([#3586](https://github.com/betagouv/service-national-universel/issues/3586)) ([03dfe99](https://github.com/betagouv/service-national-universel/commit/03dfe99f30fb91ac8d6d50b820bd0859e5e3cba2))
+
+## [1.375.1](https://github.com/betagouv/service-national-universel/compare/v1.375.0...v1.375.1) (2024-02-11)
+
+
+### Bug Fixes
+
+* **app:** Minor fixes to Phase1/Affected page ([451dcfc](https://github.com/betagouv/service-national-universel/commit/451dcfcd9a0b70d3b9e11a7cc4061a280c23787c))
+
+# [1.375.0](https://github.com/betagouv/service-national-universel/compare/v1.374.0...v1.375.0) (2024-02-08)
+
+
+### Features
+
+* **app:** 1720, 1728, 1783 - Blocking phase3 + Phase 2 Home +  Phase 2 Navbar ([#3544](https://github.com/betagouv/service-national-universel/issues/3544)) ([d5ad65f](https://github.com/betagouv/service-national-universel/commit/d5ad65f38c37ea1ffea37bf8aa8aeb1e4b24d446))
+* **app, lib:** 1715 - Adapt Phase1NotDone screen for CLE. ([#3512](https://github.com/betagouv/service-national-universel/issues/3512)) ([6656820](https://github.com/betagouv/service-national-universel/commit/6656820304e14de5fd70eee3a3723016099ba166))
+
+# [1.374.0](https://github.com/betagouv/service-national-universel/compare/v1.373.0...v1.374.0) (2024-02-07)
+
+
+### Bug Fixes
+
+* is inscription open ([9d7ec30](https://github.com/betagouv/service-national-universel/commit/9d7ec30b68fafc19d9fe2983548b1978288000a7))
+* **admin:** Bouton inscription eleve disabled ([#3570](https://github.com/betagouv/service-national-universel/issues/3570)) ([4814da0](https://github.com/betagouv/service-national-universel/commit/4814da0a2eca80b1f6a98e9a3c5b7ecebb38cbf0))
+* **app:** 595 - Restore "Download" and "Send by mail" buttons in medical file modal [#3556](https://github.com/betagouv/service-national-universel/issues/3556) ([6c8d961](https://github.com/betagouv/service-national-universel/commit/6c8d961e0becac3a461fa0249fa2b90203ae9831))
+* **app:** CLE travel info component [#3546](https://github.com/betagouv/service-national-universel/issues/3546) ([9649911](https://github.com/betagouv/service-national-universel/commit/964991128f30e25e86c1b5fbe6d76af8277efc31))
+* **lib:** validated status color ([5a727e8](https://github.com/betagouv/service-national-universel/commit/5a727e8ee70cc091106ab9abd8a7ad4250d2093b))
+* **lib,app,admin:** fix inscription CLE Closed constants ([#3566](https://github.com/betagouv/service-national-universel/issues/3566)) ([1f74d16](https://github.com/betagouv/service-national-universel/commit/1f74d168e27b491cff6e0d643c108bf03fd01485))
+* **lib/admin:** 1810 - Dev mode & env by domain ([#3571](https://github.com/betagouv/service-national-universel/issues/3571)) ([dfd13a6](https://github.com/betagouv/service-national-universel/commit/dfd13a64e0bf90eff2b9b8b8f475fde0ef4e991c))
+
+
+### Features
+
+* **app:** Inscription CLE : Ecran de clôture globale des inscriptions ([#3562](https://github.com/betagouv/service-national-universel/issues/3562)) ([53f9dad](https://github.com/betagouv/service-national-universel/commit/53f9dadf0088eb80c3e0302915471d1dfe287d9d))
+
+# [1.373.0](https://github.com/betagouv/service-national-universel/compare/v1.372.0...v1.373.0) (2024-02-06)
+
+
+### Bug Fixes
+
+* **api:** export etablissements ([c7fd494](https://github.com/betagouv/service-national-universel/commit/c7fd494677b3feebad48f33d4702b2902102a6f7))
+* **api:** JVA block good structure ([29fc6eb](https://github.com/betagouv/service-national-universel/commit/29fc6eb99b727336805b0e6ce4057f07a5a5029c))
+* **api:** qpv empty string ([#3563](https://github.com/betagouv/service-national-universel/issues/3563)) ([c700e02](https://github.com/betagouv/service-national-universel/commit/c700e023865af18660f770327730c5f1098eab61))
+* **lib,app,admin:** fix inscription CLE Closed constants ([efc9126](https://github.com/betagouv/service-national-universel/commit/efc91262bc87c553247d10c95ac3280edeaa6f3d))
+
+
+### Features
+
+* **github:** Deploy clevercloud on production branch only ([6900782](https://github.com/betagouv/service-national-universel/commit/6900782e9d5cd43c27945048fecdfe69e9364fcf))
+
+# [1.372.0](https://github.com/betagouv/service-national-universel/compare/v1.371.0...v1.372.0) (2024-02-05)
+
+
+### Bug Fixes
+
+* **api:** 1596 - Young CLE Academy ([#3560](https://github.com/betagouv/service-national-universel/issues/3560)) ([465f9c6](https://github.com/betagouv/service-national-universel/commit/465f9c6460ddaaeec97988b4004f3aa404aa8d71))
+* **api:** Reput clamav back ([074aa50](https://github.com/betagouv/service-national-universel/commit/074aa506612ab82b5e9e30d841134866f9c66c80))
+
+
+### Features
+
+* **admin:** 1582 - Alert messages for all ADMINs ([#3561](https://github.com/betagouv/service-national-universel/issues/3561)) ([d3fd23f](https://github.com/betagouv/service-national-universel/commit/d3fd23ff72f2fe035f2af8920e5d01384d53d665))
+* **api:** 1250 - Prénoms composés ([#3558](https://github.com/betagouv/service-national-universel/issues/3558)) ([fb8b46f](https://github.com/betagouv/service-national-universel/commit/fb8b46f74674aa001980abfd570e05f9995d2575))
+* **app:** 1417 - inscription closed screen for CLE ([#3534](https://github.com/betagouv/service-national-universel/issues/3534)) ([8cabc77](https://github.com/betagouv/service-national-universel/commit/8cabc775dd97d2d5c36f3390309af7a56bd01cca))
+* **app:** 1732 - Close inscription for CLE on app ([#3551](https://github.com/betagouv/service-national-universel/issues/3551)) ([72164b8](https://github.com/betagouv/service-national-universel/commit/72164b8484d417d7b3c3bfbf45062281df40b687))
+* **app:** 1746 - New screen for Young CLE when inscription is closed ([#3543](https://github.com/betagouv/service-national-universel/issues/3543)) ([1db69fc](https://github.com/betagouv/service-national-universel/commit/1db69fceada0b1e755f49c875a3310f60fcb1226))
+* **app:** 1784 - Phase 2 In_Progress new screen ([#3548](https://github.com/betagouv/service-national-universel/issues/3548)) ([a449472](https://github.com/betagouv/service-national-universel/commit/a44947250818ed74af0c675a1f7be42a7a2ae112))
+
+
+### Reverts
+
+* Revert "chore(github): Delete CleverCloud" ([fbe4728](https://github.com/betagouv/service-national-universel/commit/fbe47289f99532ea40c8fec2de1232cd37ee10a6))
+
+# [1.371.0](https://github.com/betagouv/service-national-universel/compare/v1.370.0...v1.371.0) (2024-02-02)
+
+
+### Bug Fixes
+
+* **api:** bug env sentry sample rate ([#3554](https://github.com/betagouv/service-national-universel/issues/3554)) ([4b6c4f3](https://github.com/betagouv/service-national-universel/commit/4b6c4f3445b5216265aee6403e4346ad2b527b8d))
+
+
+### Features
+
+* **api:** 1767 - Add virtual fields in ES ([#3535](https://github.com/betagouv/service-national-universel/issues/3535)) ([0c18aab](https://github.com/betagouv/service-national-universel/commit/0c18aab15f41c637854750509a487e221a0cb708))
+
+# [1.370.0](https://github.com/betagouv/service-national-universel/compare/v1.369.0...v1.370.0) (2024-02-01)
+
+
+### Features
+
+* **api/admin:** permettre la prévisualisation des CNI des jeunes au lieu de DL ([#3514](https://github.com/betagouv/service-national-universel/issues/3514)) ([a605ddf](https://github.com/betagouv/service-national-universel/commit/a605ddf118ed0420e1322efc7c5e14c8bbdb2c08))
+* **app:** Update Home - status phase 2 Validated ([#3547](https://github.com/betagouv/service-national-universel/issues/3547)) ([8a691c3](https://github.com/betagouv/service-national-universel/commit/8a691c39ea5a0662cdb8bda7323cd514e3c421bf))
+
+# [1.369.0](https://github.com/betagouv/service-national-universel/compare/v1.368.0...v1.369.0) (2024-01-31)
+
+
+### Bug Fixes
+
+* **api:** Allow empty dates on cohort edition [#3541](https://github.com/betagouv/service-national-universel/issues/3541) ([e89a346](https://github.com/betagouv/service-national-universel/commit/e89a346f31c6dfc476cc9c0df9186eddab572528))
+* **api:** Fix CLE cohesion convocation ([eeb3eb6](https://github.com/betagouv/service-national-universel/commit/eeb3eb6c4659c354cebc64256ac5d37a99c549f9))
+* **app:** Fix medical file info icon ([c6c81c1](https://github.com/betagouv/service-national-universel/commit/c6c81c194d6d9c2db74626f0e3fbbf16d22df806))
+* etablissement export ([63c29a5](https://github.com/betagouv/service-national-universel/commit/63c29a5ed2d16d6c8b5c1a7c649737346f06e2e2))
+
+
+### Features
+
+* **api/admin:** 1558 - Liste établissement export ([#3542](https://github.com/betagouv/service-national-universel/issues/3542)) ([0366bba](https://github.com/betagouv/service-national-universel/commit/0366bba7c281e09b359e279f55b2518bf8ff27c6))
+* **api/admin:** 1731 - Admin create classe for etablissement ([#3545](https://github.com/betagouv/service-national-universel/issues/3545)) ([ca729de](https://github.com/betagouv/service-national-universel/commit/ca729de440eb09e41124910d6a4fdd5b79e25665))
+* **app:** 1679 - ConvocPreview For CLE ([#3521](https://github.com/betagouv/service-national-universel/issues/3521)) ([cd9ec60](https://github.com/betagouv/service-national-universel/commit/cd9ec60c4b22204f9c73c43db83bd000af53e5fa))
+* **app:** CLE - "Affected" screen ([#3537](https://github.com/betagouv/service-national-universel/issues/3537)) ([f135c84](https://github.com/betagouv/service-national-universel/commit/f135c8484babaa7040b106e6e15a3653a5921217))
+
+# [1.368.0](https://github.com/betagouv/service-national-universel/compare/v1.367.0...v1.368.0) (2024-01-30)
+
+
+### Features
+
+* **admin:** 1731-Suppression du bouton "Créer une classe" pour les admin CLE ([a2e6f21](https://github.com/betagouv/service-national-universel/commit/a2e6f210be7e268a6fd9851f5b03405a69adfba8))
+
+# [1.367.0](https://github.com/betagouv/service-national-universel/compare/v1.366.0...v1.367.0) (2024-01-29)
+
+
+### Bug Fixes
+
+* **api:** fix populate referent [#3526](https://github.com/betagouv/service-national-universel/issues/3526) ([7f9f7a0](https://github.com/betagouv/service-national-universel/commit/7f9f7a05751e31870cf1d160d3f99fd53c34c71d))
+* **api:** Save email addresses only as lowercase ([#3398](https://github.com/betagouv/service-national-universel/issues/3398)) ([5845227](https://github.com/betagouv/service-national-universel/commit/58452270cde79411a13ba8424f2a29719ff5d2b1))
+
+
+### Features
+
+* **app:** 1488-schoolManualFilling ([#3419](https://github.com/betagouv/service-national-universel/issues/3419)) ([a0679fb](https://github.com/betagouv/service-national-universel/commit/a0679fb70761851aab5cf32f5859f5411ba0134e))
+* Create branch ([#3523](https://github.com/betagouv/service-national-universel/issues/3523)) ([9feda5d](https://github.com/betagouv/service-national-universel/commit/9feda5dac462ba0e4b751b833f96aca15bf1e2ad))
+* **api:** create token for parent2 ([#3519](https://github.com/betagouv/service-national-universel/issues/3519)) ([d80b199](https://github.com/betagouv/service-national-universel/commit/d80b199d315994240e36aab7628893dae94e7efc))
+
+# [1.366.0](https://github.com/betagouv/service-national-universel/compare/v1.365.1...v1.366.0) (2024-01-26)
+
+
+### Bug Fixes
+
+* **api:** Export SENTRY_PROFILE_SAMPLE_RATE ([15befca](https://github.com/betagouv/service-national-universel/commit/15befcaf9db77dcd2d2e461940287dfe7d43a867))
+* **api:** fermer les invitations de chef d'etablissement avec le lien de decembre ([8d24f5a](https://github.com/betagouv/service-national-universel/commit/8d24f5acd1d30eeec78965e3a4d533815034fcb4))
+
+
+### Features
+
+* **api:** HTS > CLE keep phase2 open if phase has been DONE ([#3492](https://github.com/betagouv/service-national-universel/issues/3492)) ([2bdcb12](https://github.com/betagouv/service-national-universel/commit/2bdcb1272f942f77df14477ce3e154f60c442de8))
+
+## [1.365.1](https://github.com/betagouv/service-national-universel/compare/v1.365.0...v1.365.1) (2024-01-25)
+
+
+### Bug Fixes
+
+* **api:** fix jva connexion ([2a535de](https://github.com/betagouv/service-national-universel/commit/2a535dec05a0d6a58d7eaa7cb10e719bba05aaca))
+* **api:** Jva connexion ([84a53c9](https://github.com/betagouv/service-national-universel/commit/84a53c9713738e8b00cb41c530c3cb8db85ba7ec))
+* **api:** JVA connexion ([d175b87](https://github.com/betagouv/service-national-universel/commit/d175b8771a37926508423bfccc293a93f9152154))
+* **api:** JVA connexion ([61c10e2](https://github.com/betagouv/service-national-universel/commit/61c10e27ef3e58eb906067f1650640f3a420e2fe))
+* **api:** passage du statut du jeune en WA apres consentement par un ref ([757e041](https://github.com/betagouv/service-national-universel/commit/757e041b0465d5cc773de3c73b777701818ce3ae))
+* **app:** lauchBreak fix for fev C ([3d56236](https://github.com/betagouv/service-national-universel/commit/3d562362c27c127465802ad34ce9a71003595620))
+
+# [1.365.0](https://github.com/betagouv/service-national-universel/compare/v1.364.0...v1.365.0) (2024-01-24)
+
+
+### Bug Fixes
+
+* **admin/api:** 561-resolution du bug de cohérence entre les centres dans l'export du SR ([ecfbea0](https://github.com/betagouv/service-national-universel/commit/ecfbea0bcf1f521caf82cec89633d6fa42daea21))
+
+
+### Features
+
+* **admin/api:** permettre aux refs CLE d'accepter le consentement OU le droit a l'image a la place des parents ([#3503](https://github.com/betagouv/service-national-universel/issues/3503)) ([e74a93e](https://github.com/betagouv/service-national-universel/commit/e74a93ee43648fa2ed8f596c88487bc80754cbcc))
+* **app:** 1697 - remove MaskNeeded for session ([#3499](https://github.com/betagouv/service-national-universel/issues/3499)) ([0f45d27](https://github.com/betagouv/service-national-universel/commit/0f45d279d88ec1cd237642a7f645cea8b9aea6e5))
+
 # [1.364.0](https://github.com/betagouv/service-national-universel/compare/v1.363.0...v1.364.0) (2024-01-23)
 
 

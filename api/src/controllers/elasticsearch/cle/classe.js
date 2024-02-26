@@ -9,6 +9,7 @@ const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const EtablissementModel = require("../../../models/cle/etablissement");
 const { serializeReferents } = require("../../../utils/es-serializer");
+const { YOUNG_STATUS } = require("snu-lib");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -68,6 +69,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         response = await populateWithEtablissementInfo(response);
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
+        response = await populateWithYoungsInfo(response);
       }
 
       return res.status(200).send({ ok: true, data: response });
@@ -144,6 +146,31 @@ const populateWithPdrInfo = async (classes) => {
   const pdrs = await allRecords("pointderassemblement", { ids: { values: pdrIds.flat() } });
   return classes.map((item) => {
     item.pointDeRassemblement = pdrs?.filter((e) => item.pointDeRassemblementId === e._id.toString()).shift();
+    return item;
+  });
+};
+
+const populateWithYoungsInfo = async (classes) => {
+  const classesIds = classes.map((item) => item._id);
+  const students = await allRecords("young", { bool: { must: [{ terms: { classeId: classesIds } }] } });
+
+  //count students by class
+  const result = students.reduce((acc, cur) => {
+    if (!acc[cur.classeId]) {
+      acc[cur.classeId] = [];
+    }
+    acc[cur.classeId].push(cur);
+    return acc;
+  }, {});
+
+  //populate classes with students count
+  return classes.map((item) => {
+    item.studentInProgress = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length;
+    item.studentWaiting = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length;
+    item.studentValidated = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length;
+    item.studentAbandoned = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length;
+    item.studentNotAutorized = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length;
+    item.studentWithdrawn = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length;
     return item;
   });
 };

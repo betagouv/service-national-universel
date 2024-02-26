@@ -114,7 +114,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       const qpv = await getQPV(value.zip, value.city, value.address);
       if (qpv === true) value.qpv = "true";
       else if (qpv === false) value.qpv = "false";
-      else value.qpv = "";
+      else value.qpv = undefined;
     }
 
     // Check quartier prioritaires.
@@ -417,6 +417,18 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
     const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    // --- validate data
+    const bodySchema = Joi.object().keys({
+      consent: Joi.boolean().required(),
+      imageRights: Joi.boolean().required(),
+    });
+    const result = bodySchema.validate(req.body, { stripUnknown: true });
+    const { error, value } = result;
+    if (error) {
+      console.log("joi error: ", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
     if (!canAllowSNU(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // --- get young
@@ -443,33 +455,24 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    let changes = {
-      parentAllowSNU: "true",
-      parent1AllowSNU: "true",
-      parent1ValidationDate: new Date(),
-      parent1AllowImageRights: "true",
-    };
-
-    if (young.parent2Status) {
-      changes.parent2AllowSNU = "true";
-      changes.parent2ValidationDate = new Date();
-      changes.parent2AllowImageRights = "true";
-    }
+    const changes = generateChanges(value, young);
 
     young.set(changes);
     await young.save({ fromUser: req.user });
 
-    try {
-      const emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
-        emailTo,
-        params: {
-          cta: `${APP_URL}/`,
-          SOURCE: young.source,
-        },
-      });
-    } catch (e) {
-      capture(e);
+    if (value.consent) {
+      try {
+        const emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+        await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
+          emailTo,
+          params: {
+            cta: `${APP_URL}/`,
+            SOURCE: young.source,
+          },
+        });
+      } catch (e) {
+        capture(e);
+      }
     }
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -478,6 +481,32 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+function generateChanges(value, young) {
+  const changes = {};
+
+  const setIfTrue = (condition, field, value) => {
+    if (condition) {
+      changes[field] = value;
+    }
+  };
+
+  setIfTrue(value.consent, "status", YOUNG_STATUS.WAITING_VALIDATION);
+  setIfTrue(value.consent && young.inscriptionStep2023 === "WAITING_CONSENT", "inscriptionStep2023", "DONE");
+  setIfTrue(value.consent && young.reinscriptionStep2023 === "WAITING_CONSENT", "reinscriptionStep2023", "DONE");
+  setIfTrue(value.consent, "parentAllowSNU", "true");
+
+  //Parent 1
+  setIfTrue(value.consent, "parent1AllowSNU", "true");
+  setIfTrue(value.consent, "parent1ValidationDate", new Date());
+  setIfTrue(value.imageRights, "parent1AllowImageRights", "true");
+  //Parent 2
+  setIfTrue(young.parent2Status && value.consent, "parent2AllowSNU", "true");
+  setIfTrue(young.parent2Status && value.imageRights, "parent2AllowImageRights", "true");
+  setIfTrue(young.parent2Status && value.imageRights, "parent2ValidationDate", new Date());
+
+  return changes;
+}
 
 router.get("/:id/remider/:idParent", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

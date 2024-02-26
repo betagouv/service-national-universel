@@ -218,7 +218,7 @@ export default function StepProfil() {
 
           <label className="w-full">
             {isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
-            <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} />
+            <Input value={data.lastName} onChange={(e) => setData({ ...data, lastName: e })} onBlur={() => setData({ ...data, lastName: data.lastName.toUpperCase() })} />
             {error.lastName && <span className="text-sm text-red-500">{error.lastName}</span>}
           </label>
 

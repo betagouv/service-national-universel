@@ -90,7 +90,6 @@ export default function StepEligibilite() {
         }
       }
     }
-
     function validateSchool(data) {
       if (data.isAbroad) {
         if (!data?.school?.fullName) return false;

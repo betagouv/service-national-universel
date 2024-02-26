@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { useLocation } from "react-router-dom";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
@@ -6,10 +7,14 @@ import Loader from "@/components/Loader";
 
 export default function Done({ parentId }) {
   const { young } = useContext(RepresentantsLegauxContext);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const fromRI = queryParams.get("fromRI") === "true";
   const title = getTitle();
   const text = getText();
 
   function getTitle() {
+    if (fromRI) return "Merci, nous avons bien enregistré votre réponse.";
     if (parentId === 1) return young?.parentAllowSNU === "true" ? "Merci, nous avons bien enregistré votre consentement." : "Merci, nous avons bien enregistré votre refus.";
     return young?.parent2AllowImageRights === "true"
       ? "Merci, nous avons bien enregistré votre accord de droit à l'image."
@@ -17,6 +22,7 @@ export default function Done({ parentId }) {
   }
 
   function getText() {
+    if (fromRI) return "";
     if (parentId === 1)
       return young?.parentAllowSNU === "true"
         ? "Le dossier de votre enfant a bien été enregistré, celui-ci sera étudié ultérieurement."

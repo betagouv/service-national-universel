@@ -169,6 +169,7 @@ const Schema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
+    lowercase: true,
     documentation: {
       description: "E-mail du volontaire",
     },
@@ -308,6 +309,12 @@ const Schema = new mongoose.Schema({
     type: Date,
     documentation: {
       description: "Date de dernière modification du statut lié à la seconde phase",
+    },
+  },
+  statusPhase2OpenedAt: {
+    type: Date,
+    documentation: {
+      description: "Date d'ouverture de la seconde phase",
     },
   },
   statusPhase2ValidatedAt: {
@@ -567,6 +574,12 @@ const Schema = new mongoose.Schema({
     default: "",
     documentation: {
       description: "Le volontaire a accepté les CGU",
+    },
+  },
+  acceptRI: {
+    type: String,
+    documentation: {
+      description: "Version du reglement intérieur acceptée.",
     },
   },
   cniFiles: {
@@ -1071,6 +1084,8 @@ const Schema = new mongoose.Schema({
   },
   parent1Email: {
     type: String,
+    lowercase: true,
+    trim: true,
     documentation: {
       description: "E-mail du parent 1",
     },
@@ -1222,6 +1237,8 @@ const Schema = new mongoose.Schema({
   },
   parent2Email: {
     type: String,
+    lowercase: true,
+    trim: true,
     documentation: {
       description: "E-mail du parent 2",
     },
@@ -2008,6 +2025,13 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.virtual("fromUser").set(function (fromUser) {
+  if (fromUser) {
+    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
+    this._user = { _id, role, department, region, email, firstName, lastName, model };
+  }
+});
+
 Schema.pre("save", function (next) {
   if (this.isModified("password") || this.isNew) {
     bcrypt.hash(this.password, 10, (e, hash) => {
@@ -2104,13 +2128,6 @@ Schema.post("findOneAndUpdate", function (doc) {
 });
 Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
-});
-
-Schema.virtual("fromUser").set(function (fromUser) {
-  if (fromUser) {
-    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
-  }
 });
 
 Schema.pre("save", function (next, params) {

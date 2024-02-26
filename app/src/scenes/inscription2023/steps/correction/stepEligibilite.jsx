@@ -28,6 +28,14 @@ import useAuth from "@/services/useAuth";
 
 export default function StepEligibilite() {
   const { young, isCLE } = useAuth();
+  function isInFranceOrOut(young) {
+    if (young.schoolCountry !== "FRANCE") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   const [data, setData] = React.useState({
     frenchNationality: young?.frenchNationality,
     birthDate: new Date(young?.birthdateAt),
@@ -48,7 +56,9 @@ export default function StepEligibilite() {
       : null,
     scolarity: young?.grade,
     zip: young?.zip,
+    isAbroad: isInFranceOrOut(young),
   });
+
   const dispatch = useDispatch();
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
@@ -203,62 +213,65 @@ export default function StepEligibilite() {
 
   if (!young) return <Loader />;
   if (!corrections) return <Redirect to="/" />;
+
   return (
     <>
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
-        <div className="flex-start my-4 flex flex-col">
-          <div className="flex items-center">
-            <CheckBox disabled={!isCLE} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-            <div className="flex items-center backdrop-opacity-100">
-              <span className={`ml-2 mr-2 ${!isCLE && "text-[#929292]"}`}>Je suis de nationalité française</span>
-              <IconFrance />
+        <div className="space-y-5">
+          <div className="flex-start my-4 flex flex-col">
+            <div className="flex items-center">
+              <CheckBox disabled={!isCLE} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
+              <div className="flex items-center backdrop-opacity-100">
+                <span className={`ml-2 mr-2 ${!isCLE && "text-[#929292]"}`}>Je suis de nationalité française</span>
+                <IconFrance />
+              </div>
             </div>
+            {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
           </div>
-          {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
-        </div>
-        <Select
-          label="Niveau de scolarité"
-          value={data.scolarity}
-          options={optionsScolarite}
-          onChange={(value) => {
-            setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
-          }}
-          error={error.scolarity}
-          correction={corrections.grade}
-        />
-        <label className="flex-start mt-2 flex w-full flex-col text-base">
-          Date de naissance
-          <DatePicker value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
-          <ErrorMessage>{error.birthDate}</ErrorMessage>
-          <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
-        </label>
-        {data.scolarity && (
-          <>
-            <div className="flex items-center justify-between">
-              <div>
+          <Select
+            label="Niveau de scolarité"
+            value={data.scolarity}
+            options={optionsScolarite}
+            onChange={(value) => {
+              setData({ ...data, scolarity: value, school: value === "NOT_SCOLARISE" ? null : data.school });
+            }}
+            error={error.scolarity}
+            correction={corrections.grade}
+          />
+          <label className="flex-start mt-2 flex w-full flex-col text-base">
+            Date de naissance
+            <DatePicker disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+            <ErrorMessage>{error.birthDate}</ErrorMessage>
+            <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
+          </label>
+          {data.scolarity && (
+            <>
+              <div className="flex items-center justify-between">
                 <div>
-                  <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
+                  <div>
+                    <span className="font-bold">{data.scolarity === "NOT_SCOLARISE" ? "Je réside" : "Mon établissement scolaire est"}</span> en France
+                  </div>
+                  <div className="flex h-5 items-center">
+                    <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
+                  </div>
                 </div>
-                <div className="flex h-5 items-center">
-                  <span className="text-xs leading-5 text-[#666666]">Métropolitaine ou Outre-mer</span>
-                </div>
+
+                <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, zip: data.isAbroad ? null : data.zip })} toggled={!data.isAbroad} />
               </div>
 
-              <Toggle onClick={() => setData({ ...data, isAbroad: !data.isAbroad, zip: data.isAbroad ? null : data.zip })} toggled={!data.isAbroad} />
-            </div>
-
-            {data.scolarity !== "NOT_SCOLARISE" ? (
-              data.isAbroad ? (
-                <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} corrections={corrections} />
-              ) : (
-                <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} errors={error} corrections={corrections} />
-              )
-            ) : !data.isAbroad ? (
-              <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} label="Code Postal" error={error.zip} correction={corrections.zip} />
-            ) : null}
-          </>
-        )}
-        <SignupButtonContainer labelNext="Corriger" onClickNext={onSubmit} loading={loading} />
+              {data.scolarity !== "NOT_SCOLARISE" ? (
+                data.isAbroad ? (
+                  <SchoolOutOfFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} toggleVerify={toggleVerify} corrections={corrections} />
+                ) : (
+                  <SchoolInFrance school={data.school} onSelectSchool={(school) => setData({ ...data, school: school })} errors={error} corrections={corrections} />
+                )
+              ) : !data.isAbroad ? (
+                <Input value={data.zip} onChange={(e) => setData({ ...data, zip: e })} label="Code Postal" error={error.zip} correction={corrections.zip} />
+              ) : null}
+            </>
+          )}
+          <SignupButtonContainer labelNext="Corriger" onClickNext={onSubmit} loading={loading} />
+        </div>
       </DSFRContainer>
       <ModalSejourCorrection data={modal?.data} isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} onValidation={modal?.onValidation} />
     </>

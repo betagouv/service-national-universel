@@ -130,7 +130,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                           <NavItem Icon={AddUser} title="Inviter un nouveau responsable" link={`/structure/${user.structureId}?prompt=team`} />
                         )}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />}
-                        {[ROLES.ADMIN].includes(user.role) && user.subRole === "god" && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
+                        {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
                         {<NavItem Icon={Support} title="Besoin d'aide ?" link={`/besoin-d-aide?from=${from}`} />}
                         {/* <NavItem />
                     <NavItem />

@@ -155,13 +155,7 @@ async function loadSchemaGroups({ department, region, cohort }) {
       $unwind: "$center",
     },
     {
-      $addFields: {
-        centerAddress: "$center.address",
-        centerZip: "$center.zip",
-      },
-    },
-    {
-      $project: { gpIds: 0, center: 0, centerObjectId: 0 },
+      $project: { gpIds: 0, centerObjectId: 0 },
     },
   ]);
 }
