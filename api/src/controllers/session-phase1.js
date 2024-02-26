@@ -245,7 +245,7 @@ async function generateBatchPDF(batchHtmlContent, batchIndex) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const body = fs.readFileSync(path.resolve(__dirname, "../templates/certificate/bodyBatch.html"), "utf8");
-      const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl());
+      const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()));
       const context = await timeout(getPDF(newhtml, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
       return { name: `batch_${batchIndex}_certificat.pdf`, body: context };
     } catch (e) {
@@ -303,8 +303,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     }
 
     const pdfs = await Promise.all(batchOperations);
-
-    console.log("pdfs", pdfs.length);
 
     pdfs.forEach((pdf) => {
       zip.addFile(pdf.name, pdf.body);
