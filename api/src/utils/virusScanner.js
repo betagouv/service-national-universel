@@ -1,37 +1,36 @@
 // virusScanner.js
-const NodeClam = require("clamscan");
+const { API_ANTIVIRUS_ENDPOINT } = require("../config");
 const { capture } = require("../sentry");
+const fetch = require("node-fetch");
+const FormData = require('form-data');
+const { createReadStream } = require('fs');
+const { timeout } = require("../utils");
 const { ERRORS } = require("./index");
-const { SCALEWAY_CLAMSCAN } = require("../config");
+
+const TIMEOUT_ANTIVIRUS_SERVICE = 10000;
 
 async function scanFile(tempFilePath, name, userId) {
-  try {
-    const clamscan = await new NodeClam().init(
-      SCALEWAY_CLAMSCAN
-        ? {
-            removeInfected: true,
-            clamdscan: {
-              host: "127.0.0.1",
-              port: 3310,
-              timeout: 30000,
-              socket: null,
-              tls: true,
-            },
-          }
-        : {
-            removeInfected: true,
-          },
-    );
-    const { isInfected } = await clamscan.isInfected(tempFilePath);
-    if (isInfected) {
-      capture(`File ${name} of user(${userId}) is infected`);
-      return { infected: true, error: null };
+
+  const scan = async () => {
+    const stream = createReadStream(tempFilePath);
+    const url = `${API_ANTIVIRUS_ENDPOINT}/scan`;
+
+    const formData = new FormData();
+    formData.append('file', stream);
+
+    const response = await fetch(url, { method: 'POST', body: formData });
+
+    switch (response.status) {
+      case 200:
+        return { infected: false };
+      case 403:
+        capture(`File ${name} of user(${userId}) is infected`);
+        return { infected: true };
+      default:
+        throw new Error(ERRORS.FILE_SCAN_DOWN);
     }
-    return { infected: false, error: null };
-  } catch (error) {
-    capture(error);
-    return { infected: false, error: ERRORS.FILE_SCAN_DOWN };
-  }
+  };
+  return await timeout(scan(), TIMEOUT_ANTIVIRUS_SERVICE);
 }
 
 module.exports = scanFile;

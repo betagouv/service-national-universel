@@ -1,3 +1,4 @@
+const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
@@ -51,6 +52,9 @@ app.post("/scan",
 
       const clamscan = await new NodeClam().init(CLAMSCAN_CONFIG);
       const { isInfected } = await clamscan.isInfected(files.file.tempFilePath);
+
+      fs.unlinkSync(files.file.tempFilePath);
+
       if (isInfected) {
         console.error(`File ${files.file.tempFilePath} is infected`);
         return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
@@ -58,7 +62,7 @@ app.post("/scan",
 
       return res.status(200).send({ ok: true });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }

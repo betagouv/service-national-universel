@@ -13,6 +13,8 @@ const API_ANALYTICS_ENDPOINT = process.env.API_ANALYTICS_ENDPOINT || "http://loc
 
 const API_ANALYTICS_API_KEY = process.env.API_ANALYTICS_API_KEY || "api-key";
 
+const API_ANTIVIRUS_ENDPOINT = process.env.API_ANTIVIRUS_ENDPOINT || "http://localhost:8089";
+
 const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
 const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
@@ -95,6 +97,7 @@ module.exports = {
   API_PDF_ENDPOINT,
   API_ANALYTICS_ENDPOINT,
   API_ANALYTICS_API_KEY,
+  API_ANTIVIRUS_ENDPOINT,
   REDIS_URL,
   SCALEWAY_CLAMSCAN,
 };
