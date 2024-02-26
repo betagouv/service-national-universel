@@ -1,3 +1,11 @@
+# [1.384.0](https://github.com/betagouv/service-national-universel/compare/v1.383.0...v1.384.0) (2024-02-26)
+
+
+### Features
+
+* **misc:** CC deploy on production_cc branch ([#3612](https://github.com/betagouv/service-national-universel/issues/3612)) ([08e3f17](https://github.com/betagouv/service-national-universel/commit/08e3f17811841a1a5f30449dfd64f07a2307dcdb))
+* **misc:** Normalize CC actions ([#3610](https://github.com/betagouv/service-national-universel/issues/3610)) ([5ec10c2](https://github.com/betagouv/service-national-universel/commit/5ec10c2866a99dfd774107fe8c34490dad3450e8))
+
 # [1.383.0](https://github.com/betagouv/service-national-universel/compare/v1.382.1...v1.383.0) (2024-02-24)
 
 
