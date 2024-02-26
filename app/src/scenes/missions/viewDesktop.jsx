@@ -134,7 +134,7 @@ export default function ViewDesktop() {
     });
   };
 
-  const handleClick = ({ mission }) => {
+  const handleClick = (mission) => {
     if (mission.isMilitaryPreparation === "true") {
       plausibleEvent("Phase 2/CTA - PM - Candidater");
     } else {
@@ -198,10 +198,7 @@ export default function ViewDesktop() {
             {mission.application ? (
               <ApplicationStatus mission={mission} updateApplication={updateApplication} loading={loading} />
             ) : (
-              <div className="flex flex-col gap-2 items-center">
-                <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
-                <p className="text-xs font-normal leading-none text-gray-500">{mission.placesLeft} places restantes</p>
-              </div>
+              <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
             )}
           </div>
         </div>

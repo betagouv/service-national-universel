@@ -171,7 +171,7 @@ const getAuthorizationToApply = async (mission, young) => {
     !young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length;
 
   if (isMilitaryPreparation && isMilitaryApplicationIncomplete) {
-    return { enacanApplybled: false, message: "Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page" };
+    return { canApply: false, message: "Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page" };
   }
 
   return { canApply: true, message: "" };
