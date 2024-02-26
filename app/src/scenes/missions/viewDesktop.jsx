@@ -38,7 +38,6 @@ import Download from "../../assets/icons/Download";
 import { capture } from "../../sentry";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
-import { getAuthorizationToApply } from "./missions.utils";
 import plausibleEvent from "@/services/plausible";
 
 export default function ViewDesktop() {
@@ -144,11 +143,7 @@ export default function ViewDesktop() {
     setModal("APPLY");
   };
 
-  if (!mission || !young) {
-    return <Loader />;
-  }
-
-  const authorization = getAuthorizationToApply(mission, young);
+  if (!mission) return <Loader />;
 
   return (
     <div className="flex">
@@ -201,10 +196,10 @@ export default function ViewDesktop() {
           </div>
           <div className="mt-3 flex items-center justify-center lg:!mt-0">
             {mission.application ? (
-              <ApplicationStatus mission={mission} updateApplication={updateApplication} loading={loading} authorization={authorization} />
+              <ApplicationStatus mission={mission} updateApplication={updateApplication} loading={loading} />
             ) : (
               <div className="flex flex-col gap-2 items-center">
-                <ApplyButton setModal={setModal} authorization={authorization} onClick={() => handleClick(mission)} />
+                <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
                 <p className="text-xs font-normal leading-none text-gray-500">{mission.placesLeft} places restantes</p>
               </div>
             )}
@@ -466,7 +461,7 @@ export default function ViewDesktop() {
   );
 }
 
-const ApplicationStatus = ({ mission, updateApplication, loading, authorization }) => {
+const ApplicationStatus = ({ mission, updateApplication, loading }) => {
   const young = useSelector((state) => state.Auth.young);
   const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
   const application = mission?.application;
@@ -601,8 +596,8 @@ const ApplicationStatus = ({ mission, updateApplication, loading, authorization 
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-3">
-          {!authorization.enabled ? (
-            <WithTooltip tooltipText={authorization.message}>
+          {!mission.canApply ? (
+            <WithTooltip tooltipText={mission.message}>
               <button disabled className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2">
                 <CheckCircle className="mr-2 h-5 w-5 text-blue-400" />
                 <span className="text-sm font-medium leading-5 text-white">Accepter</span>

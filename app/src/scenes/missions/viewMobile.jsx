@@ -37,7 +37,6 @@ import IconDomain from "./components/IconDomain";
 import ModalPJ from "./components/ModalPJ";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
-import { getAuthorizationToApply } from "./missions.utils";
 import plausibleEvent from "@/services/plausible";
 
 export default function ViewMobile() {
@@ -124,12 +123,7 @@ export default function ViewMobile() {
     );
   };
 
-  if (!mission || !young) {
-    return <Loader />;
-  }
-
-  const authorization = getAuthorizationToApply(mission, young);
-
+  if (!mission) return <Loader />;
   return (
     <div className="flex">
       <div className="mb-4 w-full rounded-xl bg-white p-3">
@@ -166,13 +160,12 @@ export default function ViewMobile() {
                 updateApplication={updateApplication}
                 loading={loading}
                 setLoading={setLoading}
-                authorization={authorization}
                 contract={contract}
                 contractHasAllValidation={contractHasAllValidation}
               />
             ) : (
               <div className="flex flex-col gap-2 items-center">
-                <ApplyButton authorization={authorization} handleClick={() => handleClick({ mission })} />
+                <ApplyButton mission={mission} handleClick={() => handleClick({ mission })} />
                 <p className="text-xs font-normal leading-none text-gray-500">{mission.placesLeft} places restantes</p>
               </div>
             )}
@@ -476,7 +469,7 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
   </div>
 );
 
-const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, authorization, contract, contractHasAllValidation }) => {
+const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, contract, contractHasAllValidation }) => {
   const young = useSelector((state) => state.Auth.young);
   const tutor = mission?.tutor;
   const application = mission?.application;
@@ -632,7 +625,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, au
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-3">
-          {!authorization.enabled ? (
+          {!mission.canApply ? (
             <button disabled className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2">
               <CheckCircle className="mr-2 h-5 w-5 text-blue-400 " />
               <span className="text-sm font-medium leading-5 text-white">Accepter</span>
@@ -654,7 +647,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, au
             <span className="text-sm font-medium leading-5 text-black">Décliner</span>
           </button>
         </div>
-        {!authorization.enabled ? <div className="text-center text-xs text-red-500">{authorization.message}</div> : null}
+        {!mission.canApply ? <div className="text-center text-xs text-red-500">{mission.message}</div> : null}
 
         <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} hebergement={mission.hebergement} hebergementPayant={mission.hebergementPayant} />
       </div>
