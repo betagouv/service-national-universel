@@ -245,7 +245,7 @@ async function generateBatchPDF(batchHtmlContent, batchIndex) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const body = fs.readFileSync(path.resolve(__dirname, "../templates/certificate/bodyBatch.html"), "utf8");
-      const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll("https://api.snu.gouv.fr"));
+      const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl());
       const context = await timeout(getPDF(newhtml, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
       return { name: `batch_${batchIndex}_certificat.pdf`, body: context };
     } catch (e) {
@@ -288,18 +288,12 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    // let zip = new Zip();
-    // const batchSize = 10;
-    // const numBatches = Math.ceil(youngs.length / batchSize);
-
     let zip = new Zip();
     const batchSize = 20;
     const batchOperations = [];
 
     for (let i = 0; i < youngs.length; i += batchSize) {
       const batch = youngs.slice(i, i + batchSize);
-
-      console.log("batch", batch.length, i / batchSize + 1, youngs.length);
 
       // Generate HTML content for each young in the batch
       const batchHtml = await Promise.all(batch.map((young) => phase1(young, true)));
@@ -879,7 +873,7 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
 });
 
 async function getPDF(html, options) {
-  const response = await fetch("https://pdf.beta-snu.dev/render", {
+  const response = await fetch(config.API_PDF_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/pdf" },
     body: JSON.stringify({ html, options }),
