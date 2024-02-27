@@ -51,7 +51,6 @@ data "scaleway_registry_namespace" "main" {
 
 # DNS zone
 data "scaleway_domain_zone" "main" {
-  project_id = local.project_id
   domain     = "ci.beta-snu.dev"
   subdomain  = ""
 }
@@ -145,7 +144,7 @@ resource "scaleway_container" "api" {
 }
 
 resource "scaleway_domain_record" "api" {
-  dns_zone = scaleway_domain_zone.main.id
+  dns_zone = data.scaleway_domain_zone.main.id
   name     = "api-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.api.domain_name}."
@@ -194,7 +193,7 @@ resource "scaleway_container" "admin" {
 }
 
 resource "scaleway_domain_record" "admin" {
-  dns_zone = scaleway_domain_zone.main.id
+  dns_zone = data.scaleway_domain_zone.main.id
   name     = "admin-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.admin.domain_name}."
@@ -241,7 +240,7 @@ resource "scaleway_container" "app" {
 }
 
 resource "scaleway_domain_record" "app" {
-  dns_zone = scaleway_domain_zone.main.id
+  dns_zone = data.scaleway_domain_zone.main.id
   name     = "moncompte-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
