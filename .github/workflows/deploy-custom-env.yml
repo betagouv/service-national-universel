@@ -25,7 +25,6 @@ jobs:
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
-      antivirus_image_tag: ${{ steps.prepare.outputs.antivirus_image_tag }}
       run_api_tests: ${{ steps.prepare.outputs.run_api_tests }}
 
     steps:
@@ -70,10 +69,6 @@ jobs:
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
-          antivirus_image_tag=$(git log --max-count=1 --oneline -- antivirus packages | cut -d " " -f 1)
-          echo "antivirus_image_tag: $antivirus_image_tag"
-          echo "antivirus_image_tag=$antivirus_image_tag" >> $GITHUB_OUTPUT
-
           if [[ $api_image_tag == $current_tag ]] ; then
               echo "run_api_tests=1" >> $GITHUB_OUTPUT
           else
@@ -107,7 +102,6 @@ jobs:
           {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
           {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
           {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
-          {name: antivirus, tag: "${{needs.prepare.outputs.antivirus_image_tag}}" },
         ]
 
     steps:
@@ -235,8 +229,7 @@ jobs:
           terraform plan -no-color -input=false -lock-timeout=15m \
             -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
             -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
-            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
-            -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
@@ -244,8 +237,7 @@ jobs:
           terraform apply -no-color -input=false -auto-approve -lock-timeout=15m \
             -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
             -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
-            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
-            -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Add comment to PR
         if: github.event_name == 'pull_request' && steps.check_secret.outputs.has_secret == '0'
@@ -257,7 +249,6 @@ jobs:
           api_endpoint=$(terraform output -raw api_endpoint)
           app_endpoint=$(terraform output -raw app_endpoint)
           admin_endpoint=$(terraform output -raw admin_endpoint)
-          antivirus_endpoint=$(terraform output -raw antivirus_endpoint)
           curl \
             -X POST \
             $URL \

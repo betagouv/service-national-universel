@@ -25,6 +25,7 @@ jobs:
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
+      antivirus_image_tag: ${{ steps.prepare.outputs.antivirus_image_tag }}
       run_api_tests: ${{ steps.prepare.outputs.run_api_tests }}
 
     steps:
@@ -66,6 +67,10 @@ jobs:
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
+          antivirus_image_tag=$(git log --max-count=1 --oneline -- antivirus packages | cut -d " " -f 1)
+          echo "antivirus_image_tag: $antivirus_image_tag"
+          echo "antivirus_image_tag=$antivirus_image_tag" >> $GITHUB_OUTPUT
+
           # We need to run api tests only if api has been modified in hotfix branch
           diff=$(git log --oneline origin/${{ env.production_branch }}...${{ steps.target_branch.outputs.target_branch }} -- api packages | cut -d " " -f 1 | grep $api_image_tag)
           if [[ $diff ]] ; then
@@ -98,6 +103,7 @@ jobs:
           {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
           {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
           {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+          {name: antivirus, tag: "${{needs.prepare.outputs.antivirus_image_tag}}" },
         ]
 
     steps:
@@ -204,7 +210,8 @@ jobs:
           terraform plan -no-color -input=false \
             -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
             -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
-            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
+            -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
 
   deploy_production:
     runs-on: ubuntu-latest
@@ -234,7 +241,8 @@ jobs:
           terraform apply -no-color -input=false -auto-approve \
             -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
             -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
-            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
+            -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
 
       - name: Production - Healthcheck API
         working-directory: ${{ env.prod_directory }}

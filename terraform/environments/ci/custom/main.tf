@@ -28,10 +28,6 @@ variable "app_image_tag" {
   type    = string
   nullable = false
 }
-variable "antivirus_image_tag" {
-  type    = string
-  nullable = false
-}
 
 locals {
   env            = "###___ENV_NAME___###"
@@ -40,7 +36,6 @@ locals {
   api_hostname   = "api-${local.env}.${local.domain}"
   admin_hostname = "admin-${local.env}.${local.domain}"
   app_hostname   = "moncompte-${local.env}.${local.domain}"
-  antivirus_hostname   = "antivirus-${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -107,11 +102,11 @@ resource "scaleway_container" "api" {
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.1
     "SENTRY_RELEASE"                    = var.api_image_tag
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
+    "API_ANTIVIRUS_ENDPOINT"            = local.secrets.API_ANTIVIRUS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"      = local.secrets.API_ASSOCIATION_CELLAR_KEYID
     "API_PDF_ENDPOINT"                  = local.secrets.API_PDF_ENDPOINT
-    "API_ANTIVIRUS_ENDPOINT"            = "https://${local.antivirus_hostname}"
     "BUCKET_NAME"                       = local.secrets.BUCKET_NAME
     "CELLAR_ENDPOINT"                   = local.secrets.CELLAR_ENDPOINT
     "CELLAR_ENDPOINT_SUPPORT"           = local.secrets.CELLAR_ENDPOINT_SUPPORT
@@ -259,39 +254,6 @@ resource "scaleway_container_domain" "app" {
   hostname     = "${scaleway_domain_record.app.name}${scaleway_domain_record.app.dns_zone}"
 }
 
-resource "scaleway_container" "antivirus" {
-  name            = "${local.env}-antivirus"
-  namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/antivirus:${var.antivirus_image_tag}"
-  port            = 8089
-  cpu_limit       = 512
-  memory_limit    = 4096
-  min_scale       = 1
-  max_scale       = 1
-  timeout         = 60
-  max_concurrency = 50
-  privacy         = "private"
-  protocol        = "http1"
-  deploy          = true
-
-  environment_variables = {
-    "APP_NAME"   = "antivirus"
-  }
-}
-
-resource "scaleway_domain_record" "antivirus" {
-  dns_zone = data.scaleway_domain_zone.main.id
-  name     = "antivirus-${local.env}"
-  type     = "CNAME"
-  data     = "${scaleway_container.antivirus.domain_name}."
-  ttl      = 300
-}
-
-resource "scaleway_container_domain" "antivirus" {
-  container_id = scaleway_container.antivirus.id
-  hostname     = "${scaleway_domain_record.antivirus.name}${scaleway_domain_record.antivirus.dns_zone}"
-}
-
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
 }
@@ -309,10 +271,4 @@ output "admin_endpoint" {
 }
 output "admin_image_tag" {
   value = split(":", scaleway_container.admin.registry_image)[1]
-}
-output "antivirus_endpoint" {
-  value = "https://${local.antivirus_hostname}"
-}
-output "antivirus_image_tag" {
-  value = split(":", scaleway_container.antivirus.registry_image)[1]
 }
