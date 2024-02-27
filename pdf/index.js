@@ -68,7 +68,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/render", async (req, res) => {
-=  try {
+  try {
     const random = Math.random();
     console.time("RENDERING " + random);
     const buffer = await renderFromHtml(req.body.html, req.body.options || {});
