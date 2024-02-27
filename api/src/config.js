@@ -56,8 +56,6 @@ const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
 const REDIS_URL = process.env.REDIS_URL || "";
 
-const SCALEWAY_CLAMSCAN = process.env.SCALEWAY_CLAMSCAN || "true";
-
 module.exports = {
   LOCAL,
   PORT,
@@ -102,7 +100,6 @@ module.exports = {
   API_ANTIVIRUS_ENDPOINT,
   API_ANTIVIRUS_TOKEN,
   REDIS_URL,
-  SCALEWAY_CLAMSCAN,
 };
 
 function getEnvironment() {
