@@ -1,3 +1,15 @@
+# [1.385.0](https://github.com/betagouv/service-national-universel/compare/v1.384.0...v1.385.0) (2024-02-27)
+
+
+### Bug Fixes
+
+* **api:** session phase 1 certificate ([#3614](https://github.com/betagouv/service-national-universel/issues/3614)) ([dd3e2b9](https://github.com/betagouv/service-national-universel/commit/dd3e2b90af9e7f03e87436a1e320a5ae75290b8b))
+
+
+### Features
+
+* **misc:** remove sub-DNS zones ([#3617](https://github.com/betagouv/service-national-universel/issues/3617)) ([6c51066](https://github.com/betagouv/service-national-universel/commit/6c51066995741496c7bf85612ab3ca898b6b53ab))
+
 # [1.384.0](https://github.com/betagouv/service-national-universel/compare/v1.383.0...v1.384.0) (2024-02-26)
 
 
