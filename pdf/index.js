@@ -38,6 +38,7 @@ const renderFromHtml = async (html, options) => {
 
     return buffer;
   } catch (error) {
+    console.log(error);
     capture(error);
   }
 };
@@ -55,6 +56,7 @@ const getBrowserAndPage = async (options) => {
 
     return { browser, page };
   } catch (error) {
+    console.log(error);
     capture(error);
   }
 };

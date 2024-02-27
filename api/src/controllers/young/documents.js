@@ -88,20 +88,15 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     // Create html
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const testURL = config.API_PDF_ENDPOINT;
 
     const getPDF = async () =>
-      await fetch(testURL, {
+      await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/pdf" },
         body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
       }).then((response) => {
         // ! On a retravaillé pour faire passer les tests
-        if (response.status !== 200) {
-          const errorText = response.text();
-          console.error("Error with PDF service:", errorText);
-          throw new Error("Error with PDF service");
-        }
+        if (response.status && response.status !== 200) throw new Error("Error with PDF service");
         res.set({
           "content-length": response.headers.get("content-length"),
           "content-disposition": `inline; filename="test.pdf"`,
