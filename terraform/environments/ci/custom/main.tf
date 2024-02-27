@@ -33,9 +33,9 @@ locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
   namespace_name = split("/funcscw", scaleway_container_namespace.main.registry_endpoint)[1]
-  api_hostname   = "${namespace_name}-${local.env}-api"
-  admin_hostname = "${namespace_name}-${local.env}-admin"
-  app_hostname   = "${namespace_name}-${local.env}-app"
+  api_hostname   = "${local.namespace_name}-${local.env}-api"
+  admin_hostname = "${local.namespace_name}-${local.env}-admin"
+  app_hostname   = "${local.namespace_name}-${local.env}-app"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
