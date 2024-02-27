@@ -27,9 +27,13 @@ RUN apk add --no-cache \
       nss \
       freetype \
       harfbuzz \
-      ca-certificates
+      ca-certificates \
+      ttf-freefont \
+      libstdc++
 
 COPY --chown=node:node --from=build /build/out .
+
+USER node
 
 LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel"
 
