@@ -1,4 +1,3 @@
-const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
@@ -19,7 +18,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
-  FILE_INFECTED: "FILE_INFECTED",
   INVALID_PARAMS: "INVALID_PARAMS",
 }
 
@@ -55,10 +53,10 @@ app.post("/scan",
 
       if (isInfected) {
         console.error(`File ${files.file.tempFilePath} is infected`);
-        return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        return res.status(200).send({ ok: true, infected: true });
       }
 
-      return res.status(200).send({ ok: true });
+      return res.status(200).send({ ok: true, infected: false });
     } catch (error) {
       console.error(error);
       capture(error);

@@ -129,6 +129,7 @@ resource "scaleway_container" "api" {
 
   secret_environment_variables = {
     "API_ANALYTICS_API_KEY"                 = local.secrets.API_ANALYTICS_API_KEY
+    "API_ANTIVIRUS_TOKEN"                   = local.secrets.API_ANTIVIRUS_TOKEN
     "API_ASSOCIATION_AWS_SECRET_ACCESS_KEY" = local.secrets.API_ASSOCIATION_AWS_SECRET_ACCESS_KEY
     "API_ASSOCIATION_CELLAR_KEYSECRET"      = local.secrets.API_ASSOCIATION_CELLAR_KEYSECRET
     "API_ASSOCIATION_ES_ENDPOINT"           = local.secrets.API_ASSOCIATION_ES_ENDPOINT
@@ -269,7 +270,7 @@ resource "scaleway_container" "antivirus" {
   max_scale       = 1
   timeout         = 60
   max_concurrency = 50
-  privacy         = "public"
+  privacy         = "private"
   protocol        = "http1"
   deploy          = true
 
