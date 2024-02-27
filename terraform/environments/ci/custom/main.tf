@@ -153,7 +153,7 @@ resource "scaleway_domain_record" "api" {
 
 resource "scaleway_container_domain" "api" {
   container_id = scaleway_container.api.id
-  hostname     = local.api_hostname
+  hostname     = "https://${scaleway_domain_record.api.name}${scaleway_domain_record.api.dns_zone}"
 }
 
 
@@ -202,7 +202,7 @@ resource "scaleway_domain_record" "admin" {
 
 resource "scaleway_container_domain" "admin" {
   container_id = scaleway_container.admin.id
-  hostname     = local.admin_hostname
+  hostname     = "https://${scaleway_domain_record.admin.name}${scaleway_domain_record.admin.dns_zone}"
 }
 
 resource "scaleway_container" "app" {
@@ -249,7 +249,7 @@ resource "scaleway_domain_record" "app" {
 
 resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
-  hostname     = local.app_hostname
+  hostname     = "https://${scaleway_domain_record.app.name}${scaleway_domain_record.app.dns_zone}"
 }
 
 output "api_endpoint" {
