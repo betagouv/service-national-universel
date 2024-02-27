@@ -51,7 +51,7 @@ data "scaleway_registry_namespace" "main" {
 
 # DNS zone
 data "scaleway_domain_zone" "main" {
-  project_id = data.scaleway_account_project.main.id
+  project_id = local.project_id
   domain     = "ci.beta-snu.dev"
   subdomain  = ""
 }
