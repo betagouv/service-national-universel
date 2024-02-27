@@ -155,15 +155,15 @@ const getAuthorizationToApply = async (mission, young) => {
     arr.push("Vous ne pouvez candidater qu'à 15 missions différentes.");
   }
 
+  const isMilitaryPreparation = mission?.isMilitaryPreparation === "true";
+
   const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
 
-  if (ageAtStart < 15) {
+  if (!isMilitaryPreparation && ageAtStart < 15) {
     arr.push("Vous devez avoir plus de 15 ans pour candidater.");
   }
 
   // Military preparations have special rules
-  const isMilitaryPreparation = mission?.isMilitaryPreparation === "true";
-
   if (isMilitaryPreparation && ageAtStart < 16) {
     arr.push("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
   }
