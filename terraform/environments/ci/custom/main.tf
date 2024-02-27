@@ -33,9 +33,9 @@ locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
   domain         = "ci.beta-snu.dev"
-  api_hostname   = "api.${local.env}.${local.domain}"
-  admin_hostname = "admin.${local.env}.${local.domain}"
-  app_hostname   = "moncompte.${local.env}.${local.domain}"
+  api_hostname   = "api-${local.env}.${local.domain}"
+  admin_hostname = "admin-${local.env}.${local.domain}"
+  app_hostname   = "moncompte-${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -50,10 +50,10 @@ data "scaleway_registry_namespace" "main" {
 }
 
 # DNS zone
-resource "scaleway_domain_zone" "main" {
+data "scaleway_domain_zone" "main" {
   project_id = data.scaleway_account_project.main.id
   domain     = "ci.beta-snu.dev"
-  subdomain  = "${local.env}"
+  subdomain  = ""
 }
 
 
@@ -146,7 +146,7 @@ resource "scaleway_container" "api" {
 
 resource "scaleway_domain_record" "api" {
   dns_zone = scaleway_domain_zone.main.id
-  name     = "api"
+  name     = "api-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.api.domain_name}."
   ttl      = 300
@@ -195,7 +195,7 @@ resource "scaleway_container" "admin" {
 
 resource "scaleway_domain_record" "admin" {
   dns_zone = scaleway_domain_zone.main.id
-  name     = "admin"
+  name     = "admin-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.admin.domain_name}."
   ttl      = 300
@@ -242,7 +242,7 @@ resource "scaleway_container" "app" {
 
 resource "scaleway_domain_record" "app" {
   dns_zone = scaleway_domain_zone.main.id
-  name     = "moncompte"
+  name     = "moncompte-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
   ttl      = 300
