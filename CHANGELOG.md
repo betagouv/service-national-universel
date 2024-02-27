@@ -1,3 +1,53 @@
+# [1.384.0](https://github.com/betagouv/service-national-universel/compare/v1.383.0...v1.384.0) (2024-02-26)
+
+
+### Features
+
+* **misc:** CC deploy on production_cc branch ([#3612](https://github.com/betagouv/service-national-universel/issues/3612)) ([08e3f17](https://github.com/betagouv/service-national-universel/commit/08e3f17811841a1a5f30449dfd64f07a2307dcdb))
+* **misc:** Normalize CC actions ([#3610](https://github.com/betagouv/service-national-universel/issues/3610)) ([5ec10c2](https://github.com/betagouv/service-national-universel/commit/5ec10c2866a99dfd774107fe8c34490dad3450e8))
+
+# [1.383.0](https://github.com/betagouv/service-national-universel/compare/v1.382.1...v1.383.0) (2024-02-24)
+
+
+### Features
+
+* **admin:** update export classe ([c89d51f](https://github.com/betagouv/service-national-universel/commit/c89d51f029969ff5d114526e9a73325d3c544d89))
+* **app, api:** 1705 - New screen and logic for ParentAcceptRI ([#3601](https://github.com/betagouv/service-national-universel/issues/3601)) ([89161d0](https://github.com/betagouv/service-national-universel/commit/89161d0336ad8a613239184945d8a47a5880e845))
+
+## [1.382.1](https://github.com/betagouv/service-national-universel/compare/v1.382.0...v1.382.1) (2024-02-23)
+
+
+### Bug Fixes
+
+* **pdf:** add retry for failed promise ([#3608](https://github.com/betagouv/service-national-universel/issues/3608)) ([11be6cc](https://github.com/betagouv/service-national-universel/commit/11be6ccbe0e5555940e0470bd24855f8e241503c))
+
+# [1.382.0](https://github.com/betagouv/service-national-universel/compare/v1.381.0...v1.382.0) (2024-02-22)
+
+
+### Bug Fixes
+
+* **api:** Optimise ES scroll ([#3600](https://github.com/betagouv/service-national-universel/issues/3600)) ([ce39769](https://github.com/betagouv/service-national-universel/commit/ce39769385fe15de3936ba7101e9eee531080ccb))
+* **api:** snuId should be unique ([7ed8513](https://github.com/betagouv/service-national-universel/commit/7ed85134463d025c402105a016edb3ea6f9a4497))
+* **lib:** Ajout cohort 2024 mayotte ([d957f24](https://github.com/betagouv/service-national-universel/commit/d957f240a9a885e69835668ab1b9acf45e38b233))
+
+
+### Features
+
+* **admin:** CLE - Disable young validation after instruction end date [#3605](https://github.com/betagouv/service-national-universel/issues/3605) ([22902f7](https://github.com/betagouv/service-national-universel/commit/22902f7f7c2583f41fe619cba36f9deee7ef46df))
+
+# [1.381.0](https://github.com/betagouv/service-national-universel/compare/v1.380.0...v1.381.0) (2024-02-21)
+
+
+### Bug Fixes
+
+* **api, admin:** export classe schema de repartition ([#3603](https://github.com/betagouv/service-national-universel/issues/3603)) ([b46dc3b](https://github.com/betagouv/service-national-universel/commit/b46dc3b7770ff40ab034bb9749a0a7057fb7915d))
+
+
+### Features
+
+* **api:** block some jvaStructure ([#3604](https://github.com/betagouv/service-national-universel/issues/3604)) ([0f14788](https://github.com/betagouv/service-national-universel/commit/0f147884d53cb02ff593a4223c122ff2f7807dfb))
+* **app:** 1769 - Ecran "Désisté" pour les CLE ([#3589](https://github.com/betagouv/service-national-universel/issues/3589)) ([03a6f22](https://github.com/betagouv/service-national-universel/commit/03a6f22b35bf743b070a9feaabd9f6cca4c30864))
+
 # [1.380.0](https://github.com/betagouv/service-national-universel/compare/v1.379.0...v1.380.0) (2024-02-20)
 
 

@@ -7,6 +7,7 @@ export const ABROAD = "Abroad";
 // --- API
 export const API_VERIFICATION = "/representants-legaux/data-verification";
 export const API_CONSENT = "/representants-legaux/consent";
+export const API_RI = "/representants-legaux/accept-ri";
 export const API_DECLARATION_CNI_INVALIDE = "/representants-legaux/cni-invalide";
 export const API_CONSENT_IMAGE_RIGHTS = "/representants-legaux/consent-image-rights";
 

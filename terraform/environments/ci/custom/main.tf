@@ -37,10 +37,10 @@ locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
   domain         = "ci.beta-snu.dev"
-  api_hostname   = "api.${local.env}.${local.domain}"
-  admin_hostname = "admin.${local.env}.${local.domain}"
-  app_hostname   = "moncompte.${local.env}.${local.domain}"
-  antivirus_hostname   = "antivirus.${local.env}.${local.domain}"
+  api_hostname   = "api-${local.env}.${local.domain}"
+  admin_hostname = "admin-${local.env}.${local.domain}"
+  app_hostname   = "moncompte-${local.env}.${local.domain}"
+  antivirus_hostname   = "antivirus-${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -55,10 +55,9 @@ data "scaleway_registry_namespace" "main" {
 }
 
 # DNS zone
-resource "scaleway_domain_zone" "main" {
-  project_id = data.scaleway_account_project.main.id
+data "scaleway_domain_zone" "main" {
   domain     = "ci.beta-snu.dev"
-  subdomain  = "${local.env}"
+  subdomain  = ""
 }
 
 
@@ -151,8 +150,8 @@ resource "scaleway_container" "api" {
 }
 
 resource "scaleway_domain_record" "api" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "api"
+  dns_zone = data.scaleway_domain_zone.main.id
+  name     = "api-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.api.domain_name}."
   ttl      = 300
@@ -160,7 +159,7 @@ resource "scaleway_domain_record" "api" {
 
 resource "scaleway_container_domain" "api" {
   container_id = scaleway_container.api.id
-  hostname     = local.api_hostname
+  hostname     = "${scaleway_domain_record.api.name}${scaleway_domain_record.api.dns_zone}"
 }
 
 
@@ -200,8 +199,8 @@ resource "scaleway_container" "admin" {
 }
 
 resource "scaleway_domain_record" "admin" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "admin"
+  dns_zone = data.scaleway_domain_zone.main.id
+  name     = "admin-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.admin.domain_name}."
   ttl      = 300
@@ -209,7 +208,7 @@ resource "scaleway_domain_record" "admin" {
 
 resource "scaleway_container_domain" "admin" {
   container_id = scaleway_container.admin.id
-  hostname     = local.admin_hostname
+  hostname     = "${scaleway_domain_record.admin.name}${scaleway_domain_record.admin.dns_zone}"
 }
 
 resource "scaleway_container" "app" {
@@ -247,8 +246,8 @@ resource "scaleway_container" "app" {
 }
 
 resource "scaleway_domain_record" "app" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "moncompte"
+  dns_zone = data.scaleway_domain_zone.main.id
+  name     = "moncompte-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
   ttl      = 300
@@ -256,7 +255,7 @@ resource "scaleway_domain_record" "app" {
 
 resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
-  hostname     = local.app_hostname
+  hostname     = "${scaleway_domain_record.app.name}${scaleway_domain_record.app.dns_zone}"
 }
 
 resource "scaleway_container" "antivirus" {
@@ -280,8 +279,8 @@ resource "scaleway_container" "antivirus" {
 }
 
 resource "scaleway_domain_record" "antivirus" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "antivirus"
+  dns_zone = data.scaleway_domain_zone.main.id
+  name     = "antivirus-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.antivirus.domain_name}."
   ttl      = 300
@@ -289,7 +288,7 @@ resource "scaleway_domain_record" "antivirus" {
 
 resource "scaleway_container_domain" "antivirus" {
   container_id = scaleway_container.antivirus.id
-  hostname     = local.antivirus_hostname
+  hostname     = "${scaleway_domain_record.antivirus.name}${scaleway_domain_record.antivirus.dns_zone}"
 }
 
 output "api_endpoint" {

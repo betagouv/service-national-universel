@@ -18,6 +18,7 @@ const API_ANTIVIRUS_ENDPOINT = process.env.API_ANTIVIRUS_ENDPOINT || "http://loc
 const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
 const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
+
 const SENTRY_URL = process.env.SENTRY_URL || "";
 const SENTRY_TRACING_SAMPLE_RATE = process.env.SENTRY_TRACING_SAMPLE_RATE || "";
 const SENTRY_PROFILE_SAMPLE_RATE = process.env.SENTRY_PROFILE_SAMPLE_RATE || "";
