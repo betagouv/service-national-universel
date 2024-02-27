@@ -32,10 +32,10 @@ variable "app_image_tag" {
 locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
-  domain         = "ci.beta-snu.dev"
-  api_hostname   = "api.${local.env}.${local.domain}"
-  admin_hostname = "admin.${local.env}.${local.domain}"
-  app_hostname   = "moncompte.${local.env}.${local.domain}"
+  namespace_name = split("/funcscw", scaleway_container_namespace.main.registry_endpoint)[1]
+  api_hostname   = "${namespace_name}-${local.env}-api"
+  admin_hostname = "${namespace_name}-${local.env}-admin"
+  app_hostname   = "${namespace_name}-${local.env}-app"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -47,13 +47,6 @@ data "scaleway_account_project" "main" {
 # Registry
 data "scaleway_registry_namespace" "main" {
   name = "snu-ci"
-}
-
-# DNS zone
-resource "scaleway_domain_zone" "main" {
-  project_id = data.scaleway_account_project.main.id
-  domain     = "ci.beta-snu.dev"
-  subdomain  = "${local.env}"
 }
 
 
@@ -144,19 +137,6 @@ resource "scaleway_container" "api" {
   }
 }
 
-resource "scaleway_domain_record" "api" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "api"
-  type     = "CNAME"
-  data     = "${scaleway_container.api.domain_name}."
-  ttl      = 300
-}
-
-resource "scaleway_container_domain" "api" {
-  container_id = scaleway_container.api.id
-  hostname     = local.api_hostname
-}
-
 
 
 resource "scaleway_container" "admin" {
@@ -193,19 +173,6 @@ resource "scaleway_container" "admin" {
   }
 }
 
-resource "scaleway_domain_record" "admin" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "admin"
-  type     = "CNAME"
-  data     = "${scaleway_container.admin.domain_name}."
-  ttl      = 300
-}
-
-resource "scaleway_container_domain" "admin" {
-  container_id = scaleway_container.admin.id
-  hostname     = local.admin_hostname
-}
-
 resource "scaleway_container" "app" {
   name            = "${local.env}-app"
   namespace_id    = scaleway_container_namespace.main.id
@@ -238,19 +205,6 @@ resource "scaleway_container" "app" {
     "DOCKER_ENV_VITE_SENTRY_URL" = local.secrets.SENTRY_URL
     "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
   }
-}
-
-resource "scaleway_domain_record" "app" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "moncompte"
-  type     = "CNAME"
-  data     = "${scaleway_container.app.domain_name}."
-  ttl      = 300
-}
-
-resource "scaleway_container_domain" "app" {
-  container_id = scaleway_container.app.id
-  hostname     = local.app_hostname
 }
 
 output "api_endpoint" {
