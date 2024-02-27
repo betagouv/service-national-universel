@@ -53,8 +53,6 @@ app.post("/scan",
       const clamscan = await new NodeClam().init(CLAMSCAN_CONFIG);
       const { isInfected } = await clamscan.isInfected(files.file.tempFilePath);
 
-      fs.unlinkSync(files.file.tempFilePath);
-
       if (isInfected) {
         console.error(`File ${files.file.tempFilePath} is infected`);
         return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
