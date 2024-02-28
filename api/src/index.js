@@ -95,7 +95,6 @@
   });
   app.use(loggingMiddleware);
 
-  require("./crons");
   app.use(cookieParser());
 
   app.use(express.static(__dirname + "/../public"));

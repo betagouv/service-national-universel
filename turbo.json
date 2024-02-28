@@ -21,6 +21,7 @@
       "persistent": true,
       "outputs": ["dist/**", "build/**"]
     },
-    "lint": {}
+    "lint": {},
+    "cron:start": {}
   }
 }
