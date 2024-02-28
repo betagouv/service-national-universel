@@ -454,7 +454,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      const scanResult = await scanFile(tempFilePath, name, req.user._id);
+      const scanResult = await scanFile(tempFilePath, name);
       if (scanResult.infected) {
         return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
       }

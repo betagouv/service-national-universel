@@ -9,7 +9,7 @@ const { ERRORS } = require("./index");
 
 const TIMEOUT_ANTIVIRUS_SERVICE = 10000;
 
-async function scanFile(tempFilePath, name, userId) {
+async function scanFile(tempFilePath, name, userId="anonymous") {
 
   const scan = async () => {
     const stream = createReadStream(tempFilePath);
