@@ -1,3 +1,11 @@
+## [1.385.1](https://github.com/betagouv/service-national-universel/compare/v1.385.0...v1.385.1) (2024-02-28)
+
+
+### Bug Fixes
+
+* **admin:** Visibilité affectation CLE pour ref. dep. ([#3623](https://github.com/betagouv/service-national-universel/issues/3623)) ([3dcbf07](https://github.com/betagouv/service-national-universel/commit/3dcbf0795a59815f0ff934f2d8742376f860a10a))
+* **admin, api:** [CLE] Message d’erreur lors de la création d’une inscription manuelle (d’un jeune) depuis admin ([#3625](https://github.com/betagouv/service-national-universel/issues/3625)) ([1f56c2a](https://github.com/betagouv/service-national-universel/commit/1f56c2a4f04688e58f707e91f14c4c99767edddd))
+
 # [1.385.0](https://github.com/betagouv/service-national-universel/compare/v1.384.0...v1.385.0) (2024-02-27)
 
 
