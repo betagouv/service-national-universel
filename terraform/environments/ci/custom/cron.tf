@@ -6,7 +6,6 @@ resource scaleway_job_definition cron {
   memory_limit = 512
   image_uri = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   command = "npm run cron:start"
-  cron_schedule" = "*/1 * * * *"
 
   env = {
     "ADMIN_URL"  = "https://${local.admin_hostname}"
