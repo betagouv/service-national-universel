@@ -1,4 +1,4 @@
-const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2 } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, getAge } = require("snu-lib");
 const { deletePatches } = require("../controllers/patches");
 const ApplicationModel = require("../models/application");
 const CohortModel = require("../models/cohort");
@@ -123,27 +123,16 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
   }
 };
 
-function getDiffYear(a, b) {
-  const from = new Date(a);
-  from.setHours(0, 0, 0, 0);
-  const to = new Date(b);
-  to.setHours(0, 0, 0, 0);
-  const diffTime = Math.abs(to - from);
-  const res = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365.25));
-  if (!res || isNaN(res)) return "?";
-  return res;
-}
-
 const getAuthorizationToApply = async (mission, young) => {
-  let arr = [];
+  let refusalMessages = [];
   if (isCohortTooOld(young?.cohort)) {
-    arr.push("Le délai pour candidater est dépassé.");
+    refusalMessages.push("Le délai pour candidater est dépassé.");
   }
 
   const cohort = await CohortModel.findOne({ name: young.cohort });
 
   if (!canApplyToPhase2(young, cohort)) {
-    arr.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
+    refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
   }
 
   const applicationsCount = await ApplicationModel.countDocuments({
@@ -152,34 +141,34 @@ const getAuthorizationToApply = async (mission, young) => {
   });
 
   if (applicationsCount >= 15) {
-    arr.push("Vous ne pouvez candidater qu'à 15 missions différentes.");
+    refusalMessages.push("Vous ne pouvez candidater qu'à 15 missions différentes.");
   }
 
   const isMilitaryPreparation = mission?.isMilitaryPreparation === "true";
 
-  const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
+  const ageAtStart = getAge(mission.startAt, young.birthdateAt);
 
   if (!isMilitaryPreparation && ageAtStart < 15) {
-    arr.push("Vous devez avoir plus de 15 ans pour candidater.");
+    refusalMessages.push("Vous devez avoir plus de 15 ans pour candidater.");
   }
 
   // Military preparations have special rules
   if (isMilitaryPreparation && ageAtStart < 16) {
-    arr.push("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
+    refusalMessages.push("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
   }
 
   if (isMilitaryPreparation && young.statusMilitaryPreparationFiles === "REFUSED") {
-    arr.push("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
+    refusalMessages.push("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
   }
 
   const isMilitaryApplicationIncomplete =
     !young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length;
 
   if (isMilitaryPreparation && isMilitaryApplicationIncomplete) {
-    arr.push("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");
+    refusalMessages.push("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");
   }
 
-  return { canApply: arr.length === 0, message: arr.join("\n") };
+  return { canApply: refusalMessages.length === 0, message: refusalMessages.join("\n") };
 };
 
 module.exports = {
