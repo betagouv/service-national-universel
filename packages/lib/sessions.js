@@ -32,7 +32,7 @@ const sessions2024CohortNames = [
 ];
 
 const getCohortNames = (withNew = true, withToCome = true, withOld = true) => {
-  let cohortNames = [];
+  let cohortNames = ["Test"];
   if (withNew) cohortNames = [...cohortNames, ...sessions2023CohortNames, ...sessions2024CohortNames];
   if (withToCome) cohortNames = [...cohortNames, "à venir"];
   if (withOld) cohortNames = [...oldSessions.map((e) => e.name), ...cohortNames];
