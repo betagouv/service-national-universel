@@ -48,7 +48,7 @@ jobs:
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
-          antivirus_image_tag=$(git log --max-count=1 --oneline -- antivirus packages | cut -d " " -f 1)
+          antivirus_image_tag=$(git log --max-count=1 --oneline -- antivirus | cut -d " " -f 1)
           echo "antivirus_image_tag: $antivirus_image_tag"
           echo "antivirus_image_tag=$antivirus_image_tag" >> $GITHUB_OUTPUT
 

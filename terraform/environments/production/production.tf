@@ -209,7 +209,7 @@ resource "scaleway_container_domain" "app" {
 resource "scaleway_container" "antivirus" {
   name            = "production-antivirus"
   namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/antivirus:${var.antivirus_image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/antivirus:${var.antivirus_image_tag}"
   port            = 8089
   cpu_limit       = 256
   memory_limit    = 2048
