@@ -252,5 +252,37 @@ describe("Application", () => {
 
       passport.user = previous;
     });
+    it("should return 403 when young is under 15 years old", async () => {
+      const year = new Date().getFullYear();
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", endDate: `${year - 1}-12-31T00:00:00.000Z` }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, birthdateAt: `${year - 12}-01-01T00:00:00.000Z` }));
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = getNewApplicationFixture();
+      const res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id });
+      expect(res.status).toBe(403);
+    });
+    it("should return 403 when cohort is too old", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "2019", endDate: "2019-12-31T00:00:00.000Z" }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name }));
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = getNewApplicationFixture();
+      const res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id });
+      expect(res.status).toBe(403);
+    });
+    it("should return 403 when young has not finished phase1", async () => {
+      const year = new Date().getFullYear();
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", endDate: `${year - 1}-12-31T00:00:00.000Z` }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, phase1Status: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION }));
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = getNewApplicationFixture();
+      const res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id });
+      expect(res.status).toBe(403);
+    });
   });
 });
