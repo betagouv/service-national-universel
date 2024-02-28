@@ -88,7 +88,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     // Create html
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
+    console.log("HIHIHIHIHI", config.API_PDF_ENDPOINT);
     const getPDF = async () =>
       await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
