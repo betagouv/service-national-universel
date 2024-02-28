@@ -89,11 +89,8 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    console.log("HOOOOOOOOOOOOOOO", config.API_PDF_ENDPOINT);
-    const absoluteUrl = `https://${config.API_PDF_ENDPOINT}`;
-
     const getPDF = async () =>
-      await fetch(absoluteUrl, {
+      await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/pdf" },
         body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),

@@ -107,7 +107,7 @@ resource "scaleway_container" "api" {
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"      = local.secrets.API_ASSOCIATION_CELLAR_KEYID
-    "API_PDF_ENDPOINT"                  = local.pdf_hostname
+    "API_PDF_ENDPOINT"                  = "https://${local.pdf_hostname}/render"
     "BUCKET_NAME"                       = local.secrets.BUCKET_NAME
     "CELLAR_ENDPOINT"                   = local.secrets.CELLAR_ENDPOINT
     "CELLAR_ENDPOINT_SUPPORT"           = local.secrets.CELLAR_ENDPOINT_SUPPORT
