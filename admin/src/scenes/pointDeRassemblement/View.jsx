@@ -464,7 +464,7 @@ export default function View(props) {
                 </div>
                 <div
                   className="flex h-1/2 w-full cursor-pointer items-center justify-center border-b-[1px] border-gray-200 text-sm font-medium leading-4 text-gray-900 hover:underline"
-                  onClick={() => history.push(`/ligne-de-bus?cohort=${currentCohort}&centerCode=%5B"${data.code}"%5D`)}>
+                  onClick={() => history.push(`/ligne-de-bus?cohort=${currentCohort}&pointDeRassemblements.code=${data.code}`)}>
                   Liste des lignes de transports ({lines.find((l) => l.cohort === currentCohort)?.count || 0})
                 </div>
               </div>

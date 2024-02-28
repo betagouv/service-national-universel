@@ -1,7 +1,9 @@
 const PDT_IMPORT_ERRORS = {
   BAD_TOTAL_CAPACITY: "BAD_TOTAL_CAPACITY",
   DOUBLON_BUSNUM: "DOUBLON_BUSNUM",
+  DOUBLON_CLASSE: "DOUBLON_CLASSE",
   BAD_CENTER_ID: "BAD_CENTER_ID",
+  BAD_CLASSE_ID: "BAD_CLASSE_ID",
   BAD_PDR_ID: "BAD_PDR_ID",
   BAD_PDR_DEPARTEMENT: "BAD_PDR_DEPARTEMENT",
   SAME_PDR_ON_LINE: "SAME_PDR_ON_LINE",
@@ -33,71 +35,73 @@ const PDT_IMPORT_ERRORS_TRANSLATION = {
   MISSING_COLUMN: { text: "Colonne manquante ou mal orthographiée", tooltip: "Veuillez vérifier que la colonne est présente / bien orthographiée dans le fichier." },
 };
 
-const centersInJulyClosingEarly = [{
-  "_id": {
-    "$oid": "609bebb10c1cc9a888ae8fba"
+const centersInJulyClosingEarly = [
+  {
+    _id: {
+      $oid: "609bebb10c1cc9a888ae8fba",
+    },
+    code: "SNU844210",
+    code2022: "ARALYO04203",
   },
-  "code": "SNU844210",
-  "code2022": "ARALYO04203"
-},
-{
-  "_id": {
-    "$oid": "609bebb20c1cc9a888ae8fc2"
+  {
+    _id: {
+      $oid: "609bebb20c1cc9a888ae8fc2",
+    },
+    code: "SNU846313",
+    code2022: "ARACLE06301",
   },
-  "code": "SNU846313",
-  "code2022": "ARACLE06301"
-},
-{
-  "_id": {
-    "$oid": "609bebc60c1cc9a888ae909b"
+  {
+    _id: {
+      $oid: "609bebc60c1cc9a888ae909b",
+    },
+    code: "SNU761102",
+    code2022: "OCCMON01101",
   },
-  "code": "SNU761102",
-  "code2022": "OCCMON01101"
-},
-{
-  "_id": {
-    "$oid": "609bebca0c1cc9a888ae90c7"
+  {
+    _id: {
+      $oid: "609bebca0c1cc9a888ae90c7",
+    },
+    code: "SNU524401",
+    code2022: "PDLNAN04401",
   },
-  "code": "SNU524401",
-  "code2022": "PDLNAN04401"
-},
-{
-  "_id": {
-    "$oid": "60a7dd5aa9f80b075f068cea"
+  {
+    _id: {
+      $oid: "60a7dd5aa9f80b075f068cea",
+    },
+    code: "SNU117511",
+    code2022: "IDFPAR07501",
   },
-  "code": "SNU117511",
-  "code2022": "IDFPAR07501"
-},
-{
-  "_id": {
-    "$oid": "626b07616f7eb607e9b88b90"
+  {
+    _id: {
+      $oid: "626b07616f7eb607e9b88b90",
+    },
+    code2022: "ARAGRE03802",
   },
-  "code2022": "ARAGRE03802"
-},
-{
-  "_id": {
-    "$oid": "63c553786a71d408cb817985"
+  {
+    _id: {
+      $oid: "63c553786a71d408cb817985",
+    },
+    code2022: "GENAM08804",
   },
-  "code2022": "GENAM08804"
-},
-{
-  "_id": {
-    "$oid": "63da4af647841408c5940c78"
+  {
+    _id: {
+      $oid: "63da4af647841408c5940c78",
+    },
+    code2022: "PACNIC00601",
   },
-  "code2022": "PACNIC00601"
-},
-{
-  "_id": {
-    "$oid": "63dff1eeca0dad08c4d81261"
+  {
+    _id: {
+      $oid: "63dff1eeca0dad08c4d81261",
+    },
+    code2022: "ARAGRE03805",
   },
-  "code2022": "ARAGRE03805"
-},
-// pour test en staging
-{
-  "_id": {
-    "$oid": "63873264a4ec702331abec5f"
+  // pour test en staging
+  {
+    _id: {
+      $oid: "63873264a4ec702331abec5f",
+    },
+    code2022: "ARAGRE03805",
   },
-  "code2022": "ARAGRE03805"
-}];
+];
 
 export { PDT_IMPORT_ERRORS, PDT_IMPORT_ERRORS_TRANSLATION, centersInJulyClosingEarly };
