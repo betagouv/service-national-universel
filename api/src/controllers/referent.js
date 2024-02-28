@@ -641,7 +641,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohesionStayPresence: undefined,
       cohesionStayMedicalFileReceived: undefined,
     });
-
     if (value.source === YOUNG_SOURCE.CLE) {
       young.set({
         source: YOUNG_SOURCE.CLE,
@@ -649,6 +648,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         classeId: value.classeId,
         cniFiles: [],
         "files.cniFiles": [],
+        latestCNIFileExpirationDate: undefined,
+        latestCNIFileCategory: undefined,
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
@@ -660,13 +661,23 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         });
       }
     } else {
+      if (value.source === YOUNG_SOURCE.VOLONTAIRE) {
+        if (young.source !== YOUNG_SOURCE.VOLONTAIRE) {
+          young.set({
+            status: getYoungStatus(young),
+            statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+            cniFiles: [],
+            "files.cniFiles": [],
+            latestCNIFileExpirationDate: undefined,
+            latestCNIFileCategory: undefined,
+          });
+        }
+      }
       young.set({
         // Init if young was previously CLE
         source: YOUNG_SOURCE.VOLONTAIRE,
         etablissementId: undefined,
         classeId: undefined,
-        cniFiles: [],
-        "files.cniFiles": [],
       });
     }
 
