@@ -1,57 +1,54 @@
 name: Clean resources
 
 on:
-  push:
-    branches:
-      - ci-fix-clean
   workflow_dispatch:
   schedule:
     - cron: "37 01 * * *"
 
 jobs:
-  # clean_image_tags_prod:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       app: [
-  #         {name: api, lifetime: "2 month" },
-  #         {name: app, lifetime: "2 month" },
-  #         {name: admin, lifetime: "2 month" },
-  #         {name: antivirus, lifetime: "1 year" },
-  #       ]
+  clean_image_tags_prod:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [
+          {name: api, lifetime: "2 month" },
+          {name: app, lifetime: "2 month" },
+          {name: admin, lifetime: "2 month" },
+          {name: antivirus, lifetime: "1 year" },
+        ]
 
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
 
-  #     - name: Clean Images
-  #       uses: ./.github/actions/clean_image_tags
-  #       with:
-  #         registry: "${{ secrets.SCW_PROD_IMAGE_REGISTRY }}"
-  #         secret_key: "${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}"
-  #         image_name: ${{ matrix.app.name }}
-  #         lifetime: ${{ matrix.app.lifetime }}
+      - name: Clean Images
+        uses: ./.github/actions/clean_image_tags
+        with:
+          registry: "${{ secrets.SCW_PROD_IMAGE_REGISTRY }}"
+          secret_key: "${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}"
+          image_name: ${{ matrix.app.name }}
+          lifetime: ${{ matrix.app.lifetime }}
 
-  # clean_image_tags_ci:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       app_name: [admin, api, app]
+  clean_image_tags_ci:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app_name: [admin, api, app]
 
-  #   steps:
-  #     - name: Git checkout
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
 
-  #     - name: Clean Images
-  #       uses: ./.github/actions/clean_image_tags
-  #       with:
-  #         registry: "${{ secrets.SCW_CI_IMAGE_REGISTRY }}"
-  #         secret_key: "${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}"
-  #         image_name: ${{ matrix.app_name }}
+      - name: Clean Images
+        uses: ./.github/actions/clean_image_tags
+        with:
+          registry: "${{ secrets.SCW_CI_IMAGE_REGISTRY }}"
+          secret_key: "${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}"
+          image_name: ${{ matrix.app_name }}
 
   clean_ci_environments:
     runs-on: ubuntu-latest
-    # needs: clean_image_tags_ci
+    needs: clean_image_tags_ci
     env:
       SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
       region: fr-par
@@ -104,8 +101,6 @@ jobs:
           while read namespace
           do
             namespace_id=$(echo "$namespace" | cut -d " " -f 1)
-            echo $namespace_id
-
             env_name=$(echo "$namespace" | cut -d " " -f 2 | cut -c5-) # remove "snu-"
             echo $env_name
 
