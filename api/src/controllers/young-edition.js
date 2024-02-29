@@ -20,6 +20,7 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const YoungModel = require("../models/young");
 const ClasseModel = require("../models/cle/classe");
+const ApplicationObject = require("../models/application");
 const { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } = require("../utils");
 const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
@@ -136,6 +137,16 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
       await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
     }
+
+    //update applications
+    const applications = await ApplicationObject.find({ youngId: young._id });
+
+    const updatePromises = applications.map((application) => {
+      application.set({ youngCity: value.city, youngDepartment: value.department });
+      return application.save();
+    });
+
+    await Promise.all(updatePromises);
 
     young.set(value);
     await young.save({ fromUser: req.user });
