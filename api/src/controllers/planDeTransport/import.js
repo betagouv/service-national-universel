@@ -364,7 +364,7 @@ router.post(
           if (line["ID CLASSE"] && mongoose.Types.ObjectId.isValid(line["ID CLASSE"])) {
             const classe = await ClasseModel.findById(line["ID CLASSE"]);
             if (!classe) {
-              errors["ID CLasse"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CLASSE_ID, extra: line["ID CLASSE"] });
+              errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CLASSE_ID, extra: line["ID CLASSE"] });
             }
           }
         }

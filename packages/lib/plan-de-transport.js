@@ -19,7 +19,9 @@ const PDT_IMPORT_ERRORS = {
 const PDT_IMPORT_ERRORS_TRANSLATION = {
   BAD_TOTAL_CAPACITY: { text: "La capacité totale n'est pas bonne.", tooltip: "La capacité totale doit être la somme de la capacité volontaires et accompagnateurs." },
   DOUBLON_BUSNUM: { text: "Le numéro de ligne %s est en doublon.", tooltip: "Veuillez vérifier que chaque numéro de ligne n’apparait qu’une seule fois dans le fichier." },
+  DOUBLON_CLASSE: { text: "Le numéro de classe %s est en doublon.", tooltip: "Une classe ne peut être divisé sur plusieurs lignes." },
   BAD_CENTER_ID: { text: "ID du centre %s non existant.", tooltip: "Les ID des centres sont transmis dans le schéma de répartition." },
+  BAD_CLASSE_ID: { text: "ID de classe %s non existant.", tooltip: "Les ID des classes sont transmis dans le schéma de répartition." },
   BAD_PDR_ID: { text: "ID du PDR %s non existant.", tooltip: "Les ID des PDR sont transmis dans le schéma de répartition." },
   BAD_PDR_DEPARTEMENT: { text: "Erreur sur le département du PDR %s.", tooltip: "Le département du fichier ne correspond pas au département du PDR en base de données." },
   SAME_PDR_ON_LINE: { text: "Un même PDR %s apparaît plusieurs fois sur la ligne.", tooltip: "Un PDR ne peut appraître qu'une seule fois sur une même ligne." },
