@@ -60,7 +60,7 @@ function getMailParams(type, template, young, contract) {
   // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
 }
 
-const TIMEOUT_PDF_SERVICE = 15000;
+const TIMEOUT_PDF_SERVICE = 20000;
 
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -96,23 +96,25 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
         body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
       }).then((response) => {
         // ! On a retravaillé pour faire passer les tests
-        if (response.status && response.status !== 200) throw new Error("Error with PDF service");
+        if (!response.ok) throw new Error("Error with PDF service");
         res.set({
           "content-length": response.headers.get("content-length"),
           "content-disposition": `inline; filename="test.pdf"`,
           "content-type": "application/pdf",
           "cache-control": "public, max-age=1",
         });
-        response.body.pipe(res);
-        if (res.statusCode !== 200) throw new Error("Error with PDF service");
-        response.body.on("error", (e) => {
-          capture(e);
-          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+        return new Promise((resolve, reject) => {
+          response.body.pipe(res);
+          response.body.on("end", resolve);
+          response.body.on("error", (e) => {
+            capture(e);
+            reject(new Error("Error with PDF service"));
+          });
         });
       });
+
     try {
-      // await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
-      await getPDF();
+      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
     } catch (e) {
       res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
       capture(e);
