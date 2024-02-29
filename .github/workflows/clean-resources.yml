@@ -63,7 +63,6 @@ jobs:
 
       - name: Get registry ID
         id: registry_id
-        shell: bash
         run: |
           registry_name=$(echo "${{ env.registry }}" | cut -d "/" -f 2)
           echo $registry_name
@@ -76,7 +75,7 @@ jobs:
           echo "registry_id=$registry_id" >> $GITHUB_OUTPUT
 
       - name: Get images
-        shell: bash
+        working-directory: terraform/environments/ci
         run: |
           curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
             "https://api.scaleway.com/registry/v1/regions/${{ env.region }}/images?namespace_id=${{ steps.registry_id.outputs.registry_id }}&name=${{ env.image_name }}" \
