@@ -69,124 +69,116 @@ const everyHours = (x) => `0 */${x} * * *`;
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
 
-function spam_log() {
-  console.log(new Date());
-}
-cron.schedule(everySeconds(10), () => {
-  spam_log();
+
+cron.schedule("0 9 * * 1", function () {
+  applicationPending.handler();
 });
 
-if (false) {
-  cron.schedule("0 9 * * 1", function () {
-    applicationPending.handler();
-  });
+cron.schedule("0 15 * * *", () => {
+  deleteCNIAdnSpecificAmenagementType.handler();
+});
 
-  cron.schedule("0 15 * * *", () => {
-    deleteCNIAdnSpecificAmenagementType.handler();
-  });
+cron.schedule("0 9 * * 1", function () {
+  noticePushMission.handler();
+});
 
-  cron.schedule("0 9 * * 1", function () {
-    noticePushMission.handler();
-  });
+// everyday at 0200
+cron.schedule(everyHours(6), () => {
+  apiEngagement.handler();
+});
 
-  // everyday at 0200
-  cron.schedule(everyHours(6), () => {
-    apiEngagement.handler();
-  });
+// everyday at 0200
+cron.schedule("0 0 * * *", () => {
+  deleteInactiveRefs.handler();
+});
 
-  // everyday at 0200
-  cron.schedule("0 0 * * *", () => {
-    deleteInactiveRefs.handler();
-  });
+cron.schedule(everyHours(6), () => {
+  jeVeuxAiderDaily.handler();
+});
 
-  cron.schedule(everyHours(6), () => {
-    jeVeuxAiderDaily.handler();
-  });
+cron.schedule("0 6 * * *", () => {
+  contratRelance.handler();
+});
 
-  cron.schedule("0 6 * * *", () => {
-    contratRelance.handler();
-  });
+cron.schedule("0 8 * * *", () => {
+  missionOutdated.handler();
+  missionOutdated.handlerNotice1Week();
+});
 
-  cron.schedule("0 8 * * *", () => {
-    missionOutdated.handler();
-    missionOutdated.handlerNotice1Week();
-  });
+cron.schedule("0 7 * * *", () => {
+  applicationOutaded.handler();
+  applicationOutaded.handlerNotice1Week();
+  applicationOutaded.handlerNotice13Days();
+});
 
-  cron.schedule("0 7 * * *", () => {
-    applicationOutaded.handler();
-    applicationOutaded.handlerNotice1Week();
-    applicationOutaded.handlerNotice13Days();
-  });
+cron.schedule(everyHours(1), () => {
+  computeGoalsInscription.handler();
+});
 
-  cron.schedule(everyHours(1), () => {
-    computeGoalsInscription.handler();
-  });
+cron.schedule("0 1 * * *", () => {
+  loginAttempts.handler();
+});
 
-  cron.schedule("0 1 * * *", () => {
-    loginAttempts.handler();
-  });
+cron.schedule("45 2 * * *", () => {
+  syncReferentSupport.handler();
+});
 
-  cron.schedule("45 2 * * *", () => {
-    syncReferentSupport.handler();
-  });
+cron.schedule("15 1 * * *", () => {
+  syncContactSupport.handler();
+});
 
-  cron.schedule("15 1 * * *", () => {
-    syncContactSupport.handler();
-  });
+cron.schedule("30 1 * * *", () => {
+  structurePatches.handler();
+});
 
-  cron.schedule("30 1 * * *", () => {
-    structurePatches.handler();
-  });
+cron.schedule("45 1 * * *", () => {
+  missionEquivalencePatches.handler();
+});
 
-  cron.schedule("45 1 * * *", () => {
-    missionEquivalencePatches.handler();
-  });
+cron.schedule("0 2 * * *", () => {
+  missionPatches.handler();
+});
 
-  cron.schedule("0 2 * * *", () => {
-    missionPatches.handler();
-  });
+cron.schedule("30 2 * * *", () => {
+  applicationPatches.handler();
+});
 
-  cron.schedule("30 2 * * *", () => {
-    applicationPatches.handler();
-  });
+cron.schedule("0 3 * * *", () => {
+  youngPatches.handler();
+});
 
-  cron.schedule("0 3 * * *", () => {
-    youngPatches.handler();
-  });
+cron.schedule("20 3 * * *", () => {
+  classePatches.handler();
+});
 
-  cron.schedule("20 3 * * *", () => {
-    classePatches.handler();
-  });
+cron.schedule("15 04 * * *", () => {
+  dsnjExport.handler();
+});
 
-  cron.schedule("15 04 * * *", () => {
-    dsnjExport.handler();
-  });
+cron.schedule("27 8 * * *", () => {
+  parentConsentementReminder.handler();
+});
 
-  cron.schedule("27 8 * * *", () => {
-    parentConsentementReminder.handler();
-  });
+// Every Monday at 7:30am
+cron.schedule("30 7 * * 1", () => {
+  parentRevalidateRI.handler();
+});
 
-  // Every Monday at 7:30am
-  cron.schedule("30 7 * * 1", () => {
-    parentRevalidateRI.handler();
-  });
+// Every day at 11:00
+cron.schedule("0 11 * * *", () => {
+  reminderInscription.handler();
+});
 
-  // Every day at 11:00
-  cron.schedule("0 11 * * *", () => {
-    reminderInscription.handler();
-  });
+// Every day at 10:00
+cron.schedule("0 10 * * *", () => {
+  reminderImageRightsParent2.handler();
+});
 
-  // Every day at 10:00
-  cron.schedule("0 10 * * *", () => {
-    reminderImageRightsParent2.handler();
-  });
+cron.schedule("0 5 * * *", () => {
+  refreshMaterializedViews.handler();
+});
 
-  cron.schedule("0 5 * * *", () => {
-    refreshMaterializedViews.handler();
-  });
-
-  // tous les jours à 14h00
-  cron.schedule("2 14 * * *", () => {
-    clotureMissionReminder.handler();
-  });
-}
+// tous les jours à 14h00
+cron.schedule("2 14 * * *", () => {
+  clotureMissionReminder.handler();
+});

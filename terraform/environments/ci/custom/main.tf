@@ -252,26 +252,6 @@ resource "scaleway_container_domain" "app" {
   hostname     = "${scaleway_domain_record.app.name}${scaleway_domain_record.app.dns_zone}"
 }
 
-resource "scaleway_container" "crons" {
-  name            = "${local.env}-crons"
-  namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
-  port            = 8080
-  cpu_limit       = 768
-  memory_limit    = 1024
-  min_scale       = 1
-  max_scale       = 1
-  privacy         = "private"
-  protocol        = "http1"
-  deploy          = true
-
-  environment_variables = merge(scaleway_container.api.environment_variables, {
-    "RUN_CRONS" = "true"
-  })
-
-  secret_environment_variables = scaleway_container.api.secret_environment_variables
-}
-
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
 }
