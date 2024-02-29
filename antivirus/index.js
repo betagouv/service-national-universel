@@ -15,7 +15,6 @@ const registerSentryErrorHandler = initSentry(app);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   INVALID_PARAMS: "INVALID_PARAMS",
@@ -31,24 +30,25 @@ app.get("/release", (req, res) => {
 });
 
 function validate_request(req) {
-   return Joi.object({
-    file : Joi.object({
+  return Joi.object({
+    file: Joi.object({
       name: Joi.string().required(),
       data: Joi.binary().required(),
       tempFilePath: Joi.string().allow("").optional(),
-    }).unknown()
-  })
-  .validate(
-    req.files,
-    { stripUnknown: true },
-  );
+    }).unknown(),
+  }).validate(req.files, { stripUnknown: true });
 }
 
-app.post("/scan",
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+app.post(
+  "/scan",
+  fileUpload({
+    limits: { fileSize: 10 * 1024 * 1024 },
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  }),
   async (req, res) => {
     try {
-      const { error: filesError, value: files } = validate_request(req)
+      const { error: filesError, value: files } = validate_request(req);
       if (filesError) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
@@ -67,7 +67,7 @@ app.post("/scan",
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-  }
+  },
 );
 
 registerSentryErrorHandler();

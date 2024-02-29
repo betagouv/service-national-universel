@@ -12,7 +12,7 @@ const CLAMSCAN_CONFIG = {
     timeout: 30000,
     socket: null,
   },
-}
+};
 
 module.exports = {
   PORT,
