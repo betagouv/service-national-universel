@@ -134,7 +134,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 
     if (value.latestCNIFileExpirationDate) {
       const cohort = await CohortModel.findOne({ name: young.cohort });
-      value.CNIFileNotValidOnStart = value.latestCNIFileExpirationDate < new Date(cohort.dateStart);
+      value.CNIFileNotValidOnStart = new Date(value.latestCNIFileExpirationDate) < new Date(cohort.dateStart);
     }
 
     // test de déménagement.
