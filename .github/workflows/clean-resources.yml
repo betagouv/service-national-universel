@@ -119,13 +119,8 @@ jobs:
             while read container
             do
               app_name=$(echo "$container" | cut -d ":" -f 1)
-              echo $app_name
-
               image_tag=$(echo "$container" | cut -d ":" -f 2)
-              echo $image_tag
-
               image_id=$(cat images.txt | grep $app_name | cut -d " " -f 1)
-              echo $image_id
 
               tag_exists=$(
                 curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
@@ -135,6 +130,16 @@ jobs:
               if [[ $tag_exists == 0 ]]
               then
                 echo "Image $app_name:$image_tag does not exist for environment $env_name. Deleting it"
+                cp -R custom $env_name
+                cd $env_name
+                rm imports.tf
+                sed -i".bak" "s|###___ENV_NAME___###|$env_name|g" main.tf
+                terraform init
+                terraform apply -no-color -input=false -lock-timeout=15m -auto-approve -destroy \
+                  -var="api_image_tag=latest" \
+                  -var="admin_image_tag=latest" \
+                  -var="app_image_tag=latest" || true
+                cd ..
                 break
               fi
               echo "Image $app_name:$image_tag exists for environment $env_name. Skipping deletion"
