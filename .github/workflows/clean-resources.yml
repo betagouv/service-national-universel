@@ -96,10 +96,11 @@ jobs:
         continue-on-error: true
         run: |
           # Get all CI container namespaces
+          # the grep excludes snu-ci namespace
           curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
             "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/namespaces?project_id=${{env.project_id}}" \
             | jq -r '.namespaces[]|"\(.id) \(.name)"' \
-            | grep --invert-match 0a155c15-a392-42a6-9f3c-90a84de2ccee # exclude snu-ci namespace \
+            | grep --invert-match 0a155c15-a392-42a6-9f3c-90a84de2ccee \
             > namespaces.txt
           while read namespace
           do
@@ -110,9 +111,10 @@ jobs:
             echo $env_name
 
             # Get containers
+            # [27:] truncates "rg.fr-par.scw.cloud/snu-ci/"
             curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
               "https://api.scaleway.com/containers/v1beta1/regions/${{env.region}}/containers?namespace_id=$namespace_id" \
-              | jq -r '.containers[].registry_image[27:]' # remove "rg.fr-par.scw.cloud/snu-ci/" \
+              | jq -r '.containers[].registry_image[27:]' \
               > containers.txt
 
             while read container
