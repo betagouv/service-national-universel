@@ -1,3 +1,13 @@
+## [1.385.2](https://github.com/betagouv/service-national-universel/compare/v1.385.1...v1.385.2) (2024-02-29)
+
+
+### Bug Fixes
+
+* **api:** 1945-lorsqu'un jeune démémage, on update son adresse sur ses candidatures [#3622](https://github.com/betagouv/service-national-universel/issues/3622) ([6d5d4cb](https://github.com/betagouv/service-national-universel/commit/6d5d4cb2787bd7c330142316f854b6505401c170))
+* **api:** probleme pour la date d'expiration des CNI ([#3620](https://github.com/betagouv/service-national-universel/issues/3620)) ([f4257f0](https://github.com/betagouv/service-national-universel/commit/f4257f050c37776d7d075371cf0bb3dc687de670))
+* **app:** Add link to Change cohort on Waiting List page [#3627](https://github.com/betagouv/service-national-universel/issues/3627) ([74089b7](https://github.com/betagouv/service-national-universel/commit/74089b707ef9992dce5178140a08bf4ef549217f))
+* **misc:** 1905 - fix clean action (image/app) ([#3628](https://github.com/betagouv/service-national-universel/issues/3628)) ([0a1c36b](https://github.com/betagouv/service-national-universel/commit/0a1c36b9eefaf28742ba1f7a2ac4bd88b20c343b))
+
 ## [1.385.1](https://github.com/betagouv/service-national-universel/compare/v1.385.0...v1.385.1) (2024-02-28)
 
 
