@@ -51,7 +51,7 @@ const fetch = require("node-fetch");
 const { phase1 } = require("../../src/templates/certificate/index");
 const scanFile = require("../utils/virusScanner");
 
-const TIMEOUT_PDF_SERVICE = 15000;
+const TIMEOUT_PDF_SERVICE = 25000;
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

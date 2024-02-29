@@ -422,7 +422,7 @@ router.post("/token/:token", async (req, res) => {
   }
 });
 
-const TIMEOUT_PDF_SERVICE = 10000;
+const TIMEOUT_PDF_SERVICE = 20000;
 router.post("/:id/download", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: idError, value: id } = validateId(req.params.id);

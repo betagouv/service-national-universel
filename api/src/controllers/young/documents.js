@@ -60,7 +60,7 @@ function getMailParams(type, template, young, contract) {
   // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
 }
 
-const TIMEOUT_PDF_SERVICE = 50000;
+const TIMEOUT_PDF_SERVICE = 25000;
 
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
