@@ -1,5 +1,4 @@
 const cron = require("node-cron");
-const { ENVIRONMENT } = require("../config");
 
 const apiEngagement = require("./syncApiEngagement");
 const missionOutdated = require("./missionOutdated");
@@ -70,8 +69,14 @@ const everyHours = (x) => `0 */${x} * * *`;
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
 
-// See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
-if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
+function spam_log() {
+  console.log(new Date());
+}
+cron.schedule(everySeconds(10), () => {
+  spam_log();
+});
+
+if (false) {
   cron.schedule("0 9 * * 1", function () {
     applicationPending.handler();
   });
