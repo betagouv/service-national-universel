@@ -60,7 +60,7 @@ function getMailParams(type, template, young, contract) {
   // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
 }
 
-const TIMEOUT_PDF_SERVICE = 30000;
+const TIMEOUT_PDF_SERVICE = 15000;
 
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -111,7 +111,8 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
         });
       });
     try {
-      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
+      // await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
+      await getPDF();
     } catch (e) {
       res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
       capture(e);
