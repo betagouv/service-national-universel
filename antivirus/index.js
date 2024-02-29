@@ -19,7 +19,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   INVALID_PARAMS: "INVALID_PARAMS",
-}
+};
+
+app.get("/", async (req, res) => {
+  const d = new Date();
+  res.status(200).send("ANTIVIRUS " + d.toLocaleString());
+});
 
 app.get("/release", (req, res) => {
   res.send(`${RELEASE}`);
