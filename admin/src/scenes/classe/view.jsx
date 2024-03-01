@@ -456,12 +456,12 @@ export default function View() {
                   <td className="text-gray-500 text-center py-2">Élèves</td>
                 </tr>
                 <tr className="border-b border-gray-200">
-                  <td className="font-bold pr-4 py-2">Total :</td>
+                  <td className="font-bold pr-4 py-2">Total - ( Validé ) :</td>
                   <td className="px-4 font-bold text-lg text-center py-2">{totalSeatsTakenExcluding}</td>
                   <td className="text-gray-500 text-center py-2">({Math.round((totalSeatsTakenExcluding * 100) / classe.totalSeats || 0)}%)</td>
                 </tr>
                 <tr>
-                  <td className="font-bold pr-4 py-2">Places libres</td>
+                  <td className="font-bold pr-4 py-2">Places libres :</td>
                   <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - classe.seatsTaken || 0}</td>
                   <td className="text-gray-500 text-center py-2">({Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats || 0)}%)</td>
                 </tr>
