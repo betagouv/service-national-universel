@@ -58,6 +58,9 @@ export default function View() {
     (studentStatus[YOUNG_STATUS.WITHDRAWN] || 0) -
     (studentStatus[YOUNG_STATUS.REFUSED] || 0) -
     (studentStatus[YOUNG_STATUS.NOT_AUTORISED] || 0) -
+    (studentStatus[YOUNG_STATUS.IN_PROGRESS] || 0) -
+    (studentStatus[YOUNG_STATUS.WAITING_CORRECTION] || 0) -
+    (studentStatus[YOUNG_STATUS.WAITING_VALIDATION] || 0) -
     (studentStatus[YOUNG_STATUS.ABANDONED] || 0);
 
   const colorOptions = Object.keys(CLE_COLORATION_LIST).map((value) => ({
