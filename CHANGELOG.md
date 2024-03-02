@@ -1,3 +1,10 @@
+## [1.385.3](https://github.com/betagouv/service-national-universel/compare/v1.385.2...v1.385.3) (2024-03-02)
+
+
+### Bug Fixes
+
+* **api:** Handle better S3 errors ([05c0c84](https://github.com/betagouv/service-national-universel/commit/05c0c847067f76fff4df0d77fedc3e3bbb981c88))
+
 ## [1.385.2](https://github.com/betagouv/service-national-universel/compare/v1.385.1...v1.385.2) (2024-02-29)
 
 
