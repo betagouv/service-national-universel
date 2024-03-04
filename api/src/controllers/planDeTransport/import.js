@@ -385,23 +385,23 @@ router.post(
 
       const hasError = Object.values(errors).some((error) => error.length > 0);
 
-      /*       if (hasError) {
+      if (hasError) {
         res.status(200).send({ ok: false, code: ERRORS.INVALID_BODY, errors });
-      } else { */
-      // Count total unique PDR
-      const pdrCount = lines.reduce((acc, line) => {
-        for (let i = 1; i <= countPdr; i++) {
-          if (line[`ID PDR ${i}`] && !acc.includes(line[`ID PDR ${i}`]) && mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`])) {
-            acc.push(line[`ID PDR ${i}`]);
+      } else {
+        // Count total unique PDR
+        const pdrCount = lines.reduce((acc, line) => {
+          for (let i = 1; i <= countPdr; i++) {
+            if (line[`ID PDR ${i}`] && !acc.includes(line[`ID PDR ${i}`]) && mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`])) {
+              acc.push(line[`ID PDR ${i}`]);
+            }
           }
-        }
-        return acc;
-      }, []).length;
-      // Save import plan
-      const { _id } = await ImportPlanTransportModel.create({ cohort, lines });
-      // Send response (summary)
-      res.status(200).send({ ok: true, data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, pdrCount, _id, maxPdrOnLine } });
-      //}
+          return acc;
+        }, []).length;
+        // Save import plan
+        const { _id } = await ImportPlanTransportModel.create({ cohort, lines });
+        // Send response (summary)
+        res.status(200).send({ ok: true, data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, pdrCount, _id, maxPdrOnLine } });
+      }
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
