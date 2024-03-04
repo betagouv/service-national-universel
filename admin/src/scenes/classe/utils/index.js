@@ -38,8 +38,9 @@ export function getRights(user, classe, cohort) {
   if (!user || !classe || !cohort) return {};
   return {
     canEdit:
-      [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
-      classe?.status !== STATUS_CLASSE.WITHDRAWN,
+      // [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+      // classe?.status !== STATUS_CLASSE.WITHDRAWN, //à garder car ça va changer
+      [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN,
     canEditCohort: [ROLES.ADMIN].includes(user?.role) || (user?.role === ROLES.REFERENT_REGION && (cohort ? cohort.cleUpdateCohortForReferentRegion : true)),
     canEditCenter: user?.role === ROLES.ADMIN || (user?.role === ROLES.REFERENT_REGION && (cohort ? cohort.cleUpdateCentersForReferentRegion : true)),
     canEditPDR: user?.role === ROLES.ADMIN,
