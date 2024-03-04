@@ -5,6 +5,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 
 // Form
 import InputPhone from "./form/InputPhone";
+import InputPassword from "./form/InputPassword";
 
 // Layout
 import Container from "./layout/Container";
@@ -20,6 +21,7 @@ export {
   Checkbox,
   Input,
   InputPhone,
+  InputPassword,
   Container,
   Footer,
   PaddedContainer,

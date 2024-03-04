@@ -3,11 +3,9 @@ import queryString from "query-string";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib/date";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
-import Eye from "../../../assets/icons/Eye";
-import EyeOff from "../../../assets/icons/EyeOff";
 import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/dsfr/forms/input";
 import Error from "../../../components/error";
@@ -17,12 +15,11 @@ import { capture, captureMessage } from "../../../sentry";
 import api from "../../../services/api";
 import { cohortsInit } from "../../../utils/cohorts";
 
-import { Button } from "@snu/ds/dsfr";
+import { InputPassword, Button } from "@snu/ds/dsfr";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [showPassword, setShowPassword] = React.useState(false);
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState({});
@@ -111,11 +108,7 @@ export default function Signin() {
           <Input value={email} onChange={setEmail} />
         </div>
         <div className="flex flex-col gap-1 pb-4">
-          <label className="text-base text-[#161616]">Mot de passe</label>
-          <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
-            <input className="w-full bg-inherit" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
-            {showPassword ? <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} /> : <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />}
-          </div>
+          <InputPassword label="Mot de passe" value={password} onChange={setPassword} />
         </div>
         <a href="/auth/forgot">Mot de passe perdu ?</a>
         <div className="flex w-full justify-end">
