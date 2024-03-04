@@ -107,6 +107,7 @@ router.post(
 
       // Count columns that start with "ID PDR" to know how many PDRs there are.
       const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
+      let maxPdrOnLine = 0;
 
       const errors = {
         "NUMERO DE LIGNE": [],
@@ -352,13 +353,19 @@ router.post(
         }
       }
       // Check if there is a PDR duplicate in a line
+      // and check the max number of PDR on a line
       for (const [i, line] of lines.entries()) {
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         const pdrIds = [];
+        let currentLinePDRCount = 0;
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
           if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
             pdrIds.push(line[`ID PDR ${pdrNumber}`]);
+            currentLinePDRCount++;
           }
+        }
+        if (currentLinePDRCount > maxPdrOnLine) {
+          maxPdrOnLine = currentLinePDRCount;
         }
         //check and return duplicate pdr
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
@@ -378,23 +385,23 @@ router.post(
 
       const hasError = Object.values(errors).some((error) => error.length > 0);
 
-      if (hasError) {
+      /*       if (hasError) {
         res.status(200).send({ ok: false, code: ERRORS.INVALID_BODY, errors });
-      } else {
-        // Count total unique PDR
-        const pdrCount = lines.reduce((acc, line) => {
-          for (let i = 1; i <= countPdr; i++) {
-            if (line[`ID PDR ${i}`] && !acc.includes(line[`ID PDR ${i}`]) && mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`])) {
-              acc.push(line[`ID PDR ${i}`]);
-            }
+      } else { */
+      // Count total unique PDR
+      const pdrCount = lines.reduce((acc, line) => {
+        for (let i = 1; i <= countPdr; i++) {
+          if (line[`ID PDR ${i}`] && !acc.includes(line[`ID PDR ${i}`]) && mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`])) {
+            acc.push(line[`ID PDR ${i}`]);
           }
-          return acc;
-        }, []).length;
-        // Save import plan
-        const { _id } = await ImportPlanTransportModel.create({ cohort, lines });
-        // Send response (summary)
-        res.status(200).send({ ok: true, data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, pdrCount, _id } });
-      }
+        }
+        return acc;
+      }, []).length;
+      // Save import plan
+      const { _id } = await ImportPlanTransportModel.create({ cohort, lines });
+      // Send response (summary)
+      res.status(200).send({ ok: true, data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, pdrCount, _id, maxPdrOnLine } });
+      //}
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
