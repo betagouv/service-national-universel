@@ -118,8 +118,6 @@ export default function Create() {
     frenchNationality: "",
   });
 
-  const cohort = cohorts.find(({ name }) => name === values?.cohort);
-
   const validate = () => {
     const errors = {};
     const errorEmpty = "Ne peut être vide";
@@ -139,7 +137,7 @@ export default function Create() {
       "parent1Status",
       "parent1LastName",
       "parent1FirstName",
-      "situation",
+      // "situation",
       "address",
       "city",
       "zip",
@@ -239,17 +237,18 @@ export default function Create() {
       }
     }
 
-    //
-    if (values.schooled === "true") {
-      if (values.schoolCountry === "FRANCE") {
-        if (validator.isEmpty(values.schoolCity) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
-          errors.schooled = "missing";
-          toastr.error("Des informations sont manquantes au niveau de l'établissement");
-        }
-      } else {
-        if (validator.isEmpty(values.schoolCountry) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
-          errors.schooled = "missing";
-          toastr.error("Des informations sont manquantes au niveau de l'établissement");
+    if (!classeId) {
+      if (values.schooled === "true") {
+        if (values.schoolCountry === "FRANCE") {
+          if (validator.isEmpty(values.schoolCity) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
+            errors.schooled = "missing";
+            toastr.error("Des informations sont manquantes au niveau de l'établissement");
+          }
+        } else {
+          if (validator.isEmpty(values.schoolCountry) || validator.isEmpty(values.schoolName) || validator.isEmpty(values.grade)) {
+            errors.schooled = "missing";
+            toastr.error("Des informations sont manquantes au niveau de l'établissement");
+          }
         }
       }
     }
@@ -295,10 +294,10 @@ export default function Create() {
     const receivedErrors = validate();
     setErrors(receivedErrors);
     if (Object.keys(receivedErrors).length !== 0) return;
-    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)) {
+    if (classeId) {
       sendData();
     } else {
-      const res = await api.get(`/inscription-goal/${cohort?.name}/department/${values.department}`);
+      const res = await api.get(`/inscription-goal/${values.cohort}/department/${values.department}`);
       if (!res.ok) throw new Error(res);
       const fillingRate = res.data;
       if (fillingRate >= 1) {
@@ -411,7 +410,7 @@ export default function Create() {
         <div className="ml-8 mb-6 text-lg font-normal">Informations générales</div>
         <div className={"flex pb-14"}>
           <div className="flex-[1_0_50%] pr-14 pl-8">
-            <Identite values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} cohort={cohort} />
+            <Identite values={values} handleChange={handleChange} errors={errors} setFieldValue={setFieldValue} />
           </div>
           <div className="my-16 flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-14 pr-8">
@@ -423,7 +422,7 @@ export default function Create() {
         <div className="ml-8 mb-6 text-lg font-normal">Détails</div>
         <div className={"flex pb-14"}>
           <div className="flex-[1_0_50%] pl-8 pr-14">
-            <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} />
+            <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} classeId={classeId} />
           </div>
           <div className="my-16 flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-14 pr-8">
@@ -444,33 +443,36 @@ export default function Create() {
         </div>
       </div>
 
-      {![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (cohorts.length > 0 || egibilityError !== "") && (
+      {!classeId && (cohorts.length > 0 || egibilityError !== "") && (
         <div className="relative mb-4 rounded bg-white pt-4 shadow">
           <div className="ml-8 text-lg font-normal">Choisissez un séjour pour le volontaire</div>
           {egibilityError !== "" && <div className="ml-8 pb-4">{egibilityError}</div>}
           <div className="flex flex-row flex-wrap justify-start px-3">
             {egibilityError === "" &&
-              cohorts.map((session) => (
-                <div
-                  key={session.name}
-                  onClick={() => setFieldValue("cohort", session.name)}
-                  className="m-3 flex h-14 w-60 cursor-pointer flex-row items-center justify-start rounded-md border border-[#3B82F6]">
-                  <input
-                    className="mx-3 rounded-full"
-                    type="radio"
-                    id="checkboxCohort"
-                    name="cohort"
-                    checked={session.name === values.cohort}
-                    onChange={() => setFieldValue("cohort", session.name)}
-                  />
-                  <div>{session.name}</div>
-                </div>
-              ))}
+              //filter all chort with CLE in the name regex
+              cohorts
+                .filter((session) => !session.name.match(/CLE/))
+                .map((session) => (
+                  <div
+                    key={session.name}
+                    onClick={() => setFieldValue("cohort", session.name)}
+                    className="m-3 flex h-14 w-60 cursor-pointer flex-row items-center justify-start rounded-md border border-[#3B82F6]">
+                    <input
+                      className="mx-3 rounded-full"
+                      type="radio"
+                      id="checkboxCohort"
+                      name="cohort"
+                      checked={session.name === values.cohort}
+                      onChange={() => setFieldValue("cohort", session.name)}
+                    />
+                    <div>{session.name}</div>
+                  </div>
+                ))}
           </div>
         </div>
       )}
 
-      {cohort &&
+      {values.cohort &&
         values.firstName !== "" &&
         values.lastName !== "" &&
         values.parent1FirstName !== "" &&
@@ -478,12 +480,12 @@ export default function Create() {
         values.parent1Email !== "" &&
         values.parent1Status !== "" &&
         values.temporaryDate !== null &&
-        cohorts.length > 0 &&
+        (cohorts.length > 0 || classeId) &&
         egibilityError === "" && (
           <div className="relative mb-4 rounded bg-white pt-4 shadow">
             <div className="ml-8 mb-6 text-lg font-normal">Consentements</div>
             <div className={"flex px-8 pb-14"}>
-              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} cohort={cohort} />
+              <SectionConsentements young={values} setFieldValue={setFieldValue} errors={errors} cohort={values.cohort} />
             </div>
           </div>
         )}
@@ -625,7 +627,7 @@ function Representant({ values, handleChange, errors, setFieldValue, parent }) {
   );
 }
 
-function Situation({ values, handleChange, errors, setFieldValue }) {
+function Situation({ values, handleChange, errors, setFieldValue, classeId }) {
   const onChange = (e) => {
     for (const key in e) {
       if (e[key] !== values[key]) {
@@ -660,37 +662,41 @@ function Situation({ values, handleChange, errors, setFieldValue }) {
 
   return (
     <>
-      <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Situation</div>
+      {!classeId && (
+        <>
+          <div className="mb-2 text-xs font-medium leading-snug text-[#242526]">Situation</div>
 
-      <Field
-        name="grade"
-        label="Classe"
-        type="select"
-        error={errors?.grade}
-        value={values.grade}
-        transformer={translate}
-        className="flex-[1_1_50%]"
-        options={gradeOptions}
-        onChange={(value, key) => onChangeGrade(key, value)}
-      />
-      {values.schooled !== "" && (
-        <Field
-          name="situation"
-          label="Statut"
-          type="select"
-          error={errors?.situation}
-          value={values.situation}
-          transformer={translate}
-          className="mt-4 flex-[1_1_50%]"
-          options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
-          onChange={(value, key) => onChangeSituation(key, value)}
-        />
-      )}
+          <Field
+            name="grade"
+            label="Classe"
+            type="select"
+            error={errors?.grade}
+            value={values.grade}
+            transformer={translate}
+            className="flex-[1_1_50%]"
+            options={gradeOptions}
+            onChange={(value, key) => onChangeGrade(key, value)}
+          />
+          {values.schooled !== "" && (
+            <Field
+              name="situation"
+              label="Statut"
+              type="select"
+              error={errors?.situation}
+              value={values.situation}
+              transformer={translate}
+              className="mt-4 flex-[1_1_50%]"
+              options={values.schooled === "true" ? youngSchooledSituationOptions : youngActiveSituationOptions}
+              onChange={(value, key) => onChangeSituation(key, value)}
+            />
+          )}
 
-      {values.situation !== "" && values.schooled === "true" && (
-        <div className="mt-4">
-          <SchoolEditor showBackgroundColor={false} young={values} onChange={onChange} />
-        </div>
+          {values.situation !== "" && values.schooled === "true" && (
+            <div className="mt-4">
+              <SchoolEditor showBackgroundColor={false} young={values} onChange={onChange} />
+            </div>
+          )}
+        </>
       )}
       <div className="mt-8">
         <div className="mt-8 mb-2 text-xs font-medium leading-snug text-[#242526]">Situations particulières</div>
@@ -965,7 +971,7 @@ function Coordonnees({ values, handleChange, setFieldValue, errors }) {
   );
 }
 
-function Identite({ values, handleChange, errors, setFieldValue, cohort }) {
+function Identite({ values, handleChange, errors, setFieldValue }) {
   const genderOptions = [
     { value: "male", label: "Homme" },
     { value: "female", label: "Femme" },

@@ -246,7 +246,7 @@ router.post(
         category: Joi.string(),
         expirationDate: Joi.date(),
         side: Joi.string().valid("recto", "verso"),
-      }).validate(req.body, { stripUnknown: true });
+      }).validate(JSON.parse(req.body.body), { stripUnknown: true });
       if (bodyError) {
         capture(bodyError);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });

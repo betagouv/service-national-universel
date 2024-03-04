@@ -1,3 +1,40 @@
+## [1.385.3](https://github.com/betagouv/service-national-universel/compare/v1.385.2...v1.385.3) (2024-03-02)
+
+
+### Bug Fixes
+
+* **api:** Handle better S3 errors ([05c0c84](https://github.com/betagouv/service-national-universel/commit/05c0c847067f76fff4df0d77fedc3e3bbb981c88))
+
+## [1.385.2](https://github.com/betagouv/service-national-universel/compare/v1.385.1...v1.385.2) (2024-02-29)
+
+
+### Bug Fixes
+
+* **api:** 1945-lorsqu'un jeune démémage, on update son adresse sur ses candidatures [#3622](https://github.com/betagouv/service-national-universel/issues/3622) ([6d5d4cb](https://github.com/betagouv/service-national-universel/commit/6d5d4cb2787bd7c330142316f854b6505401c170))
+* **api:** probleme pour la date d'expiration des CNI ([#3620](https://github.com/betagouv/service-national-universel/issues/3620)) ([f4257f0](https://github.com/betagouv/service-national-universel/commit/f4257f050c37776d7d075371cf0bb3dc687de670))
+* **app:** Add link to Change cohort on Waiting List page [#3627](https://github.com/betagouv/service-national-universel/issues/3627) ([74089b7](https://github.com/betagouv/service-national-universel/commit/74089b707ef9992dce5178140a08bf4ef549217f))
+* **misc:** 1905 - fix clean action (image/app) ([#3628](https://github.com/betagouv/service-national-universel/issues/3628)) ([0a1c36b](https://github.com/betagouv/service-national-universel/commit/0a1c36b9eefaf28742ba1f7a2ac4bd88b20c343b))
+
+## [1.385.1](https://github.com/betagouv/service-national-universel/compare/v1.385.0...v1.385.1) (2024-02-28)
+
+
+### Bug Fixes
+
+* **admin:** Visibilité affectation CLE pour ref. dep. ([#3623](https://github.com/betagouv/service-national-universel/issues/3623)) ([3dcbf07](https://github.com/betagouv/service-national-universel/commit/3dcbf0795a59815f0ff934f2d8742376f860a10a))
+* **admin, api:** [CLE] Message d’erreur lors de la création d’une inscription manuelle (d’un jeune) depuis admin ([#3625](https://github.com/betagouv/service-national-universel/issues/3625)) ([1f56c2a](https://github.com/betagouv/service-national-universel/commit/1f56c2a4f04688e58f707e91f14c4c99767edddd))
+
+# [1.385.0](https://github.com/betagouv/service-national-universel/compare/v1.384.0...v1.385.0) (2024-02-27)
+
+
+### Bug Fixes
+
+* **api:** session phase 1 certificate ([#3614](https://github.com/betagouv/service-national-universel/issues/3614)) ([dd3e2b9](https://github.com/betagouv/service-national-universel/commit/dd3e2b90af9e7f03e87436a1e320a5ae75290b8b))
+
+
+### Features
+
+* **misc:** remove sub-DNS zones ([#3617](https://github.com/betagouv/service-national-universel/issues/3617)) ([6c51066](https://github.com/betagouv/service-national-universel/commit/6c51066995741496c7bf85612ab3ca898b6b53ab))
+
 # [1.384.0](https://github.com/betagouv/service-national-universel/compare/v1.383.0...v1.384.0) (2024-02-26)
 
 

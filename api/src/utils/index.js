@@ -35,7 +35,7 @@ const {
   translateFileStatusPhase1,
 } = require("../config");
 const { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
 const dayjs = require("dayjs");
 
@@ -95,6 +95,7 @@ const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
     const params = { Bucket: bucket, Key: name };
     s3bucket.getObject(params, (err, data) => {
       if (err) {
+        captureMessage(`Error getting file : ${name}`, { extras: { error: err } });
         reject(err);
       } else {
         resolve(data);

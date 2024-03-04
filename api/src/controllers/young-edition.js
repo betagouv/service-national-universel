@@ -20,6 +20,7 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const YoungModel = require("../models/young");
 const ClasseModel = require("../models/cle/classe");
+const ApplicationObject = require("../models/application");
 const { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } = require("../utils");
 const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
@@ -44,6 +45,7 @@ const config = require("../config");
 const YoungObject = require("../models/young");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../models/sessionPhase1");
+const CohortModel = require("../models/cohort");
 const { APP_URL } = require("../config");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
@@ -131,11 +133,26 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 
     if (value.birthdateAt) value.birthdateAt = value.birthdateAt.setUTCHours(11, 0, 0);
 
+    if (value.latestCNIFileExpirationDate) {
+      const cohort = await CohortModel.findOne({ name: young.cohort });
+      value.CNIFileNotValidOnStart = new Date(value.latestCNIFileExpirationDate) < new Date(cohort.dateStart);
+    }
+
     // test de déménagement.
     if (young.department !== value.department && value.department !== null && value.department !== undefined && young.department !== null && young.department !== undefined) {
       await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
       await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
     }
+
+    //update applications
+    const applications = await ApplicationObject.find({ youngId: young._id });
+
+    const updatePromises = applications.map((application) => {
+      application.set({ youngCity: value.city, youngDepartment: value.department });
+      return application.save();
+    });
+
+    await Promise.all(updatePromises);
 
     young.set(value);
     await young.save({ fromUser: req.user });
