@@ -1,3 +1,13 @@
+# [1.386.0](https://github.com/betagouv/service-national-universel/compare/v1.385.3...v1.386.0) (2024-03-04)
+
+
+### Features
+
+* **admin:** 1963, 1965 - remove negative status from Classe Objective and Right Correction to Edit Cohort ([#3629](https://github.com/betagouv/service-national-universel/issues/3629)) ([f4cd437](https://github.com/betagouv/service-national-universel/commit/f4cd4375fd397d3320ac2ac15df6482afa3d509d))
+* **admin/api:** 1717- Ajout d'un compteur du nombre max de pdr sur une ligne a l'import du pdt  ([#3631](https://github.com/betagouv/service-national-universel/issues/3631)) ([856d2f6](https://github.com/betagouv/service-national-universel/commit/856d2f60849f1850e21cff7e4d1b35fb70ab75ae))
+* **api:** 1865 - Antivirus microservice ([#3611](https://github.com/betagouv/service-national-universel/issues/3611)) ([84aaa9a](https://github.com/betagouv/service-national-universel/commit/84aaa9a43b2a585efe01e12c194300220d1ed11e))
+* **api:** 1949 - CRON job ([#3624](https://github.com/betagouv/service-national-universel/issues/3624)) ([8d5d968](https://github.com/betagouv/service-national-universel/commit/8d5d968b04444fd33c875f2e027616fc7f0b3cf0))
+
 ## [1.385.3](https://github.com/betagouv/service-national-universel/compare/v1.385.2...v1.385.3) (2024-03-02)
 
 
