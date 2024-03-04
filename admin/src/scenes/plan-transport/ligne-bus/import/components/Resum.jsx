@@ -36,7 +36,7 @@ export default function Resum({ summary, cohort }) {
           <div className="text-sm leading-5">
             <p className="font-medium">Attention</p>
             <p>
-              Le nombre maximum de Points de rassemblements importés pour une ligne de bus est de : <span className="font-bold">{summary.maxPdrOnLine}</span>.
+              Le plus grand nombre de Points de rassemblement importés pour une ligne de bus est de : <span className="font-bold">{summary.maxPdrOnLine}</span>.
             </p>
             <p>Si vous constatez une incohérence, veuillez vérifier les noms de vos colonnes svp.</p>
           </div>
