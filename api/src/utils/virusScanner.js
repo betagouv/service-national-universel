@@ -12,24 +12,19 @@ const TIMEOUT_ANTIVIRUS_SERVICE = 10000;
 async function scanFile(tempFilePath, name, userId="anonymous") {
 
   const scan = async () => {
-    try {
-      const stream = createReadStream(tempFilePath);
-      const url = `${API_ANTIVIRUS_ENDPOINT}/scan`;
+    const stream = createReadStream(tempFilePath);
+    const url = `${API_ANTIVIRUS_ENDPOINT}/scan`;
 
-      const formData = new FormData();
-      formData.append('file', stream);
+    const formData = new FormData();
+    formData.append('file', stream);
 
-      const headers = formData.getHeaders()
-      headers["X-Auth-Token"] = API_ANTIVIRUS_TOKEN
+    const headers = formData.getHeaders()
+    headers["X-Auth-Token"] = API_ANTIVIRUS_TOKEN
 
-      const response = await fetch(url, { method: 'POST', body: formData, headers });
-    } catch (error) {
-      capture(error);
-      throw new Error(ERRORS.FILE_SCAN_DOWN);
-    }
+    const response = await fetch(url, { method: 'POST', body: formData, headers });
 
     if (response.status != 200) {
-      throw new Error(ERRORS.FILE_SCAN_DOWN);
+      throw new Error(ERRORS.FILE_SCAN_BAD_RESPONSE);
     }
 
     const { infected } = await response.json()
@@ -40,7 +35,13 @@ async function scanFile(tempFilePath, name, userId="anonymous") {
 
     return { infected };
   };
-  return await timeout(scan(), TIMEOUT_ANTIVIRUS_SERVICE);
+
+  try {
+    return await timeout(scan(), TIMEOUT_ANTIVIRUS_SERVICE);
+  } catch (error) {
+    capture(error);
+    throw new Error(ERRORS.FILE_SCAN_DOWN);
+  }
 }
 
 module.exports = scanFile;
