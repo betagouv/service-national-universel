@@ -13,7 +13,7 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter, timeout } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter, timeout, sanitizeAll, getBaseUrl } = require("../utils");
 const Zip = require("adm-zip");
 const {
   ROLES,
@@ -36,7 +36,7 @@ const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/se
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
-
+const path = require("path");
 const datefns = require("date-fns");
 const { fr } = require("date-fns/locale");
 const fileUpload = require("express-fileupload");
@@ -240,6 +240,24 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
   }
 });
 
+async function generateBatchPDF(batchHtmlContent, batchIndex) {
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const body = fs.readFileSync(path.resolve(__dirname, "../templates/certificate/bodyBatch.html"), "utf8");
+      const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()));
+      const context = await timeout(getPDF(newhtml, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
+      return { name: `batch_${batchIndex}_certificat.pdf`, body: context };
+    } catch (e) {
+      console.log(`Attempt ${attempt} failed for batch ${batchIndex}`);
+      if (attempt === maxRetries) {
+        captureMessage("Failed to generate PDF", { extras: { batchIndex, error: e.message } });
+        throw new Error(`Failed to generate PDF for batch ${batchIndex}: ${e.message}`); // Rethrow or handle as appropriate
+      }
+    }
+  }
+}
+
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -270,36 +288,25 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     }
 
     let zip = new Zip();
-    const batchSize = 10;
-    const numBatches = Math.ceil(youngs.length / batchSize);
+    const batchSize = 20;
+    const batchOperations = [];
 
-    for (let i = 0; i < numBatches; i++) {
-      const batchStart = i * batchSize;
-      const batchEnd = Math.min(batchStart + batchSize, youngs.length);
+    for (let i = 0; i < youngs.length; i += batchSize) {
+      const batch = youngs.slice(i, i + batchSize);
 
-      const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-        const maxRetries = 3;
-        for (let attempt = 1; attempt < maxRetries; attempt++) {
-          try {
-            const html = await phase1(young);
-            const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
-            return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
-          } catch (e) {
-            console.log(`Attempt ${attempt + 1} failed for Young ID: ${young._id}`);
-            if (attempt === maxRetries) {
-              captureMessage("Failed to generate PDF", { extras: { youngId: young._id, name: `${young.firstName} ${young.lastName}`, error: e.message } });
-              return res.status(500).send({ ok: false, code: ERRORS.INTERNAL_SERVER_ERROR });
-            }
-          }
-        }
-      });
+      // Generate HTML content for each young in the batch
+      const batchHtml = await Promise.all(batch.map((young) => phase1(young, true)));
 
-      const pdfs = await Promise.all(pdfPromises);
-
-      pdfs.forEach((pdf) => {
-        zip.addFile(pdf.name, pdf.body);
-      });
+      // Add the PDF generation promise for the batch to the operations array
+      batchOperations.push(generateBatchPDF(batchHtml, i / batchSize + 1));
     }
+
+    const pdfs = await Promise.all(batchOperations);
+
+    pdfs.forEach((pdf) => {
+      zip.addFile(pdf.name, pdf.body);
+    });
+
     const noticePdf = await getFile(`file/noticeImpression.pdf`);
     if (noticePdf) {
       zip.addFile("01-notice-d'impression.pdf", noticePdf.Body);
@@ -594,13 +601,9 @@ router.post(
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      if (config.ENVIRONMENT === "production") {
-        const scanResult = await scanFile(tempFilePath, name, req.user.id);
-        if (scanResult.infected) {
-          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-        } else if (scanResult.error) {
-          return res.status(500).send({ ok: false, code: scanResult.error });
-        }
+      const scanResult = await scanFile(tempFilePath, name, req.user.id);
+      if (scanResult.infected) {
+        return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
       }
 
       const newFile = {
