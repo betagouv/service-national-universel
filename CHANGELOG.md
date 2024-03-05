@@ -1,3 +1,17 @@
+# [1.387.0](https://github.com/betagouv/service-national-universel/compare/v1.386.0...v1.387.0) (2024-03-05)
+
+
+### Bug Fixes
+
+* **api:** Antivirus timeout ([#3632](https://github.com/betagouv/service-national-universel/issues/3632)) ([e1b080c](https://github.com/betagouv/service-national-universel/commit/e1b080c54f444525e310656b1b97c8e66a77b922))
+* **api:** Synchro api engagement ([#3634](https://github.com/betagouv/service-national-universel/issues/3634)) ([fc05d46](https://github.com/betagouv/service-national-universel/commit/fc05d46b2a4fd20679b95ab8083506711a067604))
+
+
+### Features
+
+* **api/admin:** 1772-1773 add ligne Bus sur la classe ([#3621](https://github.com/betagouv/service-national-universel/issues/3621)) ([de39104](https://github.com/betagouv/service-national-universel/commit/de391044bbdfda0d0e82155542d7a26a6f81fbb6))
+* **app:** 1034 - update RL2 logic on app ([#3633](https://github.com/betagouv/service-national-universel/issues/3633)) ([aa149dc](https://github.com/betagouv/service-national-universel/commit/aa149dc7cbfb161f008020eec6988fb5499d52af))
+
 # [1.386.0](https://github.com/betagouv/service-national-universel/compare/v1.385.3...v1.386.0) (2024-03-04)
 
 
