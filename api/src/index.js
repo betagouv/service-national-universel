@@ -36,7 +36,7 @@
   const loggingMiddleware = require("./middlewares/loggingMiddleware");
   const { forceDomain } = require("forcedomain");
   const requestIp = require("request-ip"); // Import request-ip package
-  require("./mongo");
+  await require("./mongo")();
 
   const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
 
