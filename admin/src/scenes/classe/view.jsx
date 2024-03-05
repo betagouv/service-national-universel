@@ -433,6 +433,15 @@ export default function View() {
                     </Link>
                   </>
                 )}
+                {classe.ligne && (
+                  <div className="mt-3">
+                    <Label title="Transport" name="ligneBus" />
+                    <InputText className="mb-3" label="Numéro de transport" value={classe.ligne?.busId} disabled />
+                    <Link to={`/ligne-de-bus/` + classe.ligne?._id} className="w-full">
+                      <Button type="tertiary" title="Voir la ligne de bus" className="w-full max-w-none" />
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
           </div>

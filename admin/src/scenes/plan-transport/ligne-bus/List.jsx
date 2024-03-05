@@ -106,6 +106,7 @@ const ReactiveList = ({ cohort, history }) => {
   const { user } = useSelector((state) => state.Auth);
   const [currentTab, setCurrentTab] = React.useState("aller");
   const [panel, setPanel] = React.useState({ open: false, id: null });
+  const cohortInURL = new URLSearchParams(history.location.search).get("cohort");
 
   const [data, setData] = React.useState([]);
   const pageId = "plandetransport";
@@ -197,6 +198,7 @@ const ReactiveList = ({ cohort, history }) => {
   ].filter((e) => e);
 
   React.useEffect(() => {
+    if (cohortInURL) return;
     if (!selectedFilters.cohort) setSelectedFilters({ ...selectedFilters, ["cohort"]: { filter: [cohort] } });
   }, [selectedFilters]);
 
