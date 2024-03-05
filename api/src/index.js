@@ -109,7 +109,7 @@
   app.use(loggingMiddleware);
 
   // WARNING : CleverCloud only
-  if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
+  if (process.env.CC_DEPLOYMENT_ID && ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
     require("./crons");
   }
 
