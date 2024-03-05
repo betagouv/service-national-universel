@@ -1,5 +1,7 @@
 (async () => {
 
+  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
+
   if (process.env.RUN_CRONS) {
     const { PORT } = require("./config.js");
     const { initSentry } = require("./sentry");
@@ -22,8 +24,6 @@
   };
 
   const { initSentryMiddlewares, capture } = require("./sentry");
-
-  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
   const bodyParser = require("body-parser");
   const cors = require("cors");
