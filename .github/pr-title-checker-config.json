@@ -4,9 +4,12 @@
     "color": "EEEEEE"
   },
   "CHECKS": {
-    "regexp": "^(chore\\(|feat\\(|fix\\()(release,? ?|app,? ?|admin,? ?|misc,? ?|api,? ?|lib,? ?)+\\) ?:.*$",
+    "regexp": "^(chore\\(|feat\\(|refactor\\(|fix\\()(release,? ?|app,? ?|admin,? ?|misc,? ?|api,? ?|lib,? ?)+\\) ?:.*$",
     "regexpFlags": "i",
-    "ignoreLabels" : ["bypass title", "meta"]
+    "ignoreLabels": [
+      "bypass title",
+      "meta"
+    ]
   },
   "MESSAGES": {
     "success": "Title is compliant",
@@ -14,4 +17,3 @@
     "notice": ""
   }
 }
-

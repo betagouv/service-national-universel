@@ -196,13 +196,9 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "production") {
-          const scanResult = await scanFile(tempFilePath, name, req.user._id);
-          if (scanResult.infected) {
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          } else if (scanResult.error) {
-            return res.status(500).send({ ok: false, code: scanResult.error });
-          }
+        const scanResult = await scanFile(tempFilePath, name, req.user._id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
 
         const data = fs.readFileSync(tempFilePath);
@@ -256,7 +252,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
     if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     obj.inscriptionDoneDate = new Date();
-    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(req.user.role)) {
+    if (obj.classeId) {
       obj.source = YOUNG_SOURCE.CLE;
       const classe = await ClasseModel.findById(obj.classeId);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

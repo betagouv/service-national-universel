@@ -1,4 +1,19 @@
 (async () => {
+
+  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
+
+  if (process.env.RUN_CRONS) {
+    const { PORT } = require("./config.js");
+    const { initSentry } = require("./sentry");
+    initSentry()
+    require("./crons");
+    // Serverless containers requires running http server
+    const express = require("express");
+    const app = express();
+    app.listen(PORT, () => console.log("Listening on port " + PORT));
+    return;
+  }
+
   await require("./env-manager")();
 
   // ! Ignore specific error
@@ -8,9 +23,7 @@
     originalConsoleError.apply(console, arguments);
   };
 
-  const { initSentry, capture } = require("./sentry");
-
-  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
+  const { initSentryMiddlewares, capture } = require("./sentry");
 
   const bodyParser = require("body-parser");
   const cors = require("cors");
@@ -38,7 +51,7 @@
   }
 
   const app = express();
-  const registerSentryErrorHandler = initSentry(app);
+  const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
   if (process.env.PRODUCTION) {
@@ -95,7 +108,11 @@
   });
   app.use(loggingMiddleware);
 
-  require("./crons");
+  // WARNING : CleverCloud only
+  if (process.env.CC_DEPLOYMENT_ID && ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
+    require("./crons");
+  }
+
   app.use(cookieParser());
 
   app.use(express.static(__dirname + "/../public"));

@@ -1,35 +1,46 @@
 // virusScanner.js
-const NodeClam = require("clamscan");
+const { API_ANTIVIRUS_ENDPOINT, API_ANTIVIRUS_TOKEN } = require("../config");
 const { capture } = require("../sentry");
+const fetch = require("node-fetch");
+const FormData = require('form-data');
+const { createReadStream } = require('fs');
+const { timeout } = require("../utils");
 const { ERRORS } = require("./index");
-const { SCALEWAY_CLAMSCAN } = require("../config");
 
-async function scanFile(tempFilePath, name, userId) {
-  try {
-    const clamscan = await new NodeClam().init(
-      SCALEWAY_CLAMSCAN
-        ? {
-            removeInfected: true,
-            clamdscan: {
-              host: "127.0.0.1",
-              port: 3310,
-              timeout: 30000,
-              socket: null,
-            },
-          }
-        : {
-            removeInfected: true,
-          },
-    );
-    const { isInfected } = await clamscan.isInfected(tempFilePath);
-    if (isInfected) {
-      capture(`File ${name} of user(${userId}) is infected`);
-      return { infected: true, error: null };
+const TIMEOUT_ANTIVIRUS_SERVICE = 15000;
+
+async function scanFile(tempFilePath, name, userId="anonymous") {
+
+  const scan = async () => {
+    const stream = createReadStream(tempFilePath);
+    const url = `${API_ANTIVIRUS_ENDPOINT}/scan`;
+
+    const formData = new FormData();
+    formData.append('file', stream);
+
+    const headers = formData.getHeaders()
+    headers["X-Auth-Token"] = API_ANTIVIRUS_TOKEN
+
+    const response = await fetch(url, { method: 'POST', body: formData, headers });
+
+    if (response.status != 200) {
+      throw new Error(ERRORS.FILE_SCAN_BAD_RESPONSE);
     }
-    return { infected: false, error: null };
+
+    const { infected } = await response.json()
+
+    if (infected) {
+      capture(`File ${name} of user(${userId}) is infected`);
+    }
+
+    return { infected };
+  };
+
+  try {
+    return await timeout(scan(), TIMEOUT_ANTIVIRUS_SERVICE);
   } catch (error) {
     capture(error);
-    return { infected: false, error: ERRORS.FILE_SCAN_DOWN };
+    throw new Error(ERRORS.FILE_SCAN_DOWN);
   }
 }
 

@@ -11,7 +11,7 @@ const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung } = require("../utils/index.js");
-const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");
+const { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } = require("../services/application");
 const { getTutorName } = require("../services/mission");
 const { validateId, validateMission } = require("../utils/validator");
 const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib");
@@ -291,6 +291,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
           ...serializeMission(mission),
           tutor: missionTutor,
           application: application ? serializeApplication(application) : null,
+          ...(await getAuthorizationToApply(mission, req.user)),
         },
       });
     }

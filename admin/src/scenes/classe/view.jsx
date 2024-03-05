@@ -53,6 +53,16 @@ export default function View() {
 
   const history = useHistory();
 
+  const totalSeatsTakenExcluding =
+    classe.seatsTaken -
+    (studentStatus[YOUNG_STATUS.WITHDRAWN] || 0) -
+    (studentStatus[YOUNG_STATUS.REFUSED] || 0) -
+    (studentStatus[YOUNG_STATUS.NOT_AUTORISED] || 0) -
+    (studentStatus[YOUNG_STATUS.IN_PROGRESS] || 0) -
+    (studentStatus[YOUNG_STATUS.WAITING_CORRECTION] || 0) -
+    (studentStatus[YOUNG_STATUS.WAITING_VALIDATION] || 0) -
+    (studentStatus[YOUNG_STATUS.ABANDONED] || 0);
+
   const colorOptions = Object.keys(CLE_COLORATION_LIST).map((value) => ({
     value: CLE_COLORATION_LIST[value],
     label: translateColoration(CLE_COLORATION_LIST[value]),
@@ -456,11 +466,11 @@ export default function View() {
                 </tr>
                 <tr className="border-b border-gray-200">
                   <td className="font-bold pr-4 py-2">Total :</td>
-                  <td className="px-4 font-bold text-lg text-center py-2">{classe.seatsTaken || 0}</td>
-                  <td className="text-gray-500 text-center py-2">({Math.round((classe.seatsTaken * 100) / classe.totalSeats || 0)}%)</td>
+                  <td className="px-4 font-bold text-lg text-center py-2">{totalSeatsTakenExcluding}</td>
+                  <td className="text-gray-500 text-center py-2">({Math.round((totalSeatsTakenExcluding * 100) / classe.totalSeats || 0)}%)</td>
                 </tr>
                 <tr>
-                  <td className="font-bold pr-4 py-2">Places libres</td>
+                  <td className="font-bold pr-4 py-2">Places libres :</td>
                   <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - classe.seatsTaken || 0}</td>
                   <td className="text-gray-500 text-center py-2">({Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats || 0)}%)</td>
                 </tr>
