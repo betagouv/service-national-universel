@@ -331,7 +331,7 @@ function canSearchSessionPhase1(actor) {
 }
 
 function canViewSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
 function canPutSpecificDateOnSessionPhase1(actor) {
@@ -487,7 +487,9 @@ function canSearchAssociation(actor) {
 }
 
 function canViewCohesionCenter(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(
+    actor.role,
+  );
 }
 
 function canGetReferentByEmail(actor) {
@@ -590,7 +592,16 @@ function canViewStructureChildren(actor) {
 
 function canDownloadYoungDocuments(actor, target, type = null) {
   if (type === "certificate" || type === "convocation") {
-    return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
+    return [
+      ROLES.REFERENT_DEPARTMENT,
+      ROLES.REFERENT_REGION,
+      ROLES.ADMIN,
+      ROLES.HEAD_CENTER,
+      ROLES.RESPONSIBLE,
+      ROLES.SUPERVISOR,
+      ROLES.REFERENT_CLASSE,
+      ROLES.ADMINISTRATEUR_CLE,
+    ].includes(actor.role);
   } else {
     return (
       canEditYoung(actor, target) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role)
@@ -756,7 +767,9 @@ function canDeleteSchemaDeRepartition(actor) {
 }
 
 function canViewLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.HEAD_CENTER, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(
+    actor.role,
+  );
 }
 function canUpdateLigneBus(actor) {
   return [
