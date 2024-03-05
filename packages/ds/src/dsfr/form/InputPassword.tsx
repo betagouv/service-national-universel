@@ -12,6 +12,7 @@ type OwnProps = {
   readOnly?: boolean;
   error?: string;
   className?: string;
+  hintText?: string;
 };
 
 export default function InputPassword({
@@ -23,6 +24,7 @@ export default function InputPassword({
   readOnly,
   error,
   className,
+  hintText,
 }: OwnProps) {
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -33,21 +35,23 @@ export default function InputPassword({
   const EyeButton = showPassword ? EyeOff : Eye;
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full mb-6">
       <Input
         label={label}
         disabled={disabled || readOnly}
         state={error ? "error" : "default"}
+        stateRelatedMessage={error}
+        className={`mb-1 ${className}`}
         nativeInputProps={{
           id: name,
-          className: `w-full ${className}`,
           name,
           type: showPassword ? "text" : "password",
           onChange: handleChangeValue,
           value: value,
           readOnly: readOnly,
         }}
-      />
+      ></Input>
+      {hintText && <span className="fr-hint-text">{hintText}</span>}
       <EyeButton
         className="absolute right-2 top-11 cursor-pointer"
         onClick={() => setShowPassword(!showPassword)}

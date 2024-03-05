@@ -25,7 +25,7 @@ import { setYoung } from "@/redux/auth/actions";
 import { capture } from "@/sentry";
 import { RiInformationLine } from "react-icons/ri";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
-import { InputPhone, Checkbox } from "@snu/ds/dsfr";
+import { InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -258,43 +258,17 @@ export default function StepProfil() {
               {error.emailConfirm ? <span className="text-sm text-red-500">{error.emailConfirm}</span> : null}
             </label>
 
-            <label className="w-full">
-              Mot de passe
-              <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2 mt-2">
-                <input
-                  className="w-full bg-inherit"
-                  type={showPassword ? "text" : "password"}
-                  value={data.password}
-                  onChange={(e) => setData({ ...data, password: e.target.value })}
-                />
-                {showPassword ? (
-                  <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} />
-                ) : (
-                  <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />
-                )}
-              </div>
-              <p className={`text-sm ${error?.password ? "text-red-500" : " text-[#3A3A3A]"}`}>
-                Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
-              </p>
-            </label>
-
-            <label className="w-full">
-              Confirmez votre mot de passe
-              <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2 mt-2">
-                <input
-                  className="w-full bg-inherit"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={data.confirmPassword}
-                  onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
-                />
-                {showConfirmPassword ? (
-                  <EyeOff className="cursor-pointer" onClick={() => setShowConfirmPassword(false)} />
-                ) : (
-                  <Eye className="cursor-pointer" onClick={() => setShowConfirmPassword(true)} />
-                )}
-              </div>
-              {error.confirmPassword ? <span className="text-sm text-red-500">{error.confirmPassword}</span> : null}
-            </label>
+            <InputPassword
+              hintText="Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole."
+              label="Mot de passe"
+              error={error?.password}
+              value={data.password}
+              onChange={(password) => setData({ ...data, password })}></InputPassword>
+            <InputPassword
+              label="Confirmez votre mot de passe"
+              error={error?.confirmPassword}
+              value={data.confirmPassword}
+              onChange={(confirmPassword) => setData({ ...data, confirmPassword })}></InputPassword>
           </div>
 
           <div className="flex flex-col gap-1">

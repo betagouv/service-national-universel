@@ -28,20 +28,20 @@ export default function ModalRecap({ isOpen, title, message, onCancel, onConfirm
         <div className="text-gray-500 leading-[24px] mb-4">{message}</div>
         <hr className="my-2" />
         <div className="mb-3">
-          <p className="text-gray-500">Niveau de scolarité</p>
-          <p className="font-bold">{translateGrade(young.scolarity)}</p>
+          <span className="text-gray-500">Niveau de scolarité</span>
+          <span className="font-bold">{translateGrade(young.scolarity)}</span>
         </div>
         <hr className="my-2" />
         <div className="mb-3">
           {young.scolarity === GRADES.NOT_SCOLARISE ? (
             <>
-              <p className="text-gray-500">Code postal</p>
-              <p className="font-bold">{young?.zip}</p>
+              <span className="text-gray-500">Code postal</span>
+              <span className="font-bold">{young?.zip}</span>
             </>
           ) : (
             <>
-              <p className="text-gray-500">Commune de l'établissement</p>
-              <p className="font-bold">{young.school?.city}</p>
+              <span className="text-gray-500">Commune de l'établissement</span>
+              <span className="font-bold">{young.school?.city}</span>
             </>
           )}
         </div>

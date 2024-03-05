@@ -144,36 +144,36 @@ export default function StepConfirm() {
 
         <div className="space-y-2 text-base">
           <div className="flex items-center justify-between ">
-            <p className="text-gray-500">Niveau de scolarité&nbsp;:</p>
-            <p className="text-right">{translateGrade(data.scolarity)}</p>
+            <span className="text-gray-500">Niveau de scolarité&nbsp;:</span>
+            <span className="text-right">{translateGrade(data.scolarity)}</span>
           </div>
           <div className="flex items-center justify-between ">
-            <p className="text-gray-500">Date de naissance&nbsp;:</p>
-            <p className="text-right">{formatDateFR(data.birthDate)}</p>
+            <span className="text-gray-500">Date de naissance&nbsp;:</span>
+            <span className="text-right">{formatDateFR(data.birthDate)}</span>
           </div>
           {data.school ? (
             <>
               {data.school?.country && (
                 <div className="flex items-center justify-between ">
-                  <p className="text-gray-500">Pays de l&apos;établissement&nbsp;:</p>
-                  <p className="text-right capitalize">{data.school?.country?.toLowerCase()}</p>
+                  <span className="text-gray-500">Pays de l&apos;établissement&nbsp;:</span>
+                  <span className="text-right capitalize">{data.school?.country?.toLowerCase()}</span>
                 </div>
               )}
               {data.school?.city && (
                 <div className="flex items-center justify-between ">
-                  <p className="text-gray-500">Commune de l&apos;établissement&nbsp;:</p>
-                  <p className="text-right">{data.school.city}</p>
+                  <span className="text-gray-500">Commune de l&apos;établissement&nbsp;:</span>
+                  <span className="text-right">{data.school.city}</span>
                 </div>
               )}
               <div className="flex items-center justify-between ">
-                <p className="text-gray-500">Nom de l&apos;établissement&nbsp;:</p>
-                <p className="truncate text-right">{data.school.fullName}</p>
+                <span className="text-gray-500">Nom de l&apos;établissement&nbsp;:</span>
+                <span className="truncate text-right">{data.school.fullName}</span>
               </div>
             </>
           ) : (
             <div className="flex items-center justify-between ">
-              <p className="text-gray-500">Code postal&nbsp;:</p>
-              <p className="text-right">{data.zip}</p>
+              <span className="text-gray-500">Code postal&nbsp;:</span>
+              <span className="text-right">{data.zip}</span>
             </div>
           )}
         </div>
@@ -200,22 +200,22 @@ export default function StepConfirm() {
 
             <div className="space-y-2 mb-6 text-base">
               <div className="flex items-center justify-between">
-                <p className="text-gray-500">Prénom du volontaire&nbsp;:</p>
-                <p className="text-right">{data.firstName}</p>
+                <span className="text-gray-500">Prénom du volontaire&nbsp;:</span>
+                <span className="text-right">{data.firstName}</span>
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-gray-500">Nom du volontaire&nbsp;:</p>
-                <p className="text-right">{data.lastName}</p>
+                <span className="text-gray-500">Nom du volontaire&nbsp;:</span>
+                <span className="text-right">{data.lastName}</span>
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-gray-500">Téléphone&nbsp;:</p>
-                <p className="text-right">
+                <span className="text-gray-500">Téléphone&nbsp;:</span>
+                <span className="text-right">
                   {PHONE_ZONES[data.phoneZone].code} {data.phone}
-                </p>
+                </span>
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-gray-500">Email&nbsp;:</p>
-                <p className="text-right">{data.email}</p>
+                <span className="text-gray-500">Email&nbsp;:</span>
+                <span className="text-right">{data.email}</span>
               </div>
             </div>
           </>
