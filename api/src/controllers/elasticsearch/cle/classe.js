@@ -63,7 +63,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
 
       if (req.query?.type === "schema-de-repartition") {
-        // Export is only available for admin for now
         if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
         response = await populateWithEtablissementInfo(response);
