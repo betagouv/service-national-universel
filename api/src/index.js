@@ -6,6 +6,7 @@
     const { PORT } = require("./config.js");
     const { initSentry } = require("./sentry");
     initSentry()
+    await require("./mongo")();
     require("./crons");
     // Serverless containers requires running http server
     const express = require("express");
