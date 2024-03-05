@@ -97,7 +97,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
             </div>
           )}
         </div>
-        <EditTop />
+        {![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && <EditTop />}
       </div>
       <ModalConfirm isOpen={modal?.isOpen} title={modal?.title} message={modal?.message} onCancel={() => setModal({ isOpen: false })} onConfirm={modal?.onConfirm} />
       <ModalDispense
