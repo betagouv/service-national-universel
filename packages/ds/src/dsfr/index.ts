@@ -2,6 +2,7 @@
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
+import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 
 // Form
 import InputPhone from "./form/InputPhone";
@@ -27,6 +28,7 @@ export {
   PaddedContainer,
   Page,
   Section,
+  Select,
   Field,
   List,
 };

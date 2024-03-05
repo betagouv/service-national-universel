@@ -71,9 +71,9 @@ function SessionButton({ session }) {
 
   return (
     <button key={session.id} onClick={handleClick} className="w-full my-3 flex items-center justify-between border p-4 hover:bg-gray-50">
-      <p>
+      <span>
         Séjour <strong>{getCohortPeriod(session)}</strong>
-      </p>
+      </span>
       <ArrowRightBlueSquare />
     </button>
   );

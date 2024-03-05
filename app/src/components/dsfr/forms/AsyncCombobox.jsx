@@ -97,10 +97,10 @@ function Dropdown({ loading, options, handleSelect, hint }) {
     <div className="relative">
       <div className="bg-white border flex flex-col absolute z-10 -top-2 w-full shadow">
         {loading ? (
-          <span className="p-3 text-center text-gray-800 animate-pulse">Chargement...</span>
+          <span className="p-3 text-center text-[#161616] animate-pulse">Chargement...</span>
         ) : options.length ? (
           options.map((option) => (
-            <button key={option.label} onClick={() => handleSelect(option)} className="px-3 py-2.5 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
+            <button key={option.label} onClick={() => handleSelect(option)} className="pl-10 py-2.5 hover:!bg-[#EEEEEE]  text-[#161616] w-full flex justify-between">
               <span className="text-left">{option.label}</span>
             </button>
           ))

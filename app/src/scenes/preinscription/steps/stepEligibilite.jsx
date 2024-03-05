@@ -28,7 +28,6 @@ import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupBut
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
-import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
 
 export default function StepEligibilite() {
