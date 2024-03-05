@@ -7,7 +7,7 @@ const { createReadStream } = require('fs');
 const { timeout } = require("../utils");
 const { ERRORS } = require("./index");
 
-const TIMEOUT_ANTIVIRUS_SERVICE = 10000;
+const TIMEOUT_ANTIVIRUS_SERVICE = 15000;
 
 async function scanFile(tempFilePath, name, userId="anonymous") {
 
