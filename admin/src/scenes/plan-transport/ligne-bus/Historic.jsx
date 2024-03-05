@@ -1,41 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import Breadcrumbs from "../../../components/Breadcrumbs";
 import HistoryComponent from "../../../components/views/HistoricServerDriven";
 import API from "../../../services/api";
-import { Title } from "../components/commons";
-import Select from "../components/Select";
 import { createEvent } from "../../../utils";
-import { useHistory } from "react-router-dom";
 import Loader from "../../../components/Loader";
 import { ROLES } from "snu-lib";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { BsDownload } from "react-icons/bs";
-import { getCohortSelectOptions } from "@/services/cohort.service";
 
 let filterOptionsCache = null;
 
 export default function Historic() {
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = useState(urlParams.get("cohort"));
-  const [cohortList, setCohortList] = useState([]);
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({ count: 0, page: 0, pageCount: 0 });
   const [currentPage, setCurrentPage] = useState(0);
   const [filters, setFilters] = useState({ op: [], userId: [], path: [], query: "" });
   const [options, setOptions] = useState(filterOptionsCache);
   const [exporting, setExporting] = useState(false);
-  const history = useHistory();
-
-  useEffect(() => {
-    const cohortList = getCohortSelectOptions(cohorts);
-    setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[0].value);
-  }, []);
 
   useEffect(() => {
     (async function () {
@@ -69,7 +55,6 @@ export default function Historic() {
     }
   }, [filters]);
 
-  // console.log("🚀 ~ file: Historic.js:17 ~ Historic ~ data", data);
   const formattedData = formatHistory(data, user.role);
 
   // Insert fetch and format logic here
@@ -101,6 +86,7 @@ export default function Historic() {
         .map((key) => key + "=" + query[key])
         .join("&");
       const { ok, data, pagination } = await API.get(`/ligne-de-bus/patches/${cohort}?${queryString}`);
+      console.log(pagination);
       if (!ok) return null;
       if (forExport) {
         return data;
@@ -163,34 +149,18 @@ export default function Historic() {
     ) : null;
 
   return (
-    <>
-      <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${cohort}` }, { label: "Historique du plan de transport" }]} />
-      <div className="w-full px-8 pt-3 pb-4">
-        <div className="flex items-center justify-between pb-6">
-          <Title>Historique du plan de transport</Title>
-          <Select
-            options={cohortList}
-            value={cohort}
-            onChange={(e) => {
-              setCohort(e);
-              history.replace({ search: `?cohort=${e}` });
-            }}
-          />
-        </div>
-        <HistoryComponent
-          loading={loading}
-          data={formattedData}
-          refName="Ligne"
-          path={"ligne-de-bus"}
-          pagination={pagination}
-          changePage={changePage}
-          filters={filters}
-          changeFilters={setFilters}
-          filterOptions={options}
-          extraTool={exportButton}
-        />
-      </div>
-    </>
+    <HistoryComponent
+      loading={loading}
+      data={formattedData}
+      refName="Ligne"
+      path={"ligne-de-bus"}
+      pagination={pagination}
+      changePage={changePage}
+      filters={filters}
+      changeFilters={setFilters}
+      filterOptions={options}
+      extraTool={exportButton}
+    />
   );
 }
 

@@ -95,6 +95,7 @@ export default function SelectButton({
   const customStyles: CustomStyles = {
     control: (styles, state) => ({
       ...styles,
+      cursor: "pointer",
       backgroundColor: disabled ? "#F9FAFB" : "white",
       border: error
         ? "1px solid #EF4444"
