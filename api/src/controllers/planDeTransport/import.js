@@ -88,13 +88,9 @@ router.post(
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      if (config.ENVIRONMENT === "production") {
-        const scanResult = await scanFile(tempFilePath, name, req.user.id);
-        if (scanResult.infected) {
-          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-        } else if (scanResult.error) {
-          return res.status(500).send({ ok: false, code: scanResult.error });
-        }
+      const scanResult = await scanFile(tempFilePath, name, req.user.id);
+      if (scanResult.infected) {
+        return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
       }
 
       const workbook = XLSX.readFile(tempFilePath);
@@ -107,6 +103,7 @@ router.post(
 
       // Count columns that start with "ID PDR" to know how many PDRs there are.
       const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
+      let maxPdrOnLine = 0;
 
       const errors = {
         "NUMERO DE LIGNE": [],
@@ -352,13 +349,19 @@ router.post(
         }
       }
       // Check if there is a PDR duplicate in a line
+      // and check the max number of PDR on a line
       for (const [i, line] of lines.entries()) {
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
         const pdrIds = [];
+        let currentLinePDRCount = 0;
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
           if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
             pdrIds.push(line[`ID PDR ${pdrNumber}`]);
+            currentLinePDRCount++;
           }
+        }
+        if (currentLinePDRCount > maxPdrOnLine) {
+          maxPdrOnLine = currentLinePDRCount;
         }
         //check and return duplicate pdr
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
@@ -393,7 +396,7 @@ router.post(
         // Save import plan
         const { _id } = await ImportPlanTransportModel.create({ cohort, lines });
         // Send response (summary)
-        res.status(200).send({ ok: true, data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, pdrCount, _id } });
+        res.status(200).send({ ok: true, data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, pdrCount, _id, maxPdrOnLine } });
       }
     } catch (error) {
       capture(error);

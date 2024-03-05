@@ -641,7 +641,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohesionStayPresence: undefined,
       cohesionStayMedicalFileReceived: undefined,
     });
-
     if (value.source === YOUNG_SOURCE.CLE) {
       young.set({
         source: YOUNG_SOURCE.CLE,
@@ -649,6 +648,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         classeId: value.classeId,
         cniFiles: [],
         "files.cniFiles": [],
+        latestCNIFileExpirationDate: undefined,
+        latestCNIFileCategory: undefined,
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
@@ -660,13 +661,23 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         });
       }
     } else {
+      if (value.source === YOUNG_SOURCE.VOLONTAIRE) {
+        if (young.source !== YOUNG_SOURCE.VOLONTAIRE) {
+          young.set({
+            status: getYoungStatus(young),
+            statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+            cniFiles: [],
+            "files.cniFiles": [],
+            latestCNIFileExpirationDate: undefined,
+            latestCNIFileCategory: undefined,
+          });
+        }
+      }
       young.set({
         // Init if young was previously CLE
         source: YOUNG_SOURCE.VOLONTAIRE,
         etablissementId: undefined,
         classeId: undefined,
-        cniFiles: [],
-        "files.cniFiles": [],
       });
     }
 
@@ -992,13 +1003,9 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "production") {
-          const scanResult = await scanFile(tempFilePath, name, req.user);
-          if (scanResult.infected) {
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          } else if (scanResult.error) {
-            return res.status(500).send({ ok: false, code: scanResult.error });
-          }
+        const scanResult = await scanFile(tempFilePath, name, req.user);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
 
         const data = fs.readFileSync(tempFilePath);

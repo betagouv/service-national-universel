@@ -1,5 +1,5 @@
 import PasswordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, REGLEMENT_INTERIEUR_VERSION } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, REGLEMENT_INTERIEUR_VERSION, isCohortTooOld } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
@@ -79,8 +79,8 @@ export function hasAccessToPhase2(young) {
   if (young.statusPhase2 === "VALIDATED") return true;
   if (young.status === YOUNG_STATUS.WITHDRAWN) return false;
   const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
-  const cohortIsTooOld = ["2019", "2020"].includes(young.cohort);
-  if (cohortIsTooOld && !userIsDoingAMission) {
+
+  if (isCohortTooOld(young) && !userIsDoingAMission) {
     return false;
   }
   if (wasYoungExcluded(young)) return false;
