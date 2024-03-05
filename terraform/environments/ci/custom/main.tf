@@ -28,6 +28,10 @@ variable "app_image_tag" {
   type    = string
   nullable = false
 }
+variable "pdf_image_tag" {
+  type    = string
+  nullable = false
+}
 
 locals {
   env            = "###___ENV_NAME___###"
@@ -258,7 +262,7 @@ resource "scaleway_container_domain" "app" {
 resource "scaleway_container" "pdf" {
   name            = "${local.env}-pdf"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/pdf:latest"
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/pdf:${var.pdf_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 512
@@ -278,8 +282,8 @@ resource "scaleway_container" "pdf" {
 }
 
 resource "scaleway_domain_record" "pdf" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "pdf"
+  dns_zone = data.scaleway_domain_zone.main.id
+  name     = "pdf-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.pdf.domain_name}."
   ttl      = 300
@@ -287,7 +291,7 @@ resource "scaleway_domain_record" "pdf" {
 
 resource "scaleway_container_domain" "pdf" {
   container_id = scaleway_container.pdf.id
-  hostname     = local.pdf_hostname
+  hostname     = "${scaleway_domain_record.pdf.name}${scaleway_domain_record.pdf.dns_zone}"
 }
 
 
