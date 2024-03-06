@@ -1,3 +1,10 @@
+## [1.387.1](https://github.com/betagouv/service-national-universel/compare/v1.387.0...v1.387.1) (2024-03-06)
+
+
+### Bug Fixes
+
+* **admin:** Fix ligne de bus sur les classes ([#3638](https://github.com/betagouv/service-national-universel/issues/3638)) ([25ee95d](https://github.com/betagouv/service-national-universel/commit/25ee95dc34301911b6a91630bc815f3bfa774e6c))
+
 # [1.387.0](https://github.com/betagouv/service-national-universel/compare/v1.386.0...v1.387.0) (2024-03-05)
 
 
