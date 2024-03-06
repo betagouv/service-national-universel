@@ -1,13 +1,12 @@
 import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useState } from "react";
-import { useHistory } from "react-router-dom";
-import api from "../../../services/api";
+import { toastr } from "react-redux-toastr";
+import api from "@/services/api";
+import { translate } from "@/utils";
 import Mail from "../icons/Mail";
 import Separator from "./Separator";
 
 export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
-  const history = useHistory();
-
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const onMouseEnter = () => {
@@ -20,11 +19,12 @@ export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
 
   const connectToZammood = async () => {
     try {
-      const { ok, data } = await api.get(`/zammood/signin`);
-      if (ok) window.open(data, "_blank", "noopener,noreferrer");
-      else history.push("/boite-de-reception");
+      const { ok, data, code } = await api.get(`/zammood/signin`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue. Veuillez contacter le support", translate(code));
+      window.open(data, "_blank", "noopener,noreferrer");
     } catch (e) {
       console.log(e);
+      toastr.error(e.message, translate(e.code));
     }
   };
 
