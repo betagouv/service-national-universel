@@ -183,7 +183,7 @@ export default function IndexDesktop({ young }) {
                 </AlertPrimary>
               )}
               <ButtonLinkPrimaryOutline
-                to="phase2/equivalence"
+                to="equivalence"
                 disabled={!isYoungCanApplyToPhase2Missions(young)}
                 className="flex w-full justify-center"
                 onClick={() => plausibleEvent("Phase 2/ CTA - EquivalenceMIGdemande")}>

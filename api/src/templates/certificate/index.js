@@ -71,12 +71,13 @@ const getMeetingPoint = async (young) => {
   return meetingPoint;
 };
 
-const phase1 = async (young) => {
+const phase1 = async (young, batch = false) => {
   const session = await getSession(young);
   const cohort = await getCohort(young);
   const cohortEndDate = getCohortEndDate(young, cohort);
+  const file = batch ? "phase1Batch.html" : "phase1.html";
 
-  const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
+  const html = fs.readFileSync(path.resolve(__dirname, file), "utf8");
   const ministresData = getMinistres(cohortEndDate);
   const template = ministresData.template;
   const cohesionCenter = await getCohesionCenter(young);

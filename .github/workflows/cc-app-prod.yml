@@ -9,13 +9,7 @@ on:
   push:
     branches:
       - production_cc
-    paths:
-      - app/**
-      - packages/**
-  pull_request:
-    paths:
-      - app/**
-      - packages/**
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -36,7 +30,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production_cc'
     strategy:
       matrix:
         node-version: [18.x]

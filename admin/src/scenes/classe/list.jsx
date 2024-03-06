@@ -23,6 +23,7 @@ export default function List() {
   });
   const [size, setSize] = useState(10);
   const user = useSelector((state) => state.Auth.user);
+  const [exportLoading, setExportLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -47,6 +48,7 @@ export default function List() {
   }, []);
 
   const exportData = async ({ type }) => {
+    setExportLoading(true);
     try {
       const res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
         filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
@@ -59,6 +61,7 @@ export default function List() {
     } catch (error) {
       capture(error);
     }
+    setExportLoading(false);
   };
 
   if (classes === null || !etablissements) return null;
@@ -102,7 +105,9 @@ export default function List() {
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
           ),
-          [ROLES.ADMIN].includes(user.role) && <Button rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} />,
+          [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
+            <Button title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} />
+          ),
         ].filter(Boolean)}
       />
       {!classes && (
@@ -252,7 +257,15 @@ function exportExcelSheet({ data: classes, type }) {
       updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
       region: c.etablissement?.region,
       department: c.etablissement?.department,
+      uai: c.etablissement?.uai,
+      etablissementName: c.etablissement?.name,
       youngsVolume: c.totalSeats ?? 0,
+      studentInProgress: c.studentInProgress,
+      studentWaiting: c.studentWaiting,
+      studentValidated: c.studentValidated,
+      studentAbandoned: c.studentAbandoned,
+      studentNotAutorized: c.studentNotAutorized,
+      studentWithdrawn: c.studentWithdrawn,
       centerId: c.cohesionCenterId,
       centerName: c.cohesionCenter ? `${c.cohesionCenter?.name}, ${c.cohesionCenter?.address}, ${c.cohesionCenter?.zip} ${c.cohesionCenter?.city}` : "",
       centerDepartment: c.cohesionCenter?.department,
@@ -285,7 +298,15 @@ function exportExcelSheet({ data: classes, type }) {
       "Date de dernière modification",
       "Région des volontaires",
       "Département des volontaires",
-      "Nombre d'élèves",
+      "UAI de l'établissement",
+      "Nom de l'établissement",
+      "Nombre de places total",
+      "Nombre d'élèves en cours",
+      "Nombre d'élèves en attente",
+      "Nombre d'élèves validés",
+      "Nombre d'élèves abandonnés",
+      "Nombre d'élèves non autorisés",
+      "Nombre d'élèves désistés",
       "ID centre",
       "Désignation du centre",
       "Département du centre",

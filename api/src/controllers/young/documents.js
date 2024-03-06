@@ -246,7 +246,7 @@ router.post(
         category: Joi.string(),
         expirationDate: Joi.date(),
         side: Joi.string().valid("recto", "verso"),
-      }).validate(req.body, { stripUnknown: true });
+      }).validate(JSON.parse(req.body.body), { stripUnknown: true });
       if (bodyError) {
         capture(bodyError);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -278,13 +278,9 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "production") {
-          const scanResult = await scanFile(tempFilePath, name, req.user.id);
-          if (scanResult.infected) {
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          } else if (scanResult.error) {
-            return res.status(500).send({ ok: false, code: scanResult.error });
-          }
+        const scanResult = await scanFile(tempFilePath, name, req.user.id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
 
         // align date

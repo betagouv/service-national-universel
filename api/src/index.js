@@ -1,9 +1,19 @@
-const validateCustomHeader = require("./middlewares/validateCustomHeader");
-const loggingMiddleware = require("./middlewares/loggingMiddleware");
-const { forceDomain } = require("forcedomain");
-const requestIp = require("request-ip"); // Import request-ip package
-
 (async () => {
+
+  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
+
+  if (process.env.RUN_CRONS) {
+    const { PORT } = require("./config.js");
+    const { initSentry } = require("./sentry");
+    initSentry()
+    require("./crons");
+    // Serverless containers requires running http server
+    const express = require("express");
+    const app = express();
+    app.listen(PORT, () => console.log("Listening on port " + PORT));
+    return;
+  }
+
   await require("./env-manager")();
 
   // ! Ignore specific error
@@ -13,9 +23,7 @@ const requestIp = require("request-ip"); // Import request-ip package
     originalConsoleError.apply(console, arguments);
   };
 
-  const { initSentry, capture } = require("./sentry");
-
-  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
+  const { initSentryMiddlewares, capture } = require("./sentry");
 
   const bodyParser = require("body-parser");
   const cors = require("cors");
@@ -24,6 +32,10 @@ const requestIp = require("request-ip"); // Import request-ip package
   const cookieParser = require("cookie-parser");
   const helmet = require("helmet");
   const passport = require("passport");
+  const validateCustomHeader = require("./middlewares/validateCustomHeader");
+  const loggingMiddleware = require("./middlewares/loggingMiddleware");
+  const { forceDomain } = require("forcedomain");
+  const requestIp = require("request-ip"); // Import request-ip package
   require("./mongo");
 
   const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
@@ -39,7 +51,7 @@ const requestIp = require("request-ip"); // Import request-ip package
   }
 
   const app = express();
-  const registerSentryErrorHandler = initSentry(app);
+  const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
   if (process.env.PRODUCTION) {
@@ -96,7 +108,11 @@ const requestIp = require("request-ip"); // Import request-ip package
   });
   app.use(loggingMiddleware);
 
-  require("./crons");
+  // WARNING : CleverCloud only
+  if (process.env.CC_DEPLOYMENT_ID && ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
+    require("./crons");
+  }
+
   app.use(cookieParser());
 
   app.use(express.static(__dirname + "/../public"));

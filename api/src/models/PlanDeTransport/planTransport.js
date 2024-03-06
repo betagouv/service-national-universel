@@ -237,6 +237,12 @@ const Schema = new mongoose.Schema({
       description: "Liste des points de rassemblement",
     },
   },
+  classeId: {
+    type: String,
+    documentation: {
+      description: "ID de la classe",
+    },
+  },
 
   modificationBuses: {
     type: [ModificationBusSchema],

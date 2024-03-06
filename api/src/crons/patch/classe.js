@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./../../../.env-prod" });
 require("../../mongo");
 
 const { ObjectId } = require("mongoose").Types;

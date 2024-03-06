@@ -17,6 +17,7 @@ const app = express();
 const registerSentryErrorHandler = initSentry(app);
 
 app.use(bodyParser.json());
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const DEFAULT_OPTIONS = {

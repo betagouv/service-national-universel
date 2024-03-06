@@ -325,6 +325,7 @@ const Action = ({ hit, structure }) => {
       if (!ok && code === ERRORS.LINKED_STRUCTURE) return onUniqueResponsible(hit);
       if (!ok && code === ERRORS.LINKED_MISSIONS) return onDeleteTutorLinked(hit);
       if (!ok && code === ERRORS.LINKED_CLASSES) return onUniqueResponsible(hit);
+      if (!ok && code === ERRORS.LINKED_ETABLISSEMENT) return onUniqueResponsible(hit);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       return onReferentDeleted();
     } catch (e) {

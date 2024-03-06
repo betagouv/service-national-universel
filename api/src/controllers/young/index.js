@@ -62,7 +62,9 @@ const {
   YOUNG_SOURCE,
   youngCanChangeSession,
   youngCanDeleteAccount,
+  REGLEMENT_INTERIEUR_VERSION,
 } = require("snu-lib");
+const { APP_URL } = require("../../config");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
@@ -194,13 +196,9 @@ router.post(
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "production") {
-          const scanResult = await scanFile(tempFilePath, name, req.user._id);
-          if (scanResult.infected) {
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          } else if (scanResult.error) {
-            return res.status(500).send({ ok: false, code: scanResult.error });
-          }
+        const scanResult = await scanFile(tempFilePath, name, req.user._id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
 
         const data = fs.readFileSync(tempFilePath);
@@ -237,6 +235,8 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 
     const obj = { ...value };
 
+    obj.acceptRI = REGLEMENT_INTERIEUR_VERSION;
+
     const formatedDate = new Date(obj.birthdateAt).setUTCHours(11, 0, 0);
     obj.birthdateAt = formatedDate;
 
@@ -252,7 +252,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
     if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     obj.inscriptionDoneDate = new Date();
-    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(req.user.role)) {
+    if (obj.classeId) {
       obj.source = YOUNG_SOURCE.CLE;
       const classe = await ClasseModel.findById(obj.classeId);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -440,6 +440,30 @@ router.put("/accept-cgu", passport.authenticate("young", { session: false, failW
 
     young.set({ acceptCGU: "true" });
     await young.save({ fromUser: req.user });
+
+    res.status(200).send({ ok: true, data: serializeYoung(young, young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/accept-ri", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
+    await young.save({ fromUser: req.user });
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: {
+        cta: `${APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {

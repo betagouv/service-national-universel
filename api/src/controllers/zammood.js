@@ -22,7 +22,6 @@ const { validateId } = require("../utils/validator");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
 const optionalAuth = require("../middlewares/optionalAuth");
-const { serializeClasse } = require("../utils/serializer");
 const scanFile = require("../utils/virusScanner");
 
 const router = express.Router();
@@ -320,7 +319,7 @@ router.post("/ticket/form", async (req, res) => {
     if (classeId) {
       const classe = await ClasseObject.findById(classeId);
       if (!classe) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      body = { ...body, classe: serializeClasse(classe) };
+      body = { ...body, classe };
     }
 
     const response = await zammood.api("/v0/message", {
@@ -455,14 +454,10 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      // if (ENVIRONMENT === "production") {
-      //   const scanResult = await scanFile(tempFilePath, name, req.user._id);
-      //   if (scanResult.infected) {
-      //     return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-      //   } else if (scanResult.error) {
-      //     return res.status(500).send({ ok: false, code: scanResult.error });
-      //   }
-      // }
+      const scanResult = await scanFile(tempFilePath, name);
+      if (scanResult.infected) {
+        return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+      }
 
       const data = fs.readFileSync(tempFilePath);
       const path = getS3Path(name);

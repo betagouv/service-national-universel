@@ -31,6 +31,7 @@ const Schema = new mongoose.Schema({
   snuId: {
     type: String,
     required: true,
+    unique: true,
     documentation: {
       description: "Cohorte id (defined in snu lib)",
     },
@@ -104,6 +105,16 @@ const Schema = new mongoose.Schema({
       description: "Date limite de choix du PDR par le jeune, par defaut 23h59",
     },
   },
+
+  // CLE
+  cleUpdateCohortForReferentRegion: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForReferentClasse: { type: Boolean, default: false, required: false },
+  cleUpdateCentersForReferentRegion: { type: Boolean, default: false, required: false },
+  cleDisplayCentersForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayCentersForReferentClasse: { type: Boolean, default: false, required: false },
+  cleDisplayPDRForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayPDRForReferentClasse: { type: Boolean, default: false, required: false },
 
   validationDate: {
     type: Date,

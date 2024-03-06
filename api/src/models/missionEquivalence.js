@@ -27,6 +27,12 @@ const Schema = new mongoose.Schema({
       description: "Type de mission",
     },
   },
+  desc: {
+    type: String,
+    documentation: {
+      description: "Description du type de mission si le type sélectionné est 'Autre'",
+    },
+  },
   sousType: {
     type: String,
     enum: [...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES],

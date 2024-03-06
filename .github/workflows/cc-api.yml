@@ -9,13 +9,7 @@ on:
   push:
     branches:
       - production_cc
-    paths:
-      - api/**
-      - packages/**
-  pull_request:
-    paths:
-      - api/**
-      - packages/**
+  workflow_dispatch:
 
 jobs:
   test:
@@ -58,7 +52,7 @@ jobs:
 
   deploy:
     needs: [test]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/production'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/production_cc'
     runs-on: ubuntu-latest
 
     steps:

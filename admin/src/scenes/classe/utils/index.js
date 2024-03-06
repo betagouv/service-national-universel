@@ -1,4 +1,4 @@
-import { STATUS_CLASSE } from "snu-lib";
+import { ROLES, STATUS_CLASSE } from "snu-lib";
 
 export const statusClassForBadge = (status) => {
   let statusClasse;
@@ -33,3 +33,28 @@ export const statusClassForBadge = (status) => {
   }
   return statusClasse;
 };
+
+export function getRights(user, classe, cohort) {
+  if (!user || !classe || !cohort) return {};
+  return {
+    canEdit:
+      // [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
+      // classe?.status !== STATUS_CLASSE.WITHDRAWN, //à garder car ça va changer
+      [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && classe?.status !== STATUS_CLASSE.WITHDRAWN,
+    canEditCohort: [ROLES.ADMIN].includes(user?.role) || (user?.role === ROLES.REFERENT_REGION && (cohort ? cohort.cleUpdateCohortForReferentRegion : true)),
+    canEditCenter: user?.role === ROLES.ADMIN || (user?.role === ROLES.REFERENT_REGION && (cohort ? cohort.cleUpdateCentersForReferentRegion : true)),
+    canEditPDR: user?.role === ROLES.ADMIN,
+    showCohort:
+      [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role) ||
+      (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayCohortsForAdminCLE) ||
+      (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayCohortsForReferentClasse),
+    showCenter:
+      [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role) ||
+      (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayCentersForAdminCLE) ||
+      (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayCentersForReferentClasse),
+    showPDR:
+      [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role) ||
+      (user?.role === ROLES.ADMINISTRATEUR_CLE && cohort?.cleDisplayPDRForAdminCLE) ||
+      (user?.role === ROLES.REFERENT_CLASSE && cohort?.cleDisplayPDRForReferentClasse),
+  };
+}

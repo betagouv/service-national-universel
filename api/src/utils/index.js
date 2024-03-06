@@ -35,7 +35,7 @@ const {
   translateFileStatusPhase1,
 } = require("../config");
 const { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
-const { capture } = require("../sentry");
+const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
 const dayjs = require("dayjs");
 
@@ -95,6 +95,7 @@ const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
     const params = { Bucket: bucket, Key: name };
     s3bucket.getObject(params, (err, data) => {
       if (err) {
+        captureMessage(`Error getting file : ${name}`, { extras: { error: err } });
         reject(err);
       } else {
         resolve(data);
@@ -882,6 +883,7 @@ const ERRORS = {
   INVITATION_TOKEN_EXPIRED_OR_INVALID: "INVITATION_TOKEN_EXPIRED_OR_INVALID",
   FILE_CORRUPTED: "FILE_CORRUPTED",
   FILE_INFECTED: "FILE_INFECTED",
+  FILE_SCAN_BAD_RESPONSE: "FILE_SCAN_BAD_RESPONSE",
   FILE_SCAN_DOWN: "FILE_SCAN_DOWN",
   YOUNG_ALREADY_REGISTERED: "YOUNG_ALREADY_REGISTERED",
   UNSUPPORTED_TYPE: "UNSUPPORTED_TYPE",
@@ -889,6 +891,7 @@ const ERRORS = {
   LINKED_OBJECT: "LINKED_OBJECT",
   LINKED_MISSIONS: "LINKED_MISSIONS",
   LINKED_CLASSES: "LINKED_CLASSES",
+  LINKED_ETABLISSEMENT: "LINKED_ETABLISSEMENT",
   LINKED_STRUCTURE: "LINKED_STRUCTURE",
   PDF_ERROR: "PDF_ERROR",
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",
