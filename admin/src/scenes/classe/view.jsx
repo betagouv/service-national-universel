@@ -84,22 +84,23 @@ export default function View() {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
       setClasse(classe);
+      if (classe?.ligneId) {
+        //Bus
+        const { ok: ok1, code: code1, data: ligne } = await api.get(`/ligne-de-bus/${classe.ligneId}`);
+        if (!ok1) {
+          return toastr.error("Oups, une erreur est survenue lors de la récupération des lignes de bus", translate(code1));
+        }
+        let meetingPoint = ligne.meetingsPointsDetail.find((e) => e.meetingPointId === classe.pointDeRassemblementId);
 
-      //Bus
-      const { ok: ok1, code: code1, data: ligne } = await api.get(`/ligne-de-bus/${classe.ligneId}`);
-      if (!ok1) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération des lignes de bus", translate(code1));
+        setInfoBus({
+          busId: ligne.busId,
+          departureDate: dayjs(ligne.departuredDate).format("dddd D MMMM YYYY"),
+          meetingHour: meetingPoint.meetingHour,
+          departureHour: meetingPoint.departureHour,
+          returnDate: dayjs(ligne.returnDate).format("dddd D MMMM YYYY"),
+          returnHour: meetingPoint.returnHour,
+        });
       }
-      let meetingPoint = ligne.meetingsPointsDetail.find((e) => e.meetingPointId === classe.pointDeRassemblementId);
-
-      setInfoBus({
-        busId: ligne.busId,
-        departureDate: dayjs(ligne.departuredDate).format("dddd D MMMM YYYY"),
-        meetingHour: meetingPoint.meetingHour,
-        departureHour: meetingPoint.departureHour,
-        returnDate: dayjs(ligne.returnDate).format("dddd D MMMM YYYY"),
-        returnHour: meetingPoint.returnHour,
-      });
 
       //Logical stuff
       setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
