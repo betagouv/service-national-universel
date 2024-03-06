@@ -88,7 +88,7 @@ export default function MultiNavItem({ sideBarOpen, Icon, items, path, title, cu
       {sideBarOpen && (
         <div className={`flex-col ${dropDownOpen ? "flex" : "hidden"}`}>
           <Separator />
-          <div className="flex flex-col py-[6px] overflow-auto max-h-[300px]">
+          <div className="flex flex-col py-[6px] overflow-auto">
             {items.map((item) => {
               const actif = item.link.split("/")[1] === path;
               return (

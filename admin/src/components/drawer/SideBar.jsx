@@ -254,16 +254,18 @@ const SideBar = (props) => {
   };
 
   return (
-    <div className={`${open ? "w-[250px]" : "w-[88px]"} sticky flex flex-shrink-0 flex-col  h-screen inset-y-0 bg-[#25294F] z-50`}>
-      <div className="flex flex-col h-full justify-between">
-        <div className="flex flex-col">
+    <div className={`${open ? "w-[250px]" : "w-[88px]"} sticky flex flex-col h-screen max-h-screen inset-y-0 bg-[#25294F] z-50`}>
+      <div className="flex flex-col justify-between h-full max-h-full">
+        <div className="flex flex-col flex-[1_1_auto] overflow-hidden">
           <Header open={open} setOpen={setOpen} />
           {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
           {[ROLES.HEAD_CENTER].includes(user?.role) && <Session />}
-          <div className="flex flex-col items-center !mt-1">
-            {getItems().map((Component, index) => (
-              <Component key={"nav-item" + index} />
-            ))}
+          <div className="flex-1 max-h-full overflow-scroll">
+            <div className="flex flex-col items-center !mt-1">
+              {getItems().map((Component, index) => (
+                <Component key={"nav-item" + index} />
+              ))}
+            </div>
           </div>
         </div>
         <Profil sideBarOpen={open} user={user} setOpenInvite={setOpenInvite} />
