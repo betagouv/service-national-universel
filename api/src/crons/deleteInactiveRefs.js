@@ -1,4 +1,3 @@
-require("../mongo");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
 const { capture } = require("../sentry");

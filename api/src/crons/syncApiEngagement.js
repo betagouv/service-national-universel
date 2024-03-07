@@ -1,5 +1,4 @@
 const fetch = require("node-fetch");
-require("../mongo");
 const { API_ENGAGEMENT_KEY } = require("../config");
 const { capture, captureMessage } = require("../sentry");
 const slack = require("../slack");

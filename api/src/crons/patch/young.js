@@ -1,5 +1,3 @@
-require("../../mongo");
-
 const { ObjectId } = require("mongoose").Types;
 const fetch = require("node-fetch");
 const { isInRuralArea, getAge } = require("snu-lib");

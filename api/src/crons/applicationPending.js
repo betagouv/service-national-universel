@@ -1,4 +1,3 @@
-require("../mongo");
 const { capture } = require("../sentry");
 const Application = require("../models/application");
 const Referent = require("../models/referent");
