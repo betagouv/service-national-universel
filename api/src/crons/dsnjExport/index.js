@@ -45,3 +45,38 @@ exports.handler = async () => {
     capture(e);
   }
 };
+
+exports.manualHandler = async (cohortName, exportType) => {
+  try {
+    if (!cohortName) {
+      throw new Error("cohortName is required");
+    }
+    if (!exportType) {
+      throw new Error("exportType is required");
+    }
+    if (![EXPORT_COHESION_CENTERS, EXPORT_YOUNGS_BEFORE_SESSION, EXPORT_YOUNGS_AFTER_SESSION].includes(exportType)) {
+      throw new Error(`Invalid exportType: ${exportType}`);
+    }
+
+    const cohort = await CohortModel.findOne({ name: cohortName });
+    if (!cohort) {
+      throw new Error(`Cohort ${cohortName} not found`);
+    }
+
+    console.log(`Generating ${exportType} export for ${cohort.name}`);
+
+    switch (exportType) {
+      case "cohesionCenters":
+        await generateCohesionCentersExport(cohort);
+        break;
+      case "youngsBeforeSession":
+        await generateYoungsExport(cohort);
+        break;
+      case "youngsAfterSession":
+        await generateYoungsExport(cohort, true);
+        break;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
