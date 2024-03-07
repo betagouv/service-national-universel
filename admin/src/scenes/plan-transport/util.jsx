@@ -384,10 +384,10 @@ export async function exportConvoyeur(cohort) {
       }
     }
 
-    const findTeam = (item) => {
+    const findTeam = (item, teamHeaders) => {
       const leader = item.team.filter((member) => member.role === "leader");
       const supervisor = item.team.filter((member) => member.role === "supervisor");
-      const team = {};
+      const team = teamHeaders;
 
       if (leader.length > 0) {
         team["Nom Chef de File"] = leader[0].lastName;
@@ -409,12 +409,39 @@ export async function exportConvoyeur(cohort) {
           team["Retour"] = supervisor.back === true ? "Oui" : "Non";
         });
       }
+
       return team;
     };
 
     let excel = [{ name: "Convoyeur", data: [] }];
+
+    const maxSupervisor = ligneBus.reduce((acc, item) => {
+      const supervisor = item.team.filter((member) => member.role === "supervisor");
+      return Math.max(acc, supervisor.length);
+    }, 0);
+
+    const teamHeaders = {
+      "Nom Chef de File": "",
+      "Prénom Chef de File": "",
+      "Date naissance Chef de File": "",
+      "Email Chef de File": "",
+      "Téléphone Chef de File": "",
+      Aller: "",
+      Retour: "",
+    };
+
+    for (let i = 1; i <= maxSupervisor; i++) {
+      teamHeaders["Nom Encadrant " + i] = "";
+      teamHeaders["Prénom Encadrant " + i] = "";
+      teamHeaders["Date naissance Encadrant " + i] = "";
+      teamHeaders["Email Encadrant " + i] = "";
+      teamHeaders["Téléphone Encadrant " + i] = "";
+      teamHeaders.Aller = "";
+      teamHeaders.Retour = "";
+    }
+
     ligneBus.forEach((item) => {
-      const team = findTeam(item);
+      const team = findTeam(item, teamHeaders);
 
       const dataItem = {
         "Bus n˚": item.busId,
