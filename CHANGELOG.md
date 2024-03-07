@@ -1,3 +1,12 @@
+## [1.387.2](https://github.com/betagouv/service-national-universel/compare/v1.387.1...v1.387.2) (2024-03-07)
+
+
+### Bug Fixes
+
+* **admin:** export convoyeur ([#3648](https://github.com/betagouv/service-national-universel/issues/3648)) ([ad9c3e4](https://github.com/betagouv/service-national-universel/commit/ad9c3e4d84bbc6fd589e5fd10372a61c46548f6b))
+* **api:** env manager staging ([f6f239c](https://github.com/betagouv/service-national-universel/commit/f6f239c55a0035a3d2fcc319c05ae28bdfa66e44))
+* **api:** Fix age calculation when getting a mission [#3645](https://github.com/betagouv/service-national-universel/issues/3645) ([a5869a4](https://github.com/betagouv/service-national-universel/commit/a5869a4382048fdb3882f5c6d118ab69ca51491e))
+
 ## [1.387.1](https://github.com/betagouv/service-national-universel/compare/v1.387.0...v1.387.1) (2024-03-06)
 
 
