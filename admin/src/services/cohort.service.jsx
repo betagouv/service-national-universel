@@ -55,7 +55,7 @@ export const NewGetCohortSelectOptions = (cohorts) => {
   return cohorts.map((cohort) => ({
     value: cohort.name,
     label: (
-      <div className="flex w-[400px] gap-4 py-2.5">
+      <div className="flex gap-4 py-2.5">
         <HiUsers size={20} className="mt-0.5" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
         <p>
           <span className="text-gray-700 font-medium">{cohort.name + " "} </span> : <span className="text-gray-500 font-normal"> {getCohortPeriod(cohort)}</span>

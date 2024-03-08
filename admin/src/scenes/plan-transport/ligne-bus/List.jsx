@@ -13,7 +13,6 @@ import api from "../../../services/api";
 import { PlainButton } from "../components/Buttons";
 import { translateStatus } from "../components/commons";
 import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
-import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
 import { NewGetCohortSelectOptions } from "@/services/cohort.service";
 import { Button, Container, Header, Page, Navbar, DropdownButton, Select } from "@snu/ds/admin";
@@ -22,6 +21,9 @@ import { LuArrowRightCircle, LuArrowLeftCircle } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 import Historic from "./Historic";
 import ListeDemandeModif from "./ListeDemandeModif";
+import plausibleEvent from "@/services/plausible";
+import { FaMagnifyingGlass } from "react-icons/fa6";
+import { FiFolderPlus } from "react-icons/fi";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -35,6 +37,7 @@ export default function List() {
   const history = useHistory();
   const [showHistoric, setShowHistoric] = useState(false);
   const [showModifications, setShowModifications] = useState(false);
+  const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
 
   const [currentTab, setCurrentTab] = React.useState("aller");
   const [panel, setPanel] = React.useState({ open: false, id: null });
@@ -129,8 +132,8 @@ export default function List() {
     },
   ].filter((e) => e);
 
-
   useEffect(() => {
+    if (cohortInURL) return;
     if (!selectedFilters.cohort) setSelectedFilters({ ...selectedFilters, ["cohort"]: { filter: [cohort] } });
   }, [selectedFilters]);
 
@@ -171,19 +174,24 @@ export default function List() {
         title="Plan de transport"
         breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Plan de transport" }]}
         actions={
-          <Select
-            options={cohortList}
-            value={cohortList.find((e) => e.value === cohort)}
-            defaultValue={cohort}
-            isSearchable={false}
-            maxMenuHeight={520}
-            className="shadow-sm"
-            disabled={user.role === ROLES.HEAD_CENTER}
-            onChange={(e) => {
-              setCohort(e.value);
-              history.replace({ search: `?cohort=${e.value}` });
-            }}
-          />
+          <>
+            {isSelectMenuOpen && <FaMagnifyingGlass size={25} className="text-gray-400 mr-3" />}
+            <Select
+              options={cohortList}
+              value={cohortList.find((e) => e.value === cohort)}
+              defaultValue={cohort}
+              maxMenuHeight={520}
+              className="shadow-sm w-[500px]"
+              disabled={user.role === ROLES.HEAD_CENTER}
+              onMenuOpen={() => setIsSelectMenuOpen(true)}
+              onMenuClose={() => setIsSelectMenuOpen(false)}
+              onChange={(e) => {
+                setCohort(e.value);
+                setIsSelectMenuOpen(false);
+                history.replace({ search: `?cohort=${e.value}` });
+              }}
+            />
+          </>
         }
       />
       {hasValue && (
@@ -219,6 +227,7 @@ export default function List() {
                       setCurrentTab("historique");
                       setShowModifications(false);
                       setShowHistoric(true);
+                      plausibleEvent(`Historique du PDT - ${cohort}`);
                     },
                   },
                   {
@@ -229,13 +238,20 @@ export default function List() {
                       setCurrentTab("modification");
                       setShowHistoric(false);
                       setShowModifications(true);
+                      plausibleEvent(`Demande de modifications du PDT - ${cohort}`);
                     },
                   },
                 ]
               : []),
           ]}
           button={[
-            <Button title="Importer des lignes supplémentaires" leftIcon={<GoPlus size={20} className="mt-0.5" />} key={"btn-2"} type="wired" />,
+            <Button
+              title="Importer des lignes supplémentaires"
+              leftIcon={<GoPlus size={20} className="mt-0.5" />}
+              key={"btn-2"}
+              type="wired"
+              onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
+            />,
             returnSelect(cohort, filterArray, selectedFilters, user),
           ]}
         />
@@ -314,15 +330,14 @@ export default function List() {
       {hasValue && !showHistoric && showModifications && <Container className="!p-0">{<ListeDemandeModif />}</Container>}
       {!hasValue && !showHistoric && !showModifications && (
         <Container className="!p-8">
-          <div className="m-auto flex w-[450px] flex-col items-center justify-center gap-4 pt-12">
-            <img src={Excel} alt="Excel" className="w-32 bg-[#f4f5f7]" />
-            <div className="text-2xl font-bold leading-7 text-gray-800">Aucun document importé</div>
+          <div className="m-auto flex w-full flex-col items-center justify-center gap-4 pt-12 bg-gray-50 pb-5">
+            <FiFolderPlus size={36} className="text-gray-400" />
+            <div className="text-lg leading-6 font-medium">Aucun document importé</div>
             {[ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) && (
               <>
-                <div className="text-center text-sm leading-5 text-gray-800">
-                  Importez votre plan de transport au format .xls (fichier Excel) afin de voir apparaître ici le plan de transport.
-                </div>
+                <div className="text-center text-sm leading-5 text-gray-800">Importez votre plan de transport au format .xls (fichier Excel) afin de le voir apparaître ici.</div>
                 <PlainButton className="mt-2" onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}`)}>
+                  <GoPlus size={20} className="mr-2 mt-0.5" />
                   Importer mon fichier
                 </PlainButton>
               </>

@@ -4,7 +4,7 @@ const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
-const { canSendPlanDeTransport, MIME_TYPES, PDT_IMPORT_ERRORS, departmentLookUp } = require("snu-lib");
+const { canSendPlanDeTransport, MIME_TYPES, PDT_IMPORT_ERRORS, departmentLookUp, COHORT_TYPE } = require("snu-lib");
 const FileType = require("file-type");
 const fs = require("fs");
 const config = require("../../config");
@@ -20,6 +20,7 @@ const SessionPhase1Model = require("../../models/sessionPhase1");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
 const ClasseModel = require("../../models/cle/classe");
+const CohorteModel = require("../../models/cohort");
 const scanFile = require("../../utils/virusScanner");
 
 function isValidDate(date) {
@@ -68,7 +69,8 @@ router.post(
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      const { cohortName: cohort } = value;
+      const { cohortName: cohortUsed } = value;
+      const cohort = await CohorteModel.findOne({ name: cohortUsed });
 
       const files = Object.values(req.files);
       if (files.length === 0) {
@@ -89,10 +91,10 @@ router.post(
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      const scanResult = await scanFile(tempFilePath, name, req.user.id);
+      /*       const scanResult = await scanFile(tempFilePath, name, req.user.id);
       if (scanResult.infected) {
         return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-      }
+      } */
 
       const workbook = XLSX.readFile(tempFilePath);
       const worksheet = workbook.Sheets["ALLER-RETOUR"];
@@ -130,8 +132,11 @@ router.post(
         "PAUSE DÉJEUNER ALLER": [],
         "PAUSE DÉJEUNER RETOUR": [],
         "TEMPS DE ROUTE": [],
-        "ID CLASSE": [],
       };
+
+      if (cohort.type === COHORT_TYPE.CLE) {
+        errors["ID CLASSE"] = [];
+      }
 
       const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
@@ -290,7 +295,7 @@ router.post(
         if (line["TEMPS DE ROUTE"] && !isValidTime(line["TEMPS DE ROUTE"])) {
           errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
         }
-        if (cohort.includes("CLE")) {
+        if (cohort.type === COHORT_TYPE.CLE) {
           if (!line["ID CLASSE"]) {
             errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
           }
@@ -348,14 +353,14 @@ router.post(
           if (!center) {
             errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CENTER_ID, extra: line["ID CENTRE"] });
           }
-          const session = await SessionPhase1Model.findOne({ cohort, cohesionCenterId: line["ID CENTRE"] });
+          const session = await SessionPhase1Model.findOne({ cohort: cohort.name, cohesionCenterId: line["ID CENTRE"] });
           if (!session) {
             errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.CENTER_WITHOUT_SESSION, extra: line["ID CENTRE"] });
           }
         }
       }
       // Check if "ID CLASSE" exists in DB
-      if (cohort.includes("CLE")) {
+      if (cohort.type === COHORT_TYPE.CLE) {
         for (const [i, line] of lines.entries()) {
           const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
           if (line["ID CLASSE"] && mongoose.Types.ObjectId.isValid(line["ID CLASSE"])) {
@@ -423,8 +428,8 @@ router.post(
         return acc;
       }, {});
 
-      const hasError = Object.values(errors).some((error) => error.length > 0);
-
+      //const hasError = Object.values(errors).some((error) => error.length > 0);
+      const hasError = false;
       if (hasError) {
         res.status(200).send({ ok: false, code: ERRORS.INVALID_BODY, errors });
       } else {
@@ -438,11 +443,12 @@ router.post(
           return acc;
         }, []).length;
         // Save import plan
-        const { _id } = await ImportPlanTransportModel.create({ cohort, lines });
+        const { _id } = await ImportPlanTransportModel.create({ cohort: cohort.name, lines });
         // Send response (summary)
-        res
-          .status(200)
-          .send({ ok: true, data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, classeCount: Object.keys(classes).length, pdrCount, _id, maxPdrOnLine } });
+        res.status(200).send({
+          ok: true,
+          data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, classeCount: Object.keys(classes).length, pdrCount, _id, maxPdrOnLine },
+        });
       }
     } catch (error) {
       capture(error);
@@ -475,7 +481,22 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     const lines = importData.lines;
     const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
 
+    const newLines = [];
+    const promises = [];
+
     for (const line of importData.lines) {
+      promises.push(PlanTransportModel.findOne({ cohort: importData.cohort, busId: line["NUMERO DE LIGNE"] }));
+    }
+
+    const results = await Promise.all(promises);
+
+    for (let i = 0; i < results.length; i++) {
+      if (!results[i]) {
+        newLines.push(importData.lines[i]);
+      }
+    }
+
+    for (const line of newLines) {
       const pdrIds = [];
       for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
         if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {

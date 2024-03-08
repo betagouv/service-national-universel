@@ -24,6 +24,8 @@ type OwnProps = {
   isClearable?: boolean;
   isSearchable?: boolean;
   onChange: () => void;
+  onMenuOpen?: () => void;
+  onMenuClose?: () => void;
   // async props
   isAsync?: boolean;
   noOptionsMessage?: string;
@@ -54,6 +56,8 @@ export default function SelectButton({
   hideSelectedOptions = false,
   isClearable = false,
   isSearchable = true,
+  onMenuOpen,
+  onMenuClose,
   onChange,
   // async props
   isAsync = false,
@@ -231,6 +235,8 @@ export default function SelectButton({
               isMulti ? { Option: MultiOption } : { Option: MonoOption }
             }
             styles={customStyles}
+            onMenuOpen={onMenuOpen}
+            onMenuClose={onMenuClose}
           />
         ) : (
           <Select
@@ -253,6 +259,8 @@ export default function SelectButton({
               isMulti ? { Option: MultiOption } : { Option: MonoOption }
             }
             styles={customStyles}
+            onMenuOpen={onMenuOpen}
+            onMenuClose={onMenuClose}
           />
         )}
         {error && (
