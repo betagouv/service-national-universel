@@ -10,8 +10,7 @@ const EmailObject = require("./models/email");
 
 const { PORT: port } = require("./config.js");
 
-const initDB = require("./mongo");
-await initDB();
+require("./mongo");
 
 function ipAllowListMiddleware(req, res, next) {
   // See: https://www.clever-cloud.com/doc/find-help/faq/#how-to-get-the-users-ip-address
