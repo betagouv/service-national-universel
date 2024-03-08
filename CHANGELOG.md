@@ -1,3 +1,20 @@
+# [1.388.0](https://github.com/betagouv/service-national-universel/compare/v1.387.2...v1.388.0) (2024-03-08)
+
+
+### Bug Fixes
+
+* **api:** wait for mongodb initialization ([#3643](https://github.com/betagouv/service-national-universel/issues/3643)) ([a982509](https://github.com/betagouv/service-national-universel/commit/a982509ebeb65877934f6dc3d20468e99d393676))
+* **sib:** Correct send in blue mongo import ([b033578](https://github.com/betagouv/service-national-universel/commit/b0335782816c8fac9445ebde0bc5a552087341f7))
+
+
+### Features
+
+* **admin:** 1369 - move new mission button ([#3639](https://github.com/betagouv/service-national-universel/issues/3639)) ([09fddfa](https://github.com/betagouv/service-national-universel/commit/09fddfa74259504adb0dc4c866ea8fa4ace83286))
+* **admin:** 1599 - sidebar scroll ([#3641](https://github.com/betagouv/service-national-universel/issues/3641)) ([b8f4da3](https://github.com/betagouv/service-national-universel/commit/b8f4da303be62ea6593e877a30d6f9140bc0b41b))
+* **admin:** 409 - shutdown bal ([#3640](https://github.com/betagouv/service-national-universel/issues/3640)) ([768aae1](https://github.com/betagouv/service-national-universel/commit/768aae127eba7f89a89c86f09e02cdc801ace1bd))
+* **admin:** Better infromation ([6c38e30](https://github.com/betagouv/service-national-universel/commit/6c38e302f57dc91de6f0f7618971bdc906ef054f))
+* **cron:** Add Cron basic logging ([#3647](https://github.com/betagouv/service-national-universel/issues/3647)) ([1a3b508](https://github.com/betagouv/service-national-universel/commit/1a3b5085075517649aa2b77a303919326d47fb29))
+
 ## [1.387.2](https://github.com/betagouv/service-national-universel/compare/v1.387.1...v1.387.2) (2024-03-07)
 
 
