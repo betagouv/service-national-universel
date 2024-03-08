@@ -13,14 +13,14 @@ import {
   translatePhase2,
   translateSource,
 } from "snu-lib";
-import Img4 from "../../assets/JVA_round.png";
-import Img3 from "../../assets/logo-snu.png";
-import Breadcrumbs from "../../components/Breadcrumbs";
-import SelectAction from "../../components/SelectAction";
-import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
-import DateFilter from "../../components/filters-system-v2/components/customComponent/DateFilter";
-import api from "../../services/api";
-import { ES_NO_LIMIT, ROLES, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, translate, translateVisibilty } from "../../utils";
+import Img4 from "@/assets/JVA_round.png";
+import Img3 from "@/assets/logo-snu.png";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import SelectAction from "@/components/SelectAction";
+import { Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
+import DateFilter from "@/components/filters-system-v2/components/customComponent/DateFilter";
+import api from "@/services/api";
+import { ROLES, formatDateFRTimezoneUTC, formatLongDateFR, formatStringDateTimezoneUTC, translate, translateVisibilty } from "@/utils";
 import SelectStatusMissionV2 from "./components/SelectStatusMissionV2";
 
 const optionsType = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
@@ -33,6 +33,9 @@ export default function List() {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isExportCandidatureOpen, setIsExportCandidatureOpen] = useState(false);
   const history = useHistory();
+
+  const canCreateMission =
+    (user.role === ROLES.RESPONSIBLE && user.structureId && structure?.status !== "DRAFT") || (user.role !== ROLES.RESPONSIBLE && structure?.status !== "DRAFT");
 
   //List state
   const [data, setData] = useState([]);
@@ -424,7 +427,7 @@ export default function List() {
           <div className="flex items-center justify-between py-8">
             <div className="text-2xl font-bold leading-7 text-[#242526]">Missions</div>
             <div className="flex flex-row items-center gap-3 text-sm">
-              {user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure.status !== "DRAFT" ? (
+              {canCreateMission ? (
                 <button className="cursor-pointer rounded-lg bg-blue-600 px-3 py-2 text-white" onClick={() => history.push(`/mission/create/${user.structureId}`)}>
                   Nouvelle mission
                 </button>
