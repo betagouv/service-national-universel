@@ -1,4 +1,3 @@
-require("../mongo");
 const esClient = require("../es");
 const path = require("path");
 

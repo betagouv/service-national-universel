@@ -1,5 +1,3 @@
-require("../../mongo");
-
 const { generateYoungsExport, generateCohesionCentersExport, addToSlackRapport, printSlackInfo } = require("./utils");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");

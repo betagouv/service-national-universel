@@ -1,4 +1,3 @@
-require("../mongo");
 const path = require("path");
 const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
