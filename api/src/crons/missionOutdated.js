@@ -1,4 +1,3 @@
-require("../mongo");
 const path = require("path");
 const { capture } = require("../sentry");
 const Mission = require("../models/mission");

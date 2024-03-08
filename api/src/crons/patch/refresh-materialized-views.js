@@ -1,5 +1,3 @@
-require("../../mongo");
-
 const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
