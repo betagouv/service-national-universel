@@ -25,7 +25,10 @@ export default function Index({ ...props }) {
         const id = props.match && props.match.params && props.match.params.id;
         if (!id) return setUser(null);
         const userResponse = await api.get(`/referent/${id}`);
-        if (!userResponse.ok) return setUser(null);
+        if (!userResponse.ok) {
+          setUser(null);
+          return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur. Celui-ci est peut-être introuvable.");
+        }
         setUser(userResponse.data);
         setDocumentTitle(`${userResponse.data.firstName} ${userResponse.data.lastName}`);
       } catch (e) {
