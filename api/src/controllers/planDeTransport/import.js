@@ -91,10 +91,10 @@ router.post(
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      /*       const scanResult = await scanFile(tempFilePath, name, req.user.id);
+      const scanResult = await scanFile(tempFilePath, name, req.user.id);
       if (scanResult.infected) {
         return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-      } */
+      }
 
       const workbook = XLSX.readFile(tempFilePath);
       const worksheet = workbook.Sheets["ALLER-RETOUR"];
@@ -428,8 +428,8 @@ router.post(
         return acc;
       }, {});
 
-      //const hasError = Object.values(errors).some((error) => error.length > 0);
-      const hasError = false;
+      const hasError = Object.values(errors).some((error) => error.length > 0);
+
       if (hasError) {
         res.status(200).send({ ok: false, code: ERRORS.INVALID_BODY, errors });
       } else {
