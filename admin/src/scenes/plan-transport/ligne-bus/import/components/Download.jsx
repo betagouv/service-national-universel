@@ -1,10 +1,15 @@
 import React from "react";
 import { BsDownload } from "react-icons/bs";
 import { PlainButton } from "../../../components/Buttons";
-import ExcelColor from "../../components/Icons/ExcelColor.png";
 import { CDN_BASE_URL } from "../../../../../utils";
+import { useSelector } from "react-redux";
+import { COHORT_TYPE } from "snu-lib";
 
-export default function Download({ nextStep, addLigne }) {
+export default function Download({ nextStep, addLigne, cohort }) {
+  const cohorts = useSelector((state) => state.Cohorts);
+  const currentCohort = cohorts.find((c) => c.name === cohort);
+  console.log(currentCohort.type, COHORT_TYPE.CLE);
+
   return (
     <>
       {addLigne ? (
@@ -25,7 +30,9 @@ export default function Download({ nextStep, addLigne }) {
           <div className="flex items-center gap-3 mx-auto pt-10">
             <a
               className="flex items-center gap-3 rounded-md border !border-blue-600 bg-white py-2 px-4 text-sm font-medium text-blue-700 hover:shadow"
-              href={`${CDN_BASE_URL}/file/snu-plan-de-transport-model.xlsx`}>
+              href={
+                currentCohort?.type === COHORT_TYPE.CLE ? `${CDN_BASE_URL}/file/snu-plan-de-transport-model-CLE.xlsx` : `${CDN_BASE_URL}/file/snu-plan-de-transport-model.xlsx`
+              }>
               <BsDownload className="text-blue-600" />
               Télécharger le modèle
             </a>
