@@ -105,7 +105,9 @@ export default function List() {
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
           ),
-          [ROLES.ADMIN].includes(user.role) && <Button title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} />,
+          [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
+            <Button title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} />
+          ),
         ].filter(Boolean)}
       />
       {!classes && (

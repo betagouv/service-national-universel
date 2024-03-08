@@ -38,6 +38,7 @@ export default function List() {
 
   const [currentTab, setCurrentTab] = React.useState("aller");
   const [panel, setPanel] = React.useState({ open: false, id: null });
+  const cohortInURL = new URLSearchParams(history.location.search).get("cohort");
 
   const [data, setData] = React.useState([]);
   const pageId = "plandetransport";
@@ -127,6 +128,7 @@ export default function List() {
       translate: translate,
     },
   ].filter((e) => e);
+
 
   useEffect(() => {
     if (!selectedFilters.cohort) setSelectedFilters({ ...selectedFilters, ["cohort"]: { filter: [cohort] } });

@@ -159,7 +159,6 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -170,22 +169,28 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
     if (value.parent1Email && !validator.isEmail(value.parent1Email)) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    if (value.parent2Phone && !isPhoneNumberWellFormated(value.parent2Phone, value.parent2PhoneZone)) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (value.parent2) {
+      if (value.parent2Phone && !isPhoneNumberWellFormated(value.parent2Phone, value.parent2PhoneZone)) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      if (value.parent2Phone && value.parent2PhoneZone) {
+        value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
+      }
+      if (value.parent2Email && !validator.isEmail(value.parent2Email)) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      if (value.parent2Email) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    } else {
+      young.parent2Status = "";
+      young.parent2LastName = "";
+      young.parent2FirstName = "";
+      young.parent2Phone = "";
+      young.parent2PhoneZone = null;
+      young.parent2Email = "";
+      young.parent2Inscription2023Token = "";
     }
-    if (value.parent2Phone && value.parent2PhoneZone) {
-      value.parent2Phone = formatPhoneNumberFromPhoneZone(value.parent2Phone, value.parent2PhoneZone);
-    }
-    if (value.parent2Email && !validator.isEmail(value.parent2Email)) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    if (value.parent2Email) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
-
-    if (value.parent2PhoneZone === "") delete value.parent2PhoneZone;
 
     young.set(value);
-    if (value.parent2PhoneZone === "") delete young.parent2PhoneZone;
     await young.save({ fromUser: req.user });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });

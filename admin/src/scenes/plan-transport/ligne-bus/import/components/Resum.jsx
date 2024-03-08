@@ -4,9 +4,13 @@ import { capture } from "../../../../../sentry";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { COHORT_TYPE } from "snu-lib";
 import { HiExclamation } from "react-icons/hi";
 
 export default function Resum({ summary, cohort }) {
+  const cohorts = useSelector((state) => state.Cohorts);
+  const currentCohort = cohorts.find((c) => c.name === cohort);
   const [isLoading, setIsLoading] = React.useState(false);
   const history = useHistory();
 
@@ -50,6 +54,12 @@ export default function Resum({ summary, cohort }) {
             <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.centerCount}</div>
             <div className="text-xs font-medium leading-5 text-gray-800">centres de cohésion</div>
           </div>
+          {currentCohort.type === COHORT_TYPE.CLE && (
+            <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
+              <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.classeCount}</div>
+              <div className="text-xs font-medium leading-5 text-gray-800">classes</div>
+            </div>
+          )}
           <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
             <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.pdrCount}</div>
             <div className="text-xs font-medium leading-5 text-gray-800">points de rassemblement</div>

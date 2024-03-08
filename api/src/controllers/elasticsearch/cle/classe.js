@@ -63,13 +63,13 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
 
       if (req.query?.type === "schema-de-repartition") {
-        // Export is only available for admin for now
-        if (![ROLES.ADMIN].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
         response = await populateWithEtablissementInfo(response);
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
         response = await populateWithYoungsInfo(response);
+        response = await populateWithLigneInfo(response);
       }
 
       return res.status(200).send({ ok: true, data: response });
@@ -119,6 +119,14 @@ const populateWithReferentInfo = async (classes) => {
   const referentsData = serializeReferents(referents);
   return classes.map((item) => {
     item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+    return item;
+  });
+};
+const populateWithLigneInfo = async (classes) => {
+  const ligneIds = [...new Set(classes.map((item) => item.ligneId).filter(Boolean))];
+  const ligneBus = await allRecords("lignebus", { ids: { values: ligneIds.flat() } });
+  return classes.map((item) => {
+    item.ligne = ligneBus?.filter((e) => item.ligneId === e._id.toString().shift());
     return item;
   });
 };

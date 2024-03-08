@@ -1,3 +1,43 @@
+## [1.387.2](https://github.com/betagouv/service-national-universel/compare/v1.387.1...v1.387.2) (2024-03-07)
+
+
+### Bug Fixes
+
+* **admin:** export convoyeur ([#3648](https://github.com/betagouv/service-national-universel/issues/3648)) ([ad9c3e4](https://github.com/betagouv/service-national-universel/commit/ad9c3e4d84bbc6fd589e5fd10372a61c46548f6b))
+* **api:** env manager staging ([f6f239c](https://github.com/betagouv/service-national-universel/commit/f6f239c55a0035a3d2fcc319c05ae28bdfa66e44))
+* **api:** Fix age calculation when getting a mission [#3645](https://github.com/betagouv/service-national-universel/issues/3645) ([a5869a4](https://github.com/betagouv/service-national-universel/commit/a5869a4382048fdb3882f5c6d118ab69ca51491e))
+
+## [1.387.1](https://github.com/betagouv/service-national-universel/compare/v1.387.0...v1.387.1) (2024-03-06)
+
+
+### Bug Fixes
+
+* **admin:** Fix ligne de bus sur les classes ([#3638](https://github.com/betagouv/service-national-universel/issues/3638)) ([25ee95d](https://github.com/betagouv/service-national-universel/commit/25ee95dc34301911b6a91630bc815f3bfa774e6c))
+
+# [1.387.0](https://github.com/betagouv/service-national-universel/compare/v1.386.0...v1.387.0) (2024-03-05)
+
+
+### Bug Fixes
+
+* **api:** Antivirus timeout ([#3632](https://github.com/betagouv/service-national-universel/issues/3632)) ([e1b080c](https://github.com/betagouv/service-national-universel/commit/e1b080c54f444525e310656b1b97c8e66a77b922))
+* **api:** Synchro api engagement ([#3634](https://github.com/betagouv/service-national-universel/issues/3634)) ([fc05d46](https://github.com/betagouv/service-national-universel/commit/fc05d46b2a4fd20679b95ab8083506711a067604))
+
+
+### Features
+
+* **api/admin:** 1772-1773 add ligne Bus sur la classe ([#3621](https://github.com/betagouv/service-national-universel/issues/3621)) ([de39104](https://github.com/betagouv/service-national-universel/commit/de391044bbdfda0d0e82155542d7a26a6f81fbb6))
+* **app:** 1034 - update RL2 logic on app ([#3633](https://github.com/betagouv/service-national-universel/issues/3633)) ([aa149dc](https://github.com/betagouv/service-national-universel/commit/aa149dc7cbfb161f008020eec6988fb5499d52af))
+
+# [1.386.0](https://github.com/betagouv/service-national-universel/compare/v1.385.3...v1.386.0) (2024-03-04)
+
+
+### Features
+
+* **admin:** 1963, 1965 - remove negative status from Classe Objective and Right Correction to Edit Cohort ([#3629](https://github.com/betagouv/service-national-universel/issues/3629)) ([f4cd437](https://github.com/betagouv/service-national-universel/commit/f4cd4375fd397d3320ac2ac15df6482afa3d509d))
+* **admin/api:** 1717- Ajout d'un compteur du nombre max de pdr sur une ligne a l'import du pdt  ([#3631](https://github.com/betagouv/service-national-universel/issues/3631)) ([856d2f6](https://github.com/betagouv/service-national-universel/commit/856d2f60849f1850e21cff7e4d1b35fb70ab75ae))
+* **api:** 1865 - Antivirus microservice ([#3611](https://github.com/betagouv/service-national-universel/issues/3611)) ([84aaa9a](https://github.com/betagouv/service-national-universel/commit/84aaa9a43b2a585efe01e12c194300220d1ed11e))
+* **api:** 1949 - CRON job ([#3624](https://github.com/betagouv/service-national-universel/issues/3624)) ([8d5d968](https://github.com/betagouv/service-national-universel/commit/8d5d968b04444fd33c875f2e027616fc7f0b3cf0))
+
 ## [1.385.3](https://github.com/betagouv/service-national-universel/compare/v1.385.2...v1.385.3) (2024-03-02)
 
 
