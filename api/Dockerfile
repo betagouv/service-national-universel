@@ -54,4 +54,4 @@ ENV HOST 0.0.0.0
 
 EXPOSE $PORT
 
-CMD [“node”, “api/src/index.js”]
+CMD ["node", "api/src/index.js"]
