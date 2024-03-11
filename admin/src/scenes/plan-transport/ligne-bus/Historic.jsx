@@ -86,7 +86,6 @@ export default function Historic() {
         .map((key) => key + "=" + query[key])
         .join("&");
       const { ok, data, pagination } = await API.get(`/ligne-de-bus/patches/${cohort}?${queryString}`);
-      console.log(pagination);
       if (!ok) return null;
       if (forExport) {
         return data;
