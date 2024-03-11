@@ -13,7 +13,6 @@ import Pagination from "../../components/nav/Pagination";
 import { Link } from "react-router-dom";
 import { HeroContainer } from "@/components/Content";
 import { RiArrowLeftSLine } from "react-icons/ri";
-import Breadcrumb from "@/components/layout/navbar/components/BreadCrumb";
 
 export default function MissionsComponent() {
   const young = useSelector((state) => state.Auth.young);
@@ -55,7 +54,6 @@ export default function MissionsComponent() {
 
   return (
     <HeroContainer>
-      <Breadcrumb />
       <div className="pt-2 pb-4 sm:px-4 md:px-16 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
         <Link to="/autres-engagements">
           <button className="mt-4 mb-6 flex py-2 px-2 border rounded-lg text-xs leading-4 font-medium">
