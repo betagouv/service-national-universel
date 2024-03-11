@@ -1,4 +1,3 @@
-require("../mongo");
 const { capture } = require("../sentry");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
