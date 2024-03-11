@@ -126,7 +126,8 @@ const populateWithLigneInfo = async (classes) => {
   const ligneIds = [...new Set(classes.map((item) => item.ligneId).filter(Boolean))];
   const ligneBus = await allRecords("lignebus", { ids: { values: ligneIds.flat() } });
   return classes.map((item) => {
-    item.ligne = ligneBus?.filter((e) => item.ligneId === e._id.toString().shift());
+    item.ligne = ligneBus.find((e) => item.ligneId === e._id.toString());
+
     return item;
   });
 };
