@@ -1,3 +1,16 @@
+# [1.389.0](https://github.com/betagouv/service-national-universel/compare/v1.388.0...v1.389.0) (2024-03-11)
+
+
+### Bug Fixes
+
+* **api:** 2013 - bug export classes ([#3649](https://github.com/betagouv/service-national-universel/issues/3649)) ([c382620](https://github.com/betagouv/service-national-universel/commit/c38262005fc146321c1d7f1e5fba521958ef04cb))
+* **app:** bug url boutton demande ([#3651](https://github.com/betagouv/service-national-universel/issues/3651)) ([5527036](https://github.com/betagouv/service-national-universel/commit/5527036e9fb1d4aab6bf6243da65543aabc4817d))
+
+
+### Features
+
+* **app:** 1725 - breadcrumb add on App ([#3642](https://github.com/betagouv/service-national-universel/issues/3642)) ([bd74a12](https://github.com/betagouv/service-national-universel/commit/bd74a1260bc3a898275f816916621cc609d49544))
+
 # [1.388.0](https://github.com/betagouv/service-national-universel/compare/v1.387.2...v1.388.0) (2024-03-08)
 
 
