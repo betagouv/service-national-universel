@@ -84,7 +84,7 @@ resource "scaleway_container" "api" {
   cpu_limit       = 768
   memory_limit    = 1024
   min_scale       = 1
-  max_scale       = 1
+  max_scale       = 3
   timeout         = 60
   max_concurrency = 50
   privacy         = "public"
