@@ -53,7 +53,7 @@ export default function View() {
   const rights = getRights(user, classe, cohort);
 
   const history = useHistory();
-
+  console.log(classe.seatsTaken);
   const totalSeatsTakenExcluding =
     classe.seatsTaken -
     (studentStatus[YOUNG_STATUS.WITHDRAWN] || 0) -

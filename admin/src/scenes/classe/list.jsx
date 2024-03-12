@@ -235,6 +235,7 @@ const Hit = ({ hit }) => {
 };
 
 function exportExcelSheet({ data: classes, type }) {
+  console.log(classes);
   let sheetData = classes.map((c) => ({
     id: c._id.toString(),
     uniqueKeyAndId: c.uniqueKeyAndId,
@@ -259,6 +260,9 @@ function exportExcelSheet({ data: classes, type }) {
       department: c.etablissement?.department,
       uai: c.etablissement?.uai,
       etablissementName: c.etablissement?.name,
+      classeRefLastName: c.referentClasse ? c.referentClasse[0]?.lastName : "",
+      classeRefFirstName: c.referentClasse ? c.referentClasse[0]?.firstName : "",
+      classeRefEmail: c.referentClasse ? c.referentClasse[0]?.email : "",
       youngsVolume: c.totalSeats ?? 0,
       studentInProgress: c.studentInProgress,
       studentWaiting: c.studentWaiting,
@@ -300,6 +304,9 @@ function exportExcelSheet({ data: classes, type }) {
       "Département des volontaires",
       "UAI de l'établissement",
       "Nom de l'établissement",
+      "Nom du référent de classe",
+      "Prénom du référent de classe",
+      "email du référent de classe",
       "Nombre de places total",
       "Nombre d'élèves en cours",
       "Nombre d'élèves en attente",

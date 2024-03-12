@@ -104,6 +104,10 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     value.phone = formatPhoneNumberFromPhoneZone(value.phone, value.phoneZone);
 
     // --- update young
