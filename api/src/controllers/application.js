@@ -158,7 +158,10 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // On vérifie si les candidatures sont ouvertes.
-    if (mission.visibility === "HIDDEN") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (mission.visibility === "HIDDEN") {
+      console.log("visibility", mission.visibility);
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
     value.isJvaMission = mission.isJvaMission;
 
@@ -166,7 +169,10 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const { canApply, message } = await getAuthorizationToApply(mission, young);
-    if (!canApply) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
+    if (!canApply) {
+      console.log(message);
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
+    }
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {

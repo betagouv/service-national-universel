@@ -51,7 +51,7 @@ resource "scaleway_container" "api" {
   port            = 8080
   cpu_limit       = 512
   memory_limit    = 2048
-  min_scale       = 2
+  min_scale       = 4
   max_scale       = 20
   timeout         = 60
   max_concurrency = 50

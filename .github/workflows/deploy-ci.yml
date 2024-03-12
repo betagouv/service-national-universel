@@ -17,7 +17,6 @@ jobs:
       admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
       antivirus_image_tag: ${{ steps.prepare.outputs.antivirus_image_tag }}
-      run_api_tests: ${{ steps.prepare.outputs.run_api_tests }}
 
     steps:
       - name: Get target_branch
@@ -52,12 +51,6 @@ jobs:
           echo "antivirus_image_tag: $antivirus_image_tag"
           echo "antivirus_image_tag=$antivirus_image_tag" >> $GITHUB_OUTPUT
 
-          if [[ $api_image_tag == $current_tag ]] ; then
-              echo "run_api_tests=1" >> $GITHUB_OUTPUT
-          else
-              echo "run_api_tests=0" >> $GITHUB_OUTPUT
-          fi
-
   run_tests:
     needs: prepare
     runs-on: ubuntu-latest
@@ -68,7 +61,6 @@ jobs:
 
       - name: API - run tests
         uses: ./.github/actions/run_api_tests
-        if: needs.prepare.outputs.run_api_tests == '1'
         with:
           branch_name: ${{ needs.prepare.outputs.target_branch }}
           reporter_id: ${{ secrets.CC_TEST_REPORTER_ID }}
