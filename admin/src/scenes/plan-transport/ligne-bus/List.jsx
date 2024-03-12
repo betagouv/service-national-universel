@@ -181,7 +181,7 @@ export default function List() {
               value={cohortList.find((e) => e.value === cohort)}
               defaultValue={cohort}
               maxMenuHeight={520}
-              className="shadow-sm w-[500px]"
+              className="w-[500px]"
               disabled={user.role === ROLES.HEAD_CENTER}
               onMenuOpen={() => setIsSelectMenuOpen(true)}
               onMenuClose={() => setIsSelectMenuOpen(false)}
