@@ -10,8 +10,8 @@ exports.handler = async () => {
   const finishedCohortNames = await getCohortsFinishedSinceYesterday();
 
   const where = {
-    statusPhase1: { $in: ["DONE", "NOT_DONE", "WITHDRAWN", "VALIDATED"] },
-    status: { $in: ["WITHDRAWN", "ABANDONED", "REFUSED", "NOT_ELIGIBLE", "NOT_AUTORISED"] },
+    statusPhase1: { $in: ["DONE", "NOT_DONE", "WITHDRAWN"] },
+    status: { $in: ["WITHDRAWN", "ABANDONED", "REFUSED", "NOT_ELIGIBLE", "NOT_AUTORISED", "VALIDATED"] },
     cohort: { $in: finishedCohortNames },
     latestCNIFileCategory: { $ne: "deleted" },
   };
