@@ -42,6 +42,8 @@ async function initDB() {
 
   //Bind connection to error event (to get notification of connection errors)
   db.on("error", console.error.bind(console, "MongoDB connection error:"));
+  db.on("disconnected", () => {console.log("MongoDB disconnected")});
+  db.on("close", () => {console.log("MongoDB close")});
   db.once("open", () => {
     console.log("MongoDB connexion OK");
     // db.db.listCollections().toArray(function (err, names) {
@@ -68,4 +70,13 @@ async function initDB() {
   });
 }
 
-module.exports = initDB;
+async function closeDB() {
+  let db = mongoose.connection;
+
+  await db.close()
+}
+
+module.exports = {
+  initDB,
+  closeDB,
+}

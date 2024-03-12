@@ -2,11 +2,18 @@
 
   require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
+  // ! Ignore specific error
+  const originalConsoleError = console.error;
+  console.error = function (message) {
+    if (typeof message === "string" && message.includes("AWS SDK for JavaScript (v2) into maintenance mode")) return;
+    originalConsoleError.apply(console, arguments);
+  };
+
   if (process.env.RUN_CRONS) {
     const { PORT } = require("./config.js");
     const { initSentry } = require("./sentry");
     initSentry()
-    const initDB = require("./mongo");
+    const { initDB } = require("./mongo");
     await initDB();
     require("./crons");
     // Serverless containers requires running http server
@@ -17,13 +24,6 @@
   }
 
   await require("./env-manager")();
-
-  // ! Ignore specific error
-  const originalConsoleError = console.error;
-  console.error = function (message) {
-    if (typeof message === "string" && message.includes("AWS SDK for JavaScript (v2) into maintenance mode")) return;
-    originalConsoleError.apply(console, arguments);
-  };
 
   const { initSentryMiddlewares, capture } = require("./sentry");
 
@@ -38,7 +38,7 @@
   const loggingMiddleware = require("./middlewares/loggingMiddleware");
   const { forceDomain } = require("forcedomain");
   const requestIp = require("request-ip"); // Import request-ip package
-  const initDB = require("./mongo");
+  const { initDB, closeDB } = require("./mongo");
   await initDB();
 
   const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
@@ -242,5 +242,35 @@
 
   require("./passport")();
 
-  app.listen(PORT, () => console.log("Listening on port " + PORT));
+  const { createTerminus } = require('@godaddy/terminus');
+  const http = require('http');
+
+  const server = http.createServer(app);
+
+  function onSignal () {
+    console.log('server is starting cleanup');
+    return Promise.all([
+      closeDB(),
+    ]);
+  }
+
+  function onShutdown () {
+    console.log('cleanup finished, server is shutting down');
+  }
+
+  function healthCheck ({ state }) {
+    return Promise.resolve()
+  }
+
+  const options = {
+    healthChecks: {
+      '/healthcheck': healthCheck,
+    },
+    onSignal,
+    onShutdown,
+  };
+
+  createTerminus(server, options);
+
+  server.listen(PORT, () => console.log("Listening on port " + PORT));
 })();
