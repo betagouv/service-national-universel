@@ -387,7 +387,8 @@ export async function exportConvoyeur(cohort) {
     const findTeam = (item, teamHeaders) => {
       const leader = item.team.filter((member) => member.role === "leader");
       const supervisor = item.team.filter((member) => member.role === "supervisor");
-      const team = teamHeaders;
+      // deep copy to avoid modifying the original object
+      const team = { ...teamHeaders };
 
       if (leader.length > 0) {
         team["Nom Chef de File"] = leader[0].lastName;
