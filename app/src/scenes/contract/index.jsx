@@ -205,7 +205,7 @@ export default function Index() {
                 </p>
                 <p>Si le volontaire est scolarisé, la mission ne peut être effectuée sur le temps scolaire.</p>
                 <p>
-                  Si le volontaire travaille, le temps de travail cumulé avec le temps d’accomplissement de la mission d’intérêt généralne peut excéder 8 heures par jour et 35
+                  Si le volontaire travaille, le temps de travail cumulé avec le temps d’accomplissement de la mission d’intérêt général ne peut excéder 8 heures par jour et 35
                   heures par semaine.
                 </p>
                 <p>Les horaires du volontaire pour la présente mission sont :</p>
