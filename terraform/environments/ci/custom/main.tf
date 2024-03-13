@@ -211,7 +211,7 @@ resource "scaleway_container" "app" {
   name            = "${local.env}-app"
   namespace_id    = scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
-  port            = 8080
+  port            = 80
   cpu_limit       = 256
   memory_limit    = 256
   min_scale       = 1
