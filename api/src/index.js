@@ -1,5 +1,4 @@
 (async () => {
-
   require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
   // ! Ignore specific error
@@ -12,7 +11,7 @@
   if (process.env.RUN_CRONS) {
     const { PORT } = require("./config.js");
     const { initSentry } = require("./sentry");
-    initSentry()
+    initSentry();
     const { initDB } = require("./mongo");
     await initDB();
     require("./crons");
@@ -112,12 +111,7 @@
   app.use(loggingMiddleware);
 
   // WARNING : CleverCloud only
-  if (
-    process.env.RUN_CRONS_CC
-    && ENVIRONMENT === "production"
-    && process.env.CC_DEPLOYMENT_ID
-    && process.env.INSTANCE_NUMBER === "0"
-  ) {
+  if (process.env.RUN_CRONS_CC && ENVIRONMENT === "production" && process.env.CC_DEPLOYMENT_ID && process.env.INSTANCE_NUMBER === "0") {
     require("./crons");
   }
 
@@ -242,29 +236,28 @@
 
   require("./passport")();
 
-  const { createTerminus } = require('@godaddy/terminus');
-  const http = require('http');
+  // * Use Terminus for graceful shutdown when using Docker
+  const { createTerminus } = require("@godaddy/terminus");
+  const http = require("http");
 
   const server = http.createServer(app);
 
-  function onSignal () {
-    console.log('server is starting cleanup');
-    return Promise.all([
-      closeDB(),
-    ]);
+  function onSignal() {
+    console.log("server is starting cleanup");
+    return Promise.all([closeDB()]);
   }
 
-  function onShutdown () {
-    console.log('cleanup finished, server is shutting down');
+  function onShutdown() {
+    console.log("cleanup finished, server is shutting down");
   }
 
-  function healthCheck ({ state }) {
-    return Promise.resolve()
+  function healthCheck({ state }) {
+    return Promise.resolve();
   }
 
   const options = {
     healthChecks: {
-      '/healthcheck': healthCheck,
+      "/healthcheck": healthCheck,
     },
     onSignal,
     onShutdown,

@@ -1,6 +1,5 @@
+# * https://turbo.build/repo/docs/handbook/deploying-with-docker
 FROM node:18.16.0-alpine AS base
-
-
 
 FROM base AS builder
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
@@ -12,8 +11,6 @@ RUN npm install --global turbo
 COPY . .
 ENV APP_NAME api
 RUN turbo prune $APP_NAME --docker
-
-
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
@@ -33,9 +30,6 @@ COPY turbo.json turbo.json
 
 ENV APP_NAME api
 RUN npm run build
-
-
-
 
 FROM base AS runner
 WORKDIR /app
