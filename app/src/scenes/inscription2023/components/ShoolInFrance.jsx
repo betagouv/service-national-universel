@@ -3,7 +3,6 @@ import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
 import Input from "./Input";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import { RiArrowGoBackLine } from "react-icons/ri";
-import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
 import { toastr } from "react-redux-toastr";
 import Select from "@/components/dsfr/forms/SearchableSelect";
@@ -86,7 +85,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           setManualSchool({ ...manualSchool, ...newData });
           onSelectSchool({ ...newData, fullName: manualSchool.fullName, country: "FRANCE" });
         }}
-        getOptions={getAddressOptions}
         label="Rechercher l'adresse de l'établissement"
         error={errors?.school}
         correction={corrections?.schoolAddress}
