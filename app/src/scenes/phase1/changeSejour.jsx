@@ -17,6 +17,7 @@ import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from
 import { capture } from "../../sentry";
 import { YOUNG_STATUS, getCohortPeriod, getCohortPeriodTemp } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
+import { supportURL } from "@/config";
 
 export default function ChangeSejour() {
   const young = useSelector((state) => state.Auth.young);
@@ -259,7 +260,12 @@ export default function ChangeSejour() {
           ) : (
             <Wrapper>
               <h2>Vous n&apos;êtes éligible à aucun séjour de cohésion pour le moment.</h2>
-              <a href="https://support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1" style={{ color: "#5145cc" }}>
+              <br />
+              <a
+                href={supportURL + "/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:text-blue-600 hover:underline underline-offset-2">
                 En savoir plus sur les séjours où je suis éligible.
               </a>
             </Wrapper>
@@ -312,7 +318,9 @@ const Wrapper = styled.div`
   padding: 20px 40px;
   border-radius: 6px;
   background: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;
 
 const ActionBox = styled.div`
@@ -393,7 +401,9 @@ const ContinueButton = styled.button`
   display: block;
   width: auto;
   outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   align-self: flex-end;
   :hover {
     opacity: 0.9;
@@ -415,7 +425,9 @@ const ButtonLink = styled(Link)`
   font-size: 14px !important;
   display: block;
   outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   align-self: flex-end;
   :hover {
     opacity: 0.9;
@@ -429,7 +441,9 @@ const HeroStyle = styled.div`
   }
   margin: 0 auto;
   max-width: 80rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
   display: flex;

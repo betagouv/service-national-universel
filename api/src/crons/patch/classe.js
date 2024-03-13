@@ -1,6 +1,3 @@
-require("dotenv").config({ path: "./../../../.env-prod" });
-require("../../mongo");
-
 const { ObjectId } = require("mongoose").Types;
 const fetch = require("node-fetch");
 const { getAge } = require("snu-lib");

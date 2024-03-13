@@ -68,7 +68,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
     }
   };
   return (
-    <div>
+    <div className="shrink-0">
       <Separator open={sideBarOpen} />
       <Popover className="relative focus:outline-none">
         {() => {

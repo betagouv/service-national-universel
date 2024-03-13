@@ -16,7 +16,15 @@ provider "scaleway" {
   region = "fr-par"
 }
 
-variable "image_tag" {
+variable "api_image_tag" {
+  type    = string
+  nullable = false
+}
+variable "admin_image_tag" {
+  type    = string
+  nullable = false
+}
+variable "app_image_tag" {
   type    = string
   nullable = false
 }
@@ -25,9 +33,9 @@ locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
   domain         = "ci.beta-snu.dev"
-  api_hostname   = "api.${local.env}.${local.domain}"
-  admin_hostname = "admin.${local.env}.${local.domain}"
-  app_hostname   = "moncompte.${local.env}.${local.domain}"
+  api_hostname   = "api-${local.env}.${local.domain}"
+  admin_hostname = "admin-${local.env}.${local.domain}"
+  app_hostname   = "moncompte-${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -42,10 +50,9 @@ data "scaleway_registry_namespace" "main" {
 }
 
 # DNS zone
-resource "scaleway_domain_zone" "main" {
-  project_id = data.scaleway_account_project.main.id
+data "scaleway_domain_zone" "main" {
   domain     = "ci.beta-snu.dev"
-  subdomain  = "${local.env}"
+  subdomain  = ""
 }
 
 
@@ -72,7 +79,7 @@ resource "scaleway_container_namespace" "main" {
 resource "scaleway_container" "api" {
   name            = "${local.env}-api"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port            = 8080
   cpu_limit       = 768
   memory_limit    = 1024
@@ -93,8 +100,9 @@ resource "scaleway_container" "api" {
     "FOLDER_API" = "api"
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.1
-    "SENTRY_RELEASE"                    = var.image_tag
+    "SENTRY_RELEASE"                    = var.api_image_tag
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
+    "API_ANTIVIRUS_ENDPOINT"            = local.secrets.API_ANTIVIRUS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"      = local.secrets.API_ASSOCIATION_CELLAR_KEYID
@@ -116,6 +124,7 @@ resource "scaleway_container" "api" {
 
   secret_environment_variables = {
     "API_ANALYTICS_API_KEY"                 = local.secrets.API_ANALYTICS_API_KEY
+    "API_ANTIVIRUS_TOKEN"                   = local.secrets.API_ANTIVIRUS_TOKEN
     "API_ASSOCIATION_AWS_SECRET_ACCESS_KEY" = local.secrets.API_ASSOCIATION_AWS_SECRET_ACCESS_KEY
     "API_ASSOCIATION_CELLAR_KEYSECRET"      = local.secrets.API_ASSOCIATION_CELLAR_KEYSECRET
     "API_ASSOCIATION_ES_ENDPOINT"           = local.secrets.API_ASSOCIATION_ES_ENDPOINT
@@ -137,8 +146,8 @@ resource "scaleway_container" "api" {
 }
 
 resource "scaleway_domain_record" "api" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "api"
+  dns_zone = data.scaleway_domain_zone.main.id
+  name     = "api-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.api.domain_name}."
   ttl      = 300
@@ -146,7 +155,7 @@ resource "scaleway_domain_record" "api" {
 
 resource "scaleway_container_domain" "api" {
   container_id = scaleway_container.api.id
-  hostname     = local.api_hostname
+  hostname     = "${scaleway_domain_record.api.name}${scaleway_domain_record.api.dns_zone}"
 }
 
 
@@ -154,7 +163,7 @@ resource "scaleway_container_domain" "api" {
 resource "scaleway_container" "admin" {
   name            = "${local.env}-admin"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/admin:${var.image_tag}"
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/admin:${var.admin_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -186,8 +195,8 @@ resource "scaleway_container" "admin" {
 }
 
 resource "scaleway_domain_record" "admin" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "admin"
+  dns_zone = data.scaleway_domain_zone.main.id
+  name     = "admin-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.admin.domain_name}."
   ttl      = 300
@@ -195,13 +204,13 @@ resource "scaleway_domain_record" "admin" {
 
 resource "scaleway_container_domain" "admin" {
   container_id = scaleway_container.admin.id
-  hostname     = local.admin_hostname
+  hostname     = "${scaleway_domain_record.admin.name}${scaleway_domain_record.admin.dns_zone}"
 }
 
 resource "scaleway_container" "app" {
   name            = "${local.env}-app"
   namespace_id    = scaleway_container_namespace.main.id
-  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.image_tag}"
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -233,8 +242,8 @@ resource "scaleway_container" "app" {
 }
 
 resource "scaleway_domain_record" "app" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "moncompte"
+  dns_zone = data.scaleway_domain_zone.main.id
+  name     = "moncompte-${local.env}"
   type     = "CNAME"
   data     = "${scaleway_container.app.domain_name}."
   ttl      = 300
@@ -242,15 +251,24 @@ resource "scaleway_domain_record" "app" {
 
 resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
-  hostname     = local.app_hostname
+  hostname     = "${scaleway_domain_record.app.name}${scaleway_domain_record.app.dns_zone}"
 }
 
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
 }
+output "api_image_tag" {
+  value = split(":", scaleway_container.api.registry_image)[1]
+}
 output "app_endpoint" {
   value = "https://${local.app_hostname}"
 }
+output "app_image_tag" {
+  value = split(":", scaleway_container.app.registry_image)[1]
+}
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
+}
+output "admin_image_tag" {
+  value = split(":", scaleway_container.admin.registry_image)[1]
 }

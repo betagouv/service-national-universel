@@ -13,9 +13,13 @@ const API_ANALYTICS_ENDPOINT = process.env.API_ANALYTICS_ENDPOINT || "http://loc
 
 const API_ANALYTICS_API_KEY = process.env.API_ANALYTICS_API_KEY || "api-key";
 
+const API_ANTIVIRUS_ENDPOINT = process.env.API_ANTIVIRUS_ENDPOINT || "http://localhost:8089";
+const API_ANTIVIRUS_TOKEN = process.env.API_ANTIVIRUS_TOKEN || "";
+
 const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
 const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
+
 const SENTRY_URL = process.env.SENTRY_URL || "";
 const SENTRY_TRACING_SAMPLE_RATE = process.env.SENTRY_TRACING_SAMPLE_RATE || "";
 const SENTRY_PROFILE_SAMPLE_RATE = process.env.SENTRY_PROFILE_SAMPLE_RATE || "";
@@ -51,8 +55,6 @@ const JVA_TOKEN = process.env.JVA_TOKEN || "";
 const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
 const REDIS_URL = process.env.REDIS_URL || "";
-
-const SCALEWAY_CLAMSCAN = process.env.SCALEWAY_CLAMSCAN || "";
 
 module.exports = {
   LOCAL,
@@ -95,8 +97,9 @@ module.exports = {
   API_PDF_ENDPOINT,
   API_ANALYTICS_ENDPOINT,
   API_ANALYTICS_API_KEY,
+  API_ANTIVIRUS_ENDPOINT,
+  API_ANTIVIRUS_TOKEN,
   REDIS_URL,
-  SCALEWAY_CLAMSCAN,
 };
 
 function getEnvironment() {

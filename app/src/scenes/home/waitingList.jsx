@@ -74,6 +74,9 @@ export default function WaitingList() {
               </div>
             </div>
             <hr className="text-gray-200" />
+            <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">
+              Changer de séjour &gt;
+            </Link>
 
             <div className="flex justify-end py-4 pr-8">
               <JDMA id="3154" onClick={handleClick} />

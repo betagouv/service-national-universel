@@ -2208,8 +2208,9 @@ function SectionConsentements({ young, onChange, readonly = false, cohort }) {
             ) : null}
           </div>
         )}
-        {[YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.IN_PROGRESS].includes(young.status) &&
+        {[YOUNG_STATUS.IN_PROGRESS].includes(young.status) &&
           [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) &&
+          (young.inscriptionStep2023 === "WAITING_CONSENT" || young.reinscriptionStep2023 === "WAITING_CONSENT") &&
           young.parentAllowSNU !== "true" && (
             <>
               <div className="flex justify-end mt-4 border-t border-t-[#E5E7EB] p-4">

@@ -1,6 +1,7 @@
-const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge } = require("snu-lib");
 const { deletePatches } = require("../controllers/patches");
 const ApplicationModel = require("../models/application");
+const CohortModel = require("../models/cohort");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
@@ -122,8 +123,57 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
   }
 };
 
+const getAuthorizationToApply = async (mission, young) => {
+  let refusalMessages = [];
+  if (isCohortTooOld(young?.cohort)) {
+    refusalMessages.push("Le délai pour candidater est dépassé.");
+  }
+
+  const cohort = await CohortModel.findOne({ name: young.cohort });
+
+  if (!canApplyToPhase2(young, cohort)) {
+    refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
+  }
+
+  const applicationsCount = await ApplicationModel.countDocuments({
+    youngId: young._id,
+    status: { $in: [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION] },
+  });
+
+  if (applicationsCount >= 15) {
+    refusalMessages.push("Vous ne pouvez candidater qu'à 15 missions différentes.");
+  }
+
+  const isMilitaryPreparation = mission?.isMilitaryPreparation === "true";
+
+  const ageAtStart = calculateAge(mission.startAt, young.birthdateAt);
+
+  if (!isMilitaryPreparation && ageAtStart < 15) {
+    refusalMessages.push("Vous devez avoir plus de 15 ans pour candidater.");
+  }
+
+  // Military preparations have special rules
+  if (isMilitaryPreparation && ageAtStart < 16) {
+    refusalMessages.push("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
+  }
+
+  if (isMilitaryPreparation && young.statusMilitaryPreparationFiles === "REFUSED") {
+    refusalMessages.push("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
+  }
+
+  const isMilitaryApplicationIncomplete =
+    !young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length;
+
+  if (isMilitaryPreparation && isMilitaryApplicationIncomplete) {
+    refusalMessages.push("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");
+  }
+
+  return { canApply: refusalMessages.length === 0, message: refusalMessages.join("\n") };
+};
+
 module.exports = {
   anonymizeApplicationsFromYoungId,
   updateApplicationTutor,
   updateApplicationStatus,
+  getAuthorizationToApply,
 };

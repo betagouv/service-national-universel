@@ -12,17 +12,20 @@ concurrency:
 env:
   prod_directory: ./terraform/environments/production
   staging_directory: ./terraform/environments/production/staging
+  production_branch: "production"
 
 jobs:
 
   prepare:
     runs-on: ubuntu-latest
     if: github.ref_name == 'production_hotfix'
-    env:
-      production_branch: "production"
+
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
-      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+      api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
+      admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
+      app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
+      antivirus_image_tag: ${{ steps.prepare.outputs.antivirus_image_tag }}
 
     steps:
       - name: Get target_branch
@@ -33,18 +36,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.target_branch.outputs.target_branch }}
-
-      - name: Get last commit sha
-        id: commit_sha
-        run: |
-          commit_sha=$(git rev-parse HEAD)
-          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
-
-      - name: Get image tag
-        id: image_tag
-        uses: ./.github/actions/get_image_tag
-        with:
-          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+          fetch-depth: 0
 
       - name: Check differences
         run: |
@@ -59,19 +51,50 @@ jobs:
             exit 1
           fi
 
-  run_tests_api:
+      - name: Prepare
+        id: prepare
+        run : |
+          api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
+          echo "api_image_tag: $api_image_tag"
+          echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
+
+          admin_image_tag=$(git log --max-count=1 --oneline -- admin packages | cut -d " " -f 1)
+          echo "admin_image_tag: $admin_image_tag"
+          echo "admin_image_tag=$admin_image_tag" >> $GITHUB_OUTPUT
+
+          app_image_tag=$(git log --max-count=1 --oneline -- app packages | cut -d " " -f 1)
+          echo "app_image_tag: $app_image_tag"
+          echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
+
+          antivirus_image_tag=$(git log --max-count=1 --oneline -- antivirus | cut -d " " -f 1)
+          echo "antivirus_image_tag: $antivirus_image_tag"
+          echo "antivirus_image_tag=$antivirus_image_tag" >> $GITHUB_OUTPUT
+
+  run_tests:
     needs: prepare
-    uses: ./.github/workflows/run-tests-api.yml
-    with:
-      branch_name: ${{ needs.prepare.outputs.target_branch }}
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.target_branch }}
+
+      - name: API - run tests
+        uses: ./.github/actions/run_api_tests
+        with:
+          branch_name: ${{ needs.prepare.outputs.target_branch }}
+          reporter_id: ${{ secrets.CC_TEST_REPORTER_ID }}
 
   build:
-    needs: [prepare, run_tests_api]
+    needs: [prepare, run_tests]
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app_name: [admin, api, app]
+        app: [
+          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+          {name: antivirus, tag: "${{needs.prepare.outputs.antivirus_image_tag}}" },
+        ]
 
     steps:
       - uses: actions/checkout@v4
@@ -83,15 +106,9 @@ jobs:
         uses: ./.github/actions/check_docker_image_tag
         with:
           registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_name: ${{ matrix.app.name }}
+          image_tag: ${{ matrix.app.tag }}
           secret_key: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
-
-      - name: Abort if image exists
-        if: steps.check.outputs.tag_exists != 0
-        run: |
-          echo "Image ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} already exists"
-          exit 1
 
       - name: Docker Build & Publish
         uses: ./.github/actions/build_docker_image
@@ -100,9 +117,9 @@ jobs:
           username: nologin
           password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
           registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          dockerfile_path: ${{ matrix.app_name }}/Dockerfile
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_name: ${{ matrix.app.name }}
+          dockerfile_path: ${{ matrix.app.name }}/Dockerfile
+          image_tag: ${{ matrix.app.tag }}
           image_tag_stable: hotfix
 
   deploy_staging:
@@ -131,13 +148,17 @@ jobs:
         working-directory: ${{ env.staging_directory }}
         run: |
           terraform plan -no-color -input=false \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Staging - Terraform auto-apply
         working-directory: ${{ env.staging_directory }}
         run: |
           terraform apply -no-color -input=false -auto-approve \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Staging - Healthcheck API
         working-directory: ${{ env.staging_directory }}
@@ -177,7 +198,10 @@ jobs:
         working-directory: ${{ env.prod_directory }}
         run: |
           terraform plan -no-color -input=false \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
+            -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
 
   deploy_production:
     runs-on: ubuntu-latest
@@ -205,7 +229,10 @@ jobs:
         working-directory: ${{ env.prod_directory }}
         run: |
           terraform apply -no-color -input=false -auto-approve \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
+            -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
 
       - name: Production - Healthcheck API
         working-directory: ${{ env.prod_directory }}

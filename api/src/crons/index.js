@@ -1,5 +1,4 @@
 const cron = require("node-cron");
-const { ENVIRONMENT } = require("../config");
 
 const apiEngagement = require("./syncApiEngagement");
 const missionOutdated = require("./missionOutdated");
@@ -21,6 +20,7 @@ const youngPatches = require("./patch/young");
 const classePatches = require("./patch/classe");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const parentConsentementReminder = require("./parentConsentementReminder");
+const parentRevalidateRI = require("./parentRevalidateRI");
 const reminderInscription = require("./reminderInscription");
 const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
 const dsnjExport = require("./dsnjExport");
@@ -69,113 +69,151 @@ const everyHours = (x) => `0 */${x} * * *`;
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
 
-// See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
-if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
-  cron.schedule("0 9 * * 1", function () {
-    applicationPending.handler();
-  });
-
-  cron.schedule("0 15 * * *", () => {
-    deleteCNIAdnSpecificAmenagementType.handler();
-  });
-
-  cron.schedule("0 9 * * 1", function () {
-    noticePushMission.handler();
-  });
-
-  // everyday at 0200
-  cron.schedule(everyHours(6), () => {
-    apiEngagement.handler();
-  });
-
-  // everyday at 0200
-  cron.schedule("0 0 * * *", () => {
-    deleteInactiveRefs.handler();
-  });
-
-  cron.schedule(everyHours(6), () => {
-    jeVeuxAiderDaily.handler();
-  });
-
-  cron.schedule("0 6 * * *", () => {
-    contratRelance.handler();
-  });
-
-  cron.schedule("0 8 * * *", () => {
-    missionOutdated.handler();
-    missionOutdated.handlerNotice1Week();
-  });
-
-  cron.schedule("0 7 * * *", () => {
-    applicationOutaded.handler();
-    applicationOutaded.handlerNotice1Week();
-    applicationOutaded.handlerNotice13Days();
-  });
-
-  cron.schedule(everyHours(1), () => {
-    computeGoalsInscription.handler();
-  });
-
-  cron.schedule("0 1 * * *", () => {
-    loginAttempts.handler();
-  });
-
-  cron.schedule("45 2 * * *", () => {
-    syncReferentSupport.handler();
-  });
-
-  cron.schedule("15 1 * * *", () => {
-    syncContactSupport.handler();
-  });
-
-  cron.schedule("30 1 * * *", () => {
-    structurePatches.handler();
-  });
-
-  cron.schedule("45 1 * * *", () => {
-    missionEquivalencePatches.handler();
-  });
-
-  cron.schedule("0 2 * * *", () => {
-    missionPatches.handler();
-  });
-
-  cron.schedule("30 2 * * *", () => {
-    applicationPatches.handler();
-  });
-
-  cron.schedule("0 3 * * *", () => {
-    youngPatches.handler();
-  });
-
-  cron.schedule("20 3 * * *", () => {
-    classePatches.handler();
-  });
-
-  cron.schedule("15 04 * * *", () => {
-    dsnjExport.handler();
-  });
-
-  cron.schedule("27 8 * * *", () => {
-    parentConsentementReminder.handler();
-  });
-
-  // Every day at 11:00
-  cron.schedule("0 11 * * *", () => {
-    reminderInscription.handler();
-  });
-
-  // Every day at 10:00
-  cron.schedule("0 10 * * *", () => {
-    reminderImageRightsParent2.handler();
-  });
-
-  cron.schedule("0 5 * * *", () => {
-    refreshMaterializedViews.handler();
-  });
-
-  // tous les jours à 14h00
-  cron.schedule("2 14 * * *", () => {
-    clotureMissionReminder.handler();
-  });
+function _log(task, handlers) {
+  return async () => {
+    console.log(`task started : ${task}`)
+    if (handlers instanceof Array) {
+      await Promise.all(handlers.map((handler) => handler.call()))
+    } else {
+      await handlers.call()
+    }
+    console.log(`task ended : ${task}`)
+  }
 }
+
+cron.schedule("0 9 * * 1", _log(
+  "applicationPending",
+  applicationPending.handler
+));
+
+cron.schedule("0 15 * * *", _log(
+  "deleteCNIAdnSpecificAmenagementType",
+  deleteCNIAdnSpecificAmenagementType.handler
+));
+
+cron.schedule("0 9 * * 1", _log(
+  "noticePushMission",
+  noticePushMission.handler
+));
+
+// everyday at 0200
+cron.schedule(everyHours(6), _log(
+  "apiEngagement",
+  apiEngagement.handler
+));
+
+// everyday at 0200
+cron.schedule("0 0 * * *", _log(
+  "deleteInactiveRefs",
+  deleteInactiveRefs.handler
+));
+
+cron.schedule(everyHours(6), _log(
+  "jeVeuxAiderDaily",
+  jeVeuxAiderDaily.handler
+));
+
+cron.schedule("0 6 * * *", _log(
+  "contratRelance",
+  contratRelance.handler
+));
+
+cron.schedule("0 8 * * *", _log("missionOutdated", [
+  missionOutdated.handler,
+  missionOutdated.handlerNotice1Week
+]));
+
+cron.schedule("0 7 * * *", _log("applicationOutaded",  [
+  applicationOutaded.handler,
+  applicationOutaded.handlerNotice1Week,
+  applicationOutaded.handlerNotice13Days
+]));
+
+cron.schedule(everyHours(1), _log(
+  "computeGoalsInscription",
+  computeGoalsInscription.handler
+));
+
+cron.schedule("0 1 * * *", _log(
+  "loginAttempts",
+  loginAttempts.handler
+));
+
+cron.schedule("45 2 * * *", _log(
+  "syncReferentSupport",
+  syncReferentSupport.handler
+));
+
+cron.schedule("15 1 * * *", _log(
+  "syncContactSupport",
+  syncContactSupport.handler
+));
+
+cron.schedule("30 1 * * *", _log(
+  "structurePatches",
+  structurePatches.handler
+));
+
+cron.schedule("45 1 * * *", _log(
+  "missionEquivalencePatches",
+  missionEquivalencePatches.handler
+));
+
+cron.schedule("0 2 * * *", _log(
+  "missionPatches",
+  missionPatches.handler
+));
+
+cron.schedule("30 2 * * *", _log(
+  "applicationPatches",
+  applicationPatches.handler
+));
+
+cron.schedule("0 3 * * *", _log(
+  "youngPatches",
+  youngPatches.handler
+));
+
+cron.schedule("20 3 * * *", _log(
+  "classePatches",
+  classePatches.handler
+));
+
+cron.schedule("15 04 * * *", _log(
+  "dsnjExport",
+  dsnjExport.handler
+));
+
+cron.schedule("27 8 * * *", _log(
+  "parentConsentementReminder",
+  parentConsentementReminder.handler
+));
+
+// Every Monday at 7:30am
+cron.schedule("30 7 * * 1", _log(
+  "parentRevalidateRI",
+  parentRevalidateRI.handler
+));
+
+// Every day at 11:00
+cron.schedule("0 11 * * *", _log(
+  "reminderInscription",
+  reminderInscription.handler
+));
+
+// Every day at 10:00
+cron.schedule("0 10 * * *", _log(
+  "reminderImageRightsParent2",
+  reminderImageRightsParent2.handler
+));
+
+cron.schedule("0 5 * * *", _log(
+  "refreshMaterializedViews",
+  refreshMaterializedViews.handler
+));
+
+// tous les jours à 14h00
+cron.schedule("2 14 * * *", _log(
+  "clotureMissionReminder",
+  clotureMissionReminder.handler
+));

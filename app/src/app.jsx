@@ -46,11 +46,12 @@ import AccountAlreadyExists from "./scenes/account/AccountAlreadyExists";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import Thanks from "./scenes/contact/Thanks";
 import ViewMessage from "./scenes/echanges/View";
+import ModalRI from "./components/modals/ModalRI";
 
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
-import { ENABLE_PM, YOUNG_STATUS } from "./utils";
+import { ENABLE_PM, YOUNG_STATUS, shouldReAcceptRI } from "./utils";
 import {
   youngCanChangeSession,
   inscriptionModificationOpenForYoungs,
@@ -206,6 +207,7 @@ const MandatoryLogIn = () => {
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
+  const [isModalRIOpen, setIsModalRIOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
@@ -220,11 +222,23 @@ const Espace = () => {
     return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
   };
 
+  const handleModalRIConfirm = async () => {
+    setIsModalRIOpen(false);
+    const { ok, code } = await api.put(`/young/accept-ri`);
+    if (!ok) {
+      setIsModalRIOpen(true);
+      return toastr.error(`Une erreur est survenue : ${code}`);
+    }
+    return toastr.success("Vous avez bien accepté le nouveau règlement intérieur.");
+  };
+
   useEffect(() => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
+    } else if (shouldReAcceptRI(young, cohort)) {
+      setIsModalRIOpen(true);
     }
-  }, [young]);
+  }, [young, cohort]);
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
@@ -261,6 +275,7 @@ const Espace = () => {
       <Footer />
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
+      <ModalRI isOpen={isModalRIOpen} onAccept={handleModalRIConfirm} />
     </>
   );
 };

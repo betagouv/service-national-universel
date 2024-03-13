@@ -46,6 +46,7 @@ const {
 const mime = require("mime-types");
 const patches = require("./patches");
 const scanFile = require("../utils/virusScanner");
+const { getAuthorizationToApply } = require("../services/application");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
@@ -157,16 +158,21 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // On vérifie si les candidatures sont ouvertes.
-    if (mission.visibility === "HIDDEN") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (mission.visibility === "HIDDEN") {
+      console.log("visibility", mission.visibility);
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
     value.isJvaMission = mission.isJvaMission;
 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const cohort = await CohortObject.findOne({ name: young.cohort });
-
-    if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const { canApply, message } = await getAuthorizationToApply(mission, young);
+    if (!canApply) {
+      console.log(message);
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
+    }
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
@@ -734,14 +740,12 @@ router.post(
           captureMessage("Wrong filetype", { extra: { tempFilePath, mimetype } });
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
-        if (ENVIRONMENT === "production") {
-          const scanResult = await scanFile(tempFilePath, name, user._id);
-          if (scanResult.infected) {
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          } else if (scanResult.error) {
-            return res.status(500).send({ ok: false, code: scanResult.error });
-          }
+
+        const scanResult = await scanFile(tempFilePath, name, user._id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
+
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };

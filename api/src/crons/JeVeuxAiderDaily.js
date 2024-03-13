@@ -1,5 +1,4 @@
 const fetch = require("node-fetch");
-require("../mongo");
 const path = require("path");
 const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
@@ -58,8 +57,16 @@ function addOneYear(date) {
 
 const TWO_HOURS = 2 * 60 * 60 * 1000;
 
-const JvaStructureException = ["6890"];
-const SnuStructureException = ["62b9f02788469607439b733a"];
+const JvaStructureException = [
+  "6890", //Fédération Médico-psychosociale à la Personne-Initiative
+  "14392", //Autisme espoir
+  "13419", //AUTISME ESPOIR VERS L'ÉCOLE
+];
+const SnuStructureException = [
+  "62b9f02788469607439b733a", //Fédération Médico-psychosociale à la Personne-Initiative
+  "63762279c6ccb008d446f6bc", //Autisme espoir
+  "62de85c299f28207ac826fc5", //AUTISME ESPOIR VERS L'ÉCOLE
+];
 
 const fetchMission = (page = 1) => {
   //preoprod : https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/

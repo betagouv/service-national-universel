@@ -1,5 +1,17 @@
 
-variable "image_tag" {
+variable "api_image_tag" {
+  type    = string
+  nullable = false
+}
+variable "admin_image_tag" {
+  type    = string
+  nullable = false
+}
+variable "app_image_tag" {
+  type    = string
+  nullable = false
+}
+variable "antivirus_image_tag" {
   type    = string
   nullable = false
 }
@@ -9,6 +21,7 @@ locals {
   api_hostname   = "api.${local.domain}"
   admin_hostname = "admin.${local.domain}"
   app_hostname   = "moncompte.${local.domain}"
+  antivirus_hostname   = "antivirus.beta-snu.dev"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.production.data))
 }
 
@@ -34,10 +47,10 @@ resource "scaleway_container_namespace" "production" {
 resource "scaleway_container" "api" {
   name            = "production-api"
   namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port            = 8080
-  cpu_limit       = 768
-  memory_limit    = 4096
+  cpu_limit       = 512
+  memory_limit    = 2048
   min_scale       = 4
   max_scale       = 20
   timeout         = 60
@@ -53,11 +66,11 @@ resource "scaleway_container" "api" {
     "CLE"        = "true"
     "PRODUCTION" = "true"
     "FOLDER_API" = "api"
-    "SCALEWAY_CLAMSCAN" = "true"
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.2
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.01
-    "SENTRY_RELEASE"                    = var.image_tag
+    "SENTRY_RELEASE"                    = var.api_image_tag
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
+    "API_ANTIVIRUS_ENDPOINT"            = local.secrets.API_ANTIVIRUS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"      = local.secrets.API_ASSOCIATION_CELLAR_KEYID
@@ -80,6 +93,7 @@ resource "scaleway_container" "api" {
 
   secret_environment_variables = {
     "API_ANALYTICS_API_KEY"                 = local.secrets.API_ANALYTICS_API_KEY
+    "API_ANTIVIRUS_TOKEN"                   = local.secrets.API_ANTIVIRUS_TOKEN
     "API_ASSOCIATION_AWS_SECRET_ACCESS_KEY" = local.secrets.API_ASSOCIATION_AWS_SECRET_ACCESS_KEY
     "API_ASSOCIATION_CELLAR_KEYSECRET"      = local.secrets.API_ASSOCIATION_CELLAR_KEYSECRET
     "API_ASSOCIATION_ES_ENDPOINT"           = local.secrets.API_ASSOCIATION_ES_ENDPOINT
@@ -116,7 +130,7 @@ resource "scaleway_container_domain" "api" {
 resource "scaleway_container" "admin" {
   name            = "production-admin"
   namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/admin:${var.admin_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -155,7 +169,7 @@ resource "scaleway_container_domain" "admin" {
 resource "scaleway_container" "app" {
   name            = "production-app"
   namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.image_tag}"
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
@@ -192,12 +206,72 @@ resource "scaleway_container_domain" "app" {
   hostname     = local.app_hostname
 }
 
+resource "scaleway_container" "antivirus" {
+  name            = "production-antivirus"
+  namespace_id    = scaleway_container_namespace.production.id
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/antivirus:${var.antivirus_image_tag}"
+  port            = 8089
+  cpu_limit       = 256
+  memory_limit    = 4096
+  min_scale       = 1
+  max_scale       = 5
+  timeout         = 60
+  max_concurrency = 50
+  privacy         = "private"
+  protocol        = "http1"
+  deploy          = true
+
+  environment_variables = {
+    "APP_NAME"   = "antivirus"
+  }
+}
+
+resource "scaleway_container_domain" "antivirus" {
+  container_id = scaleway_container.antivirus.id
+  hostname     = local.antivirus_hostname
+}
+
+resource "scaleway_container" "crons" {
+  name            = "production-crons"
+  namespace_id    = scaleway_container_namespace.production.id
+  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
+  port            = 8080
+  cpu_limit       = 768
+  memory_limit    = 1024
+  min_scale       = 1
+  max_scale       = 1
+  privacy         = "private"
+  protocol        = "http1"
+  deploy          = true
+
+  environment_variables = merge(scaleway_container.api.environment_variables, {
+    "RUN_CRONS" = "true"
+  })
+
+  secret_environment_variables = scaleway_container.api.secret_environment_variables
+}
+
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
+}
+output "api_image_tag" {
+  value = split(":", scaleway_container.api.registry_image)[1]
 }
 output "app_endpoint" {
   value = "https://${local.app_hostname}"
 }
+output "app_image_tag" {
+  value = split(":", scaleway_container.app.registry_image)[1]
+}
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
+}
+output "admin_image_tag" {
+  value = split(":", scaleway_container.admin.registry_image)[1]
+}
+output "antivirus_endpoint" {
+  value = "https://${local.antivirus_hostname}"
+}
+output "antivirus_image_tag" {
+  value = split(":", scaleway_container.antivirus.registry_image)[1]
 }
