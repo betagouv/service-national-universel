@@ -235,7 +235,6 @@ const Hit = ({ hit }) => {
 };
 
 function exportExcelSheet({ data: classes, type }) {
-  console.log(classes);
   let sheetData = classes.map((c) => ({
     id: c._id.toString(),
     uniqueKeyAndId: c.uniqueKeyAndId,
