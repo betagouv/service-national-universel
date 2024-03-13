@@ -55,6 +55,10 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     if (naIndex !== -1 && emptyIndex !== -1) {
       data[naIndex].doc_count += data[emptyIndex].doc_count;
       data.splice(emptyIndex, 1);
+    } else {
+      if (emptyIndex !== -1) {
+        data[emptyIndex].key = "N/A";
+      }
     }
 
     setOptionsVisible(temp);

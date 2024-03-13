@@ -53,7 +53,6 @@ export default function View() {
   const rights = getRights(user, classe, cohort);
 
   const history = useHistory();
-  console.log(classe.seatsTaken);
   const totalSeatsTakenExcluding =
     classe.seatsTaken -
     (studentStatus[YOUNG_STATUS.WITHDRAWN] || 0) -
@@ -509,8 +508,10 @@ export default function View() {
                 </tr>
                 <tr>
                   <td className="font-bold pr-4 py-2">Places libres :</td>
-                  <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - classe.seatsTaken || 0}</td>
-                  <td className="text-gray-500 text-center py-2">({Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats || 0)}%)</td>
+                  <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - classe.seatsTaken < 0 ? 0 : classe.totalSeats - classe.seatsTaken}</td>
+                  <td className="text-gray-500 text-center py-2">
+                    ({Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats) < 0 ? 0 : Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats)}%)
+                  </td>
                 </tr>
               </tbody>
             </table>
