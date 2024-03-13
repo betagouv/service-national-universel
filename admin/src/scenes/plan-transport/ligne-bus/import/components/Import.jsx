@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { PlainButton } from "../../../components/Buttons";
 import ExcelColor from "../../components/Icons/ExcelColor.png";
 import ReactLoading from "react-loading";
-import { HiOutlineChevronDown } from "react-icons/hi";
+import { HiOutlineChevronDown, HiOutlineDocumentAdd } from "react-icons/hi";
 import { GrCircleInformation } from "react-icons/gr";
 import { MIME_TYPES, PDT_IMPORT_ERRORS_TRANSLATION } from "snu-lib";
 import api from "../../../../../services/api";
@@ -10,7 +10,7 @@ import { capture } from "../../../../../sentry";
 
 const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 
-export default function Import({ cohort, onFileVerified }) {
+export default function Import({ cohort, onFileVerified, addLigne }) {
   const [isLoading, setIsLoading] = useState(false);
   const [importErrors, setImportErrors] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -109,21 +109,23 @@ export default function Import({ cohort, onFileVerified }) {
     </>
   ) : (
     <>
-      <div className="mt-8 flex w-full flex-col items-center justify-center gap-6 rounded-xl bg-white px-8 pt-12 pb-24">
-        <div className="pb-4 text-center text-xl font-medium leading-7 text-gray-900">Import du fichier</div>
-        <div className="flex h-[218px] w-[641px] flex-col items-center justify-center gap-2 rounded-lg border-[1px] border-dashed border-gray-300">
-          <img src={ExcelColor} alt="Excel" className="w-[71px]" />
+      <div className="mt-8 flex w-full flex-col items-center justify-center bg-white rounded-xl px-8 pt-12 pb-24">
+        <div className="bg-gray-50 w-full flex-col pb-5">
+          <h1 className="text-lg leading-6 font-medium text-gray-900 text-center mt-12 mb-2">{addLigne ? "Mes lignes supplémentaires" : "Mon plan de transport"}</h1>
+          <p className="text-sm leading-5 font-normal text-gray-500 text-center mb-12">Importez votre fichier (au format .xlsx jusqu’à 5Mo)</p>
+          <p className="text-sm leading-5 font-normal text-gray-500 text-center mb-12">Ce fichier doit être au même format que le plan de transport (noms des colonnes, etc).</p>
+
           {!isLoading && !isUploading ? (
             <>
-              <div onClick={importFile} className="cursor-pointer text-center text-sm font-medium leading-5 text-blue-600 hover:underline">
+              <PlainButton onClick={importFile} className="cursor-pointer text-center mx-auto text-blue-600">
+                <HiOutlineDocumentAdd className="mt-0.5 mr-2" size={20} />
                 Téléversez votre fichier
-              </div>
-              <div className="text-xs font-normal leading-4 text-gray-500">XLSX jusqu’à 5Mo</div>
+              </PlainButton>
               <input type="file" accept={MIME_TYPES.EXCEL} ref={fileInput} onChange={upload} className="hidden" />
               {uploadError && <div className="mt-8 text-center text-sm font-bold text-red-900">{uploadError}</div>}
             </>
           ) : (
-            <ReactLoading className="mt-2" type="spin" color="#2563EB" width={"40px"} height={"40px"} />
+            <ReactLoading className="mx-auto" type="spin" color="#2563EB" width={"40px"} height={"40px"} />
           )}
         </div>
       </div>

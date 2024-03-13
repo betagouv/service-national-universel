@@ -11,6 +11,7 @@ import Container from "./layout/Container";
 import Header from "./layout/Header";
 import Page from "./layout/Page";
 import Subheader from "./layout/Subheader";
+import Navbar from "./layout/Navbar";
 
 // UI
 import Badge from "./ui/Badge";
@@ -30,6 +31,7 @@ export {
   Header,
   Page,
   Subheader,
+  Navbar,
 
   // UI
   Badge,
