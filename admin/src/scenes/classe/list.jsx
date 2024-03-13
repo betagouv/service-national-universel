@@ -305,7 +305,7 @@ function exportExcelSheet({ data: classes, type }) {
       "Nom de l'établissement",
       "Nom du référent de classe",
       "Prénom du référent de classe",
-      "email du référent de classe",
+      "Email du référent de classe",
       "Nombre de places total",
       "Nombre d'élèves en cours",
       "Nombre d'élèves en attente",
