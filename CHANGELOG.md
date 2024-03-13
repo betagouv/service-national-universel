@@ -1,3 +1,13 @@
+## [1.389.1](https://github.com/betagouv/service-national-universel/compare/v1.389.0...v1.389.1) (2024-03-12)
+
+
+### Bug Fixes
+
+* **admin:** [CLE]- TRANSPORT - Bug export convoyeurs CLE MARS 1 ([#3653](https://github.com/betagouv/service-national-universel/issues/3653)) ([14a3643](https://github.com/betagouv/service-national-universel/commit/14a3643d80589b8953d4297f4b6fd41e43680386))
+* **admin:** referent can WITHDRAWN every young ([cf336f2](https://github.com/betagouv/service-national-universel/commit/cf336f29b6e47a83ac8691245cbf27759e9cdc78))
+* **admin:** sidebar ([#3658](https://github.com/betagouv/service-national-universel/issues/3658)) ([e316b50](https://github.com/betagouv/service-national-universel/commit/e316b50c7b3121bca3f3f1545e8667fcc8b2d263))
+* **misc:** Always run tests ([#3652](https://github.com/betagouv/service-national-universel/issues/3652)) ([394951d](https://github.com/betagouv/service-national-universel/commit/394951d263ba0aaff10673d5200fe1756d839362))
+
 # [1.389.0](https://github.com/betagouv/service-national-universel/compare/v1.388.0...v1.389.0) (2024-03-11)
 
 
