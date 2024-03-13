@@ -1,34 +1,51 @@
-FROM node:18.16.0-alpine as build
+FROM node:18.16.0-alpine AS base
 
-ENV APP_NAME app
-ENV MODE production
-ENV CI true
 
-WORKDIR /build
 
+FROM base AS builder
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+RUN apk update
+# Set working directory
+WORKDIR /app
+RUN npm install --global turbo
 COPY . .
-RUN --mount=type=cache,target=/build/.npm/cache \
-    npx turbo prune --scope=$APP_NAME --out-dir ./out && \
-    cd out && \
-    cp app/docker.env app/.env && \
-    npm install && \
-    npm run build && \
-    rm -rf node_modules/.cache .npm/cache
+ENV APP_NAME app
+RUN turbo prune $APP_NAME --docker
 
 
-FROM node:18.16.0-alpine as app
+
+# Add lockfile and package.json's of isolated subworkspace
+FROM base AS installer
+RUN apk add --no-cache libc6-compat
+RUN apk update
+WORKDIR /app
+
+# First install dependencies (as they change less often)
+COPY .gitignore .gitignore
+COPY --from=builder /app/out/json/ .
+COPY --from=builder /app/out/full/app/src/build-only-on-clevercloud.js ./app/src/build-only-on-clevercloud.js
+COPY --from=builder /app/out/full/packages/ ./packages/
+RUN npm install
+
+# Build the project and its dependencies
+COPY --from=builder /app/out/full/ .
+COPY turbo.json turbo.json
 
 ENV APP_NAME app
-ENV PORT 8080
+RUN npm run build
 
-WORKDIR /service-national-universel
 
-COPY --chown=node:node --from=build /build/out .
-RUN chmod +x app/docker-env.sh
+FROM nginx AS runner
 
 LABEL org.opencontainers.image.source=https://github.com/betagouv/service-national-universel
 LABEL org.opencontainers.image.description="This image provides a consistent and reproducible environment for the app (mon-compte), ensuring it deploys faster and runs the same way regardless of the deployment environment."
 
-EXPOSE $PORT
+COPY --from=installer /app/app/build/ /usr/share/nginx/html
+COPY --from=builder /app/app/docker_start.sh .
 
-CMD ./app/docker-env.sh && npm start
+RUN chmod +x ./docker_start.sh
+
+
+
+CMD ["./docker_start.sh"]
