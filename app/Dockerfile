@@ -43,7 +43,7 @@ LABEL org.opencontainers.image.description="This image provides a consistent and
 
 COPY --from=installer /app/app/build/ /usr/share/nginx/html
 COPY --from=builder /app/app/docker_start.sh .
-COPY --from=builder /app/app/docker_nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=builder /app/app/docker_nginx.conf /etc/nginx/conf.d/default.conf
 
 RUN chmod +x ./docker_start.sh
 
