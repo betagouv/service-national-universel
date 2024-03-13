@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { departmentLookUp } from "snu-lib";
 
 const baseURL = "https://api-adresse.data.gouv.fr/search/?q=";
 
@@ -28,19 +27,18 @@ export default function useAddress({ query, options = {}, enabled = true }) {
 }
 
 function formatResult(option) {
-  const arr = option.properties.context.split(",");
-  const departmentNumber = arr[0].trim();
-  const department = departmentLookUp[departmentNumber];
-  const region = arr[arr.length - 1].trim();
+  const contextArray = option.properties.context.split(",");
 
   return {
     address: option.properties.type !== "municipality" ? option.properties.name : "",
     zip: option.properties.postcode,
     city: option.properties.city,
-    department,
-    departmentNumber,
+    // For metropolitan areas, the second element is the department, and the third element is the region
+    // For some overseas areas, the second element is both the department and the region, and there is no third element
+    department: contextArray[1].trim(),
+    region: contextArray[contextArray.length - 1].trim(),
+    departmentNumber: contextArray[0].trim(),
     location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
-    region,
     cityCode: option.properties.citycode,
     addressVerified: "true",
     coordinatesAccuracyLevel: option.properties.type,
