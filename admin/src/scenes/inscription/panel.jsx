@@ -18,7 +18,6 @@ import { formatPhoneNumberFR, getAge, isInRuralArea, translate as t, YOUNG_STATU
 import styled from "styled-components";
 import PanelV2 from "../../components/PanelV2";
 import { toastr } from "react-redux-toastr";
-import { signinAs } from "@/utils/signinAs";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
@@ -56,12 +55,9 @@ export default function InscriptionPanel({ onChange, value }) {
   };
 
   const onPrendreLaPlace = async (young_id) => {
-    try {
-      plausibleEvent("Volontaires/CTA - Prendre sa place");
-      await signinAs("young", young_id);
-    } catch (e) {
-      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
-    }
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
   };
 
   return (

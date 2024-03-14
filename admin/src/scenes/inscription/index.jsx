@@ -24,7 +24,6 @@ import DeletedInscriptionPanel from "./deletedPanel";
 import Panel from "./panel";
 import { toastr } from "react-redux-toastr";
 import Loader from "@/components/Loader";
-import { signinAs } from "@/utils/signinAs";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
@@ -389,12 +388,9 @@ const Action = ({ hit }) => {
   const onPrendreLaPlace = async (young_id) => {
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
-    try {
-      plausibleEvent("Volontaires/CTA - Prendre sa place");
-      await signinAs("young", young_id);
-    } catch (e) {
-      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
-    }
+    plausibleEvent("Volontaires/CTA - Prendre sa place");
+    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
   };
 
   return (

@@ -19,7 +19,6 @@ import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import PanelV2 from "../../components/PanelV2";
-import { signinAs } from "@/utils/signinAs";
 
 export default function UserPanel({ onChange, value }) {
   const [structure, setStructure] = useState();
@@ -46,9 +45,11 @@ export default function UserPanel({ onChange, value }) {
   const handleImpersonate = async () => {
     try {
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
-      const data = await signinAs("referent", value._id);
-      dispatch(setUser(data));
+      const { ok, data, token } = await api.post(`/referent/signin_as/referent/${value._id}`);
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       history.push("/dashboard");
+      if (token) api.setToken(token);
+      if (data) dispatch(setUser(data));
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
