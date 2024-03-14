@@ -18,7 +18,6 @@ import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonCont
 import PhoneField from "@/components/dsfr/forms/PhoneField";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress } from "../utils";
-import { getAddressOptions } from "@/services/api-adresse";
 
 export default function ImageRights({ parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -290,7 +289,7 @@ function ImageRightsForm({ young, token, parentId }) {
               <>
                 <ResponsiveRadioButton label="Je réside..." options={addressTypeOptions} onChange={(e) => setData({ ...data, addressType: e })} value={data.addressType} />
                 {data.addressType === FRANCE ? (
-                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} />
+                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} />
                 ) : (
                   <>
                     <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, Select } from "@snu/ds/admin";
+import { Page, Header, Subheader, Container, InputText, Badge, Button, DropdownButton, Select, Navbar } from "@snu/ds/admin";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import { HiUsers, HiPencil, HiOutlinePencil } from "react-icons/hi";
 import { TbExternalLink } from "react-icons/tb";
@@ -179,6 +179,13 @@ export default function DesignSystemPage() {
     setValues((prev) => ({ ...prev, [name]: value }));
   };
 
+  const [isActive, setIsActive] = useState({
+    tab1: true,
+    tab2: false,
+    tab3: false,
+    tab4: false,
+  });
+
   return (
     <Page>
       <Header
@@ -187,6 +194,35 @@ export default function DesignSystemPage() {
         actions={[<Button key="header-action-1" title={"Click me"} />]}
       />
       <Subheader title="Code, preview, test, build and ship." />
+      <Navbar
+        tab={[
+          {
+            title: "Aller",
+            leftIcon: <HiOutlineCommandLine size={20} className="mt-0.5" />,
+            isActive: isActive.tab1,
+            onClick: () => setIsActive({ tab1: true, tab2: false, tab3: false, tab4: false }),
+          },
+          {
+            title: "Retour",
+            isActive: isActive.tab2,
+            leftIcon: <HiOutlineCommandLine size={20} className="mt-0.5" />,
+            onClick: () => setIsActive({ tab1: false, tab2: true, tab3: false, tab4: false }),
+          },
+          {
+            title: "Historique",
+            leftIcon: <HiOutlineCommandLine size={20} className="mt-0.5" />,
+            isActive: isActive.tab3,
+            onClick: () => setIsActive({ tab1: false, tab2: false, tab3: true, tab4: false }),
+          },
+          {
+            title: "Demande de modifications",
+            leftIcon: <HiOutlineCommandLine size={20} className="mt-0.5" />,
+            isActive: isActive.tab4,
+            onClick: () => setIsActive({ tab1: false, tab2: false, tab3: false, tab4: true }),
+          },
+        ]}
+        button={[<Button key={"button-1"} title={"Primary base"} />, <Button key={"button-2"} title={"Primary base"} loading />]}
+      />
       <Container title="Champs simples (InputText)">
         <div className="grid grid-cols-3 gap-4 w-full">
           <InputText placeholder="Input text normal" name="input1" value={values.input1} onChange={handleChange} />

@@ -580,9 +580,9 @@ const MINISTRES = [
     template: "certificates/certificateTemplate2023-08-18.png",
   },
   {
-    date_end: "02-16-2050", // ! Changer ici à l'ajout d'un nouveau
-    ministres: ["Corinne Orzechowski, Déléguée générale au Service Nationale Universel"],
-    template: "certificates/certificateTemplate_2024.png",
+    date_end: "03-13-2050", // ! Changer ici à l'ajout d'un nouveau
+    ministres: ["Nicole Belloubet, Ministre de l'Education Nationale et de la Jeunesse", "Sebastien Lecornu, Ministre des Armées"],
+    template: "certificates/certificateTemplate2024_2.png",
   },
 ];
 

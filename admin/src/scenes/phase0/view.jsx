@@ -25,6 +25,7 @@ import {
   translateColoration,
   isCle,
 } from "snu-lib";
+import { ERRORS } from "snu-lib/errors";
 import Tabs from "./components/Tabs";
 import Bin from "../../assets/Bin";
 import { toastr } from "react-redux-toastr";
@@ -677,9 +678,12 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
           onChange();
         } else {
           if (result.code === "ALREADY_EXISTS") {
-            return toastr.error("Erreur !", "Email déjà existant.");
+            toastr.error("Erreur !", "Email déjà existant.");
+          } else if (result.code === ERRORS.OPERATION_UNAUTHORIZED) {
+            toastr.error("Erreur !", "Vous n'avez pas les droits pour effectuer cette action.");
+          } else {
+            toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
           }
-          toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
         }
       } catch (err) {
         toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
