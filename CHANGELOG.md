@@ -1,28 +1,3 @@
-# [1.390.0](https://github.com/betagouv/service-national-universel/compare/v1.389.1...v1.390.0) (2024-03-13)
-
-
-### Bug Fixes
-
-* **admin/api:** Fix de plusieurs bug ([#3662](https://github.com/betagouv/service-national-universel/issues/3662)) ([763bc3e](https://github.com/betagouv/service-national-universel/commit/763bc3ebcd436d56c3bbf5c1ef44c06a87381632))
-* **api:** Fix application tests ([3d65fe2](https://github.com/betagouv/service-national-universel/commit/3d65fe243740dc058007cf1cf17ca06a4696aa9d))
-* **misc:** Increase antivirus RAM ([#3660](https://github.com/betagouv/service-national-universel/issues/3660)) ([4fb5590](https://github.com/betagouv/service-national-universel/commit/4fb55907dcc51a1145331124f4cc5ced31c23b92))
-
-
-### Features
-
-* **admin/api:** 1757 - Pouvoir rajouter des lignes sur le pdt sans réimporté tous le pdt ([#3635](https://github.com/betagouv/service-national-universel/issues/3635)) ([f87b367](https://github.com/betagouv/service-national-universel/commit/f87b3677258aa79bd160e3b7e138b20b14ac0577))
-* **misc:** 1865 - Optimize Dockerfile ([#3650](https://github.com/betagouv/service-national-universel/issues/3650)) ([b6eb75f](https://github.com/betagouv/service-national-universel/commit/b6eb75f8811f3db380f7ad8f5a74a8628cdc2a14))
-
-## [1.389.1](https://github.com/betagouv/service-national-universel/compare/v1.389.0...v1.389.1) (2024-03-12)
-
-
-### Bug Fixes
-
-* **admin:** [CLE]- TRANSPORT - Bug export convoyeurs CLE MARS 1 ([#3653](https://github.com/betagouv/service-national-universel/issues/3653)) ([14a3643](https://github.com/betagouv/service-national-universel/commit/14a3643d80589b8953d4297f4b6fd41e43680386))
-* **admin:** referent can WITHDRAWN every young ([cf336f2](https://github.com/betagouv/service-national-universel/commit/cf336f29b6e47a83ac8691245cbf27759e9cdc78))
-* **admin:** sidebar ([#3658](https://github.com/betagouv/service-national-universel/issues/3658)) ([e316b50](https://github.com/betagouv/service-national-universel/commit/e316b50c7b3121bca3f3f1545e8667fcc8b2d263))
-* **misc:** Always run tests ([#3652](https://github.com/betagouv/service-national-universel/issues/3652)) ([394951d](https://github.com/betagouv/service-national-universel/commit/394951d263ba0aaff10673d5200fe1756d839362))
-
 # [1.389.0](https://github.com/betagouv/service-national-universel/compare/v1.388.0...v1.389.0) (2024-03-11)
 
 

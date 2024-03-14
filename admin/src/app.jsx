@@ -53,7 +53,7 @@ import Footer from "./components/footer";
 import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
 
-import { adminURL, environment } from "./config";
+import { adminURL } from "./config";
 import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
 
 import * as Sentry from "@sentry/react";
@@ -63,6 +63,7 @@ import Team from "./scenes/team";
 
 import SideBar from "./components/drawer/SideBar";
 import { getCohorts } from "./services/cohort.service";
+import RestorePreviousSignin from "./components/RestorePreviousSignin";
 
 initSentry();
 initApi();
@@ -206,6 +207,7 @@ const Home = (props) => {
 
   return (
     <div>
+      <RestorePreviousSignin />
       <div className="flex">
         <SideBar sessionsList={sessionPhase1List} />
 

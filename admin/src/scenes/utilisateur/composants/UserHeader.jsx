@@ -8,11 +8,11 @@ import History from "../../../assets/icons/History";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { setUser as setUserInRedux } from "../../../redux/auth/actions";
 import TabList from "../../../components/views/TabList";
-import API from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import Tab from "../../phase0/components/Tab";
 import { ROLES, translate } from "../../../utils";
 import { Badge } from "@snu/ds/admin";
+import { signinAs } from "@/utils/signinAs";
 
 const getSubtitle = (user) => {
   const createdAt = new Date(user.createdAt);
@@ -27,11 +27,9 @@ export default function UserHeader({ user, tab, currentUser }) {
   const handleImpersonate = async () => {
     try {
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
-      const { ok, data, token } = await API.post(`/referent/signin_as/referent/${user._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", "");
+      const data = await signinAs("referent", user._id);
+      dispatch(setUserInRedux(data));
       history.push("/dashboard");
-      if (token) API.setToken(token);
-      if (data) dispatch(setUserInRedux(data));
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));

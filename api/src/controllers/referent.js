@@ -234,6 +234,35 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
   }
 });
 
+router.post("/restore_signin", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ jwt: Joi.string().required() }).unknown().validate(req.body);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    let jwtPayload;
+    try {
+      jwtPayload = await jwt.verify(value.jwt, config.secret);
+    } catch (error) {
+      return res.status(401).send({ ok: false, user: { restriction: "public" } });
+    }
+
+    const user = await ReferentModel.findOne({ _id: jwtPayload._id, role: ROLES.ADMIN });
+    if (!user) return res.status(401).send({ ok: false, user: { restriction: "public" } });
+
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+      expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
+    });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    return res.status(200).send({ ok: true, token, data: serializeReferent(user, user) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/signup_invite/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
