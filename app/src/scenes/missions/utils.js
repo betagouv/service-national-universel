@@ -1,12 +1,13 @@
+import { apiEngagementKey, apiEngagementUrl } from "@/config";
 import { capture } from "@/sentry";
-import { API_ENGAGEMENT_KEY, API_ENGAGEMENT_URL } from "@/config";
 
 export async function sendDataToJVA(missionId) {
   try {
-    const { ok, data, code } = await fetch(API_ENGAGEMENT_URL + "/v2/activity/" + missionId + "/click?tag=MIG", {
+    const res = await fetch(apiEngagementUrl + "/v2/activity/" + missionId + "/click?tag=MIG", {
       method: "POST",
-      headers: { "X-API-KEY": API_ENGAGEMENT_KEY },
+      headers: { "X-API-KEY": apiEngagementKey },
     });
+    const { ok, data, code } = await res.json();
 
     if (!ok) {
       throw new Error(code);

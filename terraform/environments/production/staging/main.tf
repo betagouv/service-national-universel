@@ -17,15 +17,15 @@ provider "scaleway" {
 }
 
 variable "api_image_tag" {
-  type    = string
+  type     = string
   nullable = false
 }
 variable "admin_image_tag" {
-  type    = string
+  type     = string
   nullable = false
 }
 variable "app_image_tag" {
-  type    = string
+  type     = string
   nullable = false
 }
 
@@ -83,12 +83,12 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "APP_NAME"   = "api"
-    "ADMIN_URL"  = "https://${local.admin_hostname}"
-    "APP_URL"    = "https://${local.app_hostname}"
-    "CLE"        = "true"
-    "STAGING"    = "true"
-    "FOLDER_API" = "api"
+    "APP_NAME"                          = "api"
+    "ADMIN_URL"                         = "https://${local.admin_hostname}"
+    "APP_URL"                           = "https://${local.app_hostname}"
+    "CLE"                               = "true"
+    "STAGING"                           = "true"
+    "FOLDER_API"                        = "api"
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.1
     "SENTRY_RELEASE"                    = var.api_image_tag
@@ -207,6 +207,8 @@ resource "scaleway_container" "app" {
     "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.1
     "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.1
     "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
+    "DOCKER_ENV_VITE_API_ENGAGEMENT_URL"         = "https://api-engagement.beta-snu.dev"
+    "DOCKER_ENV_VITE_API_ENGAGEMENT_TOKEN"       = local.secrets.API_ENGAGEMENT_TOKEN
     "FOLDER_APP"                                 = "app"
   }
 
