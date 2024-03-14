@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
-import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 
 import { setYoung } from "./redux/auth/actions";
 import { toastr } from "react-redux-toastr";
@@ -50,6 +50,7 @@ import ModalRI from "./components/modals/ModalRI";
 
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
+import { queryClient } from "./services/react-query";
 import { ENABLE_PM, YOUNG_STATUS, shouldReAcceptRI } from "./utils";
 import {
   youngCanChangeSession,
@@ -59,7 +60,7 @@ import {
   isFeatureEnabled,
   FEATURES_NAME,
 } from "snu-lib";
-import { capture, history, initSentry, SentryRoute } from "./sentry";
+import { history, initSentry, SentryRoute } from "./sentry";
 import { cohortsInit, getCohort } from "./utils/cohorts";
 
 initSentry();
@@ -70,10 +71,6 @@ function FallbackComponent() {
 }
 
 const myFallback = <FallbackComponent />;
-
-const queryClient = new QueryClient({
-  queryCache: new QueryCache({ onError: (error) => capture(error) }),
-});
 
 export default function App() {
   return (

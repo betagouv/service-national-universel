@@ -3,7 +3,7 @@ import { IoRepeat } from "react-icons/io5";
 import { HiUsers, HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_STATUS, YOUNG_SOURCE, STATUS_CLASSE } from "snu-lib";
+import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_STATUS, YOUNG_SOURCE, STATUS_CLASSE, COHORT_TYPE } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
 import { Badge, ModalConfirmation, Select } from "@snu/ds/admin";
 import Pencil from "@/assets/icons/Pencil";
@@ -31,7 +31,7 @@ export function ChangeCohortPen({ young, onChange }) {
       // }
       const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
       if (Array.isArray(data)) {
-        const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
+        const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible, type: c.type })).filter((c) => c.name !== young.cohort);
         // TODO: rajouter un flag hidden pour les cohort non visible
 
         setOptions(cohorts);
@@ -117,7 +117,9 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 <Select
                   className="text-left"
                   placeholder="Choix de la nouvelle cohorte"
-                  options={cohorts?.map((c) => ({ ...c, label: `Cohorte ${c.name}${!c.isEligible ? " (non éligible)" : " (éligible)"}`, value: c.name }))}
+                  options={cohorts
+                    ?.filter((c) => c.type === COHORT_TYPE.VOLONTAIRE)
+                    .map((c) => ({ ...c, label: `Cohorte ${c.name}${!c.isEligible ? " (non éligible)" : " (éligible)"}`, value: c.name }))}
                   noOptionsMessage={"Aucune cohorte éligible n'est disponible."}
                   closeMenuOnSelect
                   isClearable={true}

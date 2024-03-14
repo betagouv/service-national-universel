@@ -172,10 +172,12 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const { canApply, message } = await getAuthorizationToApply(mission, young);
-    if (!canApply) {
-      console.log(message);
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
+    if (isYoung(req.user)) {
+      const { canApply, message } = await getAuthorizationToApply(mission, young);
+      if (!canApply) {
+        console.log(message);
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
+      }
     }
 
     // A young can only create their own applications.
@@ -201,6 +203,10 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
         if (!structures.map((e) => e._id.toString()).includes(value.structureId.toString())) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
+      }
+      const cohort = await CohortObject.findOne({ name: young.cohort });
+      if (!canApplyToPhase2(young, cohort)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 

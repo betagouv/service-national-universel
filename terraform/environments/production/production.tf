@@ -214,7 +214,7 @@ resource "scaleway_container" "antivirus" {
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/antivirus:${var.antivirus_image_tag}"
   port            = 8089
   cpu_limit       = 256
-  memory_limit    = 2048
+  memory_limit    = 4096
   min_scale       = 1
   max_scale       = 5
   timeout         = 60

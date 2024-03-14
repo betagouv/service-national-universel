@@ -22,7 +22,6 @@ import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress, getDataForConsentStep } from "../utils";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
-import { getAddressOptions } from "@/services/api-adresse";
 
 export default function Consentement({ step, parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -288,7 +287,7 @@ function ConsentementForm({ young, token, step, parentId }) {
               <>
                 <ResponsiveRadioButton label="Je réside..." options={livesInFranceOption} onChange={(e) => setData({ ...data, livesInFrance: e })} value={data.livesInFrance} />
                 {data.livesInFrance === FRANCE ? (
-                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} />
+                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} />
                 ) : (
                   <>
                     <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />

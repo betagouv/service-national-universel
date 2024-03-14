@@ -4,17 +4,21 @@ import Input from "../../../../../../components/forms/inputs/Input";
 import LocationMarker from "../../../../../../assets/icons/LocationMarker";
 import ButtonPrimary from "../../../../../../components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../../../../components/ui/buttons/ButtonLight";
-import { formatResult, getSuggestions } from "../../../../../../services/api-adresse";
+import useAddress from "@/services/useAddress";
 
 const emptyAddress = { address: "", zip: "", city: "" };
 
 const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
   const [formValues, setFormValues] = useState(emptyAddress);
-  const [suggestion, setSuggestion] = useState();
+  const { results, isError, refetch } = useAddress({
+    query: `${formValues.address} ${formValues.zip} ${formValues.city}`,
+    options: { limit: 1, postcode: formValues.zip },
+    enabled: false,
+  });
+  const suggestion = results?.[0];
   const [errors, setErrors] = useState({});
 
   const handleChangeValue = (inputName) => (value) => {
-    setSuggestion(undefined);
     setFormValues((prevValues) => ({
       ...prevValues,
       [inputName]: value,
@@ -44,22 +48,20 @@ const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
     if (!validateForm()) {
       return;
     }
-    const updatedSuggestion = await getSuggestions(formValues.address, formValues.city, formValues.zip);
-    setSuggestion(updatedSuggestion);
+    await refetch();
   };
 
   const onAddressVerified = (isConfirmed) => async () => {
-    const formattedSuggestion = formatResult(suggestion);
     const updates = {
       addressVerified: "true",
-      cityCode: formattedSuggestion.cityCode,
-      region: formattedSuggestion.region,
-      department: formattedSuggestion.department,
-      location: formattedSuggestion.location,
+      cityCode: suggestion.cityCode,
+      region: suggestion.region,
+      department: suggestion.department,
+      location: suggestion.location,
       // if the suggestion is not confirmed we keep the address typed by the user
-      address: isConfirmed ? formattedSuggestion.address : formValues.address,
-      zip: isConfirmed ? formattedSuggestion.zip : formValues.zip,
-      city: isConfirmed ? formattedSuggestion.city : formValues.city,
+      address: isConfirmed ? suggestion.address : formValues.address,
+      zip: isConfirmed ? suggestion.zip : formValues.zip,
+      city: isConfirmed ? suggestion.city : formValues.city,
       country: "France",
     };
     onConfirm(updates);
@@ -75,31 +77,38 @@ const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
         <Input label="Adresse" name="address" value={formValues.address} onChange={handleChangeValue("address")} error={errors.address} />
         <Input label="Code Postal" name="zip" value={formValues.zip} onChange={handleChangeValue("zip")} error={errors.zip} />
         <Input label="Ville" name="city" value={formValues.city} onChange={handleChangeValue("city")} error={errors.city} />
+        <Modal.Buttons
+          isLoading={isLoading}
+          onCancel={onCancel}
+          onConfirm={onAddressVerify}
+          cancelText="Annuler"
+          confirmText={
+            <>
+              <LocationMarker />
+              <span>Vérifier mon adresse</span>
+            </>
+          }
+        />
+
         {!suggestion && (
-          <Modal.Buttons
-            isLoading={isLoading}
-            onCancel={onCancel}
-            onConfirm={onAddressVerify}
-            cancelText="Annuler"
-            confirmText={
-              <>
-                <LocationMarker />
-                <span>Vérifier mon adresse</span>
-              </>
-            }
-          />
-        )}
-        {suggestion && !suggestion.ok && (
           <div className="flex justify-center">
             <div className="text-sm text-red-500 flex-1 pr-2">L&apos;adresse saisie n&apos;a pas été trouvée.</div>
-            <ButtonLight onClick={() => setSuggestion(null)}>Réessayer</ButtonLight>
+            <ButtonLight onClick={() => setFormValues(emptyAddress)}>Réessayer</ButtonLight>
           </div>
         )}
-        {suggestion && suggestion.ok && (
+
+        {isError && (
+          <div className="flex justify-center">
+            <div className="text-sm text-red-500 flex-1 pr-2">Une erreur est survenue lors de la recherche de l&apos;adresse.</div>
+            <ButtonLight onClick={() => setFormValues(emptyAddress)}>Réessayer</ButtonLight>
+          </div>
+        )}
+
+        {suggestion && (
           <>
             <div className="text-sm text-gray-500">Est-ce que c’est la bonne adresse ?</div>
             <strong className="text-sm font-medium text-gray-900">
-              {suggestion.properties.name}, {`${suggestion.properties.postcode} ${suggestion.properties.city}`}
+              {suggestion.address}, {`${suggestion.zip} ${suggestion.city}`}
             </strong>
             <Modal.ButtonContainer className="md:flex-col">
               <ButtonPrimary onClick={onAddressVerified(true)} disabled={isLoading}>

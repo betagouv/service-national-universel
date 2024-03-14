@@ -48,6 +48,19 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
       filter.sort(temp);
     }
 
+    const naIndex = data.findIndex((item) => item.key === "N/A");
+    const emptyIndex = data.findIndex((item) => item.key === "");
+
+    // Concatenate the arrays if both 'N/A' and '' are found
+    if (naIndex !== -1 && emptyIndex !== -1) {
+      data[naIndex].doc_count += data[emptyIndex].doc_count;
+      data.splice(emptyIndex, 1);
+    } else {
+      if (emptyIndex !== -1) {
+        data[emptyIndex].key = "N/A";
+      }
+    }
+
     setOptionsVisible(temp);
   }, [data]);
 
@@ -148,6 +161,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                         ?.map((option) => {
                           const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
                           const showCount = filter?.showCount === false ? false : true;
+
                           return (
                             <div className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50" key={option.key} onClick={() => handleSelect(option.key)}>
                               <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
