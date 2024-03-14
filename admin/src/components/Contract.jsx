@@ -377,12 +377,25 @@ export default function Contract({ young }) {
                       </div>
                       <div>
                         <p>
-                          Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé la « Réserve du service national
-                          universel », nouvelle réserve civique relevant des dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté. Dans ce nouveau
-                          cadre réglementaire, les missions d’intérêt général revêtent « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif,
-                          familial ou culturel, ou concourent à des missions de défense et de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté
-                          française et européenne ». Le décret du 29 juillet 2020 a précisé qu’une mission d’intérêt général correspond à un engagement volontaire d’une durée
-                          minimale de quatre-vingt-quatre heures, qui peut être accomplie de manière continue ou, dans la limite d’une période d’une année, de manière discontinue.
+                          Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé une réserve thématique dénommée «
+                          Réserve du service national universel », régie par les dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté.
+                        </p>
+                        <p>
+                          La réserve est ouverte aux mineurs âgés de quinze ans révolus satisfaisant aux conditions fixées par l'article 3 de la loi du 27 janvier 2017 susvisée et
+                          ayant participé au séjour de cohésion mentionné à l'article R. 113-1 du code du service national, qui accomplissent une mission d'intérêt général au titre
+                          du service national universel.
+                        </p>
+                        <p>
+                          La mission d’intérêt général revêt « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif ou culturel, ou concourent à
+                          des missions de défense et de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté française et européenne ».
+                        </p>
+                        <p>
+                          Les activités exercées dans ce cadre sont complémentaires des activités confiées aux personnels de l'organisme d'accueil et ne peuvent se substituer à la
+                          création d'un emploi ou au recrutement d'un stagiaire.
+                        </p>
+                        <p>
+                          La phase d’engagement du volontaire, à l’issue du séjour de cohésion, couvre une durée minimale de quatre-vingt-quatre heures, qui peut être accomplie en
+                          continu ou, dans la limite d’une période d’une année, de manière fractionnée.
                         </p>
                       </div>
                       <div>

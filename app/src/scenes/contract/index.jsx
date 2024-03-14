@@ -45,14 +45,27 @@ export default function Index() {
                 <h2>Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)</h2>
               </div>
             </div>
-            <div>
+            <div className="border border-black pt-8 pb-8 px-2">
               <p>
-                Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé la « Réserve du service national universel »,
-                nouvelle réserve civique relevant des dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté. Dans ce nouveau cadre réglementaire, les
-                missions d’intérêt général revêtent « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif, familial ou culturel, ou concourent à
-                des missions de défense et de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté française et européenne ». Le décret du 29 juillet 2020
-                a précisé qu’une mission d’intérêt général correspond à un engagement volontaire d’une durée minimale de quatre-vingt-quatre heures, qui peut être accomplie de
-                manière continue ou, dans la limite d’une période d’une année, de manière discontinue.
+                Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé une réserve thématique dénommée « Réserve du
+                service national universel », régie par les dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté.
+              </p>
+              <p>
+                La réserve est ouverte aux mineurs âgés de quinze ans révolus satisfaisant aux conditions fixées par l'article 3 de la loi du 27 janvier 2017 susvisée et ayant
+                participé au séjour de cohésion mentionné à l'article R. 113-1 du code du service national, qui accomplissent une mission d'intérêt général au titre du service
+                national universel.
+              </p>
+              <p>
+                La mission d’intérêt général revêt « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif ou culturel, ou concourent à des
+                missions de défense et de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté française et européenne ».
+              </p>
+              <p>
+                Les activités exercées dans ce cadre sont complémentaires des activités confiées aux personnels de l'organisme d'accueil et ne peuvent se substituer à la création
+                d'un emploi ou au recrutement d'un stagiaire.
+              </p>
+              <p>
+                La phase d’engagement du volontaire, à l’issue du séjour de cohésion, couvre une durée minimale de quatre-vingt-quatre heures, qui peut être accomplie en continu
+                ou, dans la limite d’une période d’une année, de manière fractionnée.
               </p>
             </div>
             <div>
@@ -176,13 +189,16 @@ export default function Index() {
               </div>
               <h3>b) Date d’effet et durée du contrat</h3>
               <div>
-                Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties prenantes.{" "}
-                <br />
-                La mission d’intérêt général débute le
-                <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" type="date" context={context} />
-                jusqu’au
-                <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} />
-                <br /> Le volontaire effectuera un total de
+                <p className="mb-2">
+                  Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties prenantes.{" "}
+                </p>
+                <div className="flex mb-2">
+                  <p className="mr-2">La mission d’intérêt général débute le</p>
+                  <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" type="date" context={context} />
+                  <p className="mx-2">jusqu’au</p>
+                  <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} />
+                </div>
+                Le volontaire effectuera un total de
                 <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
                 heures de MIG.
               </div>
@@ -195,16 +211,16 @@ export default function Index() {
                 <br />
                 au sein de la structure d’accueil retenue par l’administration :
                 <ContractField className="lg" name="structureName" placeholder="Nom de la structure" context={context} />
-                <p>
+                <p className="my-2">
                   La durée quotidienne de la mission est égale à huit heures au maximum. Une pause de trente minutes doit être appliquée pour toute période de mission ininterrompue
                   atteignant quatre heures et demie.
                 </p>
-                <p>
+                <p className="mb-2">
                   Les missions effectuées entre 22 heures et 6 heures sont interdites. Pour les missions effectuées de manière continue, le repos hebdomadaire est de deux jours
                   consécutifs au minimum.
                 </p>
-                <p>Si le volontaire est scolarisé, la mission ne peut être effectuée sur le temps scolaire.</p>
-                <p>
+                <p className="mb-2">Si le volontaire est scolarisé, la mission ne peut être effectuée sur le temps scolaire.</p>
+                <p className="mb-2">
                   Si le volontaire travaille, le temps de travail cumulé avec le temps d’accomplissement de la mission d’intérêt général ne peut excéder 8 heures par jour et 35
                   heures par semaine.
                 </p>
@@ -213,37 +229,41 @@ export default function Index() {
                 Le volontaire bénéficie, pour assurer l’accomplissement de sa mission, de l’accompagnement d’un tuteur de mission
                 <ContractField name="tutorFirstName" placeholder="Prénom" context={context} />
                 <ContractField name="tutorLastName" placeholder="Nom" context={context} />
-                de la structure d’accueil. Le volontaire bénéficie, par son tuteur, d’entretiens réguliers permettant un suivi de la réalisation des missions ainsi que, le cas
-                échéant, d’un accompagnement renforcé.
+                de la structure d’accueil.
+                <p className="mt-2">
+                  Le volontaire bénéficie, par son tuteur, d’entretiens réguliers permettant un suivi de la réalisation des missions ainsi que, le cas échéant, d’un accompagnement
+                  renforcé.
+                </p>
               </div>
               <h3>d) Obligations réciproques des parties</h3>
               <div>
-                <p>
-                  L’Etat, représenté par le directeur académique des services de l’Education nationale, valide la mission d’intérêt général et s’assure de la qualité des conditions
-                  de réalisation de cette mission au regard des finalités du SNU.
+                <p className="mb-2">
+                  <b>L’Etat, représenté par le directeur académique des services de l’Education nationale</b>, valide la mission d’intérêt général et s’assure de la qualité des
+                  conditions de réalisation de cette mission au regard des finalités du SNU.
                 </p>
-                <p>
-                  La structure d’accueil s’engage à proposer des missions permettant la mobilisation du volontaire en faveur de l’intérêt général. Un tuteur est nommé au sein de la
-                  structure afin de s’assurer du suivi du volontaire et de la qualité des conditions de son accueil.
-                </p>
-                <p>
+                <p className="mb-2">
+                  <b>La structure d’accueil</b> s’engage à proposer des missions permettant la mobilisation du volontaire en faveur de l’intérêt général. Un tuteur est nommé au
+                  sein de la structure afin de s’assurer du suivi du volontaire et de la qualité des conditions de son accueil.
+                  <br />
                   Le cas échéant, la structure d’accueil précise les frais qu’elle entend prendre en charge, totalement ou partiellement, dans le cadre de la mission d’intérêt
                   général (frais de transports, repas, hébergement…).
                 </p>
                 <p>
-                  Le volontaire s’engage à respecter le règlement intérieur de la structure qui l’accueille, à respecter les personnes, le matériel et les locaux et à agir en
-                  conformité avec les exigences de son engagement dans le cadre du SNU : ponctualité, politesse, implication. Le volontaire est tenu à la discrétion pour les faits
-                  et informations dont il a connaissance dans l’exercice de ses missions. Il est également tenu aux obligations de convenance et de réserve inhérentes à ses
+                  <b>Le volontaire</b> s’engage à respecter le règlement intérieur de la structure qui l’accueille, à respecter les personnes, le matériel et les locaux et à agir
+                  en conformité avec les exigences de son engagement dans le cadre du SNU : ponctualité, politesse, implication. Le volontaire est tenu à la discrétion pour les
+                  faits et informations dont il a connaissance dans l’exercice de ses missions. Il est également tenu aux obligations de convenance et de réserve inhérentes à ses
                   fonctions.
                 </p>
-                <p>Le volontaire exécute la mission d’intérêt général à titre bénévole.</p>
-                <p>
+                <p className="mb-2">
+                  <b>Le volontaire exécute la mission d’intérêt général à titre bénévole.</b>
+                </p>
+                <p className="mb-2">
                   L&apos;engagement, l&apos;affectation et l&apos;activité du volontaire ne sont régis ni par le code du travail, ni par le chapitre Ier de la loi n° 84-16 du 11
                   janvier 1984 portant dispositions statutaires relatives à la fonction publique de l'Etat, le chapitre Ier de la loi n° 84-53 du 26 janvier 1984 portant
                   dispositions statutaires relatives à la fonction publique territoriale ou le chapitre Ier de la loi n° 86-33 du 9 janvier 1986 portant dispositions statutaires
                   relatives à la fonction publique hospitalière.
                 </p>
-                <p>
+                <p className="mb-2">
                   Le cas échéant, la structure d’accueil, directement ou par le tuteur désigné, informe le représentant de l’Etat, signataire du présent contrat, des difficultés
                   rencontrées dans l’exécution du présent contrat.
                 </p>

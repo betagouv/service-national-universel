@@ -6,6 +6,26 @@
     <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
   </head>
 
+  <style>
+    .flex{
+      display: flex
+    }
+  .forheadBorder {
+    border: 1px solid black;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .textMarging {
+    padding-right: 5px;
+  }
+  .specialTextMargin {
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+  </style>
+
   <body id="contract" style="margin: 20px">
     <!-- Oui j'ai eu la flemme de tout copier coller -->
     <div class="title" style="display: flex; margin-bottom: 3rem">
@@ -14,14 +34,21 @@
         <h2>Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)</h2>
       </div>
     </div>
-    <div>
+    <div class="forheadBorder">
       <p>
-        Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé la « Réserve du service national universel », nouvelle
-        réserve civique relevant des dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté. Dans ce nouveau cadre réglementaire, les missions d’intérêt
-        général revêtent « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif, familial ou culturel, ou concourent à des missions de défense et
-        de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté française et européenne ». Le décret du 29 juillet 2020 a précisé qu’une mission d’intérêt
-        général correspond à un engagement volontaire d’une durée minimale de quatre-vingt-quatre heures, qui peut être accomplie de manière continue ou, dans la limite d’une
-        période d’une année, de manière discontinue.
+        Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé une réserve thématique dénommée « Réserve du service national universel », régie par les dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté.
+      </p>
+      <p>
+        La réserve est ouverte aux mineurs âgés de quinze ans révolus satisfaisant aux conditions fixées par l'article 3 de la loi du 27 janvier 2017 susvisée et ayant participé au séjour de cohésion mentionné à l'article R. 113-1 du code du service national, qui accomplissent une mission d'intérêt général au titre du service national universel.
+      </p>
+      <p>
+        La mission d’intérêt général revêt « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif ou culturel, ou concourent à des missions de défense et de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté française et européenne ».
+      </p>
+      <p>
+        Les activités exercées dans ce cadre sont complémentaires des activités confiées aux personnels de l'organisme d'accueil et ne peuvent se substituer à la création d'un emploi ou au recrutement d'un stagiaire.
+      </p>
+      <p>
+        La phase d’engagement du volontaire, à l’issue du séjour de cohésion, couvre une durée minimale de quatre-vingt-quatre heures, qui peut être accomplie en continu ou, dans la limite d’une période d’une année, de manière fractionnée.
       </p>
     </div>
     <div>
@@ -160,14 +187,18 @@
       </div>
       <h3>b) Date d’effet et durée du contrat</h3>
       <div class="field" name="missionStartAt" placeholder="jj/mm/yyyy" type="date" context="{context}">
-        Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties prenantes. La mission
-        d’intérêt général débute le
-        <p class="attributes">{{missionStartAt}}</p>
-        jusqu'au
-        <p class="attributes">{{missionEndAt}}</p>
-        . Le volontaire effectuera un total de
-        <p class="attributes">{{missionDuration}}</p>
-        heures de MIG.
+        Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties prenantes.
+        <div class="flex">
+          <p class="textMarging">La mission d’intérêt général débute le</p>
+          <p class="attributes">{{missionStartAt}}</p>
+          <p class="specialTextMargin">jusqu'au</p>
+          <p class="attributes">{{missionEndAt}}.</p>
+        </div>
+        <div class="flex">
+          <p>Le volontaire effectuera un total de</p>
+          <p class="attributes specialTextMargin">{{missionDuration}} heures</p>
+          <p>de MIG.</p>
+        </div>
       </div>
       <h3>c) Conditions d’exercice des missions</h3>
       <div>
