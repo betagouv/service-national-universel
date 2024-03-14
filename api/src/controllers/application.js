@@ -28,6 +28,7 @@ const {
   canViewContract,
   translateAddFilePhase2,
   translateAddFilesPhase2,
+  APPLICATION_STATUS,
 } = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
 const {
@@ -47,6 +48,7 @@ const mime = require("mime-types");
 const patches = require("./patches");
 const scanFile = require("../utils/virusScanner");
 const { getAuthorizationToApply } = require("../services/application");
+const { sendTrackingDataToJva } = require("../services/jeveuxaider");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
@@ -150,6 +152,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    const { clickId } = Joi.object({ clickId: Joi.string().optional() }).validate(req.query, { stripUnknown: true }).value;
+
     if (!("priority" in value)) {
       const applications = await ApplicationObject.find({ youngId: value.youngId });
       value.priority = applications.length + 1;
@@ -207,6 +211,11 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     }
     value.contractStatus = "DRAFT";
     const data = await ApplicationObject.create(value);
+
+    if (data?.isJvaMission) {
+      await sendTrackingDataToJva(mission.jvaMissionId, data.status, clickId);
+    }
+
     await updateYoungPhase2Hours(young, req.user);
     await updateStatusPhase2(young, req.user);
     await updateMission(data, req.user);
@@ -295,6 +304,11 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       application.set({ status: valueKey.key });
       await application.save({ fromUser: req.user });
 
+      if (application.isJvaMission) {
+        const mission = await MissionObject.findById(application.missionId).project({ jvaMissionId: 1 });
+        await sendTrackingDataToJva(mission.jvaMissionId, application.status);
+      }
+
       await updateYoungPhase2Hours(young, req.user);
       await updateStatusPhase2(young, req.user);
       await updateYoungStatusPhase2Contract(young, req.user);
@@ -349,6 +363,11 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
     application.set(value);
     await application.save({ fromUser: req.user });
+
+    if (application.isJvaMission) {
+      const mission = await MissionObject.findById(application.missionId).project({ jvaMissionId: 1 });
+      await sendTrackingDataToJva(mission.jvaMissionId, application.status);
+    }
 
     await updateYoungPhase2Hours(young, req.user);
     await updateStatusPhase2(young, req.user);

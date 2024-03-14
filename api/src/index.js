@@ -1,11 +1,10 @@
 (async () => {
-
   require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
   if (process.env.RUN_CRONS) {
     const { PORT } = require("./config.js");
     const { initSentry } = require("./sentry");
-    initSentry()
+    initSentry();
     const initDB = require("./mongo");
     await initDB();
     require("./crons");
@@ -112,12 +111,7 @@
   app.use(loggingMiddleware);
 
   // WARNING : CleverCloud only
-  if (
-    process.env.RUN_CRONS_CC
-    && ENVIRONMENT === "production"
-    && process.env.CC_DEPLOYMENT_ID
-    && process.env.INSTANCE_NUMBER === "0"
-  ) {
+  if (process.env.RUN_CRONS_CC && ENVIRONMENT === "production" && process.env.CC_DEPLOYMENT_ID && process.env.INSTANCE_NUMBER === "0") {
     require("./crons");
   }
 
@@ -168,7 +162,7 @@
   app.use("/zammood", require("./controllers/zammood"));
 
   //services
-  app.use("/jeveuxaider", require("./services/jeveuxaider"));
+  app.use("/jeveuxaider", require("./services/jeveuxaider").router);
 
   app.get("/memory-stats", async (req, res) => {
     // ! Memory usage

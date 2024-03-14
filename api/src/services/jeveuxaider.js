@@ -176,4 +176,46 @@ router.get("/actions", async (req, res) => {
   }
 });
 
-module.exports = router;
+const statusOptions = {
+  [APPLICATION_STATUS.WAITING_VALIDATION]: {
+    method: "POST",
+  },
+  [APPLICATION_STATUS.VALIDATED]: {
+    method: "PUT",
+    body: JSON.stringify({ status: "VALIDATE" }),
+  },
+  [APPLICATION_STATUS.DONE]: {
+    method: "PUT",
+    body: JSON.stringify({ status: "DONE" }),
+  },
+};
+
+/**
+ *
+ * @param {string} missionId - JVA ID, not SNU ID
+ * @param {"WAITING_VALIDATION" | "VALIDATED" | "DONE"} status -  We only track application creation, validation and completion (not cancellation, refusal, etc.)
+ * @param {string} [clickId]  - Optional. Click ID stored in local storage to match a redirection to an application creation.
+ */
+async function sendTrackingDataToJva(missionId, status, clickId) {
+  try {
+    if (!Object.keys(statusOptions).includes(status)) {
+      return;
+    }
+
+    const url = `${config.API_ENGAGEMENT_URL}/v2/activity/${missionId}/click?tag=MIG${clickId && `&clickId=${clickId}`}`;
+
+    const options = {
+      headers: { "X-API-KEY": config.API_ENGAGEMENT_KEY },
+      ...statusOptions[status],
+    };
+
+    const { ok, code } = await fetch(url, options);
+    if (!ok) {
+      throw new Error(code);
+    }
+  } catch (e) {
+    capture(e);
+  }
+}
+
+module.exports = { router, sendTrackingDataToJva };

@@ -47,8 +47,11 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
         application.status = APPLICATION_STATUS.WAITING_VERIFICATION;
       }
     }
+
+    const clickId = localStorage.getItem("jva_mission_click_id");
+
     try {
-      const { ok, data, code } = await api.post(`/application`, application);
+      const { ok, data, code } = await api.post(`/application${clickId && `?clickId=${clickId}`}`, application);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
       const responseNotification = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
       if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
@@ -126,7 +129,9 @@ const Button = styled.div`
   cursor: pointer;
   background-color: #31c48d;
   border-radius: 30px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   color: #fff;
   font-size: 1rem;
   padding: 0.8rem 3rem;
