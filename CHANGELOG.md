@@ -1,3 +1,12 @@
+# [1.391.0](https://github.com/betagouv/service-national-universel/compare/v1.390.0...v1.391.0) (2024-03-14)
+
+
+### Features
+
+* **api:** Fix some error on DeleteCNICron ([#3657](https://github.com/betagouv/service-national-universel/issues/3657)) ([a855edd](https://github.com/betagouv/service-national-universel/commit/a855edd3c69857d533068a497d917fbf296d0c6e))
+* **app,admin:** 1964 - Modification du contrat d'engagement ([#3656](https://github.com/betagouv/service-national-universel/issues/3656)) ([328cfb1](https://github.com/betagouv/service-national-universel/commit/328cfb1856d7eb6e646f2bfa8b0063d01535308a))
+* **lib:** update Attestation Phase 1 ([#3661](https://github.com/betagouv/service-national-universel/issues/3661)) ([19a6de9](https://github.com/betagouv/service-national-universel/commit/19a6de9908ce2ed2aa1acc8d321e9d8d0bd637c5))
+
 # [1.390.0](https://github.com/betagouv/service-national-universel/compare/v1.389.1...v1.390.0) (2024-03-13)
 
 
