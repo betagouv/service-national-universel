@@ -24,7 +24,11 @@ WORKDIR /app
 # First install dependencies (as they change less often)
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
+# command sh -c node src/build-only-on-clevercloud.js
 COPY --from=builder /app/out/full/admin/src/build-only-on-clevercloud.js ./admin/src/build-only-on-clevercloud.js
+# copy:dsfr
+RUN mkdir ./admin/public
+# snu-lib rollup -c
 COPY --from=builder /app/out/full/packages/ ./packages/
 RUN npm install
 
@@ -43,10 +47,10 @@ LABEL org.opencontainers.image.description="This image provides a consistent and
 
 COPY --from=installer /app/admin/build/ /usr/share/nginx/html
 COPY --from=builder /app/admin/docker_start.sh .
-COPY --from=builder /app/app/docker_nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/admin/docker_nginx.conf /etc/nginx/templates/default.conf.template
 
 RUN chmod +x ./docker_start.sh
 
 
-
-CMD ["./docker_start.sh"]
+# override default entrypoint
+ENTRYPOINT ["./docker_start.sh"]

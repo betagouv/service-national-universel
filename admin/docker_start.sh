@@ -26,4 +26,4 @@ sed '/<noscript> You need to enable JavaScript to run this app. <\/noscript>/a\
 cd -
 
 # Start nginx
-exec nginx -g "daemon off;"
+exec /docker-entrypoint.sh nginx -g "daemon off;"
