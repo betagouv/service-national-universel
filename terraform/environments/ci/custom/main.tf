@@ -176,6 +176,7 @@ resource "scaleway_container" "admin" {
   deploy          = true
 
   environment_variables = {
+    "NGINX_HOSTNAME"            = local.admin_hostname
     "APP_NAME"                  = "admin"
     "CLE"                       = "true"
     "STAGING"                   = "true"
@@ -223,6 +224,7 @@ resource "scaleway_container" "app" {
   deploy          = true
 
   environment_variables = {
+    "NGINX_HOSTNAME"            = local.app_hostname
     "APP_NAME"                  = "app"
     "CLE"                       = "true"
     "STAGING"                   = "true"
