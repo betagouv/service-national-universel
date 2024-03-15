@@ -224,7 +224,6 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
     else if (type === "young") {
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
-      return res.status(200).send({ ok: true });
     }
 
     return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });

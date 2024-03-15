@@ -8,10 +8,11 @@ const signinAs = async (type, userId) => {
   if (!ok) throw new Error("Une erreur est survenue lors de la connexion");
   if (!data) throw new Error("Erreur : aucune données d'utilisateur");
   if (!token) throw new Error("Erreur : aucun token");
-
-  const previousToken = api.getToken();
-  store.dispatch(setPreviousSignin(previousToken));
-  api.setToken(token);
+  if (type === "referent") {
+    const previousToken = api.getToken();
+    store.dispatch(setPreviousSignin(previousToken));
+    api.setToken(token);
+  }
 
   return data;
 };

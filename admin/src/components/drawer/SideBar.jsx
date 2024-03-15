@@ -41,6 +41,8 @@ const SideBar = (props) => {
 
   //State
   const [open, setOpen] = React.useState(false);
+  const test = useSelector((state) => state.Auth.previousSigninToken);
+  console.log("test", test);
   const [openInvite, setOpenInvite] = React.useState(false);
   const [dropDownOpen, setDropDownOpen] = React.useState("");
 
@@ -254,8 +256,8 @@ const SideBar = (props) => {
   };
 
   return (
-    <div className={`${open ? "w-[250px]" : "w-[88px]"} sticky flex flex-col h-screen max-h-screen inset-y-0 bg-[#25294F] z-50`}>
-      <div className="flex flex-col justify-between h-full max-h-full">
+    <div className={`${open ? "w-[250px]" : "w-[88px]"} ${test ? "max-h-[95vh] top-[5vh]" : "h-screen max-h-screen"} sticky flex flex-col inset-y-0 bg-[#25294F] z-40`}>
+      <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} />
         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
         {[ROLES.HEAD_CENTER].includes(user?.role) && <Session />}

@@ -208,9 +208,9 @@ const Home = (props) => {
   return (
     <div>
       <RestorePreviousSignin />
+
       <div className="flex">
         <SideBar sessionsList={sessionPhase1List} />
-
         <div className="flex flex-col w-full">
           <div className={`flex-1  min-h-screen`}>
             <Switch>
