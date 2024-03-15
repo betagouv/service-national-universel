@@ -178,7 +178,6 @@ resource "scaleway_container" "admin" {
   environment_variables = {
     "NGINX_HOSTNAME"            = local.admin_hostname
     "APP_NAME"                  = "admin"
-    "CLE"                       = "true"
     "STAGING"                   = "true"
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
@@ -226,7 +225,6 @@ resource "scaleway_container" "app" {
   environment_variables = {
     "NGINX_HOSTNAME"            = local.app_hostname
     "APP_NAME"                  = "app"
-    "CLE"                       = "true"
     "STAGING"                   = "true"
     "ADMIN_URL" = "https://${local.admin_hostname}"
     "API_URL"   = "https://${local.api_hostname}"

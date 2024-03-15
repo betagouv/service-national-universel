@@ -147,7 +147,7 @@ resource "scaleway_container" "admin" {
   name            = "staging-admin"
   namespace_id    = scaleway_container_namespace.staging.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/admin:${var.admin_image_tag}"
-  port            = 8080
+  port            = 80
   cpu_limit       = 256
   memory_limit    = 256
   min_scale       = 1
@@ -159,21 +159,21 @@ resource "scaleway_container" "admin" {
   deploy          = true
 
   environment_variables = {
-    "APP_NAME"                                   = "admin"
-    "CLE"                                        = "true"
-    "STAGING"                                    = "true"
-    "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
-    "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
-    "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.1
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.1
-    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
+    "NGINX_HOSTNAME"            = local.admin_hostname
+    "APP_NAME"                  = "admin"
+    "STAGING"                   = "true"
+    "ADMIN_URL"                  = "https://${local.admin_hostname}"
+    "API_URL"                    = "https://${local.api_hostname}"
+    "APP_URL"                    = "https://${local.app_hostname}"
+    "SENTRY_SESSION_SAMPLE_RATE" = 0.1
+    "SENTRY_TRACING_SAMPLE_RATE" = 0.1
+    "SUPPORT_URL"                = "https://support.beta-snu.dev"
   }
 
   secret_environment_variables = {
-    "DOCKER_ENV_VITE_SENTRY_URL"            = local.secrets.SENTRY_URL
+    "SENTRY_URL"            = local.secrets.SENTRY_URL
     "SENTRY_AUTH_TOKEN"                     = local.secrets.SENTRY_AUTH_TOKEN
-    "DOCKER_ENV_VITE_USERBACK_ACCESS_TOKEN" = local.secrets.USERBACK_ACCESS_TOKEN
+    "VITE_USERBACK_ACCESS_TOKEN" = local.secrets.USERBACK_ACCESS_TOKEN
   }
 }
 
@@ -186,7 +186,7 @@ resource "scaleway_container" "app" {
   name            = "staging-app"
   namespace_id    = scaleway_container_namespace.staging.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
-  port            = 8080
+  port            = 80
   cpu_limit       = 256
   memory_limit    = 256
   min_scale       = 1
@@ -198,20 +198,19 @@ resource "scaleway_container" "app" {
   deploy          = true
 
   environment_variables = {
-    "APP_NAME"                                   = "app"
-    "CLE"                                        = "true"
-    "STAGING"                                    = "true"
-    "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
-    "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
-    "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.1
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.1
-    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.beta-snu.dev"
-    "FOLDER_APP"                                 = "app"
+    "NGINX_HOSTNAME"            = local.app_hostname
+    "APP_NAME"                  = "app"
+    "STAGING"                   = "true"
+    "ADMIN_URL" = "https://${local.admin_hostname}"
+    "API_URL"   = "https://${local.api_hostname}"
+    "APP_URL"   = "https://${local.app_hostname}"
+    "SENTRY_SESSION_SAMPLE_RATE" = 0.1
+    "SENTRY_TRACING_SAMPLE_RATE" = 0.1
+    "SUPPORT_URL" = "https://support.beta-snu.dev"
   }
 
   secret_environment_variables = {
-    "DOCKER_ENV_VITE_SENTRY_URL" = local.secrets.SENTRY_URL
+    "SENTRY_URL" = local.secrets.SENTRY_URL
     "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
   }
 }
