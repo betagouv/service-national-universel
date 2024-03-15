@@ -1,3 +1,10 @@
+# [1.392.0](https://github.com/betagouv/service-national-universel/compare/v1.391.0...v1.392.0) (2024-03-15)
+
+
+### Features
+
+* **admin:** add meeting to convocation CLE ([#3666](https://github.com/betagouv/service-national-universel/issues/3666)) ([6b32403](https://github.com/betagouv/service-national-universel/commit/6b3240324e2e2da714e552e20f3963b8f72726c5))
+
 # [1.391.0](https://github.com/betagouv/service-national-universel/compare/v1.390.0...v1.391.0) (2024-03-14)
 
 
