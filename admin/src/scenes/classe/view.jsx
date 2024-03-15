@@ -461,13 +461,13 @@ export default function View() {
                     <Label title="Transport" name="ligneBus" />
                     <InputText className="mb-3" label="Numéro de transport" value={infoBus.busId} disabled />
                     <Label title="Aller" name="Aller" />
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <InputText className="mb-3" label="Date&nbsp;de&nbsp;départ" value={infoBus.departureDate} disabled />
                       <InputText className="mb-3" label="Heure&nbsp;de&nbsp;convocation" value={infoBus.meetingHour} disabled />
                       <InputText className="mb-3" label="Heure&nbsp;de&nbsp;départ" value={infoBus.departureHour} disabled />
                     </div>
                     <Label title="Retour" name="Retour" />
-                    <div className="flex gap-2 w-full">
+                    <div className="flex gap-3 w-full">
                       <InputText className="mb-3 w-1/2" label="Date&nbsp;de&nbsp;retour" value={infoBus.returnDate} disabled />
                       <InputText className="mb-3 w-1/2" label="Heure&nbsp;de&nbsp;retour" value={infoBus.returnHour} disabled />
                     </div>
