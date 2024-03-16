@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -7,19 +6,24 @@ import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-l
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
 import History from "../../../assets/icons/History";
-import Breadcrumbs from "../../../components/Breadcrumbs";
-import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
-import SelectAction from "../../../components/SelectAction";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { PlainButton } from "../components/Buttons";
-import Select from "../components/Select";
-import { TabItem, Title, translateStatus } from "../components/commons";
+import { translateStatus } from "../components/commons";
 import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
-import Excel from "./components/Icons/Excel.png";
 import ListPanel from "./modificationPanel/List";
-import { getCohortSelectOptions } from "@/services/cohort.service";
+import { NewGetCohortSelectOptions } from "@/services/cohort.service";
+import { Button, Container, Header, Page, Navbar, DropdownButton, Select } from "@snu/ds/admin";
+import { HiOutlineChartSquareBar, HiOutlineAdjustments } from "react-icons/hi";
+import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
+import { GoPlus } from "react-icons/go";
+import Historic from "./Historic";
+import ListeDemandeModif from "./ListeDemandeModif";
+import plausibleEvent from "@/services/plausible";
+import { FaMagnifyingGlass } from "react-icons/fa6";
+import { FiFolderPlus } from "react-icons/fi";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -31,79 +35,10 @@ export default function List() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
   const history = useHistory();
+  const [showHistoric, setShowHistoric] = useState(false);
+  const [showModifications, setShowModifications] = useState(false);
+  const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const cohortList = getCohortSelectOptions(cohorts);
-    setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[0].value);
-  }, []);
-
-  const getPlanDetransport = async () => {
-    try {
-      const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/cohort/${cohort}/hasValue`);
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération du plan de transport", translate(code));
-      }
-      setHasValue(reponseBus);
-      setIsLoading(false);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
-    }
-  };
-
-  React.useEffect(() => {
-    if (user.role === ROLES.HEAD_CENTER && sessionPhase1) {
-      history.push(`/ligne-de-bus?cohort=${sessionPhase1.cohort}`);
-      setCohort(sessionPhase1.cohort);
-    }
-    setIsLoading(true);
-    getPlanDetransport();
-  }, [cohort]);
-
-  if (isLoading) return <Loader />;
-
-  return (
-    <>
-      <Breadcrumbs items={[{ label: "Plan de transport" }]} />
-      <div className="flex w-full flex-col px-8 pb-8 ">
-        <div className="flex items-center justify-between py-8">
-          <Title>Plan de transport</Title>
-          <Select
-            options={cohortList}
-            value={cohort}
-            disabled={user.role === ROLES.HEAD_CENTER}
-            onChange={(e) => {
-              setCohort(e);
-              history.replace({ search: `?cohort=${e}` });
-            }}
-          />
-        </div>
-        {hasValue ? (
-          <ReactiveList cohort={cohort} history={history} />
-        ) : (
-          <div className="m-auto flex w-[450px] flex-col items-center justify-center gap-4 pt-12">
-            <img src={Excel} alt="Excel" className="w-32 bg-[#f4f5f7]" />
-            <div className="text-2xl font-bold leading-7 text-gray-800">Aucun document importé</div>
-            {[ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) && (
-              <>
-                <div className="text-center text-sm leading-5 text-gray-800">
-                  Importez votre plan de transport au format .xls (fichier Excel) afin de voir apparaître ici le plan de transport.
-                </div>
-                <PlainButton className="mt-2" onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}`)}>
-                  Importer mon fichier
-                </PlainButton>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-    </>
-  );
-}
-
-const ReactiveList = ({ cohort, history }) => {
-  const { user } = useSelector((state) => state.Auth);
   const [currentTab, setCurrentTab] = React.useState("aller");
   const [panel, setPanel] = React.useState({ open: false, id: null });
   const cohortInURL = new URLSearchParams(history.location.search).get("cohort");
@@ -197,185 +132,321 @@ const ReactiveList = ({ cohort, history }) => {
     },
   ].filter((e) => e);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (cohortInURL) return;
     if (!selectedFilters.cohort) setSelectedFilters({ ...selectedFilters, ["cohort"]: { filter: [cohort] } });
   }, [selectedFilters]);
 
+  useEffect(() => {
+    const cohortList = NewGetCohortSelectOptions(cohorts);
+    setCohortList(cohortList);
+    if (!cohort) setCohort(cohortList[0].value);
+  }, []);
+
+  const getPlanDetransport = async () => {
+    try {
+      const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/cohort/${cohort}/hasValue`);
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération du plan de transport", translate(code));
+      }
+      setHasValue(reponseBus);
+      setIsLoading(false);
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+    }
+  };
+
+  useEffect(() => {
+    if (user.role === ROLES.HEAD_CENTER && sessionPhase1) {
+      history.push(`/ligne-de-bus?cohort=${sessionPhase1.cohort}`);
+      setCohort(sessionPhase1.cohort);
+    }
+    setIsLoading(true);
+    getPlanDetransport();
+  }, [cohort]);
+
+  if (isLoading) return <Loader />;
+
   return (
-    <>
-      <div className="flex flex-1">
-        <TabItem icon={<BsArrowRight />} title="Aller" onClick={() => setCurrentTab("aller")} active={currentTab === "aller"} />
-        <TabItem icon={<BsArrowLeft />} title="Retour" onClick={() => setCurrentTab("retour")} active={currentTab === "retour"} />
-      </div>
-      <div className="mb-8 flex flex-col rounded-lg bg-white py-4">
-        <div className="flex items-center justify-between bg-white px-4 pt-2">
-          <div className="flex items-center gap-2">
-            <Filters
-              defaultUrlParam={`cohort=${cohort}`}
-              pageId={pageId}
-              route="/elasticsearch/plandetransport/search"
-              setData={(value) => setData(value)}
-              filters={filterArray}
-              searchPlaceholder="Rechercher une ligne (numéro, ville, region)"
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
+    <Page>
+      <Header
+        title="Plan de transport"
+        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Plan de transport" }]}
+        actions={
+          <>
+            {isSelectMenuOpen && <FaMagnifyingGlass size={25} className="text-gray-400 mr-3" />}
+            <Select
+              options={cohortList}
+              value={cohortList.find((e) => e.value === cohort)}
+              defaultValue={cohort}
+              maxMenuHeight={520}
+              className="w-[500px]"
+              disabled={user.role === ROLES.HEAD_CENTER}
+              onMenuOpen={() => setIsSelectMenuOpen(true)}
+              onMenuClose={() => setIsSelectMenuOpen(false)}
+              onChange={(e) => {
+                setCohort(e.value);
+                setIsSelectMenuOpen(false);
+                history.replace({ search: `?cohort=${e.value}` });
+              }}
+            />
+          </>
+        }
+      />
+      {hasValue && (
+        <Navbar
+          tab={[
+            {
+              title: "Aller",
+              leftIcon: <LuArrowRightCircle size={20} className="mt-0.5 ml-2.5" />,
+              isActive: currentTab === "aller",
+              onClick: () => {
+                setCurrentTab("aller");
+                setShowHistoric(false);
+                setShowModifications(false);
+              },
+            },
+            {
+              title: "Retour",
+              leftIcon: <LuArrowLeftCircle size={20} className="mt-0.5 ml-2.5" />,
+              isActive: currentTab === "retour",
+              onClick: () => {
+                setCurrentTab("retour");
+                setShowHistoric(false);
+                setShowModifications(false);
+              },
+            },
+            ...(user.role !== ROLES.HEAD_CENTER
+              ? [
+                  {
+                    title: "Historique",
+                    leftIcon: <LuHistory size={20} className="mt-0.5 ml-2.5" />,
+                    isActive: currentTab === "historique",
+                    onClick: () => {
+                      setCurrentTab("historique");
+                      setShowModifications(false);
+                      setShowHistoric(true);
+                      plausibleEvent(`Historique du PDT - ${cohort}`);
+                    },
+                  },
+                  {
+                    title: "Demande de modification",
+                    leftIcon: <HiOutlineAdjustments size={22} className="mt-0.5 ml-2.5" />,
+                    isActive: currentTab === "modification",
+                    onClick: () => {
+                      setCurrentTab("modification");
+                      setShowHistoric(false);
+                      setShowModifications(true);
+                      plausibleEvent(`Demande de modifications du PDT - ${cohort}`);
+                    },
+                  },
+                ]
+              : []),
+          ]}
+          button={[
+            <Button
+              title="Importer des lignes supplémentaires"
+              leftIcon={<GoPlus size={20} className="mt-0.5" />}
+              key={"btn-2"}
+              type="wired"
+              onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
+            />,
+            returnSelect(cohort, filterArray, selectedFilters, user),
+          ]}
+        />
+      )}
+
+      {hasValue && !showHistoric && !showModifications && (
+        <Container className="!p-0">
+          <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+            <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
+              <Filters
+                defaultUrlParam={`cohort=${cohort}`}
+                pageId={pageId}
+                route="/elasticsearch/plandetransport/search"
+                setData={(value) => setData(value)}
+                filters={filterArray}
+                searchPlaceholder="Rechercher une ligne (numéro, ville, region)"
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+                paramData={paramData}
+                setParamData={setParamData}
+                size={size}
+              />
+              <SortOption
+                sortOptions={[
+                  { label: "Nom (A > Z)", field: "busId.keyword", order: "asc" },
+                  { label: "Nom (Z > A)", field: "busId.keyword", order: "desc" },
+                ]}
+                selectedFilters={selectedFilters}
+                paramData={paramData}
+                setParamData={setParamData}
+              />
+            </div>
+
+            <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+              <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+              <SelectedFilters
+                filterArray={filterArray}
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+                paramData={paramData}
+                setParamData={setParamData}
+              />
+            </div>
+            <ResultTable
               paramData={paramData}
               setParamData={setParamData}
+              currentEntryOnPage={data?.length}
               size={size}
+              setSize={setSize}
+              render={
+                <div className="mt-6 mb-2 flex w-full flex-col">
+                  <hr />
+                  <div className="flex w-full items-center py-3 px-4 text-xs uppercase text-gray-400">
+                    <div className="w-[30%]">Lignes</div>
+                    <div className="w-[40%]">Points de rassemblements</div>
+                    <div className="w-[15%]">Centres de destinations</div>
+                    <div className="w-[10%]">Taux de remplissage</div>
+                    <div className="h-1 w-[5%]"></div>
+                  </div>
+                  {data?.map((hit) => {
+                    return <Line key={hit._id} hit={hit} currentTab={currentTab} setPanel={setPanel} />;
+                  })}
+                  <hr />
+                </div>
+              }
             />
+            <ListPanel busId={panel?.id} open={panel?.open} setOpen={setPanel} />
           </div>
-          <div className="flex items-center gap-2">
-            {user.role !== ROLES.HEAD_CENTER ? (
+        </Container>
+      )}
+      {hasValue && showHistoric && !showModifications && (
+        <Container className="!p-0">
+          <Historic />
+        </Container>
+      )}
+      {hasValue && !showHistoric && showModifications && <Container className="!p-0">{<ListeDemandeModif />}</Container>}
+      {!hasValue && !showHistoric && !showModifications && (
+        <Container className="!p-8">
+          <div className="m-auto flex w-full flex-col items-center justify-center gap-4 pt-12 bg-gray-50 pb-5">
+            <FiFolderPlus size={36} className="text-gray-400" />
+            <div className="text-lg leading-6 font-medium">Aucun document importé</div>
+            {[ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) && (
               <>
-                <button
-                  className="text-grey-700 flex h-10 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium"
-                  onClick={() => history.push(`/ligne-de-bus/historique?cohort=${cohort}`)}>
-                  <History className="text-gray-400" />
-                  Historique
-                </button>
-                <button
-                  className="h-10 rounded-md border border-gray-300 bg-white px-3 text-sm font-medium text-gray-700"
-                  onClick={() => history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`)}>
-                  Demande de modification
-                </button>
+                <div className="text-center text-sm leading-5 text-gray-800">Importez votre plan de transport au format .xls (fichier Excel) afin de le voir apparaître ici.</div>
+                <PlainButton className="mt-2" onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}`)}>
+                  <GoPlus size={20} className="mr-2 mt-0.5" />
+                  Importer mon fichier
+                </PlainButton>
               </>
-            ) : null}
-            <SelectAction
-              title="Exporter"
-              alignItems="right"
-              buttonClassNames="bg-white border border-gray-300 h-10 rounded-md px-3"
-              textClassNames="text-grey-700 font-medium text-sm"
-              rightIconClassNames="text-gray-300"
-              optionsGroup={[
-                {
-                  items: [
-                    {
-                      action: async () => {},
-                      render: (
-                        <ExportComponent
-                          title="Plan de transport"
-                          exportTitle="Plan_de_transport"
-                          route="/elasticsearch/plandetransport/export"
-                          filters={filterArray}
-                          selectedFilters={selectedFilters}
-                          setIsOpen={() => true}
-                          customCss={{
-                            override: true,
-                            button: `flex items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50 cursor-pointer w-full text-sm text-gray-700`,
-                            loadingButton: `text-sm text-gray-700`,
-                          }}
-                          transform={async (data) => {
-                            let all = data;
-                            // Get the length of the longest array of PDRs
-                            const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
-
-                            return all.map((data) => {
-                              let pdrs = {};
-
-                              for (let i = 0; i < maxPDRs; i++) {
-                                const pdr = data.pointDeRassemblements?.[i];
-                                const num = i + 1;
-                                pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
-                                pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
-                                pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
-                                pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
-                                pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
-                                pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
-                                pdrs[`HEURE DE CONVOCATION AU PDR ${num}`] = pdr?.meetingHour || "";
-                                pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
-                                pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
-                              }
-
-                              return {
-                                "NUMERO DE LIGNE": data.busId,
-                                "DATE DE TRANSPORT ALLER": data.departureString,
-                                "DATE DE TRANSPORT RETOUR": data.returnString,
-                                ...pdrs,
-                                "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
-                                "REGION DU CENTRE": data.centerRegion,
-                                "ID CENTRE": data.centerId,
-                                "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
-                                "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
-                                "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
-
-                                // * followerCapacity !== Total des followers mais c'est la sémantique ici
-                                "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
-
-                                "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
-                                "CAPACITÉ TOTALE LIGNE": data.totalCapacity,
-                                "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
-                                "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
-                                "TEMPS DE ROUTE": data.travelTime,
-                                "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
-                                "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
-                              };
-                            });
-                          }}
-                        />
-                      ),
-                    },
-                    [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
-                      ? {
-                          action: async () => {
-                            await exportLigneBus(user, cohort);
-                          },
-                          render: (
-                            <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                              <div className="text-sm text-gray-700">Volontaires par ligne</div>
-                            </div>
-                          ),
-                        }
-                      : null,
-                    canExportConvoyeur(user)
-                      ? {
-                          action: async () => {
-                            await exportConvoyeur(cohort);
-                          },
-                          render: (
-                            <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                              <div className="text-sm text-gray-700">Convoyeurs</div>
-                            </div>
-                          ),
-                        }
-                      : null,
-                  ].filter((x) => x),
-                },
-              ]}
-            />
+            )}
           </div>
-        </div>
-        <div className="mt-2 flex flex-row flex-wrap items-center px-4">
-          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
-          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
-        </div>
-        <ResultTable
-          paramData={paramData}
-          setParamData={setParamData}
-          currentEntryOnPage={data?.length}
-          size={size}
-          setSize={setSize}
-          render={
-            <div className="mt-6 mb-2 flex w-full flex-col">
-              <hr />
-              <div className="flex w-full items-center py-3 px-4 text-xs uppercase text-gray-400">
-                <div className="w-[30%]">Lignes</div>
-                <div className="w-[40%]">Points de rassemblements</div>
-                <div className="w-[15%]">Centres de destinations</div>
-                <div className="w-[10%]">Taux de remplissage</div>
-                <div className="h-1 w-[5%]"></div>
-              </div>
-              {data?.map((hit) => {
-                return <Line key={hit._id} hit={hit} currentTab={currentTab} setPanel={setPanel} />;
-              })}
-              <hr />
-            </div>
-          }
-        />
-      </div>
-      <ListPanel busId={panel?.id} open={panel?.open} setOpen={setPanel} />
-    </>
+        </Container>
+      )}
+    </Page>
   );
+}
+
+const returnSelect = (cohort, filterArray, selectedFilters, user) => {
+  const selectTest = [
+    {
+      key: "1",
+      items: [
+        {
+          action: async () => {},
+          render: (
+            <ExportComponent
+              title="Plan de transport"
+              exportTitle="Plan_de_transport"
+              route="/elasticsearch/plandetransport/export"
+              filters={filterArray}
+              selectedFilters={selectedFilters}
+              setIsOpen={() => true}
+              customCss={{
+                override: true,
+                button: `flex items-center gap-2 p-2 px-3 text-gray-700 cursor-pointer w-full text-sm text-gray-700`,
+                loadingButton: `text-sm text-gray-700`,
+              }}
+              transform={async (data) => {
+                let all = data;
+                // Get the length of the longest array of PDRs
+                const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
+
+                return all.map((data) => {
+                  let pdrs = {};
+
+                  for (let i = 0; i < maxPDRs; i++) {
+                    const pdr = data.pointDeRassemblements?.[i];
+                    const num = i + 1;
+                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
+                    pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
+                    pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
+                    pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
+                    pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
+                    pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
+                    pdrs[`HEURE DE CONVOCATION AU PDR ${num}`] = pdr?.meetingHour || "";
+                    pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
+                    pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
+                  }
+
+                  return {
+                    "NUMERO DE LIGNE": data.busId,
+                    "DATE DE TRANSPORT ALLER": data.departureString,
+                    "DATE DE TRANSPORT RETOUR": data.returnString,
+                    ...pdrs,
+                    "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
+                    "REGION DU CENTRE": data.centerRegion,
+                    "ID CENTRE": data.centerId,
+                    "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
+                    "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
+                    "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
+
+                    // * followerCapacity !== Total des followers mais c'est la sémantique ici
+                    "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
+
+                    "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
+                    "CAPACITÉ TOTALE LIGNE": data.totalCapacity,
+                    "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
+                    "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
+                    "TEMPS DE ROUTE": data.travelTime,
+                    "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
+                    "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
+                  };
+                });
+              }}
+            />
+          ),
+        },
+        [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
+          ? {
+              action: async () => {
+                await exportLigneBus(user, cohort);
+              },
+              render: (
+                <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 ">
+                  <div className="text-sm text-gray-700">Volontaires par ligne</div>
+                </div>
+              ),
+            }
+          : null,
+        canExportConvoyeur(user)
+          ? {
+              action: async () => {
+                await exportConvoyeur(cohort);
+              },
+              render: (
+                <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 ">
+                  <div className="text-sm text-gray-700">Convoyeurs</div>
+                </div>
+              ),
+            }
+          : null,
+      ].filter((x) => x),
+    },
+  ];
+  return <DropdownButton title={"Exporter"} optionsGroup={selectTest} position={"right"} />;
 };
 
 const Line = ({ hit, currentTab, setPanel }) => {

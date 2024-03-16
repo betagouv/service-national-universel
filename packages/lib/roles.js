@@ -120,7 +120,6 @@ function canEditYoung(actor, young) {
   const referentDepartmentFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actorAndTargetInTheSameDepartment;
   //TODO update this
   const referentCLEAuthorized = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role) && young.source === "CLE";
-
   const authorized = isAdmin || isHeadCenter || referentRegionFromTheSameRegion || referentDepartmentFromTheSameDepartment || referentCLEAuthorized;
   return authorized;
 }

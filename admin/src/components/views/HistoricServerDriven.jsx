@@ -44,13 +44,10 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
         {!loading && (
           <div className="flex items-center gap-4">
             <PaginationServerDriven
-              pageCount={pagination.pageCount}
-              currentPage={pagination.page}
-              changePage={changePage}
-              count={pagination.count}
-              itemsPerPage={pagination.itemsPerPage}
-              itemsCount={data.length}
-              className="p-4"
+              currentPageNumber={pagination.page}
+              setCurrentPageNumber={changePage}
+              itemsCountTotal={pagination.count}
+              itemsCountOnCurrentPage={20}
               size={20}
             />
             {extraTool}
@@ -84,16 +81,8 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
             </tbody>
           </table>
           <hr className="border-t border-t-slate-100" />
-          <PaginationServerDriven
-            pageCount={pagination.pageCount}
-            currentPage={pagination.page}
-            changePage={changePage}
-            count={pagination.count}
-            itemsPerPage={pagination.itemsPerPage}
-            itemsCount={data.length}
-            className="p-4"
-            size={20}
-          />
+          <PaginationServerDriven currentPageNumber={pagination.page} setCurrentPageNumber={changePage} itemsCountTotal={pagination.count} itemsCountOnCurrentPage={20} size={20} />
+          <hr className="mt-3" />
         </>
       )}
     </div>

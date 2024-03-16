@@ -1,3 +1,34 @@
+# [1.392.0](https://github.com/betagouv/service-national-universel/compare/v1.391.0...v1.392.0) (2024-03-15)
+
+
+### Features
+
+* **admin:** add meeting to convocation CLE ([#3666](https://github.com/betagouv/service-national-universel/issues/3666)) ([6b32403](https://github.com/betagouv/service-national-universel/commit/6b3240324e2e2da714e552e20f3963b8f72726c5))
+
+# [1.391.0](https://github.com/betagouv/service-national-universel/compare/v1.390.0...v1.391.0) (2024-03-14)
+
+
+### Features
+
+* **api:** Fix some error on DeleteCNICron ([#3657](https://github.com/betagouv/service-national-universel/issues/3657)) ([a855edd](https://github.com/betagouv/service-national-universel/commit/a855edd3c69857d533068a497d917fbf296d0c6e))
+* **app,admin:** 1964 - Modification du contrat d'engagement ([#3656](https://github.com/betagouv/service-national-universel/issues/3656)) ([328cfb1](https://github.com/betagouv/service-national-universel/commit/328cfb1856d7eb6e646f2bfa8b0063d01535308a))
+* **lib:** update Attestation Phase 1 ([#3661](https://github.com/betagouv/service-national-universel/issues/3661)) ([19a6de9](https://github.com/betagouv/service-national-universel/commit/19a6de9908ce2ed2aa1acc8d321e9d8d0bd637c5))
+
+# [1.390.0](https://github.com/betagouv/service-national-universel/compare/v1.389.1...v1.390.0) (2024-03-13)
+
+
+### Bug Fixes
+
+* **admin/api:** Fix de plusieurs bug ([#3662](https://github.com/betagouv/service-national-universel/issues/3662)) ([763bc3e](https://github.com/betagouv/service-national-universel/commit/763bc3ebcd436d56c3bbf5c1ef44c06a87381632))
+* **api:** Fix application tests ([3d65fe2](https://github.com/betagouv/service-national-universel/commit/3d65fe243740dc058007cf1cf17ca06a4696aa9d))
+* **misc:** Increase antivirus RAM ([#3660](https://github.com/betagouv/service-national-universel/issues/3660)) ([4fb5590](https://github.com/betagouv/service-national-universel/commit/4fb55907dcc51a1145331124f4cc5ced31c23b92))
+
+
+### Features
+
+* **admin/api:** 1757 - Pouvoir rajouter des lignes sur le pdt sans réimporté tous le pdt ([#3635](https://github.com/betagouv/service-national-universel/issues/3635)) ([f87b367](https://github.com/betagouv/service-national-universel/commit/f87b3677258aa79bd160e3b7e138b20b14ac0577))
+* **misc:** 1865 - Optimize Dockerfile ([#3650](https://github.com/betagouv/service-national-universel/issues/3650)) ([b6eb75f](https://github.com/betagouv/service-national-universel/commit/b6eb75f8811f3db380f7ad8f5a74a8628cdc2a14))
+
 ## [1.389.1](https://github.com/betagouv/service-national-universel/compare/v1.389.0...v1.389.1) (2024-03-12)
 
 

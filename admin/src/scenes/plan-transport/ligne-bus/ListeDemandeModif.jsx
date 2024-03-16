@@ -5,37 +5,25 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { ROLES, translate } from "snu-lib";
 import ExternalLink from "../../../assets/icons/ExternalLink";
-import Breadcrumbs from "../../../components/Breadcrumbs";
 import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { getInitials, getStatusClass, Title, translateStatus } from "../components/commons";
-import Select from "../components/Select";
+import { getInitials, getStatusClass, translateStatus } from "../components/commons";
 import Thumbs from "./components/Icons/Thumbs";
-import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function ListeDemandeModif() {
-  const [cohortList, setCohortList] = useState([]);
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = useState(urlParams.get("cohort"));
   const [tagsOptions, setTagsOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
-  const history = useHistory();
 
   const [data, setData] = useState([]);
   const pageId = "demande-modification-bus";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({ page: 0 });
   const [size, setSize] = useState(10);
-
-  useEffect(() => {
-    const cohortList = getCohortSelectOptions(cohorts);
-    setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[0].value);
-  }, []);
 
   const getTags = async () => {
     try {
@@ -100,70 +88,49 @@ export default function ListeDemandeModif() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Plan de transport", to: `/ligne-de-bus?cohort=${cohort}` }, { label: "Toutes les demandes de modifications" }]} />
-      <div className="flex w-full flex-col px-8 pb-8 ">
-        <div className="flex items-center justify-between py-8">
-          <Title>Demandes de modifications</Title>
-          <Select
-            options={cohortList}
-            value={cohort}
-            onChange={(e) => {
-              setCohort(e);
-              history.push(`/ligne-de-bus/demande-de-modification?cohort=${e}`);
-            }}
-          />
-        </div>
-
-        <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
-          <div className="flex items-stretch gap-2 bg-white px-4 pt-2">
-            <Filters
-              defaultUrlParam={`cohort=${cohort}`}
-              pageId={pageId}
-              route="/elasticsearch/modificationbus/search"
-              setData={(value) => setData(value)}
-              filters={filterArray}
-              searchPlaceholder="Rechercher..."
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
-              size={size}
-            />
-          </div>
-          <div className="mt-2 flex flex-row flex-wrap items-center px-4">
-            <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
-            <SelectedFilters
-              filterArray={filterArray}
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-              paramData={paramData}
-              setParamData={setParamData}
-            />
-          </div>
-          <ResultTable
+      <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
+        <div className="flex items-stretch gap-2 bg-white px-4 pt-2">
+          <Filters
+            defaultUrlParam={`cohort=${cohort}`}
+            pageId={pageId}
+            route="/elasticsearch/modificationbus/search"
+            setData={(value) => setData(value)}
+            filters={filterArray}
+            searchPlaceholder="Rechercher..."
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
             paramData={paramData}
             setParamData={setParamData}
-            currentEntryOnPage={data?.length}
             size={size}
-            setSize={setSize}
-            render={
-              <div className="mt-6 mb-2 flex w-full flex-col">
-                <hr />
-                <div className="flex w-full items-center gap-6 py-3 px-4 text-xs uppercase text-gray-400">
-                  <div className="w-[35%]">Contenu</div>
-                  <div className="w-[12%]">Ligne</div>
-                  <div className="w-[23%]">Type</div>
-                  <div className="w-[12%]">État </div>
-                  <div className="w-[18%]">Auteur</div>
-                </div>
-                {data?.map((hit) => {
-                  return <Line key={hit._id} modification={hit} tagsOptions={tagsOptions} user={user} />;
-                })}
-                <hr />
-              </div>
-            }
           />
         </div>
+        <div className="mt-2 flex flex-row flex-wrap items-center px-4">
+          <Save selectedFilters={selectedFilters} filterArray={filterArray} page={paramData?.page} pageId={pageId} />
+          <SelectedFilters filterArray={filterArray} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={setParamData} />
+        </div>
+        <ResultTable
+          paramData={paramData}
+          setParamData={setParamData}
+          currentEntryOnPage={data?.length}
+          size={size}
+          setSize={setSize}
+          render={
+            <div className="mt-6 mb-2 flex w-full flex-col">
+              <hr />
+              <div className="flex w-full items-center gap-6 py-3 px-4 text-xs uppercase text-gray-400">
+                <div className="w-[35%]">Contenu</div>
+                <div className="w-[12%]">Ligne</div>
+                <div className="w-[23%]">Type</div>
+                <div className="w-[12%]">État </div>
+                <div className="w-[18%]">Auteur</div>
+              </div>
+              {data?.map((hit) => {
+                return <Line key={hit._id} modification={hit} tagsOptions={tagsOptions} user={user} />;
+              })}
+              <hr />
+            </div>
+          }
+        />
       </div>
     </>
   );

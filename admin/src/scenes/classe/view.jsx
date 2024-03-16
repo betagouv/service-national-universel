@@ -53,7 +53,6 @@ export default function View() {
   const rights = getRights(user, classe, cohort);
 
   const history = useHistory();
-
   const totalSeatsTakenExcluding =
     classe.seatsTaken -
     (studentStatus[YOUNG_STATUS.WITHDRAWN] || 0) -
@@ -462,13 +461,13 @@ export default function View() {
                     <Label title="Transport" name="ligneBus" />
                     <InputText className="mb-3" label="Numéro de transport" value={infoBus.busId} disabled />
                     <Label title="Aller" name="Aller" />
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <InputText className="mb-3" label="Date&nbsp;de&nbsp;départ" value={infoBus.departureDate} disabled />
                       <InputText className="mb-3" label="Heure&nbsp;de&nbsp;convocation" value={infoBus.meetingHour} disabled />
                       <InputText className="mb-3" label="Heure&nbsp;de&nbsp;départ" value={infoBus.departureHour} disabled />
                     </div>
                     <Label title="Retour" name="Retour" />
-                    <div className="flex gap-2 w-full">
+                    <div className="flex gap-3 w-full">
                       <InputText className="mb-3 w-1/2" label="Date&nbsp;de&nbsp;retour" value={infoBus.returnDate} disabled />
                       <InputText className="mb-3 w-1/2" label="Heure&nbsp;de&nbsp;retour" value={infoBus.returnHour} disabled />
                     </div>
@@ -509,8 +508,10 @@ export default function View() {
                 </tr>
                 <tr>
                   <td className="font-bold pr-4 py-2">Places libres :</td>
-                  <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - classe.seatsTaken || 0}</td>
-                  <td className="text-gray-500 text-center py-2">({Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats || 0)}%)</td>
+                  <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - classe.seatsTaken < 0 ? 0 : classe.totalSeats - classe.seatsTaken}</td>
+                  <td className="text-gray-500 text-center py-2">
+                    ({Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats) < 0 ? 0 : Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats)}%)
+                  </td>
                 </tr>
               </tbody>
             </table>

@@ -24,6 +24,8 @@ type OwnProps = {
   isClearable?: boolean;
   isSearchable?: boolean;
   onChange: () => void;
+  onMenuOpen?: () => void;
+  onMenuClose?: () => void;
   // async props
   isAsync?: boolean;
   noOptionsMessage?: string;
@@ -54,6 +56,8 @@ export default function SelectButton({
   hideSelectedOptions = false,
   isClearable = false,
   isSearchable = true,
+  onMenuOpen,
+  onMenuClose,
   onChange,
   // async props
   isAsync = false,
@@ -70,7 +74,7 @@ export default function SelectButton({
       <div className="flex justify-between">
         <label className="cursor-pointer">{props.label}</label>
         {props.isSelected && (
-          <BsCheckLg size={20} color="#2563EB" className="mt-1" />
+          <BsCheckLg size={20} color="#2563EB" className="my-auto" />
         )}
       </div>
     </Option>
@@ -95,13 +99,14 @@ export default function SelectButton({
   const customStyles: CustomStyles = {
     control: (styles, state) => ({
       ...styles,
+      cursor: "pointer",
+      boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
       backgroundColor: disabled ? "#F9FAFB" : "white",
       border: error
         ? "1px solid #EF4444"
         : isActive
           ? "1px solid #3B82F6"
           : "1px solid #E5E7EB",
-      boxShadow: "none",
       "&:hover": {
         border: error
           ? "1px solid #EF4444"
@@ -115,6 +120,7 @@ export default function SelectButton({
         outlineWidth: "2px",
         outlineOffset: "2px",
       }),
+      borderRadius: "8px",
     }),
     option: (styles, { isSelected, isFocused }) => {
       return {
@@ -167,6 +173,10 @@ export default function SelectButton({
       cursor: "pointer",
       color: disabled || readOnly ? "#D1D5DB" : "#6B7280",
       marginRight: error ? "25px" : "0",
+      "& svg": {
+        width: "24px",
+        height: "24px",
+      },
     }),
     menu: (styles) => ({
       ...styles,
@@ -201,7 +211,7 @@ export default function SelectButton({
   }, [defaultOptions]);
 
   return (
-    <div className={"flex flex-col gap-3 " + className}>
+    <div className={"flex flex-col gap-3 border-0 " + className}>
       <div className="relative">
         <label
           className={`absolute top-1 left-3 z-10 text-xs font-normal ${
@@ -230,6 +240,8 @@ export default function SelectButton({
               isMulti ? { Option: MultiOption } : { Option: MonoOption }
             }
             styles={customStyles}
+            onMenuOpen={onMenuOpen}
+            onMenuClose={onMenuClose}
           />
         ) : (
           <Select
@@ -252,6 +264,8 @@ export default function SelectButton({
               isMulti ? { Option: MultiOption } : { Option: MonoOption }
             }
             styles={customStyles}
+            onMenuOpen={onMenuOpen}
+            onMenuClose={onMenuClose}
           />
         )}
         {error && (
