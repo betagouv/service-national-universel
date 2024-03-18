@@ -26,6 +26,8 @@ COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 # command sh -c node src/build-only-on-clevercloud.js
 COPY --from=builder /app/out/full/app/src/build-only-on-clevercloud.js ./app/src/build-only-on-clevercloud.js
+# copy:dsfr
+RUN mkdir ./app/public
 # snu-lib rollup -c
 COPY --from=builder /app/out/full/packages/ ./packages/
 RUN npm install
