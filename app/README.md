@@ -16,6 +16,20 @@ npm i
 
 Lancer la commande `npm run dev` pour accéder à l'application via l'URL `http://localhost:8081`. Voir le fichier `package.json` pour le détail des commandes.
 
+## Variables d'environnements
+
+En production, les fichiers statiques générés par l'étape de build sont servis par [nginx](https://nginx.org/en/docs/) (cf [Dockerfile](Dockerfile) & [docker_nginx.conf](docker_nginx.conf))
+
+Une étape de substitution des variables d'environnement est effectuée au runtime, juste avant le démarrage du serveur (cf [envsubst](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html) & [docker_start.sh](docker_start.sh))
+
+Pour ajouter une variable d'environnement, modifier les fichiers suivants :
+
+- [docker_start.sh](docker_start.sh) (substitution de la variable au runtime)
+- [src/config.js](src/config.js) (recuperation de la variable dans la config)
+- [../terraform](les fichiers terraform impactés)
+
+Une variable d'environnement existente mais vide ("") sera ignorée
+
 ## À propos
 
 > La startup d’Etat vise donc à créer un espace personnel où chacun des jeunes effectuant son SNU pourra gérer sa participation en choisissant ses missions d’intérêt général et obtenir si nécessaire de l’aide. Cet espace qui pourra ensuite intégrer des services complémentaires liés au déroulement du SNU sera partie prenante du site informationnel snu.gouv.fr. Notre souhait est de construire un service adapté aux usages de jeunes de 15 ans et non pas destiné à répondre aux contraintes de l’administration.
