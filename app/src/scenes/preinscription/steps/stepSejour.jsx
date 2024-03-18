@@ -39,7 +39,7 @@ export default function StepSejour() {
         <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
         <div className="text-sm text-gray-500">
           La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-          <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline underline-offset-4">
+          <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer">
             En savoir plus.
           </a>
         </div>
@@ -71,9 +71,9 @@ function SessionButton({ session }) {
 
   return (
     <button key={session.id} onClick={handleClick} className="w-full my-3 flex items-center justify-between border p-4 hover:bg-gray-50">
-      <p>
+      <span>
         Séjour <strong>{getCohortPeriod(session)}</strong>
-      </p>
+      </span>
       <ArrowRightBlueSquare />
     </button>
   );

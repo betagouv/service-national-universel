@@ -40,7 +40,7 @@ export default function Done({ parentId }) {
             <ConsentDone />
             <h1 className="flex-1 text-[22px] font-bold">{title}</h1>
           </div>
-          <hr className="my-2 h-px border-0 bg-gray-200" />
+          <hr className="my-2" />
           <p className="text-base text-[#161616] ">{text}</p>
           <p className="mt-2 mb-8 text-base text-[#161616]">Vous pouvez à présent fermer cette page.</p>
         </div>

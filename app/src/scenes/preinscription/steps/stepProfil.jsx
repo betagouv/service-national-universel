@@ -4,7 +4,6 @@ import validator from "validator";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import CheckBox from "../../../components/dsfr/forms/checkbox";
 import Input from "../../../components/dsfr/forms/input";
 import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { appURL, environment, supportURL } from "../../../config";
@@ -13,7 +12,6 @@ import plausibleEvent from "../../../services/plausible";
 import { getPasswordErrorMessage } from "../../../utils";
 import { PREINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
-import PhoneField from "@/components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated, FEATURES_NAME, isFeatureEnabled, translate, YOUNG_SOURCE } from "snu-lib";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import IconFrance from "@/assets/IconFrance";
@@ -27,6 +25,7 @@ import { setYoung } from "@/redux/auth/actions";
 import { capture } from "@/sentry";
 import { RiInformationLine } from "react-icons/ri";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
+import { InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
@@ -209,11 +208,13 @@ export default function StepProfil() {
         )}
 
         <div className="space-y-5">
-          <label className="w-full">
-            {isCLE ? "Prénom de l'élève" : "Prénom du volontaire"}
-            <Input value={data.firstName} onChange={(e) => setData({ ...data, firstName: e })} />
-            {error.firstName && <span className="text-sm text-red-500">{error.firstName}</span>}
-          </label>
+          <Input
+            label={isCLE ? "Prénom de l'élève" : "Prénom du volontaire"}
+            state={error.firstName ? "error" : "default"}
+            stateRelatedMessage={error.firstName}
+            value={data.firstName}
+            onChange={(e) => setData({ ...data, firstName: e })}
+          />
 
           <label className="w-full">
             {isCLE ? "Nom de famille de l'élève" : "Nom de famille du volontaire"}
@@ -229,7 +230,7 @@ export default function StepProfil() {
             </label>
           )}
 
-          <PhoneField
+          <InputPhone
             label="Téléphone"
             onChange={(e) => setData({ ...data, phone: e })}
             onChangeZone={(e) => setData({ ...data, phoneZone: e })}
@@ -237,9 +238,8 @@ export default function StepProfil() {
             zoneValue={data.phoneZone}
             placeholder={PHONE_ZONES[data.phoneZone]?.example}
             error={error.phone || error.phoneZone}
-            className="mt-3"
+            className="w-full"
           />
-
           <hr className="my-4" />
           <h2 className="text-base font-bold my-4">Mes identifiants de connexion</h2>
           <p className="pl-3 border-l-4 border-l-indigo-500">
@@ -258,69 +258,55 @@ export default function StepProfil() {
               {error.emailConfirm ? <span className="text-sm text-red-500">{error.emailConfirm}</span> : null}
             </label>
 
-            <label className="w-full">
-              Mot de passe
-              <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2 mt-2">
-                <input
-                  className="w-full bg-inherit"
-                  type={showPassword ? "text" : "password"}
-                  value={data.password}
-                  onChange={(e) => setData({ ...data, password: e.target.value })}
-                />
-                {showPassword ? (
-                  <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} />
-                ) : (
-                  <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />
-                )}
-              </div>
-              <p className={`text-sm ${error?.password ? "text-red-500" : " text-[#3A3A3A]"}`}>
-                Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
-              </p>
-            </label>
-
-            <label className="w-full">
-              Confirmez votre mot de passe
-              <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2 mt-2">
-                <input
-                  className="w-full bg-inherit"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={data.confirmPassword}
-                  onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
-                />
-                {showConfirmPassword ? (
-                  <EyeOff className="cursor-pointer" onClick={() => setShowConfirmPassword(false)} />
-                ) : (
-                  <Eye className="cursor-pointer" onClick={() => setShowConfirmPassword(true)} />
-                )}
-              </div>
-              {error.confirmPassword ? <span className="text-sm text-red-500">{error.confirmPassword}</span> : null}
-            </label>
+            <InputPassword
+              hintText="Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole."
+              label="Mot de passe"
+              error={error?.password}
+              value={data.password}
+              onChange={(password) => setData({ ...data, password })}></InputPassword>
+            <InputPassword
+              label="Confirmez votre mot de passe"
+              error={error?.confirmPassword}
+              value={data.confirmPassword}
+              onChange={(confirmPassword) => setData({ ...data, confirmPassword })}></InputPassword>
           </div>
 
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-4">
-              <CheckBox checked={data?.acceptCGU === "true"} onChange={(e) => setData({ ...data, acceptCGU: e ? "true" : "false" })} />
-              <span className="inline flex-1  text-sm leading-5 text-[#3A3A3A]">
-                J&apos;ai lu et j&apos;accepte les{" "}
-                <a className="underline " href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
-                  Conditions Générales d&apos;Utilisation (CGU)
-                </a>{" "}
-                de la plateforme du Service National Universel.
-              </span>
-            </div>
-            {error.acceptCGU ? <span className="text-sm text-red-500">{error.acceptCGU}</span> : null}
-          </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-4">
-              <CheckBox checked={data?.rulesYoung === "true"} onChange={(e) => setData({ ...data, rulesYoung: e ? "true" : "false" })} />
-              <span className="inline flex-1 text-sm leading-5 text-[#3A3A3A]">
-                J&apos;ai pris connaissance des{" "}
-                <a className="underline" href="https://www.snu.gouv.fr/donnees-personnelles" target="_blank" rel="noreferrer">
-                  modalités de traitement de mes données personnelles
-                </a>
-              </span>
-            </div>
-            {error.rulesYoung ? <span className="text-sm text-red-500">{error.rulesYoung}</span> : null}
+            <Checkbox
+              state={error.acceptCGU || error.rulesYoung ? "error" : "default"}
+              stateRelatedMessage={error.acceptCGU || error.rulesYoung}
+              options={[
+                {
+                  label: (
+                    <span className="inline flex-1  text-sm leading-5 text-[#3A3A3A]">
+                      J&apos;ai lu et j&apos;accepte les{" "}
+                      <a href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
+                        Conditions Générales d&apos;Utilisation (CGU)
+                      </a>{" "}
+                      de la plateforme du Service National Universel.
+                    </span>
+                  ),
+                  nativeInputProps: {
+                    checked: data?.acceptCGU === "true",
+                    onChange: () => setData({ ...data, acceptCGU: data?.acceptCGU === "true" ? "false" : "true" }),
+                  },
+                },
+                {
+                  label: (
+                    <span className="inline flex-1 text-sm leading-5 text-[#3A3A3A]">
+                      J&apos;ai pris connaissance des{" "}
+                      <a href="https://www.snu.gouv.fr/donnees-personnelles" target="_blank" rel="noreferrer">
+                        modalités de traitement de mes données personnelles.
+                      </a>
+                    </span>
+                  ),
+                  nativeInputProps: {
+                    checked: data?.rulesYoung === "true",
+                    onChange: () => setData({ ...data, rulesYoung: data?.rulesYoung === "true" ? "false" : "true" }),
+                  },
+                },
+              ]}
+            />
           </div>
         </div>
         <ErrorMessage>{error?.text}</ErrorMessage>

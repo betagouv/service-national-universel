@@ -3,7 +3,7 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
 
 import { classNames } from "../../utils";
-import { PHONE_ZONES } from '../../common';
+import { PHONE_ZONES } from "../../common";
 
 type OwnProps = {
   name: string;
@@ -35,7 +35,7 @@ export default function InputPhone({
   const selectRef = React.useRef<HTMLSelectElement>(null);
 
   const handleChangePhoneZone = (
-    event: React.ChangeEvent<HTMLSelectElement>
+    event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     onChangeZone(event.target.value);
   };
@@ -53,7 +53,7 @@ export default function InputPhone({
               htmlFor={name}
               className={classNames(
                 error ? "text-red-500" : "text-[var(--text-label-grey)]",
-                "mb-0 text-base font-normal leading-6"
+                "mb-0 text-base font-normal leading-6",
               )}
             >
               {label}
@@ -63,9 +63,11 @@ export default function InputPhone({
             <div className="flex ">
               <Select
                 label=""
+                state={error ? "error" : "default"}
+                stateRelatedMessage={error}
                 disabled={disabled || readOnly}
                 nativeSelectProps={{
-                  className: "!my-0",
+                  className: "!my-0 mr-4 max-w-[120px] text-ellipsis text-sm",
                   ref: selectRef,
                   onChange: handleChangePhoneZone,
                   value: zoneValue,
@@ -78,7 +80,7 @@ export default function InputPhone({
                 )}
                 {Object.entries(PHONE_ZONES).map(([key, phoneZone]) => (
                   <option key={key} value={key}>
-                    {phoneZone.code} {phoneZone.shortcut}
+                    {phoneZone.code} {phoneZone.name}
                   </option>
                 ))}
               </Select>
@@ -87,6 +89,9 @@ export default function InputPhone({
             <Input
               label=""
               disabled={disabled}
+              className={`w-full ${
+                error && "[&>.fr-input]:shadow-[inset_0_-2px_0_-0_#ce0500]"
+              }`}
               nativeInputProps={{
                 inputMode: "tel",
                 pattern: "[0-9]*",

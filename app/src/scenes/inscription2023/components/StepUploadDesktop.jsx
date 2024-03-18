@@ -116,12 +116,12 @@ export default function StepUploadDesktop({
 
       {young.files.cniFiles?.length > 0 && (
         <>
-          <hr className="my-8 h-px border-0 bg-gray-200" />
+          <hr className="my-8" />
           <MyDocs />
         </>
       )}
 
-      <hr className="my-8 h-px border-0 bg-gray-200" />
+      <hr className="my-8" />
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
@@ -132,7 +132,7 @@ export default function StepUploadDesktop({
 
       {category !== "passport" && (
         <>
-          <hr className="my-8 h-px border-0 bg-gray-200" />
+          <hr className="my-8" />
           <p className="my-4">
             Ajouter <strong>le verso</strong>
           </p>
@@ -165,7 +165,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
   const young = useSelector((state) => state.Auth.young);
   return (
     <>
-      <hr className="my-8 h-px border-0 bg-gray-200" />
+      <hr className="my-8" />
       <div className="my-4 flex w-full">
         <div className="w-1/2">
           <div className="text-xl font-medium">Renseignez la date d’expiration</div>
