@@ -1,21 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import Modal from "../../../../../../components/ui/modals/Modal";
-import Input from "../../../../../../components/forms/inputs/Input";
-import LocationMarker from "../../../../../../assets/icons/LocationMarker";
+// import Input from "../../../../../../components/forms/inputs/Input";
+// import LocationMarker from "../../../../../../assets/icons/LocationMarker";
 import ButtonPrimary from "../../../../../../components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../../../../components/ui/buttons/ButtonLight";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 
 const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
+  const [data, setData] = useState({});
   if (isLoading) {
     return <p className="animate-pulse text-center">Chargement</p>;
   }
   return (
     <>
       <Modal.Title>Saisir votre nouvelle adresse</Modal.Title>
-      <AddressForm data={{}} updateData={onConfirm} />
+      <AddressForm data={data} updateData={setData} />
       <div className="flex justify-end gap-2 mt-4">
         <ButtonLight onClick={onCancel}>Annuler</ButtonLight>
+        <ButtonPrimary onClick={() => onConfirm(data)}>Confirmer</ButtonPrimary>
       </div>
     </>
   );
