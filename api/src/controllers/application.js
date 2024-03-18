@@ -158,15 +158,23 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // On vérifie si les candidatures sont ouvertes.
-    if (mission.visibility === "HIDDEN") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (mission.visibility === "HIDDEN") {
+      console.log("visibility", mission.visibility);
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
     value.isJvaMission = mission.isJvaMission;
 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const { canApply, message } = await getAuthorizationToApply(mission, young);
-    if (!canApply) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
+    if (isYoung(req.user)) {
+      const { canApply, message } = await getAuthorizationToApply(mission, young);
+      if (!canApply) {
+        console.log(message);
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
+      }
+    }
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
@@ -191,6 +199,10 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
         if (!structures.map((e) => e._id.toString()).includes(value.structureId.toString())) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
+      }
+      const cohort = await CohortObject.findOne({ name: young.cohort });
+      if (!canApplyToPhase2(young, cohort)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
 

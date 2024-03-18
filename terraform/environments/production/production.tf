@@ -1,28 +1,28 @@
 
 variable "api_image_tag" {
-  type    = string
+  type     = string
   nullable = false
 }
 variable "admin_image_tag" {
-  type    = string
+  type     = string
   nullable = false
 }
 variable "app_image_tag" {
-  type    = string
+  type     = string
   nullable = false
 }
 variable "antivirus_image_tag" {
-  type    = string
+  type     = string
   nullable = false
 }
 
 locals {
-  domain         = "snu.gouv.fr"
-  api_hostname   = "api.${local.domain}"
-  admin_hostname = "admin.${local.domain}"
-  app_hostname   = "moncompte.${local.domain}"
-  antivirus_hostname   = "antivirus.beta-snu.dev"
-  secrets        = jsondecode(base64decode(data.scaleway_secret_version.production.data))
+  domain             = "snu.gouv.fr"
+  api_hostname       = "api.${local.domain}"
+  admin_hostname     = "admin.${local.domain}"
+  app_hostname       = "moncompte.${local.domain}"
+  antivirus_hostname = "antivirus.beta-snu.dev"
+  secrets            = jsondecode(base64decode(data.scaleway_secret_version.production.data))
 }
 
 # Secrets
@@ -51,7 +51,7 @@ resource "scaleway_container" "api" {
   port            = 8080
   cpu_limit       = 512
   memory_limit    = 2048
-  min_scale       = 2
+  min_scale       = 4
   max_scale       = 20
   timeout         = 60
   max_concurrency = 50
@@ -60,12 +60,12 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "APP_NAME"   = "api"
-    "ADMIN_URL"  = "https://${local.admin_hostname}"
-    "APP_URL"    = "https://${local.app_hostname}"
-    "CLE"        = "true"
-    "PRODUCTION" = "true"
-    "FOLDER_API" = "api"
+    "APP_NAME"                          = "api"
+    "ADMIN_URL"                         = "https://${local.admin_hostname}"
+    "APP_URL"                           = "https://${local.app_hostname}"
+    "CLE"                               = "true"
+    "PRODUCTION"                        = "true"
+    "FOLDER_API"                        = "api"
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.2
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.01
     "SENTRY_RELEASE"                    = var.api_image_tag
@@ -143,21 +143,21 @@ resource "scaleway_container" "admin" {
   deploy          = true
 
   environment_variables = {
-    "APP_NAME"                                   = "admin"
-    "CLE"                                        = "true"
-    "PROD"                                       = "true"
-    "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
-    "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
-    "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.005
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.01
-    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
+    "NGINX_HOSTNAME"             = local.admin_hostname
+    "APP_NAME"                   = "admin"
+    "PROD"                       = "true"
+    "ADMIN_URL"                  = "https://${local.admin_hostname}"
+    "API_URL"                    = "https://${local.api_hostname}"
+    "APP_URL"                    = "https://${local.app_hostname}"
+    "SENTRY_SESSION_SAMPLE_RATE" = 0.005
+    "SENTRY_TRACING_SAMPLE_RATE" = 0.01
+    "SUPPORT_URL"                = "https://support.snu.gouv.fr"
   }
 
   secret_environment_variables = {
-    "DOCKER_ENV_VITE_SENTRY_URL"            = local.secrets.SENTRY_URL
-    "SENTRY_AUTH_TOKEN"                     = local.secrets.SENTRY_AUTH_TOKEN
-    "DOCKER_ENV_VITE_USERBACK_ACCESS_TOKEN" = local.secrets.USERBACK_ACCESS_TOKEN
+    "SENTRY_URL"                 = local.secrets.SENTRY_URL
+    "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
+    "VITE_USERBACK_ACCESS_TOKEN" = local.secrets.USERBACK_ACCESS_TOKEN
   }
 }
 
@@ -182,22 +182,21 @@ resource "scaleway_container" "app" {
   deploy          = true
 
   environment_variables = {
-    "APP_NAME"                                   = "app"
-    "CLE"                                        = "true"
-    "PROD"                                       = "true"
-    "DOCKER_ENV_VITE_ADMIN_URL"                  = "https://${local.admin_hostname}"
-    "DOCKER_ENV_VITE_API_URL"                    = "https://${local.api_hostname}"
-    "DOCKER_ENV_VITE_APP_URL"                    = "https://${local.app_hostname}"
-    "DOCKER_ENV_VITE_SENTRY_SESSION_SAMPLE_RATE" = 0.005
-    "DOCKER_ENV_VITE_SENTRY_TRACING_SAMPLE_RATE" = 0.01
-    "DOCKER_ENV_VITE_SUPPORT_URL"                = "https://support.snu.gouv.fr"
-    "DOCKER_ENV_VITE_FRANCE_CONNECT_URL"         = "https://app.franceconnect.gouv.fr/api/v1"
-    "FOLDER_APP"                                 = "app"
+    "NGINX_HOSTNAME"             = local.app_hostname
+    "APP_NAME"                   = "app"
+    "PROD"                       = "true"
+    "ADMIN_URL"                  = "https://${local.admin_hostname}"
+    "API_URL"                    = "https://${local.api_hostname}"
+    "APP_URL"                    = "https://${local.app_hostname}"
+    "SENTRY_SESSION_SAMPLE_RATE" = 0.005
+    "SENTRY_TRACING_SAMPLE_RATE" = 0.01
+    "SUPPORT_URL"                = "https://support.snu.gouv.fr"
+    "FRANCE_CONNECT_URL"         = "https://app.franceconnect.gouv.fr/api/v1"
   }
 
   secret_environment_variables = {
-    "DOCKER_ENV_VITE_SENTRY_URL" = local.secrets.SENTRY_URL
-    "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
+    "SENTRY_URL"        = local.secrets.SENTRY_URL
+    "SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
   }
 }
 
@@ -212,7 +211,7 @@ resource "scaleway_container" "antivirus" {
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/antivirus:${var.antivirus_image_tag}"
   port            = 8089
   cpu_limit       = 256
-  memory_limit    = 2048
+  memory_limit    = 4096
   min_scale       = 1
   max_scale       = 5
   timeout         = 60
@@ -222,7 +221,7 @@ resource "scaleway_container" "antivirus" {
   deploy          = true
 
   environment_variables = {
-    "APP_NAME"   = "antivirus"
+    "APP_NAME" = "antivirus"
   }
 }
 
@@ -232,17 +231,17 @@ resource "scaleway_container_domain" "antivirus" {
 }
 
 resource "scaleway_container" "crons" {
-  name            = "production-crons"
-  namespace_id    = scaleway_container_namespace.production.id
-  registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
-  port            = 8080
-  cpu_limit       = 768
-  memory_limit    = 1024
-  min_scale       = 1
-  max_scale       = 1
-  privacy         = "private"
-  protocol        = "http1"
-  deploy          = true
+  name           = "production-crons"
+  namespace_id   = scaleway_container_namespace.production.id
+  registry_image = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
+  port           = 8080
+  cpu_limit      = 768
+  memory_limit   = 1024
+  min_scale      = 1
+  max_scale      = 1
+  privacy        = "private"
+  protocol       = "http1"
+  deploy         = true
 
   environment_variables = merge(scaleway_container.api.environment_variables, {
     "RUN_CRONS" = "true"

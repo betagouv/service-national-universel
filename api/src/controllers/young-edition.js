@@ -112,6 +112,10 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);
       if (qpv === true) value.qpv = "true";
@@ -251,8 +255,10 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    console.log("SAVE VALUE: ", value);
-    console.log("body: ", req.body);
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     young.set(value);
     young.set({
@@ -291,6 +297,10 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     const young = await YoungModel.findById(id);
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- update dates
@@ -385,6 +395,10 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     let changes = {
       [`parent${value.parent}AllowSNU`]: value.allow ? "true" : "false",
     };
@@ -452,6 +466,10 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
     const young = await YoungModel.findById(id);
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const classe = await ClasseModel.findById(young.classeId).populate({
@@ -712,12 +730,17 @@ router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent"
       capture(bodyError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
+
     const parentId = bodyValue.parentId;
 
     // --- get young & verify rights
     const young = await YoungObject.findById(youngId);
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- Check and resend notification

@@ -34,8 +34,7 @@ export default function List() {
   const [isExportCandidatureOpen, setIsExportCandidatureOpen] = useState(false);
   const history = useHistory();
 
-  const canCreateMission =
-    (user.role === ROLES.RESPONSIBLE && user.structureId && structure?.status !== "DRAFT") || (user.role !== ROLES.RESPONSIBLE && structure?.status !== "DRAFT");
+  const canCreateMission = user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure?.status !== "DRAFT";
 
   //List state
   const [data, setData] = useState([]);

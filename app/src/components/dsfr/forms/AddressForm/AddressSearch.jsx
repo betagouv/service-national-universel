@@ -1,20 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import AddressDropdown from "./AddressDropdown";
 import { RiSearchLine } from "react-icons/ri";
-import { toastr } from "react-redux-toastr";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
+import useAddress from "@/services/useAddress";
+import { useDebounce } from "@uidotdev/usehooks";
 
-export default function AddressSearch({ getOptions, updateData, label, error }) {
+export default function AddressSearch({ updateData, label, error }) {
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState([]);
+  const debouncedQuery = useDebounce(query, 300);
+  const { results, isError, isPending } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
   const dropdownRef = useRef(null);
-  const controllerRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (controllerRef.current) controllerRef.current.abort();
-    };
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -22,33 +17,21 @@ export default function AddressSearch({ getOptions, updateData, label, error }) 
         setQuery("");
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
     function handleKeyDown(event) {
       if (event.key === "Escape") {
         setQuery("");
       }
     }
+    document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, []);
 
-  const handleChangeQuery = async (e) => {
+  const handleChangeQuery = (e) => {
     setQuery(e.target.value);
-    if (e.target.value.trim().length < 3) return;
-
-    // Abort previous request and refresh abort controller
-    if (controllerRef.current) controllerRef.current.abort();
-    const controller = new AbortController();
-    controllerRef.current = controller;
-
-    const [options, error] = await getOptions(e.target.value, controller.signal);
-    if (error) return toastr.error("Erreur", `Une erreur est survenue lors de la recherche d'adresse.`, { timeOut: 10_000 });
-    if (options) return setOptions(options);
-    return;
   };
 
   const handleSelect = (option) => {
@@ -72,8 +55,12 @@ export default function AddressSearch({ getOptions, updateData, label, error }) 
       <div className="relative">
         {query?.trim().length > 2 && (
           <div className="bg-white border flex flex-col absolute z-10 -top-1 w-full shadow">
-            {options.length ? (
-              <AddressDropdown optionGroups={options} handleSelect={handleSelect} />
+            {isPending ? (
+              <p className="animate-pulse p-3 text-gray-800 text-center">Chargement</p>
+            ) : isError ? (
+              <p className="p-3 text-red-500 text-center">Erreur lors de la recherche</p>
+            ) : results.length ? (
+              <AddressDropdown options={results} handleSelect={handleSelect} />
             ) : (
               <p className="p-3 text-gray-800 text-center">
                 L'adresse ne s'affiche pas ? Renseignez une <strong>commune</strong> ou un <strong>code postal</strong>.
