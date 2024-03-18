@@ -7,6 +7,9 @@ import ButtonLight from "../../../../../../components/ui/buttons/ButtonLight";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 
 const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
+  if (isLoading) {
+    return <p className="animate-pulse text-center">Chargement</p>;
+  }
   return (
     <>
       <Modal.Title>Saisir votre nouvelle adresse</Modal.Title>
