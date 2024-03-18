@@ -147,7 +147,7 @@ resource "scaleway_container" "admin" {
   name            = "staging-admin"
   namespace_id    = scaleway_container_namespace.staging.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/admin:${var.admin_image_tag}"
-  port            = 80
+  port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
   min_scale       = 1
@@ -186,7 +186,7 @@ resource "scaleway_container" "app" {
   name            = "staging-app"
   namespace_id    = scaleway_container_namespace.staging.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
-  port            = 80
+  port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
   min_scale       = 1

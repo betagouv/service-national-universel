@@ -51,6 +51,7 @@ COPY --from=builder /app/admin/docker_nginx.conf /etc/nginx/templates/default.co
 
 RUN chmod +x ./docker_start.sh
 
+EXPOSE 8080
 
 # override default entrypoint
 ENTRYPOINT ["./docker_start.sh"]
