@@ -528,6 +528,48 @@ describe("Young", () => {
     });
   });
 
+  describe("POST /invite", () => {
+    let referent;
+    const passport = require("passport");
+
+    beforeAll(async () => {
+      referent = await createReferentHelper(getNewReferentFixture());
+      passport.user = referent;
+    });
+
+    afterAll(() => {
+      passport.user = null;
+    });
+
+    it("should return 400 for invalid input data", async () => {
+      const res = await request(getAppHelper()).post("/invite").send({});
+      expect(res.statusCode).toEqual(400);
+    });
+
+    it("should return 403 when user is not authorized to invite", async () => {
+      const unauthorizedReferent = { ...getNewReferentFixture(), role: "supervisor" };
+      passport.user = unauthorizedReferent;
+
+      const res = await request(getAppHelper()).post("/invite").send(getNewYoungFixture());
+      expect(res.statusCode).toEqual(403);
+
+      // Remettre le referent autorisé pour les autres tests
+      passport.user = referent;
+    });
+
+    it("should return 200 for valid invitation", async () => {
+      const res = await request(getAppHelper()).post("/invite").send(getNewYoungFixture());
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.ok).toEqual(true);
+      expect(res.body.young).toBeDefined();
+    });
+
+    it("should return 404 if classeId not found", async () => {
+      const res = await request(getAppHelper()).post("/invite").send(getNewYoungFixture());
+      expect(res.statusCode).toEqual(404);
+    });
+  });
+
   describe("POST /young/signup_verify", () => {
     it("should return 400 when missing invitationToken", async () => {
       const res = await request(getAppHelper()).post("/young/signup_verify").send({});
