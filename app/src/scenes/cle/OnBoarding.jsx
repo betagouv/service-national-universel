@@ -6,8 +6,6 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
 import MyClass from "./MyClass";
-import PrimaryButton from "@/components/dsfr/ui/buttons/PrimaryButton";
-import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { ModalContainer } from "../../components/modals/Modal";
 import CloseSvg from "../../assets/Close";
 import plausibleEvent from "@/services/plausible";
@@ -19,6 +17,8 @@ import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
 import { RiArrowLeftLine } from "react-icons/ri";
 import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
+
+import { Button } from "@snu/ds/dsfr";
 
 const Title = () => (
   <div>
@@ -111,34 +111,29 @@ const OnboardingContent = ({ id }) => {
       {classe && (
         <DSFRContainer title={<Title />} subtitle={<Subtitle refName={classe.referent} />}>
           <MyClass classe={classe} />
-          <hr className="my-4 h-px border-0 bg-gray-200" />
+          <hr className="my-4" />
           {classe.isInscriptionOpen && (
             <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-              <InlineButton className="md:pr-4 pt-2 pb-1" onClick={() => setShowContactSupport(true)}>
+              <Button className="md:pr-4 pt-2 pb-1" priority="tertiary no outline" onClick={() => setShowContactSupport(true)}>
                 J'ai déjà un compte
-              </InlineButton>
-              <PrimaryButton
+              </Button>
+              <Button
                 onClick={() => {
                   plausibleEvent("CLE/CTA preinscription - demarrer");
                   history.push(`/preinscription/profil?parcours=CLE&classeId=${id}`);
                 }}>
                 Démarrer mon inscription
-              </PrimaryButton>
+              </Button>
             </div>
           )}
 
           {!classe.isInscriptionOpen && (
-            <>
-              <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex sm:flex-col-reverse md:flex-row justify-end">
-                <InlineButton className="md:pr-4 pt-2 pb-1" onClick={() => setShowContactSupport(true)}>
-                  J'ai déjà un compte
-                </InlineButton>
-                <PrimaryButton className="sm:w-full md:w-52 md:self-end" disabled>
-                  {classe.isFull ? "☹ Classe complète" : "☹ Inscriptions désactivées"}
-                </PrimaryButton>
-              </div>
+            <div className="fixed shadow-[0_-15px_5px_-15px_rgba(0,0,0,0.3)] md:shadow-none md:relative bottom-0 w-full bg-white left-0 sm:p-3 md:p-0 md:pt-3 flex flex-col justify-end">
+              <Button className="sm:w-full md:w-52 md:self-end" disabled>
+                {classe.isFull ? "☹ Classe complète" : "Inscriptions désactivées"}
+              </Button>
               {classe.isFull && <p className="text-[13px] w-full text-end mt-2">Pour plus d'informations contactez votre référent.</p>}
-            </>
+            </div>
           )}
           <ModalInfo isOpen={showContactSupport} onCancel={() => setShowContactSupport(false)} id={id}></ModalInfo>
         </DSFRContainer>

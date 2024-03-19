@@ -82,7 +82,7 @@ export default function StepConfirm() {
                 <EditPen />
               </button>
             </div>
-            <hr className="my-4 h-px border-0 bg-gray-200" />
+            <hr className="my-4" />
             {modal.isOpen && <ModalSejour isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} />}
           </>
         )}
@@ -133,7 +133,7 @@ export default function StepConfirm() {
             <Details title="Situation particulière" value="Non" />
           )}
         </div>
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+        <hr className="my-4" />
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h1 className="mt-2 text-lg font-bold text-[#161616]">Mes représentants légaux</h1>
@@ -153,7 +153,7 @@ export default function StepConfirm() {
           <Details title="Son téléphone" value={concatPhoneNumberWithZone(young.parent1Phone, young.parent1PhoneZone)} />
           {young.parent2Status ? (
             <>
-              <hr className="my-2 mx-10 h-px border-0 bg-gray-200" />
+              <hr className="my-2 mx-10" />
               <Details title="Votre lien" value={translate(young.parent2Status)} />
               <Details title="Son prénom" value={young.parent2FirstName} />
               <Details title="Son nom" value={young.parent2LastName} />

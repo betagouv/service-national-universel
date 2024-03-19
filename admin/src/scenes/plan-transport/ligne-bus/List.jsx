@@ -17,7 +17,7 @@ import ListPanel from "./modificationPanel/List";
 import { NewGetCohortSelectOptions } from "@/services/cohort.service";
 import { Button, Container, Header, Page, Navbar, DropdownButton, Select } from "@snu/ds/admin";
 import { HiOutlineChartSquareBar, HiOutlineAdjustments } from "react-icons/hi";
-import { LuArrowRightCircle, LuArrowLeftCircle } from "react-icons/lu";
+import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 import Historic from "./Historic";
 import ListeDemandeModif from "./ListeDemandeModif";
@@ -199,7 +199,7 @@ export default function List() {
           tab={[
             {
               title: "Aller",
-              leftIcon: <LuArrowRightCircle size={20} className="mt-0.5" />,
+              leftIcon: <LuArrowRightCircle size={20} className="mt-0.5 ml-2.5" />,
               isActive: currentTab === "aller",
               onClick: () => {
                 setCurrentTab("aller");
@@ -209,7 +209,7 @@ export default function List() {
             },
             {
               title: "Retour",
-              leftIcon: <LuArrowLeftCircle size={20} className="mt-0.5" />,
+              leftIcon: <LuArrowLeftCircle size={20} className="mt-0.5 ml-2.5" />,
               isActive: currentTab === "retour",
               onClick: () => {
                 setCurrentTab("retour");
@@ -221,7 +221,7 @@ export default function List() {
               ? [
                   {
                     title: "Historique",
-                    leftIcon: <History size={20} className="mt-0.5" />,
+                    leftIcon: <LuHistory size={20} className="mt-0.5 ml-2.5" />,
                     isActive: currentTab === "historique",
                     onClick: () => {
                       setCurrentTab("historique");
@@ -232,7 +232,7 @@ export default function List() {
                   },
                   {
                     title: "Demande de modification",
-                    leftIcon: <HiOutlineAdjustments size={22} className="mt-0.5" />,
+                    leftIcon: <HiOutlineAdjustments size={22} className="mt-0.5 ml-2.5" />,
                     isActive: currentTab === "modification",
                     onClick: () => {
                       setCurrentTab("modification");

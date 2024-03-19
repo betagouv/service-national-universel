@@ -1,3 +1,33 @@
+# [1.393.0](https://github.com/betagouv/service-national-universel/compare/v1.392.0...v1.393.0) (2024-03-18)
+
+
+### Bug Fixes
+
+* **app:** 1184 - Bumping react-dsfr version. ([01de6f8](https://github.com/betagouv/service-national-universel/commit/01de6f842f925734a5aa60fbea75dbfa03ece974))
+* **app:** 1184 - Removed only-include-used-icons from package.json. ([6fec94a](https://github.com/betagouv/service-national-universel/commit/6fec94ad878d4a3d2736f22b60ac1fae9a4ca663))
+
+
+### Features
+
+* **app:** 1184 - React DSFR on App. ([#3438](https://github.com/betagouv/service-national-universel/issues/3438)) ([e828232](https://github.com/betagouv/service-national-universel/commit/e8282326b7cda1df6649a2a7d52f58b2d471c18e))
+* **app,admin:** 1865 - Nginx & runtime environment ([#3664](https://github.com/betagouv/service-national-universel/issues/3664)) ([f27e0bb](https://github.com/betagouv/service-national-universel/commit/f27e0bb9a715a47fea8c8b7fbed9f7bd6944e220))
+
+# [1.392.0](https://github.com/betagouv/service-national-universel/compare/v1.391.0...v1.392.0) (2024-03-15)
+
+
+### Features
+
+* **admin:** add meeting to convocation CLE ([#3666](https://github.com/betagouv/service-national-universel/issues/3666)) ([6b32403](https://github.com/betagouv/service-national-universel/commit/6b3240324e2e2da714e552e20f3963b8f72726c5))
+
+# [1.391.0](https://github.com/betagouv/service-national-universel/compare/v1.390.0...v1.391.0) (2024-03-14)
+
+
+### Features
+
+* **api:** Fix some error on DeleteCNICron ([#3657](https://github.com/betagouv/service-national-universel/issues/3657)) ([a855edd](https://github.com/betagouv/service-national-universel/commit/a855edd3c69857d533068a497d917fbf296d0c6e))
+* **app,admin:** 1964 - Modification du contrat d'engagement ([#3656](https://github.com/betagouv/service-national-universel/issues/3656)) ([328cfb1](https://github.com/betagouv/service-national-universel/commit/328cfb1856d7eb6e646f2bfa8b0063d01535308a))
+* **lib:** update Attestation Phase 1 ([#3661](https://github.com/betagouv/service-national-universel/issues/3661)) ([19a6de9](https://github.com/betagouv/service-national-universel/commit/19a6de9908ce2ed2aa1acc8d321e9d8d0bd637c5))
+
 # [1.390.0](https://github.com/betagouv/service-national-universel/compare/v1.389.1...v1.390.0) (2024-03-13)
 
 

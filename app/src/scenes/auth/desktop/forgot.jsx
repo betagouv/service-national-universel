@@ -4,6 +4,7 @@ import RightArrow from "../../../assets/icons/RightArrow";
 import Input from "../../../components/dsfr/forms/input";
 import api from "../../../services/api";
 import Error from "../../../components/error";
+import { Button } from "@snu/ds/dsfr";
 
 export default function Forgot() {
   const [done, setDone] = React.useState(false);
@@ -41,17 +42,11 @@ export default function Forgot() {
         </div>
         {!done ? (
           <>
-            <div className="flex flex-col gap-1 py-3">
-              <label className="text-base text-[#161616]">E-mail</label>
-              <Input value={email} onChange={(e) => setEmail(e)} />
-            </div>
+            <Input label="E-mail" value={email} onChange={(e) => setEmail(e)} />
             <div className="flex justify-end">
-              <button
-                disabled={disabled || loading}
-                className="mt-3 flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0 disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
-                onClick={onSubmit}>
+              <Button disabled={disabled || loading} onClick={onSubmit}>
                 M&apos;envoyer le lien de réinitialisation
-              </button>
+              </Button>
             </div>
           </>
         ) : (
@@ -64,11 +59,11 @@ export default function Forgot() {
         <hr className="mt-4 text-[#E5E5E5]" />
         <div className="mt-2 py-4 text-center text-[17px] font-bold text-[#161616]">Retourner à la connexion</div>
         <div className="flex justify-center">
-          <button
+          <Button
             className="flex cursor-pointer items-center justify-center border-[1px] border-[#000091] p-2 text-[#000091] hover:bg-[#000091] hover:text-white"
             onClick={() => history.push("/auth")}>
             Se connecter
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -16,9 +16,9 @@ export default function CheckBox({ checked, onChange, label = "", description = 
         }`}>
         {checked ? <RiCheckLine className="text-white" /> : null}
       </div>
-      <p className={`pl-3 ${!disabled && "cursor-pointer"}`}>
+      <span className={`pl-3 ${!disabled && "cursor-pointer"}`}>
         {label} <span className="text-[#666666] text-sm leading-tight"> {description}</span>
-      </p>
+      </span>
     </div>
   );
 }
