@@ -310,8 +310,8 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       await application.save({ fromUser: req.user });
 
       if (application.isJvaMission) {
-        const mission = await MissionObject.findById(application.missionId).project({ jvaMissionId: 1 });
-        await sendTrackingDataToJva(mission.jvaMissionId, application.status);
+        const { jvaMissionId } = await MissionObject.findById(application.missionId).project({ jvaMissionId: 1 });
+        await sendTrackingDataToJva(jvaMissionId, application.status);
       }
 
       await updateYoungPhase2Hours(young, req.user);
@@ -370,8 +370,8 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     await application.save({ fromUser: req.user });
 
     if (application.isJvaMission) {
-      const mission = await MissionObject.findById(application.missionId).project({ jvaMissionId: 1 });
-      await sendTrackingDataToJva(mission.jvaMissionId, application.status);
+      const { jvaMissionId } = await MissionObject.findById(application.missionId).project({ jvaMissionId: 1 });
+      await sendTrackingDataToJva(jvaMissionId, application.status);
     }
 
     await updateYoungPhase2Hours(young, req.user);

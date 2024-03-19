@@ -195,6 +195,7 @@ const statusOptions = {
  * @param {string} missionId - JVA ID, not SNU ID
  * @param {"WAITING_VALIDATION" | "VALIDATED" | "DONE"} status -  We only track application creation, validation and completion (not cancellation, refusal, etc.)
  * @param {string} [clickId]  - Optional. Click ID stored in local storage to match a redirection to an application creation.
+ * doc: https://www.notion.so/jeveuxaider/API-x-SNU-MIG-b6fd11bcb6ff485ca1d42ae175af8411?pvs=4
  */
 async function sendTrackingDataToJva(missionId, status, clickId) {
   try {
