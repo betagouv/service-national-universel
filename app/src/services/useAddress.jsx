@@ -30,6 +30,7 @@ function formatResult(option) {
   const contextArray = option.properties.context.split(",");
 
   return {
+    label: `${option.properties.name} - ${option.properties.postcode} ${option.properties.city}`,
     address: option.properties.type !== "municipality" ? option.properties.name : "",
     zip: option.properties.postcode,
     city: option.properties.city,
