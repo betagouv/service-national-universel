@@ -209,9 +209,6 @@ async function sendTrackingDataToJva(missionId, status, clickId) {
       ...statusOptions[status],
     };
 
-    console.log("sendTrackingDataToJva", url, options);
-    return;
-
     const { ok, code } = await fetch(url, options);
     if (!ok) {
       throw new Error(code);

@@ -3,8 +3,6 @@ let apiURL = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
 let appURL = import.meta.env.VITE_APP_URL ?? "http://localhost:8081";
 let adminURL = import.meta.env.VITE_ADMIN_URL ?? "http://localhost:8082";
 let supportURL = import.meta.env.VITE_SUPPORT_URL ?? "http://localhost:8083";
-let apiEngagementUrl = import.meta.env.VITE_API_ENGAGEMENT_URL ?? "fakeApiUrl";
-let apiEngagementKey = import.meta.env.VITE_API_ENGAGEMENT_KEY ?? "fakeApiKey";
 let maintenance = import.meta.env.VITE_MAINTENANCE === "true";
 let SENTRY_URL = import.meta.env.VITE_SENTRY_URL;
 let SENTRY_TRACING_SAMPLE_RATE = import.meta.env.VITE_SENTRY_TRACING_SAMPLE_RATE ?? 1.0;
@@ -23,7 +21,5 @@ export {
   adminURL,
   appURL,
   supportURL,
-  apiEngagementUrl,
-  apiEngagementKey,
   maintenance,
 };

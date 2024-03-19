@@ -28,7 +28,6 @@ const {
   canViewContract,
   translateAddFilePhase2,
   translateAddFilesPhase2,
-  APPLICATION_STATUS,
 } = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
 const {
