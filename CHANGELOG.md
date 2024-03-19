@@ -1,3 +1,16 @@
+# [1.394.0](https://github.com/betagouv/service-national-universel/compare/v1.393.0...v1.394.0) (2024-03-19)
+
+
+### Bug Fixes
+
+* **api:** add class check on PDT import ([4c6b635](https://github.com/betagouv/service-national-universel/commit/4c6b635d9d1e2d580b135b9c2800ecbb4a1f17a9))
+
+
+### Features
+
+* **admin:** 1834 - Wording for PDR young CLE ([#3671](https://github.com/betagouv/service-national-universel/issues/3671)) ([f40ba33](https://github.com/betagouv/service-national-universel/commit/f40ba333360c4532264250918cc1615a0f959e14))
+* **api:** 2059 - Export DSNJ only french for after session ([#3672](https://github.com/betagouv/service-national-universel/issues/3672)) ([6fe27b6](https://github.com/betagouv/service-national-universel/commit/6fe27b61fc1bf1913d8cb88ca9c96092ebdccdce))
+
 # [1.393.0](https://github.com/betagouv/service-national-universel/compare/v1.392.0...v1.393.0) (2024-03-18)
 
 
