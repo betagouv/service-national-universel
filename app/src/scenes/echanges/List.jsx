@@ -61,7 +61,7 @@ const Echanges = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await API.get(`/zammood/tickets`);
+        const response = await API.get(`/SNUpport/tickets`);
         if (response && response.ok) {
           const { data } = response;
           setUserTickets(data);
