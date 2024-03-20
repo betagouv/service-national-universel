@@ -73,7 +73,7 @@ export default function Create(props) {
               setLoading(true);
               let uploadedFiles;
               if (files.length > 0) {
-                const filesResponse = await api.uploadFiles("/zammood/upload", files);
+                const filesResponse = await api.uploadFiles("/SNUpport/upload", files);
                 if (!filesResponse.ok) {
                   setLoading(false);
                   const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
@@ -85,7 +85,7 @@ export default function Create(props) {
               let title = type?.label;
               if ([ROLES.HEAD_CENTER, ROLES.VISITOR].includes(user.role)) title = messageSubject;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
-              const response = await api.post("/zammood/ticket", {
+              const response = await api.post("/SNUpport/ticket", {
                 message,
                 subject: title,
                 fromPage,

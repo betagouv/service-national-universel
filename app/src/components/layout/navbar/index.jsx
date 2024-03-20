@@ -19,7 +19,7 @@ export default function Navbar() {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const { ok, data } = await API.get(`/zammood/ticketsInfo`);
+        const { ok, data } = await API.get(`/SNUpport/ticketsInfo`);
         if (!ok) {
           console.log("API response not OK");
           return setTicketsInfo([]);

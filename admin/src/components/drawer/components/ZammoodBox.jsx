@@ -6,7 +6,7 @@ import { translate } from "@/utils";
 import Mail from "../icons/Mail";
 import Separator from "./Separator";
 
-export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
+export default function SNUpportBox({ newTickets, openedTickets, sideBarOpen }) {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const onMouseEnter = () => {
@@ -17,9 +17,9 @@ export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
     setPopoverOpen(false);
   };
 
-  const connectToZammood = async () => {
+  const connectToSNUpport = async () => {
     try {
-      const { ok, data, code } = await api.get(`/zammood/signin`);
+      const { ok, data, code } = await api.get(`/SNUpport/signin`);
       if (!ok) return toastr.error("Oups, une erreur est survenue. Veuillez contacter le support", translate(code));
       window.open(data, "_blank", "noopener,noreferrer");
     } catch (e) {
@@ -40,7 +40,7 @@ export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
               <div onMouseLeave={onMouseLeave}>
                 <Popover.Button onMouseEnter={onMouseEnter} className="focus:outline-none ">
                   <div
-                    onClick={connectToZammood}
+                    onClick={connectToSNUpport}
                     className={`group flex items-center h-[66px] pl-[29px] py-[18px] !pr-3 hover:bg-[#1B1F42]  ${sideBarOpen ? "!pr-2  w-[250px]" : "w-[88px]"}`}>
                     <Mail className={`w-[30px] h-[30px] text-[#EEEFF5]/70 group-hover:text-[#EEEFF5]`} />
                     {sideBarOpen && (
@@ -72,7 +72,7 @@ export default function ZammoodBox({ newTickets, openedTickets, sideBarOpen }) {
                     onEnter={() => setPopoverOpen(true)}
                     onExited={() => setPopoverOpen(false)}>
                     <Popover.Panel className="absolute transform left-[100%] bottom-1/2 translate-y-[50%]">
-                      <button onClick={connectToZammood} className="!ml-2 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20">
+                      <button onClick={connectToSNUpport} className="!ml-2 px-4 py-[6px] bg-white shadow-md rounded-lg w-fit z-20">
                         <p className="text-xs leading-5 font-medium uppercase text-[#3E426A] whitespace-nowrap">Boîte de reception</p>
                       </button>
                     </Popover.Panel>

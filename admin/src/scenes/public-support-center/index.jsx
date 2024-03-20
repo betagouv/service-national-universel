@@ -10,7 +10,7 @@ import api from "../../services/api";
 import { colors, urlWithScheme } from "../../utils";
 import { adminURL, environment, supportURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
-import ZammoodForm from "./form";
+import SNUpportForm from "./form";
 import FooterComponent from "../../components/footer";
 
 const articles = [
@@ -85,7 +85,7 @@ const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "
     searchTimeout.current = setTimeout(async () => {
       setIsSearching(true);
       setHideItems(false);
-      const response = await api.get(`/zammood/knowledgeBase/search?search=${search}&restriction=public`);
+      const response = await api.get(`/SNUpport/knowledgeBase/search?search=${search}&restriction=public`);
       setIsSearching(false);
       if (response.ok) {
         setItems(response.data);
@@ -232,7 +232,7 @@ export default function PublicSupportCenter(props) {
             </div>
           </div>
         </div>
-        {open && <ZammoodForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
+        {open && <SNUpportForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} fromPage={fromPage} />}
         {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
       {environment !== "production" ? <FooterComponent /> : null}

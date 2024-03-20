@@ -37,7 +37,7 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fr
             let uploadedFiles;
             setLoading(true);
             if (files.length > 0) {
-              const filesResponse = await api.uploadFiles("/zammood/upload", files);
+              const filesResponse = await api.uploadFiles("/SNUpport/upload", files);
               if (!filesResponse.ok) {
                 const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
                 return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
@@ -45,7 +45,7 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fr
               uploadedFiles = filesResponse.data;
             }
             const { message, subject, firstName, lastName, email, step1, step2, department } = values;
-            const response = await api.post("/zammood/ticket/form", {
+            const response = await api.post("/SNUpport/ticket/form", {
               message,
               subject: subject,
               firstName,
@@ -232,7 +232,9 @@ const Form = styled.div`
   flex: 2;
   padding: 2rem;
   border-radius: 0.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   flex-direction: column;
   background-color: #fff;
   margin: 0 auto;
