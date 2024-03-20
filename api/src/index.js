@@ -1,9 +1,19 @@
 (async () => {
+  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
+
+  // ! Ignore specific error
+  const originalConsoleError = console.error;
+  console.error = function (message) {
+    if (typeof message === "string" && message.includes("AWS SDK for JavaScript (v2) into maintenance mode")) return;
+    originalConsoleError.apply(console, arguments);
+  };
 
   if (process.env.RUN_CRONS) {
     const { PORT } = require("./config.js");
     const { initSentry } = require("./sentry");
-    initSentry()
+    initSentry();
+    const { initDB } = require("./mongo");
+    await initDB();
     require("./crons");
     // Serverless containers requires running http server
     const express = require("express");
@@ -14,16 +24,7 @@
 
   await require("./env-manager")();
 
-  // ! Ignore specific error
-  const originalConsoleError = console.error;
-  console.error = function (message) {
-    if (typeof message === "string" && message.includes("AWS SDK for JavaScript (v2) into maintenance mode")) return;
-    originalConsoleError.apply(console, arguments);
-  };
-
   const { initSentryMiddlewares, capture } = require("./sentry");
-
-  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
   const bodyParser = require("body-parser");
   const cors = require("cors");
@@ -36,7 +37,8 @@
   const loggingMiddleware = require("./middlewares/loggingMiddleware");
   const { forceDomain } = require("forcedomain");
   const requestIp = require("request-ip"); // Import request-ip package
-  require("./mongo");
+  const { initDB, closeDB } = require("./mongo");
+  await initDB();
 
   const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
 
@@ -107,6 +109,11 @@
     next();
   });
   app.use(loggingMiddleware);
+
+  // WARNING : CleverCloud only
+  if (process.env.RUN_CRONS_CC && ENVIRONMENT === "production" && process.env.CC_DEPLOYMENT_ID && process.env.INSTANCE_NUMBER === "0") {
+    require("./crons");
+  }
 
   app.use(cookieParser());
 
@@ -229,5 +236,34 @@
 
   require("./passport")();
 
-  app.listen(PORT, () => console.log("Listening on port " + PORT));
+  // * Use Terminus for graceful shutdown when using Docker
+  const { createTerminus } = require("@godaddy/terminus");
+  const http = require("http");
+
+  const server = http.createServer(app);
+
+  function onSignal() {
+    console.log("server is starting cleanup");
+    return Promise.all([closeDB()]);
+  }
+
+  function onShutdown() {
+    console.log("cleanup finished, server is shutting down");
+  }
+
+  function healthCheck({ state }) {
+    return Promise.resolve();
+  }
+
+  const options = {
+    healthChecks: {
+      "/healthcheck": healthCheck,
+    },
+    onSignal,
+    onShutdown,
+  };
+
+  createTerminus(server, options);
+
+  server.listen(PORT, () => console.log("Listening on port " + PORT));
 })();

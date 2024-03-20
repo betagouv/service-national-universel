@@ -1,6 +1,7 @@
 (async () => {
   await require("../../env-manager")();
-  require("../../mongo");
+  const { initDB } = require("./mongo");
+  await initDB();
 
   // ! To migrate into scripts dir to not be tagged as dead code
 

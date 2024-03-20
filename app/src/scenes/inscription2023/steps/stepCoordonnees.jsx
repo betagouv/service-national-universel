@@ -1,5 +1,5 @@
 import Img2 from "../../../assets/infoSquared.svg";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
@@ -26,16 +26,17 @@ import api from "../../../services/api";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
-import { debounce, translate } from "../../../utils";
+import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
 import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { apiAdress, getAddressOptions } from "../../../services/api-adresse";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
+import useAddress from "@/services/useAddress";
+import { useDebounce } from "@uidotdev/usehooks";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -119,7 +120,7 @@ export default function StepCoordonnees() {
   const [errors, setErrors] = useState({});
   const [corrections, setCorrections] = useState({});
   const [situationOptions, setSituationOptions] = useState([]);
-  const [birthCityZipSuggestions, setBirthCityZipSuggestions] = useState([]);
+  const [birthCitySuggestionsOpen, setBirthCitySuggestionsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -158,6 +159,8 @@ export default function StepCoordonnees() {
     reducedMobilityAccess,
     handicapInSameDepartment,
   } = data;
+
+  const debouncedBirthCity = useDebounce(birthCity, 200);
 
   const wasBornInFranceBool = wasBornInFrance === "true";
   const isFrenchResident = livesInFrance === "true";
@@ -241,7 +244,7 @@ export default function StepCoordonnees() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
-        setBirthCityZipSuggestions([]);
+        setBirthCitySuggestionsOpen(false);
       }
     };
     document.addEventListener("click", handleClickOutside);
@@ -284,33 +287,20 @@ export default function StepCoordonnees() {
     }
   };
 
-  const debouncedSuggestionsRequest = useCallback(
-    debounce(async (value) => {
-      try {
-        const response = await apiAdress(value, { type: "municipality" });
-        if (!response || !response.features) return;
-        const suggestions = response.features.map(({ properties: { city, postcode } }) => ({ city, postcode }));
-        setBirthCityZipSuggestions(suggestions);
-      } catch (error) {
-        capture(error);
-      }
-    }, 100),
-    [],
-  );
+  const { results: birthCityZipSuggestions } = useAddress({
+    query: debouncedBirthCity,
+    options: { type: "municipality" },
+    enabled: wasBornInFranceBool && debouncedBirthCity.length > 2,
+  });
 
   const updateBirthCity = async (value) => {
+    setBirthCitySuggestionsOpen(true);
     setData({ ...data, birthCity: value });
-    const trimmedValue = value.trim();
-    if (trimmedValue && trimmedValue.length > 2) {
-      debouncedSuggestionsRequest(trimmedValue);
-    } else {
-      setBirthCityZipSuggestions([]);
-    }
   };
 
   const onClickBirthCitySuggestion = (birthCity, birthCityZip) => {
+    setBirthCitySuggestionsOpen(false);
     setData({ ...data, birthCity, birthCityZip });
-    setBirthCityZipSuggestions([]);
   };
 
   const onSubmit = async () => {
@@ -465,7 +455,8 @@ export default function StepCoordonnees() {
     <>
       <DSFRContainer
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
-        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}        supportEvent="Phase0/aide inscription - coordonnees">
+        supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
+        supportEvent="Phase0/aide inscription - coordonnees">
         <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
         {!wasBornInFranceBool && (
           <SearchableSelect
@@ -488,15 +479,15 @@ export default function StepCoordonnees() {
               error={errors.birthCity}
               correction={corrections?.birthCity}
             />
-            {wasBornInFranceBool && (
+            {wasBornInFranceBool && birthCitySuggestionsOpen && (
               <div ref={ref} className="border-3 absolute z-[100] mt-[-24px] w-full overflow-hidden border-red-600 bg-white shadow">
-                {birthCityZipSuggestions.map(({ city, postcode }, index) => (
-                  <div
+                {birthCityZipSuggestions?.map(({ city, zip: postcode }, index) => (
+                  <button
                     onClick={() => {
                       onClickBirthCitySuggestion(city, postcode);
                     }}
-                    className="group flex cursor-pointer items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50"
-                    key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</div>
+                    className="group flex items-center justify-between gap-2 p-2  px-3 hover:bg-gray-50"
+                    key={`${index} - ${postcode}`}>{`${city} - ${postcode}`}</button>
                 ))}
               </div>
             )}
@@ -521,7 +512,7 @@ export default function StepCoordonnees() {
             correction={corrections?.situation}
           />
         )}
-        <hr className="my-2 h-px border-0 bg-gray-200" />
+        <hr className="my-2" />
         <div className="flex mt-4 items-center gap-3 mb-6">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Adresse de résidence</h2>
         </div>
@@ -534,7 +525,7 @@ export default function StepCoordonnees() {
           correction={corrections?.livesInFrance}
         />
         {isFrenchResident ? (
-          <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} correction={corrections} />
+          <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections} />
         ) : (
           <>
             <SearchableSelect
@@ -585,17 +576,11 @@ export default function StepCoordonnees() {
               error={errors.hostRelationship}
               correction={corrections?.hostRelationship}
             />
-            <AddressForm
-              data={data}
-              updateData={(newData) => setData({ ...data, ...newData })}
-              getOptions={getAddressOptions}
-              error={errors.address}
-              correction={corrections?.address}
-            />
+            <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections?.address} />
           </>
         )}
 
-        <hr className="my-2 h-px border-0 bg-gray-200" />
+        <hr className="my-2" />
         <div className="flex mt-4 items-center gap-3 mb-4">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
           <a
@@ -686,7 +671,7 @@ export default function StepCoordonnees() {
             <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
             {moreInformation && (
               <>
-                <hr className="my-4 h-px border-0 bg-gray-200" />
+                <hr className="my-4" />
                 <RadioButton
                   label="Avez-vous besoin d’aménagements spécifiques ?"
                   description="(accompagnant professionnel, participation de jour, activités adaptées... )"

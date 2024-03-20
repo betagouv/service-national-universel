@@ -2,8 +2,11 @@ import React, { useRef, useState, useEffect } from "react";
 import { BiChevronDown } from "react-icons/bi";
 import { BsDownload } from "react-icons/bs";
 import { CiMail } from "react-icons/ci";
+import { useSelector } from "react-redux";
+import { ROLES } from "snu-lib";
 
 const DocumentSelect = ({ title, onClickMail, onClickPdf }) => {
+  const user = useSelector((state) => state.Auth.user);
   const ref = useRef();
   const [open, setOpen] = useState(false);
 
@@ -39,15 +42,17 @@ const DocumentSelect = ({ title, onClickMail, onClickPdf }) => {
           <BsDownload />
           <div>Télécharger</div>
         </div>
-        <div
-          className="flex w-64 cursor-pointer flex-row items-center justify-start gap-2 py-2.5 px-2 hover:bg-blue-600 hover:text-white"
-          onClick={() => {
-            onClickMail();
-            setOpen(false);
-          }}>
-          <CiMail />
-          <div>Envoyer par mail</div>
-        </div>
+        {![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
+          <div
+            className="flex w-64 cursor-pointer flex-row items-center justify-start gap-2 py-2.5 px-2 hover:bg-blue-600 hover:text-white"
+            onClick={() => {
+              onClickMail();
+              setOpen(false);
+            }}>
+            <CiMail />
+            <div>Envoyer par mail</div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import React from "react";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { canEditLigneBusGeneralInfo, isBusEditionOpen, translate } from "snu-lib";
 import Pencil from "../../../../../assets/icons/Pencil";
 import Loader from "../../../../../components/Loader";
@@ -11,6 +11,7 @@ import api from "../../../../../services/api";
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
 import Select from "../../components/Select";
+import { Button } from "@snu/ds/admin";
 
 const options = [
   { label: "Oui", value: true },
@@ -167,11 +168,14 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }) {
               />
             </div>
           </div>
-          <button
-            className="flex justify-center rounded-lg bg-gray-100 py-2.5 text-sm text-gray-800"
-            onClick={() => history.push(`/ligne-de-bus/volontaires/bus/${bus._id.toString()}`)}>
-            Voir les volontaires ({nbYoung})
-          </button>
+          <Link to={`/ligne-de-bus/volontaires/bus/${bus._id.toString()}`} className="w-full">
+            <Button type="tertiary" title={`Voir les volontaires (${nbYoung})`} className="w-full max-w-none" />
+          </Link>
+          {bus.classeId && (
+            <Link to={`/classes/${bus.classeId}`} className="w-full">
+              <Button type="tertiary" title="Voir la classe" className="w-full max-w-none" />
+            </Link>
+          )}
         </div>
         <div className="flex w-[10%] items-center justify-center">
           <div className="my-2 h-full w-[1px] border-r-[1px] border-gray-300"></div>

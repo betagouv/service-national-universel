@@ -24,6 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@elastic/elasticsearch": "^7.14.0",
+    "@godaddy/terminus": "^4.12.1",
     "@scaleway/sdk": "^1.38.1",
     "@selego/mongoose-elastic": "^1.6.0",
     "@sentry/integrations": "^7.58.1",

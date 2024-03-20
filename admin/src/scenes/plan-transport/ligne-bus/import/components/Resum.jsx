@@ -4,9 +4,13 @@ import { capture } from "../../../../../sentry";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { COHORT_TYPE } from "snu-lib";
 import { HiExclamation } from "react-icons/hi";
 
-export default function Resum({ summary, cohort }) {
+export default function Resum({ summary, cohort, addLigne }) {
+  const cohorts = useSelector((state) => state.Cohorts);
+  const currentCohort = cohorts.find((c) => c.name === cohort);
   const [isLoading, setIsLoading] = React.useState(false);
   const history = useHistory();
 
@@ -30,7 +34,7 @@ export default function Resum({ summary, cohort }) {
   return (
     <>
       <div className="mt-8 flex w-full flex-col gap-6 rounded-xl bg-white px-8 pt-12 pb-24">
-        <div className="pb-4 text-center text-xl font-medium leading-7 text-gray-900">Vous vous apprêtez à importer...</div>
+        <div className="pb-4 text-center text-xl font-medium leading-7 text-gray-900">Vous vous apprêtez à {addLigne ? "ajouter" : "importer"}...</div>
         <div className="bg-amber-50 text-amber-700 py-4 flex gap-4 pl-4 rounded-md">
           <HiExclamation size={20} color="#FBBF24" className="mt-0.5" />
           <div className="text-sm leading-5">
@@ -44,21 +48,27 @@ export default function Resum({ summary, cohort }) {
         <div className="flex items-stretch justify-center gap-6 pt-6 pb-12">
           <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
             <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.busLineCount}</div>
-            <div className="text-xs font-medium leading-5 text-gray-800">lignes de transport</div>
+            <div className="text-xs font-medium leading-5 text-gray-800">lignes de transport {addLigne && "supplémentaires"}</div>
           </div>
           <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
             <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.centerCount}</div>
-            <div className="text-xs font-medium leading-5 text-gray-800">centres de cohésion</div>
+            <div className="text-xs font-medium leading-5 text-gray-800">centres de cohésion {addLigne && "supplémentaires"}</div>
           </div>
+          {currentCohort.type === COHORT_TYPE.CLE && (
+            <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
+              <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.classeCount}</div>
+              <div className="text-xs font-medium leading-5 text-gray-800">classes {addLigne && "supplémentaires"}</div>
+            </div>
+          )}
           <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
             <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.pdrCount}</div>
-            <div className="text-xs font-medium leading-5 text-gray-800">points de rassemblement</div>
+            <div className="text-xs font-medium leading-5 text-gray-800">points de rassemblement {addLigne && "supplémentaires"}</div>
           </div>
         </div>
       </div>
       <div className="mt-4 flex justify-end">
-        <PlainButton className="w-52" disabled={isLoading} spinner={isLoading} onClick={onSubmit}>
-          Importer
+        <PlainButton disabled={isLoading} spinner={isLoading} onClick={onSubmit}>
+          {addLigne ? "Importer ces lignes supplémentaires" : "Importer ce plan de transport"}
         </PlainButton>
       </div>
     </>

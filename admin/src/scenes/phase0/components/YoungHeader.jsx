@@ -81,6 +81,10 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
             break;
         }
       }
+      //referent can withdraw a young from every status except withdrawn
+      if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && young.status !== "WITHDRAWN") options.push(YOUNG_STATUS.WITHDRAWN);
+      options = [...new Set(options)];
+
       setStatusOptions(options.map((opt) => ({ value: opt, label: translateInscriptionStatus(opt) })));
     } else {
       setStatusOptions([]);

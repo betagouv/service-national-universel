@@ -1,3 +1,131 @@
+# [1.394.0](https://github.com/betagouv/service-national-universel/compare/v1.393.0...v1.394.0) (2024-03-19)
+
+
+### Bug Fixes
+
+* **api:** add class check on PDT import ([4c6b635](https://github.com/betagouv/service-national-universel/commit/4c6b635d9d1e2d580b135b9c2800ecbb4a1f17a9))
+
+
+### Features
+
+* **admin:** 1834 - Wording for PDR young CLE ([#3671](https://github.com/betagouv/service-national-universel/issues/3671)) ([f40ba33](https://github.com/betagouv/service-national-universel/commit/f40ba333360c4532264250918cc1615a0f959e14))
+* **api:** 2059 - Export DSNJ only french for after session ([#3672](https://github.com/betagouv/service-national-universel/issues/3672)) ([6fe27b6](https://github.com/betagouv/service-national-universel/commit/6fe27b61fc1bf1913d8cb88ca9c96092ebdccdce))
+
+# [1.393.0](https://github.com/betagouv/service-national-universel/compare/v1.392.0...v1.393.0) (2024-03-18)
+
+
+### Bug Fixes
+
+* **app:** 1184 - Bumping react-dsfr version. ([01de6f8](https://github.com/betagouv/service-national-universel/commit/01de6f842f925734a5aa60fbea75dbfa03ece974))
+* **app:** 1184 - Removed only-include-used-icons from package.json. ([6fec94a](https://github.com/betagouv/service-national-universel/commit/6fec94ad878d4a3d2736f22b60ac1fae9a4ca663))
+
+
+### Features
+
+* **app:** 1184 - React DSFR on App. ([#3438](https://github.com/betagouv/service-national-universel/issues/3438)) ([e828232](https://github.com/betagouv/service-national-universel/commit/e8282326b7cda1df6649a2a7d52f58b2d471c18e))
+* **app,admin:** 1865 - Nginx & runtime environment ([#3664](https://github.com/betagouv/service-national-universel/issues/3664)) ([f27e0bb](https://github.com/betagouv/service-national-universel/commit/f27e0bb9a715a47fea8c8b7fbed9f7bd6944e220))
+
+# [1.392.0](https://github.com/betagouv/service-national-universel/compare/v1.391.0...v1.392.0) (2024-03-15)
+
+
+### Features
+
+* **admin:** add meeting to convocation CLE ([#3666](https://github.com/betagouv/service-national-universel/issues/3666)) ([6b32403](https://github.com/betagouv/service-national-universel/commit/6b3240324e2e2da714e552e20f3963b8f72726c5))
+
+# [1.391.0](https://github.com/betagouv/service-national-universel/compare/v1.390.0...v1.391.0) (2024-03-14)
+
+
+### Features
+
+* **api:** Fix some error on DeleteCNICron ([#3657](https://github.com/betagouv/service-national-universel/issues/3657)) ([a855edd](https://github.com/betagouv/service-national-universel/commit/a855edd3c69857d533068a497d917fbf296d0c6e))
+* **app,admin:** 1964 - Modification du contrat d'engagement ([#3656](https://github.com/betagouv/service-national-universel/issues/3656)) ([328cfb1](https://github.com/betagouv/service-national-universel/commit/328cfb1856d7eb6e646f2bfa8b0063d01535308a))
+* **lib:** update Attestation Phase 1 ([#3661](https://github.com/betagouv/service-national-universel/issues/3661)) ([19a6de9](https://github.com/betagouv/service-national-universel/commit/19a6de9908ce2ed2aa1acc8d321e9d8d0bd637c5))
+
+# [1.390.0](https://github.com/betagouv/service-national-universel/compare/v1.389.1...v1.390.0) (2024-03-13)
+
+
+### Bug Fixes
+
+* **admin/api:** Fix de plusieurs bug ([#3662](https://github.com/betagouv/service-national-universel/issues/3662)) ([763bc3e](https://github.com/betagouv/service-national-universel/commit/763bc3ebcd436d56c3bbf5c1ef44c06a87381632))
+* **api:** Fix application tests ([3d65fe2](https://github.com/betagouv/service-national-universel/commit/3d65fe243740dc058007cf1cf17ca06a4696aa9d))
+* **misc:** Increase antivirus RAM ([#3660](https://github.com/betagouv/service-national-universel/issues/3660)) ([4fb5590](https://github.com/betagouv/service-national-universel/commit/4fb55907dcc51a1145331124f4cc5ced31c23b92))
+
+
+### Features
+
+* **admin/api:** 1757 - Pouvoir rajouter des lignes sur le pdt sans réimporté tous le pdt ([#3635](https://github.com/betagouv/service-national-universel/issues/3635)) ([f87b367](https://github.com/betagouv/service-national-universel/commit/f87b3677258aa79bd160e3b7e138b20b14ac0577))
+* **misc:** 1865 - Optimize Dockerfile ([#3650](https://github.com/betagouv/service-national-universel/issues/3650)) ([b6eb75f](https://github.com/betagouv/service-national-universel/commit/b6eb75f8811f3db380f7ad8f5a74a8628cdc2a14))
+
+## [1.389.1](https://github.com/betagouv/service-national-universel/compare/v1.389.0...v1.389.1) (2024-03-12)
+
+
+### Bug Fixes
+
+* **admin:** [CLE]- TRANSPORT - Bug export convoyeurs CLE MARS 1 ([#3653](https://github.com/betagouv/service-national-universel/issues/3653)) ([14a3643](https://github.com/betagouv/service-national-universel/commit/14a3643d80589b8953d4297f4b6fd41e43680386))
+* **admin:** referent can WITHDRAWN every young ([cf336f2](https://github.com/betagouv/service-national-universel/commit/cf336f29b6e47a83ac8691245cbf27759e9cdc78))
+* **admin:** sidebar ([#3658](https://github.com/betagouv/service-national-universel/issues/3658)) ([e316b50](https://github.com/betagouv/service-national-universel/commit/e316b50c7b3121bca3f3f1545e8667fcc8b2d263))
+* **misc:** Always run tests ([#3652](https://github.com/betagouv/service-national-universel/issues/3652)) ([394951d](https://github.com/betagouv/service-national-universel/commit/394951d263ba0aaff10673d5200fe1756d839362))
+
+# [1.389.0](https://github.com/betagouv/service-national-universel/compare/v1.388.0...v1.389.0) (2024-03-11)
+
+
+### Bug Fixes
+
+* **api:** 2013 - bug export classes ([#3649](https://github.com/betagouv/service-national-universel/issues/3649)) ([c382620](https://github.com/betagouv/service-national-universel/commit/c38262005fc146321c1d7f1e5fba521958ef04cb))
+* **app:** bug url boutton demande ([#3651](https://github.com/betagouv/service-national-universel/issues/3651)) ([5527036](https://github.com/betagouv/service-national-universel/commit/5527036e9fb1d4aab6bf6243da65543aabc4817d))
+
+
+### Features
+
+* **app:** 1725 - breadcrumb add on App ([#3642](https://github.com/betagouv/service-national-universel/issues/3642)) ([bd74a12](https://github.com/betagouv/service-national-universel/commit/bd74a1260bc3a898275f816916621cc609d49544))
+
+# [1.388.0](https://github.com/betagouv/service-national-universel/compare/v1.387.2...v1.388.0) (2024-03-08)
+
+
+### Bug Fixes
+
+* **api:** wait for mongodb initialization ([#3643](https://github.com/betagouv/service-national-universel/issues/3643)) ([a982509](https://github.com/betagouv/service-national-universel/commit/a982509ebeb65877934f6dc3d20468e99d393676))
+* **sib:** Correct send in blue mongo import ([b033578](https://github.com/betagouv/service-national-universel/commit/b0335782816c8fac9445ebde0bc5a552087341f7))
+
+
+### Features
+
+* **admin:** 1369 - move new mission button ([#3639](https://github.com/betagouv/service-national-universel/issues/3639)) ([09fddfa](https://github.com/betagouv/service-national-universel/commit/09fddfa74259504adb0dc4c866ea8fa4ace83286))
+* **admin:** 1599 - sidebar scroll ([#3641](https://github.com/betagouv/service-national-universel/issues/3641)) ([b8f4da3](https://github.com/betagouv/service-national-universel/commit/b8f4da303be62ea6593e877a30d6f9140bc0b41b))
+* **admin:** 409 - shutdown bal ([#3640](https://github.com/betagouv/service-national-universel/issues/3640)) ([768aae1](https://github.com/betagouv/service-national-universel/commit/768aae127eba7f89a89c86f09e02cdc801ace1bd))
+* **admin:** Better infromation ([6c38e30](https://github.com/betagouv/service-national-universel/commit/6c38e302f57dc91de6f0f7618971bdc906ef054f))
+* **cron:** Add Cron basic logging ([#3647](https://github.com/betagouv/service-national-universel/issues/3647)) ([1a3b508](https://github.com/betagouv/service-national-universel/commit/1a3b5085075517649aa2b77a303919326d47fb29))
+
+## [1.387.2](https://github.com/betagouv/service-national-universel/compare/v1.387.1...v1.387.2) (2024-03-07)
+
+
+### Bug Fixes
+
+* **admin:** export convoyeur ([#3648](https://github.com/betagouv/service-national-universel/issues/3648)) ([ad9c3e4](https://github.com/betagouv/service-national-universel/commit/ad9c3e4d84bbc6fd589e5fd10372a61c46548f6b))
+* **api:** env manager staging ([f6f239c](https://github.com/betagouv/service-national-universel/commit/f6f239c55a0035a3d2fcc319c05ae28bdfa66e44))
+* **api:** Fix age calculation when getting a mission [#3645](https://github.com/betagouv/service-national-universel/issues/3645) ([a5869a4](https://github.com/betagouv/service-national-universel/commit/a5869a4382048fdb3882f5c6d118ab69ca51491e))
+
+## [1.387.1](https://github.com/betagouv/service-national-universel/compare/v1.387.0...v1.387.1) (2024-03-06)
+
+
+### Bug Fixes
+
+* **admin:** Fix ligne de bus sur les classes ([#3638](https://github.com/betagouv/service-national-universel/issues/3638)) ([25ee95d](https://github.com/betagouv/service-national-universel/commit/25ee95dc34301911b6a91630bc815f3bfa774e6c))
+
+# [1.387.0](https://github.com/betagouv/service-national-universel/compare/v1.386.0...v1.387.0) (2024-03-05)
+
+
+### Bug Fixes
+
+* **api:** Antivirus timeout ([#3632](https://github.com/betagouv/service-national-universel/issues/3632)) ([e1b080c](https://github.com/betagouv/service-national-universel/commit/e1b080c54f444525e310656b1b97c8e66a77b922))
+* **api:** Synchro api engagement ([#3634](https://github.com/betagouv/service-national-universel/issues/3634)) ([fc05d46](https://github.com/betagouv/service-national-universel/commit/fc05d46b2a4fd20679b95ab8083506711a067604))
+
+
+### Features
+
+* **api/admin:** 1772-1773 add ligne Bus sur la classe ([#3621](https://github.com/betagouv/service-national-universel/issues/3621)) ([de39104](https://github.com/betagouv/service-national-universel/commit/de391044bbdfda0d0e82155542d7a26a6f81fbb6))
+* **app:** 1034 - update RL2 logic on app ([#3633](https://github.com/betagouv/service-national-universel/issues/3633)) ([aa149dc](https://github.com/betagouv/service-national-universel/commit/aa149dc7cbfb161f008020eec6988fb5499d52af))
+
 # [1.386.0](https://github.com/betagouv/service-national-universel/compare/v1.385.3...v1.386.0) (2024-03-04)
 
 

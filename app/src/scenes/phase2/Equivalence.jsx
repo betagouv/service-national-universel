@@ -26,8 +26,9 @@ export const Equivalence = () => {
             <span>Vous devez avoir terminé votre séjour de cohésion.</span>
           </AlertPrimary>
         )}
+
         <ButtonLinkPrimaryOutline
-          to="phase2/equivalence"
+          to="/phase2/equivalence"
           disabled={!isYoungCanApplyToPhase2Missions(young)}
           className="flex w-full justify-center"
           onClick={() => plausibleEvent("Phase 2/ CTA - EquivalenceMIGdemande")}>

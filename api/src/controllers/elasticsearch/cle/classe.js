@@ -63,13 +63,14 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
 
       if (req.query?.type === "schema-de-repartition") {
-        // Export is only available for admin for now
-        if (![ROLES.ADMIN].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
         response = await populateWithEtablissementInfo(response);
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
         response = await populateWithYoungsInfo(response);
+        response = await populateWithLigneInfo(response);
+        response = await populateWithReferentInfo(response, req.params.action);
       }
 
       return res.status(200).send({ ok: true, data: response });
@@ -77,7 +78,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       let response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
 
       if (req.query?.needRefInfo) {
-        response.body.responses[0].hits.hits = await populateWithReferentInfo(response.body.responses[0].hits.hits);
+        response.body.responses[0].hits.hits = await populateWithReferentInfo(response.body.responses[0].hits.hits, req.params.action);
       }
 
       return res.status(200).send(response.body);
@@ -113,12 +114,30 @@ async function buildClasseContext(user) {
   return { classeContextFilters: contextFilters };
 }
 
-const populateWithReferentInfo = async (classes) => {
-  const refIds = [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))];
+const populateWithReferentInfo = async (classes, action) => {
+  const refIds =
+    action === "search"
+      ? [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
+
   const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
   const referentsData = serializeReferents(referents);
+
   return classes.map((item) => {
-    item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+    if (action === "search") {
+      item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+    } else {
+      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds.includes(e._id.toString()));
+    }
+    return item;
+  });
+};
+const populateWithLigneInfo = async (classes) => {
+  const ligneIds = [...new Set(classes.map((item) => item.ligneId).filter(Boolean))];
+  const ligneBus = await allRecords("lignebus", { ids: { values: ligneIds.flat() } });
+  return classes.map((item) => {
+    item.ligne = ligneBus.find((e) => item.ligneId === e._id.toString());
+
     return item;
   });
 };

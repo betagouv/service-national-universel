@@ -20,7 +20,7 @@ export default function ModalSejourCorrection({ data, isOpen, onValidation }) {
     <Modal centered isOpen={isOpen} size="lg">
       <div className="flex w-full flex-col px-3 py-4">
         <div className="mt-2 text-lg font-bold text-[#161616]">Choisissez la date de votre séjour</div>
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+        <hr className="my-4" />
         {error?.text && <Error {...error} onClose={() => setError({})} />}
 
         {loading ? (

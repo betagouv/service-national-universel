@@ -105,7 +105,9 @@ export default function List() {
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
           ),
-          [ROLES.ADMIN].includes(user.role) && <Button title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} />,
+          [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
+            <Button title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} />
+          ),
         ].filter(Boolean)}
       />
       {!classes && (
@@ -257,6 +259,9 @@ function exportExcelSheet({ data: classes, type }) {
       department: c.etablissement?.department,
       uai: c.etablissement?.uai,
       etablissementName: c.etablissement?.name,
+      classeRefLastName: c.referentClasse ? c.referentClasse[0]?.lastName : "",
+      classeRefFirstName: c.referentClasse ? c.referentClasse[0]?.firstName : "",
+      classeRefEmail: c.referentClasse ? c.referentClasse[0]?.email : "",
       youngsVolume: c.totalSeats ?? 0,
       studentInProgress: c.studentInProgress,
       studentWaiting: c.studentWaiting,
@@ -298,6 +303,9 @@ function exportExcelSheet({ data: classes, type }) {
       "Département des volontaires",
       "UAI de l'établissement",
       "Nom de l'établissement",
+      "Nom du référent de classe",
+      "Prénom du référent de classe",
+      "Email du référent de classe",
       "Nombre de places total",
       "Nombre d'élèves en cours",
       "Nombre d'élèves en attente",

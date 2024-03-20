@@ -4,7 +4,7 @@ const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
-const { canSendPlanDeTransport, MIME_TYPES, PDT_IMPORT_ERRORS, departmentLookUp } = require("snu-lib");
+const { canSendPlanDeTransport, MIME_TYPES, PDT_IMPORT_ERRORS, departmentLookUp, COHORT_TYPE } = require("snu-lib");
 const FileType = require("file-type");
 const fs = require("fs");
 const config = require("../../config");
@@ -19,6 +19,8 @@ const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+const ClasseModel = require("../../models/cle/classe");
+const CohorteModel = require("../../models/cohort");
 const scanFile = require("../../utils/virusScanner");
 
 function isValidDate(date) {
@@ -67,7 +69,8 @@ router.post(
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      const { cohortName: cohort } = value;
+      const { cohortName: cohortUsed } = value;
+      const cohort = await CohorteModel.findOne({ name: cohortUsed });
 
       const files = Object.values(req.files);
       if (files.length === 0) {
@@ -130,6 +133,10 @@ router.post(
         "PAUSE DÉJEUNER RETOUR": [],
         "TEMPS DE ROUTE": [],
       };
+
+      if (cohort.type === COHORT_TYPE.CLE) {
+        errors["ID CLASSE"] = [];
+      }
 
       const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
@@ -288,6 +295,14 @@ router.post(
         if (line["TEMPS DE ROUTE"] && !isValidTime(line["TEMPS DE ROUTE"])) {
           errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
         }
+        if (cohort.type === COHORT_TYPE.CLE) {
+          if (!line["ID CLASSE"]) {
+            errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
+          }
+          if (line["ID CLASSE"] && !mongoose.Types.ObjectId.isValid(line["ID CLASSE"])) {
+            errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+          }
+        }
       }
 
       // Coherence errors.
@@ -316,6 +331,20 @@ router.post(
           errors["NUMERO DE LIGNE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_BUSNUM, extra: line["NUMERO DE LIGNE"] });
         }
       }
+      // Check duplicates "ID CLASSE"
+      const duplicateClasses = lines.reduce((acc, line) => {
+        if (line["ID CLASSE"]) {
+          acc[line["ID CLASSE"]] = (acc[line["ID CLASSE"]] || 0) + 1;
+        }
+        return acc;
+      }, {});
+
+      for (const [i, line] of lines.entries()) {
+        const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
+        if (line["ID CLASSE"] && duplicateClasses[line["ID CLASSE"]] > 1) {
+          errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_CLASSE, extra: line["ID CLASSE"] });
+        }
+      }
       // Check if "ID CENTRE" exists in DB
       for (const [i, line] of lines.entries()) {
         const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
@@ -324,9 +353,21 @@ router.post(
           if (!center) {
             errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CENTER_ID, extra: line["ID CENTRE"] });
           }
-          const session = await SessionPhase1Model.findOne({ cohort, cohesionCenterId: line["ID CENTRE"] });
+          const session = await SessionPhase1Model.findOne({ cohort: cohort.name, cohesionCenterId: line["ID CENTRE"] });
           if (!session) {
             errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.CENTER_WITHOUT_SESSION, extra: line["ID CENTRE"] });
+          }
+        }
+      }
+      // Check if "ID CLASSE" exists in DB
+      if (cohort.type === COHORT_TYPE.CLE) {
+        for (const [i, line] of lines.entries()) {
+          const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
+          if (line["ID CLASSE"] && mongoose.Types.ObjectId.isValid(line["ID CLASSE"])) {
+            const classe = await ClasseModel.findById(line["ID CLASSE"]);
+            if (!classe) {
+              errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CLASSE_ID, extra: line["ID CLASSE"] });
+            }
           }
         }
       }
@@ -379,6 +420,14 @@ router.post(
         return acc;
       }, {});
 
+      // Count total unique classes
+      const classes = lines.reduce((acc, line) => {
+        if (line["ID CLASSE"]) {
+          acc[line["ID CLASSE"]] = (acc[line["ID CLASSE"]] || 0) + parseInt(line["CAPACITÉ VOLONTAIRE TOTALE"]);
+        }
+        return acc;
+      }, {});
+
       const hasError = Object.values(errors).some((error) => error.length > 0);
 
       if (hasError) {
@@ -394,9 +443,12 @@ router.post(
           return acc;
         }, []).length;
         // Save import plan
-        const { _id } = await ImportPlanTransportModel.create({ cohort, lines });
+        const { _id } = await ImportPlanTransportModel.create({ cohort: cohort.name, lines });
         // Send response (summary)
-        res.status(200).send({ ok: true, data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, pdrCount, _id, maxPdrOnLine } });
+        res.status(200).send({
+          ok: true,
+          data: { cohort, busLineCount: lines.length, centerCount: Object.keys(centers).length, classeCount: Object.keys(classes).length, pdrCount, _id, maxPdrOnLine },
+        });
       }
     } catch (error) {
       capture(error);
@@ -429,7 +481,22 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     const lines = importData.lines;
     const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
 
+    const newLines = [];
+    const promises = [];
+
     for (const line of importData.lines) {
+      promises.push(PlanTransportModel.findOne({ cohort: importData.cohort, busId: line["NUMERO DE LIGNE"] }));
+    }
+
+    const results = await Promise.all(promises);
+
+    for (let i = 0; i < results.length; i++) {
+      if (!results[i]) {
+        newLines.push(importData.lines[i]);
+      }
+    }
+
+    for (const line of newLines) {
       const pdrIds = [];
       for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
         if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
@@ -455,6 +522,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         travelTime: formatTime(line["TEMPS DE ROUTE"]),
         sessionId: session?._id.toString(),
         meetingPointsIds: pdrIds,
+        classeId: line["ID CLASSE"] ? line["ID CLASSE"] : undefined,
       };
       const newBusLine = new LigneBusModel(busLineData);
       const busLine = await newBusLine.save();
@@ -526,6 +594,12 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           });
         }
       }
+      if (busLine.classeId) {
+        const classe = await ClasseModel.findById(busLine.classeId);
+        if (!classe) return res.status(404).send({ ok: false, code: `La classe (ID: ${busLine.classeId}) n'existe pas. Vérifiez les données.` });
+        classe.set({ ligneId: busLine._id });
+        await classe.save();
+      }
       await PlanTransportModel.create({
         _id: busLine._id,
         cohort: busLine.cohort,
@@ -549,6 +623,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         centerArrivalTime: busLine.centerArrivalTime,
         centerDepartureTime: busLine.centerDepartureTime,
         pointDeRassemblements,
+        classeId: busLine.classeId ? busLine.classeId : undefined,
       });
       // * End update slave PlanTransport
     }

@@ -45,6 +45,7 @@ export default function View() {
   const [edit, setEdit] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [infoBus, setInfoBus] = useState(null);
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort));
@@ -52,7 +53,6 @@ export default function View() {
   const rights = getRights(user, classe, cohort);
 
   const history = useHistory();
-
   const totalSeatsTakenExcluding =
     classe.seatsTaken -
     (studentStatus[YOUNG_STATUS.WITHDRAWN] || 0) -
@@ -78,14 +78,33 @@ export default function View() {
 
   const getClasse = async () => {
     try {
-      const { ok, code, data: response } = await api.get(`/cle/classe/${id}`);
+      const { ok, code, data: classe } = await api.get(`/cle/classe/${id}`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
-      setClasse(response);
-      setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${response._id.toString()}`);
-      if (response.status !== STATUS_CLASSE.DRAFT) {
-        getStudents(response._id);
+      setClasse(classe);
+      if (classe?.ligneId) {
+        //Bus
+        const { ok: ok1, code: code1, data: ligne } = await api.get(`/ligne-de-bus/${classe.ligneId}`);
+        if (!ok1) {
+          return toastr.error("Oups, une erreur est survenue lors de la récupération des lignes de bus", translate(code1));
+        }
+        let meetingPoint = ligne.meetingsPointsDetail.find((e) => e.meetingPointId === classe.pointDeRassemblementId);
+
+        setInfoBus({
+          busId: ligne.busId,
+          departureDate: dayjs(ligne.departuredDate).format("dddd D MMMM YYYY"),
+          meetingHour: meetingPoint.meetingHour,
+          departureHour: meetingPoint.departureHour,
+          returnDate: dayjs(ligne.returnDate).format("dddd D MMMM YYYY"),
+          returnHour: meetingPoint.returnHour,
+        });
+      }
+
+      //Logical stuff
+      setUrl(`${appURL}/je-rejoins-ma-classe-engagee?id=${classe._id.toString()}`);
+      if (classe.status !== STATUS_CLASSE.DRAFT) {
+        getStudents(classe._id);
       }
     } catch (e) {
       capture(e);
@@ -382,9 +401,11 @@ export default function View() {
                       <InputText className="flex-1" label="Département" value={classe.cohesionCenter.department} disabled />
                       <InputText className="flex-1" label="Région" value={classe.cohesionCenter.region} disabled />
                     </div>
-                    <Link to={`/centre/` + classe.cohesionCenter._id} className="w-full">
-                      <Button type="tertiary" title="Voir le centre" className="w-full max-w-none" />
-                    </Link>
+                    {![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
+                      <Link to={`/centre/` + classe.cohesionCenter._id} className="w-full">
+                        <Button type="tertiary" title="Voir le centre" className="w-full max-w-none" />
+                      </Link>
+                    )}
                   </>
                 )}
               </div>
@@ -428,10 +449,35 @@ export default function View() {
                       <InputText className="flex-1" label="Département" value={classe.pointDeRassemblement?.department} disabled />
                       <InputText className="flex-1" label="Région" value={classe.pointDeRassemblement?.region} disabled />
                     </div>
-                    <Link to={`/point-de-rassemblement/` + classe.pointDeRassemblement._id} className="w-full">
-                      <Button type="tertiary" title="Voir le point de rassemblement" className="w-full max-w-none" />
-                    </Link>
+                    {![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
+                      <Link to={`/point-de-rassemblement/` + classe.pointDeRassemblement._id} className="w-full">
+                        <Button type="tertiary" title="Voir le point de rassemblement" className="w-full max-w-none" />
+                      </Link>
+                    )}
                   </>
+                )}
+                {infoBus && (
+                  <div className="mt-3">
+                    <Label title="Transport" name="ligneBus" />
+                    <InputText className="mb-3" label="Numéro de transport" value={infoBus.busId} disabled />
+                    <Label title="Aller" name="Aller" />
+                    <div className="flex gap-3">
+                      <InputText className="mb-3" label="Date&nbsp;de&nbsp;départ" value={infoBus.departureDate} disabled />
+                      <InputText className="mb-3" label="Heure&nbsp;de&nbsp;convocation" value={infoBus.meetingHour} disabled />
+                      <InputText className="mb-3" label="Heure&nbsp;de&nbsp;départ" value={infoBus.departureHour} disabled />
+                    </div>
+                    <Label title="Retour" name="Retour" />
+                    <div className="flex gap-3 w-full">
+                      <InputText className="mb-3 w-1/2" label="Date&nbsp;de&nbsp;retour" value={infoBus.returnDate} disabled />
+                      <InputText className="mb-3 w-1/2" label="Heure&nbsp;de&nbsp;retour" value={infoBus.returnHour} disabled />
+                    </div>
+
+                    {![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && (
+                      <Link to={`/ligne-de-bus/` + classe.ligneId} className="w-full">
+                        <Button type="tertiary" title="Voir la ligne de bus" className="w-full max-w-none" />
+                      </Link>
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -462,8 +508,10 @@ export default function View() {
                 </tr>
                 <tr>
                   <td className="font-bold pr-4 py-2">Places libres :</td>
-                  <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - classe.seatsTaken || 0}</td>
-                  <td className="text-gray-500 text-center py-2">({Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats || 0)}%)</td>
+                  <td className="px-4 font-bold text-lg text-center py-2">{classe.totalSeats - classe.seatsTaken < 0 ? 0 : classe.totalSeats - classe.seatsTaken}</td>
+                  <td className="text-gray-500 text-center py-2">
+                    ({Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats) < 0 ? 0 : Math.round(100 - (classe.seatsTaken * 100) / classe.totalSeats)}%)
+                  </td>
                 </tr>
               </tbody>
             </table>

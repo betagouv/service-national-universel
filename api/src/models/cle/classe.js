@@ -115,6 +115,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  ligneId: {
+    type: String,
+    documentation: {
+      description: "ID de la ligne de bus",
+    },
+  },
+
   pointDeRassemblementId: {
     type: String,
     documentation: {
@@ -175,6 +182,13 @@ Schema.virtual("session", {
 Schema.virtual("pointDeRassemblement", {
   ref: "pointderassemblement",
   localField: "pointDeRassemblementId",
+  foreignField: "_id",
+  justOne: true,
+});
+
+Schema.virtual("ligne", {
+  ref: "lignebuses",
+  localField: "ligneId",
   foreignField: "_id",
   justOne: true,
 });

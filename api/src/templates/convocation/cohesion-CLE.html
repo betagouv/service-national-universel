@@ -28,6 +28,10 @@
 		z-index: -1;
 	}
 
+  .center-text {
+    text-align: center;
+  }
+
 	#convocation-cohesion {
 		border: 1px solid transparent;
 		background-image: url({{GENERAL_BG}});
@@ -186,7 +190,13 @@
     {{COHESION_CENTER_CITY}}.
   </div>
   <div class="meeting-point">
-    <div class="info">Les informations sur les modalités d'acheminement vers le centre et de retour vous seront transmises par votre établissement scolaire.</div>
+    <div class="center-text">Vous voudrez bien vous présenter <b>impérativement</b> à la date et au lieu suivants:</div>
+    <div class="info">
+      <div>{{MEETING_DATE}}</div>
+      <div>{{MEETING_HOURS}}</div>
+      <div>{{MEETING_ADDRESS}}</div>
+      <div>{{TRANSPORT}}</div>
+    </div>
   </div>
   <div class="warning">
     Attention à bien respecter l'horaire indiqué. En cas de retard, vous ne pourrez pas effectuer votre séjour de

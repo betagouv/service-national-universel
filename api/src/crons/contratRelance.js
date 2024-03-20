@@ -1,4 +1,3 @@
-require("../mongo");
 const { capture } = require("../sentry");
 const slack = require("../slack");
 const ContractModel = require("../models/contract");

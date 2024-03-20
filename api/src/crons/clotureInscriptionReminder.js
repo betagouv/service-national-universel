@@ -3,7 +3,6 @@
  * Il vérifie si on est la veille de la fermeture des instructions d'une cohorte.
  * Si c'est le cas, il envoit à tous les référents départementaux pour qui il reste des jeunes en attente de validation une relance mail.
  */
-require("../mongo");
 const { capture } = require("../sentry");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");

@@ -73,7 +73,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
             </button>
           ) : null}
         </div>
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+        <hr className="my-4" />
         {error?.text && <Error {...error} onClose={() => setError({})} />}
 
         {loading ? (
@@ -101,7 +101,7 @@ export default function ModalSejour({ isOpen, onCancel }) {
                 <div className="py-2 font-semibold">Pourquoi je ne vois pas tous les séjours ?</div>
                 <div className="text-sm text-gray-500">
                   La proposition des séjours dépend de vos caractéristiques personnelles (âge, situation scolaire ou professionnelle, localisation).{" "}
-                  <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer" className="underline hover:underline">
+                  <a href={`${supportURL}/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion`} target="_blank" rel="noreferrer">
                     En savoir plus.
                   </a>
                 </div>

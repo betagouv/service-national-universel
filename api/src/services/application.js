@@ -1,4 +1,4 @@
-const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, getAge } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge } = require("snu-lib");
 const { deletePatches } = require("../controllers/patches");
 const ApplicationModel = require("../models/application");
 const CohortModel = require("../models/cohort");
@@ -146,7 +146,7 @@ const getAuthorizationToApply = async (mission, young) => {
 
   const isMilitaryPreparation = mission?.isMilitaryPreparation === "true";
 
-  const ageAtStart = getAge(mission.startAt, young.birthdateAt);
+  const ageAtStart = calculateAge(young.birthdateAt, mission.startAt);
 
   if (!isMilitaryPreparation && ageAtStart < 15) {
     refusalMessages.push("Vous devez avoir plus de 15 ans pour candidater.");
