@@ -10,6 +10,7 @@ function getAppHelper() {
   app.use(cookieParser());
   app.use("/referent", require("../../controllers/referent"));
   app.use("/young", require("../../controllers/young"));
+  app.use("/classe", require("../../controllers/cle/classe"));
   app.use("/point-de-rassemblement", require("../../controllers/planDeTransport/point-de-rassemblement"));
   app.use("/mission", require("../../controllers/mission"));
   app.use("/program", require("../../controllers/program"));

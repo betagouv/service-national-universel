@@ -528,7 +528,7 @@ describe("Young", () => {
     });
   });
 
-  describe("POST /invite", () => {
+  describe("POST /young/invite", () => {
     let referent;
     const passport = require("passport");
 
@@ -542,7 +542,7 @@ describe("Young", () => {
     });
 
     it("should return 400 for invalid input data", async () => {
-      const res = await request(getAppHelper()).post("/invite").send({});
+      const res = await request(getAppHelper()).post("/young/invite").send({ firstName: 123, lastName: 234 });
       expect(res.statusCode).toEqual(400);
     });
 
@@ -550,22 +550,23 @@ describe("Young", () => {
       const unauthorizedReferent = { ...getNewReferentFixture(), role: "supervisor" };
       passport.user = unauthorizedReferent;
 
-      const res = await request(getAppHelper()).post("/invite").send(getNewYoungFixture());
+      const res = await request(getAppHelper()).post("/young/invite").send(getNewYoungFixture());
       expect(res.statusCode).toEqual(403);
 
-      // Remettre le referent autorisé pour les autres tests
       passport.user = referent;
     });
 
     it("should return 200 for valid invitation", async () => {
-      const res = await request(getAppHelper()).post("/invite").send(getNewYoungFixture());
+      const res = await request(getAppHelper()).post("/young/invite").send(getNewYoungFixture());
       expect(res.statusCode).toEqual(200);
       expect(res.body.ok).toEqual(true);
       expect(res.body.young).toBeDefined();
     });
 
     it("should return 404 if classeId not found", async () => {
-      const res = await request(getAppHelper()).post("/invite").send(getNewYoungFixture());
+      const res = await request(getAppHelper())
+        .post("/young/invite")
+        .send({ ...getNewYoungFixture(), classeId: "104a49ba503040e4d2153000" });
       expect(res.statusCode).toEqual(404);
     });
   });

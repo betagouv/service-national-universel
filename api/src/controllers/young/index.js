@@ -223,7 +223,6 @@ router.post(
   },
 );
 
-// to move on ref controller 
 router.post("/invite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body);
@@ -1052,7 +1051,6 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
   }
 });
 
-// remove on ref 
 router.post("/phase1/multiaction/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -1096,7 +1094,6 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
   }
 });
 
-// remove on ref
 router.post("/phase1/multiaction/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];
