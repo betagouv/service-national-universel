@@ -11,7 +11,7 @@ const { ROLES, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const slack = require("../slack");
 const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } = require("../cookie-options");
 const { capture } = require("../sentry");
-const zammood = require("../zammood");
+const SNUpport = require("../SNUpport");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
 const { ADMIN_URL, ENVIRONMENT, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config.js");
 const { sendTemplate } = require("../sendinblue");
@@ -28,7 +28,7 @@ const router = express.Router();
 
 router.get("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { ok, data } = await zammood.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
+    const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data });
@@ -40,7 +40,7 @@ router.get("/tickets", passport.authenticate(["referent", "young"], { session: f
 
 router.get("/ticketsInfo", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { ok, data } = await zammood.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
+    const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const hasMessage = Array.isArray(data) && data.length > 0;
     // Count the number of tickets with status "NEW"
@@ -55,7 +55,7 @@ router.get("/ticketsInfo", passport.authenticate(["referent", "young"], { sessio
 
 router.get("/signin", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { ok, data, token } = await zammood.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
+    const { ok, data, token } = await SNUpport.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     res.cookie("jwtzamoud", token, cookieOptions(COOKIE_SNUPPORT_MAX_AGE_MS));
@@ -68,7 +68,7 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
 
 router.get("/knowledgeBase/search", async (req, res) => {
   try {
-    const { ok, data } = await zammood.api(`/knowledge-base/${req.query.restriction}/search?search=${req.query.search}`, { method: "GET", credentials: "include" });
+    const { ok, data } = await SNUpport.api(`/knowledge-base/${req.query.restriction}/search?search=${req.query.search}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -79,7 +79,7 @@ router.get("/knowledgeBase/search", async (req, res) => {
 
 router.post("/knowledgeBase/feedback", optionalAuth, async (req, res) => {
   try {
-    const { ok, data } = await zammood.api(`/feedback`, {
+    const { ok, data } = await SNUpport.api(`/feedback`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({ ...req.body, contactEmail: req.user?.email }),
@@ -95,7 +95,7 @@ router.post("/knowledgeBase/feedback", optionalAuth, async (req, res) => {
 
 router.post("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { ok, data } = await zammood.api(`/v0/ticket/search`, {
+    const { ok, data } = await SNUpport.api(`/v0/ticket/search`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify(req.body),
@@ -130,7 +130,7 @@ router.get("/ticketscount", passport.authenticate("referent", { session: false, 
         canal: { $in: ["PLATFORM", "MAIL"] },
       };
 
-    const { ok, data } = await zammood.api(`/v0/ticket/count`, {
+    const { ok, data } = await SNUpport.api(`/v0/ticket/count`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify(query),
@@ -153,7 +153,7 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const messages = await zammood.api(`/v0/ticket/withMessages?ticketId=${checkedId}`, { method: "GET", credentials: "include" });
+    const messages = await SNUpport.api(`/v0/ticket/withMessages?ticketId=${checkedId}`, { method: "GET", credentials: "include" });
     if (!messages.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: messages.data });
@@ -201,7 +201,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     }
     const { subject, message, author, formSubjectStep1, formSubjectStep2, files, parcours } = value;
     const userAttributes = await getUserAttributes(req.user);
-    const response = await zammood.api("/v0/message", {
+    const response = await SNUpport.api("/v0/message", {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({
@@ -222,7 +222,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
     else if (isYoung(req.user && subject.includes("J'ai une question"))) {
       const isNotified = await notifyReferent(response.data, req.body.message);
-      if (!isNotified) slack.error({ title: "Notify referent new message to zammood", text: JSON.stringify(response.code) });
+      if (!isNotified) slack.error({ title: "Notify referent new message to SNUpport", text: JSON.stringify(response.code) });
     }
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
     return res.status(200).send({ ok: true, data: response });
@@ -322,7 +322,7 @@ router.post("/ticket/form", async (req, res) => {
       body = { ...body, classe };
     }
 
-    const response = await zammood.api("/v0/message", {
+    const response = await SNUpport.api("/v0/message", {
       method: "POST",
       credentials: "include",
       body: JSON.stringify(body),
@@ -350,7 +350,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
     if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { status } = value;
 
-    const response = await zammood.api(`/v0/ticket/${checkedId}`, {
+    const response = await SNUpport.api(`/v0/ticket/${checkedId}`, {
       method: "PUT",
       credentials: "include",
       body: JSON.stringify({
@@ -387,7 +387,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
     const { message, files } = value;
 
     const userAttributes = await getUserAttributes(req.user);
-    const response = await zammood.api("/v0/message", {
+    const response = await SNUpport.api("/v0/message", {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({
@@ -400,7 +400,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
         attributes: userAttributes,
       }),
     });
-    if (!response.ok) slack.error({ title: "Create message Zammood", text: JSON.stringify(response.code) });
+    if (!response.ok) slack.error({ title: "Create message SNUpport", text: JSON.stringify(response.code) });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
