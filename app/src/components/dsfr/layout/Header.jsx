@@ -37,7 +37,7 @@ const Header = ({ title }) => {
     {
       buttonProps: {
         onClick: () => loginOrLogout(),
-        className: "border border-gray-500 py-1 px-2 hover:bg-gray-100",
+        className: "border border-gray-500  hover:bg-gray-100",
       },
       text: isLoggedIn ? "Se déconnecter" : "Se connecter",
     },
