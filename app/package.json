@@ -30,7 +30,7 @@
     "vite": "^4.4.9"
   },
   "dependencies": {
-    "@codegouvfr/react-dsfr": "^0.78.5",
+    "@codegouvfr/react-dsfr": "^1.9.2",
     "@headlessui/react": "^1.7.13",
     "@sentry/integrations": "^7.58.1",
     "@sentry/react": "^7.58.1",

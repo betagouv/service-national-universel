@@ -39,6 +39,16 @@ import Toggle from "./Toggle";
 import Modal from "../../../../components/ui/modals/Modal";
 import useAddress from "@/services/useAddress";
 
+function _location(results) {
+  if (!results) {
+    return undefined;
+  }
+  if (Array.isArray(results) && results.length > 0) {
+    return results[0].location;
+  }
+  return undefined;
+}
+
 export default function MissionFilters({ filters, setFilters }) {
   const young = useSelector((state) => state.Auth.young);
 
@@ -57,14 +67,14 @@ export default function MissionFilters({ filters, setFilters }) {
     options: { postcode: young?.zip, limit: 1 },
     enabled: Boolean(young?.address && young?.zip && !young?.location),
   });
-  const youngLocation = young?.location || youngResults?.[0].location;
+  const youngLocation = young?.location || _location(youngResults);
 
   const { results: relativeResults } = useAddress({
     query: `${young?.mobilityNearRelativeAddress} ${young?.mobilityNearRelativeCity}`,
     options: { postcode: young?.mobilityNearRelativeZip, limit: 1 },
     enabled: Boolean(young?.mobilityNearRelativeAddress && young?.mobilityNearRelativeZip),
   });
-  const relativeLocation = relativeResults?.[0].location;
+  const relativeLocation = _location(relativeResults);
 
   const DISTANCE_MAX = 100;
   const marginDistance = getMarginDistance(document.getElementById("distanceKm"));
