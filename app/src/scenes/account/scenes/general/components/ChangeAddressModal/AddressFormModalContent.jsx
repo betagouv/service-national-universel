@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import Modal from "../../../../../../components/ui/modals/Modal";
-// import Input from "../../../../../../components/forms/inputs/Input";
-// import LocationMarker from "../../../../../../assets/icons/LocationMarker";
 import ButtonPrimary from "../../../../../../components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../../../../components/ui/buttons/ButtonLight";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
