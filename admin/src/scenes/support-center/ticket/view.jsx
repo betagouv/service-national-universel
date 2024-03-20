@@ -26,7 +26,7 @@ const updateHeightElement = (e) => {
 const download = async (file) => {
   try {
     const s3Id = file.path.split("/")[1];
-    const { ok, data } = await api.get(`/zammood/s3file/${s3Id}`);
+    const { ok, data } = await api.get(`/SNUpport/s3file/${s3Id}`);
     FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
   } catch (e) {
     toastr.error("Le fichier n'a pas pu être téléchargé");
@@ -53,10 +53,10 @@ export default function View(props) {
     try {
       const id = props.match?.params?.id;
       if (!id) return setTicket(undefined);
-      const { data, ok } = await api.get(`/zammood/ticket/${id}?`);
+      const { data, ok } = await api.get(`/SNUpport/ticket/${id}?`);
       if (!ok) return;
       setTicket(data.ticket);
-      const zammoodMessages = data?.messages
+      const SNUpportMessages = data?.messages
         .map((message) => {
           return {
             id: message._id,
@@ -69,7 +69,7 @@ export default function View(props) {
           };
         })
         .filter((message) => message !== undefined);
-      setMessages(zammoodMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setMessages(SNUpportMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       setTicket(null);
     }
@@ -85,7 +85,7 @@ export default function View(props) {
       if (!message) return setSending(false);
       let uploadedFiles;
       if (files.length > 0) {
-        const filesResponse = await api.uploadFiles("/zammood/upload", files);
+        const filesResponse = await api.uploadFiles("/SNUpport/upload", files);
         if (!filesResponse.ok) {
           setSending(false);
           const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
@@ -94,7 +94,7 @@ export default function View(props) {
         uploadedFiles = filesResponse.data;
       }
       const id = props.match?.params?.id;
-      const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
+      const { ok, code } = await api.post(`/SNUpport/ticket/${id}/message`, { message, fromPage: props.fromPage, files: uploadedFiles });
       if (!ok) {
         capture(new Error(code));
         toastr.error("Oups, une erreur est survenue", translate(code));

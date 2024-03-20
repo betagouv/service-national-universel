@@ -68,7 +68,7 @@ export default function PublicContactForm({ category, question, parcours }) {
       setLoading(true);
       let uploadedFiles;
       if (files.length > 0) {
-        const filesResponse = await API.uploadFiles("/zammood/upload", files);
+        const filesResponse = await API.uploadFiles("/SNUpport/upload", files);
         if (!filesResponse?.ok) {
           setLoading(false);
           const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
@@ -77,7 +77,7 @@ export default function PublicContactForm({ category, question, parcours }) {
         uploadedFiles = filesResponse.data;
       }
 
-      const response = await API.post("/zammood/ticket/form", {
+      const response = await API.post("/SNUpport/ticket/form", {
         message,
         subject: `${categories.find((e) => e.value === category)?.label} - ${questions.find((e) => e.value === question)?.label}`,
         firstName,
