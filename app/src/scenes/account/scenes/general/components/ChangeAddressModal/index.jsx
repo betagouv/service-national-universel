@@ -79,7 +79,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     try {
       setLoading(true);
       // @todo eligibility is based on address, should be based on school address.
-      const { data } = await api.post("/cohort-session/eligibility/2023timeZoneOffset=${new Date().getTimezoneOffset()}", {
+      const { data } = await api.post("/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}", {
         grade: young.grade,
         birthdateAt: young.birthdateAt,
         ...address,
