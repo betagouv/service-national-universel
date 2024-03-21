@@ -56,17 +56,43 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   };
 
-  const checkInscriptionGoal = async (cohortName, address) => {
-    setLoading(true);
+  const checkIfGoalIsReached = async (cohortName, address) => {
     try {
+      setLoading(true);
       const res = await api.get(`/inscription-goal/${cohortName}/department/${address.department}/reached`);
       if (!res.ok) throw new Error(res);
-      const isGoalReached = res.data;
+      return res.data;
+    } catch (error) {
+      capture(error);
+      toastr.error("Oups, une erreur est survenue", translate(error.code));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkInscriptionGoal = async (cohortName, address) => {
+    try {
+      const isGoalReached = await checkIfGoalIsReached(cohortName, address);
       if (isGoalReached && young.status === YOUNG_STATUS.VALIDATED) {
         setStep(changeAddressSteps.COMPLEMENTARY_LIST);
       } else {
         updateAddress(address, isGoalReached ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED);
       }
+    } catch (error) {
+      capture(error);
+      toastr.error("Oups, une erreur est survenue", translate(error.code));
+    }
+  };
+
+  const fetchAvailableCohorts = async (address = {}) => {
+    try {
+      setLoading(true);
+      const { data } = await api.post("/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}", {
+        grade: young.grade,
+        birthdateAt: young.birthdateAt,
+        ...address,
+      });
+      return data;
     } catch (error) {
       capture(error);
       toastr.error("Oups, une erreur est survenue", translate(error.code));
@@ -77,13 +103,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
 
   const getAvailableCohorts = async (address = {}) => {
     try {
-      setLoading(true);
-      // @todo eligibility is based on address, should be based on school address.
-      const { data } = await api.post("/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}", {
-        grade: young.grade,
-        birthdateAt: young.birthdateAt,
-        ...address,
-      });
+      const data = await fetchAvailableCohorts(address);
       const isArray = Array.isArray(data);
       let cohorts = [];
       // get all available cohorts except the current one
@@ -108,8 +128,6 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     } catch (error) {
       capture(error);
       toastr.error("Oups, une erreur est survenue", translate(error.code));
-    } finally {
-      setLoading(false);
     }
   };
 
