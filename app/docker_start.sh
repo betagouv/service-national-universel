@@ -19,6 +19,8 @@ sed '/<noscript> You need to enable JavaScript to run this app. <\/noscript>/a\
         "SENTRY_SESSION_SAMPLE_RATE":"$SENTRY_SESSION_SAMPLE_RATE", \
         "SENTRY_ON_ERROR_SAMPLE_RATE":"$SENTRY_ON_ERROR_SAMPLE_RATE", \
         "FRANCE_CONNECT_URL":"$FRANCE_CONNECT_URL" \
+        "API_ENGAGEMENT_URL":"$API_ENGAGEMENT_URL" \
+        "API_ENGAGEMENT_SNU_ID":"$API_ENGAGEMENT_SNU_ID" \
     }; \
 </script> \
 ' index.html.template \
