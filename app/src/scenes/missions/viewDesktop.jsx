@@ -85,6 +85,7 @@ export default function ViewDesktop() {
 
   useEffect(() => {
     getMission();
+    return localStorage.removeItem("jva_mission_click_id");
   }, []);
 
   React.useEffect(() => {

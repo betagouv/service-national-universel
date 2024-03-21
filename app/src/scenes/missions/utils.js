@@ -16,7 +16,7 @@ export async function sendDataToJVA(jvaMissionId) {
       }
       localStorage.setItem("jva_mission_click_id", data.clickId);
     } else {
-      console.log("Sending tracking data to API Engagement:", url);
+      localStorage.setItem("jva_mission_click_id", "fake-click-id");
     }
   } catch (e) {
     capture(e);

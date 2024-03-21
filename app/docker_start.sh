@@ -21,6 +21,7 @@ sed '/<noscript> You need to enable JavaScript to run this app. <\/noscript>/a\
         "FRANCE_CONNECT_URL":"$FRANCE_CONNECT_URL" \
         "API_ENGAGEMENT_URL":"$API_ENGAGEMENT_URL" \
         "API_ENGAGEMENT_SNU_ID":"$API_ENGAGEMENT_SNU_ID" \
+        "API_ENGAGEMENT_KEY":"$API_ENGAGEMENT_KEY" \
     }; \
 </script> \
 ' index.html.template \

@@ -210,9 +210,15 @@ async function sendTrackingDataToJva(missionId, status, clickId) {
       ...statusOptions[status],
     };
 
-    const { ok, code } = await fetch(url, options);
-    if (!ok) {
-      throw new Error(code);
+    if (config.ENVIRONMENT === "production") {
+      const { ok, code } = await fetch(url, options);
+      if (!ok) {
+        throw new Error(code);
+      }
+    } else {
+      console.log("Would send tracking data to API Engagement:");
+      console.log("URL:", url);
+      console.log("Options:", options);
     }
   } catch (e) {
     capture(e);

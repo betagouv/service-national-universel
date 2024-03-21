@@ -60,7 +60,9 @@ export default function ViewMobile() {
   const getMission = async () => {
     if (!id) return setMission(null);
     const { data } = await api.get(`/mission/${id}`);
-    await sendDataToJVA(`/mission/${id}/click?tag=MIG`);
+    if (data?.isJvaMission === "true") {
+      await sendDataToJVA(`/mission/${id}/click?tag=MIG`);
+    }
     return setMission(data);
   };
 
@@ -68,6 +70,7 @@ export default function ViewMobile() {
 
   useEffect(() => {
     getMission();
+    return localStorage.removeItem("jva_mission_click_id");
   }, []);
 
   useEffect(() => {
