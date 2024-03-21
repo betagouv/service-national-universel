@@ -31,12 +31,10 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
     if (!canUpdateInscriptionGoals(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const promises = inscriptionsGoals.map((item) => {
-      return InscriptionGoalModel.findOneAndUpdate(
-        // 2021 can be empty in database. This could be removed once all data is migrated.
-        { cohort: value.cohort === "2021" ? ["2021", null] : value.cohort, department: item.department },
-        { ...item, cohort: value.cohort },
-        { new: true, upsert: true, useFindAndModify: false },
-      );
+      // 2021 can be empty in database. This could be removed once all data is migrated.
+      return InscriptionGoalModel.find({ cohort: value.cohort === "2021" ? ["2021", null] : value.cohort, department: item.department })
+        .then((data) => data.set({ ...item, cohort: value.cohort }))
+        .then((data) => data.save({ fromUser: req.user }));
     });
     await Promise.all(promises);
     return res.status(200).send({ ok: true });
