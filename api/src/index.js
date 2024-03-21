@@ -162,7 +162,7 @@
   app.use("/SNUpport", require("./controllers/SNUpport"));
 
   //services
-  app.use("/jeveuxaider", require("./services/jeveuxaider"));
+  app.use("/jeveuxaider", require("./services/jeveuxaider").router);
 
   app.get("/memory-stats", async (req, res) => {
     // ! Memory usage
