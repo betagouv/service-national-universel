@@ -186,8 +186,6 @@ resource "scaleway_container" "admin" {
     "SENTRY_SESSION_SAMPLE_RATE" = 0.1
     "SENTRY_TRACING_SAMPLE_RATE" = 0.1
     "SUPPORT_URL"                = "https://support.beta-snu.dev"
-    "API_ENGAGEMENT_URL"         = local.secrets.API_ENGAGEMENT_URL
-    "API_ENGAGEMENT_SNU_ID"      = local.secrets.API_ENGAGEMENT_SNU_ID
   }
 
   secret_environment_variables = {
