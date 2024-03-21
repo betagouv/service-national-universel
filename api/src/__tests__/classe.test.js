@@ -9,7 +9,9 @@ const { getClasseHelper, createClasseHelper, deleteClasseByIdHelper, getClasseBy
 const { createReferentHelper } = require("./helpers/referent");
 const getNewReferentFixture = require("./fixtures/referent");
 
-describe("POST /classe/", () => {
+beforeAll(dbConnect);
+
+describe("POST /cle/classe/", () => {
   let referent;
   const passport = require("passport");
 
@@ -23,14 +25,14 @@ describe("POST /classe/", () => {
   });
 
   it("should return 200 for valid invitation", async () => {
-    const res = await request(getAppHelper()).post("/classe/").send(getNewClasseFixture());
+    const res = await request(getAppHelper()).post("/cle/classe/").send(getNewClasseFixture());
     expect(res.statusCode).toEqual(200);
     expect(res.body.ok).toEqual(true);
     expect(res.body.young).toBeDefined();
   });
 
   it("should return 400 for invalid input", async () => {
-    const res = await request(getAppHelper()).post("/classe/").send({ firstName: "123" });
+    const res = await request(getAppHelper()).post("/cle/classe/").send({ firstName: "123" });
 
     expect(res.statusCode).toEqual(400);
   });
@@ -39,14 +41,14 @@ describe("POST /classe/", () => {
     const unauthorizedReferent = { ...getNewReferentFixture(), role: "supervisor" };
     passport.user = unauthorizedReferent;
 
-    const res = await request(getAppHelper()).post("/classe/").send(getNewClasseFixture());
+    const res = await request(getAppHelper()).post("/cle/classe/").send(getNewClasseFixture());
     expect(res.statusCode).toEqual(403);
 
     // Remettre le referent autorisé pour les autres tests
     passport.user = referent;
   });
 
-  describe("PUT /classe/:id", () => {
+  describe("PUT /cle/classe/:id", () => {
     let referent, classe, updatedClasse;
 
     beforeAll(async () => {
@@ -56,10 +58,8 @@ describe("POST /classe/", () => {
       passport.user = referent;
     });
 
-    console.log(classe);
-
     it("should update a class successfully", async () => {
-      const res = await request(getAppHelper()).put(`/classe/${classe._id}`).send(updatedClasse);
+      const res = await request(getAppHelper()).put(`/cle/classe/${classe._id}`).send(updatedClasse);
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.ok).toEqual(true);
@@ -67,7 +67,7 @@ describe("POST /classe/", () => {
     });
 
     it("should return 400 for invalid input", async () => {
-      const res = await request(getAppHelper()).put(`/classe/${classe._id}`).send({}); // Données invalides
+      const res = await request(getAppHelper()).put(`/cle/classe/${classe._id}`).send({}); // Données invalides
 
       expect(res.statusCode).toEqual(400);
     });
@@ -83,7 +83,7 @@ describe("POST /classe/", () => {
     });
 
     it("should return 404 if class is not found", async () => {
-      const res = await request(getAppHelper()).put(`/classe/non-existing-id`).send(updatedClasse);
+      const res = await request(getAppHelper()).put(`/cle/classe/non-existing-id`).send(updatedClasse);
 
       expect(res.statusCode).toEqual(404);
     });
@@ -91,7 +91,7 @@ describe("POST /classe/", () => {
     afterAll(dbClose);
   });
 
-  describe("DELETE /classe/:id", () => {
+  describe("DELETE /cle/classe/:id", () => {
     let classe, referent;
     const passport = require("passport");
 
@@ -105,7 +105,7 @@ describe("POST /classe/", () => {
     console.log(classe);
 
     it("should delete class successfully", async () => {
-      const res = await request(getAppHelper()).delete(`/classe/${classe._id}`);
+      const res = await request(getAppHelper()).delete(`/cle/classe/${classe._id}`);
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.ok).toEqual(true);
@@ -115,13 +115,13 @@ describe("POST /classe/", () => {
     });
 
     it("should return 400 for invalid ID", async () => {
-      const res = await request(getAppHelper()).delete(`/classe/invalid-Id`);
+      const res = await request(getAppHelper()).delete(`/cle/classe/invalid-Id`);
 
       expect(res.statusCode).toEqual(400);
     });
 
     it("should return 404 if class not found", async () => {
-      const res = await request(getAppHelper()).delete(`/classe/${notExistingClasseId}`);
+      const res = await request(getAppHelper()).delete(`/cle/classe/${notExistingClasseId}`);
 
       expect(res.statusCode).toEqual(404);
     });
@@ -129,7 +129,7 @@ describe("POST /classe/", () => {
     it("should return 403 when user is not authorized to delete", async () => {
       const unauthorizedReferent = { ...getNewReferentFixture(), role: "supervisor" };
       passport.user = unauthorizedReferent;
-      const res = await request(getAppHelper()).delete(`/classe/${classe._id}`);
+      const res = await request(getAppHelper()).delete(`/cle/classe/${classe._id}`);
 
       expect(res.statusCode).toEqual(403);
     });
@@ -144,21 +144,3 @@ describe("POST /classe/", () => {
     });
   });
 });
-
-// jest.mock('../../models/cle/classe', () => {
-//     const mockClasseModel = {
-//       find: jest.fn().mockResolvedValue([...]), // Remplacer [...] par les données mockées
-//       findById: jest.fn().mockImplementation(id => Promise.resolve({
-//         // Retournez un objet de classe mocké avec des champs virtuels
-//         _id: id,
-//         region: 'mock-region',
-//         department: 'mock-department',
-//         etablissement: {/* informations de l'établissement mockées */},
-//         populate: jest.fn().mockReturnThis(), // Simule le comportement de populate
-//       })),
-//       create: jest.fn().mockResolvedValue({/* objet mocké */}),
-//       // Autres méthodes mockées si nécessaire
-//     };
-
-//     return mockClasseModel;
-//   });
