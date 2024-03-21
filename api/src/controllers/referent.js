@@ -198,6 +198,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 router.get("/signin_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.signinToken(req, res));
+router.get("/refresh_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.refreshToken(req, res));
 router.post("/forgot_password", async (req, res) => ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => ReferentAuth.resetPassword(req, res));

@@ -1,5 +1,5 @@
 //!TOKEN need to be in seconds
-const JWT_SIGNIN_MAX_AGE_SEC = 60 * 60 * 2; // 2h
+const JWT_SIGNIN_MAX_AGE_SEC = 60 * 2; // 2 min
 const JWT_TRUST_TOKEN_MAX_AGE_SEC = 60 * 60 * 24 * 30; // 1 mois
 //!TOKEN need to be in seconds
 
