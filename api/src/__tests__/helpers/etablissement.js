@@ -17,6 +17,10 @@ async function createEtablissementHelper(etablissement) {
   return await EtablissementObject.create(etablissement);
 }
 
+async function updateEtablissementByIdHelper(classeId, updateData) {
+  return await EtablissementObject.findByIdAndUpdate(classeId, updateData, { new: true });
+}
+
 const notExistingEtablissementId = "104a49ba503040e4d2153000";
 
 module.exports = {
@@ -25,4 +29,5 @@ module.exports = {
   deleteEtablissementByIdHelper,
   createEtablissementHelper,
   notExistingEtablissementId,
+  updateEtablissementByIdHelper,
 };
