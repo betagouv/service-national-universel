@@ -48,7 +48,7 @@ export default function ViewDesktop() {
   const [openContractButton, setOpenContractButton] = useState();
   const [modalDocument, setModalDocument] = useState({ isOpen: false });
   const [openAttachments, setOpenAttachments] = useState(false);
-
+  console.log("HIHIHI");
   const refContractButton = React.useRef();
 
   const history = useHistory();
