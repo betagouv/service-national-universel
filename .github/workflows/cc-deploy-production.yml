@@ -3,63 +3,23 @@ name: Build and deploy Production (Clever Cloud)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - production_cc
+  workflow_call:
+    inputs:
+      api_image_tag:
+        default: 'latest'
+        type: string
+      admin_image_tag:
+        default: 'latest'
+        type: string
+      app_image_tag:
+        default: 'latest'
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
-
-  prepare:
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'production_cc'
-    outputs:
-      target_branch: ${{ steps.target_branch.outputs.target_branch }}
-      api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
-      admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
-      app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
-    env:
-      SCW_ACCESS_KEY: ${{ secrets.SCW_PROD_DEPLOY_ACCESS_KEY }}
-      SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
-
-    steps:
-      - name: Get target_branch
-        id: target_branch
-        run: |
-          echo "target_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.target_branch.outputs.target_branch }}
-
-      - uses: hashicorp/setup-terraform@v3
-
-      - name: Prepare
-        id: prepare
-        working-directory: ${{ env.prod_directory }}
-        env:
-          PG_CONN_STR: ${{ secrets.SCW_PROD_BACKEND_CONN_STR }}
-          PGUSER: ${{ secrets.SCW_PROD_BACKEND_USER }}
-          PGPASSWORD: ${{ secrets.SCW_PROD_BACKEND_PASSWORD }}
-          prod_directory: ./terraform/environments/production
-        run: |
-          terraform init
-          output=$(terraform output -json)
-
-          api_image_tag=$(jq -r '.api_image_tag.value' <<< $output)
-          echo "api_image_tag: $api_image_tag"
-          echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
-
-          admin_image_tag=$(jq -r '.admin_image_tag.value' <<< $output)
-          echo "admin_image_tag: $admin_image_tag"
-          echo "admin_image_tag=$admin_image_tag" >> $GITHUB_OUTPUT
-
-          app_image_tag=$(jq -r '.app_image_tag.value' <<< $output)
-          echo "app_image_tag: $app_image_tag"
-          echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
   deploy_image:
     needs: prepare
@@ -68,13 +28,13 @@ jobs:
       matrix:
         include:
           - name: api
-            tag: ${{needs.prepare.outputs.api_image_tag}}
+            tag: ${{inputs.api_image_tag}}
             remote: CLEVER_CLOUD_GIT_REMOTE_API_DOCKER
           - name: app
-            tag: ${{needs.prepare.outputs.app_image_tag}}
+            tag: ${{inputs.app_image_tag}}
             remote: CLEVER_CLOUD_GIT_REMOTE_APP_DOCKER
           - name: admin
-            tag: ${{needs.prepare.outputs.admin_image_tag}}
+            tag: ${{inputs.admin_image_tag}}
             remote: CLEVER_CLOUD_GIT_REMOTE_ADMIN_DOCKER
 
     steps:
