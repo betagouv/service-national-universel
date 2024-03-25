@@ -23,7 +23,7 @@ const datefns = require("date-fns");
 var { fr } = require("date-fns/locale");
 
 function getBg() {
-  return getSignedUrl("convocation/convocation_template_base_2024.png");
+  return getSignedUrl("convocation/convocation_template_base_2024_V2.png");
 }
 function getTop() {
   return getSignedUrl("convocation/top_V2.png");
