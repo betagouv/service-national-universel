@@ -70,7 +70,7 @@ jobs:
           - name: api
             tag: ${{needs.prepare.outputs.api_image_tag}}
             remote: CLEVER_CLOUD_GIT_REMOTE_API_DOCKER
-          - name: acc
+          - name: app
             tag: ${{needs.prepare.outputs.app_image_tag}}
             remote: CLEVER_CLOUD_GIT_REMOTE_APP_DOCKER
           - name: admin
