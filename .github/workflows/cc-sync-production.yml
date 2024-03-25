@@ -1,12 +1,11 @@
-name: Build and deploy Production (Clever Cloud)
-# This action deploys on clever cloud docker images already built for production (deploy-production.yml) hosted on SCW_PROD_IMAGE_REGISTRY
+name: Synchronise Production (Clever Cloud)
+# This action deploys on Clever Cloud the same images that are deployed on Scaleway
 
 on:
   workflow_dispatch:
   push:
     branches:
       - 2068-deploy-cc # TODO: update
-      - production_cc
 
 concurrency:
   group: ${{ github.workflow }}
@@ -16,7 +15,7 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'production_cc' || github.ref_name == '2068-deploy-cc' # TODO: update
+    if: github.ref_name == '2068-deploy-cc' # TODO: update
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}

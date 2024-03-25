@@ -18,7 +18,6 @@ on:
 jobs:
 
   deploy_image:
-    if: ${{ vars.DEPLOY_ON_CC == 'true' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
