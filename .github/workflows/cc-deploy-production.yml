@@ -18,7 +18,6 @@ jobs:
     if: github.ref_name == 'production_cc' || github.ref_name == '2068-deploy-cc' # TODO: update
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
-      registry_endpoint: ${{ steps.prepare.outputs.registry_endpoint }}
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
@@ -49,10 +48,6 @@ jobs:
         run: |
           terraform init
           output=$(terraform output -json)
-
-          registry_endpoint=$(jq -r '.registry_endpoint.value' <<< $output)
-          echo "registry_endpoint: $registry_endpoint"
-          echo "registry_endpoint=$registry_endpoint" >> $GITHUB_OUTPUT
 
           api_image_tag=$(jq -r '.api_image_tag.value' <<< $output)
           echo "api_image_tag: $api_image_tag"
@@ -98,10 +93,11 @@ jobs:
       - name: Push
         env:
           CLEVER_CLOUD_GIT_REMOTE: ${{ secrets[matrix.remote] }}
+          registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
         run: |
           mkdir docker
           cd docker
-          image_tag=${{ needs.prepare.outputs.registry_endpoint }}/${{ matrix.name }}:${{ matrix.tag }}
+          image_tag=${{ env.registry }}/${{ matrix.name }}:${{ matrix.tag }}
           echo "FROM $image_tag"> Dockerfile
           git init
           git config user.email "github.deployer@gmail.com"
