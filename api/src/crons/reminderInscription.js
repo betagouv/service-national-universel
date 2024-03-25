@@ -10,10 +10,10 @@ exports.handler = async () => {
   try {
     let countNotice = 0;
 
-    const now = startOfDay(new Date());
+    const today = startOfDay(new Date());
 
-    const threeDaysBefore = addDays(now, -3);
-    const sevenDaysBefore = addDays(now, -7);
+    const threeDaysBefore = addDays(today, -3);
+    const sevenDaysBefore = addDays(today, -7);
 
     try {
       const cohorts = await CohortModel.find({ name: /2024/ });
