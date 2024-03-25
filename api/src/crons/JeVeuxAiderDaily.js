@@ -186,6 +186,7 @@ const sync = async (result) => {
         location: mission.location,
         isJvaMission: true,
         jvaMissionId: mission.clientId,
+        apiEngagementId: mission.id,
         jvaRawData: mission,
         lastSyncAt: Date.now(),
 
