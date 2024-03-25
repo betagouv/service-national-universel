@@ -50,7 +50,7 @@ export default function ViewDesktop() {
   const [openAttachments, setOpenAttachments] = useState(false);
 
   const refContractButton = React.useRef();
-
+  console.log("TEST");
   const history = useHistory();
 
   const young = useSelector((state) => state.Auth.young);
