@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 const path = require("path");
+const { addYears, addHours } = require("date-fns");
 const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
 const { JVA_API_KEY, API_ENGAGEMENT_URL, API_ENGAGEMENT_KEY } = require("../config");
@@ -31,14 +32,6 @@ const jva2SnuDomaines = {
   "vivre-ensemble": MISSION_DOMAINS.CITIZENSHIP,
 };
 
-function addOneYear(date) {
-  const newDate = new Date(date);
-  newDate.setFullYear(newDate.getFullYear() + 1);
-  return newDate;
-}
-
-const TWO_HOURS = 2 * 60 * 60 * 1000;
-
 const JvaStructureException = [
   "6890", //Fédération Médico-psychosociale à la Personne-Initiative
   "14392", //Autisme espoir
@@ -50,7 +43,7 @@ const SnuStructureException = [
   "62de85c299f28207ac826fc5", //AUTISME ESPOIR VERS L'ÉCOLE
 ];
 
-const fetchMission = async (skip = 0) =>
+const fetchMission = (skip = 0) =>
   fetch(`${API_ENGAGEMENT_URL}/v2/mission?snu=true&skip=${skip}&limit=50`, {
     headers: { "x-api-key": API_ENGAGEMENT_KEY },
     method: "GET",
@@ -175,8 +168,8 @@ const sync = async (result) => {
         description,
         actions,
         mainDomain: jva2SnuDomaines[mission.domain],
-        startAt: new Date(startAt.getTime() + TWO_HOURS),
-        endAt: mission.endAt ? new Date(endAt.getTime() + TWO_HOURS) : addOneYear(mission.startAt),
+        startAt: addHours(startAt, 2),
+        endAt: mission.endAt ? addHours(endAt, 2) : addYears(startAt, 1),
         placesTotal: mission.snuPlaces,
         frequence: mission.schedule,
         structureId: structure.id,
