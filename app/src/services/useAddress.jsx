@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { department2region } from "snu-lib";
 
 const baseURL = "https://api-adresse.data.gouv.fr/search/?q=";
 
@@ -33,10 +34,10 @@ function formatResult(option) {
     address: option.properties.type !== "municipality" ? option.properties.name : "",
     zip: option.properties.postcode,
     city: option.properties.city,
-    // For metropolitan areas, the second element is the department, and the third element is the region
-    // For some overseas areas, the second element is both the department and the region, and there is no third element
     department: contextArray[1].trim(),
-    region: contextArray[contextArray.length - 1].trim(),
+    // Sur le SNU, certains départements d'outre-mer sont rattachés à d'autres régions au lieu d'être une collectivité indépendante
+    // (ex: "Wallis-et-Futuna": "Nouvelle-Calédonie") => on utilise un mapping fait maison et non la région de l'API.
+    region: department2region(contextArray[1].trim()),
     departmentNumber: contextArray[0].trim(),
     location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
     cityCode: option.properties.citycode,
