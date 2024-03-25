@@ -1,3 +1,10 @@
+## [1.394.1](https://github.com/betagouv/service-national-universel/compare/v1.394.0...v1.394.1) (2024-03-21)
+
+
+### Bug Fixes
+
+* **app:** 1184 - Fixed AddressDropdown component. ([30ba59e](https://github.com/betagouv/service-national-universel/commit/30ba59e354b818ed40ff9476618aec73f67d0ad3))
+
 # [1.394.0](https://github.com/betagouv/service-national-universel/compare/v1.393.0...v1.394.0) (2024-03-19)
 
 
