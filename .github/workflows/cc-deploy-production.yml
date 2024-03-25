@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 2068-deploy-cc # TODO: update
+      - production_cc
 
 concurrency:
   group: ${{ github.workflow }}
@@ -14,7 +15,7 @@ jobs:
 
   prepare:
     runs-on: ubuntu-latest
-    if: github.ref_name == 'release_candidate'
+    if: github.ref_name == 'production_cc' || github.ref_name == '2068-deploy-cc' # TODO: update
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
