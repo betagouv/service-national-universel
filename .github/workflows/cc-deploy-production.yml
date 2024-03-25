@@ -2,17 +2,16 @@ name: Build and deploy Production (Clever Cloud)
 # This action deploys on clever cloud docker images already built for production (deploy-production.yml) hosted on SCW_PROD_IMAGE_REGISTRY
 
 on:
-  workflow_dispatch:
   workflow_call:
     inputs:
       api_image_tag:
-        default: 'latest'
+        required: true
         type: string
       admin_image_tag:
-        default: 'latest'
+        required: true
         type: string
       app_image_tag:
-        default: 'latest'
+        required: true
         type: string
 
 jobs:

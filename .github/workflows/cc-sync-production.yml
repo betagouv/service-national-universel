@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref_name == '2068-deploy-cc' # TODO: update
     outputs:
-      target_branch: ${{ steps.target_branch.outputs.target_branch }}
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
@@ -26,14 +25,9 @@ jobs:
       SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
 
     steps:
-      - name: Get target_branch
-        id: target_branch
-        run: |
-          echo "target_branch=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-
       - uses: actions/checkout@v4
         with:
-          ref: ${{ steps.target_branch.outputs.target_branch }}
+          ref: production
 
       - uses: hashicorp/setup-terraform@v3
 
