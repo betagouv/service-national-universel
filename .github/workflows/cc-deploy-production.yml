@@ -18,6 +18,7 @@ jobs:
     if: github.ref_name == 'production_cc' || github.ref_name == '2068-deploy-cc' # TODO: update
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
+      registry_endpoint: ${{ steps.prepare.outputs.registry_endpoint }}
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
@@ -49,6 +50,10 @@ jobs:
           terraform init
           output=$(terraform output -json)
 
+          registry_endpoint=$(jq -r '.registry_endpoint.value' <<< $output)
+          echo "registry_endpoint: $registry_endpoint"
+          echo "registry_endpoint=$registry_endpoint" >> $GITHUB_OUTPUT
+
           api_image_tag=$(jq -r '.api_image_tag.value' <<< $output)
           echo "api_image_tag: $api_image_tag"
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
@@ -60,13 +65,43 @@ jobs:
           app_image_tag=$(jq -r '.app_image_tag.value' <<< $output)
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
-      # - name: Create SSH key
-      #   run: |
-      #     mkdir -p ~/.ssh/
-      #     echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-      #     sudo chmod 600 ~/.ssh/id_ed25519
-      #     echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
-      #     chmod go-rwx ~/.ssh/id_ed25519
-      #   env:
-      #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+  deploy_image:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [
+          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}", remote: "${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_DOCKER }}"},
+          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}", remote: "${{ secrets.CLEVER_CLOUD_GIT_REMOTE_APP_DOCKER }}" },
+          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}", remote: "${{ secrets.CLEVER_CLOUD_GIT_REMOTE_ADMIN_DOCKER }}" },
+        ]
+
+    steps:
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          sudo chmod 600 ~/.ssh/id_ed25519
+          echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          chmod go-rwx ~/.ssh/id_ed25519
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+
+      - name: Push
+        env:
+          CLEVER_CLOUD_GIT_REMOTE: ${{ matrix.app.remote }}
+        run: |
+          mkdir docker
+          cd docker
+          image_tag=${{ needs.prepare.outputs.registry_endpoint }}/${{ matrix.app.name }}:${{ matrix.app.tag }}
+          echo "FROM $image_tag"> Dockerfile
+          git init
+          git config user.email "github.deployer@gmail.com"
+          git config user.name "Github Deployer"
+          git remote add cloud "$CLEVER_CLOUD_GIT_REMOTE"
+          git add -A
+          git commit -m "For deploy"
+          git push -f -u cloud master
