@@ -22,7 +22,6 @@ concurrency:
 jobs:
 
   deploy_image:
-    needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
