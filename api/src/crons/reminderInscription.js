@@ -4,7 +4,7 @@ const CohortModel = require("../models/cohort");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
-const { startOfDay, addDays } = require("date-fns");
+const { startOfDay, subDays, endOfDay } = require("date-fns");
 
 exports.handler = async () => {
   try {
@@ -12,8 +12,8 @@ exports.handler = async () => {
 
     const today = startOfDay(new Date());
 
-    const threeDaysBefore = addDays(today, -3);
-    const sevenDaysBefore = addDays(today, -7);
+    const threeDaysBefore = subDays(today, 3);
+    const sevenDaysBefore = subDays(today, 7);
 
     try {
       const cohorts = await CohortModel.find({ name: /2024/ });
@@ -21,11 +21,11 @@ exports.handler = async () => {
         $or: [
           {
             status: YOUNG_STATUS.IN_PROGRESS,
-            createdAt: { $gte: threeDaysBefore, $lt: addDays(threeDaysBefore, 1) },
+            createdAt: { $gte: threeDaysBefore, $lt: endOfDay(threeDaysBefore) },
           },
           {
             status: YOUNG_STATUS.IN_PROGRESS,
-            createdAt: { $gte: sevenDaysBefore, $lt: addDays(sevenDaysBefore, 1) },
+            createdAt: { $gte: sevenDaysBefore, $lt: endOfDay(sevenDaysBefore) },
           },
         ],
       }).cursor();
