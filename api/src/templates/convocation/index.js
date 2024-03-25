@@ -26,7 +26,7 @@ function getBg() {
   return getSignedUrl("convocation/convocation_template_base_2024.png");
 }
 function getTop() {
-  return getSignedUrl("convocation/top.png");
+  return getSignedUrl("convocation/top_V2.png");
 }
 function getBottom() {
   return getSignedUrl("convocation/bottom.png");
@@ -93,7 +93,12 @@ const render = async (young) => {
         .replace(/{{TOP}}/g, sanitizeAll(getTop()))
         .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
         .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()))
-        .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
+        .replace(
+          /{{LUNCH_BREAK}}/g,
+          sanitizeAll(
+            ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>` : "",
+          ),
+        );
     } else {
       const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
       return html
@@ -129,7 +134,12 @@ const render = async (young) => {
         .replace(/{{TOP}}/g, sanitizeAll(getTop()))
         .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
         .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()))
-        .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
+        .replace(
+          /{{LUNCH_BREAK}}/g,
+          sanitizeAll(
+            ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>` : "",
+          ),
+        );
     }
   } catch (e) {
     capture(e);
