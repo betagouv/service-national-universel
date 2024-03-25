@@ -15,10 +15,6 @@ on:
         default: 'latest'
         type: string
 
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: false
-
 jobs:
 
   deploy_image:
