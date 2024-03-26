@@ -16,13 +16,9 @@ function addOneDay(date) {
   accepté).
 */
 export function shouldReAcceptRI(young, cohort) {
-  // Si le jeune ne va pas partir en séjour, pas besoin de revalier le RI
-  const { VALIDATED, WAITING_LIST, WAITING_VALIDATION, WAITING_CORRECTION, REINSCRIPTION, IN_PROGRESS } = YOUNG_STATUS;
-  if (![VALIDATED, WAITING_LIST, WAITING_VALIDATION, WAITING_CORRECTION, REINSCRIPTION, IN_PROGRESS].includes(young.status)) return false;
-
   const newRiDate = new Date(REGLEMENT_INTERIEUR_VERSION);
   const cohortStartDate = new Date(cohort?.dateStart);
-  if (cohortStartDate >= newRiDate && young?.acceptRI != REGLEMENT_INTERIEUR_VERSION) {
+  if (permissionPhase1(young) && cohortStartDate >= newRiDate && young?.acceptRI != REGLEMENT_INTERIEUR_VERSION) {
     return true;
   }
   return false;
