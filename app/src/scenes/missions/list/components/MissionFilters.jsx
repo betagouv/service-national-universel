@@ -17,6 +17,7 @@ import Securite from "../../../../assets/mission-domaines/securite";
 import Culture from "../../../../assets/mission-domaines/culture";
 import PreparationMilitaire from "../../../../assets/mission-domaines/preparation-militaire";
 
+import CloseSvg from "../../../../assets/Close";
 import AcademicCap from "../../../../assets/icons/AcademicCap";
 import Sun from "../../../../assets/icons/Sun";
 import Calendar from "../../../../assets/icons/Calendar";
@@ -39,6 +40,26 @@ import Toggle from "./Toggle";
 import Modal from "../../../../components/ui/modals/Modal";
 import useAddress from "@/services/useAddress";
 
+const useOutsideClick = (callback) => {
+  const ref = React.useRef();
+
+  React.useEffect(() => {
+    const handleClick = (event) => {
+      if (ref.current && event.target.compareDocumentPosition(ref.current) & Node.DOCUMENT_POSITION_CONTAINED_BY) {
+        callback();
+      }
+    };
+
+    document.addEventListener("click", handleClick, true);
+
+    return () => {
+      document.removeEventListener("click", handleClick, true);
+    };
+  }, [ref]);
+
+  return ref;
+};
+
 function _location(results) {
   if (!results) {
     return undefined;
@@ -59,8 +80,8 @@ export default function MissionFilters({ filters, setFilters }) {
   const [keyWordOpen, setKeyWordOpen] = React.useState(false);
   const [keyWord, setKeyWord] = React.useState("");
   const [showMoreDetails, setShowMoreDetails] = useState(false);
-  const refDropdownControlDistance = React.useRef(null);
-  const refDropdownControlWhen = React.useRef(null);
+  const refDropdownControlDistance = useOutsideClick(() => setDropdownControlDistanceOpen(false));
+  const refDropdownControlWhen = useOutsideClick(() => setDropdownControlWhenOpen(false));
 
   const { results: youngResults } = useAddress({
     query: `${young?.address} ${young?.city}`,
@@ -507,16 +528,19 @@ export default function MissionFilters({ filters, setFilters }) {
             />
             <div
               className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
-              onClick={() => setDropdownControlDistanceOpen((e) => !e)}>
+              onClick={() => {
+                setDropdownControlDistanceOpen((e) => !e);
+                setDropdownControlWhenOpen(false);
+              }}>
               Distance max. {filters.distance}km
             </div>
             <div
               className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
-              onClick={() => setDropdownControlWhenOpen((e) => !e)}>
+              onClick={() => {
+                setDropdownControlWhenOpen((e) => !e);
+                setDropdownControlDistanceOpen(false);
+              }}>
               {getLabelWhen(filters.period)}
-            </div>
-            <div className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-full bg-blue-600 hover:bg-blue-500">
-              <Search className="text-white" />
             </div>
           </div>
           {/* BEGIN MODAL CONTROL DISTANCE */}
@@ -527,6 +551,7 @@ export default function MissionFilters({ filters, setFilters }) {
             } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
             <div className="flex items-center justify-center">
               <div className="text-gray-00 mr-1 text-sm font-bold"> Distance maximum </div>
+              <CloseSvg className="absolute right-4 top-4 cursor-pointer" height={10} width={10} onClick={() => setDropdownControlDistanceOpen(false)} />
               <div>
                 <img src={InfobulleIcon} data-tip data-for="info" />
                 <ReactTooltip delayHide={3000} clickable={true} id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
@@ -641,6 +666,7 @@ export default function MissionFilters({ filters, setFilters }) {
             className={`${
               dropdownControlWhenOpen ? "block" : "hidden"
             } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
+            <CloseSvg className="absolute right-4 top-4 cursor-pointer" height={10} width={10} onClick={() => setDropdownControlWhenOpen(false)} />
             <div className="text-gray-00 text-center text-sm font-bold">Période de réalisation de la mission</div>
             <div className="flex w-full flex-col py-2 px-4">
               <div className="mt-4 flex w-full justify-center gap-2 px-[10px] text-sm font-medium text-gray-700">
