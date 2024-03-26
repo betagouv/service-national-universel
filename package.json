@@ -2,7 +2,7 @@
   "name": "service-national-universel",
   "scripts": {
     "lint": "turbo run lint --continue",
-    "dev": "[[ -e .git/hooks/pre-commit ]] && turbo run dev --filter=!pdf --filter=!antivirus --filter=!pdf || echo 'Follow Procedure here : https://www.notion.so/jeveuxaider/Gitguardian-1b6d580a315f4f7c8440fde951aa42c9?pvs=4'",
+    "dev": "[[ -e .git/hooks/pre-commit ]] && turbo run dev --filter=!pdf --filter=!antivirus || echo 'Follow Procedure here : https://www.notion.so/jeveuxaider/Gitguardian-1b6d580a315f4f7c8440fde951aa42c9?pvs=4'",
     "build": "turbo run build --filter=$APP_NAME",
     "start": "turbo run start --filter=$APP_NAME",
     "test": "turbo build --filter='./packages/lib' && turbo run test --filter=api"
