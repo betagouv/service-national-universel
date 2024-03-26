@@ -514,8 +514,8 @@ export default function MissionFilters({ filters, setFilters }) {
       {/* Desktop */}
       <div className="hidden md:block my-4 space-y-6 rounded-xl bg-gray-50 p-10">
         {/* search bar */}
-        <div className="relative flex justify-center">
-          <div className="flex w-9/12 items-center overflow-hidden rounded-full border-[1px] border-gray-300 bg-white  p-1.5">
+        <div className="relative flex flex-col justify-center">
+          <div className="flex pl-8 pr-8 mb-2 w-full items-center overflow-hidden rounded-full border-[1px] border-gray-300 bg-white  p-1.5">
             <input
               value={filters.searchbar}
               onChange={(e) => {
@@ -527,7 +527,10 @@ export default function MissionFilters({ filters, setFilters }) {
               placeholder="Rechercher une mission..."
             />
             <div
-              className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
+              // className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
+              className={`flex ${
+                dropdownControlDistanceOpen ? "text-blue-600" : "text-gray-700"
+              } w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm  placeholder:text-gray-400`}
               onClick={() => {
                 setDropdownControlDistanceOpen((e) => !e);
                 setDropdownControlWhenOpen(false);
@@ -535,7 +538,9 @@ export default function MissionFilters({ filters, setFilters }) {
               Distance max. {filters.distance}km
             </div>
             <div
-              className="flex w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm text-gray-700 placeholder:text-gray-400"
+              className={`flex ${
+                dropdownControlWhenOpen ? "text-blue-600" : "text-gray-700"
+              } w-full flex-1 cursor-pointer items-center border-l-[1px] border-gray-300 p-1 px-3 text-sm placeholder:text-gray-400`}
               onClick={() => {
                 setDropdownControlWhenOpen((e) => !e);
                 setDropdownControlDistanceOpen(false);
@@ -547,24 +552,11 @@ export default function MissionFilters({ filters, setFilters }) {
           <div
             ref={refDropdownControlDistance}
             className={`${
-              dropdownControlDistanceOpen ? "block" : "hidden"
-            } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
-            <div className="flex items-center justify-center">
-              <div className="text-gray-00 mr-1 text-sm font-bold"> Distance maximum </div>
+              dropdownControlDistanceOpen ? "max-h-96" : "max-h-0"
+            } h-auto w-full relative overflow-hidden rounded-2xl bg-white transition-maxHeight duration-200 ease-in-out`}>
+            <div className="flex items-center pt-2 justify-center">
               <CloseSvg className="absolute right-4 top-4 cursor-pointer" height={10} width={10} onClick={() => setDropdownControlDistanceOpen(false)} />
-              <div>
-                <img src={InfobulleIcon} data-tip data-for="info" />
-                <ReactTooltip delayHide={3000} clickable={true} id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
-                  <div className="mb-2 text-left text-[15px] text-[#414458]">Visibilité des missions</div>
-                  <div className="text-left text-[12px] text-[#83869A]">
-                    Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous
-                    conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaître ces offres et y accéder, contactez tout de suite votre
-                    référent phase 2 : <a href={`mailto:${referentManagerPhase2?.email}`}>{referentManagerPhase2?.email}</a>
-                  </div>
-                </ReactTooltip>
-              </div>
             </div>
-
             <div className="flex w-full flex-col space-y-2 py-2 px-4">
               <div className="my-3 flex flex-row justify-around">
                 <div className="flex w-1/2 flex-col items-center justify-center">
@@ -623,11 +615,22 @@ export default function MissionFilters({ filters, setFilters }) {
                   </div>
                 </div>
                 <div className="flex w-1/2 flex-col items-center justify-center">
-                  <div className="flex w-3/4 flex-row items-center justify-center">
+                  <div className="flex  flex-row items-center justify-center">
                     <Toggle toggled={filters.hebergement} onClick={() => setFilters((prev) => ({ ...prev, hebergement: !prev.hebergement }))} />
                     <div className="ml-4">
                       <div className="text-[13px]">Mission avec hébergement</div>
                       <div className="text-[15px]">Dans toute la France</div>
+                    </div>
+                    <div className="pl-4">
+                      <img src={InfobulleIcon} data-tip data-for="info" />
+                      <ReactTooltip clickable={true} id="info" className="w-[527px] bg-white opacity-100 shadow-xl" arrowColor="white">
+                        <div className="mb-2 text-left text-[15px] text-[#414458]">Visibilité des missions</div>
+                        <div className="text-left text-[12px] bg-white text-[#83869A]">
+                          Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous
+                          conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaître ces offres et y accéder, contactez tout de suite
+                          votre référent phase 2 : <a href={`mailto:${referentManagerPhase2?.email}`}>{referentManagerPhase2?.email}</a>
+                        </div>
+                      </ReactTooltip>
                     </div>
                   </div>
                 </div>
@@ -664,11 +667,10 @@ export default function MissionFilters({ filters, setFilters }) {
           <div
             ref={refDropdownControlWhen}
             className={`${
-              dropdownControlWhenOpen ? "block" : "hidden"
-            } absolute top-[calc(100%+8px)] left-0 z-20 w-full overflow-hidden rounded-lg bg-white p-3 shadow transition`}>
+              dropdownControlWhenOpen ? "max-h-62" : "max-h-0"
+            } h-auto w-full relative overflow-hidden rounded-2xl bg-white transition-maxHeight duration-200 ease-in-out`}>
             <CloseSvg className="absolute right-4 top-4 cursor-pointer" height={10} width={10} onClick={() => setDropdownControlWhenOpen(false)} />
-            <div className="text-gray-00 text-center text-sm font-bold">Période de réalisation de la mission</div>
-            <div className="flex w-full flex-col py-2 px-4">
+            <div className="flex w-full flex-col pt-2 pb-4 px-4">
               <div className="mt-4 flex w-full justify-center gap-2 px-[10px] text-sm font-medium text-gray-700">
                 <PeriodeTab label={getLabelWhen("")} active={!filters.period} name="" onClick={() => setFilters((prev) => ({ ...prev, period: undefined }))} />
                 <PeriodeTab
