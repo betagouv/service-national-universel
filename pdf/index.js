@@ -86,22 +86,17 @@
       res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
       res.set("Cache-Control", "public, max-age=1");
       console.log("begin pipe");
-      stream
-        .on("end", () => {
-          console.log("stream_end: page.close");
-          page.close();
-        })
-        .on("error", (err) => {
-          capture(err);
-          console.log("stream_error: page.close");
-          page.close();
-        })
-        .pipe(res);
+      stream.pipe(res);
       console.log("end pipe");
       console.timeEnd("RENDERING " + random);
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    } finally {
+      if (page) {
+        console.log("finally");
+        // await page.close();
+      }
     }
   });
 
