@@ -37,7 +37,7 @@ function formatResult(option) {
     department: contextArray[1].trim(),
     // Sur le SNU, certains départements d'outre-mer sont rattachés à d'autres régions au lieu d'être une collectivité indépendante
     // (ex: "Wallis-et-Futuna": "Nouvelle-Calédonie") => on utilise un mapping fait maison et non la région de l'API.
-    region: department2region(contextArray[1].trim()),
+    region: department2region[contextArray[1].trim()],
     departmentNumber: contextArray[0].trim(),
     location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
     cityCode: option.properties.citycode,
