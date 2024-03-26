@@ -8,6 +8,14 @@ const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
 const EXPORT_YOUNGS_AFTER_SESSION = "youngsAfterSession";
 
 exports.handler = async () => {
+  await generateReports(new Date());
+};
+
+exports.manualHandler = async (date) => {
+  await generateReports(new Date(date));
+};
+
+async function generateReports(today) {
   try {
     const cohorts = await CohortModel.find({});
     const exportsGenerated = {};
@@ -17,8 +25,8 @@ exports.handler = async () => {
       const cohesionCenterExportDate = cohort.dsnjExportDates[EXPORT_COHESION_CENTERS] ? new Date(cohort.dsnjExportDates[EXPORT_COHESION_CENTERS]) : undefined;
       const youngBeforeSessionExportDate = cohort.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION] ? new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION]) : undefined;
       const youngAfterSessionExportDate = cohort.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION] ? new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION]) : undefined;
-      const todayStart = new Date(new Date().setHours(0, 0, 0, 0));
-      const todayEnd = new Date(new Date().setHours(23, 59, 59, 999));
+      const todayStart = new Date(today.setHours(0, 0, 0, 0));
+      const todayEnd = new Date(today.setHours(23, 59, 59, 999));
 
       if (cohesionCenterExportDate && cohesionCenterExportDate >= todayStart && cohesionCenterExportDate <= todayEnd) {
         await generateCohesionCentersExport(cohort);
@@ -42,4 +50,4 @@ exports.handler = async () => {
     slack.error({ title: "DSNJ export generation", text: e });
     capture(e);
   }
-};
+}
