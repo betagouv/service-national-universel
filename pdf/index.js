@@ -13,6 +13,10 @@
 
   const { PORT: port, GENERATE_LOCALLY } = require("./config.js");
 
+  const ERRORS = {
+    SERVER_ERROR: "SERVER_ERROR",
+  };
+
   const initBrowser = async () => {
     try {
       return await puppeteer.launch({ headless: "new" });
@@ -38,35 +42,20 @@
   };
 
   const renderFromHtml = async (html, options) => {
-    try {
-      const page = await getPage(options);
-      await page.setContent(html, options?.navigation ?? {});
-      const pdfOptions = options ?? {};
-      const buffer = await page.pdf({
-        ...DEFAULT_OPTIONS,
-        ...pdfOptions,
-      });
+    const page = await browser.newPage();
 
-      return buffer;
-    } catch (error) {
-      console.log(error);
-      capture(error);
+    if (options?.emulateMedia) {
+      await page.emulateMediaType(options.emulateMedia);
     }
-  };
 
-  const getPage = async (options) => {
-    try {
-      const page = await browser.newPage();
+    await page.setContent(html, options?.navigation ?? {});
+    const pdfOptions = options ?? {};
+    const buffer = await page.pdf({
+      ...DEFAULT_OPTIONS,
+      ...pdfOptions,
+    });
 
-      if (options?.emulateMedia) {
-        await page.emulateMediaType(options.emulateMedia);
-      }
-
-      return page;
-    } catch (error) {
-      console.log(error);
-      capture(error);
-    }
+    return buffer;
   };
 
   app.use(express.static(__dirname + "/public"));
@@ -96,9 +85,8 @@
       res.send(buffer);
       console.timeEnd("RENDERING " + random);
     } catch (error) {
-      console.log(error);
       capture(error);
-      res.status(500).send({ ok: false, error });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
   });
 
