@@ -51,22 +51,15 @@ jobs:
           echo "antivirus_image_tag: $antivirus_image_tag"
           echo "antivirus_image_tag=$antivirus_image_tag" >> $GITHUB_OUTPUT
 
-  run_tests:
+  run_tests_api:
     needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.target_branch }}
-
-      - name: API - run tests
-        uses: ./.github/actions/run_api_tests
-        with:
-          branch_name: ${{ needs.prepare.outputs.target_branch }}
-          reporter_id: ${{ secrets.CC_TEST_REPORTER_ID }}
+    uses: ./.github/workflows/run-tests-api.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.target_branch }}
+    secrets: inherit
 
   build:
-    needs: [prepare, run_tests]
+    needs: [prepare, run_tests_api]
     runs-on: ubuntu-latest
     strategy:
       matrix:
