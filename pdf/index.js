@@ -41,21 +41,19 @@
     margin: 0,
   };
 
-  const renderFromHtml = async (html, options) => {
-    const page = await browser.newPage();
-
+  const renderFromHtml = async (page, html, options) => {
     if (options?.emulateMedia) {
       await page.emulateMediaType(options.emulateMedia);
     }
 
     await page.setContent(html, options?.navigation ?? {});
     const pdfOptions = options ?? {};
-    const buffer = await page.pdf({
+    const stream = await page.createPDFStream({
       ...DEFAULT_OPTIONS,
       ...pdfOptions,
     });
 
-    return buffer;
+    return stream;
   };
 
   app.use(express.static(__dirname + "/public"));
@@ -65,24 +63,41 @@
   });
 
   app.post("/render", async (req, res) => {
+    let page;
     try {
       const random = Math.random();
       console.time("RENDERING " + random);
-      const buffer = await renderFromHtml(
+
+      page = await browser.newPage();
+      const stream = await renderFromHtml(
+        page,
         req.body.html,
         req.body.options || {}
       );
-      if (!buffer)
-        throw new Error("No buffer returned : " + JSON.stringify(req.body));
-      if (GENERATE_LOCALLY)
+      if (!stream)
+        throw new Error("No stream returned : " + JSON.stringify(req.body));
+      if (GENERATE_LOCALLY) {
         fs.writeFileSync(
           `generated/${new Date().toISOString()}_test.pdf`,
-          buffer
+          stream
         );
+      }
       res.contentType("application/pdf");
       res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
       res.set("Cache-Control", "public, max-age=1");
-      res.send(buffer);
+      console.log("begin pipe");
+      stream
+        .on("end", () => {
+          console.log("stream_end: page.close");
+          page.close();
+        })
+        .on("error", (err) => {
+          capture(err);
+          console.log("stream_error: page.close");
+          page.close();
+        })
+        .pipe(res);
+      console.log("end pipe");
       console.timeEnd("RENDERING " + random);
     } catch (error) {
       capture(error);
