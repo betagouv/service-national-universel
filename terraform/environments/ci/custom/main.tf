@@ -263,8 +263,8 @@ resource "scaleway_container" "pdf" {
   namespace_id    = scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/pdf:${var.pdf_image_tag}"
   port            = 8080
-  cpu_limit       = 256
-  memory_limit    = 512
+  cpu_limit       = 512
+  memory_limit    = 4096
   min_scale       = 1
   max_scale       = 1
   timeout         = 60
