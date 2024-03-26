@@ -8,16 +8,6 @@ on:
 
 jobs:
   prepare:
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' &&
-        (contains(github.head_ref, '-ci-') ||
-        startsWith(github.head_ref, 'ci-') ||
-        endsWith(github.head_ref, '-ci') ||
-        contains(github.head_ref, '_ci_') ||
-        startsWith(github.head_ref, 'ci_') ||
-        endsWith(github.head_ref, '_ci'))
-      )
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.check.outputs.branch_name }}
@@ -73,21 +63,24 @@ jobs:
           echo "pdf_image_tag: $pdf_image_tag"
           echo "pdf_image_tag=$pdf_image_tag" >> $GITHUB_OUTPUT
 
-  run_tests:
+  run_tests_api:
     needs: prepare
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.branch_name }}
-
-      - name: API - run tests
-        uses: ./.github/actions/run_api_tests
-        with:
-          branch_name: ${{ needs.prepare.outputs.branch_name }}
-          reporter_id: ${{ secrets.CC_TEST_REPORTER_ID }}
+    uses: ./.github/workflows/run-tests-api.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.branch_name }}
+    secrets: inherit
 
   build:
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+        (contains(github.head_ref, '-ci-') ||
+        startsWith(github.head_ref, 'ci-') ||
+        endsWith(github.head_ref, '-ci') ||
+        contains(github.head_ref, '_ci_') ||
+        startsWith(github.head_ref, 'ci_') ||
+        endsWith(github.head_ref, '_ci'))
+      )
     needs: prepare
     runs-on: ubuntu-latest
     strategy:

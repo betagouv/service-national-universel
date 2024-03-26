@@ -10,18 +10,18 @@ export default function AddressDropdown({ options, handleSelect }) {
 
   return optionGroups.map((optionGroup) => (
     <div key={optionGroup.label}>
-      <p className="p-2 font-bold bg-[#EEEEEE]">{optionGroup.label}</p>
+      <span className="p-2 w-full flex justify-between font-bold bg-[#EEEEEE]">{optionGroup.label}</span>
       {optionGroup.options.map((option) => (
-        <button
+        <span
           key={option.address + option.city + option.zip}
           onClick={() => handleSelect(option)}
           className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
-          <p className="text-left">{option.address}</p>
-          <p className="text-right">
+          <span className="text-left">{option.address}</span>
+          <span className="text-right">
             {option.city}
             {option.zip && " - " + option.zip}
-          </p>
-        </button>
+          </span>
+        </span>
       ))}
     </div>
   ));

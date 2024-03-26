@@ -1,0 +1,62 @@
+name: Build and deploy Production (Clever Cloud)
+# This action deploys on clever cloud docker images already built for production (deploy-production.yml) hosted on SCW_PROD_IMAGE_REGISTRY
+
+on:
+  workflow_call:
+    inputs:
+      api_image_tag:
+        required: true
+        type: string
+      admin_image_tag:
+        required: true
+        type: string
+      app_image_tag:
+        required: true
+        type: string
+
+jobs:
+
+  deploy_image:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: api
+            tag: ${{inputs.api_image_tag}}
+            remote: CLEVER_CLOUD_GIT_REMOTE_API_DOCKER
+          - name: app
+            tag: ${{inputs.app_image_tag}}
+            remote: CLEVER_CLOUD_GIT_REMOTE_APP_DOCKER
+          - name: admin
+            tag: ${{inputs.admin_image_tag}}
+            remote: CLEVER_CLOUD_GIT_REMOTE_ADMIN_DOCKER
+
+    steps:
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          sudo chmod 600 ~/.ssh/id_ed25519
+          echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          chmod go-rwx ~/.ssh/id_ed25519
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+
+      - name: Push
+        env:
+          CLEVER_CLOUD_GIT_REMOTE: ${{ secrets[matrix.remote] }}
+          registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
+        run: |
+          mkdir docker
+          cd docker
+          image_tag=${{ env.registry }}/${{ matrix.name }}:${{ matrix.tag }}
+          echo "FROM $image_tag"> Dockerfile
+          git init
+          git config user.email "github.deployer@gmail.com"
+          git config user.name "Github Deployer"
+          git remote add cloud "$CLEVER_CLOUD_GIT_REMOTE"
+          git add -A
+          git commit -m "For deploy"
+          git push -f -u cloud master
