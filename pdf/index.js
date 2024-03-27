@@ -33,24 +33,7 @@
   const registerSentryErrorHandler = initSentry(app);
 
   const cors = require("cors");
-  app.use(
-    cors({
-      credentials: true,
-      origin: [API_URL],
-      allowedHeaders: [
-        "Content-Type",
-        "Authorization",
-        "X-Requested-With",
-        "Accept",
-        "Origin",
-        "Referer",
-        "User-Agent",
-        "sentry-trace",
-        "baggage",
-        "x-user-timezone",
-      ],
-    })
-  );
+  app.use(cors());
 
   app.use(bodyParser.json());
 
