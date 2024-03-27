@@ -286,7 +286,6 @@ resource "scaleway_container_domain" "app" {
   hostname     = local.app_hostname
 }
 
-
 output "project_id" {
   value = scaleway_account_project.main.id
 }

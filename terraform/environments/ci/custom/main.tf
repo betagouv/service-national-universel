@@ -28,6 +28,10 @@ variable "app_image_tag" {
   type     = string
   nullable = false
 }
+variable "pdf_image_tag" {
+  type    = string
+  nullable = false
+}
 
 locals {
   env            = "###___ENV_NAME___###"
@@ -36,6 +40,7 @@ locals {
   api_hostname   = "api-${local.env}.${local.domain}"
   admin_hostname = "admin-${local.env}.${local.domain}"
   app_hostname   = "moncompte-${local.env}.${local.domain}"
+  pdf_hostname   = "pdf-${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -106,7 +111,7 @@ resource "scaleway_container" "api" {
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"      = local.secrets.API_ASSOCIATION_CELLAR_KEYID
-    "API_PDF_ENDPOINT"                  = local.secrets.API_PDF_ENDPOINT
+    "API_PDF_ENDPOINT"                  = "https://${local.pdf_hostname}/render"
     "BUCKET_NAME"                       = local.secrets.BUCKET_NAME
     "CELLAR_ENDPOINT"                   = local.secrets.CELLAR_ENDPOINT
     "CELLAR_ENDPOINT_SUPPORT"           = local.secrets.CELLAR_ENDPOINT_SUPPORT
@@ -253,6 +258,41 @@ resource "scaleway_container_domain" "app" {
   hostname     = "${scaleway_domain_record.app.name}${scaleway_domain_record.app.dns_zone}"
 }
 
+resource "scaleway_container" "pdf" {
+  name            = "${local.env}-pdf"
+  namespace_id    = scaleway_container_namespace.main.id
+  registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/pdf:${var.pdf_image_tag}"
+  port            = 8080
+  cpu_limit       = 1024
+  memory_limit    = 4096
+  min_scale       = 1
+  max_scale       = 1
+  timeout         = 60
+  max_concurrency = 50
+  privacy         = "private"
+  protocol        = "http1"
+  deploy          = true
+
+  environment_variables = {
+    "SENTRY_TRACING_SAMPLE_RATE" = "0.01"
+    "SENTRY_URL"                 = local.secrets.SENTRY_URL
+  }
+}
+
+resource "scaleway_domain_record" "pdf" {
+  dns_zone = data.scaleway_domain_zone.main.id
+  name     = "pdf-${local.env}"
+  type     = "CNAME"
+  data     = "${scaleway_container.pdf.domain_name}."
+  ttl      = 300
+}
+
+resource "scaleway_container_domain" "pdf" {
+  container_id = scaleway_container.pdf.id
+  hostname     = "${scaleway_domain_record.pdf.name}${scaleway_domain_record.pdf.dns_zone}"
+}
+
+
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
 }
@@ -268,6 +308,15 @@ output "app_image_tag" {
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
 }
+
 output "admin_image_tag" {
   value = split(":", scaleway_container.admin.registry_image)[1]
+}
+
+output "pdf_endpoint" {
+  value = "https://${local.pdf_hostname}"
+}
+
+output "pdf_image_tag" {
+  value = split(":", scaleway_container.pdf.registry_image)[1]
 }

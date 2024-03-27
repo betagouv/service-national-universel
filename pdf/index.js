@@ -1,99 +1,108 @@
-require("dotenv").config({ path: "./.env" });
+(async function () {
+  require("dotenv").config({ path: "./.env" });
 
-const express = require("express");
-const puppeteer = require("puppeteer");
-const bodyParser = require("body-parser");
+  const express = require("express");
+  const puppeteer = require("puppeteer");
+  const bodyParser = require("body-parser");
 
-const { initSentry, capture } = require("./sentry");
+  const { initSentry, capture } = require("./sentry");
 
-require("events").EventEmitter.defaultMaxListeners = 30; // Fix warning node
+  require("events").EventEmitter.defaultMaxListeners = 30; // Fix warning node
 
-const fs = require("fs");
+  const fs = require("fs");
 
-const { PORT: port, GENERATE_LOCALLY } = require("./config.js");
+  const { PORT: port, GENERATE_LOCALLY } = require("./config.js");
 
-const app = express();
+  const ERRORS = {
+    SERVER_ERROR: "SERVER_ERROR",
+  };
 
-const registerSentryErrorHandler = initSentry(app);
+  const initBrowser = async () => {
+    try {
+      return await puppeteer.launch({ headless: "new" });
+    } catch (error) {
+      capture(error);
+      throw error;
+    }
+  };
 
-app.use(bodyParser.json());
+  const browser = await initBrowser();
 
-app.use(bodyParser.urlencoded({ extended: true }));
+  const app = express();
 
-const DEFAULT_OPTIONS = {
-  format: "A4",
-  margin: 0,
-};
+  const registerSentryErrorHandler = initSentry(app);
 
-const renderFromHtml = async (html, options) => {
-  try {
-    const { browser, page } = await getBrowserAndPage(options);
-    await page.setContent(html, options?.navigation ?? {});
-    const pdfOptions = options ?? {};
-    const buffer = await page.pdf({
-      ...DEFAULT_OPTIONS,
-      ...pdfOptions,
-    });
+  app.use(bodyParser.json());
 
-    await browser.close();
+  app.use(bodyParser.urlencoded({ extended: true }));
 
-    return buffer;
-  } catch (error) {
-    console.log(error);
-    capture(error);
-  }
-};
+  const DEFAULT_OPTIONS = {
+    format: "A4",
+    margin: 0,
+  };
 
-const getBrowserAndPage = async (options) => {
-  try {
-    const browser = await puppeteer.launch(
-      options?.launch ?? { headless: "new" }
-    );
-    const page = await browser.newPage();
-
+  const renderFromHtml = async (page, html, options) => {
     if (options?.emulateMedia) {
       await page.emulateMediaType(options.emulateMedia);
     }
 
-    return { browser, page };
-  } catch (error) {
-    console.log(error);
-    capture(error);
-  }
-};
+    await page.setContent(html, options?.navigation ?? {});
+    const pdfOptions = options ?? {};
+    const stream = await page.createPDFStream({
+      ...DEFAULT_OPTIONS,
+      ...pdfOptions,
+    });
 
-app.use(express.static(__dirname + "/public"));
+    return stream;
+  };
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+  app.use(express.static(__dirname + "/public"));
 
-app.post("/render", async (req, res) => {
-  try {
-    const random = Math.random();
-    console.time("RENDERING " + random);
-    const buffer = await renderFromHtml(req.body.html, req.body.options || {});
-    if (!buffer)
-      throw new Error("No buffer returned : " + JSON.stringify(req.body));
-    if (GENERATE_LOCALLY)
-      fs.writeFileSync(
-        `generated/${new Date().toISOString()}_test.pdf`,
-        buffer
+  app.get("/", (req, res) => {
+    res.send("Hello World!");
+  });
+
+  app.post("/render", async (req, res) => {
+    let page;
+    try {
+      const random = Math.random();
+      console.time("RENDERING " + random);
+
+      page = await browser.newPage();
+      const stream = await renderFromHtml(
+        page,
+        req.body.html,
+        req.body.options || {}
       );
-    res.contentType("application/pdf");
-    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-    res.set("Cache-Control", "public, max-age=1");
-    res.send(buffer);
-    console.timeEnd("RENDERING " + random);
-  } catch (error) {
-    console.log(error);
-    capture(error);
-    res.status(500).send({ ok: false, error });
-  }
-});
+      if (!stream)
+        throw new Error("No stream returned : " + JSON.stringify(req.body));
+      if (GENERATE_LOCALLY) {
+        fs.writeFileSync(
+          `generated/${new Date().toISOString()}_test.pdf`,
+          stream
+        );
+      }
+      res.contentType("application/pdf");
+      res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+      res.set("Cache-Control", "public, max-age=1");
+      console.log("begin pipe");
+      stream.pipe(res);
+      console.log("end pipe");
+      console.timeEnd("RENDERING " + random);
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    } finally {
+      if (page) {
+        console.log("finally");
+        // await page.close();
+      }
+    }
+  });
 
-registerSentryErrorHandler();
+  registerSentryErrorHandler();
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+  app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`);
+  });
+})();

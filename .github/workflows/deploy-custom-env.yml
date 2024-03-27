@@ -15,6 +15,7 @@ jobs:
       api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
       admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
       app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
+      pdf_image_tag: ${{ steps.prepare.outputs.pdf_image_tag }}
 
     steps:
       - name: Check branch name
@@ -38,7 +39,7 @@ jobs:
 
       - name: Prepare
         id: prepare
-        run : |
+        run: |
           current_tag=$(git log --max-count=1 --oneline | cut -d " " -f 1)
           echo "current_tag: $current_tag"
 
@@ -58,14 +59,16 @@ jobs:
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 
+          pdf_image_tag=$(git log --max-count=1 --oneline -- pdf | cut -d " " -f 1)
+          echo "pdf_image_tag: $pdf_image_tag"
+          echo "pdf_image_tag=$pdf_image_tag" >> $GITHUB_OUTPUT
+
   run_tests_api:
     needs: prepare
     uses: ./.github/workflows/run-tests-api.yml
     with:
       branch_name: ${{ needs.prepare.outputs.branch_name }}
     secrets: inherit
-
-
 
   build:
     if: |
@@ -82,11 +85,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [
-          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
-          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
-          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
-        ]
+        app:
+          [
+            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+            { name: pdf, tag: "${{needs.prepare.outputs.pdf_image_tag}}" },
+          ]
 
     steps:
       - uses: actions/checkout@v4
@@ -205,7 +210,6 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         run: terraform validate -no-color
 
-
       - name: Terraform plan
         working-directory: ${{ env.custom_directory }}
         # add -lock-timeout option until https://github.com/hashicorp/terraform/issues/33217 is fixed
@@ -213,7 +217,8 @@ jobs:
           terraform plan -no-color -input=false -lock-timeout=15m \
             -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
             -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
-            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
+            -var="pdf_image_tag=${{ needs.prepare.outputs.pdf_image_tag }}"
 
       - name: Terraform auto-apply
         working-directory: ${{ env.custom_directory }}
@@ -221,7 +226,8 @@ jobs:
           terraform apply -no-color -input=false -auto-approve -lock-timeout=15m \
             -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
             -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
-            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
+            -var="pdf_image_tag=${{ needs.prepare.outputs.pdf_image_tag }}"
 
       - name: Add comment to PR
         if: github.event_name == 'pull_request' && steps.check_secret.outputs.has_secret == '0'
