@@ -1,3 +1,21 @@
+# [1.396.0](https://github.com/betagouv/service-national-universel/compare/v1.395.0...v1.396.0) (2024-03-27)
+
+
+### Bug Fixes
+
+* **api:** Up to HTML5 ([#3696](https://github.com/betagouv/service-national-universel/issues/3696)) ([89e0430](https://github.com/betagouv/service-national-universel/commit/89e04302703bb1ca7b2c819c0dd46c5a882a016e))
+* **app:** 2109 - Improved UI on mission page. ([#3693](https://github.com/betagouv/service-national-universel/issues/3693)) ([54ad365](https://github.com/betagouv/service-national-universel/commit/54ad3652d4559c310993c4fbe7eba6f8ee2fa614))
+
+
+### Features
+
+* **admin, api:** 1450 - Session keep alive ([#3682](https://github.com/betagouv/service-national-universel/issues/3682)) ([dca1913](https://github.com/betagouv/service-national-universel/commit/dca1913a134de2ed47111ddbca3f8b90634bf730))
+* **api:** 1843 - Now fetching missions from api-engagement. ([#3680](https://github.com/betagouv/service-national-universel/issues/3680)) ([ad34915](https://github.com/betagouv/service-national-universel/commit/ad3491522b85c48705d02138f0aa9f0605038da5))
+* **api:** 2098 - Modified wording on ageAtStart < 15 ([#3692](https://github.com/betagouv/service-national-universel/issues/3692)) ([ddf29f6](https://github.com/betagouv/service-national-universel/commit/ddf29f6d8d450114f4463321219bc4311f7f53cc))
+* **api:** update convoc CLE -> lunchbreak and Background ([#3686](https://github.com/betagouv/service-national-universel/issues/3686)) ([e85cdd6](https://github.com/betagouv/service-national-universel/commit/e85cdd62d445fd95d84de891394e3fa7dba87ce1))
+* **app:** Add new address form on My Account page ([#3670](https://github.com/betagouv/service-national-universel/issues/3670)) ([555d432](https://github.com/betagouv/service-national-universel/commit/555d43244d7bfcc0a8b3b5b7112720e947e04524))
+* **misc:** 1671 - PDF : instantiate browser at app boot ([#3695](https://github.com/betagouv/service-national-universel/issues/3695)) ([c403d54](https://github.com/betagouv/service-national-universel/commit/c403d545946eb4f0ed01e1d0a4fd13fbe9c35c2a))
+
 # [1.395.0](https://github.com/betagouv/service-national-universel/compare/v1.394.1...v1.395.0) (2024-03-26)
 
 
