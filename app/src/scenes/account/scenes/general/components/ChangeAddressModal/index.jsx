@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import Modal from "../../../../../../components/ui/modals/Modal";
@@ -10,7 +10,7 @@ import ChooseCohortModalContent from "./ChooseCohortModalContent";
 import { updateYoung } from "../../../../../../services/young.service";
 import { capture } from "../../../../../../sentry";
 import { isCohortDone } from "../../../../../../utils/cohorts";
-import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod } from "snu-lib";
+import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod, isCle } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import api from "../../../../../../services/api";
 import { setYoung } from "../../../../../../redux/auth/actions";
@@ -25,7 +25,7 @@ const changeAddressSteps = {
 };
 
 const ChangeAddressModal = ({ onClose, isOpen, young }) => {
-  const [currentCohort, setCurrentCohort] = useState();
+  const currentCohort = getCohort(young?.cohort);
   const [newCohortName, setNewCohortName] = useState();
   const [newAddress, setNewAddress] = useState();
   const [step, setStep] = useState(changeAddressSteps.CONFIRM);
@@ -41,16 +41,10 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     onClose();
   };
 
-  useEffect(() => {
-    if (young) {
-      const cohort = getCohort(young.cohort);
-      setCurrentCohort(cohort);
-    }
-  }, [young]);
-
   const onAddressEntered = async (newAddress) => {
     setNewAddress(newAddress);
     if (
+      !isCle(young) &&
       newAddress.department !== young.department &&
       young.cohort !== "à venir" &&
       young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
@@ -62,17 +56,43 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   };
 
-  const checkInscriptionGoal = async (cohortName, address) => {
-    setLoading(true);
+  const checkIfGoalIsReached = async (cohortName, address) => {
     try {
+      setLoading(true);
       const res = await api.get(`/inscription-goal/${cohortName}/department/${address.department}/reached`);
       if (!res.ok) throw new Error(res);
-      const isGoalReached = res.data;
+      return res.data;
+    } catch (error) {
+      capture(error);
+      toastr.error("Oups, une erreur est survenue", translate(error.code));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkInscriptionGoal = async (cohortName, address) => {
+    try {
+      const isGoalReached = await checkIfGoalIsReached(cohortName, address);
       if (isGoalReached && young.status === YOUNG_STATUS.VALIDATED) {
         setStep(changeAddressSteps.COMPLEMENTARY_LIST);
       } else {
         updateAddress(address, isGoalReached ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED);
       }
+    } catch (error) {
+      capture(error);
+      toastr.error("Oups, une erreur est survenue", translate(error.code));
+    }
+  };
+
+  const fetchAvailableCohorts = async (address = {}) => {
+    try {
+      setLoading(true);
+      const { data } = await api.post("/cohort-session/eligibility/2023?timeZoneOffset=${new Date().getTimezoneOffset()}", {
+        grade: young.grade,
+        birthdateAt: young.birthdateAt,
+        ...address,
+      });
+      return data;
     } catch (error) {
       capture(error);
       toastr.error("Oups, une erreur est survenue", translate(error.code));
@@ -83,13 +103,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
 
   const getAvailableCohorts = async (address = {}) => {
     try {
-      setLoading(true);
-      // @todo eligibility is based on address, should be based on school address.
-      const { data } = await api.post("/cohort-session/eligibility/2023timeZoneOffset=${new Date().getTimezoneOffset()}", {
-        grade: young.grade,
-        birthdateAt: young.birthdateAt,
-        ...address,
-      });
+      const data = await fetchAvailableCohorts(address);
       const isArray = Array.isArray(data);
       let cohorts = [];
       // get all available cohorts except the current one
@@ -114,8 +128,6 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     } catch (error) {
       capture(error);
       toastr.error("Oups, une erreur est survenue", translate(error.code));
-    } finally {
-      setLoading(false);
     }
   };
 

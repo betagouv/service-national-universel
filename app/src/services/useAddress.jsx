@@ -9,7 +9,7 @@ export default function useAddress({ query, options = {}, enabled = true }) {
     url += `&${key}=${encodeURIComponent(value)}`;
   }
 
-  const { data, isError, isPending, refetch } = useQuery({
+  const { data, isError, isPending } = useQuery({
     queryKey: ["address", query],
     queryFn: async ({ signal }) => {
       const res = await fetch(url, { signal });
@@ -24,7 +24,7 @@ export default function useAddress({ query, options = {}, enabled = true }) {
 
   const results = data?.features?.map((result) => formatResult(result));
 
-  return { results, isError, isPending, refetch };
+  return { results, isError, isPending };
 }
 
 function formatResult(option) {
@@ -44,12 +44,14 @@ function formatResult(option) {
   const region = department2region[department];
 
   return {
+    label: `${option.properties.name} - ${option.properties.postcode} ${option.properties.city}`,
     address: option.properties.type !== "municipality" ? option.properties.name : "",
     zip: option.properties.postcode,
     city: option.properties.city,
     departmentNumber,
     department,
     region,
+    country: "France",
     location: { lat: option.geometry.coordinates[1], lon: option.geometry.coordinates[0] },
     cityCode: option.properties.citycode,
     addressVerified: "true",
