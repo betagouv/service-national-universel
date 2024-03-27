@@ -103,19 +103,18 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
         console.log(response.status);
         // ! On a retravaillé pour faire passer les tests
         if (response.status && response.status !== 200) throw new Error("Error with PDF service");
-        response.pipe(res);
         // res.set({
         //   "content-length": response.headers.get("content-length"),
         //   "content-disposition": `inline; filename="test.pdf"`,
         //   "content-type": "application/pdf",
         //   "cache-control": "public, max-age=1",
         // });
-        // response.body.pipe(res);
-        // if (res.statusCode !== 200) throw new Error("Error with PDF service");
-        // response.body.on("error", (e) => {
-        //   capture(e);
-        //   res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-        // });
+        response.body.pipe(res);
+        if (res.statusCode !== 200) throw new Error("Error with PDF service");
+        response.body.on("error", (e) => {
+          capture(e);
+          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+        });
       });
     };
 
