@@ -11,7 +11,7 @@
 
   const fs = require("fs");
 
-  const { PORT: port, API_URL, GENERATE_LOCALLY } = require("./config.js");
+  const { PORT: port, GENERATE_LOCALLY } = require("./config.js");
 
   const ERRORS = {
     SERVER_ERROR: "SERVER_ERROR",
@@ -31,9 +31,6 @@
   const app = express();
 
   const registerSentryErrorHandler = initSentry(app);
-
-  const cors = require("cors");
-  app.use(cors());
 
   app.use(bodyParser.json());
 
