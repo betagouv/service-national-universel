@@ -11,7 +11,7 @@
 
   const fs = require("fs");
 
-  const { PORT: port, GENERATE_LOCALLY } = require("./config.js");
+  const { PORT: port, API_URL, GENERATE_LOCALLY } = require("./config.js");
 
   const ERRORS = {
     SERVER_ERROR: "SERVER_ERROR",
@@ -31,6 +31,26 @@
   const app = express();
 
   const registerSentryErrorHandler = initSentry(app);
+
+  const cors = require("cors");
+  app.use(
+    cors({
+      credentials: true,
+      origin: [API_URL],
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-Requested-With",
+        "Accept",
+        "Origin",
+        "Referer",
+        "User-Agent",
+        "sentry-trace",
+        "baggage",
+        "x-user-timezone",
+      ],
+    })
+  );
 
   app.use(bodyParser.json());
 

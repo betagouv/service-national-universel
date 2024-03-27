@@ -274,6 +274,7 @@ resource "scaleway_container" "pdf" {
   deploy          = true
 
   environment_variables = {
+    "API_URL"                    = "https://${local.api_hostname}"
     "SENTRY_TRACING_SAMPLE_RATE" = "0.01"
     "SENTRY_URL"                 = local.secrets.SENTRY_URL
   }
