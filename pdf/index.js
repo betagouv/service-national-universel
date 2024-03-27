@@ -38,15 +38,18 @@
   };
 
   const renderFromHtml = async (html, options) => {
+    let buffer;
     const page = await getPage(options);
-    await page.setContent(html, options?.navigation ?? {});
-    const pdfOptions = options ?? {};
-    const buffer = await page.pdf({
-      ...DEFAULT_OPTIONS,
-      ...pdfOptions,
-    });
-
-    await page.close();
+    try {
+      await page.setContent(html, options?.navigation ?? {});
+      const pdfOptions = options ?? {};
+      buffer = await page.pdf({
+        ...DEFAULT_OPTIONS,
+        ...pdfOptions,
+      });
+    } finally {
+      await page.close();
+    }
 
     return buffer;
   };
