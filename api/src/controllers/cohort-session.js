@@ -52,13 +52,12 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
 
       const bypassFilter =
         (user?.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
-      const defaultSession = { name: "à venir", type: "VOLONTAIRE" };
       const sessions = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user?.role)
         ? await getFilteredSessionsForCLE()
         : bypassFilter
           ? await getAllSessions(young)
           : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
-      sessions.push(defaultSession);
+      if (sessions.length === 0) return res.send({ ok: true, data: [], message: "no_session_found" });
       return res.send({ ok: true, data: sessions });
     } catch (error) {
       capture(error);
