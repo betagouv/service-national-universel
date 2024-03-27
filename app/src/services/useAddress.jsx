@@ -8,7 +8,7 @@ export default function useAddress({ query, options = {}, enabled = true }) {
     url += `&${key}=${encodeURIComponent(value)}`;
   }
 
-  const { data, isError, isPending, refetch } = useQuery({
+  const { data, isError, isPending } = useQuery({
     queryKey: ["address", query],
     queryFn: async ({ signal }) => {
       const res = await fetch(url, { signal });
@@ -23,16 +23,18 @@ export default function useAddress({ query, options = {}, enabled = true }) {
 
   const results = data?.features?.map((result) => formatResult(result));
 
-  return { results, isError, isPending, refetch };
+  return { results, isError, isPending };
 }
 
 function formatResult(option) {
   const contextArray = option.properties.context.split(",");
 
   return {
+    label: `${option.properties.name} - ${option.properties.postcode} ${option.properties.city}`,
     address: option.properties.type !== "municipality" ? option.properties.name : "",
     zip: option.properties.postcode,
     city: option.properties.city,
+    country: "France",
     // For metropolitan areas, the second element is the department, and the third element is the region
     // For some overseas areas, the second element is both the department and the region, and there is no third element
     department: contextArray[1].trim(),
