@@ -1,3 +1,18 @@
+# [1.395.0](https://github.com/betagouv/service-national-universel/compare/v1.394.1...v1.395.0) (2024-03-26)
+
+
+### Bug Fixes
+
+* **api, app:** 2064 - Prevent RI revalidation for youngs that won't do phase1 anyway. ([#3690](https://github.com/betagouv/service-national-universel/issues/3690)) ([ae26e2b](https://github.com/betagouv/service-national-universel/commit/ae26e2bf16d442e2ff4a8319b9ed6e782b7f02ea))
+* **app:** Download convocation button [#3691](https://github.com/betagouv/service-national-universel/issues/3691) ([b842097](https://github.com/betagouv/service-national-universel/commit/b842097372609729e9cf9398b34d0c06fc6f0b48))
+
+
+### Features
+
+* **api:** 1483 - Cron Reminder Waiting correction J+3 and J+7 ([#3674](https://github.com/betagouv/service-national-universel/issues/3674)) ([920553f](https://github.com/betagouv/service-national-universel/commit/920553f6df6640a46e35960236ec83a0ba38d8f1))
+* **misc:** 2068 - Deploy docker image on CC ([#3683](https://github.com/betagouv/service-national-universel/issues/3683)) ([906876e](https://github.com/betagouv/service-national-universel/commit/906876e9b858d709db20f3ba9145a3d125e2ba3b))
+* **misc:** Run tests on every PR ([#3688](https://github.com/betagouv/service-national-universel/issues/3688)) ([0ebeef7](https://github.com/betagouv/service-national-universel/commit/0ebeef7464911d07bab772ba5cc26ba688f2a3c9))
+
 ## [1.394.1](https://github.com/betagouv/service-national-universel/compare/v1.394.0...v1.394.1) (2024-03-21)
 
 
