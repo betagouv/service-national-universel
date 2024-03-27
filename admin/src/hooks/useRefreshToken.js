@@ -4,14 +4,12 @@ import api from "@/services/api";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useInterval } from "react-use";
+import { useInterval, useTimeoutFn } from "react-use";
 
 const PING_INTERVAL = 1000 * 60 * 15; // Every 15 minutes
 const INACTIVITY_DURATION = 1000 * 60 * 60 * 2; // 2 hours
 
 export default function useRefreshToken() {
-  let timeout = undefined;
-
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
 
@@ -24,15 +22,7 @@ export default function useRefreshToken() {
   }, PING_INTERVAL);
 
   // If idle after X minutes of inactivity, we logout the user
-  const startTimeout = () => {
-    const to = setTimeout(() => logout(), INACTIVITY_DURATION);
-    timeout = to;
-  };
-
-  const resetTimeout = () => {
-    clearTimeout(timeout);
-    startTimeout();
-  };
+  const [isTimeoutReady, cancelTimeout, resetTimeout] = useTimeoutFn(() => logout(), INACTIVITY_DURATION);
 
   const logout = async () => {
     try {
@@ -47,12 +37,10 @@ export default function useRefreshToken() {
   };
 
   useEffect(() => {
-    startTimeout();
     window.addEventListener("mousedown", resetTimeout);
     window.addEventListener("keydown", resetTimeout);
 
     return () => {
-      clearTimeout(timeout);
       window.removeEventListener("mousedown", resetTimeout);
       window.removeEventListener("keydown", resetTimeout);
     };
