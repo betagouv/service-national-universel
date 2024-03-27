@@ -447,7 +447,7 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     const getPDF = async () =>
       await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        headers: { "Content-Type": "application/json", Accept: "application/pdf", "X-Auth-Token": config.API_PDF_TOKEN },
         body: JSON.stringify({ html: newhtml, options: { format: "A4", margin: 0 } }),
       }).then((response) => {
         // ! On a retravaillé pour faire passer les tests

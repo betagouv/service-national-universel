@@ -92,7 +92,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const getPDF = async () =>
       await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        headers: { "Content-Type": "application/json", Accept: "application/pdf", "X-Auth-Token": config.API_PDF_TOKEN },
         body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
       }).then((response) => {
         // ! On a retravaillé pour faire passer les tests
@@ -165,7 +165,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     const getPDF = async () =>
       await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+        headers: { "Content-Type": "application/json", Accept: "application/pdf", "X-Auth-Token": config.API_PDF_TOKEN },
         body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
       }).then((response) => {
         if (response.status !== 200) throw new Error("Error with PDF service");

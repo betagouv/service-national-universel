@@ -868,7 +868,7 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
 async function getPDF(html, options) {
   const response = await fetch(config.API_PDF_ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/pdf" },
+    headers: { "Content-Type": "application/json", Accept: "application/pdf", "X-Auth-Token": config.API_PDF_TOKEN },
     body: JSON.stringify({ html, options }),
   });
   if (response.status && response.status !== 200) {
