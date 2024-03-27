@@ -89,12 +89,18 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const getPDF = async () =>
+    const getPDF = async () => {
+      const headers = { "Content-Type": "application/json", Accept: "application/pdf", "X-Auth-Token": config.API_PDF_TOKEN };
+      const body = JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } });
+      console.log(config.API_PDF_ENDPOINT);
+      console.log(headers);
+      console.log(body);
       await fetch(config.API_PDF_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf", "X-Auth-Token": config.API_PDF_TOKEN },
-        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
+        headers,
+        body,
       }).then((response) => {
+        console.log(response.status);
         // ! On a retravaillé pour faire passer les tests
         if (response.status && response.status !== 200) throw new Error("Error with PDF service");
         res.set({
@@ -110,6 +116,8 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
           res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
         });
       });
+    };
+
     try {
       await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
     } catch (e) {
