@@ -21,7 +21,10 @@ export default function Todos({ user }) {
   const [fullNote, setFullNote] = useState(false);
   const [stats, setStats] = useState({});
   const cohorts = useSelector((state) => state.Cohorts);
-  const cohortsNotFinished = cohorts.filter((c) => new Date(c.dateEnd) > Date.now())?.map((e) => e.name);
+  const cohortsNotFinished = cohorts
+    .filter((c) => new Date(c.dateEnd) > Date.now())
+    .map((e) => e.name)
+    .filter((e) => !e.match(/CLE/));
   const sessionPhase1 = useSelector((state) => state.Auth.sessionPhase1);
   const sessionId = sessionPhase1?._id;
   const centerId = sessionPhase1?.cohesionCenterId;
