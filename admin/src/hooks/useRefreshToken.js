@@ -1,31 +1,27 @@
 import { setUser } from "@/redux/auth/actions";
+import { capture } from "@/sentry";
 import api from "@/services/api";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { useInterval } from "react-use";
 
-const PING_INTERVAL = 1000 * 60; // Every minute
-const INACTIVITY_DURATION = 1000 * 60 * 30; // 30 minutes
+const PING_INTERVAL = 1000 * 60 * 15; // Every 15 minutes
+const INACTIVITY_DURATION = 1000 * 60 * 60 * 2; // 2 hours
 
 export default function useRefreshToken() {
-  let interval = undefined;
   let timeout = undefined;
 
-  const history = useHistory();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
 
-  const startInterval = () => {
-    const int = setInterval(async () => {
-      if (user) {
-        const res = await api.checkToken(true);
-        if (!res.ok || !res.user) return logout();
-        if (res.token) api.setToken(res.token);
-      }
-    }, PING_INTERVAL);
-    interval = int;
-  };
+  useInterval(async () => {
+    if (user) {
+      const res = await api.checkToken(true);
+      if (!res.ok || !res.user) return logout();
+      if (res.token) api.setToken(res.token);
+    }
+  }, PING_INTERVAL);
 
   // If idle after X minutes of inactivity, we logout the user
   const startTimeout = () => {
@@ -44,22 +40,20 @@ export default function useRefreshToken() {
       api.setToken(null);
       dispatch(setUser(null));
       toastr.info("Vous avez bien été déconnecté dû a une trop longue inactivité.", { timeOut: 10000 });
-      history.push("/auth?disconnected=1");
+      window.location.href = "/auth?disconnected=1";
     } catch (e) {
-      toastr.error("Oups une erreur est survenue lors de la déconnexion", { timeOut: 10000 });
+      capture(e);
     }
   };
 
   useEffect(() => {
-    startInterval();
     startTimeout();
-    window.addEventListener("click", resetTimeout);
+    window.addEventListener("mousedown", resetTimeout);
     window.addEventListener("keydown", resetTimeout);
 
     return () => {
-      clearInterval(interval);
       clearTimeout(timeout);
-      window.removeEventListener("click", resetTimeout);
+      window.removeEventListener("mousedown", resetTimeout);
       window.removeEventListener("keydown", resetTimeout);
     };
   }, []);
