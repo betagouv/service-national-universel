@@ -39,8 +39,11 @@
 
   const renderFromHtml = async (html, options) => {
     let buffer;
-    const page = await getPage(options);
+    const page = await browser.newPage();
     try {
+      if (options?.emulateMedia) {
+        await page.emulateMediaType(options.emulateMedia);
+      }
       await page.setContent(html, options?.navigation ?? {});
       const pdfOptions = options ?? {};
       buffer = await page.pdf({
@@ -52,16 +55,6 @@
     }
 
     return buffer;
-  };
-
-  const getPage = async (options) => {
-    const page = await browser.newPage();
-
-    if (options?.emulateMedia) {
-      await page.emulateMediaType(options.emulateMedia);
-    }
-
-    return page;
   };
 
   app.use(express.static(__dirname + "/public"));
