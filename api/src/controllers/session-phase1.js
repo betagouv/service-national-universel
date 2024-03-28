@@ -13,7 +13,7 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter, timeout, sanitizeAll, getBaseUrl } = require("../utils");
+const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter, sanitizeAll, getBaseUrl } = require("../utils");
 const Zip = require("adm-zip");
 const {
   ROLES,
@@ -43,15 +43,11 @@ const fileUpload = require("express-fileupload");
 const SessionPhase1 = require("../models/sessionPhase1");
 const FileType = require("file-type");
 const fs = require("fs");
-const config = require("../config");
 const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
-const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
-const fetch = require("node-fetch");
 const { phase1 } = require("../../src/templates/certificate/index");
 const scanFile = require("../utils/virusScanner");
-
-const TIMEOUT_PDF_SERVICE = 15000;
+const { getPdfBuffer, htmlToPdfBuffer } = require("../utils/pdf-renderer");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -246,7 +242,7 @@ async function generateBatchPDF(batchHtmlContent, batchIndex) {
     try {
       const body = fs.readFileSync(path.resolve(__dirname, "../templates/certificate/bodyBatch.html"), "utf8");
       const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()));
-      const context = await timeout(getPDF(newhtml, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
+      const context = await htmlToPdfBuffer(newhtml, { format: "A4", margin: 0, landscape: true });
       return { name: `batch_${batchIndex}_certificat.pdf`, body: context };
     } catch (e) {
       console.log(`Attempt ${attempt} failed for batch ${batchIndex}`);
@@ -835,16 +831,14 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
     let zip = new Zip();
 
     // --- build PDFS 10 by 10 and zip'em
-    const template = readTemplate();
     const batchSize = 10;
     const numBatches = Math.ceil(youngs.length / batchSize);
     for (let i = 0; i < numBatches; i++) {
       const batchStart = i * batchSize;
       const batchEnd = Math.min(batchStart + batchSize, youngs.length);
       const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-        const html = renderWithTemplate(young, template);
-        const body = await timeout(getPDF(html, { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
-        return { name: young.lastName + " " + young.firstName + " - Droits à l'image.pdf", body };
+        const buffer = await getPdfBuffer({ type: "droitImage", template: "droitImage", young });
+        return { name: young.lastName + " " + young.firstName + " - Droits à l'image.pdf", buffer };
       });
       const pdfs = await Promise.all(pdfPromises);
       pdfs.forEach((pdf) => {
@@ -864,28 +858,6 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-async function getPDF(html, options) {
-  const response = await fetch(config.API_PDF_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-    body: JSON.stringify({ html, options }),
-  });
-  if (response.status && response.status !== 200) {
-    throw new Error("Error with PDF service");
-  }
-
-  return stream2buffer(response.body);
-}
-
-function stream2buffer(stream) {
-  return new Promise((resolve, reject) => {
-    const buf = [];
-    stream.on("data", (chunk) => buf.push(chunk));
-    stream.on("end", () => resolve(Buffer.concat(buf)));
-    stream.on("error", (err) => reject(err));
-  });
-}
 
 const formatDateTimeZone = (date) => {
   //set timezone to UTC
