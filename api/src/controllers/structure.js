@@ -6,7 +6,7 @@ const { capture } = require("../sentry");
 const StructureObject = require("../models/structure");
 const MissionObject = require("../models/mission");
 const ReferentObject = require("../models/referent");
-const ApplicationObject = require("../models/application");
+const ApplicationObject = require("../infra/application/applicationModel");
 const { ERRORS } = require("../utils");
 const {
   ROLES,

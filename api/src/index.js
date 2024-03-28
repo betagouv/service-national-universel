@@ -122,7 +122,7 @@
   app.use(passport.initialize());
 
   app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
-  app.use("/application", require("./controllers/application"));
+  app.use("/application", require("./infra/application/applicationController"));
   app.use("/bus", require("./controllers/bus"));
   app.use("/classe", require("./controllers/cle/classe"));
   app.use("/cle", require("./controllers/cle"));

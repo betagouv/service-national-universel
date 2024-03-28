@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
 
-const ApplicationModel = require("../../models/application");
+const ApplicationModel = require("../../infra/application/applicationModel");
 const ApplicationPatchModel = require("./models/applicationPatch");
 
 const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");

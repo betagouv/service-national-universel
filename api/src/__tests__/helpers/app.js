@@ -13,7 +13,7 @@ function getAppHelper() {
   app.use("/point-de-rassemblement", require("../../controllers/planDeTransport/point-de-rassemblement"));
   app.use("/mission", require("../../controllers/mission"));
   app.use("/program", require("../../controllers/program"));
-  app.use("/application", require("../../controllers/application"));
+  app.use("/application", require("../../infra/application/applicationController"));
   app.use("/bus", require("../../controllers/bus"));
   app.use("/cohesion-center", require("../../controllers/cohesion-center"));
   app.use("/session-phase1", require("../../controllers/session-phase1"));

@@ -1,5 +1,5 @@
 const { capture } = require("../sentry");
-const Application = require("../models/application");
+const Application = require("../infra/application/applicationModel");
 const Referent = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");

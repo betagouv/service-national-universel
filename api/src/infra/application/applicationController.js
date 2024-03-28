@@ -4,21 +4,21 @@ const passport = require("passport");
 const Joi = require("joi");
 const { ObjectId } = require("mongoose").Types;
 
-const { capture, captureMessage } = require("../sentry");
-const ApplicationObject = require("../models/application");
-const ContractObject = require("../models/contract");
-const MissionObject = require("../models/mission");
-const StructureObject = require("../models/structure");
-const YoungObject = require("../models/young");
-const CohortObject = require("../models/cohort");
-const ReferentObject = require("../models/referent");
-const { decrypt, encrypt } = require("../cryptoUtils");
+const { capture, captureMessage } = require("../../sentry");
+const ApplicationObject = require("./applicationModel");
+const ContractObject = require("../../models/contract");
+const MissionObject = require("../../models/mission");
+const StructureObject = require("../../models/structure");
+const YoungObject = require("../../models/young");
+const CohortObject = require("../../models/cohort");
+const ReferentObject = require("../../models/referent");
+const { decrypt, encrypt } = require("../../cryptoUtils");
 const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
-const { sendTemplate } = require("../sendinblue");
-const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
-const { ENVIRONMENT, ADMIN_URL, APP_URL } = require("../config");
+const { sendTemplate } = require("../../sendinblue");
+const { validateUpdateApplication, validateNewApplication, validateId } = require("../../utils/validator");
+const { ENVIRONMENT, ADMIN_URL, APP_URL } = require("../../config");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -29,7 +29,7 @@ const {
   translateAddFilePhase2,
   translateAddFilesPhase2,
 } = require("snu-lib");
-const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
+const { serializeApplication, serializeYoung, serializeContract } = require("../../utils/serializer");
 const {
   uploadFile,
   ERRORS,
@@ -42,11 +42,12 @@ const {
   updateYoungStatusPhase2Contract,
   getReferentManagerPhase2,
   updateYoungApplicationFilesType,
-} = require("../utils");
+} = require("../../utils");
 const mime = require("mime-types");
-const patches = require("./patches");
-const scanFile = require("../utils/virusScanner");
-const { getAuthorizationToApply } = require("../services/application");
+const patches = require("../../controllers/patches");
+const scanFile = require("../../utils/virusScanner");
+const { getAuthorizationToApply } = require("../../services/application");
+const {updateMission} = require("../../core/mission/missionService");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
@@ -64,44 +65,6 @@ const canUpdateApplication = async (user, application, young, structures) => {
   }
   return true;
 };
-
-async function updateMission(app, fromUser) {
-  try {
-    const mission = await MissionObject.findById(app.missionId);
-
-    // Get all applications for the mission
-    const placesTaken = await ApplicationObject.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
-    const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
-    if (mission.placesLeft !== placesLeft) {
-      mission.set({ placesLeft });
-    }
-
-    if (placesLeft === 0) {
-      mission.set({ placesStatus: "FULL" });
-    } else if (placesLeft === mission.placesTotal) {
-      mission.set({ placesStatus: "EMPTY" });
-    } else {
-      mission.set({ placesStatus: "ONE_OR_MORE" });
-    }
-
-    // On met à jour le nb de candidatures en attente.
-    const pendingApplications = await ApplicationObject.countDocuments({
-      missionId: mission._id,
-      status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION"] },
-    });
-
-    if (mission.pendingApplications !== pendingApplications) {
-      mission.set({ pendingApplications });
-    }
-
-    const allApplications = await ApplicationObject.find({ missionId: mission._id });
-    mission.set({ applicationStatus: allApplications.map((e) => e.status) });
-
-    await mission.save({ fromUser });
-  } catch (e) {
-    capture(e);
-  }
-}
 
 router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {

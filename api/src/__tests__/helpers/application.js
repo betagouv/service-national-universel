@@ -1,4 +1,4 @@
-const ApplicationObject = require("../../models/application");
+const ApplicationObject = require("../../infra/application/applicationModel");
 
 async function createApplication(application) {
   return await ApplicationObject.create(application);

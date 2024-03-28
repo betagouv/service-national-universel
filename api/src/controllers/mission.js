@@ -6,7 +6,7 @@ const Joi = require("joi");
 const { capture } = require("../sentry");
 const MissionObject = require("../models/mission");
 const UserObject = require("../models/referent");
-const ApplicationObject = require("../models/application");
+const ApplicationObject = require("../infra/application/applicationModel");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars

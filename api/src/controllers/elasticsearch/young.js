@@ -12,7 +12,7 @@ const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 
 const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
 const StructureObject = require("../../models/structure");
-const ApplicationObject = require("../../models/application");
+const ApplicationObject = require("../../infra/application/applicationModel");
 const SessionPhase1Object = require("../../models/sessionPhase1");
 const CohesionCenterObject = require("../../models/cohesionCenter");
 const MissionObject = require("../../models/mission");

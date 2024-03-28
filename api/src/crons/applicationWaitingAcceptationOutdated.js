@@ -1,6 +1,6 @@
 const { capture } = require("../sentry");
 const slack = require("../slack");
-const ApplicationModel = require("../models/application");
+const ApplicationModel = require("../infra/application/applicationModel");
 const StructureModel = require("../models/structure");
 const YoungModel = require("../models/young");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");

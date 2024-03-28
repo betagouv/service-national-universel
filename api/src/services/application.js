@@ -1,6 +1,6 @@
 const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge } = require("snu-lib");
 const { deletePatches } = require("../controllers/patches");
-const ApplicationModel = require("../models/application");
+const ApplicationModel = require("../infra/application/applicationModel");
 const CohortModel = require("../models/cohort");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");

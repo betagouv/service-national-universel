@@ -6,7 +6,7 @@ const { SENDINBLUE_TEMPLATES, getAge, canCreateOrUpdateContract, canViewContract
 const { capture } = require("../sentry");
 const ContractObject = require("../models/contract");
 const YoungObject = require("../models/young");
-const ApplicationObject = require("../models/application");
+const ApplicationObject = require("../infra/application/applicationModel");
 const ReferentObject = require("../models/referent");
 const StructureObject = require("../models/structure");
 const { ERRORS, isYoung, isReferent, timeout } = require("../utils");
