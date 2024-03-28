@@ -68,6 +68,10 @@ const SearchableSelect = ({
 };
 
 const customStyles = {
+  dropdownIndicator: (provided) => ({
+    ...provided,
+    color: "var(--grey-50-1000)",
+  }),
   placeholder: (provided) => ({
     ...provided,
     color: "var(--text-mention-grey)",
