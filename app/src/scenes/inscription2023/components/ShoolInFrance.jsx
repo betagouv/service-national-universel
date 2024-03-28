@@ -74,6 +74,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         value={manualSchool.fullName}
         label="Saisir le nom de l'établissement"
         nativeInputProps={{
+          placeholder: "Ex. Lycée général Carnot, Collège Georges Brassens...",
           onChange: (e) => {
             setManualSchool({ ...manualSchool, fullName: e.target.value });
           },
@@ -97,7 +98,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <hr></hr>
       <AsyncCombobox
         label="Rechercher la commune de l'établissement"
-        placeholder="Ex. Paris, Marseille..."
+        placeholder="Ex. Lille, La Rochelle, Paris 13e..."
         hint="Aucune commune trouvée."
         getOptions={getCities}
         value={city}

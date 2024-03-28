@@ -43,8 +43,14 @@ export default function AddressSearch({ updateData, label, error }) {
   return (
     <div ref={dropdownRef}>
       <div className="relative">
-        <Input label={label} hintText="Si l'adresse est introuvable, sélectionnez uniquement une commune ou un code postal." value={query} onChange={handleChangeQuery} />
-        <span className="material-icons absolute right-5 mt-[12px] text-lg">
+        <Input
+          label={label}
+          nativeInputProps={{ placeholder: "Adresse, voie, commune, code postal, lieu-dit..." }}
+          hintText="Si l'adresse est introuvable, sélectionnez uniquement une commune ou un code postal."
+          value={query}
+          onChange={handleChangeQuery}
+        />
+        <span className="material-icons absolute top-14 right-2 mt-[12px] text-lg">
           <RiSearchLine />
         </span>
       </div>
