@@ -14,12 +14,12 @@ import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
-import Input from "../components/Input";
-import PhoneField from "../../../components/dsfr/forms/PhoneField";
+// import Input from "../components/Input";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import useAuth from "@/services/useAuth";
+import { Input, InputPhone } from "@snu/ds/dsfr";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -284,36 +284,42 @@ const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
         error={errors[`parent${i}Status`]}
         correction={corrections[`parent${i}Status`]}
       />
+
       <Input
-        value={data[`parent${i}FirstName`]}
         label="Son prénom"
-        onChange={(e) => setData({ ...data, [`parent${i}FirstName`]: e })}
-        error={errors[`parent${i}FirstName`]}
-        correction={corrections[`parent${i}FirstName`]}
+        nativeInputProps={{
+          value: data[`parent${i}FirstName`],
+          onChange: (e) => setData({ ...data, [`parent${i}FirstName`]: e.target.value }),
+        }}
+        state={(corrections[`parent${i}FirstName`] || errors[`parent${i}FirstName`]) && "error"}
+        stateRelatedMessage={corrections[`parent${i}FirstName`] || errors[`parent${i}FirstName`]}
       />
       <Input
-        value={data[`parent${i}LastName`]}
         label="Son nom"
-        onChange={(e) => setData({ ...data, [`parent${i}LastName`]: e })}
-        error={errors[`parent${i}LastName`]}
-        correction={corrections[`parent${i}LastName`]}
+        nativeInputProps={{
+          value: data[`parent${i}LastName`],
+          onChange: (e) => setData({ ...data, [`parent${i}LastName`]: e.target.value }),
+        }}
+        state={(corrections[`parent${i}LastName`] || errors[`parent${i}LastName`]) && "error"}
+        stateRelatedMessage={corrections[`parent${i}LastName`] || errors[`parent${i}LastName`]}
       />
       <Input
-        value={data[`parent${i}Email`]}
-        label="Son e-mail"
-        onChange={(e) => setData({ ...data, [`parent${i}Email`]: e })}
-        error={errors[`parent${i}Email`]}
-        correction={corrections[`parent${i}Email`]}
+        label="Son nom"
+        nativeInputProps={{
+          value: data[`parent${i}Email`],
+          onChange: (e) => setData({ ...data, [`parent${i}Email`]: e.target.value }),
+        }}
+        state={(corrections[`parent${i}Email`] || errors[`parent${i}Email`]) && "error"}
+        stateRelatedMessage={corrections[`parent${i}Email`] || errors[`parent${i}Email`]}
       />
-      <PhoneField
+      <InputPhone
         label="Son numéro de téléphone"
         onChange={(value) => setData({ ...data, [`parent${i}Phone`]: value })}
         onChangeZone={(value) => setData({ ...data, [`parent${i}PhoneZone`]: value })}
         value={data[`parent${i}Phone`]}
         zoneValue={data[`parent${i}PhoneZone`]}
         placeholder={PHONE_ZONES[data[`parent${i}PhoneZone`]]?.example}
-        error={errors[`parent${i}Phone`] || errors[`parent${i}PhoneZone`]}
-        correction={corrections[`parent${i}Phone`]}
+        error={errors[`parent${i}Phone`] || errors[`parent${i}PhoneZone`] || corrections[`parent${i}Phone`]}
       />
     </div>
   );

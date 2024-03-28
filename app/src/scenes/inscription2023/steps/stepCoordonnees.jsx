@@ -4,13 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
-import { RiInformationFill } from "react-icons/ri";
-
 import validator from "validator";
-
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
-import Input from "../components/Input";
-import Select from "../../../components/dsfr/forms/Select";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import {
   youngSchooledSituationOptions,
@@ -37,6 +32,8 @@ import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
 import useAddress from "@/services/useAddress";
 import { useDebounce } from "@uidotdev/usehooks";
+import { fr } from "@codegouvfr/react-dsfr";
+import { Button, Input, Select } from "@snu/ds/dsfr";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -472,12 +469,14 @@ export default function StepCoordonnees() {
         <div className="flex flex-col md:flex-row md:gap-8">
           <div className="relative w-full">
             <Input
-              list="suggestions"
-              value={birthCity}
               label="Ville de naissance"
-              onChange={wasBornInFranceBool ? updateBirthCity : updateData("birthCity")}
-              error={errors.birthCity}
-              correction={corrections?.birthCity}
+              nativeInputProps={{
+                list: "suggestions",
+                value: birthCity,
+                onChange: (e) => (wasBornInFranceBool ? updateBirthCity(e.target.value) : updateData("birthCity")(e.target.value)),
+              }}
+              state={(corrections?.birthCity || errors.birthCity) && "error"}
+              stateRelatedMessage={corrections?.birthCity || errors.birthCity}
             />
             {wasBornInFranceBool && birthCitySuggestionsOpen && (
               <div ref={ref} className="border-3 absolute z-[100] mt-[-24px] w-full overflow-hidden border-red-600 bg-white shadow">
@@ -493,23 +492,30 @@ export default function StepCoordonnees() {
             )}
           </div>
           <Input
-            value={birthCityZip}
             label="Code postal de naissance"
-            onChange={updateData("birthCityZip")}
-            error={errors.birthCityZip}
-            correction={corrections?.birthCityZip}
             className="w-full"
+            nativeInputProps={{
+              list: "suggestions",
+              value: birthCityZip,
+              onChange: (e) => updateData("birthCityZip")(e.target.value),
+            }}
+            state={(corrections?.birthCityZip || errors.birthCityZip) && "error"}
+            stateRelatedMessage={corrections?.birthCityZip || errors.birthCityZip}
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
+        {console.log(situation)}
+        {console.log(situationOptions)}
         {!isCLE && (
           <Select
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
             options={situationOptions}
-            value={situation}
-            onChange={updateData("situation")}
-            error={errors.situation}
-            correction={corrections?.situation}
+            nativeSelectProps={{
+              value: situation,
+              onChange: (e) => updateData("situation")(e.target.value),
+            }}
+            state={(corrections?.situation || errors.situation) && "error"}
+            stateRelatedMessage={corrections?.situation || errors.situation}
           />
         )}
         <hr className="my-2" />
@@ -537,16 +543,38 @@ export default function StepCoordonnees() {
               error={errors.foreignCountry}
               correction={corrections?.foreignCountry}
             />
+
             <Input
-              value={foreignAddress}
               label="Adresse de résidence"
-              onChange={updateData("foreignAddress")}
-              error={errors.foreignAddress}
-              correction={corrections?.foreignAddress}
+              nativeInputProps={{
+                value: foreignAddress,
+                onChange: (e) => updateData("foreignAddress")(e.target.value),
+              }}
+              state={(corrections?.foreignAddress || errors.foreignAddress) && "error"}
+              stateRelatedMessage={corrections?.foreignAddress || errors.foreignAddress}
             />
             <div className="flex flex-col md:flex-row md:gap-8">
-              <Input value={foreignZip} label="Code postal" onChange={updateData("foreignZip")} error={errors.foreignZip} correction={corrections?.foreignZip} className="w-full" />
-              <Input value={foreignCity} label="Ville" onChange={updateData("foreignCity")} error={errors.foreignCity} correction={corrections?.foreignCity} className="w-full" />
+              <Input
+                label="Code postal"
+                className="w-full"
+                nativeInputProps={{
+                  value: foreignZip,
+                  onChange: (e) => updateData("foreignZip")(e.target.value),
+                }}
+                state={(corrections?.foreignZip || errors.foreignZip) && "error"}
+                stateRelatedMessage={corrections?.foreignZip || errors.foreignZip}
+              />
+
+              <Input
+                label="Ville"
+                className="w-full"
+                nativeInputProps={{
+                  value: foreignCity,
+                  onChange: (e) => updateData("foreignCity")(e.target.value),
+                }}
+                state={(corrections?.foreignCity || errors.foreignCity) && "error"}
+                stateRelatedMessage={corrections?.foreignCity || errors.foreignCity}
+              />
             </div>
             <h2 className="text-[16px] font-bold">Mon hébergeur</h2>
             <div className="my-3 flex">
@@ -561,20 +589,32 @@ export default function StepCoordonnees() {
               À noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
             </p>
             <Input
-              value={hostFirstName}
               label="Prénom de l’hébergeur"
-              onChange={updateData("hostFirstName")}
-              error={errors.hostFirstName}
-              correction={corrections?.hostFirstName}
+              nativeInputProps={{
+                value: hostFirstName,
+                onChange: (e) => updateData("hostFirstName")(e.target.value),
+              }}
+              state={(corrections?.hostFirstName || errors.hostFirstName) && "error"}
+              stateRelatedMessage={corrections?.hostFirstName || errors.hostFirstName}
             />
-            <Input value={hostLastName} label="Nom de l’hébergeur" onChange={updateData("hostLastName")} error={errors.hostLastName} correction={corrections?.hostLastName} />
+            <Input
+              label="Nom de l’hébergeur"
+              nativeInputProps={{
+                value: hostLastName,
+                onChange: (e) => updateData("hostLastName")(e.target.value),
+              }}
+              state={(corrections?.hostLastName || errors.hostLastName) && "error"}
+              stateRelatedMessage={corrections?.hostLastName || errors.hostLastName}
+            />
             <Select
-              options={hostRelationshipOptions}
-              value={hostRelationship}
               label="Précisez votre lien avec l’hébergeur"
-              onChange={updateData("hostRelationship")}
-              error={errors.hostRelationship}
-              correction={corrections?.hostRelationship}
+              options={hostRelationshipOptions}
+              nativeSelectProps={{
+                value: hostRelationship,
+                onChange: (e) => updateData("hostRelationship")(e.target.value),
+              }}
+              state={(corrections?.hostRelationship || errors.hostRelationship) && "error"}
+              stateRelatedMessage={corrections?.hostRelationship || errors.hostRelationship}
             />
             <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections?.address} />
           </>
@@ -583,13 +623,13 @@ export default function StepCoordonnees() {
         <hr className="my-2" />
         <div className="flex mt-4 items-center gap-3 mb-4">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Situations particulières</h2>
-          <a
-            className="mt-1"
-            href={`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`}
-            target="_blank"
-            rel="noreferrer">
-            <RiInformationFill className="text-xl text-blue-france-sun-113 hover:text-blue-france-sun-113-hover" />
-          </a>
+          <Button
+            className="cursor-pointer"
+            iconId={fr.cx("fr-icon-information-fill")}
+            onClick={() => window.open(`${supportURL}/base-de-connaissance/je-suis-en-situation-de-handicap-et-jai-besoin-dun-amenagement-specifique`, "_blank")?.focus()}
+            priority="tertiary no outline"
+            title="Information"
+          />
         </div>
         <div className="mb-4 flex items-center">
           <div>
@@ -682,10 +722,13 @@ export default function StepCoordonnees() {
                 />
                 {specificAmenagment === "true" && (
                   <Input
-                    value={specificAmenagmentType}
                     label="Quelle est la nature de cet aménagement ?"
-                    onChange={updateData("specificAmenagmentType")}
-                    error={errors.specificAmenagmentType}
+                    nativeInputProps={{
+                      value: specificAmenagmentType,
+                      onChange: (e) => updateData("specificAmenagmentType")(e.target.value),
+                    }}
+                    state={errors.specificAmenagmentType && "error"}
+                    stateRelatedMessage={errors.specificAmenagmentType}
                   />
                 )}
                 <RadioButton
