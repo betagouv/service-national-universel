@@ -1,3 +1,11 @@
+## [1.396.1](https://github.com/betagouv/service-national-universel/compare/v1.396.0...v1.396.1) (2024-03-28)
+
+
+### Bug Fixes
+
+* **app:** Disable confirm button on address change modal ([d758e84](https://github.com/betagouv/service-national-universel/commit/d758e84b83ca50f19a33ae6b2ba846b3e5d33e8b))
+* **app:** Fix department to region mapping ([#3687](https://github.com/betagouv/service-national-universel/issues/3687)) ([3bad51a](https://github.com/betagouv/service-national-universel/commit/3bad51a4c928f67670a63dfae5e13876c76e333a))
+
 # [1.396.0](https://github.com/betagouv/service-national-universel/compare/v1.395.0...v1.396.0) (2024-03-27)
 
 
