@@ -4,9 +4,27 @@ import { toastr } from "react-redux-toastr";
 import { Input } from "@snu/ds/dsfr";
 import { debounce } from "@/utils";
 
+const Dropdown = ({ loading, options, handleSelect, hint }) => (
+  <div className="relative">
+    <div className="bg-white border flex flex-col absolute z-10 -top-6 w-full shadow">
+      {loading ? (
+        <span className="p-3 text-center text-[#161616] animate-pulse">Chargement...</span>
+      ) : options.length ? (
+        options.map((option) => (
+          <button key={option.label} onClick={() => handleSelect(option)} className="pl-4 py-2.5 hover:!bg-[#EEEEEE]  text-[#161616] w-full flex justify-between">
+            <span className="text-left">{option.label}</span>
+          </button>
+        ))
+      ) : (
+        <span className="p-3 text-gray-800 text-center">{hint}</span>
+      )}
+    </div>
+  </div>
+);
+
 export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeholder = null, getOptions, value, onChange, errorMessage }) {
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState();
+  const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
@@ -48,19 +66,18 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeh
     [],
   );
 
-  function handleFocus() {
-    setQuery("");
+  const handleFocus = () => {
     onChange(null);
-    setOpen(true);
-  }
+    if (query.length > 0) setOpen(true);
+  };
 
   const handleChangeQuery = async (e) => {
-    console.log("IN HANDLER");
+    if (query.length) setOpen(true);
     setOptions([]);
-    const query = e.target.value;
-    setQuery(query);
-    if (query.length > 1) {
-      debouncedOptions(query);
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    if (newQuery.length > 1) {
+      debouncedOptions(newQuery);
     }
   };
 
@@ -75,40 +92,20 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeh
       <div className="relative ">
         <Input
           label={label}
-          value={query || value?.label || ""}
           state={errorMessage && "error"}
           stateRelatedMessage={errorMessage}
           nativeInputProps={{
+            value: query || value?.label || "",
             placeholder,
             onChange: (e) => handleChangeQuery(e),
+            onFocus: handleFocus,
           }}
-          onFocus={handleFocus}
         />
         <span className="material-icons absolute top-8 right-2 mt-[12px] text-lg">
           <RiSearchLine />
         </span>
       </div>
       {open && <Dropdown options={options} handleSelect={handleSelect} loading={loading} hint={hint} />}
-    </div>
-  );
-}
-
-function Dropdown({ loading, options, handleSelect, hint }) {
-  return (
-    <div className="relative">
-      <div className="bg-white border flex flex-col absolute z-10 -top-6 w-full shadow">
-        {loading ? (
-          <span className="p-3 text-center text-[#161616] animate-pulse">Chargement...</span>
-        ) : options.length ? (
-          options.map((option) => (
-            <button key={option.label} onClick={() => handleSelect(option)} className="pl-4 py-2.5 hover:!bg-[#EEEEEE]  text-[#161616] w-full flex justify-between">
-              <span className="text-left">{option.label}</span>
-            </button>
-          ))
-        ) : (
-          <span className="p-3 text-gray-800 text-center">{hint}</span>
-        )}
-      </div>
     </div>
   );
 }
