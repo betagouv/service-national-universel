@@ -78,18 +78,19 @@ const customStyles = {
       cursor: "pointer",
     };
   },
+  // Blue DSFR Focus #0a76f6
   control: (provided, state) => {
     return {
       ...provided,
       marginTop: 8,
-      border: "none",
       borderRadius: 0,
+      border: "none",
       borderColor: "#EEEEEE",
+      boxShadow: "0 0 0 0 #EEEEEE",
       ["&:hover"]: {
         borderColor: "#EEEEEE",
         borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
       },
-      boxShadow: "0 0 0 0 #EEEEEE",
       borderTopLeftRadius: 4,
       borderTopRightRadius: 4,
       borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
@@ -97,6 +98,15 @@ const customStyles = {
       height: 40,
       paddingLeft: 24,
       cursor: "pointer",
+      transition: "none",
+      ...(state.isFocused
+        ? {
+            outlineOffset: "2px !important",
+            outlineWidth: "2px !important",
+            outlineStyle: "solid !important",
+            outlineColor: "#0a76f6 !important",
+          }
+        : {}),
     };
   },
   singleValue: (provided) => {
