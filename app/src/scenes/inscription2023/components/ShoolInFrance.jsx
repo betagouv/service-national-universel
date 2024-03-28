@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
-import Input from "./Input";
+import { Input } from "@snu/ds/dsfr";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import { RiArrowGoBackLine } from "react-icons/ri";
 import { getCities, getSchools } from "../utils";
@@ -59,7 +59,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   return manualFilling ? (
     <>
       <hr></hr>
-      <div className="flex items-center py-4">
+      <div className="flex items-center">
         <RiArrowGoBackLine className="font-bold mt-1 mr-2 text-[#000091]" />
         <button
           className="text-[#000091] cursor-pointer"
@@ -73,11 +73,13 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <Input
         value={manualSchool.fullName}
         label="Saisir le nom de l'établissement"
-        onChange={(value) => {
-          setManualSchool({ ...manualSchool, fullName: value });
+        nativeInputProps={{
+          onChange: (e) => {
+            setManualSchool({ ...manualSchool, fullName: e.target.value });
+          },
         }}
-        error={errors?.manualFullName}
-        correction={corrections?.schoolName}
+        stateRelatedMessage={errors?.manualFullName || corrections?.schoolName}
+        state={errors?.manualFullName || (corrections?.schoolName && "error")}
       />
       <AddressForm
         data={manualSchool}
@@ -95,6 +97,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <hr></hr>
       <AsyncCombobox
         label="Rechercher la commune de l'établissement"
+        placeholder="Ex. Paris, Marseille..."
         hint="Aucune commune trouvée."
         getOptions={getCities}
         value={city}

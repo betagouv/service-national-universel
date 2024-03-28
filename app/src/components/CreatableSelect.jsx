@@ -13,7 +13,7 @@ const CreatableSelect = ({ label, options, value, onChange, placeholder = "Séle
         options={options}
         isSearchable
         placeholder={placeholder}
-        noOptionsMessage={() => "Pas d'options"}
+        noOptionsMessage={() => "Pas d'option."}
         formatCreateLabel={(inputValue) => `Ajoutez manuellement : ${inputValue}`}
         onCreateOption={onCreateOption}
         error={correction || error}
