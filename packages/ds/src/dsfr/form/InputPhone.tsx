@@ -89,7 +89,7 @@ export default function InputPhone({
             <Input
               label=""
               disabled={disabled}
-              className={`w-full ${
+              className={`pl-2 w-full ${
                 error && "[&>.fr-input]:shadow-[inset_0_-2px_0_-0_#ce0500]"
               }`}
               nativeInputProps={{
