@@ -47,6 +47,7 @@ export default function ChangeSejour() {
         const isArray = Array.isArray(data);
         if (isArray) {
           const availableCohorts = data.map((cohort) => cohort.name).filter((cohort) => (young.status === YOUNG_STATUS.WITHDRAWN ? cohort : cohort !== young.cohort));
+          availableCohorts.push("à venir");
           setSejours(availableCohorts);
           setIsElegible(availableCohorts.length > 0);
         } else {

@@ -8,8 +8,7 @@ export default function FutureCohort() {
         <h1 className="text-xl md:text-3xl font-bold">Vous êtes en cours d'inscription au SNU pour un séjour à venir.</h1>
         <hr />
         <p className="md:text-lg">
-          <strong>Les inscriptions ont été clôturées</strong> pour les sessions de {new Date().getFullYear()}. L'administration reviendra vers vous pour vous prévenir de
-          l'ouverture des prochaines inscriptions.
+          Votre inscription a été reportée sur<strong> un prochain séjour </strong> dont les dates vous seront communiquées ultérieurement.
         </p>
       </main>
     </DSFRLayout>
