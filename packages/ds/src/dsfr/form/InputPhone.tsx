@@ -84,7 +84,6 @@ export default function InputPhone({
                 ))}
               </Select>
             </div>
-            {/* <div className="h-6 my-auto w-[1px] bg-gray-200" /> */}
             <Input
               label=""
               disabled={disabled}
