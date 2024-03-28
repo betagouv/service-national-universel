@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
 import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
+import * as Sentry from "@sentry/react";
 
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
 import CGU from "./scenes/CGU";
@@ -57,28 +58,23 @@ import api, { initApi } from "./services/api";
 import { adminURL } from "./config";
 import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
 
-import * as Sentry from "@sentry/react";
 import ModalCGU from "./components/modals/ModalCGU";
 import "./index.css";
 import Team from "./scenes/team";
 
-import SideBar from "./components/drawer/SideBar";
 import { getCohorts } from "./services/cohort.service";
 import RestorePreviousSignin from "./components/RestorePreviousSignin";
 import useRefreshToken from "./hooks/useRefreshToken";
 
+import SideBar from "./components/drawer/SideBar";
+import ApplicationError from "./components/layout/ApplicationError";
+
 initSentry();
 initApi();
 
-function FallbackComponent() {
-  return <></>;
-}
-
-const myFallback = <FallbackComponent />;
-
 export default function App() {
   return (
-    <Sentry.ErrorBoundary fallback={myFallback}>
+    <Sentry.ErrorBoundary fallback={ApplicationError}>
       <Router history={history}>
         <ScrollToTop />
         <div className="main">
@@ -100,7 +96,7 @@ export default function App() {
   );
 }
 
-const Home = (props) => {
+const Home = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const { pathname, search } = useLocation();
@@ -217,49 +213,50 @@ const Home = (props) => {
         <SideBar sessionsList={sessionPhase1List} />
         <div className="flex flex-col w-full">
           <div className={`flex-1  min-h-screen`}>
-            <Switch>
-              <RestrictedRoute path="/structure" component={Structure} />
-              <RestrictedRoute path="/settings" component={Settings} />
-              <RestrictedRoute path="/alerte" component={Alerte} />
-              <RestrictedRoute path="/profil" component={Profil} />
-              <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-              <RestrictedRoute path="/school" component={School} />
-              <RestrictedRoute path="/mission" component={Missions} />
-              <RestrictedRoute path="/inscription" component={Inscription} />
-              <RestrictedRoute path="/user" component={Utilisateur} />
-              <RestrictedRoute path="/contenu" component={Content} />
-              <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
-              <RestrictedRoute path="/centre" component={Center} />
-              <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
-              <RestrictedRoute path="/association" component={Association} />
-              <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
-              <RestrictedRoute path="/boite-de-reception" component={Inbox} />
-              <RestrictedRoute path="/equipe" component={Team} />
-              <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
-              {/* Plan de transport */}
-              {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
-              {/* Table de répartition */}
-              <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
-              {/* Ligne de bus */}
-              <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
-              {/* Schéma de répartition */}
-              <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
-              <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
-              <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
-              {/* Institution */}
-              <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
-              <RestrictedRoute path="/etablissement" component={Etablissement} />
+            <Sentry.ErrorBoundary fallback={ApplicationError}>
+              <Switch>
+                <RestrictedRoute path="/structure" component={Structure} />
+                <RestrictedRoute path="/settings" component={Settings} />
+                <RestrictedRoute path="/alerte" component={Alerte} />
+                <RestrictedRoute path="/profil" component={Profil} />
+                <RestrictedRoute path="/volontaire" component={renderVolontaire} />
+                <RestrictedRoute path="/school" component={School} />
+                <RestrictedRoute path="/mission" component={Missions} />
+                <RestrictedRoute path="/inscription" component={Inscription} />
+                <RestrictedRoute path="/user" component={Utilisateur} />
+                <RestrictedRoute path="/contenu" component={Content} />
+                <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
+                <RestrictedRoute path="/centre" component={Center} />
+                <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
+                <RestrictedRoute path="/association" component={Association} />
+                <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+                <RestrictedRoute path="/boite-de-reception" component={Inbox} />
+                <RestrictedRoute path="/equipe" component={Team} />
+                <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
+                {/* Plan de transport */}
+                {user?.role === "admin" && user?.subRole === "god" ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
+                {/* Table de répartition */}
+                <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
+                {/* Ligne de bus */}
+                <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
+                {/* Schéma de répartition */}
+                <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
+                <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
+                <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
+                {/* Institution */}
+                <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
+                <RestrictedRoute path="/etablissement" component={Etablissement} />
 
-              <RestrictedRoute path="/classes" component={Classe} />
-              <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
-              <RestrictedRoute path="/mes-contacts" component={Contact} />
-              {/* Only for developper eyes... */}
-              {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} /> : null}
-              {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
-              {/* DASHBOARD */}
-              <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
-              <RestrictedRoute path="/" component={renderDashboardV2} />
-            </Switch>
+                <RestrictedRoute path="/classes" component={Classe} />
+                <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
+                <RestrictedRoute path="/mes-contacts" component={Contact} />
+                {/* Only for developper eyes... */}
+                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} /> : null}
+                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
+                {/* DASHBOARD */}
+                <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
+              </Switch>
+            </Sentry.ErrorBoundary>
           </div>
           <Footer />
         </div>
