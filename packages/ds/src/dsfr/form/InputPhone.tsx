@@ -8,13 +8,12 @@ import { PHONE_ZONES } from "../../common";
 type OwnProps = {
   name: string;
   value: string;
-  onChange: (e: string) => void;
-  onChangeZone: (e: string) => void;
-  zoneValue?: string;
+  onChange: (value: string) => void;
+  onChangeZone: (value: string) => void;
+  zoneValue: string;
   label?: string;
   placeholder?: string;
   disabled?: boolean;
-  active?: boolean;
   readOnly?: boolean;
   error?: string;
 };
@@ -28,7 +27,6 @@ export default function InputPhone({
   label,
   placeholder,
   disabled,
-  active,
   readOnly,
   error,
 }: OwnProps) {
@@ -63,11 +61,12 @@ export default function InputPhone({
             <div className="flex ">
               <Select
                 label=""
+                className="max-w-[160px]"
                 state={error ? "error" : "default"}
                 stateRelatedMessage={error}
                 disabled={disabled || readOnly}
                 nativeSelectProps={{
-                  className: "!my-0 mr-4 max-w-[120px] text-ellipsis text-sm",
+                  className: "!my-0 text-ellipsis max-w-[160px] ",
                   ref: selectRef,
                   onChange: handleChangePhoneZone,
                   value: zoneValue,
