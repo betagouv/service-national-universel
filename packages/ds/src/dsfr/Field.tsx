@@ -1,5 +1,5 @@
 import React from "react";
-import { Field as TField } from "./types";
+import { Field as TField } from "../common/types";
 
 const Field = ({ label, value }: TField) => (
   <div className="flex w-full justify-between sm:flex-col md:flex-row">

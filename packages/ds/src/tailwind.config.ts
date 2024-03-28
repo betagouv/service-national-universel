@@ -4,6 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
+        dsfr: {
+          "focus-blue": "#0a76f6",
+        },
         ds: {
           gray: {
             900: "#111827",

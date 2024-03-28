@@ -8,7 +8,7 @@ const SearchableSelect = ({
   value,
   onChange,
   placeholder = "Sélectionner une option",
-  noOptionsMessage = "Pas d'option",
+  noOptionsMessage = "Pas d'option.",
   error = "",
   correction = "",
   isDebounced = false,
@@ -68,37 +68,56 @@ const SearchableSelect = ({
 };
 
 const customStyles = {
-  option: (provided, state) => {
-    return {
-      ...provided,
-      paddingLeft: 24,
-      color: "#161616",
-      fontWeight: state.isSelected ? 700 : 400,
-      backgroundColor: state.isFocused ? "#EEEEEE" : "tranparent",
-      cursor: "pointer",
-    };
-  },
-  control: (provided, state) => {
-    return {
-      ...provided,
-      marginTop: 8,
-      border: "none",
-      borderRadius: 0,
-      borderColor: "#EEEEEE",
-      ["&:hover"]: {
-        borderColor: "#EEEEEE",
-        borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
-      },
-      boxShadow: "0 0 0 0 #EEEEEE",
-      borderTopLeftRadius: 4,
-      borderTopRightRadius: 4,
-      borderBottom: state.selectProps.error ? "2px solid #CE0500" : "2px solid #3A3A3A",
-      background: "#EEEEEE",
-      height: 40,
-      paddingLeft: 24,
-      cursor: "pointer",
-    };
-  },
+  dropdownIndicator: (provided) => ({
+    ...provided,
+    color: "var(--grey-50-1000)",
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "var(--text-mention-grey)",
+    fontStyle: "italic",
+  }),
+  noOptionsMessage: (provided) => ({
+    ...provided,
+    color: "var(--grey-50-1000)",
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    paddingLeft: 24,
+    color: "var(--grey-50-1000)",
+    fontWeight: state.isSelected ? 700 : 400,
+    backgroundColor: state.isFocused ? "var(--grey-950-100)" : "tranparent",
+    cursor: "pointer",
+  }),
+  // Blue DSFR Focus #0a76f6
+  control: (provided, state) => ({
+    ...provided,
+    background: "var(--grey-950-100)",
+    borderRadius: 0,
+    border: "none",
+    borderColor: "var(--grey-950-100)",
+    boxShadow: "0 0 0 0 #EEEEEE",
+    ["&:hover"]: {
+      borderColor: "var(--grey-950-100)",
+      borderBottom: state.selectProps.error ? "2px solid var(--error-425-625)" : "2px solid var(--grey-200-850)",
+    },
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    borderBottom: state.selectProps.error ? "2px solid var(--error-425-625)" : "2px solid var(--grey-200-850)",
+    cursor: "pointer",
+    height: 40,
+    marginTop: 8,
+    paddingLeft: 16,
+    transition: "none",
+    ...(state.isFocused
+      ? {
+          outlineOffset: "2px !important",
+          outlineWidth: "2px !important",
+          outlineStyle: "solid !important",
+          outlineColor: "#0a76f6 !important",
+        }
+      : {}),
+  }),
   singleValue: (provided) => {
     return { ...provided, margin: 0, padding: 0 };
   },
