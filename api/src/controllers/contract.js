@@ -17,7 +17,7 @@ const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
 const Joi = require("joi");
 const patches = require("./patches");
-const { getPdfStream } = require("../utils/pdf-renderer");
+const { generatePdfIntoStream } = require("../utils/pdf-renderer");
 
 async function createContract(data, fromUser) {
   const { sendMessage } = data;
@@ -437,8 +437,7 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    const stream = await getPdfStream({ type: "contract", template: "2", contract });
-    stream.pipe(res);
+    await generatePdfIntoStream(res, { type: "contract", template: "2", contract });
 
   } catch (e) {
     capture(e);

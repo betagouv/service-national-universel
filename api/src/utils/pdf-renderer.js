@@ -3,6 +3,7 @@ const { timeout } = require("../utils");
 const { capture } = require("../sentry");
 const { ERRORS } = require("./index");
 const fetch = require("node-fetch");
+const PDFDocument = require("pdfkit");
 
 const TIMEOUT_PDF_SERVICE = 15000;
 
@@ -11,6 +12,8 @@ const form = require("../templates/form");
 const convocation = require("../templates/convocation");
 const contractPhase2 = require("../templates/contractPhase2");
 const droitImage = require("../templates/droitImage");
+
+const certifPhase1 = require("../templates/certificate/phase1");
 
 async function getHtmlTemplate(type, template, young, contract) {
   if (type === "certificate" && template === "1") return await certificate.phase1(young); // WIP
@@ -60,14 +63,26 @@ async function htmlToPdfBuffer(html, options) {
   return stream2buffer(stream);
 }
 
-async function getPdfStream({ type, template, young, contract }) {
-  const html = await getHtmlTemplate(type, template, young, contract);
-  if (!html) {
-    throw new Error(ERRORS.NOT_FOUND);
-  }
+async function generatePdfIntoStream(outStream, { type, template, young, contract }) {
+  if (type === "certificate" && template === "1" && young) {
+    const random = Math.random();
+    console.time("RENDERING " + random);
+    const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0 });
+    doc.pipe(outStream);
+    await certifPhase1.generate(doc, young);
+    doc.end();
+    console.timeEnd("RENDERING " + random);
 
-  const options = type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 };
-  return htmlToPdfStream(html, options);
+  } else {
+    const html = await getHtmlTemplate(type, template, young, contract);
+    if (!html) {
+      throw new Error(ERRORS.NOT_FOUND);
+    }
+
+    const options = type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 };
+    const inStream = await htmlToPdfStream(html, options);
+    inStream.pipe(outStream);
+  }
 }
 
 //   res.set({
@@ -77,7 +92,7 @@ async function getPdfStream({ type, template, young, contract }) {
 //     "cache-control": "public, max-age=1",
 //   });
 
-async function getPdfBuffer({ type, template, young, contract }) {
+async function generatePdfIntoBuffer({ type, template, young, contract }) {
   const html = await getHtmlTemplate(type, template, young, contract);
   if (!html) {
     throw new Error(ERRORS.NOT_FOUND);
@@ -89,4 +104,4 @@ async function getPdfBuffer({ type, template, young, contract }) {
   return stream2buffer(stream);
 }
 
-module.exports = { getPdfStream, getPdfBuffer, htmlToPdfBuffer };
+module.exports = { generatePdfIntoStream, generatePdfIntoBuffer, htmlToPdfBuffer };

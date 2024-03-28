@@ -47,7 +47,7 @@ const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { phase1 } = require("../../src/templates/certificate/index");
 const scanFile = require("../utils/virusScanner");
-const { getPdfBuffer, htmlToPdfBuffer } = require("../utils/pdf-renderer");
+const { generatePdfIntoBuffer, htmlToPdfBuffer } = require("../utils/pdf-renderer");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -837,7 +837,7 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
       const batchStart = i * batchSize;
       const batchEnd = Math.min(batchStart + batchSize, youngs.length);
       const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-        const buffer = await getPdfBuffer({ type: "droitImage", template: "droitImage", young });
+        const buffer = await generatePdfIntoBuffer({ type: "droitImage", template: "droitImage", young });
         return { name: young.lastName + " " + young.firstName + " - Droits à l'image.pdf", buffer };
       });
       const pdfs = await Promise.all(pdfPromises);

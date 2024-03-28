@@ -18,7 +18,7 @@ const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
 const mime = require("mime-types");
 const scanFile = require("../../utils/virusScanner");
-const { getPdfStream, getPdfBuffer } = require("../../utils/pdf-renderer");
+const { generatePdfIntoStream, generatePdfIntoBuffer } = require("../../utils/pdf-renderer");
 
 function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
@@ -82,8 +82,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    const stream = await getPdfStream({ type, template, young });
-    stream.pipe(res);
+    await generatePdfIntoStream(res, { type, template, young });
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -126,7 +125,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const buffer = await getPdfBuffer({ type, template, young, contract });
+    const buffer = await generatePdfIntoBuffer({ type, template, young, contract });
 
     const content = buffer.toString("base64");
 
