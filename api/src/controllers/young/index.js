@@ -340,6 +340,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
   }
 });
 
+// to move on ref controller 
 router.put("/update_phase3/:young", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -817,6 +818,7 @@ router.post("/france-connect/user-info", async (req, res) => {
   }
 });
 
+// Why on Yougn controller if only ref can do delete ?
 // Delete one user (only admin can delete user)
 // And apparently referent in same geography as well (see canDeleteYoung())
 router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
@@ -992,6 +994,7 @@ router.put("/abandon", passport.authenticate("young", { session: false, failWith
   }
 });
 
+// move to referent
 router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.string().required().email().validate(req.query.email, { stripUnknown: true });
