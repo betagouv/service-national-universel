@@ -348,8 +348,11 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
           content: (
             <div className="text-gray-900">
               <p className="text-lg text-red-500 mb-3">
-                Attention : l’attestation de la Phase 1 validée (HTS) de <span className="font-medium">Prénom NOM</span> ne sera plus accessible après ce changement de cohorte !
-                Veuillez vérifier ces informations afin que cette attestation lui soit envoyée par email&nbsp;:
+                Attention : l’attestation de la Phase 1 validée (HTS) de{" "}
+                <span className="font-medium">
+                  {young.firstName} <span className="uppercase">{young.lastName}</span>
+                </span>{" "}
+                ne sera plus accessible après ce changement de cohorte ! Veuillez vérifier ces informations afin que cette attestation lui soit envoyée par email&nbsp;:
               </p>
               <div className="text-left">
                 <div className="flex space-x-3 mb-3">
