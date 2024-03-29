@@ -1,3 +1,10 @@
+## [1.396.2](https://github.com/betagouv/service-national-universel/compare/v1.396.1...v1.396.2) (2024-03-29)
+
+
+### Bug Fixes
+
+* **admin:** highlight «email» ([#3703](https://github.com/betagouv/service-national-universel/issues/3703)) ([f7059e9](https://github.com/betagouv/service-national-universel/commit/f7059e921cbed50da90958182e9e143e5e5c7746))
+
 ## [1.396.1](https://github.com/betagouv/service-national-universel/compare/v1.396.0...v1.396.1) (2024-03-28)
 
 
