@@ -137,7 +137,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 
     if (value.birthdateAt) value.birthdateAt = value.birthdateAt.setUTCHours(11, 0, 0);
 
-    if (value.latestCNIFileExpirationDate) {
+    if (value.latestCNIFileExpirationDate && young.cohort !== "à venir") {
       const cohort = await CohortModel.findOne({ name: young.cohort });
       value.CNIFileNotValidOnStart = new Date(value.latestCNIFileExpirationDate) < new Date(cohort.dateStart);
     }
