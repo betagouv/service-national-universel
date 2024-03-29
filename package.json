@@ -25,5 +25,12 @@
     "node": "^18.16.0",
     "npm": "^9.5.1",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.30",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.3",
+    "typescript-eslint": "^7.4.0"
   }
 }

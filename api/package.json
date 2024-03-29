@@ -10,7 +10,7 @@
   },
   "scripts": {
     "//": "dev sleep 2 seconds to let lib compile",
-    "dev": "sleep 2 && nodemon --watch ../packages/lib/common-js/index.cjs --watch .env-staging --watch ./src ./src/index.js",
+    "dev": "sleep 2 && tsx watch --clear-screen=false ./src/index.js",
     "debug": "DEBUG=express:* nodemon ./src/index.js",
     "start": "pm2 install pm2-slack && pm2 set pm2-slack:slack_url $PM2_SLACK_URL &&  pm2 set pm2-slack:servername PM2-ERROR-API && pm2 start ./src/index.js --no-daemon --node-args '--max-old-space-size=4096'",
     "test": "jest --silent --runInBand --detectOpenHandles",
