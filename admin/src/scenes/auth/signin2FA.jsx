@@ -85,7 +85,7 @@ export default function Signin() {
                   </div>
                   <div className="px-6">
                     <p className="self-stretch mb-2">
-                      Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
+                      Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>«&nbsp;{email}&nbsp;»</b>.
                     </p>
                     <p className="self-stretch mb-2">
                       Ce code est valable pendant <b>10 minutes</b>, si vous avez reçu plusieurs codes veuillez <b>utiliser le dernier</b> qui vous a été transmis par mail.
