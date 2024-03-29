@@ -3,13 +3,15 @@ import { IoRepeat } from "react-icons/io5";
 import { HiUsers, HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_STATUS, YOUNG_SOURCE, STATUS_CLASSE, COHORT_TYPE } from "snu-lib";
+import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, STATUS_CLASSE, COHORT_TYPE, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
-import { Badge, ModalConfirmation, Select } from "@snu/ds/admin";
+import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
 import Pencil from "@/assets/icons/Pencil";
+import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
 import api from "@/services/api";
 import Loader from "@/components/Loader";
 import { capture } from "@/sentry";
+import downloadPDF from "@/utils/download-pdf";
 
 export function ChangeCohortPen({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
@@ -87,6 +89,13 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
       setClasse(undefined);
     }
   }, [isOpen]);
+
+  const downloadAttestation = async () => {
+    await downloadPDF({
+      url: `/young/${young._id}/documents/certificate/1`,
+      fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
+    });
+  };
 
   useEffect(() => {
     switch (state) {
@@ -321,7 +330,54 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
           ),
           actions: [
             { title: "Annuler", isCancel: true, onClick: onClose },
-            { title: "Valider", disabled: !classe, onClick: () => setState("cle-confirmation") },
+            {
+              title: "Valider",
+              disabled: !classe,
+              onClick: () => {
+                if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) {
+                  return setState("cle-attestation");
+                }
+                setState("cle-confirmation");
+              },
+            },
+          ],
+        });
+      case "cle-attestation":
+        return setStep({
+          ...step,
+          content: (
+            <div className="text-gray-900">
+              <p className="text-lg text-red-500 mb-3">
+                Attention : l’attestation de la Phase 1 validée (HTS) de <span className="font-medium">Prénom NOM</span> ne sera plus accessible après ce changement de cohorte !
+                Veuillez vérifier ces informations afin que cette attestation lui soit envoyée par email&nbsp;:
+              </p>
+              <div className="text-left">
+                <div className="flex space-x-3 mb-3">
+                  <InputText className="flex-1" label="Prénom" value={young.firstName} />
+                  <InputText className="flex-1" label="Nom" value={young.lastName} />
+                </div>
+                <InputText className="mb-3" label="Adresse email" value={young.email} disabled />
+                <p className="mb-3">
+                  Si cette adresse email n’est pas correcte,{" "}
+                  <span className="underline text-blue-500 cursor-pointer" onClick={onClose}>
+                    veuillez la modifier sur le profil du volontaire
+                  </span>
+                  .
+                </p>
+                <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-md">
+                  <UploadedFileIcon width={64} height={64} />
+                  <div className="flex-1 font-medium mx-2">Attestation Phase 1 validée (HTS)</div>
+                  <Button title="Télécharger" type="wired" onClick={downloadAttestation} />
+                </div>
+              </div>
+            </div>
+          ),
+          actions: [
+            { title: "Annuler", isCancel: true, onClick: onClose },
+            {
+              title: "Valider",
+              onClick: () => setState("cle-confirmation"),
+            },
           ],
         });
       case "cle-confirmation":
@@ -372,14 +428,19 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
               onClick: async () => {
                 try {
                   setIsSaving(true);
+                  // ⚠️ It's important to make sure the certificate is properly sent before changing the cohort
+                  // Because afterwards, the certificate will no longer be accessible because we override lots of young's data
+                  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) {
+                    await api.post(`young/${young._id}/documents/certificate/1/send-email`, {
+                      fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
+                    });
+                  }
                   await api.put(`/referent/young/${young._id}/change-cohort`, {
                     source: YOUNG_SOURCE.CLE,
                     cohort: classe.cohort,
                     etablissementId: etablissement._id,
                     classeId: classe._id,
                   });
-                  // if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
-                  // if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
                   await onChange();
                   toastr.success("Cohorte modifiée avec succès");
                 } catch (error) {
