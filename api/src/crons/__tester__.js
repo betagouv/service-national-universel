@@ -22,6 +22,9 @@
     case "parent-revalidate-ri":
       await require("./parentRevalidateRI").handler();
       break;
+    case "crons/dsnjExport":
+      await require("./dsnjExport").manualHandler("2024-2-25");
+      break;
   }
   process.exit(0);
 })();
