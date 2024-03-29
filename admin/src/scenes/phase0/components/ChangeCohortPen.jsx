@@ -90,8 +90,8 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
     }
   }, [isOpen]);
 
-  const downloadAttestation = async () => {
-    await downloadPDF({
+  const downloadAttestation = () => {
+    downloadPDF({
       url: `/young/${young._id}/documents/certificate/1`,
       fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
     });
