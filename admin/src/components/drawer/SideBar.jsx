@@ -42,7 +42,6 @@ const SideBar = (props) => {
   //State
   const [open, setOpen] = React.useState(false);
   const test = useSelector((state) => state.Auth.previousSigninToken);
-  console.log("test", test);
   const [openInvite, setOpenInvite] = React.useState(false);
   const [dropDownOpen, setDropDownOpen] = React.useState("");
 
