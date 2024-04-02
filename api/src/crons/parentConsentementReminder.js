@@ -30,6 +30,7 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "parentConsentementReminder", text: JSON.stringify(e) });
+    throw e;
   }
 };
 

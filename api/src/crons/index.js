@@ -1,4 +1,6 @@
 const cron = require("node-cron");
+const { instrumentNodeCron } = require("@sentry/node").cron;
+const { captureCheckIn } = require("@sentry/node");
 
 const apiEngagement = require("./syncApiEngagement");
 const missionOutdated = require("./missionOutdated");
@@ -70,75 +72,98 @@ const everyHours = (x) => `0 */${x} * * *`;
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
 
+const sentry_cron = instrumentNodeCron(cron);
+
 function _log(task, handlers) {
   return async () => {
     console.log(`task started : ${task}`);
-    if (handlers instanceof Array) {
-      await Promise.all(handlers.map((handler) => handler.call()));
-    } else {
-      await handlers.call();
+    const checkInId = captureCheckIn({
+      monitorSlug: task,
+      status: "in_progress",
+    });
+    try {
+      if (handlers instanceof Array) {
+        await Promise.all(handlers.map((handler) => handler.call()));
+      } else {
+        await handlers.call();
+      }
+      captureCheckIn({
+        checkInId,
+        monitorSlug: task,
+        status: "ok",
+      });
+    } catch (e) {
+      captureCheckIn({
+        checkInId,
+        monitorSlug: task,
+        status: "error",
+      });
     }
     console.log(`task ended : ${task}`);
   };
 }
 
-cron.schedule("0 9 * * 1", _log("applicationPending", applicationPending.handler));
+function schedule(crontab, name, handlers) {
+  sentry_cron.schedule(crontab, _log(name, handlers), { name });
+}
 
-cron.schedule("0 15 * * *", _log("deleteCNIAdnSpecificAmenagementType", deleteCNIAdnSpecificAmenagementType.handler));
+schedule("0 9 * * 1", "applicationPending", applicationPending.handler);
 
-cron.schedule("0 9 * * 1", _log("noticePushMission", noticePushMission.handler));
+schedule("0 15 * * *", "deleteCNIAdnSpecificAmenagementType", deleteCNIAdnSpecificAmenagementType.handler);
+
+schedule("0 9 * * 1", "noticePushMission", noticePushMission.handler);
 
 // everyday at 0200
-cron.schedule(everyHours(6), _log("apiEngagement", apiEngagement.handler));
+schedule(everyHours(6), "apiEngagement", apiEngagement.handler);
 
 // everyday at 0200
-cron.schedule("0 0 * * *", _log("deleteInactiveRefs", deleteInactiveRefs.handler));
+schedule("0 0 * * *", "deleteInactiveRefs", deleteInactiveRefs.handler);
 
-cron.schedule(everyHours(6), _log("jeVeuxAiderDaily", jeVeuxAiderDaily.handler));
+schedule(everyHours(6), "jeVeuxAiderDaily", jeVeuxAiderDaily.handler);
 
-cron.schedule("0 6 * * *", _log("contratRelance", contratRelance.handler));
+schedule("0 6 * * *", "contratRelance", contratRelance.handler);
 
-cron.schedule("0 8 * * *", _log("missionOutdated", [missionOutdated.handler, missionOutdated.handlerNotice1Week]));
+schedule("0 8 * * *", "missionOutdated", [missionOutdated.handler, missionOutdated.handlerNotice1Week]);
 
-cron.schedule("0 7 * * *", _log("applicationOutaded", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]));
+schedule("0 7 * * *", "applicationOutaded", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]);
 
-cron.schedule(everyHours(1), _log("computeGoalsInscription", computeGoalsInscription.handler));
+schedule(everyHours(1), "computeGoalsInscription", computeGoalsInscription.handler);
 
-cron.schedule("0 1 * * *", _log("loginAttempts", loginAttempts.handler));
+schedule("0 1 * * *", "loginAttempts", loginAttempts.handler);
 
-cron.schedule("45 2 * * *", _log("syncReferentSupport", syncReferentSupport.handler));
+schedule("45 2 * * *", "syncReferentSupport", syncReferentSupport.handler);
 
-cron.schedule("15 1 * * *", _log("syncContactSupport", syncContactSupport.handler));
+schedule("15 1 * * *", "syncContactSupport", syncContactSupport.handler);
 
-cron.schedule("30 1 * * *", _log("structurePatches", structurePatches.handler));
+schedule("30 1 * * *", "structurePatches", structurePatches.handler);
 
-cron.schedule("45 1 * * *", _log("missionEquivalencePatches", missionEquivalencePatches.handler));
+schedule("45 1 * * *", "missionEquivalencePatches", missionEquivalencePatches.handler);
 
-cron.schedule("0 2 * * *", _log("missionPatches", missionPatches.handler));
+schedule("0 2 * * *", "missionPatches", missionPatches.handler);
 
-cron.schedule("30 2 * * *", _log("applicationPatches", applicationPatches.handler));
+schedule("30 2 * * *", "applicationPatches", applicationPatches.handler);
 
-cron.schedule("0 3 * * *", _log("youngPatches", youngPatches.handler));
+schedule("0 3 * * *", "youngPatches", youngPatches.handler);
 
-cron.schedule("20 3 * * *", _log("classePatches", classePatches.handler));
+schedule("20 3 * * *", "classePatches", classePatches.handler);
 
-cron.schedule("15 04 * * *", _log("dsnjExport", dsnjExport.handler));
+schedule("15 04 * * *", "dsnjExport", dsnjExport.handler);
 
-cron.schedule("27 8 * * *", _log("parentConsentementReminder", parentConsentementReminder.handler));
+schedule("27 8 * * *", "parentConsentementReminder", parentConsentementReminder.handler);
 
 // Every Monday at 7:30am
-cron.schedule("30 7 * * 1", _log("parentRevalidateRI", parentRevalidateRI.handler));
+schedule("30 7 * * 1", "parentRevalidateRI", parentRevalidateRI.handler);
 
 // Every day at 11:00
-cron.schedule("0 11 * * *", _log("reminderInscription", reminderInscription.handler));
+schedule("0 11 * * *", "reminderInscription", reminderInscription.handler);
 
 // Every day at 11:00
-cron.schedule("0 11 * * *", _log("reminderWaitingCorrection", reminderWaitingCorrection.handler));
+schedule("0 11 * * *", "reminderWaitingCorrection", reminderWaitingCorrection.handler);
 
 // Every day at 10:00
-cron.schedule("0 10 * * *", _log("reminderImageRightsParent2", reminderImageRightsParent2.handler));
+schedule("0 10 * * *", "reminderImageRightsParent2", reminderImageRightsParent2.handler);
 
-cron.schedule("0 5 * * *", _log("refreshMaterializedViews", refreshMaterializedViews.handler));
+schedule("0 5 * * *", "refreshMaterializedViews", refreshMaterializedViews.handler);
 
 // tous les jours à 14h00
-cron.schedule("2 14 * * *", _log("clotureMissionReminder", clotureMissionReminder.handler));
+schedule("2 14 * * *", "clotureMissionReminder", clotureMissionReminder.handler);

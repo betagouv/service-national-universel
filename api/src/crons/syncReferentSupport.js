@@ -14,5 +14,6 @@ exports.handler = async () => {
     if (!response.ok) slack.error({ title: "Fail sync referent to SNUpport", text: JSON.stringify(response.code) });
   } catch (e) {
     capture(e);
+    throw e;
   }
 };

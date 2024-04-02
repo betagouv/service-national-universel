@@ -38,5 +38,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "computeGoalsInscription", text: JSON.stringify(e) });
+    throw e;
   }
 };

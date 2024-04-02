@@ -118,6 +118,7 @@ exports.handler = async () => {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
     slack.error({ title: "outdated mission", text: JSON.stringify(e) });
+    throw e;
   }
 };
 
@@ -128,6 +129,7 @@ exports.handlerNotice1Week = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "1 week notice outdated mission", text: JSON.stringify(e) });
+    throw e;
   }
 };
 

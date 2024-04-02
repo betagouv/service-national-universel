@@ -99,6 +99,7 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Mission Equivalence Logs", text: e });
     capture(e);
+    throw e;
   }
 };
 
