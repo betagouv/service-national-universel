@@ -12,3 +12,4 @@ requestZammad.json
 
 .idea
 node_modules
+out/
