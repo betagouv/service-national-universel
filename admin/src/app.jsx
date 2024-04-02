@@ -17,6 +17,7 @@ import DesignSystemPage from "./scenes/develop/DesignSystemPage";
 import DSNJExport from "./scenes/dsnj-export";
 import EditTransport from "./scenes/edit-transport";
 import Goal from "./scenes/goal";
+import Inbox from "./scenes/inbox";
 import Inscription from "./scenes/inscription";
 import Missions from "./scenes/missions";
 import LigneBus from "./scenes/plan-transport/ligne-bus";
@@ -232,6 +233,7 @@ const Home = (props) => {
               <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
               <RestrictedRoute path="/association" component={Association} />
               <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+              <RestrictedRoute path="/boite-de-reception" component={Inbox} />
               <RestrictedRoute path="/equipe" component={Team} />
               <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
               {/* Plan de transport */}
