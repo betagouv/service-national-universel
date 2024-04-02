@@ -61,9 +61,9 @@ export default function InputPhone({
             <div className="flex ">
               <Select
                 label=""
-                className="max-w-[160px]"
+                className={`max-w-[160px] 
+                ${error && "[&>.fr-error-text]:invisible"}`}
                 state={error ? "error" : "default"}
-                stateRelatedMessage={error}
                 disabled={disabled || readOnly}
                 nativeSelectProps={{
                   className: "!my-0 text-ellipsis max-w-[160px] ",
@@ -87,8 +87,12 @@ export default function InputPhone({
             <Input
               label=""
               disabled={disabled}
+              state={error ? "error" : "default"}
+              stateRelatedMessage={error}
               className={`pl-2 w-full ${
-                error && "[&>.fr-input]:shadow-[inset_0_-2px_0_-0_#ce0500]"
+                error &&
+                "[&>.fr-input]:shadow-[inset_0_-2px_0_-0_#ce0500]" &&
+                "before:!bg-none"
               }`}
               nativeInputProps={{
                 inputMode: "tel",
