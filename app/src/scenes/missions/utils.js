@@ -3,21 +3,21 @@
 import { API_ENGAGEMENT_SNU_ID, API_ENGAGEMENT_URL, environment } from "@/config";
 import { capture } from "@/sentry";
 
-export async function sendDataToJVA(jvaMissionId) {
+export async function sendDataToJVA(missionId) {
   try {
-    const url = `${API_ENGAGEMENT_URL}/v2/activity/${jvaMissionId}/${API_ENGAGEMENT_SNU_ID}/click?tag=MIG`;
-    const options = { method: "POST" };
+    // if (environment !== "production") {
+    //   return;
+    // }
+    const url = `${API_ENGAGEMENT_URL}/v2/activity/${missionId}/${API_ENGAGEMENT_SNU_ID}/click`;
+    const options = { method: "POST", mode: "cors" };
+    const res = await fetch(url, options);
+    const { ok, data, code } = await res.json();
 
-    if (environment === "production") {
-      const res = await fetch(url, options);
-      const { ok, data, code } = await res.json();
-      if (!ok) {
-        throw new Error(code);
-      }
-      localStorage.setItem("jva_mission_click_id", data.clickId);
-    } else {
-      localStorage.setItem("jva_mission_click_id", "fake-click-id");
+    if (!ok) {
+      throw new Error(code);
     }
+    console.log("🚀 ~ sendDataToJVA ~ data:", data);
+    localStorage.setItem("jva_mission_click_id", data._id);
   } catch (e) {
     capture(e);
   }

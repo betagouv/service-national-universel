@@ -162,7 +162,7 @@
   app.use("/zammood", require("./controllers/zammood"));
 
   //services
-  app.use("/jeveuxaider", require("./services/jeveuxaider").router);
+  app.use("/jeveuxaider", require("./services/jeveuxaider"));
 
   app.get("/memory-stats", async (req, res) => {
     // ! Memory usage

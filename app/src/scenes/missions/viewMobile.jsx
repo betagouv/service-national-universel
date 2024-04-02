@@ -61,7 +61,7 @@ export default function ViewMobile() {
     if (!id) return setMission(null);
     const { data } = await api.get(`/mission/${id}`);
     if (data?.isJvaMission === "true") {
-      await sendDataToJVA(`/mission/${id}/click?tag=MIG`);
+      await sendDataToJVA(data.apiEngagementId);
     }
     return setMission(data);
   };

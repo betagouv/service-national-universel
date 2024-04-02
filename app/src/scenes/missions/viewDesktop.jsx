@@ -62,7 +62,7 @@ export default function ViewDesktop() {
     if (!id) return setMission(null);
     const { data } = await api.get(`/mission/${id}`);
     if (data?.isJvaMission === "true") {
-      await sendDataToJVA(data.jvaMissionId);
+      await sendDataToJVA(data.apiEngagementId);
     }
     return setMission(data);
   };

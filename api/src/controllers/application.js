@@ -47,7 +47,7 @@ const mime = require("mime-types");
 const patches = require("./patches");
 const scanFile = require("../utils/virusScanner");
 const { getAuthorizationToApply } = require("../services/application");
-const { sendTrackingDataToJva } = require("../services/jeveuxaider");
+const { apiEngagement } = require("../services/gouv.fr/api-engagement");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
@@ -214,12 +214,14 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (doublon) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
+
+    if (mission?.isJvaMission) {
+      const { _id } = await apiEngagement.create(mission.jvaRawData._id, clickId);
+      value.apiEngagementId = _id;
+    }
+
     value.contractStatus = "DRAFT";
     const data = await ApplicationObject.create(value);
-
-    if (data?.isJvaMission) {
-      await sendTrackingDataToJva(mission.jvaMissionId, data.status, clickId);
-    }
 
     await updateYoungPhase2Hours(young, req.user);
     await updateStatusPhase2(young, req.user);
@@ -310,8 +312,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       await application.save({ fromUser: req.user });
 
       if (application.isJvaMission) {
-        const { jvaMissionId } = await MissionObject.findById(application.missionId).project({ jvaMissionId: 1 });
-        await sendTrackingDataToJva(jvaMissionId, application.status);
+        await apiEngagement.update(application);
       }
 
       await updateYoungPhase2Hours(young, req.user);
@@ -369,15 +370,14 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     application.set(value);
     await application.save({ fromUser: req.user });
 
-    if (application.isJvaMission) {
-      const { jvaMissionId } = await MissionObject.findById(application.missionId).project({ jvaMissionId: 1 });
-      await sendTrackingDataToJva(jvaMissionId, application.status);
-    }
-
     await updateYoungPhase2Hours(young, req.user);
     await updateStatusPhase2(young, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
     await updateMission(application, req.user);
+
+    if (application.isJvaMission) {
+      await apiEngagement.update(application);
+    }
 
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {

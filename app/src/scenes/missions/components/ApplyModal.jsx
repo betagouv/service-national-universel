@@ -51,7 +51,7 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
     const clickId = localStorage.getItem("jva_mission_click_id");
 
     try {
-      const { ok, data, code } = await api.post(`/application${clickId && `?clickId=${clickId}`}`, application);
+      const { ok, data, code } = await api.post(`/application${clickId ? `?clickId=${clickId}` : ""}`, application);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
       const responseNotification = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
       if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
