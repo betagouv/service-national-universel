@@ -82,7 +82,7 @@ const ACADEMIQUE_DOMAINS = [
 ];
 
 const validateEmailAcademique = (email) => {
-  if (process.env.STAGING === "true" || process.env.TESTING === "true" || process.env.NODE_ENV === "test") return true;
+  if (["development", "staging"].includes(config.ENVIRONMENT)) return true;
   const domain = email.split("@")[1];
   if (!domain) return false;
   return ACADEMIQUE_DOMAINS.includes(domain);
