@@ -119,7 +119,7 @@ export default function VolontairePanel({ onChange, value }) {
               )}
             </div>
             <Details title="Vu(e) le" value={formatStringLongDate(young.lastActivityAt ?? young.lastLoginAt)} />
-            <Link to={`/user?DEPARTMENT=%5B"${young.department}"%5D&ROLE=%5B"${ROLES.REFERENT_DEPARTMENT}"%5D`}>
+            <Link to={`/user?role=${ROLES.REFERENT_DEPARTMENT}&department=${young.department}`}>
               <TextButton>Voir équipe de référents ({young.department}) ›</TextButton>
             </Link>
             {young.departSejourMotifComment ? (
