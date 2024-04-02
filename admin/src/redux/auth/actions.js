@@ -5,6 +5,7 @@ export const authActions = {
   SETSTRUCTURE: "SETSTRUCTURE",
   SETSESSIONPHASE1: "SETSESSIONPHASE1",
   SETTICKETS: "SETTICKETS",
+  SETPREVIOUSSIGNIN: "SETPREVIOUSSIGNIN",
 };
 
 export function setUser(user) {
@@ -23,4 +24,8 @@ export function setSessionPhase1(sessionPhase1) {
 
 export function setTickets(tickets) {
   return { type: authActions.SETTICKETS, tickets };
+}
+
+export function setPreviousSignin(previousSigninToken) {
+  return { type: authActions.SETPREVIOUSSIGNIN, previousSigninToken };
 }
