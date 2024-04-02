@@ -18,6 +18,7 @@
 **Ticket / Issue**
 
 <!-- If you have a Notion Ticket / GitHub Issue -->
+<!-- Fixes [Notion ticket #123](https://notion.so/abc) -->
 
 **Testing instructions**
 
