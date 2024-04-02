@@ -222,8 +222,8 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
-  const supportLink = `${supportURL}${	
-    isCLE ? "/base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"	
+  const supportLink = `${supportURL}${
+    isCLE ? "/base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"
   }`;
 
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
@@ -235,7 +235,7 @@ export default function StepRepresentants() {
       <DSFRContainer title="Mes représentants légaux" supportLink={supportLink} supportEvent="Phase0/aide inscription - rep leg">
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+        <hr className="my-4" />
         <div className="flex items-center gap-4">
           <CheckBox
             checked={isParent2Visible}

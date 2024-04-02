@@ -305,6 +305,12 @@ const Schema = new mongoose.Schema({
       description: "JVA mission ID",
     },
   },
+  apiEngagementId: {
+    type: String,
+    documentation: {
+      description: "Api Engagement mission ID",
+    },
+  },
   jvaRawData: mongoose.Schema.Types.Mixed,
 
   applicationStatus: {

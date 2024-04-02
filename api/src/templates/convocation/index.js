@@ -23,10 +23,10 @@ const datefns = require("date-fns");
 var { fr } = require("date-fns/locale");
 
 function getBg() {
-  return getSignedUrl("convocation/convocation_template_base_2024.png");
+  return getSignedUrl("convocation/convocation_template_base_2024_V2.png");
 }
 function getTop() {
-  return getSignedUrl("convocation/top.png");
+  return getSignedUrl("convocation/top_V2.png");
 }
 function getBottom() {
   return getSignedUrl("convocation/bottom.png");
@@ -84,12 +84,21 @@ const render = async (young) => {
         .replace(/{{COHESION_CENTER_ADDRESS}}/g, sanitizeAll(center.address))
         .replace(/{{COHESION_CENTER_ZIP}}/g, sanitizeAll(center.zip))
         .replace(/{{COHESION_CENTER_CITY}}/g, sanitizeAll(center.city))
+        .replace(/{{MEETING_DATE}}/g, sanitizeAll("<b>Le</b> " + dayjs(departureDate).locale("fr-FR").format("dddd DD MMMM YYYY")))
+        .replace(/{{MEETING_HOURS}}/g, sanitizeAll(`<b>A</b> ${meetingPoint ? ligneToPoint.meetingHour : "16:00"}`))
+        .replace(/{{MEETING_ADDRESS}}/g, sanitizeAll(`<b>Au</b> ${getMeetingAddress(meetingPoint, center)}`))
+        .replace(/{{TRANSPORT}}/g, sanitizeAll(ligneBus ? `<b>Numéro de transport</b> : ${ligneBus.busId}` : ""))
         .replace(/{{MEETING_DATE_RETURN}}/g, sanitizeAll(dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")))
         .replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()))
         .replace(/{{TOP}}/g, sanitizeAll(getTop()))
         .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
         .replace(/{{GENERAL_BG}}/g, sanitizeAll(getBg()))
-        .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
+        .replace(
+          /{{LUNCH_BREAK}}/g,
+          sanitizeAll(
+            ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>` : "",
+          ),
+        );
     } else {
       const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
       return html
@@ -125,7 +134,12 @@ const render = async (young) => {
         .replace(/{{TOP}}/g, sanitizeAll(getTop()))
         .replace(/{{BOTTOM}}/g, sanitizeAll(getBottom()))
         .replace(/{{GENERAL_BG}}/g, sanitizeAll(young.cohort === "Octobre 2023 - NC" ? getBGForNc() : getBg()))
-        .replace(/{{LUNCH_BREAK}}/g, sanitizeAll(ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid pour le repas.</li>` : ""));
+        .replace(
+          /{{LUNCH_BREAK}}/g,
+          sanitizeAll(
+            ligneBus?.lunchBreak ? `<li>une collation ou un déjeuner froid selon la durée de votre trajet entre le lieu de rassemblement et le centre du séjour.</li>` : "",
+          ),
+        );
     }
   } catch (e) {
     capture(e);

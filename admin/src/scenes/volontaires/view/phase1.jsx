@@ -2,17 +2,18 @@ import React, { useEffect, useState } from "react";
 import { ImQuotesLeft } from "react-icons/im";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
+import ModalConfirm from "@/components/modals/ModalConfirm";
 
+import { YOUNG_SOURCE } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
-import ExternalLink from "../../../assets/icons/ExternalLink";
-import Refresh from "../../../assets/icons/Refresh";
-import { adminURL } from "../../../config";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
-import { getCohortByName } from "../../../services/cohort.service";
-import { YOUNG_STATUS_PHASE1, canAssignManually, translate, youngCheckinField } from "../../../utils";
+import ExternalLink from "@/assets/icons/ExternalLink";
+import Refresh from "@/assets/icons/Refresh";
+import { adminURL } from "@/config";
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import { getCohortByName } from "@/services/cohort.service";
+import { YOUNG_STATUS_PHASE1, canAssignManually, translate, youngCheckinField } from "@/utils";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import ModalAffectations from "../components/ModalAffectation";
@@ -117,8 +118,8 @@ export default function Phase1(props) {
               meetingPoint?.bus?.delayedForth === "true" && meetingPoint?.bus?.delayedBack === "true"
                 ? "à l'Aller et au Retour"
                 : meetingPoint?.bus?.delayedForth === "true"
-                ? "à l'Aller"
-                : "au Retour"
+                  ? "à l'Aller"
+                  : "au Retour"
             }.`}
           />
         ) : null}
@@ -202,6 +203,10 @@ export default function Phase1(props) {
                       <div>Les informations de transport seront transmises par email.</div>
                     ) : young?.deplacementPhase1Autonomous === "true" ? (
                       <div>{young.firstName} se rend au centre et en revient par ses propres moyens.</div>
+                    ) : young?.source === YOUNG_SOURCE.CLE ? (
+                      <>
+                        <div>Le point de rassemblement n&apos;a pas été confirmé par le référent régional.</div>
+                      </>
                     ) : editing ? (
                       <>
                         <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement.</div>

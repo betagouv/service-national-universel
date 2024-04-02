@@ -1,7 +1,6 @@
 import React from "react";
-import { FiChevronLeft } from "react-icons/fi";
-import PrimaryButton from "./PrimaryButton";
-import SecondaryButton from "./SecondaryButton";
+import { Button } from "@snu/ds/dsfr";
+import { fr } from "@codegouvfr/react-dsfr";
 
 export default function SignupButtonContainer({
   onClickNext,
@@ -13,19 +12,23 @@ export default function SignupButtonContainer({
   text = "",
 }) {
   return (
-    <div className="fixed bottom-0 left-0 mx-auto w-full bg-white py-4 px-[1rem] shadow-ninaInverted md:relative md:px-0 md:shadow-none ">
-      <hr className="mb-8 hidden h-px border-0 bg-gray-200 md:block" />
+    <div className="fixed sm:z-10 md:z-auto bottom-0 left-0 mx-auto w-full bg-white py-4 px-[1rem] shadow-ninaInverted md:relative md:px-0 md:shadow-none ">
       <div className={`flex ${!collapsePrevious && "flex-col-reverse md:flex-row"} justify-center gap-2 md:justify-end items-center`}>
         {onClickPrevious && (
-          <SecondaryButton className={`${collapsePrevious ? "w-auto" : "w-full md:w-auto"} `} onClick={onClickPrevious}>
-            {onClickNext && collapsePrevious ? <FiChevronLeft className="block md:hidden" /> : <p className="block w-64 md:hidden">{labelPrevious}</p>}
-            <p className="hidden md:block">{labelPrevious}</p>
-          </SecondaryButton>
+          <Button priority="secondary" className={`justify-center ${collapsePrevious ? "!w-auto" : "sm:!w-full md:!w-auto"} `} onClick={onClickPrevious}>
+            {collapsePrevious ? (
+              <i className={fr.cx("fr-icon-arrow-left-s-line", "text-[var(--background-action-high-blue-france)]", "md:hidden")}></i>
+            ) : (
+              <span className="block w-64 md:hidden">{labelPrevious}</span>
+            )}
+            <span className="sm:hidden md:block">{labelPrevious}</span>
+          </Button>
         )}
+
         {onClickNext && (
-          <PrimaryButton onClick={onClickNext} disabled={disabled}>
+          <Button onClick={onClickNext} className={`sm:!w-full items-center justify-center bg md:!w-auto `} disabled={disabled}>
             {labelNext}
-          </PrimaryButton>
+          </Button>
         )}
       </div>
       {text && <p className="md:text-right text-sm mt-3">{text}</p>}

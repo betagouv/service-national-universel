@@ -596,6 +596,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       }
       if (busLine.classeId) {
         const classe = await ClasseModel.findById(busLine.classeId);
+        if (!classe) return res.status(404).send({ ok: false, code: `La classe (ID: ${busLine.classeId}) n'existe pas. Vérifiez les données.` });
         classe.set({ ligneId: busLine._id });
         await classe.save();
       }

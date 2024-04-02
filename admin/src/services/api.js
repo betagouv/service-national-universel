@@ -25,7 +25,7 @@ class api {
     this.token = token;
   }
 
-  checkToken() {
+  checkToken(shouldRefresh) {
     return new Promise(async (resolve, reject) => {
       try {
         const controller = new AbortController();
@@ -33,7 +33,7 @@ class api {
 
         window.addEventListener("beforeunload", () => controller.abort());
 
-        const response = await fetch(`${apiURL}/referent/signin_token`, {
+        const response = await fetch(`${apiURL}/referent/${shouldRefresh ? "refresh_token" : "signin_token"}`, {
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],

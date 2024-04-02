@@ -1,5 +1,7 @@
 const { Media } = require("reactstrap");
 const colors = require("tailwindcss/colors");
+const plugin = require("tailwindcss/plugin");
+
 /* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
   presets: [require("@snu/ds/tailwind.config")],
@@ -24,6 +26,10 @@ module.exports = {
       print: { raw: "print" },
     },
     extend: {
+      transitionProperty: {
+        height: "height",
+        maxHeight: "max-height",
+      },
       lineHeight: {
         12: "3rem",
       },
@@ -99,7 +105,23 @@ module.exports = {
     },
     maxHeight: {
       0: "0",
+      42: "0",
+      32: "8rem",
+      36: "9rem",
+      40: "10rem",
+      44: "11rem",
+      48: "12rem",
+      52: "13rem",
+      56: "14rem",
+      60: "15rem",
+      62: "16rem",
+      66: "17rem",
       80: "20rem",
+      84: "21rem",
+      88: "22rem",
+      90: "23rem",
+      94: "24rem",
+      96: "25rem",
       "1/4": "25%",
       "1/2": "50%",
       "3/4": "75%",
@@ -109,5 +131,9 @@ module.exports = {
   variants: {
     extend: {},
   },
-  plugins: [],
+  plugins: [
+    plugin(function ({ addVariant }) {
+      addVariant("third", "&:nth-child(3)");
+    }),
+  ],
 };

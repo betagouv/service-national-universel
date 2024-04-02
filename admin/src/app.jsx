@@ -64,6 +64,7 @@ import Team from "./scenes/team";
 import SideBar from "./components/drawer/SideBar";
 import { getCohorts } from "./services/cohort.service";
 import RestorePreviousSignin from "./components/RestorePreviousSignin";
+import useRefreshToken from "./hooks/useRefreshToken";
 
 initSentry();
 initApi();
@@ -146,6 +147,8 @@ const Home = (props) => {
     }
     fetchData();
   }, []);
+
+  useRefreshToken();
 
   useEffect(() => {
     if (!user) return;
