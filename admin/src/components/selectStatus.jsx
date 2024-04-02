@@ -94,7 +94,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         setStatus(status);
       },
       title: "Modification de statut",
-      message: "Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.",
+      message: "Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utilisateur.",
     });
   };
 

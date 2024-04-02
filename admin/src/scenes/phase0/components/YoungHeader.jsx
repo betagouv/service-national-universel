@@ -116,7 +116,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       title: status === YOUNG_STATUS.WITHDRAWN ? "Désistement" : "Modification de statut",
       message: `${
         status === YOUNG_STATUS.WITHDRAWN ? `Êtes-vous sûr(e) de vouloir désister ce profil?` : `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?`
-      } Un email sera automatiquement envoyé à l'utlisateur.`,
+      } Un email sera automatiquement envoyé à l'utilisateur.`,
       type: status,
     });
   };
