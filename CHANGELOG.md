@@ -1,3 +1,11 @@
+# [1.397.0](https://github.com/betagouv/service-national-universel/compare/v1.396.2...v1.397.0) (2024-04-02)
+
+
+### Features
+
+* **admin:** 1694 - HTS to CLE Attestation when phase1 has been done ([#3701](https://github.com/betagouv/service-national-universel/issues/3701)) ([a3254b6](https://github.com/betagouv/service-national-universel/commit/a3254b686ae31e9dc0c1bb768a7d73fe23a08cdc))
+* **api/admin:** 1877 - Restore previous signin when ADMIN [#3588](https://github.com/betagouv/service-national-universel/issues/3588) ([#3667](https://github.com/betagouv/service-national-universel/issues/3667)) ([8837c2b](https://github.com/betagouv/service-national-universel/commit/8837c2b4e0c73a0c756a18171478dead1a30623e))
+
 ### Bug Fixes
 
 * **api, app:** 2064 - Prevent RI revalidation for youngs that won't do phase1 anyway. ([#3690](https://github.com/betagouv/service-national-universel/issues/3690)) ([ae26e2b](https://github.com/betagouv/service-national-universel/commit/ae26e2bf16d442e2ff4a8319b9ed6e782b7f02ea))
