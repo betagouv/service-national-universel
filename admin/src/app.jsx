@@ -68,6 +68,7 @@ import useRefreshToken from "./hooks/useRefreshToken";
 
 import SideBar from "./components/drawer/SideBar";
 import ApplicationError from "./components/layout/ApplicationError";
+import NotFound from "./components/layout/NotFound";
 
 initSentry();
 initApi();
@@ -87,7 +88,7 @@ export default function App() {
             <SentryRoute path="/creer-mon-compte" component={Signup} />
             {/* Authentification accessoire */}
             <SentryRoute path="/auth" component={Auth} />
-            {/* Authentification nécessaire */}
+            {/* Page par default (404 et Home) */}
             <SentryRoute path="/" component={Home} />
           </Switch>
         </div>
@@ -255,6 +256,8 @@ const Home = () => {
                 {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
                 {/* DASHBOARD */}
                 <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
+                {/* Default route (redirection de la home et 404) */}
+                <RestrictedRoute path="/" component={(props) => <NotFound {...props} homePath="/dashboard" />} />
               </Switch>
             </Sentry.ErrorBoundary>
           </div>

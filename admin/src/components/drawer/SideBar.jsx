@@ -66,8 +66,10 @@ const SideBar = (props) => {
     if (!user || ![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role)) return;
     const getTickets = async () => {
       try {
-        const { data } = await api.get("/SNUpport/ticketscount");
-        props.dispatchTickets(data);
+        const { data: tickets } = await api.get("/SNUpport/ticketscount");
+        if (tickets) {
+          props.dispatchTickets(tickets);
+        }
       } catch (error) {
         console.log(error);
       }
