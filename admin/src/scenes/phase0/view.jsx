@@ -38,6 +38,7 @@ import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "./commons";
 import Check from "../../assets/icons/Check";
+import MiniSwitch from "./components/MiniSwitch";
 import FranceConnect from "../../assets/icons/FranceConnect";
 import SchoolEditor from "./components/SchoolEditor";
 import validator from "validator";
@@ -59,7 +60,6 @@ import { Link } from "react-router-dom";
 import { Button, ModalConfirmation } from "@snu/ds/admin";
 import { FaCheck } from "react-icons/fa6";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
-import AddressForm from "@/components/forms/AddressForm";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -84,10 +84,10 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts);
   const [currentCorrectionRequestField, setCurrentCorrectionRequestField] = useState("");
-  const [requests, setRequests] = useState(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
+  const [requests, setRequests] = useState([]);
   const [processing, setProcessing] = useState(false);
-  const cohort = cohorts?.find((c) => c.name === young.cohort || undefined);
-  const oldCohort = !cohort;
+  const [cohort, setCohort] = useState(undefined);
+  const [oldCohort, setOldCohort] = useState(true);
   const [footerMode, setFooterMode] = useState("NO_REQUEST");
   const [footerClass, setFooterClass] = useState("");
 
@@ -110,6 +110,19 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
     if (localStorage?.getItem("sideBarOpen") === "false") setFooterClass("left-[88px]");
     else setFooterClass("left-[220px]");
   }, []);
+
+  useEffect(() => {
+    if (young) {
+      setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
+      const currentCohort = cohorts.find((c) => c.name === young.cohort);
+      setCohort(currentCohort);
+      setOldCohort(!currentCohort);
+    } else {
+      setRequests([]);
+      setCohort(undefined);
+      setOldCohort(true);
+    }
+  }, [young]);
 
   useEffect(() => {
     if (requests.some((r) => r.status === "PENDING")) {
@@ -608,19 +621,31 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   );
 }
 
-function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
+function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false, user }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState(young || {});
+  const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
-  const birthDate = getBirthDate || { day: "", month: "", year: "" };
+  const [birthDate, setBirthDate] = useState({ day: "", month: "", year: "" });
   const [errors, setErrors] = useState({});
 
-  function getBirthDate() {
+  useEffect(() => {
+    if (young) {
+      setData({ ...young });
+    } else {
+      setData({});
+    }
+  }, [young]);
+
+  useEffect(() => {
+    setSectionMode(globalMode);
+  }, [globalMode]);
+
+  useEffect(() => {
     if (data && data.birthdateAt) {
       const date = dayjs(data.birthdateAt);
-      return { day: date.date(), month: date.format("MMMM"), year: date.year() };
+      setBirthDate({ day: date.date(), month: date.format("MMMM"), year: date.year() });
     }
-  }
+  }, [data]);
 
   function onSectionChangeMode(mode) {
     setSectionMode(mode === "default" ? globalMode : mode);
@@ -696,36 +721,20 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
     return result;
   }
 
-  const addressData = {
-    address: data.address,
-    zip: data.zip,
-    city: data.city,
-    country: data.country,
-    region: data.region,
-    department: data.department,
-    location: data.location,
-    coordinatesAccuracyLevel: data.coordinatesAccuracyLevel,
-    addressVerified: data.addressVerified,
+  const onVerifyAddress = (isConfirmed) => (suggestion) => {
+    setData({
+      ...data,
+      addressVerified: true,
+      cityCode: suggestion.cityCode,
+      region: suggestion.region,
+      department: suggestion.department,
+      location: suggestion.location,
+      // if the suggestion is not confirmed we keep the address typed by the user
+      address: isConfirmed ? suggestion.address : data.address,
+      zip: isConfirmed ? suggestion.zip : data.zip,
+      city: isConfirmed ? suggestion.city : data.city,
+    });
   };
-
-  function updateAddress(data) {
-    setData({ ...data, addressVerified: true });
-  }
-
-  // const onVerifyAddress = (isConfirmed) => (suggestion) => {
-  //   setData({
-  //     ...data,
-  //     addressVerified: true,
-  //     cityCode: suggestion.cityCode,
-  //     region: suggestion.region,
-  //     department: suggestion.department,
-  //     location: suggestion.location,
-  //     // if the suggestion is not confirmed we keep the address typed by the user
-  //     address: isConfirmed ? suggestion.address : data.address,
-  //     zip: isConfirmed ? suggestion.zip : data.zip,
-  //     city: isConfirmed ? suggestion.city : data.city,
-  //   });
-  // };
 
   const nationalityOptions = [
     { value: "true", label: translate("true") },
@@ -883,7 +892,6 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
             </div>
           )}
           <div className="mt-[32px]">
-            <AddressForm data={addressData} updateData={updateAddress} />
             <MiniTitle>Adresse</MiniTitle>
             <Field
               name="address"
@@ -946,7 +954,7 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
               <Field name="department" label="Département" value={data.department} mode="readonly" className="mr-[8px] flex-[1_1_50%]" />
               <Field name="region" label="Région" value={data.region} mode="readonly" className="ml-[8px] flex-[1_1_50%]" />
             </div>
-            {/* {sectionMode === "edition" && data.country && data.country.toUpperCase() === "FRANCE" && (
+            {sectionMode === "edition" && data.country && data.country.toUpperCase() === "FRANCE" && (
               <VerifyAddress
                 address={data.address}
                 zip={data.zip}
@@ -956,7 +964,7 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
                 isVerified={data.addressVerified === true}
                 buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
               />
-            )} */}
+            )}
           </div>
           {data.foreignAddress && (
             <div className="mt-[32px]">

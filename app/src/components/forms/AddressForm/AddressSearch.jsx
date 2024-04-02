@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import useAddress from "@/services/useAddress";
 import { useDebounce } from "@uidotdev/usehooks";
-import Combobox from "../Combobox";
+import Combobox from "../inputs/Combobox";
 
 export default function AddressSearch({ updateData, label }) {
   const [query, setQuery] = useState("");
