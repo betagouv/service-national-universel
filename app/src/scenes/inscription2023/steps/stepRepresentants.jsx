@@ -304,7 +304,7 @@ const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
         stateRelatedMessage={corrections[`parent${i}LastName`] || errors[`parent${i}LastName`]}
       />
       <Input
-        label="Son nom"
+        label="Son email"
         nativeInputProps={{
           value: data[`parent${i}Email`],
           onChange: (e) => setData({ ...data, [`parent${i}Email`]: e.target.value }),
