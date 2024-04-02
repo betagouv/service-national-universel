@@ -18,7 +18,7 @@ function addOneDay(date) {
 export function shouldReAcceptRI(young, cohort) {
   const newRiDate = new Date(REGLEMENT_INTERIEUR_VERSION);
   const cohortStartDate = new Date(cohort?.dateStart);
-  if (cohortStartDate >= newRiDate && young?.acceptRI != REGLEMENT_INTERIEUR_VERSION) {
+  if (permissionPhase1(young) && cohortStartDate >= newRiDate && young?.acceptRI != REGLEMENT_INTERIEUR_VERSION) {
     return true;
   }
   return false;

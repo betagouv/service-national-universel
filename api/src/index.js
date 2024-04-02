@@ -159,7 +159,7 @@
   app.use("/waiting-list", require("./controllers/waiting-list"));
   app.use("/young", require("./controllers/young/index"));
   app.use("/young-edition", require("./controllers/young-edition"));
-  app.use("/zammood", require("./controllers/zammood"));
+  app.use("/SNUpport", require("./controllers/SNUpport"));
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));

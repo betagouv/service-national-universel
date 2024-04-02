@@ -18,6 +18,7 @@ import plausibleEvent from "../../services/plausible";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import { captureEvent } from "@sentry/react";
 import styled from "styled-components";
+import { signinAs } from "@/utils/signinAs";
 
 export default function UserPanel({ onChange, value }) {
   const user = useSelector((state) => state.Auth.user);
@@ -30,11 +31,9 @@ export default function UserPanel({ onChange, value }) {
   const handleImpersonate = async () => {
     try {
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
-      const { ok, data, token } = await api.post(`/referent/signin_as/referent/${value._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
+      const data = await signinAs("referent", value._id);
+      dispatch(setUser(data));
       history.push("/dashboard");
-      if (token) api.setToken(token);
-      if (data) dispatch(setUser(data));
     } catch (e) {
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
     }

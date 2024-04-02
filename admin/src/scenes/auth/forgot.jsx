@@ -34,7 +34,7 @@ export default function Forgot() {
                 <form onSubmit={handleSubmit} className="mb-6 flex flex-col items-start gap-4">
                   {mail ? (
                     <>
-                      <h1 className="mb-4 mb-0 text-xl font-bold text-brand-black md:text-3xl">Email envoyé à : {mail}</h1>
+                      <h1 className="mb-4 mb-0 text-xl font-bold text-brand-black md:text-3xl">Email envoyé à : «&nbsp;{mail}&nbsp;»</h1>
                       <h2 className="mb-8 mb-0 text-base font-normal text-brand-grey">
                         Si vous possedez un compte chez nous, un email contenant les instructions pour réinitialiser votre mot de passe vient de vous être envoyé.
                       </h2>
