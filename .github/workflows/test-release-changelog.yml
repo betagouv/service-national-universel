@@ -15,14 +15,11 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
-      with:
-        ref: main
-        fetch-depth: 0
 
     - name: Prepare
       id: prepare
       run : |
-        main_sha=$(git rev-parse HEAD)
+        main_sha=$(git rev-parse origin/main)
         echo "main_sha: $main_sha"
         echo "main_sha=$main_sha" >> $GITHUB_OUTPUT
 
