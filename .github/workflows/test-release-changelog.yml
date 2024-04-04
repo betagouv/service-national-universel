@@ -35,3 +35,15 @@ jobs:
         echo "# [$(date -Idate)](https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }})" > CHANGELOG.md
         git log --pretty="- %s" ${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }} >> CHANGELOG.md
         cat CHANGELOG.md
+
+    - name: Slack Post
+      uses: slackapi/slack-github-action@v1.25.0
+      with:
+        # Slack channel id, channel name, or user id to post message.
+        # See also: https://api.slack.com/methods/chat.postMessage#channels
+        # You can pass in multiple channels to post to by providing a comma-delimited list of channel IDs.
+        channel-id: '#test-rt'
+        # For posting a simple plain text message
+        slack-message: "GitHub build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
