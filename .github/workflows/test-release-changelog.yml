@@ -19,12 +19,11 @@ jobs:
     - name: Prepare
       id: prepare
       run : |
-        git fetch origin main
+        git fetch origin main production
         main_sha=$(git rev-parse origin/main)
         echo "main_sha: $main_sha"
         echo "main_sha=$main_sha" >> $GITHUB_OUTPUT
 
-        git fetch origin production
         production_sha=$(git rev-parse origin/production)
         echo "production_sha: $production_sha"
         echo "production_sha=$production_sha" >> $GITHUB_OUTPUT
@@ -32,9 +31,7 @@ jobs:
     - name: "print changelog"
       id: changelog
       run : |
-        git fetch --all --prune
         echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }}|Release du $(date -Idate)>" > CHANGELOG.md
-        git log --pretty="• %s" "origin/production...origin/main"
         git log --pretty="• %s" "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }}" \
           | sed 's #\([0-9]*\) <https://github.com/betagouv/service-national-universel/pull/\1|#\1> g' \
           >> CHANGELOG.md
