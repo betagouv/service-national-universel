@@ -1,4 +1,4 @@
-FROM node:18.16-alpine AS base
+FROM node:18.16.0-alpine AS base
 
 
 
