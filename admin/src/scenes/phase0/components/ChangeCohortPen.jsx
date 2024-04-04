@@ -35,7 +35,7 @@ export function ChangeCohortPen({ young, onChange }) {
       if (Array.isArray(data)) {
         const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible, type: c.type })).filter((c) => c.name !== young.cohort);
         // TODO: rajouter un flag hidden pour les cohort non visible
-
+        cohorts.push({ name: "à venir", type: "VOLONTAIRE" });
         setOptions(cohorts);
       } else setOptions([]);
     })();
