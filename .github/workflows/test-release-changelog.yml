@@ -35,9 +35,15 @@ jobs:
       run : |
         echo "# [$(date -Idate)](https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }})" > CHANGELOG.md
         git log --pretty="- %s" ${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }} >> CHANGELOG.md
-        changelog=$(cat CHANGELOG.md)
         cat CHANGELOG.md
-        echo "changelog=$(cat CHANGELOG.md)" >> $GITHUB_OUTPUT
+        {
+          echo 'changelog<<EOF'
+          cat CHANGELOG.md
+          echo EOF
+        } >> "$GITHUB_ENV"
+
+    - name: debug
+      run : echo "${{ steps.changelog.outputs.changelog }}"
 
     - name: Slack Post
       uses: slackapi/slack-github-action@v1.25.0
