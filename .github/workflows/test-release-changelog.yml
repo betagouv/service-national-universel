@@ -1,0 +1,26 @@
+name: Test Release Changelog
+
+on:
+  push:
+    branches:
+      - 2214_release_changelog
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v4
+      with:
+        ref: main
+        fetch-depth: 0
+
+    - name: "✏️ Generate release changelog"
+      id: changelog
+      uses: heinrichreimer/action-github-changelog-generator@v2.3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: "print changelog"
+      run : |
+        echo ${{ steps.changelog.outputs.changelog }}
