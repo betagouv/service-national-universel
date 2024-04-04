@@ -40,7 +40,7 @@ jobs:
           echo 'changelog<<EOF'
           cat CHANGELOG.md
           echo EOF
-        } >> "$GITHUB_ENV"
+        } >> "$GITHUB_OUTPUT"
 
     - name: debug
       run : echo "${{ steps.changelog.outputs.changelog }}"
