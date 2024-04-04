@@ -32,9 +32,18 @@ jobs:
     - name: "print changelog"
       id: changelog
       run : |
+        git fetch --all --prune
         echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }}|Release du $(date -Idate)>" > CHANGELOG.md
-        git log --pretty="• %s" "origin/production...origin/main" --
-
+        git log --pretty="• %s" "origin/production...origin/main"
+        git log --pretty="• %s" "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }}" \
+          | sed 's #\([0-9]*\) <https://github.com/betagouv/service-national-universel/pull/\1|#\1> g' \
+          >> CHANGELOG.md
+        cat CHANGELOG.md
+        {
+          echo 'changelog<<EOF'
+          cat CHANGELOG.md
+          echo EOF
+        } >> "$GITHUB_OUTPUT"
 
     # - name: debug
     #   run : echo ${{ steps.changelog.outputs.changelog }}
