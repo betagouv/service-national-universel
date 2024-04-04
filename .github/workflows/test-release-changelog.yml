@@ -36,8 +36,8 @@ jobs:
         echo "# [$(date -Idate)](https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }})" > CHANGELOG.md
         git log --pretty="- %s" ${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }} >> CHANGELOG.md
         changelog=$(cat CHANGELOG.md)
-        echo $changelog
-        echo "changelog=$changelog" >> $GITHUB_OUTPUT
+        cat CHANGELOG.md
+        echo "changelog=$(cat CHANGELOG.md)" >> $GITHUB_OUTPUT
 
     - name: Slack Post
       uses: slackapi/slack-github-action@v1.25.0
