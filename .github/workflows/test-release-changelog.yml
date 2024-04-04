@@ -33,7 +33,7 @@ jobs:
     - name: "print changelog"
       id: changelog
       run : |
-        echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }})|Release du $(date -Idate)>" > CHANGELOG.md
+        echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }}|Release du $(date -Idate)>" > CHANGELOG.md
         git log --pretty="- %s" ${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }} >> CHANGELOG.md
         cat CHANGELOG.md
         {
@@ -43,7 +43,7 @@ jobs:
         } >> "$GITHUB_OUTPUT"
 
     - name: debug
-      run : echo "${{ steps.changelog.outputs.changelog }}"
+      run : echo ${{ steps.changelog.outputs.changelog }}
 
     - name: Slack Post
       uses: slackapi/slack-github-action@v1.25.0
