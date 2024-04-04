@@ -33,6 +33,7 @@ jobs:
       run : |
         echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }}|Release du $(date -Idate)>" > CHANGELOG.md
         git log --pretty="• %s" "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }}" \
+          | sort \
           | sed 's #\([0-9]*\) <https://github.com/betagouv/service-national-universel/pull/\1|#\1> g' \
           >> CHANGELOG.md
         cat CHANGELOG.md
