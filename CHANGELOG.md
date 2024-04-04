@@ -1,3 +1,18 @@
+# [1.398.0](https://github.com/betagouv/service-national-universel/compare/v1.397.0...v1.398.0) (2024-04-04)
+
+
+### Bug Fixes
+
+* **admin:** Reopen boite reception temporairement ([d0e20b1](https://github.com/betagouv/service-national-universel/commit/d0e20b173d1889d149dc8eb59da01dc688925eda))
+* **app:** 2160 - Fixed ES filter isMilitaryPreparation. ([5b7a1f5](https://github.com/betagouv/service-national-universel/commit/5b7a1f56b3f1ef3423583036382dd2b3fdb7127f))
+
+
+### Features
+
+* **api:** 1993 - Add sentry-cron integration ([#3707](https://github.com/betagouv/service-national-universel/issues/3707)) ([327d740](https://github.com/betagouv/service-national-universel/commit/327d7402a22c3b70ea1eb2567202c46a05a17abf))
+* **app:** 2160 - Filtering military preparations for CLE. ([#3708](https://github.com/betagouv/service-national-universel/issues/3708)) ([effac47](https://github.com/betagouv/service-national-universel/commit/effac47a28f1c20a91cf65e87b23577b6cfa2149))
+* **app, admin:** 2055 - add "à venir" in changeSejour form ([#3697](https://github.com/betagouv/service-national-universel/issues/3697)) ([9d5efc8](https://github.com/betagouv/service-national-universel/commit/9d5efc8bb7c671fb2f1cd3febfc30bd77e230207))
+
 # [1.397.0](https://github.com/betagouv/service-national-universel/compare/v1.396.2...v1.397.0) (2024-04-02)
 
 
