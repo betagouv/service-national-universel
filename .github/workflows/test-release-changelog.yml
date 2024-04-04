@@ -33,7 +33,7 @@ jobs:
     - name: "print changelog"
       id: changelog
       run : |
-        echo "[$(date -Idate)](https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }})" > CHANGELOG.md
+        echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }})|$(date -Idate)>" > CHANGELOG.md
         git log --pretty="* %s" ${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }} >> CHANGELOG.md
         cat CHANGELOG.md
         {
