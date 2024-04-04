@@ -45,8 +45,9 @@ const cleanData = async () => {
 exports.handler = async () => {
   if (!API_ENGAGEMENT_KEY) {
     slack.error({ title: "sync with missions api-engagement", text: "I do not have any API_ENGAGEMENT_KEY !" });
-    captureMessage("NO API_ENGAGEMENT_KEY");
-    return;
+    const err = new Error("NO API_ENGAGEMENT_KEY");
+    capture(err);
+    throw err;
   }
   try {
     const myHeaders = new fetch.Headers();
@@ -59,5 +60,6 @@ exports.handler = async () => {
     fetchData(requestOptions);
   } catch (e) {
     capture(e);
+    throw e;
   }
 };

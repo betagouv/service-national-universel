@@ -17,6 +17,7 @@ import DesignSystemPage from "./scenes/develop/DesignSystemPage";
 import DSNJExport from "./scenes/dsnj-export";
 import EditTransport from "./scenes/edit-transport";
 import Goal from "./scenes/goal";
+import Inbox from "./scenes/inbox";
 import Inscription from "./scenes/inscription";
 import Missions from "./scenes/missions";
 import LigneBus from "./scenes/plan-transport/ligne-bus";
@@ -53,7 +54,7 @@ import Footer from "./components/footer";
 import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
 
-import { adminURL, environment } from "./config";
+import { adminURL } from "./config";
 import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
 
 import * as Sentry from "@sentry/react";
@@ -63,6 +64,7 @@ import Team from "./scenes/team";
 
 import SideBar from "./components/drawer/SideBar";
 import { getCohorts } from "./services/cohort.service";
+import RestorePreviousSignin from "./components/RestorePreviousSignin";
 import useRefreshToken from "./hooks/useRefreshToken";
 
 initSentry();
@@ -209,9 +211,10 @@ const Home = (props) => {
 
   return (
     <div>
+      <RestorePreviousSignin />
+
       <div className="flex">
         <SideBar sessionsList={sessionPhase1List} />
-
         <div className="flex flex-col w-full">
           <div className={`flex-1  min-h-screen`}>
             <Switch>
@@ -230,6 +233,7 @@ const Home = (props) => {
               <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
               <RestrictedRoute path="/association" component={Association} />
               <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
+              <RestrictedRoute path="/boite-de-reception" component={Inbox} />
               <RestrictedRoute path="/equipe" component={Team} />
               <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
               {/* Plan de transport */}

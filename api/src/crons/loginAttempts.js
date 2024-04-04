@@ -20,5 +20,6 @@ const clean = async (model) => {
   } catch (e) {
     capture(e);
     slack.error({ title: "loginAttempts", text: JSON.stringify(e) });
+    throw e;
   }
 };
