@@ -9,9 +9,10 @@ import MissionFilters from "./components/MissionFilters";
 import MissionList from "./components/MissionList";
 import Loader from "../../../components/Loader";
 import { HiOutlineAdjustments } from "react-icons/hi";
+import useAuth from "@/services/useAuth";
 
 export default function List() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const [data, setData] = useState();
   const urlParams = new URLSearchParams(window.location.search);
   const isMilitaryPreparation = Boolean(urlParams.get("MILITARY_PREPARATION"));
@@ -36,6 +37,7 @@ export default function List() {
     debounce(async (filters, page, size, sort, setData) => {
       try {
         if (!filters.location?.lat || !filters.distance) return;
+        if (isCLE) filters.isMilitaryPreparation = "false";
         const res = await api.post("/elasticsearch/mission/young/search", { filters, page, size, sort });
         setData(res.data);
       } catch (e) {
