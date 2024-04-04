@@ -35,6 +35,7 @@ jobs:
       run : |
         echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }}|Release du $(date -Idate)>" > CHANGELOG.md
         git log --pretty="- %s" ${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }} >> CHANGELOG.md
+        echo "- test\n- test2\n" >> CHANGELOG.md
         cat CHANGELOG.md
         {
           echo 'changelog<<EOF'
@@ -56,15 +57,3 @@ jobs:
         slack-message: "${{ steps.changelog.outputs.changelog }}"
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
-    - name: Slack POST (webhook)
-      uses: slackapi/slack-github-action@v1.25.0
-      with:
-        # For posting a rich message using Block Kit
-        payload: |
-          {
-            "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
