@@ -12,16 +12,15 @@ import { HiOutlineAdjustments } from "react-icons/hi";
 import useAuth from "@/services/useAuth";
 
 export default function List() {
-  const { young, isCLE } = useAuth();
+  const { young } = useAuth();
   const [data, setData] = useState();
   const urlParams = new URLSearchParams(window.location.search);
-  const isMilitaryPreparation = Boolean(urlParams.get("MILITARY_PREPARATION"));
+  const canDoMilitaryPreparation = young?.frenchNationality === "true";
 
   const [filters, setFilters] = useState({
     domains: [],
     distance: 50,
     location: young?.location || {},
-    isMilitaryPreparation: isMilitaryPreparation || false,
     period: "",
     subPeriod: [],
     searchbar: "",
@@ -37,7 +36,6 @@ export default function List() {
     debounce(async (filters, page, size, sort, setData) => {
       try {
         if (!filters.location?.lat || !filters.distance) return;
-        if (isCLE) filters.isMilitaryPreparation = "false";
         const res = await api.post("/elasticsearch/mission/young/search", { filters, page, size, sort });
         setData(res.data);
       } catch (e) {
@@ -47,6 +45,13 @@ export default function List() {
     }, 250),
     [],
   );
+
+  useEffect(() => {
+    const isMilitaryPreparation = urlParams.get("MILITARY_PREPARATION");
+    if (isMilitaryPreparation || !canDoMilitaryPreparation) {
+      setFilters({ ...filters, isMilitaryPreparation: canDoMilitaryPreparation && isMilitaryPreparation });
+    }
+  }, []);
 
   useEffect(() => {
     updateOnFilterChange(filters, page, size, sort, setData);

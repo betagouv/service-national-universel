@@ -71,8 +71,7 @@ function _location(results) {
 }
 
 export default function MissionFilters({ filters, setFilters }) {
-  const { isCLE, young } = useAuth();
-
+  const { young } = useAuth();
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
   const [dropdownControlWhenOpen, setDropdownControlWhenOpen] = React.useState(false);
@@ -808,7 +807,7 @@ export default function MissionFilters({ filters, setFilters }) {
           <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={filters.domains.includes("ENVIRONMENT")} />
           <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={filters.domains.includes("SECURITY")} />
           <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={filters.domains.includes("CULTURE")} />
-          {!isCLE && (
+          {young?.frenchNationality === "true" && (
             <DomainFilter
               Icon={PreparationMilitaire}
               label="Préparations militaires"
