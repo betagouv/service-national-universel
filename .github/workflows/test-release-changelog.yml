@@ -42,8 +42,8 @@ jobs:
           echo EOF
         } >> "$GITHUB_OUTPUT"
 
-    - name: debug
-      run : echo ${{ steps.changelog.outputs.changelog }}
+    # - name: debug
+    #   run : echo ${{ steps.changelog.outputs.changelog }}
 
     - name: Slack Post
       uses: slackapi/slack-github-action@v1.25.0
