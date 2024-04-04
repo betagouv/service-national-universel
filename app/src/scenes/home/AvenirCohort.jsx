@@ -1,12 +1,11 @@
 import Img3 from "../../assets/homePhase2Mobile.png";
 import Img2 from "../../assets/homePhase2Desktop.png";
 import React from "react";
-import { useSelector } from "react-redux";
-import { YOUNG_STATUS } from "snu-lib";
+import useAuth from "@/services/useAuth";
 import Clock from "../../assets/icons/Clock";
 
 export default function FutureCohort() {
-  const young = useSelector((state) => state.Auth.young) || {};
+  const { young } = useAuth();
   const title = "Bonjour ";
   return (
     <main className="bg-white md:rounded-xl shadow-sm md:m-8 flex flex-col md:flex-row max-w-7xl pb-20 md:pb-0">
