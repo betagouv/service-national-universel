@@ -31,10 +31,13 @@ jobs:
         echo "production_sha=$production_sha" >> $GITHUB_OUTPUT
 
     - name: "print changelog"
+      id: changelog
       run : |
         echo "# [$(date -Idate)](https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }})" > CHANGELOG.md
         git log --pretty="- %s" ${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }} >> CHANGELOG.md
-        cat CHANGELOG.md
+        changelog=$(cat CHANGELOG.md)
+        echo $changelog
+        echo "changelog=$changelog" >> $GITHUB_OUTPUT
 
     - name: Slack Post
       uses: slackapi/slack-github-action@v1.25.0
@@ -44,6 +47,27 @@ jobs:
         # You can pass in multiple channels to post to by providing a comma-delimited list of channel IDs.
         channel-id: '#test-rt'
         # For posting a simple plain text message
-        slack-message: "GitHub build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+        slack-message: "${{ steps.changelog.outputs.changelog }}"
       env:
         SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+    - name: Slack POST (webhook)
+      uses: slackapi/slack-github-action@v1.25.0
+      with:
+        # For posting a rich message using Block Kit
+        payload: |
+          {
+            "text": "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "${{ steps.changelog.outputs.changelog }}"
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
