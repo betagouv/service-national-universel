@@ -8,6 +8,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    outputs:
+      main_sha: ${{ steps.prepare.outputs.main_sha }}
+      production_sha: ${{ steps.prepare.outputs.production_sha }}
+
     steps:
 
     - uses: actions/checkout@v4
@@ -15,12 +19,19 @@ jobs:
         ref: main
         fetch-depth: 0
 
-    - name: "✏️ Generate release changelog"
-      id: changelog
-      uses: heinrichreimer/action-github-changelog-generator@v2.3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Prepare
+      id: prepare
+      run : |
+        main_sha=$(git rev-parse HEAD)
+        echo "main_sha: $main_sha"
+        echo "main_sha=$main_sha" >> $GITHUB_OUTPUT
+
+        production_sha=$(git rev-parse origin/production)
+        echo "production_sha: $production_sha"
+        echo "production_sha=$production_sha" >> $GITHUB_OUTPUT
 
     - name: "print changelog"
       run : |
-        echo ${{ steps.changelog.outputs.changelog }}
+        echo "# [$(date -Idate)](https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }})" > CHANGELOG.md
+        git log --pretty="- %s" ${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.main_sha }} >> CHANGELOG.md
+        cat CHANGELOG.md
