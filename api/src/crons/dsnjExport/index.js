@@ -41,5 +41,6 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "DSNJ export generation", text: e });
     capture(e);
+    throw e;
   }
 };

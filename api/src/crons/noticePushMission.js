@@ -85,6 +85,7 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "noticePushMission", text: JSON.stringify(e) });
+    throw e;
   }
 };
 

@@ -26,5 +26,6 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Refresh Materialized Views", text: `${JSON.toString(e)}` });
     capture(e);
+    throw e;
   }
 };
