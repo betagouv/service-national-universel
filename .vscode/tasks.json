@@ -2,8 +2,8 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Run all application",
-      "dependsOn": ["Build dependencies", "Start Applications"],
+      "label": "Install and start All applications",
+      "dependsOn": ["Install dependencies", "Start All Applications"],
       "dependsOrder": "sequence",
       "problemMatcher": [],
       "group": {
@@ -12,18 +12,37 @@
       }
     },
     {
-      "label": "Run admin",
-      "dependsOn": ["Build dependencies", "Start Admin Applications"],
+      "label": "Install and start Admin",
+      "dependsOn": ["Install dependencies", "Start Admin Applications"],
       "dependsOrder": "sequence",
       "problemMatcher": [],
       "group": {
         "kind": "build",
         "isDefault": true
+      }
+    },
+    {
+      "label": "Install and start App",
+      "dependsOn": ["Install dependencies", "Start App Applications"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Install dependencies",
+      "command": "npm install && APP_NAME=\\!antivirus npm run build",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
       }
     },
     {
       "label": "Build dependencies",
-      "command": "npm install && APP_NAME=\\!antivirus npm run build",
+      "command": "APP_NAME=\\!antivirus npm run build",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -36,7 +55,12 @@
       "problemMatcher": []
     },
     {
-      "label": "Start Applications",
+      "label": "Start App Applications",
+      "dependsOn": ["Start Lib", "Start DS", "Start Api", "Start App"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Start All Applications",
       "dependsOn": [
         "Start Lib",
         "Start DS",
