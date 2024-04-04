@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../../../utils";
-import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { capture } from "../../../../sentry";
@@ -39,6 +38,7 @@ import Select from "./Select.jsx";
 import Toggle from "./Toggle";
 import Modal from "../../../../components/ui/modals/Modal";
 import useAddress from "@/services/useAddress";
+import useAuth from "@/services/useAuth";
 
 const useOutsideClick = (callback) => {
   const ref = React.useRef();
@@ -71,7 +71,7 @@ function _location(results) {
 }
 
 export default function MissionFilters({ filters, setFilters }) {
-  const young = useSelector((state) => state.Auth.young);
+  const { isCLE, young } = useAuth();
 
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [dropdownControlDistanceOpen, setDropdownControlDistanceOpen] = React.useState(false);
@@ -808,12 +808,14 @@ export default function MissionFilters({ filters, setFilters }) {
           <DomainFilter Icon={Environment} name="ENVIRONMENT" label="Environment" onClick={handleToggleChangeDomain} active={filters.domains.includes("ENVIRONMENT")} />
           <DomainFilter Icon={Securite} name="SECURITY" label="Sécurité" onClick={handleToggleChangeDomain} active={filters.domains.includes("SECURITY")} />
           <DomainFilter Icon={Culture} name="CULTURE" label="Culture" onClick={handleToggleChangeDomain} active={filters.domains.includes("CULTURE")} />
-          <DomainFilter
-            Icon={PreparationMilitaire}
-            label="Préparations militaires"
-            active={filters.isMilitaryPreparation}
-            onClick={() => setFilters((prev) => ({ ...prev, isMilitaryPreparation: !prev.isMilitaryPreparation }))}
-          />
+          {!isCLE && (
+            <DomainFilter
+              Icon={PreparationMilitaire}
+              label="Préparations militaires"
+              active={filters.isMilitaryPreparation}
+              onClick={() => setFilters((prev) => ({ ...prev, isMilitaryPreparation: !prev.isMilitaryPreparation }))}
+            />
+          )}
         </div>
       </div>
     </>
