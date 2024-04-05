@@ -1,3 +1,10 @@
+# [1.399.0](https://github.com/betagouv/service-national-universel/compare/v1.398.0...v1.399.0) (2024-04-05)
+
+
+### Features
+
+* **misc:** 2214 - Release CHANGELOG ([#3712](https://github.com/betagouv/service-national-universel/issues/3712)) ([7610628](https://github.com/betagouv/service-national-universel/commit/761062893384201940c2a37bb6603abf7354dd4b))
+
 # [1.398.0](https://github.com/betagouv/service-national-universel/compare/v1.397.0...v1.398.0) (2024-04-04)
 
 
