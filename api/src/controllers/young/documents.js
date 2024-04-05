@@ -188,8 +188,6 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
 
     if (switchToCle) {
       emailTemplate = SENDINBLUE_TEMPLATES.young.PHASE_1_ATTESTATION_SWITCH_CLE;
-      params.oldcohortdate = undefined;
-      params.newcohortdate = undefined;
     }
 
     const mail = await sendTemplate(emailTemplate, {
