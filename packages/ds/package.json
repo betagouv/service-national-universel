@@ -21,6 +21,7 @@
     "./tailwind.config": "./dist/tailwind.config.js",
     "./admin": "./dist/admin/index.js",
     "./app": "./dist/app/index.js",
+    "./common": "./dist/common/index.js",
     "./dsfr": "./dist/dsfr/index.js"
   },
   "peerDependencies": {
