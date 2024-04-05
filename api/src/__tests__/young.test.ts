@@ -1,5 +1,6 @@
 require("dotenv").config({ path: "./.env-testing" });
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
+
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
@@ -24,7 +25,6 @@ const jwt = require("jsonwebtoken");
 const { default: faker } = require("@faker-js/faker");
 const { createReferentHelper } = require("./helpers/referent");
 const getNewReferentFixture = require("./fixtures/referent");
-
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
@@ -111,7 +111,7 @@ describe("Young", () => {
           } else if (key === "phase2ApplicationStatus") {
             expect(updatedYoung[key]).toEqual(Array.from(young[key]));
           } else if (["birthdateAt", "createdAt"].includes(key)) {
-            expect(Date(updatedYoung[key])).toEqual(Date(young[key]));
+            expect(new Date(updatedYoung[key])).toEqual(new Date(young[key]));
           } else {
             expect(updatedYoung[key]).toEqual(young[key]);
           }
@@ -155,7 +155,13 @@ describe("Young", () => {
       expect(res.body.data).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/firstName", value: "MY NEW NAME" })]),
+            ops: expect.arrayContaining([
+              expect.objectContaining({
+                op: "replace",
+                path: "/firstName",
+                value: "MY NEW NAME",
+              }),
+            ]),
           }),
         ]),
       );
@@ -236,7 +242,7 @@ describe("Young", () => {
           }),
         )
         .mockReturnValue(Promise.resolve({}));
-      fetch.mockReturnValue(
+      fetch.mockImplementation(
         Promise.resolve({
           status: 200,
           json: jsonResponse,

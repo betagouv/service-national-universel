@@ -1,5 +1,6 @@
 require("dotenv").config({ path: "./.env-testing" });
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
+
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
