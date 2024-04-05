@@ -16,6 +16,8 @@ const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports|snu
 
 const api = async (path, options = {}) => {
   try {
+    if (process.env.OFFLINE === "true") return console.log("No mail sent in OFFLINE mode");
+
     if (!SENDINBLUEKEY) {
       console.log("NO SENDINBLUE KEY");
       console.log(options);
