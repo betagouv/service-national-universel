@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 import fetch from "node-fetch";
 
 const request = require("supertest");
