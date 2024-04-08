@@ -153,6 +153,7 @@ resource "scaleway_domain_record" "api" {
   ttl      = 300
 }
 
+# wait beetween DNS record creation and endpoint creation
 resource "time_sleep" "api_dns" {
   depends_on = [scaleway_domain_record.api]
 
@@ -211,6 +212,7 @@ resource "scaleway_domain_record" "admin" {
   ttl      = 300
 }
 
+# wait beetween DNS record creation and endpoint creation
 resource "time_sleep" "admin_dns" {
   depends_on = [scaleway_domain_record.admin]
 
@@ -265,6 +267,7 @@ resource "scaleway_domain_record" "app" {
   ttl      = 300
 }
 
+# wait beetween DNS record creation and endpoint creation
 resource "time_sleep" "app_dns" {
   depends_on = [scaleway_domain_record.app]
 
