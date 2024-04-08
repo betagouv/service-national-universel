@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 import fetch from "node-fetch";
 
 const request = require("supertest");
@@ -155,13 +154,7 @@ describe("Young", () => {
       expect(res.body.data).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            ops: expect.arrayContaining([
-              expect.objectContaining({
-                op: "replace",
-                path: "/firstName",
-                value: "MY NEW NAME",
-              }),
-            ]),
+            ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/firstName", value: "MY NEW NAME" })]),
           }),
         ]),
       );
@@ -242,7 +235,7 @@ describe("Young", () => {
           }),
         )
         .mockReturnValue(Promise.resolve({}));
-      fetch.mockImplementation(
+      fetch.mockReturnValue(
         Promise.resolve({
           status: 200,
           json: jsonResponse,

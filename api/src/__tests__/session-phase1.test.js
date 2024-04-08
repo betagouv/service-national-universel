@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const { getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");

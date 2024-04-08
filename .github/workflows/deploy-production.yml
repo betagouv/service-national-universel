@@ -76,6 +76,40 @@ jobs:
           echo "antivirus_image_tag: $antivirus_image_tag"
           echo "antivirus_image_tag=$antivirus_image_tag" >> $GITHUB_OUTPUT
 
+          git fetch origin release_candidate production
+
+          rc_sha=$(git rev-parse origin/release_candidate)
+          echo "rc_sha: $rc_sha"
+          echo "rc_sha=$rc_sha" >> $GITHUB_OUTPUT
+
+          production_sha=$(git rev-parse origin/production)
+          echo "production_sha: $production_sha"
+          echo "production_sha=$production_sha" >> $GITHUB_OUTPUT
+
+      - name: Changelog
+        id: changelog
+        run : |
+          echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}|Release du $(date -Idate)>" > CHANGELOG.md
+          git log --pretty="• %s" "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}" \
+            | grep --invert-match "chore(release): version" \
+            | sort \
+            | sed 's #\([0-9]*\) <https://github.com/betagouv/service-national-universel/pull/\1|#\1> g' \
+            >> CHANGELOG.md
+          cat CHANGELOG.md
+          {
+            echo 'changelog<<EOF'
+            cat CHANGELOG.md
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post Changelog on slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: '#dev-release,#nouveauté-produit'
+          slack-message: "${{ steps.changelog.outputs.changelog }}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
 
 
   copy_image:

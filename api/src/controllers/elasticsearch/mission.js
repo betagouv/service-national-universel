@@ -249,7 +249,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
           lat: Joi.number().min(-90).max(90),
           lon: Joi.number().min(-180).max(180),
         }).required(),
-        isMilitaryPreparation: Joi.boolean(),
+        isMilitaryPreparation: Joi.boolean().default(null),
         period: Joi.string().allow("", "CUSTOM", "VACANCES", "SCOLAIRE"),
         subPeriod: Joi.array().items(Joi.string().allow("")),
         fromDate: Joi.date(),
@@ -356,7 +356,13 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
     }
 
     if (filters.domains?.length) body.query.bool.must.push({ terms: { "domains.keyword": filters.domains } });
-    if (filters.isMilitaryPreparation) body.query.bool.must.push({ term: { "isMilitaryPreparation.keyword": String(filters.isMilitaryPreparation) } });
+    if (filters.isMilitaryPreparation !== null) body.query.bool.must.push({ term: { "isMilitaryPreparation.keyword": String(filters.isMilitaryPreparation) } });
+    if (filters.isMilitaryPreparation !== null) {
+      console.log("HELLO PED");
+      console.log(filters.isMilitaryPreparation);
+      console.log(String(filters.isMilitaryPreparation));
+      console.log(JSON.stringify(filters));
+    }
 
     if (["DURING_SCHOOL", "DURING_HOLIDAYS"].includes(filters.period)) body.query.bool.must.push({ term: { "period.keyword": filters.period } });
     if (filters.period === "CUSTOM") {
