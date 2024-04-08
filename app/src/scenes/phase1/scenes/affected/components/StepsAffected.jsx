@@ -5,13 +5,14 @@ import StepAgreement from "./step/stepAgreement";
 import StepConvocation from "./step/stepConvocation";
 import StepMedicalFile from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
-import { getSteps } from "../utils/steps.utils";
 
-export default function StepsAffected({ center, session, meetingPoint, departureDate, returnDate }) {
+export default function StepsAffected({ steps, center, session, meetingPoint, departureDate, returnDate }) {
   const young = useSelector((state) => state.Auth.young);
   if (!young) return null;
 
-  const { steps, count, total, allDone } = getSteps(young);
+  const total = steps.length;
+  const count = steps.filter((s) => s.isDone).length;
+  const allDone = count === total;
 
   const components = {
     PDR: <StepPDR center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />,

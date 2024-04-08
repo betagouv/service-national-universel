@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { isCle, transportDatesToString, youngCanChangeSession, getDepartureDate, getReturnDate } from "snu-lib";
+import { isCle, transportDatesToString, youngCanChangeSession, getDepartureDate, getReturnDate, YOUNG_SOURCE } from "snu-lib";
 import { getCohort } from "../../../../utils/cohorts";
 import api from "../../../../services/api";
-import { getSteps } from "./utils/steps.utils";
+import { hasPDR, pdrChoiceExpired } from "./utils/steps.utils";
 
 import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink";
@@ -29,12 +29,6 @@ export default function Affected() {
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
 
-  const { allDone } = getSteps(young);
-
-  if (allDone) {
-    window.scrollTo(0, 0);
-  }
-
   useEffect(() => {
     if (!young.sessionPhase1Id) return;
     (async () => {
@@ -52,6 +46,42 @@ export default function Affected() {
       }
     })();
   }, [young]);
+
+  const steps = [
+    {
+      id: "PDR",
+      isDone: hasPDR(young) || pdrChoiceExpired(young?.cohort),
+      parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    },
+    {
+      id: "AGREEMENT",
+      isDone: young?.youngPhase1Agreement === "true",
+      parcours: [YOUNG_SOURCE.VOLONTAIRE],
+    },
+    {
+      id: "CONVOCATION",
+      isDone: young?.convocationFileDownload === "true",
+      parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    },
+    {
+      id: "MEDICAL_FILE",
+      isDone: young?.cohesionStayMedicalFileDownload === "true",
+      parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
+    },
+  ];
+
+  const filteredSteps = steps.filter((s) => s.parcours.includes(young?.source));
+
+  const stepsWithEnabled = filteredSteps.map((s, i) => {
+    const enabled = i === 0 || filteredSteps[i - 1].isDone;
+    return { ...s, enabled, stepNumber: i + 1 };
+  });
+
+  const allDone = stepsWithEnabled.every((s) => s.isDone);
+
+  if (allDone) {
+    window.scrollTo(0, 0);
+  }
 
   if (loading) {
     return (
@@ -99,7 +129,7 @@ export default function Affected() {
           </div>
         )}
 
-        <StepsAffected center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
+        <StepsAffected steps={stepsWithEnabled} center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
         {!isCle(young) && <FaqAffected className={`${allDone ? "order-3" : "order-4"}`} />}
       </div>
 
