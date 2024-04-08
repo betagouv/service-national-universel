@@ -91,7 +91,7 @@ async function generate(doc, young) {
   const DATE = cohortEndDate.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
   const page = doc.page;
 
-  doc.image("public/images/certificateTemplate_template.png", 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+  doc.image("api/public/images/certificateTemplate_template.png", 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
 
   doc
     .text(`${TO}, volontaire à l'édition ${COHORT},`, 150, 300)
