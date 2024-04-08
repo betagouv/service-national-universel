@@ -11,12 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      - uses: actions/checkout@v4
+
       - name: Prepare
         id: prepare
         run : |
-          git fetch origin release_candidate production
+          git fetch origin main production
 
-          rc_sha=$(git rev-parse origin/release_candidate)
+          rc_sha=$(git rev-parse origin/main)
           echo "rc_sha: $rc_sha"
           echo "rc_sha=$rc_sha" >> $GITHUB_OUTPUT
 
