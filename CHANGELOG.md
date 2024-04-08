@@ -1,3 +1,11 @@
+## [1.399.1](https://github.com/betagouv/service-national-universel/compare/v1.399.0...v1.399.1) (2024-04-08)
+
+
+### Bug Fixes
+
+* **app:** Fix ReInscription context bug. ([fad3adc](https://github.com/betagouv/service-national-universel/commit/fad3adcf93003cd71454bafb1a4a480af7a454c1))
+* **misc:** 2181 - Wait after DNS record at custom env creation ([#3718](https://github.com/betagouv/service-national-universel/issues/3718)) ([e620539](https://github.com/betagouv/service-national-universel/commit/e6205397d27d7067107be5f3230c265f16ae77b4))
+
 # [1.399.0](https://github.com/betagouv/service-national-universel/compare/v1.398.0...v1.399.0) (2024-04-05)
 
 
