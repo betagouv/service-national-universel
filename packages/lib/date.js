@@ -1,15 +1,58 @@
+import { isSameYear, subYears, format, setYear, setMonth, setDate, isWithinInterval, getYear } from "date-fns";
+import { formatInTimeZone } from 'date-fns-tz';
+
 const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 
 const formatDay = (date) => {
   if (!date) return "-";
-  return new Date(date).toISOString().split("T")[0];
+  // return new Date(date).toISOString().split("T")[0];
+  return format(new Date(date), "yyyy-MM-dd");
 };
 
-const formatDateFR = (d) => {
-  if (!d) return "-";
-  const date = new Date(d);
-  return date.toLocaleDateString("fr-FR");
+const isLastYear = (date) => {
+  const dateObj = new Date(date);
+  const lastYear = subYears(new Date(), 1);
+  return isSameYear(dateObj, lastYear);
 };
+
+
+const isLastSchoolYear = (date) => {
+  const dateObj = new Date(date);
+  const currentYear = getYear(new Date());
+  const currentYearStartDate = new Date(currentYear, 8, 1); // 1er septembre de l'année en cours
+  const lastYearStartDate = subYears(currentYearStartDate, 1)
+
+return isWithinInterval(dateObj, {
+    start: currentYearStartDate,
+    end: lastYearStartDate,
+  });};
+
+// const isLastSchoolYear = (date) => {
+//   const currentYear = new Date().getFullYear();
+
+//   // Début de l'année scolaire précédente : 1er septembre de l'année dernière
+//   const startOfLastSchoolYear = new Date(setDate(setMonth(setYear(new Date(), currentYear - 1), 8), 1));
+
+//   // Fin de l'année scolaire précédente : 31 août de cette année
+//   const endOfLastSchoolYear = new Date(setDate(setMonth(setYear(new Date(), currentYear), 8), 0));
+
+//   return isWithinInterval(date, {
+//     start: startOfLastSchoolYear,
+//     end: endOfLastSchoolYear,
+//   });
+// };
+
+// const formatDateFR = (d) => {
+//   if (!d) return "-";
+//   const date = new Date(d);
+//   return date.toLocaleDateString("fr-FR");
+// };
+const formatDateFR = (date) => {
+  if (!date) return "-";
+  const timeZone = 'Europe/Paris';
+  return formatInTimeZone(date, timeZone, 'dd/MM/yyyy');
+};
+
 const formatToActualTime = (d) => {
   if (!d) return "-";
   const date = new Date(d);
@@ -148,6 +191,8 @@ const formatDateForPostGre = (date) => {
 export {
   MONTHS,
   formatDay,
+  isLastYear,
+  isLastSchoolYear,
   formatDateFR,
   formatToActualTime,
   formatLongDateFR,

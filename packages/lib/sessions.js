@@ -1,5 +1,6 @@
 import { regionsListDROMS } from "./region-and-departments";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
+import { isLastSchoolYear } from "./date";
 import { isCle } from "./young";
 const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "2022" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
 
@@ -261,7 +262,7 @@ function hasAccessToReinscription(young) {
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
-  if (new Date(young.createdAt) > new Date(2023, 9, 1)) {
+  if (isLastSchoolYear(young.createdAt)) {
     return false;
   }
   if (isCohortTooOld(young)) {

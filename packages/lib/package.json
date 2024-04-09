@@ -25,6 +25,8 @@
   },
   "dependencies": {
     "@rollup/plugin-commonjs": "^25.0.3",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.0.0",
     "sanitize-html": "^2.11.0"
   }
 }
