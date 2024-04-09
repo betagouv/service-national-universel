@@ -19,7 +19,7 @@
     "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
   },
   "devDependencies": {
-    "@swc/plugin-styled-components": "^1.5.81",
+    "@swc/plugin-styled-components": "1.5.111",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.0.1",
