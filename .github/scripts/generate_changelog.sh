@@ -58,6 +58,8 @@ sed -e 's/\(.*\)/{"property":"Identifiant","number":{"equals":\1}}/g' NOTION_IDS
         --data '@-' |
     jq -r '.results[]|"\(.properties."Identifiant".unique_id.number)\t\(.url)\t\(.properties."Tâche".title[].plain_text)"' |
     sort -b > NOTION_DATA.csv
+
+cat NOTION_DATA.csv
 # NOTION_DATA.csv is tab-separated with columns (Notion.identifiant, Notion.url, Notion.title)
 
 join -a 1 -t$'\t' NOTION_ID_CHANGELOG.csv NOTION_DATA.csv > MERGE.csv # left outer join by notion.Identifiant
