@@ -7,7 +7,7 @@ const url = "/v2/classe/:id/certificates";
 export const downloadCertificatesByClassId = async (classeId) => {
   try {
     const file = await api.openpdf(url.replace(":id", classeId), {});
-    download(file, "Attestations.pdf");
+    download(file, "Attestations.zip");
   } catch (e) {
     if (e?.code === "YOUNG_NOT_FOUND") {
       toastr.warning("Aucun jeune trouvé. Aucun document à télécharger.");
