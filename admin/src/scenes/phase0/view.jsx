@@ -60,6 +60,7 @@ import { Link } from "react-router-dom";
 import { Button, ModalConfirmation } from "@snu/ds/admin";
 import { FaCheck } from "react-icons/fa6";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
+import { HiExclamation } from "react-icons/hi";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -424,6 +425,7 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
   const [error, setError] = useState(null);
+  const datePassed = young.latestCNIFileExpirationDate ? new Date(young.latestCNIFileExpirationDate) < new Date() : false;
 
   async function validate() {
     try {
@@ -431,9 +433,17 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
         return setConfirmModal({
           icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
           title: (
-            <span>
-              Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur liste principale</strong>.
-            </span>
+            <>
+              <span>
+                Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur liste principale</strong>.
+              </span>
+              {datePassed && (
+                <>
+                  <HiExclamation size={24} className="text-red-500 mx-auto mt-3" />
+                  <span className="text-red-500">La date de péremption de la CNI est dépassée, pensez à vérifier qu’il n’y ait pas d’erreur de saisie.</span>
+                </>
+              )}
+            </>
           ),
           message: `Souhaitez-vous confirmer l'action ?`,
           type: "VALIDATED",
@@ -450,10 +460,18 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
           return setConfirmModal({
             icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
             title: (
-              <span>
-                L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-                <strong className="text-bold">validé sur liste complémentaire</strong>.
-              </span>
+              <>
+                <span>
+                  L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+                  <strong className="text-bold">validé sur liste complémentaire</strong>.
+                </span>
+                {datePassed && (
+                  <>
+                    <HiExclamation size={24} className="text-red-500 mx-auto mt-3" />
+                    <span className="text-red-500">La date de péremption de la CNI est dépassée, pensez à vérifier qu’il n’y ait pas d’erreur de saisie.</span>
+                  </>
+                )}
+              </>
             ),
             message: `Souhaitez-vous confirmer l'action ?`,
             type: "SESSION_FULL",
@@ -466,10 +484,18 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
         return setConfirmModal({
           icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
           title: (
-            <span>
-              L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-              <strong className="text-bold">validé sur liste principale</strong>.
-            </span>
+            <>
+              <span>
+                L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
+                <strong className="text-bold">validé sur liste principale</strong>.
+              </span>
+              {datePassed && (
+                <>
+                  <HiExclamation size={24} className="text-red-500 mx-auto mt-3" />
+                  <span className="text-red-500">La date de péremption de la CNI est dépassée, pensez à vérifier qu’il n’y ait pas d’erreur de saisie.</span>
+                </>
+              )}
+            </>
           ),
           message: `Souhaitez-vous confirmer l'action ?`,
           type: "VALIDATED",
