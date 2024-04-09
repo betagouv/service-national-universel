@@ -88,7 +88,7 @@ grep --ignore-case " feat(" OUTPUT.txt
 echo ""
 echo "Correctifs"
 echo ""
-grep --ignore-case" fix(" OUTPUT.txt
+grep --ignore-case " fix(" OUTPUT.txt
 echo ""
 echo "Divers"
 echo ""
