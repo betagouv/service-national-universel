@@ -84,15 +84,15 @@ echo "<https://github.com/betagouv/service-national-universel/compare/$rev_range
 echo ""
 echo "Features"
 echo ""
-grep " feat(" OUTPUT.txt
+grep --ignore-case " feat(" OUTPUT.txt
 echo ""
 echo "Correctifs"
 echo ""
-grep " fix(" OUTPUT.txt
+grep --ignore-case" fix(" OUTPUT.txt
 echo ""
-echo "Autres"
+echo "Divers"
 echo ""
-grep --invert-match -e " fix(" -e " feat(" OUTPUT.txt
+grep --ignore-case --invert-match -e " fix(" -e " feat(" OUTPUT.txt
 
 
 rm -f CHANGELOG.txt NOTION_ID_CHANGELOG.csv NOTION_IDS.txt NOTION_DATA.csv MERGE.csv OUTPUT.txt
