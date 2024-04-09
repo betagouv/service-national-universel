@@ -32,6 +32,9 @@ then
     exit 1
 fi
 
+set -e
+set -x
+
 git log --pretty="%s" $rev_range > CHANGELOG.txt
 
 
