@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import validator from "validator";
 import Modal from "../../../components/ui/modals/Modal";
 import ArrowRightBlue from "../../../assets/icons/ArrowRightBlue";
-import PrimaryButton from "../../../components/dsfr/ui/buttons/PrimaryButton";
-import SecondaryButton from "../../../components/dsfr/ui/buttons/SecondaryButton";
-import Input from "../../../components/dsfr/forms/input";
+import Input from "@/components/dsfr/forms/input";
+import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 
 const ModifyEmailModal = ({ onClose, isOpen, onEmailChange }) => {
   const [email, setEmail] = useState("");
@@ -65,25 +64,15 @@ const ModifyEmailModal = ({ onClose, isOpen, onEmailChange }) => {
       <h1 className="mb-3 text-2xl font-semibold text-[#161616]">
         <ArrowRightBlue className="inline mr-2" /> Modifier mon adresse e-mail
       </h1>
-      <div className="mt-4 flex flex-col gap-1">
-        <label>Email</label>
-        <Input value={email} onChange={setEmail} />
-        <div className="h-2">{error && <span className="text-sm text-red-500">{error?.email}</span>}</div>
-      </div>
-      <div className="mt-3 flex flex-col gap-1">
-        <label>Confirmez votre e-mail</label>
-        <Input value={emailConfirmation} onChange={setEmailConfirmation} />
-        <div className="h-2">{error && <span className="text-sm text-red-500">{error?.emailConfirmation}</span>}</div>
-      </div>
-      <hr className="mt-3 mb-1 h-px border-0 md:bg-gray-200" />
-      <div className="flex flex-col md:flex-row justify-end gap-3 mt-4">
-        <SecondaryButton className="flex-2" onClick={_onClose}>
-          Annuler
-        </SecondaryButton>
-        <PrimaryButton className="flex-1" onClick={onSubmit}>
-          Recevoir le code d’activation
-        </PrimaryButton>
-      </div>
+      <Input label="Email" value={email} onChange={setEmail} state={error?.email ? "error" : "default"} stateRelatedMessage={error?.email} />
+      <Input
+        label="Confirmez votre e-mail"
+        state={error?.emailConfirmation ? "error" : "default"}
+        stateRelatedMessage={error?.emailConfirmation}
+        value={emailConfirmation}
+        onChange={setEmailConfirmation}
+      />
+      <SignupButtonContainer className="w-full" onClickNext={onSubmit} onClickPrevious={_onClose} labelNext="Recevoir le code d’activation" labelPrevious="Annuler" />
     </Modal>
   );
 };
