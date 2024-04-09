@@ -151,6 +151,7 @@ resource "scaleway_container" "admin" {
     "APP_URL"                    = "https://${local.app_hostname}"
     "SENTRY_SESSION_SAMPLE_RATE" = 0.005
     "SENTRY_TRACING_SAMPLE_RATE" = 0.01
+    "SENTRY_RELEASE"             = var.admin_image_tag
     "SUPPORT_URL"                = "https://support.snu.gouv.fr"
   }
 
@@ -190,6 +191,7 @@ resource "scaleway_container" "app" {
     "APP_URL"                    = "https://${local.app_hostname}"
     "SENTRY_SESSION_SAMPLE_RATE" = 0.005
     "SENTRY_TRACING_SAMPLE_RATE" = 0.01
+    "SENTRY_RELEASE"             = var.app_image_tag
     "SUPPORT_URL"                = "https://support.snu.gouv.fr"
     "FRANCE_CONNECT_URL"         = "https://app.franceconnect.gouv.fr/api/v1"
   }
