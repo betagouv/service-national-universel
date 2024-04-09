@@ -78,7 +78,7 @@ sed -E 's/^(.+)\t(.+)\t(.+)\t(.+)$/\t\2 -> <\3|\4>/g' MERGE.csv | # create link 
     sed -E 's/^(.*)\t//g' | # remove first column (notion.Identifiant)
     sed 's #\([0-9]*\) <https://github.com/betagouv/service-national-universel/pull/\1|#\1> g' | # update link to PR
     grep --invert-match "chore(release): version" | # remove useless infos
-    sort |
+    sort --ignore-case |
     sed -E 's/^(.*)$/• \1/g' # Add list item char
 
 
