@@ -26,7 +26,7 @@
     "@sentry/integrations": "^7.58.1",
     "@sentry/react": "^7.58.1",
     "@snu/ds": "*",
-    "@swc/plugin-styled-components": "^1.5.83",
+    "@swc/plugin-styled-components": "1.5.111",
     "bootstrap": "4.6.2",
     "browser-image-resizer": "^2.4.1",
     "chart.js": "^4.2.1",
