@@ -83,8 +83,8 @@
     "vite": "^4.5.3"
   },
   "engines": {
-    "node": "^18.16.0",
-    "npm": "^9.5.1",
+    "node": "^18.20",
+    "npm": "^10.5",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "optionalDependencies": {
