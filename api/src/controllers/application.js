@@ -312,7 +312,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       application.set({ status: valueKey.key });
       await application.save({ fromUser: req.user });
 
-      if (application.isJvaMission) {
+      if (application.isJvaMission === "true") {
         await apiEngagement.update(application);
       }
 
