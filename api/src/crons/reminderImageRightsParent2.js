@@ -52,5 +52,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: `Parent 2 image right reminder - ERROR`, text: JSON.stringify(e) });
+    throw e;
   }
 };

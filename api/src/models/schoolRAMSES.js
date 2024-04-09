@@ -3,6 +3,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
 
 const MODELNAME = "schoolramses";
+const patchHistory = require("mongoose-patch-history").default;
 
 const Schema = new mongoose.Schema(
   {
@@ -22,6 +23,30 @@ const Schema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+Schema.virtual("fromUser").set(function (fromUser) {
+  if (fromUser) {
+    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
+    this._user = { _id, role, department, region, email, firstName, lastName, model };
+  }
+});
+
+Schema.pre("save", function (next, params) {
+  this.fromUser = params?.fromUser;
+  this.updatedAt = Date.now();
+  next();
+});
+
+Schema.plugin(patchHistory, {
+  mongoose,
+  name: `${MODELNAME}Patches`,
+  trackOriginalValue: true,
+  includes: {
+    modelName: { type: String, required: true, default: MODELNAME },
+    user: { type: Object, required: false, from: "_user" },
+  },
+  excludes: ["/updatedAt"],
+});
 
 Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["data"] }), MODELNAME);
 

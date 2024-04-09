@@ -35,5 +35,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "Delete inactive refs", text: JSON.stringify(e) });
+    throw e;
   }
 };

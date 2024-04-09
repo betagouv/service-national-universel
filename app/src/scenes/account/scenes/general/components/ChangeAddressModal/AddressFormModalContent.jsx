@@ -15,7 +15,9 @@ const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
       <AddressForm data={data} updateData={setData} />
       <div className="flex justify-end gap-2 mt-4">
         <ButtonLight onClick={onCancel}>Annuler</ButtonLight>
-        <ButtonPrimary onClick={() => onConfirm(data)}>Confirmer</ButtonPrimary>
+        <ButtonPrimary onClick={() => onConfirm(data)} disabled={!data.address}>
+          Confirmer
+        </ButtonPrimary>
       </div>
     </>
   );

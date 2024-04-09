@@ -1,23 +1,40 @@
-# [1.396.0](https://github.com/betagouv/service-national-universel/compare/v1.395.0...v1.396.0) (2024-03-27)
+## [1.399.1](https://github.com/betagouv/service-national-universel/compare/v1.399.0...v1.399.1) (2024-04-08)
 
 
 ### Bug Fixes
 
-* **api:** Up to HTML5 ([#3696](https://github.com/betagouv/service-national-universel/issues/3696)) ([89e0430](https://github.com/betagouv/service-national-universel/commit/89e04302703bb1ca7b2c819c0dd46c5a882a016e))
-* **app:** 2109 - Improved UI on mission page. ([#3693](https://github.com/betagouv/service-national-universel/issues/3693)) ([54ad365](https://github.com/betagouv/service-national-universel/commit/54ad3652d4559c310993c4fbe7eba6f8ee2fa614))
+* **app:** Fix ReInscription context bug. ([fad3adc](https://github.com/betagouv/service-national-universel/commit/fad3adcf93003cd71454bafb1a4a480af7a454c1))
+* **misc:** 2181 - Wait after DNS record at custom env creation ([#3718](https://github.com/betagouv/service-national-universel/issues/3718)) ([e620539](https://github.com/betagouv/service-national-universel/commit/e6205397d27d7067107be5f3230c265f16ae77b4))
+
+# [1.399.0](https://github.com/betagouv/service-national-universel/compare/v1.398.0...v1.399.0) (2024-04-05)
 
 
 ### Features
 
-* **admin, api:** 1450 - Session keep alive ([#3682](https://github.com/betagouv/service-national-universel/issues/3682)) ([dca1913](https://github.com/betagouv/service-national-universel/commit/dca1913a134de2ed47111ddbca3f8b90634bf730))
-* **api:** 1843 - Now fetching missions from api-engagement. ([#3680](https://github.com/betagouv/service-national-universel/issues/3680)) ([ad34915](https://github.com/betagouv/service-national-universel/commit/ad3491522b85c48705d02138f0aa9f0605038da5))
-* **api:** 2098 - Modified wording on ageAtStart < 15 ([#3692](https://github.com/betagouv/service-national-universel/issues/3692)) ([ddf29f6](https://github.com/betagouv/service-national-universel/commit/ddf29f6d8d450114f4463321219bc4311f7f53cc))
-* **api:** update convoc CLE -> lunchbreak and Background ([#3686](https://github.com/betagouv/service-national-universel/issues/3686)) ([e85cdd6](https://github.com/betagouv/service-national-universel/commit/e85cdd62d445fd95d84de891394e3fa7dba87ce1))
-* **app:** Add new address form on My Account page ([#3670](https://github.com/betagouv/service-national-universel/issues/3670)) ([555d432](https://github.com/betagouv/service-national-universel/commit/555d43244d7bfcc0a8b3b5b7112720e947e04524))
-* **misc:** 1671 - PDF : instantiate browser at app boot ([#3695](https://github.com/betagouv/service-national-universel/issues/3695)) ([c403d54](https://github.com/betagouv/service-national-universel/commit/c403d545946eb4f0ed01e1d0a4fd13fbe9c35c2a))
+* **misc:** 2214 - Release CHANGELOG ([#3712](https://github.com/betagouv/service-national-universel/issues/3712)) ([7610628](https://github.com/betagouv/service-national-universel/commit/761062893384201940c2a37bb6603abf7354dd4b))
 
-# [1.395.0](https://github.com/betagouv/service-national-universel/compare/v1.394.1...v1.395.0) (2024-03-26)
+# [1.398.0](https://github.com/betagouv/service-national-universel/compare/v1.397.0...v1.398.0) (2024-04-04)
 
+
+### Bug Fixes
+
+* **admin:** Reopen boite reception temporairement ([d0e20b1](https://github.com/betagouv/service-national-universel/commit/d0e20b173d1889d149dc8eb59da01dc688925eda))
+* **app:** 2160 - Fixed ES filter isMilitaryPreparation. ([5b7a1f5](https://github.com/betagouv/service-national-universel/commit/5b7a1f56b3f1ef3423583036382dd2b3fdb7127f))
+
+
+### Features
+
+* **api:** 1993 - Add sentry-cron integration ([#3707](https://github.com/betagouv/service-national-universel/issues/3707)) ([327d740](https://github.com/betagouv/service-national-universel/commit/327d7402a22c3b70ea1eb2567202c46a05a17abf))
+* **app:** 2160 - Filtering military preparations for CLE. ([#3708](https://github.com/betagouv/service-national-universel/issues/3708)) ([effac47](https://github.com/betagouv/service-national-universel/commit/effac47a28f1c20a91cf65e87b23577b6cfa2149))
+* **app, admin:** 2055 - add "à venir" in changeSejour form ([#3697](https://github.com/betagouv/service-national-universel/issues/3697)) ([9d5efc8](https://github.com/betagouv/service-national-universel/commit/9d5efc8bb7c671fb2f1cd3febfc30bd77e230207))
+
+# [1.397.0](https://github.com/betagouv/service-national-universel/compare/v1.396.2...v1.397.0) (2024-04-02)
+
+
+### Features
+
+* **admin:** 1694 - HTS to CLE Attestation when phase1 has been done ([#3701](https://github.com/betagouv/service-national-universel/issues/3701)) ([a3254b6](https://github.com/betagouv/service-national-universel/commit/a3254b686ae31e9dc0c1bb768a7d73fe23a08cdc))
+* **api/admin:** 1877 - Restore previous signin when ADMIN [#3588](https://github.com/betagouv/service-national-universel/issues/3588) ([#3667](https://github.com/betagouv/service-national-universel/issues/3667)) ([8837c2b](https://github.com/betagouv/service-national-universel/commit/8837c2b4e0c73a0c756a18171478dead1a30623e))
 
 ### Bug Fixes
 

@@ -17,11 +17,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await DepartmentServiceModel.findOneAndUpdate({ department: checkedDepartementService.department }, checkedDepartementService, {
-      new: true,
-      upsert: true,
-      useFindAndModify: false,
-    });
+    const service = await DepartmentServiceModel.findOne({ department: checkedDepartementService.department });
+    service.set(checkedDepartementService);
+    const data = await service.save({ fromUser: req.user });
+
     return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
   } catch (error) {
     capture(error);
