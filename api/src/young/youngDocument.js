@@ -1,0 +1,10 @@
+const YOUNG_DOCUMENT = {
+  CERTIFICATE: "certificate",
+};
+const YOUNG_DOCUMENT_PHASE_TEMPLATE = {
+  PHASE_1: "1",
+};
+module.exports = {
+  YOUNG_DOCUMENT,
+  YOUNG_DOCUMENT_PHASE_TEMPLATE,
+};

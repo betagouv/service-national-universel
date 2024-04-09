@@ -33,6 +33,7 @@ import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDangerous } from "react-icons/md";
 import plausibleEvent from "@/services/plausible";
 import dayjs from "dayjs";
+import { downloadCertificatesByClassId } from "@/services/certificate.service";
 
 export default function View() {
   const [classe, setClasse] = useState({});
@@ -212,11 +213,15 @@ export default function View() {
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status)} />}
         breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
         actions={
-          ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) &&
-          IS_INSCRIPTION_OPEN_CLE && [
-            <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
-            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
-          ]
+          (![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) &&
+            IS_INSCRIPTION_OPEN_CLE && [
+              <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
+              <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
+            ]) ||
+          // TODO : change to status STATUS_CLASSE.VALIDATED after testing
+          (STATUS_CLASSE.INSCRIPTION_TO_CHECK === classe.status && [
+            <Button key="export" title="Exporter toutes les convocations" onClick={() => downloadCertificatesByClassId(classe._id)} />,
+          ])
         }
       />
       <Container title="Informations générales" actions={actionList({ edit, setEdit, canEdit: rights.canEdit })}>

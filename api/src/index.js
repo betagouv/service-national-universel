@@ -160,6 +160,7 @@
   app.use("/young", require("./controllers/young/index"));
   app.use("/young-edition", require("./controllers/young-edition"));
   app.use("/SNUpport", require("./controllers/SNUpport"));
+  app.use("/v2/classe", require("./classe/classe.controller"));
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));
