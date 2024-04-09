@@ -25,15 +25,24 @@ if ! [[ -x "$(command -v curl)" ]]; then
   exit 1
 fi
 
+if [[ $NOTION_DATABASE_ID == "" ]]
+then
+    echo "NOTION_DATABASE_ID is not defined"
+    exit 1
+fi
+
+if [[ $NOTION_SECRET_KEY == "" ]]
+then
+    echo "NOTION_SECRET_KEY is not defined"
+    exit 1
+fi
+
 rev_range=$1
 if [[ $rev_range == "" ]]
 then
     echo "You must specify the revision-range"
     exit 1
 fi
-
-set -e
-set -x
 
 git log --pretty="%s" $rev_range > CHANGELOG.txt
 
@@ -51,15 +60,13 @@ sed -e 's/\(.*\)/{"property":"Identifiant","number":{"equals":\1}}/g' NOTION_IDS
     tr "\n" "," | # Replaces new lines with commas
     sed -e 's/,$//g' | # Remove last comma
     sed -e 's/\(.*\)/{"filter":{"or":[\1]}}/g' | # format the filter as Or condition
-    curl -sX POST "https://api.notion.com/v1/databases/d2af256de5e04953a0b1e45b0b67267f/query?filter_properties=title&filter_properties=$identifiant_id" \
-        -H 'Authorization: Bearer '"$NOTION_API_KEY"'' \
+    curl -sX POST "https://api.notion.com/v1/databases/$NOTION_DATABASE_ID/query?filter_properties=title&filter_properties=$identifiant_id" \
+        -H 'Authorization: Bearer '"$NOTION_SECRET_KEY"'' \
         -H 'Notion-Version: 2022-06-28' \
         -H "Content-Type: application/json" \
         --data '@-' |
     jq -r '.results[]|"\(.properties."Identifiant".unique_id.number)\t\(.url)\t\(.properties."Tâche".title[].plain_text)"' |
     sort -b > NOTION_DATA.csv
-
-cat NOTION_DATA.csv
 # NOTION_DATA.csv is tab-separated with columns (Notion.identifiant, Notion.url, Notion.title)
 
 join -a 1 -t$'\t' NOTION_ID_CHANGELOG.csv NOTION_DATA.csv > MERGE.csv # left outer join by notion.Identifiant

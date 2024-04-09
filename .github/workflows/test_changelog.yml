@@ -29,6 +29,9 @@ jobs:
 
       - name: Changelog
         id: changelog
+        env:
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          NOTION_SECRET_KEY: ${{ secrets.NOTION_SECRET_KEY }}
         run : |
           .github/scripts/generate_changelog.sh "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}" > CHANGELOG.md
           cat CHANGELOG.md
