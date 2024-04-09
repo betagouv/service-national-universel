@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import StepEligibilite from "../preinscription/steps/stepEligibilite";
 import StepSejour from "../preinscription/steps/stepSejour";
 import StepConfirm from "../preinscription/steps/stepConfirm";
+import StepNoSejour from "../preinscription/steps/StepNoSejour";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
@@ -20,6 +21,7 @@ function renderStepResponsive(step) {
   if (step === STEPS.ELIGIBILITE) return <StepEligibilite />;
   if (step === STEPS.SEJOUR) return <StepSejour />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
+  if (step === STEPS.NO_SEJOUR) return <StepNoSejour />;
 }
 
 const Step = () => {
