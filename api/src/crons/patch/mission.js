@@ -112,6 +112,7 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Mission Logs", text: e });
     capture(e);
+    throw e;
   }
 };
 

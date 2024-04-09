@@ -3,11 +3,12 @@ const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, REGLEMENT_INTERIEUR_VERSION } = require("snu-lib");
+const { YOUNG_STATUS, SENDINBLUE_TEMPLATES, REGLEMENT_INTERIEUR_VERSION } = require("snu-lib");
 const { APP_URL } = require("../config");
 
 exports.handler = async () => {
   try {
+    const { ABANDONED, WITHDRAWN, REFUSED, NOT_ELIGIBLE } = YOUNG_STATUS;
     let countNotice = 0;
     const newRiDate = new Date(REGLEMENT_INTERIEUR_VERSION);
     const cohortCollection = await CohortModel.find({
@@ -16,8 +17,10 @@ exports.handler = async () => {
     const cohorts = cohortCollection.map(({ name }) => name);
     const cursor = await YoungModel.find({
       cohort: cohorts,
+      status: { $nin: [ABANDONED, WITHDRAWN, REFUSED, NOT_ELIGIBLE] },
       parent1ValidationDate: { $lt: newRiDate },
     }).cursor();
+
     await cursor.eachAsync(async function (young) {
       countNotice++;
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
@@ -33,5 +36,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "parentRevalidateRI", text: JSON.stringify(e) });
+    throw e;
   }
 };

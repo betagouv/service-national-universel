@@ -4,26 +4,16 @@ const CohortModel = require("../models/cohort");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
+const { startOfDay, subDays, endOfDay } = require("date-fns");
 
 exports.handler = async () => {
   try {
     let countNotice = 0;
 
-    const now = new Date();
-    now.setUTCHours(0, 0, 0, 0);
+    const today = startOfDay(new Date());
 
-    now.setDate(now.getDate() - 3);
-    const threeDaysBefore = {
-      begin: new Date(now),
-      end: new Date(now.setUTCHours(23, 59, 59, 999)),
-    };
-
-    now.setDate(now.getDate() - 7);
-    now.setUTCHours(0, 0, 0, 0);
-    const sevenDaysBefore = {
-      begin: new Date(now),
-      end: new Date(now.setUTCHours(23, 59, 59, 999)),
-    };
+    const threeDaysBefore = subDays(today, 3);
+    const sevenDaysBefore = subDays(today, 7);
 
     try {
       const cohorts = await CohortModel.find({ name: /2024/ });
@@ -31,11 +21,11 @@ exports.handler = async () => {
         $or: [
           {
             status: YOUNG_STATUS.IN_PROGRESS,
-            createdAt: { $gte: threeDaysBefore.begin, $lt: threeDaysBefore.end },
+            createdAt: { $gte: threeDaysBefore, $lt: endOfDay(threeDaysBefore) },
           },
           {
             status: YOUNG_STATUS.IN_PROGRESS,
-            createdAt: { $gte: sevenDaysBefore.begin, $lt: sevenDaysBefore.end },
+            createdAt: { $gte: sevenDaysBefore, $lt: endOfDay(sevenDaysBefore) },
           },
         ],
       }).cursor();
@@ -60,5 +50,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: `Inscription reminder day 3 and day 7 - ERROR`, text: JSON.stringify(e) });
+    throw e;
   }
 };

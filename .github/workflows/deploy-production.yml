@@ -76,6 +76,40 @@ jobs:
           echo "antivirus_image_tag: $antivirus_image_tag"
           echo "antivirus_image_tag=$antivirus_image_tag" >> $GITHUB_OUTPUT
 
+          git fetch origin release_candidate production
+
+          rc_sha=$(git rev-parse origin/release_candidate)
+          echo "rc_sha: $rc_sha"
+          echo "rc_sha=$rc_sha" >> $GITHUB_OUTPUT
+
+          production_sha=$(git rev-parse origin/production)
+          echo "production_sha: $production_sha"
+          echo "production_sha=$production_sha" >> $GITHUB_OUTPUT
+
+      - name: Changelog
+        id: changelog
+        run : |
+          echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}|Release du $(date -Idate)>" > CHANGELOG.md
+          git log --pretty="• %s" "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}" \
+            | grep --invert-match "chore(release): version" \
+            | sort \
+            | sed 's #\([0-9]*\) <https://github.com/betagouv/service-national-universel/pull/\1|#\1> g' \
+            >> CHANGELOG.md
+          cat CHANGELOG.md
+          {
+            echo 'changelog<<EOF'
+            cat CHANGELOG.md
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post Changelog on slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: '#dev-release,#nouveauté-produit'
+          slack-message: "${{ steps.changelog.outputs.changelog }}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
 
 
   copy_image:
@@ -255,6 +289,16 @@ jobs:
       - name: Production - Healthcheck App
         working-directory: ${{ env.prod_directory }}
         run: curl -I "$(terraform output -raw app_endpoint)"
+
+  deploy_cc:
+    needs: [prepare, copy_image]
+    if: ${{ vars.DEPLOY_ON_CC == 'true' }}
+    uses: ./.github/workflows/cc-deploy-production.yml
+    with:
+      api_image_tag: ${{ needs.prepare.outputs.api_image_tag }}
+      admin_image_tag: ${{ needs.prepare.outputs.admin_image_tag }}
+      app_image_tag: ${{ needs.prepare.outputs.app_image_tag }}
+    secrets: inherit
 
   merge_branch:
     runs-on: ubuntu-latest

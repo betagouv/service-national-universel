@@ -9,18 +9,18 @@ import MissionFilters from "./components/MissionFilters";
 import MissionList from "./components/MissionList";
 import Loader from "../../../components/Loader";
 import { HiOutlineAdjustments } from "react-icons/hi";
+import useAuth from "@/services/useAuth";
 
 export default function List() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const [data, setData] = useState();
   const urlParams = new URLSearchParams(window.location.search);
-  const isMilitaryPreparation = Boolean(urlParams.get("MILITARY_PREPARATION"));
+  const canDoMilitaryPreparation = young?.frenchNationality === "true";
 
   const [filters, setFilters] = useState({
     domains: [],
     distance: 50,
     location: young?.location || {},
-    isMilitaryPreparation: isMilitaryPreparation || false,
     period: "",
     subPeriod: [],
     searchbar: "",
@@ -45,6 +45,13 @@ export default function List() {
     }, 250),
     [],
   );
+
+  useEffect(() => {
+    const isMilitaryPreparation = urlParams.get("MILITARY_PREPARATION");
+    if (isMilitaryPreparation || !canDoMilitaryPreparation) {
+      setFilters({ ...filters, isMilitaryPreparation: canDoMilitaryPreparation && isMilitaryPreparation });
+    }
+  }, []);
 
   useEffect(() => {
     updateOnFilterChange(filters, page, size, sort, setData);

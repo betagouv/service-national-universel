@@ -714,6 +714,33 @@ class Auth {
     }
   }
 
+  async refreshToken(req, res) {
+    const { error, value } = Joi.object({ token_ref: Joi.string(), token_young: Joi.string() }).validate({ token_ref: req.cookies.jwt_ref, token_young: req.cookies.jwt_young });
+    if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+
+    try {
+      const { user } = req;
+      user.set({ lastActivityAt: Date.now() });
+      await user.save();
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+        expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
+      });
+
+      if (!data || !token) {
+        captureMessage("PB with signin_token", { extras: { data, token } });
+        return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      }
+
+      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      res.send({ ok: true, token, user: data, data });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
   async checkPassword(req, res) {
     const { error, value } = Joi.object({
       password: Joi.string().required(),

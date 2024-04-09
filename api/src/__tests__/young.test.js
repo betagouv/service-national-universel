@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 const fetch = require("node-fetch");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");

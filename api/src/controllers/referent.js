@@ -198,6 +198,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 router.get("/signin_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.signinToken(req, res));
+router.get("/refresh_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.refreshToken(req, res));
 router.post("/forgot_password", async (req, res) => ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => ReferentAuth.resetPassword(req, res));
@@ -224,10 +225,38 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     if (type === "referent") res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
     else if (type === "young") {
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
-      return res.status(200).send({ ok: true });
     }
 
     return res.status(200).send({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/restore_signin", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ jwt: Joi.string().required() }).unknown().validate(req.body);
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    let jwtPayload;
+    try {
+      jwtPayload = await jwt.verify(value.jwt, config.secret);
+    } catch (error) {
+      return res.status(401).send({ ok: false, user: { restriction: "public" } });
+    }
+
+    const user = await ReferentModel.findOne({ _id: jwtPayload._id, role: ROLES.ADMIN });
+    if (!user) return res.status(401).send({ ok: false, user: { restriction: "public" } });
+
+    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+      expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
+    });
+    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    return res.status(200).send({ ok: true, token, data: serializeReferent(user, user) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

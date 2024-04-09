@@ -36,7 +36,7 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
             <input
               type="text"
               value={data.address || data.adresse}
-              onChange={(e) => updateData({ address: e.target.value })}
+              onChange={(e) => updateData({ ...data, address: e.target.value })}
               className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 border-b-2 border-gray-800"
             />
             <ErrorMessage>{correction?.address}</ErrorMessage>

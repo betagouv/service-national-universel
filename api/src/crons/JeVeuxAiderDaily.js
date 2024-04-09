@@ -1,8 +1,9 @@
 const fetch = require("node-fetch");
 const path = require("path");
+const { addYears, addHours } = require("date-fns");
 const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
-const { JVA_API_KEY } = require("../config");
+const { JVA_API_KEY, API_ENGAGEMENT_URL, API_ENGAGEMENT_KEY } = require("../config");
 const slack = require("../slack");
 const MissionModel = require("../models/mission");
 const StructureModel = require("../models/structure");
@@ -20,42 +21,16 @@ let startTime = new Date();
 const fromUser = { firstName: `Cron ${fileName}` };
 
 const jva2SnuDomaines = {
-  "Mobilisation Covid19": MISSION_DOMAINS.SOLIDARITY,
-  "Éducation pour tous": MISSION_DOMAINS.EDUCATION,
-  "Santé pour tous": MISSION_DOMAINS.HEALTH,
-  "Protection de la nature": MISSION_DOMAINS.ENVIRONMENT,
-  "Solidarité et insertion": MISSION_DOMAINS.SOLIDARITY,
-  "Solidarité & Insertion": MISSION_DOMAINS.SOLIDARITY,
-  "Sport pour tous": MISSION_DOMAINS.SPORT,
-  "Prévention et protection": MISSION_DOMAINS.SECURITY,
-  "Mémoire et citoyenneté": MISSION_DOMAINS.CITIZENSHIP,
-  "Coopération internationale": MISSION_DOMAINS.CITIZENSHIP,
-  "Art et culture pour tous": MISSION_DOMAINS.CULTURE,
-  "Art & Culture pour tous": MISSION_DOMAINS.CULTURE,
+  education: MISSION_DOMAINS.EDUCATION,
+  environnement: MISSION_DOMAINS.ENVIRONMENT,
+  sport: MISSION_DOMAINS.SPORT,
+  sante: MISSION_DOMAINS.HEALTH,
+  "solidarite-insertion": MISSION_DOMAINS.SOLIDARITY,
+  "prevention-protection": MISSION_DOMAINS.SECURITY,
+  "culture-loisirs": MISSION_DOMAINS.CULTURE,
+  "benevolat-competences": MISSION_DOMAINS.SOLIDARITY,
+  "vivre-ensemble": MISSION_DOMAINS.CITIZENSHIP,
 };
-
-const jva2SnuTimePeriod = {
-  week: "semaine",
-  month: "mois",
-  year: "an",
-};
-
-const jva2SnuDuration = {
-  "1_hour": "1 heure",
-  "2_hours": "2 heures",
-  half_day: "Une demi-journée",
-  day: "1 jour",
-  "3_days": "3 jours",
-  "5_days": "5 jours",
-};
-
-function addOneYear(date) {
-  const newDate = new Date(date);
-  newDate.setFullYear(newDate.getFullYear() + 1);
-  return newDate;
-}
-
-const TWO_HOURS = 2 * 60 * 60 * 1000;
 
 const JvaStructureException = [
   "6890", //Fédération Médico-psychosociale à la Personne-Initiative
@@ -68,18 +43,15 @@ const SnuStructureException = [
   "62de85c299f28207ac826fc5", //AUTISME ESPOIR VERS L'ÉCOLE
 ];
 
-const fetchMission = (page = 1) => {
-  //preoprod : https://jeveuxaider-preprod-router.osc-secnum-fr1.scalingo.io/
-  //prod : https://www.jeveuxaider.gouv.fr/
-  fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/missions?filter[is_snu_mig_compatible]=1&apikey=${JVA_API_KEY}&page=${page}`, {
+const fetchMission = (skip = 0) =>
+  fetch(`${API_ENGAGEMENT_URL}/v2/mission?snu=true&skip=${skip}&limit=50`, {
+    headers: { "x-api-key": API_ENGAGEMENT_KEY },
     method: "GET",
-    redirect: "follow",
   })
     .then((response) => response.json())
     .then((result) => sync(result))
-    .then((rest) => (rest ? fetchMission(++page) : cleanData()))
+    .then((rest) => (rest ? fetchMission(skip + 50) : cleanData()))
     .catch((error) => console.log("error fetch mission :", error));
-};
 
 const fetchStructure = async (id) => {
   return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${JVA_API_KEY}`, {
@@ -99,9 +71,9 @@ const sync = async (result) => {
       const mission = result.data[i];
 
       //stop sync for exception
-      if (JvaStructureException.includes(mission.structure.id)) continue;
+      if (JvaStructureException.includes(mission.organizationId)) continue;
 
-      let structure = await StructureModel.findOne({ jvaStructureId: mission.structure.id });
+      let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationId });
 
       //stop sync for exception
       if (SnuStructureException.includes(structure?._id.toString())) continue;
@@ -109,7 +81,7 @@ const sync = async (result) => {
       if (!structure) {
         // console.log("Create new struct");
         //get JVA struture
-        let jvaStructure = await fetchStructure(mission.structure.id);
+        let jvaStructure = await fetchStructure(mission.organizationId);
 
         //Struct without resp skip
         if (!jvaStructure?.responsables.length) {
@@ -184,69 +156,49 @@ const sync = async (result) => {
       }
 
       //Get referent mission
-      let referentMission = await ReferentModel.findOne({ email: mission.responsable.email });
-      if (!referentMission) {
-        //Create referent
-        referentMission = await ReferentModel.create({
-          firstName: mission.responsable.first_name,
-          lastName: mission.responsable.last_name,
-          email: mission.responsable.email,
-          role: ROLES.RESPONSIBLE,
-          structureId: structure.id,
-        });
-      } else if (referentMission.structureId !== structure.id) {
-        // console.log("Skip mission : error referent links to another structure");
-        continue;
-      }
+      let referentMission = await ReferentModel.findOne({ structureId: structure.id });
 
       //Create or updade mission
-      const frequence = mission.commitment.time_period
-        ? mission.commitment.duration
-          ? jva2SnuDuration[mission.commitment.duration] + " par " + jva2SnuTimePeriod[mission.commitment.time_period]
-          : ""
-        : "";
-
-      const startAt = new Date(mission.start_date);
-      const endAt = new Date(mission.end_date);
+      const startAt = new Date(mission.startAt);
+      const endAt = new Date(mission.endAt);
+      const [description, actions] = mission.descriptionHtml.split("Objectifs:");
 
       const infoMission = {
-        name: mission.name,
-        mainDomain: jva2SnuDomaines[mission.domaine.name],
-        startAt: new Date(startAt.getTime() + TWO_HOURS),
-        endAt: mission.end_date ? new Date(endAt.getTime() + TWO_HOURS) : addOneYear(mission.start_date),
-        placesTotal: mission.snu_mig_places,
-        description: mission.objectifs,
-        frequence: frequence,
-        actions: mission.description,
+        name: mission.title,
+        description,
+        actions,
+        mainDomain: jva2SnuDomaines[mission.domain],
+        startAt: addHours(startAt, 2),
+        endAt: mission.endAt ? addHours(endAt, 2) : addYears(startAt, 1),
+        placesTotal: mission.snuPlaces,
+        frequence: mission.schedule,
         structureId: structure.id,
         structureName: structure.name,
         status: MISSION_STATUS.WAITING_VALIDATION,
         tutorId: referentMission.id,
         tutorName: getTutorName(referentMission),
-        zip: mission.address.zip,
-        address: mission.address.address,
-        city: mission.address.city,
-        department: departmentLookUp[mission.address.department],
-        region: department2region[departmentLookUp[mission.address.department]],
+        zip: mission.postalCode,
+        address: mission.address,
+        city: mission.city,
+        department: mission.department,
+        region: mission.region,
         country: "France",
-        location: {
-          lat: Number(mission.address.latitude),
-          lon: Number(mission.address.longitude),
-        },
+        location: mission.location,
         isJvaMission: true,
-        jvaMissionId: mission.id,
+        jvaMissionId: mission.clientId,
+        apiEngagementId: mission.id,
         jvaRawData: mission,
         lastSyncAt: Date.now(),
 
-        updatedAt: new Date(mission.updated_at),
-        createdAt: new Date(mission.created_at),
+        updatedAt: new Date(mission.updatedAt),
+        createdAt: new Date(mission.postedAt),
       };
 
       //Check if mission exist
-      const missionExist = await MissionModel.findOne({ jvaMissionId: mission.id });
+      const missionExist = await MissionModel.findOne({ jvaMissionId: mission.clientId });
       if (!missionExist) {
         // console.log("Create new mission");
-        const data = await MissionModel.create({ ...infoMission, placesLeft: mission.snu_mig_places });
+        const data = await MissionModel.create({ ...infoMission, placesLeft: mission.snuPlaces });
 
         //Send mail to responsable department
         const referentsDepartment = await ReferentModel.find({
@@ -292,7 +244,7 @@ const sync = async (result) => {
       console.log("ERROR 🚫", e);
     }
   }
-  return result.next_page_url ? true : false;
+  return result.skip < result.total ? true : false;
 };
 
 const cleanData = async () => {
@@ -331,12 +283,20 @@ exports.handler = async () => {
   slack.info({ title: "sync with JVA missions", text: "I'm starting the synchronization !" });
   if (!JVA_API_KEY) {
     slack.error({ title: "sync with JVA missions", text: "I do not have any JVA_API_KEY !" });
-    capture("NO JVA_API_KEY");
-    return;
+    const err = new Error("NO JVA_API_KEY");
+    capture(err);
+    throw err;
+  }
+  if (!API_ENGAGEMENT_KEY) {
+    slack.error({ title: "sync with API-ENGAGEMENT missions", text: "I do not have any API_ENGAGEMENT_KEY !" });
+    const err = new Error("NO API_ENGAGEMENT_KEY");
+    capture(err);
+    throw err;
   }
   try {
-    fetchMission();
+    await fetchMission();
   } catch (e) {
     capture(e);
+    throw e;
   }
 };

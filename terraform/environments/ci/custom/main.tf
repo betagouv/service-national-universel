@@ -82,8 +82,8 @@ resource "scaleway_container" "api" {
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port            = 8080
   cpu_limit       = 768
-  memory_limit    = 1024
-  min_scale       = 1
+  memory_limit    = 2048
+  min_scale       = 0
   max_scale       = 1
   timeout         = 60
   max_concurrency = 50
@@ -154,10 +154,20 @@ resource "scaleway_domain_record" "api" {
   ttl      = 300
 }
 
+# wait beetween DNS record creation and endpoint creation
+resource "time_sleep" "api_dns" {
+  depends_on = [scaleway_domain_record.api]
+
+  create_duration = "300s"
+}
+
 resource "scaleway_container_domain" "api" {
   container_id = scaleway_container.api.id
   hostname     = "${scaleway_domain_record.api.name}${scaleway_domain_record.api.dns_zone}"
+
+  depends_on = [time_sleep.api_dns]
 }
+
 
 
 
@@ -168,7 +178,7 @@ resource "scaleway_container" "admin" {
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
-  min_scale       = 1
+  min_scale       = 0
   max_scale       = 1
   timeout         = 60
   max_concurrency = 50
@@ -203,9 +213,18 @@ resource "scaleway_domain_record" "admin" {
   ttl      = 300
 }
 
+# wait beetween DNS record creation and endpoint creation
+resource "time_sleep" "admin_dns" {
+  depends_on = [scaleway_domain_record.admin]
+
+  create_duration = "300s"
+}
+
 resource "scaleway_container_domain" "admin" {
   container_id = scaleway_container.admin.id
   hostname     = "${scaleway_domain_record.admin.name}${scaleway_domain_record.admin.dns_zone}"
+
+  depends_on = [time_sleep.admin_dns]
 }
 
 resource "scaleway_container" "app" {
@@ -215,7 +234,7 @@ resource "scaleway_container" "app" {
   port            = 8080
   cpu_limit       = 256
   memory_limit    = 256
-  min_scale       = 1
+  min_scale       = 0
   max_scale       = 1
   timeout         = 60
   max_concurrency = 50
@@ -251,9 +270,19 @@ resource "scaleway_domain_record" "app" {
   ttl      = 300
 }
 
+# wait beetween DNS record creation and endpoint creation
+resource "time_sleep" "app_dns" {
+  depends_on = [scaleway_domain_record.app]
+
+  create_duration = "300s"
+}
+
 resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
   hostname     = "${scaleway_domain_record.app.name}${scaleway_domain_record.app.dns_zone}"
+
+
+  depends_on = [time_sleep.app_dns]
 }
 
 output "api_endpoint" {

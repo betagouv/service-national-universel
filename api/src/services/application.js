@@ -149,7 +149,7 @@ const getAuthorizationToApply = async (mission, young) => {
   const ageAtStart = calculateAge(young.birthdateAt, mission.startAt);
 
   if (!isMilitaryPreparation && ageAtStart < 15) {
-    refusalMessages.push("Vous devez avoir plus de 15 ans pour candidater.");
+    refusalMessages.push("Vous devez avoir au moins 15 ans pour candidater.");
   }
 
   // Military preparations have special rules

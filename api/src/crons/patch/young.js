@@ -149,6 +149,7 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Young Logs", text: `${JSON.toString(e)}` });
     capture(e);
+    throw e;
   }
 };
 

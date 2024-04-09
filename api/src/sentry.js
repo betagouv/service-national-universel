@@ -89,7 +89,7 @@ function initSentryMiddlewares(app) {
 }
 
 function capture(err, contexte) {
-  console.log("capture", err);
+  console.error("capture", err);
   if (!err) {
     sentryCaptureMessage("Error not defined");
     return;
@@ -106,7 +106,7 @@ function capture(err, contexte) {
   }
 }
 function captureMessage(mess, contexte) {
-  console.log("captureMessage", mess);
+  console.error("captureMessage", mess);
   if (!mess) {
     sentryCaptureMessage("Message not defined");
     return;

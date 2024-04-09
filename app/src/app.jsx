@@ -232,7 +232,7 @@ const MandatoryLogIn = () => {
 
   return (
     <Switch>
-      <SentryRoute path={["/inscription2023", "/reinscription"]} component={() => <Inscription />} />
+      <SentryRoute path={["/inscription2023", "/reinscription"]} component={Inscription} />
       <SentryRoute path="/" component={Espace} />
     </Switch>
   );

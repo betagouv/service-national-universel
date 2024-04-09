@@ -103,7 +103,7 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
         isOpen={modal?.isOpen}
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onClose={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={modal}
+        onConfirm={modal.onConfirm}
         title="Envoi de document par mail"
         subTitle={`Vous allez recevoir le lien de téléchargement de votre convocation par mail à l'adresse ${young.email}.`}
       />

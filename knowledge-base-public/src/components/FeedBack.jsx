@@ -18,7 +18,7 @@ function FeedbackComponent({ item }) {
       setSubmitting(true);
       const response = await API.post({
         origin: snuApiUrl,
-        path: `/zammood/knowledgeBase/feedback`,
+        path: `/SNUpport/knowledgeBase/feedback`,
         body: { ...feedback, knowledgeBaseArticle: item?._id },
       });
       if (response.ok) {
