@@ -25,16 +25,16 @@ router.post(
       }
       const { id } = value;
       const certificates = await generateCertificatesByClasseId(id);
+      // TODO : change content-length
       res.set({
         "content-length": "9999",
-        "content-disposition": `inline; filename="test.pdf"`,
+        "content-disposition": `inline; filename="test.zip"`,
         "content-type": "application/pdf",
         "cache-control": "public, max-age=1",
       });
       res.send(certificates);
     } catch (e) {
-      console.error(e);
-      throw new Error("Cannot generate pdf");
+      capture(e);
     }
   },
 );
