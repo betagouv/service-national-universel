@@ -99,3 +99,5 @@ db.on("error", (error) => {
 db.once("open", () => console.log("CONNECTED OK"));
 
 module.exports = connect;
+
+// https://chat.openai.com/share/998a8dbf-7a46-4354-9e1d-203ed8bdbbc6
