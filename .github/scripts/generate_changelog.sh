@@ -74,7 +74,7 @@ join -a 1 -t$'\t' NOTION_ID_CHANGELOG.csv NOTION_DATA.csv > MERGE.csv # left out
 
 # Output Changelog
 echo "<https://github.com/betagouv/service-national-universel/compare/$rev_range|Release du $(date -Idate)>"
-sed -E 's/^(.+)\t(.+)\t(.+)\t(.+)$/\t\2 -> <\3|\4>/g' MERGE.csv | # create link to notion
+sed -E 's/^(.+)\t(.+)\t(.+)\t(.+)$/\t\2 - ✅ <\3|\4>/g' MERGE.csv | # create link to notion
     sed -E 's/^(.*)\t//g' | # remove first column (notion.Identifiant)
     sed 's #\([0-9]*\) <https://github.com/betagouv/service-national-universel/pull/\1|#\1> g' | # update link to PR
     grep --invert-match "chore(release): version" | # remove useless infos
