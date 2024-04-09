@@ -34,6 +34,7 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
       // 2021 can be empty in database. This could be removed once all data is migrated.
       return InscriptionGoalModel.find({ cohort: value.cohort === "2021" ? ["2021", null] : value.cohort, department: item.department }).then((data) => {
         const inscriptionsGoal = data[0];
+        if (!inscriptionsGoal) return InscriptionGoalModel.create({ ...item, cohort: value.cohort });
         inscriptionsGoal.set({ ...item, cohort: value.cohort });
         return inscriptionsGoal.save({ fromUser: req.user });
       });
