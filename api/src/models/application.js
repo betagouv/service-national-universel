@@ -16,7 +16,7 @@ const Schema = new mongoose.Schema({
   apiEngagementId: {
     type: String,
     documentation: {
-      description: "Identifiant de la candidature dans l'API Engagement",
+      description: "Identifiant de la candidature (Activity) dans l'API Engagement",
     },
   },
   youngId: {

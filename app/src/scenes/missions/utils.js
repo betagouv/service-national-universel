@@ -5,18 +5,15 @@ import { capture } from "@/sentry";
 
 export async function sendDataToJVA(missionId) {
   try {
-    // if (environment !== "production") {
-    //   return;
-    // }
+    if (environment !== "production") return;
+
     const url = `${API_ENGAGEMENT_URL}/v2/activity/${missionId}/${API_ENGAGEMENT_SNU_ID}/click`;
-    const options = { method: "POST", mode: "cors" };
+    const options = { method: "POST" };
     const res = await fetch(url, options);
     const { ok, data, code } = await res.json();
 
-    if (!ok) {
-      throw new Error(code);
-    }
-    console.log("🚀 ~ sendDataToJVA ~ data:", data);
+    if (!ok) throw new Error(code);
+
     localStorage.setItem("jva_mission_click_id", data._id);
   } catch (e) {
     capture(e);

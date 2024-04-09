@@ -11,53 +11,64 @@ const apiEngagementStatus = {
 
 const apiEngagement = {
   /**
+   * Create a new application in API Engagement.
+   * @param {object} application - Application object
    * @param {string} missionId - API Engagement GUID, not SNU ID or JVA ID
-   * @param {string} [clickId] - Optional. Click ID stored in local storage to match a redirection to an application creation.
+   * @param {string} [clickId] - Optional. Click ID stored in local storage to match a redirection with an application creation.
    */
-  create: async (missionId, clickId) => {
-    let url = config.API_ENGAGEMENT_URL + "/v2/activity/" + missionId + "/click";
-    if (clickId) url += `?clickId=${clickId}`;
+  create: async (application, missionId, clickId) => {
+    try {
+      if (config.ENVIRONMENT !== "production") return;
 
-    const res = await fetch(url, { method: "POST" });
-    const { ok, data, code, message } = await res.json();
+      if (application.status !== APPLICATION_STATUS.WAITING_VALIDATION) return;
 
-    if (!ok) {
-      console.error("Error while sending tracking data to API Engagement:", code, message);
-      throw new Error(code);
+      let url = config.API_ENGAGEMENT_URL + "/v2/activity/" + missionId + "/apply?tag=MIG";
+      if (clickId) url += `&clickId=${clickId}`;
+
+      const options = {
+        method: "POST",
+        headers: { "X-API-KEY": config.API_ENGAGEMENT_KEY },
+      };
+
+      const res = await fetch(url, options);
+      const { ok, data, code } = await res.json();
+
+      if (!ok) throw new Error(code);
+
+      return data;
+    } catch (e) {
+      console.error("Error while sending tracking data to API Engagement:", e);
     }
-    console.log("🚀 ~ sendTrackingDataToJva ~ data:", data);
-    return data;
   },
 
   update: async (application) => {
-    if (!application.apiEngagementId) {
-      console.error("No API Engagement ID found for application", application._id);
-      return;
+    try {
+      if (config.ENVIRONMENT !== "production") return;
+
+      // We only track application creation, validation and completion (not cancelation, refusal, etc.)
+      if (!Object.keys(apiEngagementStatus).includes(application.status)) return;
+
+      if (!application.apiEngagementId) {
+        throw new Error("No API Engagement ID found for application" + application._id);
+      }
+
+      const url = config.API_ENGAGEMENT_URL + "/v2/activity/" + application.apiEngagementId;
+
+      const options = {
+        method: "PUT",
+        headers: { "X-API-KEY": config.API_ENGAGEMENT_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ status: apiEngagementStatus[application.status] }),
+      };
+
+      const res = await fetch(url, options);
+      const { ok, data, code } = await res.json();
+
+      if (!ok) throw new Error(code);
+
+      return data;
+    } catch (e) {
+      console.error("Error while sending tracking data to API Engagement:", e);
     }
-
-    // We only track application creation, validation and completion (not cancellation, refusal, etc.)
-    if (!Object.keys(apiEngagementStatus).includes(application.status)) {
-      return;
-    }
-
-    const url = config.API_ENGAGEMENT_URL + "/v2/activity/" + application.apiEngagementId;
-    console.log("🚀 ~ update: ~ url:", url);
-
-    const options = {
-      method: "PUT",
-      headers: { "X-API-KEY": config.API_ENGAGEMENT_KEY },
-      body: JSON.stringify({ status: apiEngagementStatus[application.status] }),
-    };
-    console.log("🚀 ~ update: ~ options:", options);
-
-    const res = await fetch(url, options);
-    const { ok, data, code, message } = await res.json();
-
-    if (!ok) {
-      console.error("Error while sending tracking data to API Engagement:", code, message);
-      throw new Error(code);
-    }
-    console.log("🚀 ~ sendTrackingDataToJva ~ data:", data);
   },
 };
 

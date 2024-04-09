@@ -28,6 +28,7 @@ const {
   canViewContract,
   translateAddFilePhase2,
   translateAddFilesPhase2,
+  APPLICATION_STATUS,
 } = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
 const {
@@ -215,9 +216,9 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    if (mission?.isJvaMission) {
-      const { _id } = await apiEngagement.create(mission.jvaRawData._id, clickId);
-      value.apiEngagementId = _id;
+    if (mission.isJvaMission === "true") {
+      const data = await apiEngagement.create(value, mission.jvaRawData?._id, clickId);
+      value.apiEngagementId = data?._id;
     }
 
     value.contractStatus = "DRAFT";
@@ -367,17 +368,26 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
       }
     }
 
+    const originalStatus = application.status;
+
     application.set(value);
+
+    if (application.isJvaMission === "true") {
+      if (originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION && application.status === APPLICATION_STATUS.WAITING_VALIDATION) {
+        const mission = await MissionObject.findById(application.missionId);
+        const data = await apiEngagement.create(application, mission.jvaRawData._id, null);
+        application.set({ apiEngagementId: data._id });
+      } else {
+        await apiEngagement.update(application);
+      }
+    }
+
     await application.save({ fromUser: req.user });
 
     await updateYoungPhase2Hours(young, req.user);
     await updateStatusPhase2(young, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
     await updateMission(application, req.user);
-
-    if (application.isJvaMission) {
-      await apiEngagement.update(application);
-    }
 
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {
