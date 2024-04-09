@@ -33,7 +33,7 @@ jobs:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           NOTION_SECRET_KEY: ${{ secrets.NOTION_SECRET_KEY }}
         run : |
-          .github/scripts/generate_changelog.sh "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}" > CHANGELOG.md
+          .github/scripts/generate_changelog.sh "d758e84b83ca50f19a33ae6b2ba846b3e5d33e8b...811db816d248a75f25a2ee815b1195db0" > CHANGELOG.md
           cat CHANGELOG.md
           {
             echo 'changelog<<EOF'
