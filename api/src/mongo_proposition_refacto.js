@@ -2,7 +2,6 @@ const Sentry = require("@sentry/core");
 const mongoose = require("mongoose");
 const { MONGO_URL, IS_MAIN_INSTANCE } = require("./config.js");
 const { capture } = require("./third-parties/sentry.js");
-const { executeMigrations } = require("./migrations/migrations.js");
 const os = require("os");
 
 console.log(`Connect to MONGO : ${MONGO_URL}`);
@@ -26,9 +25,6 @@ function connect() {
       autoIndex: process.env.NODE_ENV === "production" ? IS_MAIN_INSTANCE : false,
     })
     .then(() => {
-      // Access the underlying database object provided by the MongoDB driver.
-      let db = mongoose.connection.db;
-
       console.log("Connected to MONGO: creating models start");
       const adminModel = require("./models/admin.js");
       const answerModel = require("./models/answer.js");
