@@ -72,15 +72,27 @@ sed -e 's/\(.*\)/{"property":"Identifiant","number":{"equals":\1}}/g' NOTION_IDS
 join -a 1 -t$'\t' NOTION_ID_CHANGELOG.csv NOTION_DATA.csv > MERGE.csv # left outer join by notion.Identifiant
 
 
-# Output Changelog
-echo "<https://github.com/betagouv/service-national-universel/compare/$rev_range|Release du $(date -Idate)>"
 sed -E 's/^(.+)\t(.+)\t(.+)\t(.+)$/\t\2 - ✅ <\3|\4>/g' MERGE.csv | # create link to notion
     sed -E 's/^(.*)\t//g' | # remove first column (notion.Identifiant)
     sed 's #\([0-9]*\) <https://github.com/betagouv/service-national-universel/pull/\1|#\1> g' | # update link to PR
     grep --invert-match "chore(release): version" | # remove useless infos
     sort --ignore-case |
-    sed -E 's/^(.*)$/• \1/g' # Add list item char
+    sed -E 's/^(.*)$/• \1/g' > OUTPUT.txt # Add list item char
+
+# Output Changelog
+echo "<https://github.com/betagouv/service-national-universel/compare/$rev_range|Release du $(date -Idate)>"
+echo ""
+echo "Features"
+echo ""
+grep " feat(" OUTPUT.txt
+echo ""
+echo "Correctifs"
+echo ""
+grep " fix(" OUTPUT.txt
+echo ""
+echo "Autres"
+echo ""
+grep --invert-match -e " fix(" -e " feat(" OUTPUT.txt
 
 
-
-rm -f CHANGELOG.txt NOTION_ID_CHANGELOG.csv NOTION_IDS.txt NOTION_DATA.csv MERGE.csv
+rm -f CHANGELOG.txt NOTION_ID_CHANGELOG.csv NOTION_IDS.txt NOTION_DATA.csv MERGE.csv OUTPUT.txt

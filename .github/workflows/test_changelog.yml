@@ -1,0 +1,50 @@
+name: Test Changelog Notion
+
+on:
+  push:
+    branches:
+      - 2256_notion_changelog
+
+jobs:
+
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Prepare
+        id: prepare
+        run : |
+          git fetch origin main production
+
+          rc_sha=$(git rev-parse origin/main)
+          echo "rc_sha: $rc_sha"
+          echo "rc_sha=$rc_sha" >> $GITHUB_OUTPUT
+
+          production_sha=$(git rev-parse origin/production)
+          echo "production_sha: $production_sha"
+          echo "production_sha=$production_sha" >> $GITHUB_OUTPUT
+
+      - name: Changelog
+        id: changelog
+        env:
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          NOTION_SECRET_KEY: ${{ secrets.NOTION_SECRET_KEY }}
+        run : |
+          .github/scripts/generate_changelog.sh "d758e84b83ca50f19a33ae6b2ba846b3e5d33e8b...811db816d248a75f25a2ee815b1195db0" > CHANGELOG.md
+          cat CHANGELOG.md
+          {
+            echo 'changelog<<EOF'
+            cat CHANGELOG.md
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post Changelog on slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: '#test-rt'
+          slack-message: "${{ steps.changelog.outputs.changelog }}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
