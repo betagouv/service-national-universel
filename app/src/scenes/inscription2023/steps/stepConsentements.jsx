@@ -89,11 +89,7 @@ export default function StepConsentements() {
                 </>
               )}
               et m&apos;engage à en respecter le{" "}
-              <a
-                href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf"
-                target="_blank"
-                rel="noreferrer"
-                className="underline hover:underline">
+              <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf" target="_blank" rel="noreferrer">
                 règlement intérieur
               </a>
               .
