@@ -1,4 +1,5 @@
 {
+  "extends": [":semanticCommitTypeAll(chore)", ":semanticCommitScope(lib)"],
   "packageRules": [
     {
       "description": "Automerge non-major updates",
