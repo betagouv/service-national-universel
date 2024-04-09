@@ -192,9 +192,9 @@ resource "scaleway_container" "admin" {
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
+    "RELEASE"                    = var.admin_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.1
     "SENTRY_TRACING_SAMPLE_RATE" = 0.1
-    "SENTRY_RELEASE"             = var.admin_image_tag
     "SUPPORT_URL"                = "https://support.beta-snu.dev"
   }
 
@@ -249,9 +249,9 @@ resource "scaleway_container" "app" {
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
+    "RELEASE"                    = var.app_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.1
     "SENTRY_TRACING_SAMPLE_RATE" = 0.1
-    "SENTRY_RELEASE"             = var.app_image_tag
     "SUPPORT_URL"                = "https://support.beta-snu.dev"
   }
 
