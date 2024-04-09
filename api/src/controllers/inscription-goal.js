@@ -32,9 +32,12 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
 
     const promises = inscriptionsGoals.map((item) => {
       // 2021 can be empty in database. This could be removed once all data is migrated.
-      return InscriptionGoalModel.find({ cohort: value.cohort === "2021" ? ["2021", null] : value.cohort, department: item.department })
-        .then((data) => data.set({ ...item, cohort: value.cohort }))
-        .then((data) => data.save({ fromUser: req.user }));
+      return InscriptionGoalModel.find({ cohort: value.cohort === "2021" ? ["2021", null] : value.cohort, department: item.department }).then((data) => {
+        const inscriptionsGoal = data[0];
+        if (!inscriptionsGoal) return InscriptionGoalModel.create({ ...item, cohort: value.cohort });
+        inscriptionsGoal.set({ ...item, cohort: value.cohort });
+        return inscriptionsGoal.save({ fromUser: req.user });
+      });
     });
     await Promise.all(promises);
     return res.status(200).send({ ok: true });
