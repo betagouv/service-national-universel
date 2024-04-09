@@ -82,13 +82,16 @@ sed -E 's/^(.+)\t(.+)\t(.+)\t(.+)$/\t\2 - ✅ <\3|\4>/g' MERGE.csv | # create li
 # Output Changelog
 echo "<https://github.com/betagouv/service-national-universel/compare/$rev_range|Release du $(date -Idate)>"
 echo ""
+echo ""
 echo "Features"
 echo ""
 grep --ignore-case " feat(" OUTPUT.txt
 echo ""
+echo ""
 echo "Correctifs"
 echo ""
 grep --ignore-case " fix(" OUTPUT.txt
+echo ""
 echo ""
 echo "Divers"
 echo ""
