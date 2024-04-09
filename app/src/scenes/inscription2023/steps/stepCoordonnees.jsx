@@ -6,20 +6,9 @@ import { useHistory, useParams } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
 import validator from "validator";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
-import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
-import {
-  youngSchooledSituationOptions,
-  youngActiveSituationOptions,
-  foreignCountryOptions,
-  hostRelationshipOptions,
-  inFranceOrAbroadOptions,
-  genderOptions,
-  booleanOptions,
-} from "../utils";
-
+import { youngSchooledSituationOptions, youngActiveSituationOptions, foreignCountryOptions, hostRelationshipOptions, inFranceOrAbroadOptions, genderOptions } from "../utils";
 import api from "../../../services/api";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
-import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate } from "../../../utils";
 import { capture } from "../../../sentry";
@@ -33,7 +22,7 @@ import useAuth from "@/services/useAuth";
 import useAddress from "@/services/useAddress";
 import { useDebounce } from "@uidotdev/usehooks";
 import { fr } from "@codegouvfr/react-dsfr";
-import { Button, Input, Select } from "@snu/ds/dsfr";
+import { booleanOptions, RadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -135,9 +124,7 @@ export default function StepCoordonnees() {
     birthCity,
     gender,
     livesInFrance,
-    address,
     zip,
-    city,
     foreignCountry,
     foreignAddress,
     foreignCity,
@@ -153,8 +140,6 @@ export default function StepCoordonnees() {
     paiBeneficiary,
     specificAmenagment,
     specificAmenagmentType,
-    reducedMobilityAccess,
-    handicapInSameDepartment,
   } = data;
 
   const debouncedBirthCity = useDebounce(birthCity, 200);
@@ -504,8 +489,6 @@ export default function StepCoordonnees() {
           />
         </div>
         <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
-        {console.log(situation)}
-        {console.log(situationOptions)}
         {!isCLE && (
           <Select
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
@@ -631,94 +614,83 @@ export default function StepCoordonnees() {
             title="Information"
           />
         </div>
-        <div className="mb-4 flex items-center">
-          <div>
-            <h2 className="mt-0 leading-6 text-[16px]">
-              Souhaitez-vous nous faire part d’une situation particulière ?
-              <span className="text-[16px]"> (allergie, situation de handicap, besoin d&apos;un aménagement spécifique, ...)</span>
-            </h2>
-            <div className=" mt-2 text-[12px] leading-5 text-[#666666]">
-              Le SNU est ouvert à tous. Pour vous accueillir dans les meilleures conditions, un responsable pourra prendre contact avec vous.
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row mb-4">
-          <div className="pr-4 border-r">
-            <input
-              className="mr-2"
-              type="radio"
-              id="oui"
-              name="specialSituation"
-              value="true"
-              checked={hasSpecialSituation === true}
-              onChange={(e) => updateSpecialSituation(e.target.value === "true")}
-            />
-            <label className="mb-0" htmlFor="oui">
-              Oui
-            </label>
-          </div>
-          <div className="md:px-6">
-            <input
-              className="mr-2"
-              type="radio"
-              id="non"
-              name="specialSituation"
-              value="false"
-              checked={hasSpecialSituation === false}
-              onChange={(e) => updateSpecialSituation(e.target.value === "true")}
-            />
-            <label className="mb-0" htmlFor="non">
-              Non
-            </label>
-          </div>
-        </div>
-        <ErrorMessage>{errors.hasSelectedSpecialSituation}</ErrorMessage>
+        <RadioButtons
+          legend="Souhaitez-vous nous faire part d’une situation particulière ? (allergie, situation de handicap, besoin d'un aménagement spécifique, ...)"
+          hintText="Le SNU est ouvert à tous. Pour vous accueillir dans les meilleures conditions, un responsable pourra prendre contact avec vous."
+          name="radio"
+          options={[
+            {
+              label: "Oui",
+              nativeInputProps: {
+                value: "true",
+                checked: hasSpecialSituation === true,
+                onChange: (e) => updateSpecialSituation(e.target.value === "true"),
+              },
+            },
+            {
+              label: "Non",
+              nativeInputProps: {
+                value: "false",
+                checked: hasSpecialSituation === false,
+                onChange: (e) => updateSpecialSituation(e.target.value === "true"),
+              },
+            },
+          ]}
+          orientation="horizontal"
+          state={errors.hasSelectedSpecialSituation ? "error" : "default"}
+          stateRelatedMessage={errors.hasSelectedSpecialSituation}
+        />
         {hasSpecialSituation && (
           <>
-            <CheckBox
-              className="mb-4"
-              label="Je suis en situation de handicap"
-              checked={handicap === "true"}
-              onChange={(value) => {
-                setData({ ...data, handicap: value.toString() });
-              }}
+            <Checkbox
+              state={errors.hasSpecialSituation ? "error" : "default"}
+              stateRelatedMessage={errors.hasSpecialSituation}
+              options={[
+                {
+                  label: "Je suis en situation de handicap",
+                  nativeInputProps: {
+                    onChange: (e) => {
+                      setData({ ...data, handicap: e.target.checked.toString() });
+                    },
+                  },
+                },
+                {
+                  label: "Je suis bénéficiaire d’un Projet personnalisé de scolarisation (PPS)",
+                  nativeInputProps: {
+                    onChange: (e) => {
+                      setData({ ...data, ppsBeneficiary: e.target.checked.toString() });
+                    },
+                  },
+                },
+                {
+                  label: "Je suis bénéficiaire d’un Projet d’accueil individualisé (PAI)",
+                  nativeInputProps: {
+                    onChange: (e) => {
+                      setData({ ...data, paiBeneficiary: e.target.checked.toString() });
+                    },
+                  },
+                },
+                {
+                  label: "J’ai des allergies ou intolérances alimentaires.",
+                  nativeInputProps: {
+                    onChange: (e) => {
+                      setData({ ...data, allergies: e.target.checked.toString() });
+                    },
+                  },
+                },
+              ]}
             />
-            <CheckBox
-              className="mb-4"
-              label="Je suis bénéficiaire d’un Projet personnalisé de scolarisation (PPS)"
-              checked={ppsBeneficiary === "true"}
-              onChange={(value) => {
-                setData({ ...data, ppsBeneficiary: value.toString() });
-              }}
-            />
-            <CheckBox
-              className="mb-4"
-              label="Je suis bénéficiaire d’un Projet d’accueil individualisé (PAI)"
-              checked={paiBeneficiary === "true"}
-              onChange={(value) => {
-                setData({ ...data, paiBeneficiary: value.toString() });
-              }}
-            />
-            <CheckBox
-              className="mb-4"
-              label="J’ai des allergies ou intolérances alimentaires."
-              description="(nécessitant la mise en place de mesures adaptées)"
-              checked={allergies === "true"}
-              onChange={(value) => {
-                setData({ ...data, allergies: value.toString() });
-              }}
-            />
-            <ErrorMessage>{errors.hasSpecialSituation}</ErrorMessage>
             {moreInformation && (
               <>
                 <hr className="my-4" />
-                <RadioButton
-                  label="Avez-vous besoin d’aménagements spécifiques ?"
-                  description="(accompagnant professionnel, participation de jour, activités adaptées... )"
-                  options={booleanOptions}
-                  onChange={updateData("specificAmenagment")}
-                  value={specificAmenagment}
-                  error={errors.specificAmenagment}
+                <RadioButtons
+                  legend="Avez-vous besoin d’aménagements spécifiques ?"
+                  hintText="(accompagnant professionnel, participation de jour, activités adaptées... )"
+                  options={booleanOptions((e) => updateData("specificAmenagment")(e.target.value))}
+                  orientation="horizontal"
+                  small
+                  state={errors.specificAmenagment ? "error" : "default"}
+                  stateRelatedMessage={errors.specificAmenagment}
                 />
                 {specificAmenagment === "true" && (
                   <Input
@@ -731,19 +703,21 @@ export default function StepCoordonnees() {
                     stateRelatedMessage={errors.specificAmenagmentType}
                   />
                 )}
-                <RadioButton
-                  label="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
-                  options={booleanOptions}
-                  onChange={updateData("reducedMobilityAccess")}
-                  value={reducedMobilityAccess}
-                  error={errors.reducedMobilityAccess}
+                <RadioButtons
+                  legend="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
+                  options={booleanOptions((e) => updateData("reducedMobilityAccess")(e.target.value))}
+                  orientation="horizontal"
+                  small
+                  state={errors.reducedMobilityAccess ? "error" : "default"}
+                  stateRelatedMessage={errors.reducedMobilityAccess}
                 />
-                <RadioButton
-                  label="Pour le séjour de cohésion, avez-vous besoin d’être affecté(e) dans un centre proche de chez vous pour raison médicale ?"
-                  options={booleanOptions}
-                  onChange={updateData("handicapInSameDepartment")}
-                  value={handicapInSameDepartment}
-                  error={errors.handicapInSameDepartment}
+                <RadioButtons
+                  legend="Pour le séjour de cohésion, avez-vous besoin d’être affecté(e) dans un centre proche de chez vous pour raison médicale ?"
+                  options={booleanOptions((e) => updateData("handicapInSameDepartment")(e.target.value))}
+                  orientation="horizontal"
+                  small
+                  state={errors.handicapInSameDepartment ? "error" : "default"}
+                  stateRelatedMessage={errors.handicapInSameDepartment}
                 />
               </>
             )}

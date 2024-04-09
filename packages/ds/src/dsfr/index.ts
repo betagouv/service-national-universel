@@ -3,6 +3,8 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
+import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { booleanOptions } from "./utils";
 
 // Form
 import InputPhone from "./form/InputPhone";
@@ -18,6 +20,7 @@ import Field from "./Field";
 import List from "./List";
 
 export {
+  booleanOptions,
   Button,
   Checkbox,
   Input,
@@ -27,6 +30,7 @@ export {
   Footer,
   PaddedContainer,
   Page,
+  RadioButtons,
   Section,
   Select,
   Field,
