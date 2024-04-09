@@ -41,7 +41,7 @@ router.post("/:cohort", passport.authenticate("referent", { session: false, fail
     await Promise.all(promises);
     return res.status(200).send({ ok: true });
   } catch (error) {
-    console.error(error);
+    capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
