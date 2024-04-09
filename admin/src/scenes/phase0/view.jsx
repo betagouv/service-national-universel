@@ -60,6 +60,7 @@ import { Link } from "react-router-dom";
 import { Button, ModalConfirmation } from "@snu/ds/admin";
 import { FaCheck } from "react-icons/fa6";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
+import { filterDataObject } from "./utils";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -671,7 +672,8 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
       try {
         // eslint-disable-next-line no-unused-vars
         const { applications, ...dataToSend } = data;
-        const result = await api.put(`/young-edition/${young._id}/identite`, dataToSend);
+        const filteredDataToSend = filterDataObject(dataToSend, "identite");
+        const result = await api.put(`/young-edition/${young._id}/identite`, filteredDataToSend);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
@@ -1268,21 +1270,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
 
         if (data.grade === GRADES.NOT_SCOLARISE) {
-          const request = await api.put(`/young-edition/${young._id}/situationparents`, {
-            schooled: "false",
-            schoolName: "",
-            schoolType: "",
-            schoolAddress: "",
-            schoolComplementAdresse: "",
-            schoolZip: "",
-            schoolCity: "",
-            schoolDepartment: "",
-            schoolRegion: "",
-            schoolCountry: "",
-            schoolLocation: null,
-            schoolId: "",
-            academy: "",
-          });
           data.schoolName = "";
           data.schoolType = "";
           data.schoolAddress = "";
@@ -1295,13 +1282,10 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           data.schoolLocation = null;
           data.schoolId = "";
           data.academy = "";
-
-          if (!request.ok) {
-            toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
-          }
         }
 
-        const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
+        const filteredDataToSend = filterDataObject(data, "parent");
+        const result = await api.put(`/young-edition/${young._id}/situationparents`, filteredDataToSend);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
