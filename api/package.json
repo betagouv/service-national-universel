@@ -76,7 +76,7 @@
     "jest": "27.5.1",
     "jest-cli": "27.5.1",
     "nodemon": "^3.0.1",
-    "supertest": "6.3.3",
+    "supertest": "6.3.4",
     "xlsx": "^0.18.5"
   }
 }
