@@ -5,7 +5,6 @@ import { ID } from "../utils";
 import { getCohort } from "@/utils/cohorts";
 import dayjs from "dayjs";
 import { formatDateFR, translateCorrectionReason } from "snu-lib";
-
 import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
@@ -192,7 +191,6 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
         <label className="flex-start mt-2 flex w-full flex-col text-base">
           Date d&apos;expiration
           <DatePicker
-            displayError
             value={date}
             onChange={(date) => {
               setDate(date);
