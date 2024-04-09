@@ -7,7 +7,7 @@
       "matchCurrentVersion": "!/^0/",
       "automerge": true,
       "automergeType": "pr",
-      "automergeSchedule": ["before 8am on Tuesdays"]
+      "automergeSchedule": ["before 11am on Tuesdays"]
     }
   ]
 }
