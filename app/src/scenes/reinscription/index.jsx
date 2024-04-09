@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 import StepEligibilite from "../preinscription/steps/stepEligibilite";
 import StepSejour from "../preinscription/steps/stepSejour";
 import StepConfirm from "../preinscription/steps/stepConfirm";
-import StepNoSejour from "../preinscription/steps/StepNoSejour";
+import StepNoSejour from "../preinscription/steps/stepNoSejour";
 
 import { getStepFromUrlParam, REINSCRIPTION_STEPS as STEPS, REINSCRIPTION_STEPS_LIST as STEP_LIST } from "../../utils/navigation";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";

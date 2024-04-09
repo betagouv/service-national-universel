@@ -9,7 +9,7 @@ import StepNonEligible from "./steps/stepNonEligible";
 import StepSejour from "./steps/stepSejour";
 import StepProfil from "./steps/stepProfil";
 import StepConfirm from "./steps/stepConfirm";
-import StepNoSejour from "../preinscription/steps/StepNoSejour";
+import StepNoSejour from "../preinscription/steps/stepNoSejour";
 import EmailValidation from "./EmailValidation";
 import Done from "./Done";
 
