@@ -1,4 +1,4 @@
-name: Build and deploy Production
+name: Test Changelog Notion
 
 on:
   push:
@@ -30,12 +30,7 @@ jobs:
       - name: Changelog
         id: changelog
         run : |
-          echo "<https://github.com/betagouv/service-national-universel/compare/${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}|Release du $(date -Idate)>" > CHANGELOG.md
-          git log --pretty="• %s" "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}" \
-            | grep --invert-match "chore(release): version" \
-            | sort \
-            | sed 's #\([0-9]*\) <https://github.com/betagouv/service-national-universel/pull/\1|#\1> g' \
-            >> CHANGELOG.md
+          .github/scripts/generate_changelog.sh "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}" > CHANGELOG.md
           cat CHANGELOG.md
           {
             echo 'changelog<<EOF'
