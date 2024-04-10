@@ -240,7 +240,7 @@ export default function StepEligibilite() {
           />
           <label className="flex-start mt-2 flex w-full flex-col text-base">
             Date de naissance
-            <DatePicker disabled={true} value={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
+            <DatePicker disabled={true} initialValue={data.birthDate} onChange={(date) => setData({ ...data, birthDate: date })} />
             <ErrorMessage>{error.birthDate}</ErrorMessage>
             <ErrorMessage>{corrections.birthdateAt}</ErrorMessage>
           </label>

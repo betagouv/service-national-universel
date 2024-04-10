@@ -193,7 +193,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
           Date d&apos;expiration
           <DatePicker
             displayError
-            value={date}
+            initialValue={date}
             onChange={(date) => {
               setDate(date);
               onChange && onChange();
