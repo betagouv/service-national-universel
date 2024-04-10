@@ -70,6 +70,7 @@
   "devDependencies": {
     "@faker-js/faker": "^6.1.2",
     "@jest/test-sequencer": "^29.7.0",
+    "@types/adm-zip": "^0.5.5",
     "@types/jest": "^29.5.12",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
