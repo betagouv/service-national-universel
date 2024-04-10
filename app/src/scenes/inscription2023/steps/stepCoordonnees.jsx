@@ -657,7 +657,7 @@ export default function StepCoordonnees() {
                 {
                   label: "Je suis en situation de handicap",
                   nativeInputProps: {
-                    checked: handicap,
+                    checked: handicap === "true",
                     onChange: (e) => {
                       setData({ ...data, handicap: e.target.checked.toString() });
                     },
@@ -665,8 +665,8 @@ export default function StepCoordonnees() {
                 },
                 {
                   label: "Je suis bénéficiaire d’un Projet personnalisé de scolarisation (PPS)",
-                  checked: ppsBeneficiary,
                   nativeInputProps: {
+                    checked: ppsBeneficiary === "true",
                     onChange: (e) => {
                       setData({ ...data, ppsBeneficiary: e.target.checked.toString() });
                     },
@@ -674,8 +674,8 @@ export default function StepCoordonnees() {
                 },
                 {
                   label: "Je suis bénéficiaire d’un Projet d’accueil individualisé (PAI)",
-                  checked: paiBeneficiary,
                   nativeInputProps: {
+                    checked: paiBeneficiary === "true",
                     onChange: (e) => {
                       setData({ ...data, paiBeneficiary: e.target.checked.toString() });
                     },
@@ -683,8 +683,8 @@ export default function StepCoordonnees() {
                 },
                 {
                   label: "J’ai des allergies ou intolérances alimentaires.",
-                  checked: allergies,
                   nativeInputProps: {
+                    checked: allergies === "true",
                     onChange: (e) => {
                       setData({ ...data, allergies: e.target.checked.toString() });
                     },

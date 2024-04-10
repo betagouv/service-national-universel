@@ -139,6 +139,7 @@ resource "scaleway_container" "api" {
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"      = local.secrets.API_ASSOCIATION_CELLAR_KEYID
+    "API_ENGAGEMENT_URL"                = local.secrets.API_ENGAGEMENT_URL
     "API_PDF_ENDPOINT"                  = local.secrets.API_PDF_ENDPOINT
     "BUCKET_NAME"                       = local.secrets.BUCKET_NAME
     "CELLAR_ENDPOINT"                   = local.secrets.CELLAR_ENDPOINT
@@ -265,6 +266,8 @@ resource "scaleway_container" "app" {
     "SENTRY_SESSION_SAMPLE_RATE" = 0.1
     "SENTRY_TRACING_SAMPLE_RATE" = 0.1
     "SUPPORT_URL"                = "https://support.beta-snu.dev"
+    "API_ENGAGEMENT_URL"         = local.secrets.API_ENGAGEMENT_URL
+    "API_ENGAGEMENT_SNU_ID"      = local.secrets.API_ENGAGEMENT_SNU_ID
   }
 
   secret_environment_variables = {
