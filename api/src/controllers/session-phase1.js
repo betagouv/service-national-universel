@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
+const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
 const { capture, captureMessage } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
@@ -236,24 +237,6 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
   }
 });
 
-async function generateBatchPDF(batchHtmlContent, batchIndex) {
-  const maxRetries = 3;
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const body = fs.readFileSync(path.resolve(__dirname, "../templates/certificate/bodyBatch.html"), "utf8");
-      const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()));
-      const context = await htmlToPdfBuffer(newhtml, { format: "A4", margin: 0, landscape: true });
-      return { name: `batch_${batchIndex}_certificat.pdf`, body: context };
-    } catch (e) {
-      console.log(`Attempt ${attempt} failed for batch ${batchIndex}`);
-      if (attempt === maxRetries) {
-        captureMessage("Failed to generate PDF", { extras: { batchIndex, error: e.message } });
-        throw new Error(`Failed to generate PDF for batch ${batchIndex}: ${e.message}`); // Rethrow or handle as appropriate
-      }
-    }
-  }
-}
-
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -283,37 +266,20 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    let zip = new Zip();
-    const batchSize = 20;
-    const batchOperations = [];
+    const cohort = await CohortModel.findOne({ name: session.cohort }); //TODO
+    const meetingPoint = null; //TODO
+    generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter, meetingPoint);
 
-    for (let i = 0; i < youngs.length; i += batchSize) {
-      const batch = youngs.slice(i, i + batchSize);
+    // const noticePdf = await getFile(`file/noticeImpression.pdf`);
+    // if (noticePdf) {
+    //   zip.addFile("01-notice-d'impression.pdf", noticePdf.Body);
+    // }
 
-      // Generate HTML content for each young in the batch
-      const batchHtml = await Promise.all(batch.map((young) => phase1(young, true)));
-
-      // Add the PDF generation promise for the batch to the operations array
-      batchOperations.push(generateBatchPDF(batchHtml, i / batchSize + 1));
-    }
-
-    const pdfs = await Promise.all(batchOperations);
-
-    pdfs.forEach((pdf) => {
-      zip.addFile(pdf.name, pdf.body);
-    });
-
-    const noticePdf = await getFile(`file/noticeImpression.pdf`);
-    if (noticePdf) {
-      zip.addFile("01-notice-d'impression.pdf", noticePdf.Body);
-    }
-
-    res.set({
-      "content-disposition": `inline; filename="certificats.zip"`,
-      "content-type": "application/zip",
-      "cache-control": "public, max-age=1",
-    });
-    res.status(200).end(zip.toBuffer());
+    // res.set({
+    //   "content-disposition": `inline; filename="certificats.zip"`,
+    //   "content-type": "application/zip",
+    //   "cache-control": "public, max-age=1",
+    // });
   } catch (error) {
     console.log("error", error);
     capture(error);

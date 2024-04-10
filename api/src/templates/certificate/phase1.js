@@ -1,4 +1,5 @@
 const path = require("path");
+const PDFDocument = require("pdfkit");
 const { getSignedUrl } = require("../../utils");
 const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
 const { MINISTRES, getCohortEndDate, transportDatesToString } = require("snu-lib");
@@ -74,7 +75,19 @@ async function fetchDataForYoung(young) {
   return { session, cohort, cohesionCenter, meetingPoint };
 }
 
-async function generate(doc, young, session, cohort, cohesionCenter, meetingPoint) {
+const FONT = "Marianne";
+const FONT_BOLD = `${FONT}-Bold`;
+
+function initDocument(options={}) {
+  const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0, ...options });
+
+  doc.registerFont(FONT, path.join(__dirname, "..", "..", "/assets/fonts/Marianne/Marianne-Regular.woff"));
+  doc.registerFont(FONT_BOLD, path.join(__dirname, "..", "..", "/assets/fonts/Marianne/Marianne-Bold.woff"));
+
+  return doc;
+}
+
+function render(doc, young, session, cohort, cohesionCenter, meetingPoint) {
   const cohortEndDate = getCohortEndDate(young, cohort);
 
   const ministresData = getMinistres(cohortEndDate);
@@ -92,34 +105,53 @@ async function generate(doc, young, session, cohort, cohesionCenter, meetingPoin
 
   const page = doc.page;
 
-  const font = "Marianne";
-  const font_bold = `${font}-Bold`;
-
-  doc.registerFont(font, path.join(__dirname, "..", "..", "/assets/fonts/Marianne/Marianne-Regular.woff"));
-  doc.registerFont(font_bold, path.join(__dirname, "..", "..", "/assets/fonts/Marianne/Marianne-Bold.woff"));
-  doc.font("Marianne").fontSize(14).lineGap(14).fillColor("#444");
+  doc.font(FONT).fontSize(14).lineGap(14).fillColor("#444");
 
   doc.image(path.join(__dirname, "..", "..", "..", "/public/images/certificateTemplate_template.png"), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
 
   doc
     .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 300, { continued: true })
-    .font(font_bold)
+    .font(FONT_BOLD)
     .text(`${young.firstName} ${young.lastName}`, { continued: true })
-    .font(font)
+    .font(FONT)
     .text(`, volontaire à l'édition ${COHORT},`)
     .text("pour la réalisation de son ", { continued: true })
-    .font(font_bold)
+    .font(FONT_BOLD)
     .text("séjour de cohésion", { continued: true })
-    .font(font)
+    .font(FONT)
     .text(`, ${COHESION_DATE}, au centre de :`)
     .text(`${COHESION_CENTER_NAME} ${COHESION_CENTER_LOCATION},`)
     .text("validant la ", { continued: true })
-    .font(font_bold)
+    .font(FONT_BOLD)
     .text("phase 1", { continued: true })
-    .font(font)
+    .font(FONT)
     .text(" du Service National Universel.")
     .moveDown()
     .text(`Fait le ${DATE}`);
 }
 
-module.exports = { generate, fetchDataForYoung };
+async function generateCertifPhase1(outStream, young) {
+  const { session, cohort, cohesionCenter, meetingPoint } = await fetchDataForYoung(young);
+  const random = Math.random();
+  console.time("RENDERING " + random);
+  const doc = initDocument();
+  doc.pipe(outStream);
+  render(doc, young, session, cohort, cohesionCenter, meetingPoint);
+  doc.end();
+  console.timeEnd("RENDERING " + random);
+}
+
+function generateBatchCertifPhase1(outStream, youngs, session, cohort, cohesionCenter, meetingPoint) {
+  const random = Math.random();
+  console.time("RENDERING " + random);
+  const doc = initDocument({ autoFirstPage: false });
+  doc.pipe(outStream);
+  for (const young of youngs) {
+    doc.addPage();
+    render(doc, young, session, cohort, cohesionCenter, meetingPoint);
+  }
+  doc.end();
+  console.timeEnd("RENDERING " + random);
+}
+
+module.exports = { generateCertifPhase1, generateBatchCertifPhase1 };

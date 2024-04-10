@@ -253,7 +253,7 @@ export default function CenterYoungIndex() {
     });
     try {
       const file = await api.openpdf(`/session-phase1/${sessionId}/certificate`, {});
-      download(file, "certificates.zip");
+      download(file, "certificates.pdf");
     } catch (e) {
       // We don't capture unauthorized. Just redirect.
       if (e?.message === "unauthorized") {
