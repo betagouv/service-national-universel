@@ -10,7 +10,7 @@ import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import { SignupButtons } from "@snu/ds/dsfr";
 import Verify from "./VerifyDocument";
 
 export default function StepUploadMobile({
@@ -79,7 +79,7 @@ export default function StepUploadMobile({
       )}
       {renderStep(step)}
       {step === "verify" && (
-        <SignupButtonContainer
+        <SignupButtons
           labelNext="Continuer"
           onClickNext={() => setStep("date")}
           onClickPrevious={() => {
@@ -93,9 +93,9 @@ export default function StepUploadMobile({
       )}
       {step === "date" &&
         (corrections?.length ? (
-          <SignupButtonContainer onClickNext={() => onCorrect(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Corriger"} disabled={!isEnabled} />
+          <SignupButtons onClickNext={() => onCorrect(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Corriger"} disabled={!isEnabled} />
         ) : (
-          <SignupButtonContainer onClickNext={() => onSubmit(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Continuer"} disabled={!isEnabled} />
+          <SignupButtons onClickNext={() => onSubmit(resetState)} labelNext={loading ? "Scan antivirus en cours" : "Continuer"} disabled={!isEnabled} />
         ))}
     </>
   );

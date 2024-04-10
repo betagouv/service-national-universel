@@ -4,13 +4,13 @@ import React, { useContext, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import { translate } from "snu-lib";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import Loader from "../../../components/Loader";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import api from "../../../services/api";
 import { API_DECLARATION_CNI_INVALIDE } from "../commons";
 import Check from "../components/Check";
 import plausibleEvent from "../../../services/plausible";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function CniInvalide() {
   const history = useHistory();
@@ -74,7 +74,7 @@ export default function CniInvalide() {
             </div>
           </Check>
         </div>
-        <SignupButtonContainer onClickNext={onSubmit} labelNext="Valider ma déclaration" disabled={saving} />
+        <SignupButtons onClickNext={onSubmit} labelNext="Valider ma déclaration" disabled={saving} />
       </DSFRContainer>
     </>
   );

@@ -1,6 +1,6 @@
 import React from "react";
 import Field from "./Field";
-import { Field as TField } from "./types";
+import { Field as TField } from "../common/types";
 
 type OwnProps = {
   title?: string | React.ReactNode;

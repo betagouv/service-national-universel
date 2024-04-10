@@ -4,7 +4,6 @@ import { Link, useHistory } from "react-router-dom";
 import { getCohortPeriod, GRADES } from "snu-lib";
 import ArrowRightBlueSquare from "../../../assets/icons/ArrowRightBlueSquare";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import Alert from "../../../components/dsfr/ui/Alert";
 import { supportURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
@@ -12,6 +11,7 @@ import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvi
 import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/navigation";
 import ProgressBar from "../components/ProgressBar";
 import plausibleEvent from "@/services/plausible";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepSejour() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -48,7 +48,7 @@ export default function StepSejour() {
             Consulter d’autres dispositifs d’engagement
           </Link>
         </div>
-        <SignupButtonContainer onClickPrevious={() => history.push(route)} />
+        <SignupButtons onClickPrevious={() => history.push(route)} />
       </DSFRContainer>
     </>
   );
