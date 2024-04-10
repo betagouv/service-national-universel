@@ -1,36 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import dayjs from "dayjs";
 import Input from "./input";
 
 export default function DatePicker({ value, onChange, disabled = false, state = "default", displayError = false }) {
-  const [day, setDay] = useState(() => (value ? value.getDate() : ""));
-  const [month, setMonth] = useState(() => (value ? value.getMonth() + 1 : ""));
-  const [year, setYear] = useState(() => (value ? value.getFullYear() : ""));
+  const [day, setDay] = useState(value ? value.getDate() : null);
+  const [month, setMonth] = useState(value ? value.getMonth() + 1 : null);
+  const [year, setYear] = useState(value ? value.getFullYear() : null);
   const maxYear = new Date().getFullYear();
   const minYear = 0;
   const error = state == "error" || displayError;
 
   const blockInvalidChar = (e) => ["e", "E", "+", "-"].includes(e.key) && e.preventDefault();
 
-  useEffect(() => {
-    if (day && month && year) {
-      const dayString = day.toString();
-      const monthString = month.toString();
-      const dateString = `${year}-${monthString.length === 1 ? `0${monthString}` : monthString}-${dayString.length === 1 ? `0${dayString}` : dayString}T00:00:00`;
-      const newDate = new Date(dateString);
-      onChange(newDate);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [day, month, year]);
+  const handleChangeDay = (newDay) => {
+    setDay(newDay);
+    onChange(new Date(year, month - 1, newDay));
+  };
 
-  useEffect(() => {
-    if (value && !day && !month && !year) {
-      setDay(value.getDate());
-      setMonth(value.getMonth() + 1);
-      setYear(value.getFullYear());
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value]);
+  const handleChangeMonth = (newMonth) => {
+    setMonth(newMonth);
+    onChange(new Date(year, newMonth - 1, day));
+  };
+
+  const handleChangeYear = (newYear) => {
+    setYear(newYear);
+    onChange(new Date(newYear, month - 1, day));
+  };
 
   return (
     <>
@@ -44,7 +39,7 @@ export default function DatePicker({ value, onChange, disabled = false, state = 
             max="31"
             value={day}
             onKeyDown={blockInvalidChar}
-            onChange={setDay}
+            onChange={handleChangeDay}
             placeholder="Jour"
             hintText="Exemple : 14"
             maxLength="2"
@@ -60,7 +55,7 @@ export default function DatePicker({ value, onChange, disabled = false, state = 
             max="12"
             value={month}
             onKeyDown={blockInvalidChar}
-            onChange={setMonth}
+            onChange={handleChangeMonth}
             placeholder="Mois"
             hintText="Exemple : 12"
             maxLength="2"
@@ -76,7 +71,7 @@ export default function DatePicker({ value, onChange, disabled = false, state = 
             max={maxYear}
             value={year}
             onKeyDown={blockInvalidChar}
-            onChange={setYear}
+            onChange={handleChangeYear}
             placeholder="Année"
             hintText="Exemple : 2004"
             maxLength="4"
