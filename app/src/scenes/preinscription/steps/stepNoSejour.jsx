@@ -4,7 +4,7 @@ import { PreInscriptionContext } from "../../../context/PreInscriptionContextPro
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import { useHistory } from "react-router-dom";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
+import { SignupButtons } from "@snu/ds/dsfr";
 import EngagementPrograms from "../components/EngagementPrograms";
 
 export default function NonEligible() {
@@ -22,7 +22,7 @@ export default function NonEligible() {
     <>
       <DSFRContainer title="Nous n'avons pas trouvé de séjour qui correspond à votre situation.">
         <EngagementPrograms />
-        <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
+        <SignupButtons onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
       </DSFRContainer>
     </>
   );
