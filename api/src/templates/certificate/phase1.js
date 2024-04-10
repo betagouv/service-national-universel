@@ -1,5 +1,5 @@
-const path = require('path');
-const { getSignedUrl, } = require("../../utils");
+const path = require("path");
+const { getSignedUrl } = require("../../utils");
 const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
 const { MINISTRES, getCohortEndDate, transportDatesToString } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
@@ -67,6 +67,9 @@ const getMeetingPoint = async (young) => {
 };
 
 async function generate(doc, young) {
+  const random = Math.random();
+  console.time("QUERYING " + random);
+
   const session = await getSession(young);
   const cohort = await getCohort(young);
   const cohortEndDate = getCohortEndDate(young, cohort);
@@ -85,35 +88,40 @@ async function generate(doc, young) {
   const COHESION_CENTER_LOCATION = cohesionCenterLocation;
   const GENERAL_BG = getSignedUrl(template);
   const DATE = cohortEndDate.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
-  const page = doc.page;
-  const font = doc._font.name;
+  console.timeEnd("QUERYING " + random);
 
-  doc
-    .fontSize(14)
-    .lineGap(14)
-    .fillColor("#444");
+  console.time("RENDERING " + random);
+  const page = doc.page;
+
+  const font = "Marianne";
+  const font_bold = `${font}-Bold`;
+
+  doc.registerFont(font, path.join(__dirname, "..", "..", "/assets/fonts/Marianne/Marianne-Regular.woff"));
+  doc.registerFont(font_bold, path.join(__dirname, "..", "..", "/assets/fonts/Marianne/Marianne-Bold.woff"));
+  doc.font("Marianne").fontSize(14).lineGap(14).fillColor("#444");
 
   doc.image(path.join(__dirname, "..", "..", "..", "/public/images/certificateTemplate_template.png"), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
 
   doc
-    .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 300, {continued: true})
-    .font(`${font}-Bold`)
-    .text(`${young.firstName} ${young.lastName}`, {continued: true})
+    .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 300, { continued: true })
+    .font(font_bold)
+    .text(`${young.firstName} ${young.lastName}`, { continued: true })
     .font(font)
     .text(`, volontaire à l'édition ${COHORT},`)
-    .text("pour la réalisation de son ", {continued: true})
-    .font(`${font}-Bold`)
-    .text("séjour de cohésion", {continued: true})
+    .text("pour la réalisation de son ", { continued: true })
+    .font(font_bold)
+    .text("séjour de cohésion", { continued: true })
     .font(font)
     .text(`, ${COHESION_DATE}, au centre de :`)
     .text(`${COHESION_CENTER_NAME} ${COHESION_CENTER_LOCATION},`)
-    .text("validant la ", {continued: true})
-    .font(`${font}-Bold`)
-    .text("phase 1", {continued: true})
+    .text("validant la ", { continued: true })
+    .font(font_bold)
+    .text("phase 1", { continued: true })
     .font(font)
     .text(" du Service National Universel.")
     .moveDown()
     .text(`Fait le ${DATE}`);
+  console.timeEnd("RENDERING " + random);
 }
 
 module.exports = { generate };

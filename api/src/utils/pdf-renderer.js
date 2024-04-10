@@ -65,13 +65,11 @@ async function htmlToPdfBuffer(html, options) {
 
 async function generatePdfIntoStream(outStream, { type, template, young, contract }) {
   if (type === "certificate" && template === "1" && young) {
-    const random = Math.random();
-    console.time("RENDERING " + random);
+
     const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0 });
     doc.pipe(outStream);
     await certifPhase1.generate(doc, young);
     doc.end();
-    console.timeEnd("RENDERING " + random);
 
   } else {
     const html = await getHtmlTemplate(type, template, young, contract);
