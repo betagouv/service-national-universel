@@ -34,7 +34,17 @@ const {
   PUBLIC_BUCKET_NAME_SUPPORT,
   translateFileStatusPhase1,
 } = require("../config");
-const { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, FILE_STATUS_PHASE1, ROLES, SUB_ROLES } = require("snu-lib");
+const {
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS,
+  APPLICATION_STATUS,
+  FILE_STATUS_PHASE1,
+  ROLES,
+  SUB_ROLES,
+  EQUIVALENCE_STATUS,
+} = require("snu-lib");
 const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
 const dayjs = require("dayjs");
@@ -564,6 +574,13 @@ async function cancelPendingApplications(pendingApplication, fromUser) {
   }
 }
 
+async function cancelPendingEquivalence(pendingEquivalence, fromUser) {
+  for (const equivalence of pendingEquivalence) {
+    equivalence.set({ status: EQUIVALENCE_STATUS.REFUSED, message: "La phase 2 a été validée" });
+    await equivalence.save({ fromUser });
+  }
+}
+
 async function sendNotificationApplicationClosedBecausePhase2Validated(application) {
   if (application.tutorId) {
     const responsible = await ReferentModel.findById(application.tutorId);
@@ -1000,6 +1017,7 @@ module.exports = {
   getReferentManagerPhase2,
   SUPPORT_BUCKET_CONFIG,
   cancelPendingApplications,
+  cancelPendingEquivalence,
   updateYoungApplicationFilesType,
   updateHeadCenter,
   getTransporter,

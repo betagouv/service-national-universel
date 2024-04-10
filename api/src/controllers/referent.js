@@ -15,6 +15,7 @@ const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
 const SessionPhase1 = require("../models/sessionPhase1");
 const StructureModel = require("../models/structure");
+const MissionEquivalenceModel = require("../models/missionEquivalence");
 const AuthObject = require("../auth");
 const ReferentAuth = new AuthObject(ReferentModel);
 const patches = require("./patches");
@@ -44,6 +45,8 @@ const {
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
+  cancelPendingApplications,
+  cancelPendingEquivalence,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } = require("../utils/serializer");
@@ -73,13 +76,15 @@ const {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
   MILITARY_FILE_KEYS,
   department2region,
   formatPhoneNumberFromPhoneZone,
   canCheckIfRefExist,
   YOUNG_SOURCE,
   YOUNG_SOURCE_LIST,
-  STATUS_CLASSE,
+  APPLICATION_STATUS,
+  EQUIVALENCE_STATUS,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 const scanFile = require("../utils/virusScanner");
@@ -538,6 +543,18 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (newYoung.cityCode) {
       const populationDensity = await getDensity(newYoung.cityCode);
       newYoung.populationDensity = populationDensity;
+    }
+
+    // when changing statusPhase2, we check applications and equivalence
+    if (newYoung.statusPhase2 && newYoung.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) {
+      const applications = await ApplicationModel.find({ youngId: young._id });
+      const pendingApplication = applications.filter((a) => [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION].includes(a.status));
+
+      const equivalence = await MissionEquivalenceModel.find({ youngId: young._id });
+      const pendingEquivalence = equivalence.filter((e) => [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(e.status));
+
+      await cancelPendingApplications(pendingApplication, req.user);
+      await cancelPendingEquivalence(pendingEquivalence, req.user);
     }
 
     young.set(newYoung);

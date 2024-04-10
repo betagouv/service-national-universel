@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { ModalConfirmation } from "@snu/ds/admin";
+import { IoWarningOutline } from "react-icons/io5";
 
 import api from "../services/api";
 
@@ -25,7 +27,7 @@ import ModalWithdrawn from "./modals/ModalWithdrawn";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
 import ModalConfirmMultiAction from "./modals/ModalConfirmMultiAction";
-import { isCle, translateInscriptionStatus } from "snu-lib";
+import { YOUNG_STATUS_PHASE2, isCle, translateInscriptionStatus } from "snu-lib";
 
 const lookUpAuthorizedStatus = ({ status, role }) => {
   switch (status) {
@@ -51,6 +53,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   const user = useSelector((state) => state.Auth.user);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
   const [modalGoal, setModalGoal] = useState({ isOpen: false, onConfirm: null });
+  const [modalValidatePhase2, setModalValidatePhase2] = useState(false);
 
   const getInscriptionGoalReachedNormalized = async ({ department, cohort }) => {
     const { data, ok, code } = await api.get(`/inscription-goal/${encodeURIComponent(cohort)}/department/${encodeURIComponent(department)}`);
@@ -73,29 +76,33 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   if (!young) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
   const handleClickStatus = async (status) => {
-    setModalConfirm({
-      isOpen: true,
-      onConfirm: async () => {
-        if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
-        if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-          const fillingRate = await getInscriptionGoalReachedNormalized({ department: young.department, cohort: young.cohort });
-          if (fillingRate >= 1)
-            return setModalGoal({
-              isOpen: true,
-              onConfirm: () => setStatus(YOUNG_STATUS.WAITING_LIST),
-              confirmText: "Placer en liste complémentaire",
-              onConfirm2: () => setStatus(YOUNG_STATUS.VALIDATED),
-              confirmText2: "Valider quand même",
-              title: "Jauge de candidats atteinte",
-              message:
-                "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
-            });
-        }
-        setStatus(status);
-      },
-      title: "Modification de statut",
-      message: "Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utilisateur.",
-    });
+    if (statusName === "statusPhase2" && status === YOUNG_STATUS_PHASE2.VALIDATED) {
+      setModalValidatePhase2(true);
+    } else {
+      setModalConfirm({
+        isOpen: true,
+        onConfirm: async () => {
+          if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
+          if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
+            const fillingRate = await getInscriptionGoalReachedNormalized({ department: young.department, cohort: young.cohort });
+            if (fillingRate >= 1)
+              return setModalGoal({
+                isOpen: true,
+                onConfirm: () => setStatus(YOUNG_STATUS.WAITING_LIST),
+                confirmText: "Placer en liste complémentaire",
+                onConfirm2: () => setStatus(YOUNG_STATUS.VALIDATED),
+                confirmText2: "Valider quand même",
+                title: "Jauge de candidats atteinte",
+                message:
+                  "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
+              });
+          }
+          setStatus(status);
+        },
+        title: "Modification de statut",
+        message: "Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utilisateur.",
+      });
+    }
   };
 
   const setStatus = async (status, values) => {
@@ -113,6 +120,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
     const now = new Date();
     young.lastStatusAt = now.toISOString();
     if (statusName === "statusPhase2") young.statusPhase2UpdatedAt = now.toISOString();
+    if (statusName === "statusPhase2" && status === YOUNG_STATUS_PHASE2.VALIDATED) young.statusPhase2ValidatedAt = now.toISOString();
     if (statusName === "statusPhase3") young.statusPhase3UpdatedAt = now.toISOString();
     if (status === "WITHDRAWN" && (values?.withdrawnReason || values?.withdrawnMessage)) {
       young.withdrawnReason = values?.withdrawnReason;
@@ -255,6 +263,21 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
           setModal(null);
         }}
       />
+      <ModalConfirmation
+        isOpen={modalValidatePhase2}
+        onClose={() => {
+          setModalValidatePhase2(false);
+        }}
+        className="md:max-w-[700px]"
+        icon={<IoWarningOutline className="text-amber-500" size={40} />}
+        title="Attention, vous êtes sur le point de valider la phase 2 de ce volontaire"
+        text="Cette action entraînera l'abandon des candidatures et des demandes d'équivalence encore en cours. Êtes-vous sûr de vouloir continuer ?"
+        actions={[
+          { title: "Annuler", isCancel: true },
+          { title: "Confirmer", onClick: () => setStatus(status) },
+        ]}
+      />
+
       <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button" disabled={disabled || !options.length}>
