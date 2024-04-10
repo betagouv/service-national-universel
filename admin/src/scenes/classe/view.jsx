@@ -33,7 +33,7 @@ import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDangerous } from "react-icons/md";
 import plausibleEvent from "@/services/plausible";
 import dayjs from "dayjs";
-import { downloadCertificatesByClassId } from "@/services/certificate.service";
+import { downloadCertificatesByClassId } from "@/services/convocation.service";
 
 export default function View() {
   const [classe, setClasse] = useState({});
@@ -47,6 +47,7 @@ export default function View() {
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [infoBus, setInfoBus] = useState(null);
+  const [isCertificateLoading, setIsCertificateLoading] = useState(false);
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort));
@@ -193,6 +194,18 @@ export default function View() {
     history.push(`/volontaire/create?classeId=${classe._id}`);
   };
 
+  const handleCertificateDownload = () => {
+    setIsCertificateLoading(true);
+    toastr.info("Téléchargement des convocations en cours", { timeOut: 1500 });
+    downloadCertificatesByClassId(classe._id)
+      .then(() => {
+        toastr.success("Les convocations ont bien été téléchargées", { timeOut: 1500 });
+      })
+      .finally(() => {
+        setIsCertificateLoading(false);
+      });
+  };
+
   const actionList = ({ edit, setEdit, canEdit }) => {
     return edit ? (
       <div className="flex items-center justify-end ml-6">
@@ -218,9 +231,8 @@ export default function View() {
               <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
               <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
             ]) ||
-          // TODO : change to status STATUS_CLASSE.VALIDATED after testing
-          (STATUS_CLASSE.INSCRIPTION_TO_CHECK === classe.status && [
-            <Button key="export" title="Exporter toutes les convocations" onClick={() => downloadCertificatesByClassId(classe._id)} />,
+          (STATUS_CLASSE.VALIDATED === classe.status && [
+            <Button disabled={isCertificateLoading} key="export" title="Exporter toutes les convocations" onClick={handleCertificateDownload} />,
           ])
         }
       />

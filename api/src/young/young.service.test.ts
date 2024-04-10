@@ -27,7 +27,7 @@ describe("YoungService", () => {
     // const generatePdf = jest.fn().mockResolvedValue(mockBuffer);
     // const getHtmlTemplate = jest.fn().mockResolvedValue("html");
 
-    const result = youngService.generateCertificateByYoung(young);
+    const result = youngService.generateConvocationByYoung(young);
     await expect(result).resolves.toEqual({ buffer: mockBuffer, youngName: expectedUniqueName });
     // expect(generatePdf).toHaveBeenCalledTimes(1);
     // expect(getHtmlTemplate).toHaveBeenCalledTimes(1);
