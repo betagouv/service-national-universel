@@ -9,10 +9,10 @@ import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import FileImport from "@/components/dsfr/forms/FileImport";
 import Verify from "./VerifyDocument";
 import plausibleEvent from "@/services/plausible";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepUploadDesktop({
   recto,
@@ -73,7 +73,7 @@ export default function StepUploadDesktop({
     return (
       <>
         <Verify recto={recto} verso={verso} checked={checked} setChecked={setChecked} />
-        <SignupButtonContainer
+        <SignupButtons
           onClickNext={() => (corrections?.length ? onCorrect(resetState) : onSubmit(resetState))}
           labelNext={loading ? "Scan antivirus en cours" : "Oui, les documents sont conformes"}
           disabled={Object.values(checked).some((e) => e === false)}
@@ -155,7 +155,7 @@ export default function StepUploadDesktop({
       {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      <SignupButtonContainer onClickNext={handleOnClickNext} disabled={!isEnabled} onClickPrevious={() => history.push("/inscription2023/documents")} />
+      <SignupButtons onClickNext={handleOnClickNext} disabled={!isEnabled} onClickPrevious={() => history.push("/inscription2023/documents")} />
     </>
   );
 }

@@ -15,13 +15,12 @@ import { supportURL } from "../../../config";
 import { YOUNG_STATUS } from "snu-lib";
 import { getCorrectionByStep } from "../../../utils/navigation";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
 import useAddress from "@/services/useAddress";
 import { useDebounce } from "@uidotdev/usehooks";
 import { fr } from "@codegouvfr/react-dsfr";
-import { BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
+import { SignupButtons, BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -733,7 +732,7 @@ export default function StepCoordonnees() {
             )}
           </>
         )}
-        <SignupButtonContainer onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />
+        <SignupButtons onClickNext={modeCorrection ? onCorrection : onSubmit} disabled={loading} />
       </DSFRContainer>
     </>
   );

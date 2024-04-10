@@ -12,12 +12,11 @@ import { setYoung } from "../../../redux/auth/actions";
 import { RiEditFill } from "react-icons/ri";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
 import JDMA from "@/components/JDMA";
-import { Button } from "@snu/ds/dsfr";
+import { Button, SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepWaitingConsent() {
   const { young, logout, isCLE } = useAuth();
@@ -84,7 +83,7 @@ export default function StepWaitingConsent() {
           <p className="mt-2 text-base text-[#161616]">
             {isCLE ? "Vous pouvez désormais accéder à votre compte élève" : "Vous pouvez désormais accéder à votre compte volontaire"}
           </p>
-          <SignupButtonContainer labelNext="Accéder à mon compte" onClickNext={handleDone} />
+          <SignupButtons labelNext="Accéder à mon compte" onClickNext={handleDone} />
         </DSFRContainer>
       ) : (
         <>
@@ -130,7 +129,7 @@ export default function StepWaitingConsent() {
               </Link>
             </span>
 
-            <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={logout} />
+            <SignupButtons labelNext="Revenir à l'accueil" onClickNext={logout} />
           </DSFRContainer>
         </>
       )}
@@ -151,7 +150,7 @@ export default function StepWaitingConsent() {
           Mais tout n’est pas perdu, il existe d’autres moyens de s’engager ! Découvrez-les maintenant.
         </div>
         <EngagementPrograms />
-        <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={logout} />
+        <SignupButtons labelNext="Revenir à l'accueil" onClickNext={logout} />
       </DSFRContainer>
     </>
   );

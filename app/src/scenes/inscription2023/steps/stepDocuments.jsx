@@ -13,8 +13,8 @@ import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import Info from "../../../components/info";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import plausibleEvent from "@/services/plausible";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepDocuments() {
   const history = useHistory();
@@ -123,7 +123,7 @@ export default function StepDocuments() {
             </span>
           ))}
         </div>
-        <SignupButtonContainer onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />
+        <SignupButtons onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />
       </DSFRContainer>
     </>
   );

@@ -16,12 +16,11 @@ import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
-import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress, getDataForConsentStep } from "../utils";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
 import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Consentement({ step, parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -390,8 +389,7 @@ function ConsentementForm({ young, token, step, parentId }) {
           )}
           {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
         </div>
-        <SignupButtonContainer onClickNext={onSubmit} labelNext="Je valide" onClickPrevious={onPrevious} disabled={saving} />
+        <SignupButtons onClickNext={onSubmit} labelNext="Je valide" onClickPrevious={onPrevious} disabled={saving} />
       </DSFRContainer>
-    </>
   );
 }

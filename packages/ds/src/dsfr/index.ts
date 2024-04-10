@@ -9,6 +9,7 @@ import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import InputPhone from "./form/InputPhone";
 import InputPassword from "./form/InputPassword";
 import BooleanRadioButtons from "./form/BooleanRadioButtons";
+import SignupButtons from "./SignupButtons";
 
 // Layout
 import Container from "./layout/Container";
@@ -33,6 +34,7 @@ export {
   BooleanRadioButtons,
   Section,
   Select,
+  SignupButtons,
   Field,
   List,
 };

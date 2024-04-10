@@ -13,7 +13,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepConsentements() {
   const { young, isCLE } = useAuth();
@@ -96,7 +96,7 @@ export default function StepConsentements() {
             </div>
           </div>
         </div>
-        <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/coordonnee")} disabled={disabled || loading} />
+        <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/coordonnee")} disabled={disabled || loading} />
       </DSFRContainer>
     </>
   );

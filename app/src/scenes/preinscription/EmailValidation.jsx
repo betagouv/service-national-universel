@@ -9,13 +9,13 @@ import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
 import plausibleEvent from "../../services/plausible";
 import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
 import Input from "../../components/dsfr/forms/input";
 import { capture } from "../../sentry";
 import InlineButton from "../../components/dsfr/ui/buttons/InlineButton";
 import DidNotReceiveActivationCodeModal from "./components/DidNotReceiveActivationCodeModal";
 import ModifyEmailModal from "./components/ModifyEmailModal";
 import useAuth from "@/services/useAuth";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 //@todo:
 // - move from preinscription folder to be reused for "class engagee" also /preinscription/email-validation => /email-validation
@@ -127,7 +127,7 @@ export default function StepEmailValidation() {
         }}>
         Je n'ai rien reçu
       </InlineButton>
-      <SignupButtonContainer onClickNext={handleClick} labelNext="Activer mon compte" />
+      <SignupButtons onClickNext={handleClick} labelNext="Activer mon compte" />
     </DSFRContainer>
   );
 }

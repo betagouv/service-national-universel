@@ -12,7 +12,7 @@ import Error from "../../../components/error";
 import plausibleEvent from "../../../services/plausible";
 import { concatPhoneNumberWithZone } from "snu-lib/phone-number";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepConfirm() {
   const young = useSelector((state) => state.Auth.young);
@@ -162,7 +162,7 @@ export default function StepConfirm() {
             </>
           ) : null}
         </div>
-        <SignupButtonContainer onClickNext={onSubmit} labelNext="Valider mon inscription au SNU" disabled={loading} />
+        <SignupButtons onClickNext={onSubmit} labelNext="Valider mon inscription au SNU" disabled={loading} />
       </DSFRContainer>
     </>
   );

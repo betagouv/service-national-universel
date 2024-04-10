@@ -17,9 +17,8 @@ import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-l
 // import Input from "../components/Input";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import useAuth from "@/services/useAuth";
-import { Input, InputPhone } from "@snu/ds/dsfr";
+import { SignupButtons, Input, InputPhone } from "@snu/ds/dsfr";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -252,9 +251,9 @@ export default function StepRepresentants() {
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
         {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-          <SignupButtonContainer onClickNext={onCorrection} onClickPrevious={() => history.push("/")} disabled={loading} />
+          <SignupButtons onClickNext={onCorrection} onClickPrevious={() => history.push("/")} disabled={loading} />
         ) : (
-          <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
+          <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
         )}
       </DSFRContainer>
     </>

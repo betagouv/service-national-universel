@@ -3,7 +3,7 @@ import validator from "validator";
 import Modal from "../../../components/ui/modals/Modal";
 import ArrowRightBlue from "../../../assets/icons/ArrowRightBlue";
 import Input from "@/components/dsfr/forms/input";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 const ModifyEmailModal = ({ onClose, isOpen, onEmailChange }) => {
   const [email, setEmail] = useState("");
@@ -72,7 +72,7 @@ const ModifyEmailModal = ({ onClose, isOpen, onEmailChange }) => {
         value={emailConfirmation}
         onChange={setEmailConfirmation}
       />
-      <SignupButtonContainer className="w-full" onClickNext={onSubmit} onClickPrevious={_onClose} labelNext="Recevoir le code d’activation" labelPrevious="Annuler" />
+      <SignupButtons className="w-full" onClickNext={onSubmit} onClickPrevious={_onClose} labelNext="Recevoir le code d’activation" labelPrevious="Annuler" />
     </Modal>
   );
 };

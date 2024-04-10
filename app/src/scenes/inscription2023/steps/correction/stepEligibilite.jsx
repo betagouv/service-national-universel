@@ -22,9 +22,9 @@ import DatePicker from "../../../../components/dsfr/forms/DatePicker";
 import ModalSejourCorrection from "../../components/ModalSejourCorrection";
 import { supportURL } from "@/config";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepEligibilite() {
   const { young, isCLE } = useAuth();
@@ -270,7 +270,7 @@ export default function StepEligibilite() {
               ) : null}
             </>
           )}
-          <SignupButtonContainer labelNext="Corriger" onClickNext={onSubmit} loading={loading} />
+          <SignupButtons labelNext="Corriger" onClickNext={onSubmit} loading={loading} />
         </div>
       </DSFRContainer>
       <ModalSejourCorrection data={modal?.data} isOpen={modal.isOpen} onCancel={() => setModal({ isOpen: false })} onValidation={modal?.onValidation} />
