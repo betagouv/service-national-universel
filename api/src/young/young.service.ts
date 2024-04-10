@@ -1,5 +1,5 @@
 import { YoungType } from "./young.type";
-import { capture } from "../sentry";
+import { capture } from "../sentry.js";
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 
 const YoungModel = require("../models/young");
@@ -16,7 +16,7 @@ export const generateCertificateForMultipleYoungs = async (youngs: YoungType[]) 
     try {
       return await generateCertificateByYoung(young);
     } catch (error) {
-      capture(`Failed to generate certificate for young: ${young._id}`);
+      capture({ message: `Failed to generate certificate for young: ${young._id}` }, error);
       return null;
     }
   });
