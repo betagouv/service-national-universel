@@ -5,8 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import plausibleEvent from "../../../services/plausible";
 import validator from "validator";
-import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
-import { youngSchooledSituationOptions, youngActiveSituationOptions, foreignCountryOptions, hostRelationshipOptions, inFranceOrAbroadOptions, genderOptions } from "../utils";
+import { genderOptions, inFranceOrAbroadOptions, youngSchooledSituationOptions, youngActiveSituationOptions, foreignCountryOptions, hostRelationshipOptions } from "../utils";
 import api from "../../../services/api";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
 import { setYoung } from "../../../redux/auth/actions";
@@ -22,7 +21,7 @@ import useAuth from "@/services/useAuth";
 import useAddress from "@/services/useAddress";
 import { useDebounce } from "@uidotdev/usehooks";
 import { fr } from "@codegouvfr/react-dsfr";
-import { booleanOptions, RadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
+import { BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
 
 const getObjectWithEmptyData = (fields) => {
   const object = {};
@@ -70,10 +69,10 @@ const defaultState = {
   birthCountry: FRANCE,
   birthCityZip: "",
   birthCity: "",
-  gender: genderOptions[0].value,
+  gender: "female",
   phone: "",
   phoneZone: "",
-  livesInFrance: inFranceOrAbroadOptions[0].value,
+  livesInFrance: "true",
   address: "",
   zip: "",
   city: "",
@@ -140,6 +139,8 @@ export default function StepCoordonnees() {
     paiBeneficiary,
     specificAmenagment,
     specificAmenagmentType,
+    reducedMobilityAccess,
+    handicapInSameDepartment,
   } = data;
 
   const debouncedBirthCity = useDebounce(birthCity, 200);
@@ -234,6 +235,10 @@ export default function StepCoordonnees() {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   const updateWasBornInFrance = (newWasBornInFrance) => {
     if (newWasBornInFrance === "true") {
@@ -439,7 +444,14 @@ export default function StepCoordonnees() {
         title={isCLE ? "Mon profil élève" : "Mon profil volontaire"}
         supportLink={`${supportURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-remplis-mon-profil" : "/base-de-connaissance/je-minscris-et-remplis-mon-profil"}`}
         supportEvent="Phase0/aide inscription - coordonnees">
-        <RadioButton label="Je suis né(e)..." options={inFranceOrAbroadOptions} onChange={updateWasBornInFrance} value={wasBornInFrance} />
+        <BooleanRadioButtons
+          options={inFranceOrAbroadOptions}
+          legend="Je suis né(e)..."
+          value={wasBornInFrance}
+          onChange={(e) => updateWasBornInFrance(e.target.value)}
+          orientation="horizontal"
+        />
+
         {!wasBornInFranceBool && (
           <SearchableSelect
             label="Pays de naissance"
@@ -488,7 +500,16 @@ export default function StepCoordonnees() {
             stateRelatedMessage={corrections?.birthCityZip || errors.birthCityZip}
           />
         </div>
-        <RadioButton label="Sexe" options={genderOptions} onChange={updateData("gender")} value={gender} error={errors?.gender} correction={corrections.gender} />
+        <BooleanRadioButtons
+          className="!mt-8"
+          legend="Sexe"
+          value={gender}
+          options={genderOptions}
+          onChange={(e) => updateData("gender")(e.target.value)}
+          orientation="horizontal"
+          state={(corrections?.gender || errors.gender) && "error"}
+          stateRelatedMessage={corrections?.gender || errors.gender}
+        />
         {!isCLE && (
           <Select
             label={schooled === "true" ? "Ma situation scolaire" : "Ma situation"}
@@ -505,13 +526,15 @@ export default function StepCoordonnees() {
         <div className="flex mt-4 items-center gap-3 mb-6">
           <h2 className="m-0 text-lg font-semibold leading-6 align-left">Adresse de résidence</h2>
         </div>
-        <RadioButton
-          label="Je réside..."
+
+        <BooleanRadioButtons
+          legend="Je réside..."
           options={inFranceOrAbroadOptions}
-          onChange={setLivesInFrance}
           value={livesInFrance}
-          error={errors?.livesInFrance}
-          correction={corrections?.livesInFrance}
+          onChange={(e) => setLivesInFrance(e.target.value)}
+          orientation="horizontal"
+          state={(corrections?.livesInFrance || errors.livesInFrance) && "error"}
+          stateRelatedMessage={corrections?.livesInFrance || errors.livesInFrance}
         />
         {isFrenchResident ? (
           <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} correction={corrections} />
@@ -614,28 +637,11 @@ export default function StepCoordonnees() {
             title="Information"
           />
         </div>
-        <RadioButtons
+        <BooleanRadioButtons
           legend="Souhaitez-vous nous faire part d’une situation particulière ? (allergie, situation de handicap, besoin d'un aménagement spécifique, ...)"
           hintText="Le SNU est ouvert à tous. Pour vous accueillir dans les meilleures conditions, un responsable pourra prendre contact avec vous."
-          name="radio"
-          options={[
-            {
-              label: "Oui",
-              nativeInputProps: {
-                value: "true",
-                checked: hasSpecialSituation === true,
-                onChange: (e) => updateSpecialSituation(e.target.value === "true"),
-              },
-            },
-            {
-              label: "Non",
-              nativeInputProps: {
-                value: "false",
-                checked: hasSpecialSituation === false,
-                onChange: (e) => updateSpecialSituation(e.target.value === "true"),
-              },
-            },
-          ]}
+          value={(!!hasSpecialSituation).toString()}
+          onChange={(e) => updateSpecialSituation(e.target.value === "true")}
           orientation="horizontal"
           state={errors.hasSelectedSpecialSituation ? "error" : "default"}
           stateRelatedMessage={errors.hasSelectedSpecialSituation}
@@ -683,10 +689,11 @@ export default function StepCoordonnees() {
             {moreInformation && (
               <>
                 <hr className="my-4" />
-                <RadioButtons
+                <BooleanRadioButtons
                   legend="Avez-vous besoin d’aménagements spécifiques ?"
+                  value={specificAmenagment}
                   hintText="(accompagnant professionnel, participation de jour, activités adaptées... )"
-                  options={booleanOptions((e) => updateData("specificAmenagment")(e.target.value))}
+                  onChange={(e) => updateData("specificAmenagment")(e.target.value)}
                   orientation="horizontal"
                   small
                   state={errors.specificAmenagment ? "error" : "default"}
@@ -703,17 +710,20 @@ export default function StepCoordonnees() {
                     stateRelatedMessage={errors.specificAmenagmentType}
                   />
                 )}
-                <RadioButtons
+                {console.log(reducedMobilityAccess)}
+                <BooleanRadioButtons
                   legend="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
-                  options={booleanOptions((e) => updateData("reducedMobilityAccess")(e.target.value))}
+                  value={reducedMobilityAccess}
+                  onChange={(e) => updateData("reducedMobilityAccess")(e.target.value)}
                   orientation="horizontal"
                   small
                   state={errors.reducedMobilityAccess ? "error" : "default"}
                   stateRelatedMessage={errors.reducedMobilityAccess}
                 />
-                <RadioButtons
+                <BooleanRadioButtons
                   legend="Pour le séjour de cohésion, avez-vous besoin d’être affecté(e) dans un centre proche de chez vous pour raison médicale ?"
-                  options={booleanOptions((e) => updateData("handicapInSameDepartment")(e.target.value))}
+                  value={handicapInSameDepartment}
+                  onChange={(e) => updateData("handicapInSameDepartment")(e.target.value)}
                   orientation="horizontal"
                   small
                   state={errors.handicapInSameDepartment ? "error" : "default"}

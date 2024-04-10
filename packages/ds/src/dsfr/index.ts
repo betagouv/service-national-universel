@@ -4,11 +4,11 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { booleanOptions } from "./utils";
 
 // Form
 import InputPhone from "./form/InputPhone";
 import InputPassword from "./form/InputPassword";
+import BooleanRadioButtons from "./form/BooleanRadioButtons";
 
 // Layout
 import Container from "./layout/Container";
@@ -20,7 +20,6 @@ import Field from "./Field";
 import List from "./List";
 
 export {
-  booleanOptions,
   Button,
   Checkbox,
   Input,
@@ -31,6 +30,7 @@ export {
   PaddedContainer,
   Page,
   RadioButtons,
+  BooleanRadioButtons,
   Section,
   Select,
   Field,
