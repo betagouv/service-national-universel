@@ -4,13 +4,13 @@ import Joi from "joi";
 import { capture } from "../sentry";
 import { ERRORS, isReferent } from "../utils";
 import { canDownloadYoungDocuments } from "snu-lib";
-import { generateCertificatesByClasseId } from "./classe.service";
+import { generateConvocationsByClasseId } from "./classe.service";
 
 import { UserRequest } from "../controllers/request";
 
 const router = express.Router();
 router.post(
-  "/:id/certificates",
+  "/:id/convocations",
   passport.authenticate(["young", "referent"], {
     session: false,
     failWithError: true,
@@ -22,11 +22,11 @@ router.post(
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, null, "certificate")) {
+      if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, null, "convocation")) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
       const { id } = value;
-      const certificates = await generateCertificatesByClasseId(id);
+      const certificates = await generateConvocationsByClasseId(id);
       // TODO : change content-length
       res.set({
         "content-length": "9999",

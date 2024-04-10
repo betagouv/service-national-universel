@@ -3,7 +3,7 @@ import { capture } from "../sentry.js";
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 
 const YoungModel = require("../models/young");
-const { getHtmlTemplate } = require("../templates/utils");
+const { getHtmlTemplate } = require("../templates/utils.js");
 const { generatePdf } = require("../document/document.service");
 
 export type YoungPdfWithUniqueName = {
@@ -11,10 +11,10 @@ export type YoungPdfWithUniqueName = {
   youngName: string;
 };
 
-export const generateCertificateForMultipleYoungs = async (youngs: YoungType[]) => {
+export const generateConvocationsForMultipleYoungs = async (youngs: YoungType[]) => {
   const youngPdfPromises = youngs.map(async (young) => {
     try {
-      return await generateCertificateByYoung(young);
+      return await generateConvocationByYoung(young);
     } catch (error) {
       capture({ message: `Failed to generate certificate for young: ${young._id}` }, error);
       return null;
@@ -26,8 +26,8 @@ export const generateCertificateForMultipleYoungs = async (youngs: YoungType[]) 
   return filteredYoungPdfPromises;
 };
 
-export const generateCertificateByYoung = async (young: YoungType): Promise<YoungPdfWithUniqueName> => {
-  const youngHtml = await getHtmlTemplate(YOUNG_DOCUMENT.CERTIFICATE, YOUNG_DOCUMENT_PHASE_TEMPLATE.PHASE_1, young);
+export const generateConvocationByYoung = async (young: YoungType): Promise<YoungPdfWithUniqueName> => {
+  const youngHtml = await getHtmlTemplate(YOUNG_DOCUMENT.CONVOCATION, YOUNG_DOCUMENT_PHASE_TEMPLATE.COHESION, young);
   const youngBuffer = await generatePdf(youngHtml);
   return { buffer: youngBuffer, youngName: buildUniqueName(young) };
 };

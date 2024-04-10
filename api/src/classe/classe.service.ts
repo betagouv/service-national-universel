@@ -1,13 +1,13 @@
 import * as youngService from "../young/young.service";
 import Zip from "adm-zip";
 
-export const generateCertificatesByClasseId = async (classeId: string) => {
+export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await youngService.findYoungsByClasseId(classeId);
 
   if (youngsInClasse.length > 50) {
     throw new Error("TOO_MANY_YOUNGS_IN_CLASSE");
   }
-  const youngsPdfs = await youngService.generateCertificateForMultipleYoungs(youngsInClasse);
+  const youngsPdfs = await youngService.generateConvocationsForMultipleYoungs(youngsInClasse);
 
   let zip = new Zip();
   youngsPdfs.forEach((youngPdf) => {
