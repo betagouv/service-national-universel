@@ -640,7 +640,8 @@ export default function StepCoordonnees() {
         <BooleanRadioButtons
           legend="Souhaitez-vous nous faire part d’une situation particulière ? (allergie, situation de handicap, besoin d'un aménagement spécifique, ...)"
           hintText="Le SNU est ouvert à tous. Pour vous accueillir dans les meilleures conditions, un responsable pourra prendre contact avec vous."
-          value={(!!hasSpecialSituation).toString()}
+          value={hasSpecialSituation}
+          options={[{ value: true }, { value: false }]}
           onChange={(e) => updateSpecialSituation(e.target.value === "true")}
           orientation="horizontal"
           state={errors.hasSelectedSpecialSituation ? "error" : "default"}
@@ -710,7 +711,6 @@ export default function StepCoordonnees() {
                     stateRelatedMessage={errors.specificAmenagmentType}
                   />
                 )}
-                {console.log(reducedMobilityAccess)}
                 <BooleanRadioButtons
                   legend="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
                   value={reducedMobilityAccess}
