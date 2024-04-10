@@ -39,22 +39,19 @@ jobs:
       - name: Prepare
         id: prepare
         run : |
-          current_tag=$(git log --max-count=1 --oneline | cut -d " " -f 1)
-          echo "current_tag: $current_tag"
-
           env_name=$(.github/scripts/get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
-          api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
+          api_image_tag=$(git log --max-count=1 --oneline -- api packages package-lock.json | cut -d " " -f 1)
           echo "api_image_tag: $api_image_tag"
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
 
-          admin_image_tag=$(git log --max-count=1 --oneline -- admin packages | cut -d " " -f 1)
+          admin_image_tag=$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)
           echo "admin_image_tag: $admin_image_tag"
           echo "admin_image_tag=$admin_image_tag" >> $GITHUB_OUTPUT
 
-          app_image_tag=$(git log --max-count=1 --oneline -- app packages | cut -d " " -f 1)
+          app_image_tag=$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)
           echo "app_image_tag: $app_image_tag"
           echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
 

@@ -54,5 +54,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "applicationPending", text: JSON.stringify(e) });
+    throw e;
   }
 };

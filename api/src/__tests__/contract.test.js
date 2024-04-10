@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 const crypto = require("crypto");
 const { ObjectId } = require("mongoose").Types;
 const request = require("supertest");

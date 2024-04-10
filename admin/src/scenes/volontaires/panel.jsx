@@ -29,6 +29,7 @@ import { ImQuotesLeft } from "react-icons/im";
 import ModalConfirmDeleteYoung from "../../components/modals/young/ModalConfirmDeleteYoung";
 import PanelV2 from "../../components/PanelV2";
 import { toastr } from "react-redux-toastr";
+import { signinAs } from "@/utils/signinAs";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -76,10 +77,13 @@ export default function VolontairePanel({ onChange, value }) {
   const onPrendreLaPlace = async (young_id) => {
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
-    plausibleEvent("Volontaires/CTA - Prendre sa place");
-    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
-    window.open(appURL, "_blank");
+    try {
+      plausibleEvent("Volontaires/CTA - Prendre sa place");
+      await signinAs("young", young_id);
+      window.open(appURL, "_blank");
+    } catch (e) {
+      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    }
   };
 
   return (
@@ -115,7 +119,7 @@ export default function VolontairePanel({ onChange, value }) {
               )}
             </div>
             <Details title="Vu(e) le" value={formatStringLongDate(young.lastActivityAt ?? young.lastLoginAt)} />
-            <Link to={`/user?DEPARTMENT=%5B"${young.department}"%5D&ROLE=%5B"${ROLES.REFERENT_DEPARTMENT}"%5D`}>
+            <Link to={`/user?role=${ROLES.REFERENT_DEPARTMENT}&department=${young.department}`}>
               <TextButton>Voir équipe de référents ({young.department}) ›</TextButton>
             </Link>
             {young.departSejourMotifComment ? (

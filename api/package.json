@@ -28,7 +28,7 @@
     "@scaleway/sdk": "^1.38.1",
     "@selego/mongoose-elastic": "^1.6.0",
     "@sentry/integrations": "^7.58.1",
-    "@sentry/node": "^7.58.1",
+    "@sentry/node": "^7.92.0",
     "@sentry/profiling-node": "^1.2.1",
     "adm-zip": "^0.5.10",
     "aws-sdk": "^2.1248.0",
@@ -77,7 +77,7 @@
     "jest": "27.5.1",
     "jest-cli": "27.5.1",
     "nodemon": "^3.0.1",
-    "supertest": "6.3.3",
+    "supertest": "6.3.4",
     "xlsx": "^0.18.5"
   }
 }
