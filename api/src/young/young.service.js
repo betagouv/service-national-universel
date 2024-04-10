@@ -25,4 +25,5 @@ module.exports = {
   generateCertificateByYoung,
   findYoungsByClasseId,
   generateCertificateForMultipleYoungs,
+  buildUniqueName,
 };
