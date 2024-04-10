@@ -3,7 +3,7 @@
 import { API_ENGAGEMENT_SNU_ID, API_ENGAGEMENT_URL, environment } from "@/config";
 import { capture } from "@/sentry";
 
-export async function sendDataToJVA(missionId) {
+export async function apiEngagement(missionId) {
   try {
     if (environment !== "production") return;
 

@@ -19,7 +19,6 @@ function serializeMission(mission) {
       delete ret.sqlId;
       delete ret.sqlStructureId;
       delete ret.sqlTutorId;
-      ret.apiEngagementId = ret.jvaRawData?._id;
       delete ret.jvaRawData;
       return ret;
     },

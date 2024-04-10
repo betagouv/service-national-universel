@@ -39,7 +39,7 @@ import { capture } from "../../sentry";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
-import { sendDataToJVA } from "./utils";
+import { apiEngagement } from "./utils";
 
 export default function ViewDesktop() {
   const [mission, setMission] = useState();
@@ -61,8 +61,8 @@ export default function ViewDesktop() {
   const getMission = async () => {
     if (!id) return setMission(null);
     const { data } = await api.get(`/mission/${id}`);
-    if ((!data.application || data.application?.status === APPLICATION_STATUS.WAITING_ACCEPTATION) && data?.isJvaMission === "true") {
-      await sendDataToJVA(data.apiEngagementId);
+    if (data?.apiEngagementId && (!data.application || data.application?.status === APPLICATION_STATUS.WAITING_ACCEPTATION)) {
+      await apiEngagement(data.apiEngagementId);
     }
     return setMission(data);
   };

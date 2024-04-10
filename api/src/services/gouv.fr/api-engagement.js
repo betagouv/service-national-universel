@@ -56,7 +56,10 @@ const apiEngagement = {
 
       const options = {
         method: "PUT",
-        headers: { "X-API-KEY": config.API_ENGAGEMENT_KEY, "Content-Type": "application/json" },
+        headers: {
+          "X-API-KEY": config.API_ENGAGEMENT_KEY,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ status: apiEngagementStatus[application.status] }),
       };
 
