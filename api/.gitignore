@@ -4,3 +4,5 @@
 /src/scripts/
 *scripts*
 /coverage
+/dist
+tsconfig.tsbuildinfo

@@ -11,7 +11,7 @@
     "printWidth": 180
   },
   "dependencies": {
-    "@headlessui/react": "1.7.17",
+    "@headlessui/react": "1.7.18",
     "@heroicons/react": "^2.0.18",
     "@sentry/nextjs": "7.77.0",
     "autoprefixer": "^10.4.16",

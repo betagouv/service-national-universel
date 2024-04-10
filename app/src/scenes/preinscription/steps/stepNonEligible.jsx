@@ -2,9 +2,9 @@ import React, { useContext } from "react";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { useHistory } from "react-router-dom";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import EngagementPrograms from "../components/EngagementPrograms";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function NonEligible() {
   const history = useHistory();
@@ -26,7 +26,7 @@ export default function NonEligible() {
           </p>
         )}
         <EngagementPrograms />
-        <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
+        <SignupButtons onClickNext={onClickButton} labelNext="Revenir à l'accueil" />
       </DSFRContainer>
     </>
   );

@@ -16,7 +16,6 @@ import { PaddedContainer } from "@snu/ds/dsfr";
 
 import IconFrance from "../../../assets/IconFrance";
 import School from "../../../assets/school.png";
-import CheckBox from "../../../components/dsfr/forms/checkbox";
 import Input from "../../../components/dsfr/forms/input";
 import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
@@ -24,11 +23,10 @@ import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
-import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
+import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -203,17 +201,23 @@ export default function StepEligibilite() {
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
         <div className="space-y-5">
           {!isLoggedIn && (
-            <div className="flex-start flex flex-col">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckBox
-                  checked={data.frenchNationality === "true"}
-                  onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })}
-                  label="Je suis de nationalité française"
-                />
-                <IconFrance />
-              </div>
-              {error.frenchNationality ? <ErrorMessage>{error.frenchNationality}</ErrorMessage> : null}
-            </div>
+            <Checkbox
+              state={error.frenchNationality && "error"}
+              stateRelatedMessage={error.frenchNationality}
+              options={[
+                {
+                  label: (
+                    <span className="flex items-center">
+                      <span className="mr-2">Je suis de nationalité française</span> <IconFrance />
+                    </span>
+                  ),
+                  nativeInputProps: {
+                    checked: data.frenchNationality === "true",
+                    onChange: (e) => setData({ ...data, frenchNationality: e.target.checked ? "true" : "false" }),
+                  },
+                },
+              ]}
+            />
           )}
           <div className="flex flex-col gap-4">
             <div className="flex w-full flex-col">
@@ -274,7 +278,7 @@ export default function StepEligibilite() {
               ) : null}
             </>
           )}
-          <SignupButtonContainer onClickNext={onVerify} disabled={loading} />
+          <SignupButtons onClickNext={onVerify} disabled={loading} />
           {confirmationModal.isOpen && (
             <ModalRecap
               isOpen={confirmationModal?.isOpen}

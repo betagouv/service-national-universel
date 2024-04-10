@@ -48,7 +48,7 @@ const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
 const fetch = require("node-fetch");
-const { phase1 } = require("../../src/templates/certificate/index");
+const { phase1 } = require("../templates/certificate/index");
 const scanFile = require("../utils/virusScanner");
 
 const TIMEOUT_PDF_SERVICE = 15000;
