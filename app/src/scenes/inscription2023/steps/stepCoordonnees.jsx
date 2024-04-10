@@ -204,7 +204,7 @@ export default function StepCoordonnees() {
 
   useEffect(() => {
     setErrors(getErrors());
-  }, [birthCityZip, hasSpecialSituation, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
+  }, [birthCityZip, handicap, allergies, ppsBeneficiary, paiBeneficiary]);
 
   const getErrors = () => {
     let errors = {};

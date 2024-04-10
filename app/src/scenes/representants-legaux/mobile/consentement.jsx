@@ -16,6 +16,7 @@ import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress, getDataForConsentStep } from "../utils";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
@@ -391,5 +392,6 @@ function ConsentementForm({ young, token, step, parentId }) {
         </div>
         <SignupButtons onClickNext={onSubmit} labelNext="Je valide" onClickPrevious={onPrevious} disabled={saving} />
       </DSFRContainer>
+    </>
   );
 }

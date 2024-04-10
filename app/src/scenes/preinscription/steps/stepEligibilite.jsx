@@ -24,6 +24,7 @@ import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
+import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
@@ -285,6 +286,7 @@ export default function StepEligibilite() {
           )}
           <SignupButtons onClickNext={onVerify} disabled={loading} />
           {confirmationModal.isOpen && (
+            <ModalRecap
               isOpen={confirmationModal?.isOpen}
               title={"Les informations sont-elles correctes ?"}
               message={"Ces informations seront utilisées pour déterminer votre éligibilité. Si vous n'êtes pas éligible, vous ne pourrez plus revenir en arrière."}
