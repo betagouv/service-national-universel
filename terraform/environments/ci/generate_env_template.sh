@@ -2,7 +2,6 @@
 
 if [ "$#" -lt 1 ]; then
     echo "Usage $0 <branch_name>"
-    echo "  branch_name: ci, cust, sand, prod"
     echo "Generate a custom env terraform template based on <branch_name>"
     exit 1
 fi
@@ -25,8 +24,12 @@ then
     exit 1
 fi
 
-cp -R custom $branch_name
-cd $branch_name
-rm imports.tf
-sed -I".bak" "s|###___ENV_NAME___###|$branch_name|g" main.tf
+set -e
+
+env_name=$(../../../.github/scripts/get_custom_env_name.sh $branch_name)
+
+cp -R custom $env_name
+cd $env_name
+rm -f imports.tf
+sed -I".bak" "s|###___ENV_NAME___###|$env_name|g" main.tf
 terraform init
