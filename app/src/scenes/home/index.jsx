@@ -5,6 +5,7 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames,
 import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
+import AvenirCohort from "./AvenirCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
@@ -29,6 +30,10 @@ export default function Home() {
 
   const renderStep = () => {
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
+
+    if (young.cohort === "à venir") {
+      return <AvenirCohort />;
+    }
 
     if (hasAccessToReinscription(young)) {
       return <WaitingReinscription />;

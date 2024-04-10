@@ -77,7 +77,7 @@ export default function Signin() {
 
         <div className="flex flex-col gap-1 py-4 text-sm leading-relaxed">
           <p className="mb-1">
-            Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
+            Un mail contenant le code unique de connexion vous a été envoyé à l'adresse "<b>{email}</b>".
           </p>
           <p className="mb-4">Ce code est valable pendant 10 minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été transmis par mail.</p>
           <label>

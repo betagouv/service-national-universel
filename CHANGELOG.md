@@ -1,3 +1,51 @@
+# [1.400.0](https://github.com/betagouv/service-national-universel/compare/v1.399.1...v1.400.0) (2024-04-09)
+
+
+### Bug Fixes
+
+* **api:** pipeline test with new historic  ([#3736](https://github.com/betagouv/service-national-universel/issues/3736)) ([1d8c461](https://github.com/betagouv/service-national-universel/commit/1d8c46194357e8b45d13efe57f4880395c614e66))
+* **api:** schoolRAMSES conflit mongoose-patch-history ([18035c0](https://github.com/betagouv/service-national-universel/commit/18035c04e56189e48402ee214719ea88a5999929))
+* **deps:** update dependency @sentry/nextjs to v7.77.0 [security] ([#3252](https://github.com/betagouv/service-national-universel/issues/3252)) ([3e7d418](https://github.com/betagouv/service-national-universel/commit/3e7d418ed3d94f79eecc8952f883700f823a8a24))
+* **deps:** update dependency express to v4.19.2 [security] ([#3689](https://github.com/betagouv/service-national-universel/issues/3689)) ([ceb3fd5](https://github.com/betagouv/service-national-universel/commit/ceb3fd5857044072fb3fd1d889cc1517031816c2))
+* **deps:** update dependency sanitize-html to v2.12.1 [security] ([#3630](https://github.com/betagouv/service-national-universel/issues/3630)) ([f71d346](https://github.com/betagouv/service-national-universel/commit/f71d34631055e3bdeeb782aaec43445672178518))
+* **deps:** update dependency turbo to v1.13.2 ([#3009](https://github.com/betagouv/service-national-universel/issues/3009)) ([080ed62](https://github.com/betagouv/service-national-universel/commit/080ed6262d5edfd604a7b8ded55cead540b8167f))
+* **misc:** Rebuild if package-json.lock is updated ([#3731](https://github.com/betagouv/service-national-universel/issues/3731)) ([a6f5ff0](https://github.com/betagouv/service-national-universel/commit/a6f5ff0fe75aaec494ad6612275ed30a296fc57d))
+
+
+### Features
+
+* **api:** add history on model without history (to complete on save) ([#3675](https://github.com/betagouv/service-national-universel/issues/3675)) ([4ded73d](https://github.com/betagouv/service-national-universel/commit/4ded73d88af71c52bc004b253962c00109d80a20))
+
+## [1.399.1](https://github.com/betagouv/service-national-universel/compare/v1.399.0...v1.399.1) (2024-04-08)
+
+
+### Bug Fixes
+
+* **app:** Fix ReInscription context bug. ([fad3adc](https://github.com/betagouv/service-national-universel/commit/fad3adcf93003cd71454bafb1a4a480af7a454c1))
+* **misc:** 2181 - Wait after DNS record at custom env creation ([#3718](https://github.com/betagouv/service-national-universel/issues/3718)) ([e620539](https://github.com/betagouv/service-national-universel/commit/e6205397d27d7067107be5f3230c265f16ae77b4))
+
+# [1.399.0](https://github.com/betagouv/service-national-universel/compare/v1.398.0...v1.399.0) (2024-04-05)
+
+
+### Features
+
+* **misc:** 2214 - Release CHANGELOG ([#3712](https://github.com/betagouv/service-national-universel/issues/3712)) ([7610628](https://github.com/betagouv/service-national-universel/commit/761062893384201940c2a37bb6603abf7354dd4b))
+
+# [1.398.0](https://github.com/betagouv/service-national-universel/compare/v1.397.0...v1.398.0) (2024-04-04)
+
+
+### Bug Fixes
+
+* **admin:** Reopen boite reception temporairement ([d0e20b1](https://github.com/betagouv/service-national-universel/commit/d0e20b173d1889d149dc8eb59da01dc688925eda))
+* **app:** 2160 - Fixed ES filter isMilitaryPreparation. ([5b7a1f5](https://github.com/betagouv/service-national-universel/commit/5b7a1f56b3f1ef3423583036382dd2b3fdb7127f))
+
+
+### Features
+
+* **api:** 1993 - Add sentry-cron integration ([#3707](https://github.com/betagouv/service-national-universel/issues/3707)) ([327d740](https://github.com/betagouv/service-national-universel/commit/327d7402a22c3b70ea1eb2567202c46a05a17abf))
+* **app:** 2160 - Filtering military preparations for CLE. ([#3708](https://github.com/betagouv/service-national-universel/issues/3708)) ([effac47](https://github.com/betagouv/service-national-universel/commit/effac47a28f1c20a91cf65e87b23577b6cfa2149))
+* **app, admin:** 2055 - add "à venir" in changeSejour form ([#3697](https://github.com/betagouv/service-national-universel/issues/3697)) ([9d5efc8](https://github.com/betagouv/service-national-universel/commit/9d5efc8bb7c671fb2f1cd3febfc30bd77e230207))
+
 # [1.397.0](https://github.com/betagouv/service-national-universel/compare/v1.396.2...v1.397.0) (2024-04-02)
 
 

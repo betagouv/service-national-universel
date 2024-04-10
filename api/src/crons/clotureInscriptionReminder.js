@@ -42,6 +42,7 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     await slack.error({ title: "clotureInscriptionReminder", text: JSON.stringify(e) });
+    throw e;
   }
 };
 

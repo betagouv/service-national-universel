@@ -39,5 +39,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     await slack.error({ title: "WARNING: Problème suppression CNI && specificAmenagmentType", text: JSON.stringify(e) });
+    throw e;
   }
 };

@@ -283,17 +283,20 @@ exports.handler = async () => {
   slack.info({ title: "sync with JVA missions", text: "I'm starting the synchronization !" });
   if (!JVA_API_KEY) {
     slack.error({ title: "sync with JVA missions", text: "I do not have any JVA_API_KEY !" });
-    capture("NO JVA_API_KEY");
-    return;
+    const err = new Error("NO JVA_API_KEY");
+    capture(err);
+    throw err;
   }
   if (!API_ENGAGEMENT_KEY) {
     slack.error({ title: "sync with API-ENGAGEMENT missions", text: "I do not have any API_ENGAGEMENT_KEY !" });
-    capture("NO API_ENGAGEMENT_KEY");
-    return;
+    const err = new Error("NO API_ENGAGEMENT_KEY");
+    capture(err);
+    throw err;
   }
   try {
     await fetchMission();
   } catch (e) {
     capture(e);
+    throw e;
   }
 };

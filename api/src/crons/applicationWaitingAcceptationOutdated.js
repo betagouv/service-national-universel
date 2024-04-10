@@ -89,6 +89,7 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "outdated waiting acceptation application", text: JSON.stringify(e) });
+    throw e;
   }
 };
 
@@ -99,6 +100,7 @@ exports.handlerNotice1Week = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "1 week notice outdated waiting acceptation application", text: JSON.stringify(e) });
+    throw e;
   }
 };
 
@@ -109,6 +111,7 @@ exports.handlerNotice13Days = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "13 days notice outdated waiting acceptation application", text: JSON.stringify(e) });
+    throw e;
   }
 };
 

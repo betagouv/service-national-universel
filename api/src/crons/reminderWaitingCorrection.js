@@ -39,5 +39,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: `Inscription reminder day 3 and day 7 - ERROR`, text: JSON.stringify(e) });
+    throw e;
   }
 };

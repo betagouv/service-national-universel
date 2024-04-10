@@ -36,5 +36,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "parentRevalidateRI", text: JSON.stringify(e) });
+    throw e;
   }
 };

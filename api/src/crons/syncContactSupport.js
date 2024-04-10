@@ -27,5 +27,6 @@ exports.handler = async () => {
     }
   } catch (e) {
     capture(e);
+    throw e;
   }
 };
