@@ -1,8 +1,12 @@
 const fetch = require("node-fetch");
-const querystring = require("querystring");
-const { capture } = require("./sentry");
-const { QPV_USERNAME, QPV_PASSWORD } = require("./config");
-const AreaModel = require("./models/areas");
+import querystring from "querystring";
+import { capture } from "./sentry";
+import { QPV_USERNAME, QPV_PASSWORD } from "./config";
+import AreaModel from "./models/areas";
+
+type GeoReferenceurResponse = {
+  code_reponse?: string;
+};
 
 const url = "https://wsa.sig.ville.gouv.fr/service/georeferenceur.json";
 // ZUS : Zone Urbain Sensible /
@@ -10,7 +14,7 @@ const url = "https://wsa.sig.ville.gouv.fr/service/georeferenceur.json";
 // HZUS : ???
 // QP : QUartier Prioritaire
 
-async function getQPV(postcode, commune, adresse) {
+async function getQPV(postcode: string, commune: string, adresse: string): Promise<unknown> {
   try {
     if (!QPV_USERNAME || !QPV_PASSWORD) return console.log("QPV ENV VARIABLES ARE NOT SET (QPV_USERNAME and QPV_PASSWORD) ");
 
@@ -33,7 +37,10 @@ async function getQPV(postcode, commune, adresse) {
         retries: 3,
         retryDelay: 1000,
         retryOn: [502, 503, 504],
-        headers: { "Content-Type": "application/json", Authorization: "Basic " + Buffer.from(QPV_USERNAME + ":" + QPV_PASSWORD).toString("base64") },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Basic " + Buffer.from(QPV_USERNAME + ":" + QPV_PASSWORD).toString("base64"),
+        },
       })
         .then((res) => {
           if (res.status !== 200) {
@@ -42,7 +49,7 @@ async function getQPV(postcode, commune, adresse) {
           }
           return res.json();
         })
-        .then(({ code_reponse } = {}) => {
+        .then(({ code_reponse }: GeoReferenceurResponse = {}) => {
           if (!code_reponse) {
             return resolve(null);
           }
@@ -59,7 +66,7 @@ async function getQPV(postcode, commune, adresse) {
   }
 }
 
-async function getDensity(cityCode) {
+async function getDensity(cityCode: string): Promise<string> {
   try {
     if (!cityCode) {
       console.log("City Code is not set");
