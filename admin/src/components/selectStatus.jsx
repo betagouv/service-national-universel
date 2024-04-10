@@ -54,6 +54,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
   const [modalGoal, setModalGoal] = useState({ isOpen: false, onConfirm: null });
   const [modalValidatePhase2, setModalValidatePhase2] = useState(false);
+  const [newStatus, setNewStatus] = useState(null);
 
   const getInscriptionGoalReachedNormalized = async ({ department, cohort }) => {
     const { data, ok, code } = await api.get(`/inscription-goal/${encodeURIComponent(cohort)}/department/${encodeURIComponent(department)}`);
@@ -77,6 +78,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
 
   const handleClickStatus = async (status) => {
     if (statusName === "statusPhase2" && status === YOUNG_STATUS_PHASE2.VALIDATED) {
+      setNewStatus(status);
       setModalValidatePhase2(true);
     } else {
       setModalConfirm({
@@ -161,7 +163,10 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         inscriptionRefusedMessage,
         withdrawnReason,
       });
-      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      if (!ok) {
+        setModalValidatePhase2(false);
+        return toastr.error("Une erreur s'est produite :", translate(code));
+      }
 
       const validationTemplate = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED;
 
@@ -173,11 +178,13 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
       }
       setYoung(newYoung);
+      setModalValidatePhase2(false);
       toastr.success("Mis à jour!");
       callback();
     } catch (e) {
       console.log(e);
       toastr.error("Oups, une erreur est survenue :", translate(e.code));
+      setModalValidatePhase2(false);
     }
   };
 
@@ -274,7 +281,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         text="Cette action entraînera l'abandon des candidatures et des demandes d'équivalence encore en cours. Êtes-vous sûr de vouloir continuer ?"
         actions={[
           { title: "Annuler", isCancel: true },
-          { title: "Confirmer", onClick: () => setStatus(status) },
+          { title: "Confirmer", onClick: () => setStatus(newStatus) },
         ]}
       />
 
