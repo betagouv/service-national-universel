@@ -11,10 +11,10 @@ import Navbar from "../components/Navbar";
 import dayjs from "dayjs";
 import Check from "../components/Check";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import { supportURL } from "../../../config";
 import plausibleEvent from "@/services/plausible";
 import { YOUNG_SOURCE } from "snu-lib";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Verification({ step, parentId }) {
   const history = useHistory();
@@ -117,7 +117,7 @@ export default function Verification({ step, parentId }) {
             {error && <div className="my-2 ml-[40px] text-[14px] leading-[19px] text-[#CE0500]">{error}</div>}
           </>
         )}
-        <SignupButtonContainer onClickNext={onNext} onClickPrevious={onPrevious} disabled={saving} />
+        <SignupButtons onClickNext={onNext} onClickPrevious={onPrevious} disabled={saving} />
       </DSFRContainer>
     </>
   );

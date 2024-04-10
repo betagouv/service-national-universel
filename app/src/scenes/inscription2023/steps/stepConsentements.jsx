@@ -5,7 +5,6 @@ import useAuth from "@/services/useAuth";
 import { getCohortPeriod, getCohortYear } from "snu-lib";
 import { getCohort } from "@/utils/cohorts";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -13,7 +12,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
+import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 
 export default function StepConsentements() {
   const { young, isCLE } = useAuth();
@@ -64,43 +63,55 @@ export default function StepConsentements() {
         supportEvent="Phase0/aide inscription - consentement">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
         <div className="mt-4 flex flex-col gap-4 pb-2">
-          <div className="text-base text-[#161616]">
-            Je,{" "}
-            <strong>
-              {young.firstName} {young.lastName}
-            </strong>
-            ,
-          </div>
-          <div className="flex items-center gap-4">
-            <CheckBox checked={data.consentment1} onChange={(e) => setData({ ...data, consentment1: e })} />
-            <div className="flex-1 text-sm text-[#3A3A3A]">
-              Me porte volontaire pour participer à la session <strong>{getCohortYear(getCohort(young.cohort))}</strong> du Service National Universel qui comprend la participation
-              à un séjour de cohésion puis la réalisation d'une phase d'engagement.
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <CheckBox checked={data.consentment2} onChange={(e) => setData({ ...data, consentment2: e })} />
-            <div className="flex-1 text-sm text-[#3A3A3A]">
-              {isCLE ? (
-                <>M&apos;inscris au séjour de cohésion </>
-              ) : (
-                <>
-                  M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles{" "}
-                </>
-              )}
-              et m&apos;engage à en respecter le{" "}
-              <a
-                href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf"
-                target="_blank"
-                rel="noreferrer"
-                className="underline hover:underline">
-                règlement intérieur
-              </a>
-              .
-            </div>
-          </div>
+          <Checkbox
+            legend={
+              <div className="text-base text-[#161616]">
+                Je,{" "}
+                <strong>
+                  {young.firstName} {young.lastName}
+                </strong>
+                ,
+              </div>
+            }
+            options={[
+              {
+                label: (
+                  <span>
+                    Me porte volontaire pour participer à la session <strong>{getCohortYear(getCohort(young.cohort))}</strong> du Service National Universel.
+                  </span>
+                ),
+                hintText: "qui comprend la participation à un séjour de cohésion puis la réalisation d'une phase d'engagement.",
+                nativeInputProps: {
+                  checked: data.consentment1,
+                  onChange: (e) => setData({ ...data, consentment1: e.target.checked }),
+                },
+              },
+              {
+                label: (
+                  <span>
+                    {isCLE ? (
+                      <>M&apos;inscris au séjour de cohésion </>
+                    ) : (
+                      <>
+                        M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles{" "}
+                      </>
+                    )}
+                    et m&apos;engage à en respecter le{" "}
+                    <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf" target="_blank" rel="noreferrer">
+                      règlement intérieur
+                    </a>
+                    .
+                  </span>
+                ),
+                nativeInputProps: {
+                  checked: data.consentment2,
+                  onChange: (e) => setData({ ...data, consentment2: e.target.checked }),
+                },
+              },
+            ]}
+          />
         </div>
-        <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/coordonnee")} disabled={disabled || loading} />
+        <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/coordonnee")} disabled={disabled || loading} />
       </DSFRContainer>
     </>
   );

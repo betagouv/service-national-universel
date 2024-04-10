@@ -1,5 +1,10 @@
 {
+  "labels": ["dependencies"],
   "extends": [
-    "config:base"
+    "config:recommended",
+    "group:monorepos",
+    "group:recommended",
+    ":semanticCommitTypeAll(chore)",
+    ":semanticCommitScope(lib)"
   ]
 }

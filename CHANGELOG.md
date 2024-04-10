@@ -1,3 +1,21 @@
+# [1.400.0](https://github.com/betagouv/service-national-universel/compare/v1.399.1...v1.400.0) (2024-04-09)
+
+
+### Bug Fixes
+
+* **api:** pipeline test with new historic  ([#3736](https://github.com/betagouv/service-national-universel/issues/3736)) ([1d8c461](https://github.com/betagouv/service-national-universel/commit/1d8c46194357e8b45d13efe57f4880395c614e66))
+* **api:** schoolRAMSES conflit mongoose-patch-history ([18035c0](https://github.com/betagouv/service-national-universel/commit/18035c04e56189e48402ee214719ea88a5999929))
+* **deps:** update dependency @sentry/nextjs to v7.77.0 [security] ([#3252](https://github.com/betagouv/service-national-universel/issues/3252)) ([3e7d418](https://github.com/betagouv/service-national-universel/commit/3e7d418ed3d94f79eecc8952f883700f823a8a24))
+* **deps:** update dependency express to v4.19.2 [security] ([#3689](https://github.com/betagouv/service-national-universel/issues/3689)) ([ceb3fd5](https://github.com/betagouv/service-national-universel/commit/ceb3fd5857044072fb3fd1d889cc1517031816c2))
+* **deps:** update dependency sanitize-html to v2.12.1 [security] ([#3630](https://github.com/betagouv/service-national-universel/issues/3630)) ([f71d346](https://github.com/betagouv/service-national-universel/commit/f71d34631055e3bdeeb782aaec43445672178518))
+* **deps:** update dependency turbo to v1.13.2 ([#3009](https://github.com/betagouv/service-national-universel/issues/3009)) ([080ed62](https://github.com/betagouv/service-national-universel/commit/080ed6262d5edfd604a7b8ded55cead540b8167f))
+* **misc:** Rebuild if package-json.lock is updated ([#3731](https://github.com/betagouv/service-national-universel/issues/3731)) ([a6f5ff0](https://github.com/betagouv/service-national-universel/commit/a6f5ff0fe75aaec494ad6612275ed30a296fc57d))
+
+
+### Features
+
+* **api:** add history on model without history (to complete on save) ([#3675](https://github.com/betagouv/service-national-universel/issues/3675)) ([4ded73d](https://github.com/betagouv/service-national-universel/commit/4ded73d88af71c52bc004b253962c00109d80a20))
+
 ## [1.399.1](https://github.com/betagouv/service-national-universel/compare/v1.399.0...v1.399.1) (2024-04-08)
 
 

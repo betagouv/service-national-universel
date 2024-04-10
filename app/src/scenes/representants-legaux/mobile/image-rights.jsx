@@ -14,10 +14,10 @@ import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress } from "../utils";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function ImageRights({ parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -343,7 +343,7 @@ function ImageRightsForm({ young, token, parentId }) {
 
           {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
         </div>
-        <SignupButtonContainer onClickNext={onSubmit} labelNext="Valider" disabled={saving} />
+        <SignupButtons onClickNext={onSubmit} labelNext="Valider" disabled={saving} />
       </DSFRContainer>
     </>
   );
