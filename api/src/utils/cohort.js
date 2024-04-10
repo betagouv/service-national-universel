@@ -135,10 +135,9 @@ async function getCohortValidationDate(cohortName) {
   }
 }
 
-async function getDepartureDateSession(meetingPoint, session, young, cohort) {
+function getDepartureDateSession(meetingPoint, session, young, cohort) {
   // Compatibility with legacy sessions
-  const sessions2023 = await CohortModel.find({});
-  if (!sessions2023.map((e) => e.name).includes(young.cohort)) {
+  if (young.cohort in START_DATE_PHASE1) {
     return START_DATE_PHASE1[young.cohort];
   }
 
@@ -158,10 +157,9 @@ async function getDepartureDateSession(meetingPoint, session, young, cohort) {
   return new Date(cohortDateStart);
 }
 
-async function getReturnDateSession(meetingPoint, session, young, cohort) {
-  const sessions2023 = await CohortModel.find({});
+function getReturnDateSession(meetingPoint, session, young, cohort) {
   // Compatibility with legacy sessions
-  if (!sessions2023.map((e) => e.name).includes(young.cohort)) {
+  if (young.cohort in END_DATE_PHASE1) {
     return END_DATE_PHASE1[young.cohort];
   }
 

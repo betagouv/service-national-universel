@@ -66,21 +66,22 @@ const getMeetingPoint = async (young) => {
   return meetingPoint;
 };
 
-async function generate(doc, young) {
-  const random = Math.random();
-  console.time("QUERYING " + random);
-
+async function fetchDataForYoung(young) {
   const session = await getSession(young);
   const cohort = await getCohort(young);
+  const cohesionCenter = await getCohesionCenter(young);
+  const meetingPoint = await getMeetingPoint(young);
+  return { session, cohort, cohesionCenter, meetingPoint };
+}
+
+async function generate(doc, young, session, cohort, cohesionCenter, meetingPoint) {
   const cohortEndDate = getCohortEndDate(young, cohort);
 
   const ministresData = getMinistres(cohortEndDate);
   const template = ministresData.template;
-  const cohesionCenter = await getCohesionCenter(young);
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
-  const meetingPoint = await getMeetingPoint(young);
-  const departureDate = await getDepartureDateSession(meetingPoint, session, young, cohort);
-  const returnDate = await getReturnDateSession(meetingPoint, session, young, cohort);
+  const departureDate = getDepartureDateSession(meetingPoint, session, young, cohort);
+  const returnDate = getReturnDateSession(meetingPoint, session, young, cohort);
 
   const COHORT = cohortEndDate.getYear() + 1900;
   const COHESION_DATE = transportDatesToString(departureDate, returnDate);
@@ -88,9 +89,7 @@ async function generate(doc, young) {
   const COHESION_CENTER_LOCATION = cohesionCenterLocation;
   const GENERAL_BG = getSignedUrl(template);
   const DATE = cohortEndDate.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
-  console.timeEnd("QUERYING " + random);
 
-  console.time("RENDERING " + random);
   const page = doc.page;
 
   const font = "Marianne";
@@ -121,7 +120,6 @@ async function generate(doc, young) {
     .text(" du Service National Universel.")
     .moveDown()
     .text(`Fait le ${DATE}`);
-  console.timeEnd("RENDERING " + random);
 }
 
-module.exports = { generate };
+module.exports = { generate, fetchDataForYoung };

@@ -83,8 +83,8 @@ const phase1 = async (young, batch = false) => {
   const cohesionCenter = await getCohesionCenter(young);
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   const meetingPoint = await getMeetingPoint(young);
-  const departureDate = await getDepartureDateSession(meetingPoint, session, young, cohort);
-  const returnDate = await getReturnDateSession(meetingPoint, session, young, cohort);
+  const departureDate = getDepartureDateSession(meetingPoint, session, young, cohort);
+  const returnDate = getReturnDateSession(meetingPoint, session, young, cohort);
 
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))

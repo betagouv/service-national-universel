@@ -67,8 +67,8 @@ const render = async (young) => {
     const service = await DepartmentServiceModel.findOne({ department: young?.department });
     if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
     const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
-    const departureDate = await getDepartureDateSession(meetingPoint, session, young, cohort);
-    const returnDate = await getReturnDateSession(meetingPoint, session, young, cohort);
+    const departureDate = getDepartureDateSession(meetingPoint, session, young, cohort);
+    const returnDate = getReturnDateSession(meetingPoint, session, young, cohort);
     if (young.source === "CLE") {
       const html = fs.readFileSync(path.resolve(__dirname, "./cohesion-CLE.html"), "utf8");
       return html
