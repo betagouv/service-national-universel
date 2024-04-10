@@ -10,7 +10,7 @@ import {
   makeFetchTransport,
   Replay,
 } from "@sentry/react";
-import { environment, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE } from "./config";
+import { environment, RELEASE, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -25,6 +25,7 @@ function initSentry() {
       enabled: Boolean(SENTRY_URL),
       dsn: SENTRY_URL,
       environment: "app",
+      release: RELEASE,
       normalizeDepth: 16,
       transport: makeBrowserOfflineTransport(makeFetchTransport),
       transportOptions: {

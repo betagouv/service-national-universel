@@ -66,9 +66,9 @@ resource "scaleway_container" "api" {
     "CLE"                               = "true"
     "PRODUCTION"                        = "true"
     "FOLDER_API"                        = "api"
+    "RELEASE"                           = var.api_image_tag
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.2
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.01
-    "SENTRY_RELEASE"                    = var.api_image_tag
     "API_ANALYTICS_ENDPOINT"            = local.secrets.API_ANALYTICS_ENDPOINT
     "API_ANTIVIRUS_ENDPOINT"            = local.secrets.API_ANTIVIRUS_ENDPOINT
     "API_ASSOCIATION_AWS_ACCESS_KEY_ID" = local.secrets.API_ASSOCIATION_AWS_ACCESS_KEY_ID
@@ -150,6 +150,7 @@ resource "scaleway_container" "admin" {
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
+    "RELEASE"                    = var.admin_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.005
     "SENTRY_TRACING_SAMPLE_RATE" = 0.01
     "SUPPORT_URL"                = "https://support.snu.gouv.fr"
@@ -189,6 +190,7 @@ resource "scaleway_container" "app" {
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
+    "RELEASE"                    = var.app_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.005
     "SENTRY_TRACING_SAMPLE_RATE" = 0.01
     "SUPPORT_URL"                = "https://support.snu.gouv.fr"
