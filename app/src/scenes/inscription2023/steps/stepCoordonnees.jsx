@@ -701,6 +701,7 @@ export default function StepCoordonnees() {
                 />
                 {specificAmenagment === "true" && (
                   <Input
+                    className="pb-8"
                     label="Quelle est la nature de cet aménagement ?"
                     nativeInputProps={{
                       value: specificAmenagmentType,
