@@ -1,4 +1,4 @@
-const youngService = require("./young.service");
+import * as youngService from "./young.service";
 
 const mockBuffer = Buffer.from("pdf");
 
