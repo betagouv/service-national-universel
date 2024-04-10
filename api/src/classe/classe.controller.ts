@@ -1,10 +1,12 @@
-const passport = require("passport");
-const express = require("express");
-const Joi = require("joi");
-const { capture } = require("../sentry");
-const { ERRORS, isReferent } = require("../utils");
-const { canDownloadYoungDocuments } = require("snu-lib");
-const { generateCertificatesByClasseId } = require("./classe.service");
+import passport from "passport";
+import express, { Response } from "express";
+import Joi from "joi";
+import { capture } from "../sentry";
+import { ERRORS, isReferent } from "../utils";
+import { canDownloadYoungDocuments } from "snu-lib";
+import { generateCertificatesByClasseId } from "./classe.service";
+
+import { UserRequest } from "../controllers/request";
 
 const router = express.Router();
 router.post(
@@ -13,7 +15,7 @@ router.post(
     session: false,
     failWithError: true,
   }),
-  async (req, res) => {
+  async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
       if (error) {
