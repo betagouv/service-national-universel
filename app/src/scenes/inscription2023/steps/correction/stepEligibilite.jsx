@@ -24,7 +24,7 @@ import { supportURL } from "@/config";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
-import { SignupButtons } from "@snu/ds/dsfr";
+import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 
 export default function StepEligibilite() {
   const { young, isCLE } = useAuth();
@@ -218,16 +218,24 @@ export default function StepEligibilite() {
     <>
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={supportURL + "/base-de-connaissance/phase-0-les-inscriptions"}>
         <div className="space-y-5">
-          <div className="flex-start my-4 flex flex-col">
-            <div className="flex items-center">
-              <CheckBox disabled={!isCLE} checked={data.frenchNationality === "true"} onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })} />
-              <div className="flex items-center backdrop-opacity-100">
-                <span className={`ml-2 mr-2 ${!isCLE && "text-[#929292]"}`}>Je suis de nationalité française</span>
-                <IconFrance />
-              </div>
-            </div>
-            {error.frenchNationality ? <span className="text-sm text-red-500">{error.frenchNationality}</span> : null}
-          </div>
+          <Checkbox
+            state={error.frenchNationality && "error"}
+            stateRelatedMessage={error.frenchNationality}
+            options={[
+              {
+                label: (
+                  <span className="flex items-center">
+                    <span className="mr-2">Je suis de nationalité française</span> <IconFrance />
+                  </span>
+                ),
+                nativeInputProps: {
+                  disabled: !isCLE,
+                  checked: data.frenchNationality === "true",
+                  onChange: (e) => setData({ ...data, frenchNationality: e.target.checked ? "true" : "false" }),
+                },
+              },
+            ]}
+          />
           <Select
             label="Niveau de scolarité"
             value={data.scolarity}

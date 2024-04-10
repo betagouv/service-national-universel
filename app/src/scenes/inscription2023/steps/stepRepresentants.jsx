@@ -5,7 +5,6 @@ import { Redirect, useHistory, useParams } from "react-router-dom";
 import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -18,7 +17,7 @@ import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-l
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import useAuth from "@/services/useAuth";
-import { SignupButtons, Input, InputPhone } from "@snu/ds/dsfr";
+import { SignupButtons, Checkbox, Input, InputPhone } from "@snu/ds/dsfr";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -236,18 +235,27 @@ export default function StepRepresentants() {
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
         <hr className="my-4" />
         <div className="flex items-center gap-4">
-          <CheckBox
-            checked={isParent2Visible}
-            onChange={(e) => {
-              const eventName = isCLE ? "CLE/CTA inscription - ajouter rep leg" : "Phase0/CTA inscription - ajouter rep leg";
-              plausibleEvent(eventName);
-              // Event mal nommé, pas un call to action. Ne pas confondre avec l'event envoyé lors du clic sur le bouton "Suivant".
-              setIsParent2Visible(e);
-            }}
+          <Checkbox
+            options={[
+              {
+                label: (
+                  <span>
+                    Je renseigne un(e) second(e) représentant(e) légal(e) - <span className="text-[#666666]">Facultatif</span>
+                  </span>
+                ),
+                nativeInputProps: {
+                  checked: isParent2Visible,
+                  onChange: (e) => {
+                    const eventName = isCLE ? "CLE/CTA inscription - ajouter rep leg" : "Phase0/CTA inscription - ajouter rep leg";
+                    plausibleEvent(eventName);
+                    // Event mal nommé, pas un call to action. Ne pas confondre avec l'event envoyé lors du clic sur le bouton "Suivant".
+                    setIsParent2Visible(e.target.checked);
+                  },
+                },
+              },
+            ]}
           />
-          <div className="flex-1 text-[16px] text-[#3A3A3A]">
-            Je renseigne un(e) second(e) représentant(e) légal(e) - <span className="text-[#666666]">Facultatif</span>
-          </div>
+          <div className="flex-1 text-[16px] text-[#3A3A3A]"></div>
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
         {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (

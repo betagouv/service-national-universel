@@ -114,7 +114,9 @@ export default function StepCoordonnees() {
   const modeCorrection = young.status === YOUNG_STATUS.WAITING_CORRECTION;
 
   const { isCLE } = useAuth();
-  const [hasSpecialSituation, setSpecialSituation] = useState(null);
+  const [hasSpecialSituation, setSpecialSituation] = useState(
+    young.handicap === "true" || young.allergies === "true" || young.ppsBeneficiary === "true" || young.paiBeneficiary === "true",
+  );
 
   const {
     birthCountry,
@@ -655,6 +657,7 @@ export default function StepCoordonnees() {
                 {
                   label: "Je suis en situation de handicap",
                   nativeInputProps: {
+                    checked: handicap,
                     onChange: (e) => {
                       setData({ ...data, handicap: e.target.checked.toString() });
                     },
@@ -662,6 +665,7 @@ export default function StepCoordonnees() {
                 },
                 {
                   label: "Je suis bénéficiaire d’un Projet personnalisé de scolarisation (PPS)",
+                  checked: ppsBeneficiary,
                   nativeInputProps: {
                     onChange: (e) => {
                       setData({ ...data, ppsBeneficiary: e.target.checked.toString() });
@@ -670,6 +674,7 @@ export default function StepCoordonnees() {
                 },
                 {
                   label: "Je suis bénéficiaire d’un Projet d’accueil individualisé (PAI)",
+                  checked: paiBeneficiary,
                   nativeInputProps: {
                     onChange: (e) => {
                       setData({ ...data, paiBeneficiary: e.target.checked.toString() });
@@ -678,6 +683,7 @@ export default function StepCoordonnees() {
                 },
                 {
                   label: "J’ai des allergies ou intolérances alimentaires.",
+                  checked: allergies,
                   nativeInputProps: {
                     onChange: (e) => {
                       setData({ ...data, allergies: e.target.checked.toString() });
