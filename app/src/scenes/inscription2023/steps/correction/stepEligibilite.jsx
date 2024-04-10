@@ -3,7 +3,6 @@ import { toastr } from "react-redux-toastr";
 import { Redirect, useHistory, useParams } from "react-router-dom";
 import validator from "validator";
 import IconFrance from "../../../../assets/IconFrance";
-import CheckBox from "../../../../components/dsfr/forms/checkbox";
 import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
