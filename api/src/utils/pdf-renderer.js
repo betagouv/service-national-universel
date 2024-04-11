@@ -1,8 +1,11 @@
-const { API_PDF_ENDPOINT } = require("../config");
-const { timeout } = require("../utils");
+const path = require("path");
+const fs = require("fs").promises;
+const { API_PDF_ENDPOINT, CERTIFICATE_TEMPLATES_ROOTDIR } = require("../config");
+const { timeout, getFile } = require("../utils");
 const { capture } = require("../sentry");
 const { ERRORS } = require("./index");
 const fetch = require("node-fetch");
+const { MINISTRES } = require("snu-lib");
 
 const TIMEOUT_PDF_SERVICE = 15000;
 
@@ -77,12 +80,31 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
   }
 }
 
-//   res.set({
-//     "content-length": response.headers.get("content-length"),
-//     "content-disposition": `inline; filename="test.pdf"`,
-//     "content-type": "application/pdf",
-//     "cache-control": "public, max-age=1",
-//   });
+async function getCertificateTemplate(template) {
+  const _path = path.join(CERTIFICATE_TEMPLATES_ROOTDIR, template);
+  try {
+    const handle = await fs.open(_path, "wx");
+    console.log(`Downloading ${template}`);
+    // Download locally certificate template
+    // in order to make them available for pdf generation
+    const downloaded = await getFile(template);
+
+    await handle.writeFile(_path, downloaded.Body);
+    await handle.close();
+  } catch (err) {
+    if (err.code != "EEXIST") {
+      throw err;
+    }
+  }
+}
+
+async function getAllCertificateTemplates() {
+  await fs.mkdir(path.join(CERTIFICATE_TEMPLATES_ROOTDIR, "certificates"), { recursive: true });
+  const ministres = [...MINISTRES].reverse(); // Most recent first
+  for (const m of ministres) {
+    await getCertificateTemplate(m.template);
+  }
+}
 
 async function generatePdfIntoBuffer({ type, template, young, contract }) {
   const html = await getHtmlTemplate(type, template, young, contract);
@@ -96,4 +118,4 @@ async function generatePdfIntoBuffer({ type, template, young, contract }) {
   return stream2buffer(stream);
 }
 
-module.exports = { generatePdfIntoStream, generatePdfIntoBuffer, htmlToPdfBuffer };
+module.exports = { getAllCertificateTemplates, generatePdfIntoStream, generatePdfIntoBuffer, htmlToPdfBuffer };

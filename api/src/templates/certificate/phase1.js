@@ -7,6 +7,7 @@ const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
 const CohortModel = require("../../models/cohort");
+const { CERTIFICATE_TEMPLATES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
 
 const getCohesionCenter = async (young) => {
   let cohesionCenter;
@@ -72,8 +73,8 @@ const FONT_BOLD = `${FONT}-Bold`;
 function initDocument(options={}) {
   const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0, ...options });
 
-  doc.registerFont(FONT, path.join(__dirname, "..", "..", "/assets/fonts/Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(__dirname, "..", "..", "/assets/fonts/Marianne/Marianne-Bold.woff"));
+  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
+  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
 
   return doc;
 }
@@ -91,17 +92,16 @@ function render(doc, young, session, cohort, cohesionCenter) {
   const COHESION_DATE = transportDatesToString(departureDate, returnDate);
   const COHESION_CENTER_NAME = cohesionCenter.name || "";
   const COHESION_CENTER_LOCATION = cohesionCenterLocation;
-  const GENERAL_BG = getSignedUrl(template);
   const DATE = cohortEndDate.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
 
   const page = doc.page;
 
-  doc.font(FONT).fontSize(14).lineGap(14).fillColor("#444");
+  doc.font(FONT).fontSize(12).lineGap(12).fillColor("#444");
 
-  doc.image(path.join(__dirname, "../../../public/images/certificateTemplate_template.png"), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+  doc.image(path.join(CERTIFICATE_TEMPLATES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
 
   doc
-    .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 300, { continued: true })
+    .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 280, { continued: true })
     .font(FONT_BOLD)
     .text(`${young.firstName} ${young.lastName}`, { continued: true })
     .font(FONT)

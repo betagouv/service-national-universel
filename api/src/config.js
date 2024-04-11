@@ -56,6 +56,9 @@ const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
 const REDIS_URL = process.env.REDIS_URL || "";
 
+const CERTIFICATE_TEMPLATES_ROOTDIR = `${__dirname}/../public/images`;
+const FONT_ROOTDIR = `${__dirname}/assets/fonts`;
+
 module.exports = {
   LOCAL,
   PORT,
@@ -100,6 +103,8 @@ module.exports = {
   API_ANTIVIRUS_ENDPOINT,
   API_ANTIVIRUS_TOKEN,
   REDIS_URL,
+  CERTIFICATE_TEMPLATES_ROOTDIR,
+  FONT_ROOTDIR,
 };
 
 function getEnvironment() {

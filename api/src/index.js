@@ -42,6 +42,17 @@
 
   const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
 
+  /*
+    Download all certificate templates when instance is starting,
+    making them available for PDF generation
+
+    These templates are sensitive data, so we can't treat theam as simple statics
+
+    TODO : A possible improvement would be to download templates at build time
+  */
+  const { getAllCertificateTemplates } = require("./utils/pdf-renderer");
+  getAllCertificateTemplates();
+
   if (process.env.NODE_ENV !== "test") {
     console.log("APP_URL", APP_URL);
     console.log("ADMIN_URL", ADMIN_URL);
