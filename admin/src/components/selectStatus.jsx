@@ -53,7 +53,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   const user = useSelector((state) => state.Auth.user);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
   const [modalGoal, setModalGoal] = useState({ isOpen: false, onConfirm: null });
-  const [modalValidatePhase2, setModalValidatePhase2] = useState(false);
+  const [isModalValidatePhase2Open, setModalValidatePhase2] = useState(false);
   const [newStatus, setNewStatus] = useState(null);
 
   const getInscriptionGoalReachedNormalized = async ({ department, cohort }) => {
