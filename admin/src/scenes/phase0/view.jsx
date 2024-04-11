@@ -626,7 +626,7 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
   const [sectionMode, setSectionMode] = useState(globalMode);
   const [data, setData] = useState({});
   const [saving, setSaving] = useState(false);
-  const [birthDate, setBirthDate] = useState({ day: "", month: "", year: "" });
+  const birthDate = getBirthDate();
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -641,12 +641,14 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
     setSectionMode(globalMode);
   }, [globalMode]);
 
-  useEffect(() => {
+  function getBirthDate() {
     if (data && data.birthdateAt) {
       const date = dayjs(data.birthdateAt);
-      setBirthDate({ day: date.date(), month: date.format("MMMM"), year: date.year() });
+      return { day: date.date(), month: date.format("MMMM"), year: date.year() };
+    } else {
+      return { day: "", month: "", year: "" };
     }
-  }, [data]);
+  }
 
   function onSectionChangeMode(mode) {
     setSectionMode(mode === "default" ? globalMode : mode);
