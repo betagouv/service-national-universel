@@ -16,6 +16,9 @@ const contractPhase2 = require("../templates/contractPhase2");
 const droitImage = require("../templates/droitImage");
 
 const { generateCertifPhase1 } = require("../templates/certificate/phase1");
+const { generateCertifPhase2 } = require("../templates/certificate/phase2");
+const { generateCertifPhase3 } = require("../templates/certificate/phase3");
+const { generateCertifSNU } = require("../templates/certificate/snu");
 
 async function getHtmlTemplate(type, template, young, contract) {
   if (type === "certificate" && template === "1") return await certificate.phase1(young); // WIP
@@ -67,17 +70,38 @@ async function htmlToPdfBuffer(html, options) {
 
 async function generatePdfIntoStream(outStream, { type, template, young, contract }) {
   if (type === "certificate" && template === "1" && young) {
-    await generateCertifPhase1(outStream, young);
-  } else {
-    const html = await getHtmlTemplate(type, template, young, contract);
-    if (!html) {
-      throw new Error(ERRORS.NOT_FOUND);
-    }
-
-    const options = type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 };
-    const inStream = await htmlToPdfStream(html, options);
-    inStream.pipe(outStream);
+    return await generateCertifPhase1(outStream, young);
   }
+  if (type === "certificate" && template === "2" && young) {
+    return generateCertifPhase2(outStream, young);
+  }
+  if (type === "certificate" && template === "3" && young) {
+    return generateCertifPhase3(outStream, young);
+  }
+  if (type === "certificate" && template === "snu" && young) {
+    return generateCertifSNU(outStream, young);
+  }
+  const html = await getHtmlTemplate(type, template, young, contract);
+  if (!html) {
+    throw new Error(ERRORS.NOT_FOUND);
+  }
+
+  const options = type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 };
+  const inStream = await htmlToPdfStream(html, options);
+  inStream.pipe(outStream);
+}
+
+async function generatePdfIntoBuffer({ type, template, young, contract }) {
+  // TODO create in memory writableStream and use generatePdfIntoStream
+  const html = await getHtmlTemplate(type, template, young, contract);
+  if (!html) {
+    throw new Error(ERRORS.NOT_FOUND);
+  }
+
+  const options = type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 };
+  const stream = await htmlToPdfStream(html, options);
+
+  return stream2buffer(stream);
 }
 
 async function getCertificateTemplate(template) {
@@ -88,6 +112,7 @@ async function getCertificateTemplate(template) {
     // Download locally certificate template
     // in order to make them available for pdf generation
     const downloaded = await getFile(template);
+
 
     await handle.writeFile(downloaded.Body);
     await handle.close();
@@ -104,18 +129,6 @@ async function getAllCertificateTemplates() {
   for (const m of ministres) {
     await getCertificateTemplate(m.template);
   }
-}
-
-async function generatePdfIntoBuffer({ type, template, young, contract }) {
-  const html = await getHtmlTemplate(type, template, young, contract);
-  if (!html) {
-    throw new Error(ERRORS.NOT_FOUND);
-  }
-
-  const options = type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 };
-  const stream = await htmlToPdfStream(html, options);
-
-  return stream2buffer(stream);
 }
 
 module.exports = { getAllCertificateTemplates, generatePdfIntoStream, generatePdfIntoBuffer, htmlToPdfBuffer };

@@ -1,13 +1,12 @@
 const path = require("path");
-const PDFDocument = require("pdfkit");
-const { getSignedUrl } = require("../../utils");
 const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
-const { MINISTRES, getCohortEndDate, transportDatesToString } = require("snu-lib");
+const { getCohortEndDate, transportDatesToString } = require("snu-lib");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
 const CohortModel = require("../../models/cohort");
-const { CERTIFICATE_TEMPLATES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
+const { CERTIFICATE_TEMPLATES_ROOTDIR } = require("../../config");
+const { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
 
 const getCohesionCenter = async (young) => {
   let cohesionCenter;
@@ -26,25 +25,6 @@ const getCohesionCenter = async (young) => {
   return cohesionCenter;
 };
 
-const getCohesionCenterLocation = (cohesionCenter) => {
-  let t = "";
-  if (cohesionCenter?.city) {
-    t = `à ${cohesionCenter.city}`;
-    if (cohesionCenter.zip) {
-      t += `, ${cohesionCenter.zip}`;
-    }
-  }
-
-  return t;
-};
-
-const getMinistres = (date) => {
-  if (!date) return;
-  for (const item of MINISTRES) {
-    if (date < new Date(item.date_end)) return item;
-  }
-};
-
 const getSession = async (young) => {
   let session = await SessionPhase1Model.findById(young.sessionPhase1Id);
   if (!session) return;
@@ -59,24 +39,11 @@ const getCohort = async (young) => {
   return cohort;
 };
 
-
 async function fetchDataForYoung(young) {
   const session = await getSession(young);
   const cohort = await getCohort(young);
   const cohesionCenter = await getCohesionCenter(young);
   return { session, cohort, cohesionCenter };
-}
-
-const FONT = "Marianne";
-const FONT_BOLD = `${FONT}-Bold`;
-
-function initDocument(options={}) {
-  const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0, ...options });
-
-  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
-
-  return doc;
 }
 
 function render(doc, young, session, cohort, cohesionCenter) {
@@ -96,7 +63,7 @@ function render(doc, young, session, cohort, cohesionCenter) {
 
   const page = doc.page;
 
-  doc.font(FONT).fontSize(12).lineGap(12).fillColor("#444");
+  doc.font(FONT).fontSize(FONT_SIZE).lineGap(LINE_GAP).fillColor(FILL_COLOR);
 
   doc.image(path.join(CERTIFICATE_TEMPLATES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
 
