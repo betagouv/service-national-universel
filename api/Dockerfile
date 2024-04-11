@@ -37,7 +37,8 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 expressjs
 RUN adduser --system --uid 1001 expressjs
 USER expressjs
-COPY --from=installer /app .
+
+COPY --chown=expressjs:expressjs --from=installer /app .
 
 LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel" \
       org.opencontainers.image.description="This image provides a consistent and reproducible environment for the backend, ensuring it deploys faster and runs the same way regardless of the deployment environment."
