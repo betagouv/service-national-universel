@@ -622,24 +622,12 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   );
 }
 
-function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false, user }) {
+function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState({});
+  const [data, setData] = useState(filterDataObject(young, "identite"));
   const [saving, setSaving] = useState(false);
   const birthDate = getBirthDate();
   const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    if (young) {
-      setData({ ...young });
-    } else {
-      setData({});
-    }
-  }, [young]);
-
-  useEffect(() => {
-    setSectionMode(globalMode);
-  }, [globalMode]);
 
   function getBirthDate() {
     if (data && data.birthdateAt) {
@@ -1197,7 +1185,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState({});
+  const [data, setData] = useState(filterDataObject(young, "parent"));
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [youngAge, setYoungAge] = useState(0);
@@ -1222,10 +1210,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
       setYoungAge(0);
     }
   }, [young]);
-
-  useEffect(() => {
-    setSectionMode(globalMode);
-  }, [globalMode]);
 
   function onSectionChangeMode(mode) {
     setSectionMode(mode === "default" ? globalMode : mode);
