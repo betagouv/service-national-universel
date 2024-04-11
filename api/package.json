@@ -61,7 +61,7 @@
     "password-validator": "^5.3.0",
     "pm2": "^5.3.0",
     "redis": "^4.6.5",
-    "sanitize-html": "^2.7.3",
+    "sanitize-html": "^2.12.1",
     "sib-api-v3-sdk": "^8.5.0",
     "snu-lib": "*",
     "uuid": "^9.0.0",
