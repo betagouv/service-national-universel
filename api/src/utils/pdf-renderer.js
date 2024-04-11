@@ -89,7 +89,7 @@ async function getCertificateTemplate(template) {
     // in order to make them available for pdf generation
     const downloaded = await getFile(template);
 
-    await handle.writeFile(_path, downloaded.Body);
+    await handle.writeFile(downloaded.Body);
     await handle.close();
   } catch (err) {
     if (err.code != "EEXIST") {
