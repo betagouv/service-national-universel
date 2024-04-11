@@ -546,7 +546,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
 
     // when changing statusPhase2, we check applications and equivalence
-    if (newYoung.statusPhase2 && newYoung.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) {
+    if (newYoung.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) {
       const applications = await ApplicationModel.find({ youngId: young._id });
       const pendingApplication = applications.filter((a) => [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION].includes(a.status));
 
