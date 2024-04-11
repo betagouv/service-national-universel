@@ -26,8 +26,5 @@ export function usePendingAction() {
       });
   };
 
-  return {
-    isPendingAction,
-    handlePendingAction,
-  };
+  return [isPendingAction, handlePendingAction];
 }

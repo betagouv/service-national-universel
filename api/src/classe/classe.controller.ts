@@ -27,9 +27,8 @@ router.post(
       }
       const { id } = value;
       const convocations = await generateConvocationsByClasseId(id);
-      // TODO : change content-length
       res.set({
-        "content-length": "9999",
+        "content-length": convocations.length,
         "content-disposition": `inline; filename="test.zip"`,
         "content-type": "application/pdf",
         "cache-control": "public, max-age=1",
