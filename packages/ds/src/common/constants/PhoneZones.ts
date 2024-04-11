@@ -1,4 +1,6 @@
-export default {
+import { PhoneZone as TPhoneZone } from "../types";
+
+const PhoneZones: Record<string, TPhoneZone> = {
   FRANCE: {
     shortcut: "FR",
     name: "France métropolitaine",
@@ -111,4 +113,6 @@ export default {
     errorMessage: null,
     example: "Numéro de téléphone",
   },
-}
+};
+
+export default PhoneZones;

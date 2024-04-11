@@ -1,11 +1,8 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 import validator from "validator";
-import Eye from "../../../assets/icons/Eye";
-import EyeOff from "../../../assets/icons/EyeOff";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import Input from "../../../components/dsfr/forms/input";
-import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { appURL, environment, supportURL } from "../../../config";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import plausibleEvent from "../../../services/plausible";
@@ -25,12 +22,10 @@ import { setYoung } from "@/redux/auth/actions";
 import { capture } from "@/sentry";
 import { RiInformationLine } from "react-icons/ri";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
-import { InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
+import { SignupButtons, InputPassword, InputPhone, Checkbox } from "@snu/ds/dsfr";
 
 export default function StepProfil() {
   const [data, setData] = React.useContext(PreInscriptionContext);
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [error, setError] = React.useState({});
   const [loading, setLoading] = React.useState(false);
   const keyList = ["firstName", "lastName", "phone", "phoneZone", "email", "emailConfirm", "password", "confirmPassword"];
@@ -310,7 +305,7 @@ export default function StepProfil() {
           </div>
         </div>
         <ErrorMessage>{error?.text}</ErrorMessage>
-        <SignupButtonContainer
+        <SignupButtons
           onClickNext={() => onSubmit()}
           onClickPrevious={isCLE ? () => history.push(`/je-rejoins-ma-classe-engagee?id=${classeId}`) : () => history.push("/preinscription/sejour")}
           labelNext={isCLE ? "Recevoir un code d’activation par e-mail" : "Continuer"}

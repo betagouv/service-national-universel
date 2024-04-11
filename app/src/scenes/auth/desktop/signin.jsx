@@ -7,7 +7,6 @@ import { useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib/date";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import RightArrow from "../../../assets/icons/RightArrow";
-import Input from "../../../components/dsfr/forms/input";
 import Error from "../../../components/error";
 import { environment } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
@@ -15,7 +14,7 @@ import { capture, captureMessage } from "../../../sentry";
 import api from "../../../services/api";
 import { cohortsInit } from "../../../utils/cohorts";
 
-import { InputPassword, Button } from "@snu/ds/dsfr";
+import { Input, InputPassword, Button } from "@snu/ds/dsfr";
 
 export default function Signin() {
   const [email, setEmail] = React.useState("");
@@ -103,13 +102,14 @@ export default function Signin() {
           <RightArrow />
           <div className="text-[21px] font-bold text-[#161616]">Mon espace volontaire</div>
         </div>
-        <div className="mb-1 flex flex-col gap-1 py-1">
-          <label className="text-base text-[#161616]">E-mail</label>
-          <Input value={email} onChange={setEmail} />
-        </div>
-        <div className="flex flex-col gap-1 pb-4">
-          <InputPassword label="Mot de passe" value={password} onChange={setPassword} />
-        </div>
+        <Input
+          label="E-mail"
+          nativeInputProps={{
+            value: email,
+            onChange: (e) => setEmail(e.target.value),
+          }}
+        />
+        <InputPassword label="Mot de passe" value={password} onChange={setPassword} />
         <a href="/auth/forgot">Mot de passe perdu ?</a>
         <div className="flex w-full justify-end">
           <Button disabled={disabled || loading} onClick={onSubmit}>

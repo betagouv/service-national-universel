@@ -12,10 +12,10 @@ import Input from "../../components/Input";
 import { supportURL } from "@/config";
 import IconFrance from "@/assets/IconFrance";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
 import DatePicker from "@/components/dsfr/forms/DatePicker";
 import useAuth from "@/services/useAuth";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepProfil() {
   const { young, isCLE } = useAuth();
@@ -186,7 +186,7 @@ export default function StepProfil() {
           <Input value={data.email} onChange={(e) => setData({ ...data, email: e })} label="E-mail" error={error.email} correction={corrections.email} type="email" />
           <Input value={data.emailConfirm} onChange={(e) => setData({ ...data, emailConfirm: e })} label="Confirmez votre e-mail" error={error.emailConfirm} type="email" />
         </div>
-        <SignupButtonContainer labelNext="Corriger" onClickNext={onSubmit} disabled={Object.keys(error).length > 0 || loading} />
+        <SignupButtons labelNext="Corriger" onClickNext={onSubmit} disabled={Object.keys(error).length > 0 || loading} />
       </DSFRContainer>
     </>
   );

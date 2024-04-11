@@ -47,7 +47,7 @@ export default function PaddedContainer({
               {subtitle}
             </p>
           )}
-          <hr className="my-4" />
+          <hr className="mt-4" />
         </>
       )}
       {children}
