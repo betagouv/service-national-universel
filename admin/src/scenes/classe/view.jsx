@@ -35,7 +35,7 @@ import { MdOutlineDangerous } from "react-icons/md";
 import plausibleEvent from "@/services/plausible";
 import dayjs from "dayjs";
 import { downloadCertificatesByClassId } from "@/services/convocation.service";
-import { usePendingAction } from "@/scenes/classe/usePendingAction";
+import { usePendingAction } from "@/hooks/usePendingAction";
 
 export default function View() {
   const [classe, setClasse] = useState({});
@@ -49,7 +49,7 @@ export default function View() {
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [infoBus, setInfoBus] = useState(null);
-  const { isPendingAction, handlePendingAction } = usePendingAction();
+  const [isConvocationDownloading, handleConvocationDownload] = usePendingAction();
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort));
@@ -204,7 +204,7 @@ export default function View() {
       }
       return errorMessage;
     };
-    handlePendingAction(downloadCertificatesByClassId(classe._id), "Téléchargement des convocations en cours", "Les convocations ont bien été téléchargées", getErrorMessage);
+    handleConvocationDownload(downloadCertificatesByClassId(classe._id), "Téléchargement des convocations en cours", "Les convocations ont bien été téléchargées", getErrorMessage);
   };
 
   const actionList = ({ edit, setEdit, canEdit }) => {
@@ -225,7 +225,14 @@ export default function View() {
       <Header
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status)} />}
-        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
+        breadcrumb={[
+          { title: <HiOutlineOfficeBuilding size={20} /> },
+          {
+            title: "Mes classes",
+            to: "/classes",
+          },
+          { title: "Fiche de la classe" },
+        ]}
         actions={
           (![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) &&
             IS_INSCRIPTION_OPEN_CLE && [
@@ -233,7 +240,7 @@ export default function View() {
               <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
             ]) ||
           (STATUS_CLASSE.VALIDATED === classe.status && [
-            <Button disabled={isPendingAction} key="export" title="Exporter toutes les convocations" onClick={handleCertificateDownload} />,
+            <Button disabled={isConvocationDownloading} key="export" title="Exporter toutes les convocations" onClick={handleCertificateDownload} />,
           ])
         }
       />
@@ -358,7 +365,6 @@ export default function View() {
           </div>
         </div>
       </Container>
-
       {classe?.referents?.length > 0 && (
         <Container title="Référent de classe" actions={[]}>
           <div className="flex items-stretch justify-stretch">
@@ -373,9 +379,14 @@ export default function View() {
           </div>
         </Container>
       )}
-
       {(rights.showCenter || rights.showPDR) && (
-        <Container title="Séjour" actions={actionList({ edit: editStay, setEdit: setEditStay, canEdit: rights.canEditCenter || rights.canEditPDR })}>
+        <Container
+          title="Séjour"
+          actions={actionList({
+            edit: editStay,
+            setEdit: setEditStay,
+            canEdit: rights.canEditCenter || rights.canEditPDR,
+          })}>
           <div className="flex items-stretch justify-stretch">
             {rights.showCenter && (
               <div className="flex-1">
@@ -441,7 +452,12 @@ export default function View() {
                   className="mb-3"
                   placeholder={"Choisissez un point de rassemblement existant"}
                   loadOptions={(q) => searchPointDeRassemblements({ q, cohort: classe.cohort })}
-                  defaultOptions={() => searchPointDeRassemblements({ q: classe.etablissement?.name, cohort: classe.cohort })}
+                  defaultOptions={() =>
+                    searchPointDeRassemblements({
+                      q: classe.etablissement?.name,
+                      cohort: classe.cohort,
+                    })
+                  }
                   noOptionsMessage={"Aucun point de rassemblement ne correspond à cette recherche"}
                   isClearable={true}
                   closeMenuOnSelect={true}
@@ -450,7 +466,13 @@ export default function View() {
                       ? { label: `${classe.pointDeRassemblement?.name}, ${classe.pointDeRassemblement?.department}` }
                       : null
                   }
-                  onChange={(option) => setClasse({ ...classe, pointDeRassemblement: option?.pointDeRassemblement, pointDeRassemblementId: option?._id })}
+                  onChange={(option) =>
+                    setClasse({
+                      ...classe,
+                      pointDeRassemblement: option?.pointDeRassemblement,
+                      pointDeRassemblementId: option?._id,
+                    })
+                  }
                   error={errors.pointDeRassemblement}
                   isActive={editStay && rights.canEditPDR}
                   readOnly={!editStay || !rights.canEditPDR}
@@ -502,7 +524,6 @@ export default function View() {
           </div>
         </Container>
       )}
-
       {classe?.status !== STATUS_CLASSE.DRAFT ? (
         <Container
           title="Suivi de la classe"
@@ -597,7 +618,12 @@ export default function View() {
         text="Cette action entraînera l'abandon de l'inscription de tous les élèves de cette classe."
         actions={[
           { title: "Annuler", isCancel: true },
-          { title: "Désister la classe", leftIcon: <MdOutlineDangerous size={20} />, onClick: onDelete, isDestructive: true },
+          {
+            title: "Désister la classe",
+            leftIcon: <MdOutlineDangerous size={20} />,
+            onClick: onDelete,
+            isDestructive: true,
+          },
         ]}
       />
       <Modal
@@ -643,7 +669,12 @@ const searchSessions = async ({ q, cohort }) => {
 
   const { responses } = await api.post(`/elasticsearch/sessionphase1/search?needCohesionCenterInfo=true`, query);
   return responses[0].hits.hits.map((hit) => {
-    return { value: hit._source, _id: hit._id, label: hit._source.cohesionCenter.name, session: { ...hit._source, _id: hit._id } };
+    return {
+      value: hit._source,
+      _id: hit._id,
+      label: hit._source.cohesionCenter.name,
+      session: { ...hit._source, _id: hit._id },
+    };
   });
 };
 
@@ -661,6 +692,11 @@ const searchPointDeRassemblements = async ({ q, cohort }) => {
 
   const { responses } = await api.post(`/elasticsearch/pointderassemblement/search`, query);
   return responses[0].hits.hits.map((hit) => {
-    return { value: hit._source, _id: hit._id, label: `${hit._source.name}, ${hit._source.department}`, pointDeRassemblement: { ...hit._source, _id: hit._id } };
+    return {
+      value: hit._source,
+      _id: hit._id,
+      label: `${hit._source.name}, ${hit._source.department}`,
+      pointDeRassemblement: { ...hit._source, _id: hit._id },
+    };
   });
 };
