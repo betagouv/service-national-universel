@@ -1,7 +1,7 @@
-export function filterDataObject(data, section) {
-  let bodySchema = {};
+export function filterDataForYoungSection(data, section) {
+  let bodyYoungSection = {};
   if (section === "identite") {
-    bodySchema = {
+    bodyYoungSection = {
       firstName: data.firstName,
       lastName: data.lastName,
       gender: data.gender,
@@ -30,7 +30,7 @@ export function filterDataObject(data, section) {
       foreignCountry: data.foreignCountry,
     };
   } else if (section === "parent") {
-    bodySchema = {
+    bodyYoungSection = {
       situation: data.situation,
       schoolId: data.schoolId,
       schoolName: data.schoolName,
@@ -79,5 +79,5 @@ export function filterDataObject(data, section) {
     };
   }
 
-  return bodySchema;
+  return bodyYoungSection;
 }

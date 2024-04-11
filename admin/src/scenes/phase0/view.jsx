@@ -38,7 +38,6 @@ import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "./commons";
 import Check from "../../assets/icons/Check";
-import MiniSwitch from "./components/MiniSwitch";
 import FranceConnect from "../../assets/icons/FranceConnect";
 import SchoolEditor from "./components/SchoolEditor";
 import validator from "validator";
@@ -60,7 +59,7 @@ import { Link } from "react-router-dom";
 import { Button, ModalConfirmation } from "@snu/ds/admin";
 import { FaCheck } from "react-icons/fa6";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
-import { filterDataObject } from "./utils";
+import { filterDataForYoungSection } from "./utils";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -624,7 +623,7 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
 
 function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState(filterDataObject(young, "identite"));
+  const [data, setData] = useState(filterDataForYoungSection(young, "identite"));
   const [saving, setSaving] = useState(false);
   const birthDate = getBirthDate();
   const [errors, setErrors] = useState({});
@@ -662,8 +661,7 @@ function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorr
       try {
         // eslint-disable-next-line no-unused-vars
         const { applications, ...dataToSend } = data;
-        const filteredDataToSend = filterDataObject(dataToSend, "identite");
-        const result = await api.put(`/young-edition/${young._id}/identite`, filteredDataToSend);
+        const result = await api.put(`/young-edition/${young._id}/identite`, dataToSend);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
@@ -1185,7 +1183,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState(filterDataObject(young, "parent"));
+  const [data, setData] = useState(filterDataForYoungSection(young, "parent"));
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [youngAge, setYoungAge] = useState(0);
@@ -1270,8 +1268,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           data.academy = "";
         }
 
-        const filteredDataToSend = filterDataObject(data, "parent");
-        const result = await api.put(`/young-edition/${young._id}/situationparents`, filteredDataToSend);
+        const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
         if (result.ok) {
           toastr.success("Les données ont bien été enregistrées.");
           setSectionMode(globalMode);
