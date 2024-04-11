@@ -260,7 +260,7 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A" || !bus?.length) return item;
-        return bus.find((option) => option._id.toString() === item)?.busId;
+        return bus.find((option) => option._id.toString() === item)?.busId || item;
       },
     },
     {

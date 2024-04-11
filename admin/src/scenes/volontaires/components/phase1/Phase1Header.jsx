@@ -83,7 +83,7 @@ const Phase1Header = ({ setLoading, young = null, editing = false, setEditing, l
               onClickMail={() =>
                 setModal({
                   isOpen: true,
-                  title: "Envoie de document par mail",
+                  title: "Envoi de document par mail",
                   message: `Êtes-vous sûr de vouloir transmettre le document Convocation par mail à ${young.email} ?`,
                   onConfirm: handleSendConvocationByEmail,
                 })
