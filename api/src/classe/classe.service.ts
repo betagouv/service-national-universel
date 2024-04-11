@@ -5,7 +5,7 @@ import { buildZip } from "../file/file.service";
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
 
-  if (youngsInClasse.length > 0) {
+  if (youngsInClasse.length > 50) {
     throw new Error(FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE);
   }
   const youngsPdfs = await generateConvocationsForMultipleYoungs(youngsInClasse);
