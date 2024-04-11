@@ -23,6 +23,7 @@ import {
   COHORT_TYPE,
   IS_INSCRIPTION_OPEN_CLE,
 } from "snu-lib";
+import { FUNCTIONAL_ERRORS } from "snu-lib/functionalErrors";
 import { useSelector } from "react-redux";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
@@ -34,6 +35,7 @@ import { MdOutlineDangerous } from "react-icons/md";
 import plausibleEvent from "@/services/plausible";
 import dayjs from "dayjs";
 import { downloadCertificatesByClassId } from "@/services/convocation.service";
+import { usePendingAction } from "@/scenes/classe/usePendingAction";
 
 export default function View() {
   const [classe, setClasse] = useState({});
@@ -47,7 +49,7 @@ export default function View() {
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [infoBus, setInfoBus] = useState(null);
-  const [isCertificateLoading, setIsCertificateLoading] = useState(false);
+  const { isPendingAction, handlePendingAction } = usePendingAction();
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort));
@@ -195,15 +197,14 @@ export default function View() {
   };
 
   const handleCertificateDownload = () => {
-    setIsCertificateLoading(true);
-    toastr.info("Téléchargement des convocations en cours", { timeOut: 1500 });
-    downloadCertificatesByClassId(classe._id)
-      .then(() => {
-        toastr.success("Les convocations ont bien été téléchargées", { timeOut: 1500 });
-      })
-      .finally(() => {
-        setIsCertificateLoading(false);
-      });
+    const getErrorMessage = (error) => {
+      let errorMessage = "Téléchargement des convocations impossible";
+      if (FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE === error.code) {
+        errorMessage = "Le nombre de convocations est trop élevé";
+      }
+      return errorMessage;
+    };
+    handlePendingAction(downloadCertificatesByClassId(classe._id), "Téléchargement des convocations en cours", "Les convocations ont bien été téléchargées", getErrorMessage);
   };
 
   const actionList = ({ edit, setEdit, canEdit }) => {
@@ -232,7 +233,7 @@ export default function View() {
               <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
             ]) ||
           (STATUS_CLASSE.VALIDATED === classe.status && [
-            <Button disabled={isCertificateLoading} key="export" title="Exporter toutes les convocations" onClick={handleCertificateDownload} />,
+            <Button disabled={isPendingAction} key="export" title="Exporter toutes les convocations" onClick={handleCertificateDownload} />,
           ])
         }
       />

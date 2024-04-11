@@ -1,17 +1,19 @@
-import * as youngService from "../young/young.service";
-import Zip from "adm-zip";
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../young/young.service";
+import { FUNCTIONAL_ERRORS } from "snu-lib/functionalErrors";
+import { buildZip } from "../file/file.service";
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
-  const youngsInClasse = await youngService.findYoungsByClasseId(classeId);
+  const youngsInClasse = await findYoungsByClasseId(classeId);
 
-  if (youngsInClasse.length > 50) {
-    throw new Error("TOO_MANY_YOUNGS_IN_CLASSE");
+  if (youngsInClasse.length > 0) {
+    throw new Error(FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE);
   }
-  const youngsPdfs = await youngService.generateConvocationsForMultipleYoungs(youngsInClasse);
+  const youngsPdfs = await generateConvocationsForMultipleYoungs(youngsInClasse);
 
-  let zip = new Zip();
-  youngsPdfs.forEach((youngPdf) => {
-    zip.addFile(`${youngPdf.youngName}.pdf`, youngPdf.buffer);
-  });
-  return zip.toBuffer();
+  return buildZip(
+    youngsPdfs.map((youngPdf) => ({
+      name: `${youngPdf.youngName}.pdf`,
+      buffer: youngPdf.buffer,
+    })),
+  );
 };

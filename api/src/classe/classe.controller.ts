@@ -26,7 +26,7 @@ router.post(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
       const { id } = value;
-      const certificates = await generateConvocationsByClasseId(id);
+      const convocations = await generateConvocationsByClasseId(id);
       // TODO : change content-length
       res.set({
         "content-length": "9999",
@@ -34,9 +34,10 @@ router.post(
         "content-type": "application/pdf",
         "cache-control": "public, max-age=1",
       });
-      res.send(certificates);
-    } catch (e) {
-      capture(e);
+      res.send(convocations);
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: error.message });
     }
   },
 );

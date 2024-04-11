@@ -1,7 +1,8 @@
 const config = require("../config");
 const { ERRORS } = require("../utils");
 const fetch = require("node-fetch");
-const generatePdf = async (html) => {
+
+export const generatePdf = async (html: string) => {
   const pdfResponse = await fetch(config.API_PDF_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/pdf" },
@@ -13,8 +14,4 @@ const generatePdf = async (html) => {
   }
 
   return await pdfResponse.buffer();
-};
-
-module.exports = {
-  generatePdf,
 };

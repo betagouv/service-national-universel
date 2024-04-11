@@ -215,3 +215,4 @@ export * from "./translation";
 export * from "./transport-info";
 export * from "./young";
 export * from "./SNUpport";
+export * from "./functionalErrors";

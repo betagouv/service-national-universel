@@ -26,7 +26,7 @@ interface Referent {
   id?: string;
   firstName?: string;
   lastName?: string;
-  role?: string; // This should be an enum in your actual code
+  role?: string;
 }
 
 interface Note {

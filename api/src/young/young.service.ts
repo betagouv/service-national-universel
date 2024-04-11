@@ -1,12 +1,12 @@
 import { YoungType } from "./young.type";
 import { capture } from "../sentry.js";
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
+import { generatePdf } from "../document/document.service";
 
 const YoungModel = require("../models/young");
 const { getHtmlTemplate } = require("../templates/utils.js");
-const { generatePdf } = require("../document/document.service");
 
-export type YoungPdfWithUniqueName = {
+type YoungPdfWithUniqueName = {
   buffer: Buffer;
   youngName: string;
 };
