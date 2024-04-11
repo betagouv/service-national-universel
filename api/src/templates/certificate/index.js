@@ -63,14 +63,6 @@ const getCohort = async (young) => {
   return cohort;
 };
 
-const getMeetingPoint = async (young) => {
-  if (!young.meetingPointId) return;
-  let meetingPoint = await PointDeRassemblementModel.findById(young.meetingPointId);
-  if (!meetingPoint) return;
-
-  return meetingPoint;
-};
-
 const phase1 = async (young, batch = false) => {
   const session = await getSession(young);
   const cohort = await getCohort(young);
@@ -82,9 +74,8 @@ const phase1 = async (young, batch = false) => {
   const template = ministresData.template;
   const cohesionCenter = await getCohesionCenter(young);
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
-  const meetingPoint = await getMeetingPoint(young);
-  const departureDate = getDepartureDateSession(meetingPoint, session, young, cohort);
-  const returnDate = getReturnDateSession(meetingPoint, session, young, cohort);
+  const departureDate = getDepartureDateSession(session, young, cohort);
+  const returnDate = getReturnDateSession(session, young, cohort);
 
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))

@@ -7,7 +7,6 @@ const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
 const CohortModel = require("../../models/cohort");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 
 const getCohesionCenter = async (young) => {
   let cohesionCenter;
@@ -59,20 +58,12 @@ const getCohort = async (young) => {
   return cohort;
 };
 
-const getMeetingPoint = async (young) => {
-  if (!young.meetingPointId) return;
-  let meetingPoint = await PointDeRassemblementModel.findById(young.meetingPointId);
-  if (!meetingPoint) return;
-
-  return meetingPoint;
-};
 
 async function fetchDataForYoung(young) {
   const session = await getSession(young);
   const cohort = await getCohort(young);
   const cohesionCenter = await getCohesionCenter(young);
-  const meetingPoint = await getMeetingPoint(young);
-  return { session, cohort, cohesionCenter, meetingPoint };
+  return { session, cohort, cohesionCenter };
 }
 
 const FONT = "Marianne";
@@ -87,14 +78,14 @@ function initDocument(options={}) {
   return doc;
 }
 
-function render(doc, young, session, cohort, cohesionCenter, meetingPoint) {
+function render(doc, young, session, cohort, cohesionCenter) {
   const cohortEndDate = getCohortEndDate(young, cohort);
 
   const ministresData = getMinistres(cohortEndDate);
   const template = ministresData.template;
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
-  const departureDate = getDepartureDateSession(meetingPoint, session, young, cohort);
-  const returnDate = getReturnDateSession(meetingPoint, session, young, cohort);
+  const departureDate = getDepartureDateSession(session, young, cohort);
+  const returnDate = getReturnDateSession(session, young, cohort);
 
   const COHORT = cohortEndDate.getYear() + 1900;
   const COHESION_DATE = transportDatesToString(departureDate, returnDate);
@@ -107,7 +98,7 @@ function render(doc, young, session, cohort, cohesionCenter, meetingPoint) {
 
   doc.font(FONT).fontSize(14).lineGap(14).fillColor("#444");
 
-  doc.image(path.join(__dirname, "..", "..", "..", "/public/images/certificateTemplate_template.png"), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+  doc.image(path.join(__dirname, "../../../public/images/certificateTemplate_template.png"), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
 
   doc
     .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 300, { continued: true })
@@ -131,24 +122,24 @@ function render(doc, young, session, cohort, cohesionCenter, meetingPoint) {
 }
 
 async function generateCertifPhase1(outStream, young) {
-  const { session, cohort, cohesionCenter, meetingPoint } = await fetchDataForYoung(young);
+  const { session, cohort, cohesionCenter } = await fetchDataForYoung(young);
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument();
   doc.pipe(outStream);
-  render(doc, young, session, cohort, cohesionCenter, meetingPoint);
+  render(doc, young, session, cohort, cohesionCenter);
   doc.end();
   console.timeEnd("RENDERING " + random);
 }
 
-function generateBatchCertifPhase1(outStream, youngs, session, cohort, cohesionCenter, meetingPoint) {
+function generateBatchCertifPhase1(outStream, youngs, session, cohort, cohesionCenter) {
   const random = Math.random();
   console.time("RENDERING " + random);
   const doc = initDocument({ autoFirstPage: false });
   doc.pipe(outStream);
   for (const young of youngs) {
     doc.addPage();
-    render(doc, young, session, cohort, cohesionCenter, meetingPoint);
+    render(doc, young, session, cohort, cohesionCenter);
   }
   doc.end();
   console.timeEnd("RENDERING " + random);

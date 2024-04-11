@@ -266,9 +266,8 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const cohort = await CohortModel.findOne({ name: session.cohort }); //TODO
-    const meetingPoint = null; //TODO
-    generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter, meetingPoint);
+    const cohort = await CohortModel.findOne({ name: session.cohort });
+    generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
 
     // const noticePdf = await getFile(`file/noticeImpression.pdf`);
     // if (noticePdf) {
