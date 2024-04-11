@@ -554,8 +554,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       const pendingEquivalence = equivalences.filter((equivalence) => [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(equivalence.status));
 
       await cancelPendingApplications(pendingApplication, req.user);
-      await cancelPendingEquivalence(pendingEquivalence, req.user);
-      if (pendingEquivalence.length > 0) {
+      await cancelPendingEquivalence(pendingEquivalences, req.user);
+      if (pendingEquivalences.length > 0) {
         newYoung.status_equivalence = EQUIVALENCE_STATUS.REFUSED;
       }
     }
