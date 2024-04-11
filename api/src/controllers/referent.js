@@ -551,7 +551,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       const pendingApplication = applications.filter((a) => [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION].includes(a.status));
 
       const equivalences = await MissionEquivalenceModel.find({ youngId: young._id });
-      const pendingEquivalence = equivalences.filter((equivalence) => [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(equivalence.status));
+      const pendingEquivalences = equivalences.filter((equivalence) =>
+        [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(equivalence.status),
+      );
 
       await cancelPendingApplications(pendingApplication, req.user);
       await cancelPendingEquivalence(pendingEquivalences, req.user);

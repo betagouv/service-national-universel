@@ -575,7 +575,7 @@ async function cancelPendingApplications(pendingApplication, fromUser) {
 }
 
 async function cancelPendingEquivalence(pendingEquivalences, fromUser) {
-  for (const equivalence of pendingEquivalence) {
+  for (const equivalence of pendingEquivalences) {
     equivalence.set({ status: EQUIVALENCE_STATUS.REFUSED, message: "La phase 2 a été validée" });
     await equivalence.save({ fromUser });
   }

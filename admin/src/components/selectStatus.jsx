@@ -90,16 +90,16 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
             if (fillingRate >= 1)
               return setModalGoal({
                 isOpen: true,
-                onConfirm: () => setStatus(YOUNG_STATUS.WAITING_LIST),
+                onConfirm: () => handleChangeStatus(YOUNG_STATUS.WAITING_LIST),
                 confirmText: "Placer en liste complémentaire",
-                onConfirm2: () => setStatus(YOUNG_STATUS.VALIDATED),
+                onConfirm2: () => handleChangeStatus(YOUNG_STATUS.VALIDATED),
                 confirmText2: "Valider quand même",
                 title: "Jauge de candidats atteinte",
                 message:
                   "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
               });
           }
-          setStatus(status);
+          handleChangeStatus(status);
         },
         title: "Modification de statut",
         message: "Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utilisateur.",
@@ -107,7 +107,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
     }
   };
 
-  const setStatus = async (status, values) => {
+  const handleChangeStatus = async (status, values) => {
     const prevStatus = young.status;
     if (status === "WITHDRAWN") {
       young.historic.push({
@@ -222,7 +222,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         value={young}
         onChange={() => setModal(false)}
         onSend={(note) => {
-          setStatus(YOUNG_STATUS.WAITING_CORRECTION, { note });
+          handleChangeStatus(YOUNG_STATUS.WAITING_CORRECTION, { note });
           setModal(null);
         }}
       />
@@ -231,7 +231,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         value={young}
         onChange={() => setModal(false)}
         onSend={(note) => {
-          setStatus(YOUNG_STATUS.REFUSED, { note });
+          handleChangeStatus(YOUNG_STATUS.REFUSED, { note });
           setModal(null);
         }}
       />
@@ -243,7 +243,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         placeholder="Précisez en quelques mots les raisons du désistement du volontaire"
         onChange={() => setModal(false)}
         onConfirm={(values) => {
-          setStatus(YOUNG_STATUS.WITHDRAWN, values);
+          handleChangeStatus(YOUNG_STATUS.WITHDRAWN, values);
           setModal(null);
         }}
       />
@@ -271,7 +271,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         }}
       />
       <ModalConfirmation
-        isOpen={modalValidatePhase2}
+        isOpen={isModalValidatePhase2Open}
         onClose={() => {
           setModalValidatePhase2(false);
         }}
@@ -281,7 +281,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         text="Cette action entraînera l'abandon des candidatures et des demandes d'équivalence encore en cours. Êtes-vous sûr de vouloir continuer ?"
         actions={[
           { title: "Annuler", isCancel: true },
-          { title: "Confirmer", onClick: () => setStatus(newStatus) },
+          { title: "Confirmer", onClick: () => handleChangeStatus(newStatus) },
         ]}
       />
 
