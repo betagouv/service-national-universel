@@ -5,3 +5,5 @@
 *scripts*
 /coverage
 /public/images/certificates/
+/dist
+tsconfig.tsbuildinfo

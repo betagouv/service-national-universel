@@ -4,7 +4,7 @@ const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
 const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
-const { capture, captureMessage } = require("../sentry");
+const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const CohortModel = require("../models/cohort");
@@ -37,7 +37,6 @@ const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/se
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
-const path = require("path");
 const datefns = require("date-fns");
 const { fr } = require("date-fns/locale");
 const fileUpload = require("express-fileupload");
@@ -46,9 +45,8 @@ const FileType = require("file-type");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
-const { phase1 } = require("../../src/templates/certificate/index");
 const scanFile = require("../utils/virusScanner");
-const { generatePdfIntoBuffer, htmlToPdfBuffer } = require("../utils/pdf-renderer");
+const { generatePdfIntoBuffer } = require("../utils/pdf-renderer");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

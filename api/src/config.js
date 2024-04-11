@@ -11,6 +11,8 @@ let KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8084"
 const API_PDF_ENDPOINT = process.env.API_PDF_ENDPOINT || "http://localhost:8087/render";
 const API_ANALYTICS_ENDPOINT = process.env.API_ANALYTICS_ENDPOINT || "http://localhost:8085";
 
+const RELEASE = process.env.RELEASE || "";
+
 const API_ANALYTICS_API_KEY = process.env.API_ANALYTICS_API_KEY || "api-key";
 
 const API_ANTIVIRUS_ENDPOINT = process.env.API_ANTIVIRUS_ENDPOINT || "http://localhost:8089";
@@ -105,6 +107,7 @@ module.exports = {
   REDIS_URL,
   CERTIFICATE_TEMPLATES_ROOTDIR,
   FONT_ROOTDIR,
+  RELEASE,
 };
 
 function getEnvironment() {

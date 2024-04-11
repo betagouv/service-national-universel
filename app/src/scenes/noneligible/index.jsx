@@ -6,11 +6,11 @@ import { Redirect } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
 import { YOUNG_STATUS } from "snu-lib";
 import API from "@/services/api";
 import dayjs from "dayjs";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function NonEligible() {
   const history = useHistory();
@@ -40,7 +40,7 @@ export default function NonEligible() {
           </p>
         )}
         <EngagementPrograms />
-        <SignupButtonContainer onClickNext={onClickButton} labelNext="Revenir à l'accueil" disabled={loading} />
+        <SignupButtons onClickNext={onClickButton} labelNext="Revenir à l'accueil" disabled={loading} />
       </DSFRContainer>
     </DSFRLayout>
   );

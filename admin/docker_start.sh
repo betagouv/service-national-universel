@@ -14,6 +14,7 @@ sed '/<noscript> You need to enable JavaScript to run this app. <\/noscript>/a\
         "ADMIN_URL":"$ADMIN_URL", \
         "SUPPORT_URL":"$SUPPORT_URL", \
         "MAINTENANCE":"$MAINTENANCE", \
+        "RELEASE":"$RELEASE", \
         "SENTRY_URL":"$SENTRY_URL", \
         "SENTRY_TRACING_SAMPLE_RATE":"$SENTRY_TRACING_SAMPLE_RATE", \
         "SENTRY_SESSION_SAMPLE_RATE":"$SENTRY_SESSION_SAMPLE_RATE", \

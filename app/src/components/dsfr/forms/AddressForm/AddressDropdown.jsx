@@ -8,21 +8,25 @@ export default function AddressDropdown({ options, handleSelect }) {
 
   const optionGroups = [housenumberOptions, streetOptions, localityOptions, municipalityOptions].filter((o) => o.options?.length);
 
-  return optionGroups.map((optionGroup) => (
-    <div key={optionGroup.label}>
-      <span className="p-2 w-full flex justify-between font-bold bg-[#EEEEEE]">{optionGroup.label}</span>
-      {optionGroup.options.map((option) => (
-        <span
-          key={option.address + option.city + option.zip}
-          onClick={() => handleSelect(option)}
-          className="p-2 hover:bg-blue-france-sun-113 hover:text-white w-full flex justify-between">
-          <span className="text-left">{option.address}</span>
-          <span className="text-right">
-            {option.city}
-            {option.zip && " - " + option.zip}
-          </span>
-        </span>
+  return (
+    <span className="text-[#161616]">
+      {optionGroups.map((optionGroup) => (
+        <div key={optionGroup.label}>
+          <span className="pl-3 p-2 w-full flex justify-between font-bold bg-[#EEEEEE] ">{optionGroup.label}</span>
+          {optionGroup.options.map((option) => (
+            <span
+              key={option.address + option.city + option.zip}
+              onClick={() => handleSelect(option)}
+              className="cursor-pointer pl-3 p-2 hover:bg-[#EEEEEE]  w-full flex justify-between">
+              <span className="text-left">{option.address}</span>
+              <span className="text-right">
+                {option.city}
+                {option.zip && " - " + option.zip}
+              </span>
+            </span>
+          ))}
+        </div>
       ))}
-    </div>
-  ));
+    </span>
+  );
 }

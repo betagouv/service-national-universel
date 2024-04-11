@@ -10,8 +10,8 @@ import { isReturningParent } from "../commons";
 import { BorderButton } from "../components/Buttons";
 import Navbar from "../components/Navbar";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import plausibleEvent from "@/services/plausible";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
@@ -106,11 +106,7 @@ export default function Presentation({ step, parentId }) {
               )}
             </div>
           </div>
-          <SignupButtonContainer
-            onClickNext={onSubmit}
-            labelNext="Continuer vers la vérification"
-            text="Votre consentement ne sera recueilli qu’à la troisième étape de ce formulaire"
-          />
+          <SignupButtons onClickNext={onSubmit} labelNext="Continuer vers la vérification" text="Votre consentement ne sera recueilli qu’à la troisième étape de ce formulaire" />
         </DSFRContainer>
       </>
     </>

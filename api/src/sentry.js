@@ -10,7 +10,7 @@ const {
 } = require("@sentry/node");
 const { ProfilingIntegration } = require("@sentry/profiling-node");
 
-const { ENVIRONMENT, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("./config");
+const { RELEASE, ENVIRONMENT, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("./config");
 
 const regex = /[0-9a-fA-F]{24}/g;
 
@@ -30,6 +30,7 @@ function initSentry() {
     enabled: Boolean(SENTRY_URL),
     dsn: SENTRY_URL,
     environment: "api",
+    release: RELEASE,
     normalizeDepth: 16,
     integrations: [
       new ExtraErrorData({ depth: 16 }),

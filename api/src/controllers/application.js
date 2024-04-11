@@ -18,7 +18,7 @@ const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const { sendTemplate } = require("../sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
-const { ENVIRONMENT, ADMIN_URL, APP_URL } = require("../config");
+const { ADMIN_URL, APP_URL } = require("../config");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -28,6 +28,7 @@ const {
   canViewContract,
   translateAddFilePhase2,
   translateAddFilesPhase2,
+  APPLICATION_STATUS,
 } = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
 const {
@@ -47,6 +48,7 @@ const mime = require("mime-types");
 const patches = require("./patches");
 const scanFile = require("../utils/virusScanner");
 const { getAuthorizationToApply } = require("../services/application");
+const { apiEngagement } = require("../services/gouv.fr/api-engagement");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
@@ -150,6 +152,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    const { clickId } = Joi.object({ clickId: Joi.string().optional() }).validate(req.query, { stripUnknown: true }).value;
+
     if (!("priority" in value)) {
       const applications = await ApplicationObject.find({ youngId: value.youngId });
       value.priority = applications.length + 1;
@@ -211,6 +215,12 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (doublon) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
+
+    if (mission.apiEngagementId) {
+      const data = await apiEngagement.create(value, mission.apiEngagementId, clickId);
+      value.apiEngagementId = data?._id;
+    }
+
     value.contractStatus = "DRAFT";
     const data = await ApplicationObject.create(value);
     await updateYoungPhase2Hours(young, req.user);
@@ -301,6 +311,10 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       application.set({ status: valueKey.key });
       await application.save({ fromUser: req.user });
 
+      if (application.apiEngagementId) {
+        await apiEngagement.update(application);
+      }
+
       await updateYoungPhase2Hours(young, req.user);
       await updateStatusPhase2(young, req.user);
       await updateYoungStatusPhase2Contract(young, req.user);
@@ -353,7 +367,20 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
       }
     }
 
+    const originalStatus = application.status;
+
     application.set(value);
+
+    if (application.isJvaMission === "true") {
+      if (originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION && application.status === APPLICATION_STATUS.WAITING_VALIDATION) {
+        const mission = await MissionObject.findById(application.missionId);
+        const data = await apiEngagement.create(application, mission.apiEngagementId, null);
+        application.set({ apiEngagementId: data._id });
+      } else {
+        await apiEngagement.update(application);
+      }
+    }
+
     await application.save({ fromUser: req.user });
 
     await updateYoungPhase2Hours(young, req.user);

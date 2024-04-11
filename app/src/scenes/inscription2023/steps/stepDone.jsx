@@ -12,11 +12,11 @@ import { setYoung } from "../../../redux/auth/actions";
 import { RiEditFill } from "react-icons/ri";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
 import JDMA from "@/components/JDMA";
+import { Button, SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepWaitingConsent() {
   const { young, logout, isCLE } = useAuth();
@@ -83,7 +83,7 @@ export default function StepWaitingConsent() {
           <p className="mt-2 text-base text-[#161616]">
             {isCLE ? "Vous pouvez désormais accéder à votre compte élève" : "Vous pouvez désormais accéder à votre compte volontaire"}
           </p>
-          <SignupButtonContainer labelNext="Accéder à mon compte" onClickNext={handleDone} />
+          <SignupButtons labelNext="Accéder à mon compte" onClickNext={handleDone} />
         </DSFRContainer>
       ) : (
         <>
@@ -102,12 +102,12 @@ export default function StepWaitingConsent() {
               </div>
               <div className="text-sm text-[#666666] ">{young?.parent1Email}</div>
               <div className="mt-2 flex justify-between">
-                <button
+                <Button
                   className="mt-2 h-10 w-32 bg-[#000091] text-base text-white disabled:bg-[#E5E5E5]  disabled:text-[#929292] "
                   disabled={disabled}
                   onClick={() => handleClick()}>
                   Relancer
-                </button>
+                </Button>
                 <img className="translate-y-4" src={Avatar} />
               </div>
             </div>
@@ -122,12 +122,14 @@ export default function StepWaitingConsent() {
               </div>
             )}
 
-            <Link className="mt-6 flex cursor-pointer items-center justify-end gap-2 text-base text-[#000091]" to="/inscription2023/confirm">
-              <RiEditFill className="h-5 w-5" />
-              Modifier mes informations
-            </Link>
+            <span className="flex items-center justify-end">
+              <Link className="mt-6 flex items-center justify-end" to="/inscription2023/confirm">
+                <RiEditFill className="h-5 w-5" />
+                Modifier mes informations
+              </Link>
+            </span>
 
-            <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={logout} />
+            <SignupButtons labelNext="Revenir à l'accueil" onClickNext={logout} />
           </DSFRContainer>
         </>
       )}
@@ -148,7 +150,7 @@ export default function StepWaitingConsent() {
           Mais tout n’est pas perdu, il existe d’autres moyens de s’engager ! Découvrez-les maintenant.
         </div>
         <EngagementPrograms />
-        <SignupButtonContainer labelNext="Revenir à l'accueil" onClickNext={logout} />
+        <SignupButtons labelNext="Revenir à l'accueil" onClickNext={logout} />
       </DSFRContainer>
     </>
   );

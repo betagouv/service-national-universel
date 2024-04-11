@@ -38,6 +38,7 @@ import ModalPJ from "./components/ModalPJ";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
+import { apiEngagement } from "./utils";
 
 export default function ViewMobile() {
   const [mission, setMission] = useState();
@@ -59,6 +60,9 @@ export default function ViewMobile() {
   const getMission = async () => {
     if (!id) return setMission(null);
     const { data } = await api.get(`/mission/${id}`);
+    if (data?.apiEngagementId && (!data.application || data.application?.status === APPLICATION_STATUS.WAITING_ACCEPTATION)) {
+      await apiEngagement(data.apiEngagementId);
+    }
     return setMission(data);
   };
 
@@ -66,6 +70,7 @@ export default function ViewMobile() {
 
   useEffect(() => {
     getMission();
+    return localStorage.removeItem("jva_mission_click_id");
   }, []);
 
   useEffect(() => {
