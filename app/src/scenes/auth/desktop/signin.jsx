@@ -24,7 +24,22 @@ export default function Signin() {
   const [error, setError] = React.useState({});
   const [isInscriptionOpen, setInscriptionOpen] = React.useState(false);
   const history = useHistory();
-
+  const declencherErreur = () => {
+    try {
+      // Simule une erreur
+      fonctionInexistante();
+    } catch (err) {
+      capture(err);
+    }
+  };
+  const envoyerMessage = () => {
+    try {
+      // Simule une erreur
+      throw new Error("Erreur déclenchée pour test Sentry JEUNE");
+    } catch (err) {
+      capture(err);
+    }
+  };
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
 
@@ -115,6 +130,7 @@ export default function Signin() {
           <Button disabled={disabled || loading} onClick={onSubmit}>
             Connexion
           </Button>
+          <button onClick={declencherErreur}>Déclencher une Erreur</button>
         </div>
         <hr className="mt-3 border-b-1 text-[#E5E5E5]" />
         <div className="mt-3 text-[#E5E5E5] space-y-3">
