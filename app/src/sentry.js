@@ -24,7 +24,7 @@ function initSentry() {
     init({
       enabled: Boolean(SENTRY_URL),
       dsn: SENTRY_URL,
-      environment: "app",
+      environment: environment,
       release: RELEASE,
       normalizeDepth: 16,
       transport: makeBrowserOfflineTransport(makeFetchTransport),
