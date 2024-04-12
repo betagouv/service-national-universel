@@ -336,9 +336,108 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 
+      const shouldUse2FA = async () => {
+        try {
+          if (config.ENVIRONMENT === "development") return false;
+          if (config.ENVIRONMENT === "staging" && !user.email.match(regexp_exception_staging)) return false;
+
+          const trustToken = req.cookies[`trust_token-${user._id}`];
+          if (!trustToken) return true;
+
+          let jwtPayload;
+          try {
+            jwtPayload = await jwt.verify(trustToken, config.secret);
+          } catch (e) {
+            return true;
+          }
+          const { error, value } = Joi.object({ __v: Joi.string().required() }).validate(jwtPayload, { stripUnknown: true });
+          return error || !checkJwtTrustTokenVersion(value);
+        } catch (e) {
+          capture(e);
+          return true; // Handle JWT verification errors or other exceptions
+        }
+      };
+
+      if (await shouldUse2FA()) {
+        const token2FA = await crypto.randomInt(1000000);
+        user.set({ token2FA, attempts2FA: 0, token2FAExpires: Date.now() + 1000 * 60 * 10 });
+        await user.save();
+
+        await sendTemplate(SENDINBLUE_TEMPLATES.SIGNIN_2FA, {
+          emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
+          params: {
+            token2FA,
+            cta: isYoung(user) ? `${config.APP_URL}/auth/2fa?email=${encodeURIComponent(user.email)}` : `${config.ADMIN_URL}/auth/2fa?email=${encodeURIComponent(user.email)}`,
+          },
+        });
+
+        return res.status(200).send({
+          ok: true,
+          code: "2FA_REQUIRED",
+        });
+      }
+
       user.set({ loginAttempts: 0 });
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
       await user.save();
+
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+        expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
+      });
+      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      return res.status(200).send({
+        ok: true,
+        token,
+        user: data,
+        data,
+      });
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  }
+
+  async signin2FA(req, res) {
+    try {
+      const { error, value } = Joi.object({
+        email: Joi.string().lowercase().trim().email().required(),
+        token_2fa: Joi.string().required(),
+        rememberMe: Joi.boolean().required(),
+      })
+        .unknown()
+        .validate(req.body);
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      const { email, token_2fa, rememberMe } = value;
+      const user = await this.model.findOne({
+        email,
+        attempts2FA: { $lt: 3 },
+        token2FAExpires: { $gt: Date.now() },
+      });
+      if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      if (user.token2FA !== token_2fa) {
+        user.set({ attempts2FA: (user.attempts2FA || 0) + 1 });
+        await user.save();
+        return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      }
+
+      user.set({ token2FA: null, token2FAExpires: null });
+      user.set({ loginAttempts: 0, attempts2FA: 0 });
+      user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
+      if (!user.emailVerified || user.emailVerified === "false") {
+        user.set({ emailVerified: "true" });
+        if (user.inscriptionStep2023 === STEPS2023.EMAIL_WAITING_VALIDATION) {
+          user.set({ inscriptionStep2023: STEPS2023.COORDONNEES });
+        }
+      }
+      await user.save();
+
+      if (rememberMe) {
+        const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.secret, { expiresIn: JWT_TRUST_TOKEN_MAX_AGE_SEC });
+        res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_JWT_MAX_AGE_MS));
+      }
 
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
