@@ -1,3 +1,20 @@
+# [1.402.0](https://github.com/betagouv/service-national-universel/compare/v1.401.0...v1.402.0) (2024-04-12)
+
+
+### Bug Fixes
+
+* **admin:** 664 - reduire la taille des requetes volontaires ([#3734](https://github.com/betagouv/service-national-universel/issues/3734)) ([556dfe9](https://github.com/betagouv/service-national-universel/commit/556dfe9c391bc9391c1d189f4999cc95ee3320a2))
+* **admin, api:** 1694 - Send new Brevo template when HTS switch to CL… ([#3711](https://github.com/betagouv/service-national-universel/issues/3711)) ([774b778](https://github.com/betagouv/service-national-universel/commit/774b77855d8454beaf9a4fe04286e1d7297463c5))
+* **admin/api:** 2200 - revoir les regles de validation manuelle de la phase 2 ([#3757](https://github.com/betagouv/service-national-universel/issues/3757)) ([560fa8c](https://github.com/betagouv/service-national-universel/commit/560fa8c809471d707bc77b4213503983012980dc))
+* **api:** 2199 Admin - Téléchargement d’une attestation 2022 ([#3713](https://github.com/betagouv/service-national-universel/issues/3713)) ([1fddd8e](https://github.com/betagouv/service-national-universel/commit/1fddd8e3ba874b86ac1a4801e3a29edc0c084cff))
+* **app, api:** update change-cohort email template ([#3762](https://github.com/betagouv/service-national-universel/issues/3762)) ([c7978b4](https://github.com/betagouv/service-national-universel/commit/c7978b4f48a5a75e94afd536055f5ec12eddc476))
+
+
+### Features
+
+* **admin:** 1982-ajouter un champ CNI invalide lors de la validation du jeune ([#3737](https://github.com/betagouv/service-national-universel/issues/3737)) ([fd47ee7](https://github.com/betagouv/service-national-universel/commit/fd47ee7f48f307349229d32681f1293b69f795fa))
+* **app, lib:** Add address search form with classic design ([#3678](https://github.com/betagouv/service-national-universel/issues/3678)) ([eec3f0c](https://github.com/betagouv/service-national-universel/commit/eec3f0cd72c9124daae6ba69f4ed19f9797e382f))
+
 # [1.401.0](https://github.com/betagouv/service-national-universel/compare/v1.400.0...v1.401.0) (2024-04-10)
 
 
