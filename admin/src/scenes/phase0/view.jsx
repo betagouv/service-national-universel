@@ -32,7 +32,6 @@ import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import { CniField } from "./components/CniField";
 import FieldSituationsParticulieres from "./components/FieldSituationsParticulieres";
-import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
@@ -59,6 +58,8 @@ import { Link } from "react-router-dom";
 import { Button, ModalConfirmation } from "@snu/ds/admin";
 import { FaCheck } from "react-icons/fa6";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
+import { isBefore } from "date-fns";
+import { ConfirmModalContent } from "./components/ConfirmModalContent";
 import { filterDataForYoungSection } from "./utils";
 
 const REJECTION_REASONS = {
@@ -424,60 +425,20 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
   const [error, setError] = useState(null);
+  const isDatePassed = young.latestCNIFileExpirationDate ? isBefore(new Date(young.latestCNIFileExpirationDate), new Date()) : false;
 
   async function validate() {
     try {
       if (young.source === YOUNG_SOURCE.CLE) {
-        return setConfirmModal({
-          icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-          title: (
-            <span>
-              Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur liste principale</strong>.
-            </span>
-          ),
-          message: `Souhaitez-vous confirmer l'action ?`,
-          type: "VALIDATED",
-          infoLink: {
-            href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
-            text: "Des questions sur ce fonctionnement ?",
-          },
-        });
+        return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate: 0, isDatePassed, young }));
       } else {
         const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
         if (!res.ok) throw new Error(res);
         const fillingRate = res.data;
         if (fillingRate >= 1) {
-          return setConfirmModal({
-            icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-            title: (
-              <span>
-                L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-                <strong className="text-bold">validé sur liste complémentaire</strong>.
-              </span>
-            ),
-            message: `Souhaitez-vous confirmer l'action ?`,
-            type: "SESSION_FULL",
-            infoLink: {
-              href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
-              text: "Des questions sur ce fonctionnement ?",
-            },
-          });
+          return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate, isDatePassed, young }));
         }
-        return setConfirmModal({
-          icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-          title: (
-            <span>
-              L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-              <strong className="text-bold">validé sur liste principale</strong>.
-            </span>
-          ),
-          message: `Souhaitez-vous confirmer l'action ?`,
-          type: "VALIDATED",
-          infoLink: {
-            href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
-            text: "Des questions sur ce fonctionnement ?",
-          },
-        });
+        return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate, isDatePassed, young }));
       }
     } catch (e) {
       capture(e);
