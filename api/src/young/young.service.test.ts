@@ -1,9 +1,9 @@
 import * as youngService from "./young.service";
-import { generatePdf } from "../document/document.service";
-import { generateConvocationsForMultipleYoungs } from "./young.service";
+import * as documentService from "../document/document.service";
+
+const { getHtmlTemplate } = require("../templates/utils.js");
 
 const mockBuffer = Buffer.from("pdf");
-const { getHtmlTemplate } = require("../templates/utils.js");
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -11,17 +11,7 @@ afterEach(() => {
 
 jest.mock("../templates/utils", () => ({
   ...jest.requireActual("../templates/utils"),
-  getHtmlTemplate: jest.fn(),
-}));
-// const generatePdfMock = jest.fn(async () => mockBuffer);
-jest.mock("../document/document.service", () => ({
-  ...jest.requireActual("../document/document.service"),
-  generatePdf: jest
-    .fn()
-    .mockImplementationOnce(async () => mockBuffer)
-    .mockImplementationOnce(async () => {
-      throw new Error("Mock error");
-    }),
+  getHtmlTemplate: jest.fn().mockReturnValue("html"),
 }));
 
 describe("YoungService", () => {
@@ -31,46 +21,44 @@ describe("YoungService", () => {
     expect(uniqueName).toBe(expectedUniqueName);
   });
 
-  it("should return one buffer and one unique name for 1 young", async () => {
+  it("should return one PDF for 1 young", async () => {
     const young = buildYoung();
     const expectedUniqueName = buildUniqueName(young);
 
-    const youngPdfCreated = youngService.generateConvocationByYoung(young);
+    const generatePdfSpy = jest.spyOn(documentService, "generatePdf").mockResolvedValue(mockBuffer);
 
-    await expect(youngPdfCreated).resolves.toEqual({ buffer: mockBuffer, youngName: expectedUniqueName });
-    expect(generatePdf).toHaveBeenCalledTimes(1);
+    const youngPdfCreated = await youngService.generateConvocationByYoung(young);
+
+    expect(youngPdfCreated).toEqual({ buffer: mockBuffer, youngName: expectedUniqueName });
+    expect(generatePdfSpy).toHaveBeenCalledTimes(1);
     expect(getHtmlTemplate).toHaveBeenCalledTimes(1);
+
+    generatePdfSpy.mockReset();
   });
 
-  it("should return one buffer and one unique name for 2 youngs", async () => {
-    // jest.mock("../document/document.service", () => ({
-    //   ...jest.requireActual("../document/document.service"),
-    //   generatePdf: jest
-    //     .fn()
-    //     .mockImplementationOnce(async () => mockBuffer)
-    //     .mockImplementationOnce(async () => {
-    //       throw new Error("Mock error");
-    //     }),
-    // }));
-    const young1 = buildYoung("id_2");
+  it("should return one PDF for 2 youngs", async () => {
+    jest.restoreAllMocks();
+    const young1 = buildYoung("id_1");
     const expectedUniqueName1 = buildUniqueName(young1);
-
     const young2 = buildYoung("id_2");
-    const expectedUniqueName2 = buildUniqueName(young2);
 
-    const youngsPdfCreated = youngService.generateConvocationsForMultipleYoungs([young1, young2]);
+    const generatePdfSpy = jest
+      .spyOn(documentService, "generatePdf")
+      .mockResolvedValueOnce(mockBuffer)
+      .mockRejectedValue(() => {
+        throw "Pdf error";
+      });
 
-    await expect(youngsPdfCreated).resolves.toEqual([
+    const youngsPdfCreated = await youngService.generateConvocationsForMultipleYoungs([young1, young2]);
+
+    expect(youngsPdfCreated).toHaveLength(1);
+    expect(youngsPdfCreated).toEqual([
       {
         buffer: mockBuffer,
         youngName: expectedUniqueName1,
       },
-      {
-        buffer: mockBuffer,
-        youngName: expectedUniqueName2,
-      },
     ]);
-    expect(generatePdf).toHaveBeenCalledTimes(2);
+    expect(generatePdfSpy).toHaveBeenCalledTimes(2);
     expect(getHtmlTemplate).toHaveBeenCalledTimes(2);
   });
 });

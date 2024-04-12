@@ -1,6 +1,8 @@
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../young/young.service";
-import { FUNCTIONAL_ERRORS } from "snu-lib/functionalErrors";
 import { buildZip } from "../file/file.service";
+
+// Import via commonjs to allow jest testing
+const { FUNCTIONAL_ERRORS } = require("snu-lib");
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
