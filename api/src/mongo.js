@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { MONGO_URL, ENVIRONMENT } = require("./config.js");
 
 // Set up default mongoose connection
+//
 async function initDB() {
   if (!MONGO_URL) {
     throw new Error("ERROR CONNECTION. MONGO URL EMPTY");
