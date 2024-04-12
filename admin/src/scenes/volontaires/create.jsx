@@ -328,7 +328,7 @@ export default function Create() {
   };
 
   const getClasseCohort = async (classeId) => {
-    const { data, ok, code } = await api.get(`/classe/${classeId}`);
+    const { data, ok, code } = await api.get(`/cle/classe/${classeId}`);
     if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
     setValues((prevValues) => ({ ...prevValues, cohort: data.cohort }));
   };
