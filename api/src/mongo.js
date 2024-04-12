@@ -15,15 +15,15 @@ async function initDB() {
     useUnifiedTopology: true,
     useFindAndModify: false,
     // * ----
-    maxPoolSize: 500,
-    minPoolSize: 200,
+    maxPoolSize: 30,
+    minPoolSize: 5,
     waitQueueTimeoutMS: 30_000,
     tls: true, // Enable TLS
   };
 
   if (ENVIRONMENT === "production") {
-    options.maxPoolSize = 5_000;
-    options.minPoolSize = 500;
+    options.maxPoolSize = 200;
+    options.minPoolSize = 50;
   }
 
   try {
