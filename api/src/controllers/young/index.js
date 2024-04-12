@@ -19,7 +19,6 @@ const ReferentModel = require("../../models/referent");
 const SessionPhase1 = require("../../models/sessionPhase1");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
-const CohortModel = require("../../models/cohort");
 const AuthObject = require("../../auth");
 const LigneDeBusModel = require("../../models/PlanDeTransport/ligneBus");
 const ClasseModel = require("../../models/cle/classe");
@@ -53,7 +52,6 @@ const {
   canViewYoungApplications,
   canEditPresenceYoung,
   canDeletePatchesHistory,
-  getCohortPeriod,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS,
@@ -71,6 +69,7 @@ const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
 const { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } = require("../../jwt-options");
 const scanFile = require("../../utils/virusScanner");
+const emailsEmitter = require("../../emails");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
@@ -492,6 +491,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
+    const previousYoung = { ...young.toObject() };
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
@@ -581,15 +581,12 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       });
     }
 
-    let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
-    const cohortObj = await CohortModel.findOne({ name: cohort });
-
-    await sendTemplate(template, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: {
-        motif: cohortChangeReason,
-        cohort: cohortObj ? getCohortPeriod(cohortObj) : cohort,
-      },
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
+      young,
+      previousYoung,
+      cohortName: cohort,
+      cohortChangeReason,
+      message: value.message,
     });
 
     res.status(200).send({ ok: true, data: young });
