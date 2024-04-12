@@ -15,6 +15,7 @@ sed '/<noscript> You need to enable JavaScript to run this app. <\/noscript>/a\
         "SUPPORT_URL":"$SUPPORT_URL", \
         "MAINTENANCE":"$MAINTENANCE", \
         "RELEASE":"$RELEASE", \
+        "ENVIRONNEMENT":"$ENVIRONNEMENT", \
         "SENTRY_URL":"$SENTRY_URL", \
         "SENTRY_TRACING_SAMPLE_RATE":"$SENTRY_TRACING_SAMPLE_RATE", \
         "SENTRY_SESSION_SAMPLE_RATE":"$SENTRY_SESSION_SAMPLE_RATE", \
@@ -25,8 +26,8 @@ sed '/<noscript> You need to enable JavaScript to run this app. <\/noscript>/a\
         "API_ENGAGEMENT_KEY":"$API_ENGAGEMENT_KEY" \
     }; \
 </script> \
-' index.html.template \
-| envsubst > index.html
+' index.html.template |
+    envsubst >index.html
 
 cd -
 

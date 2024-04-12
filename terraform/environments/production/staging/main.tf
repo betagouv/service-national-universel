@@ -89,6 +89,7 @@ resource "scaleway_container" "api" {
     "CLE"                               = "true"
     "STAGING"                           = "true"
     "FOLDER_API"                        = "api"
+    "ENVIRONNEMENT"                     = "staging"
     "RELEASE"                           = var.api_image_tag
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.1
@@ -173,7 +174,7 @@ resource "scaleway_container" "admin" {
   }
 
   secret_environment_variables = {
-    "SENTRY_URL"                 = local.secrets.SENTRY_URL
+    "SENTRY_URL"                 = local.secrets.SENTRY_ADMIN
     "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
     "VITE_USERBACK_ACCESS_TOKEN" = local.secrets.USERBACK_ACCESS_TOKEN
   }
@@ -215,7 +216,7 @@ resource "scaleway_container" "app" {
   }
 
   secret_environment_variables = {
-    "SENTRY_URL"        = local.secrets.SENTRY_URL
+    "SENTRY_URL"        = local.secrets.SENTRY_MONCOMPTE
     "SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
   }
 }
