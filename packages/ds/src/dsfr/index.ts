@@ -3,10 +3,13 @@ import { Button } from "@codegouvfr/react-dsfr/Button";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
+import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 
 // Form
 import InputPhone from "./form/InputPhone";
 import InputPassword from "./form/InputPassword";
+import BooleanRadioButtons from "./form/BooleanRadioButtons";
+import SignupButtons from "./SignupButtons";
 
 // Layout
 import Container from "./layout/Container";
@@ -27,8 +30,11 @@ export {
   Footer,
   PaddedContainer,
   Page,
+  RadioButtons,
+  BooleanRadioButtons,
   Section,
   Select,
+  SignupButtons,
   Field,
   List,
 };

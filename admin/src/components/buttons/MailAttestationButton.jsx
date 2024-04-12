@@ -37,7 +37,7 @@ export default function MailAttestationButton({ young, children, type, template,
           setModal({
             isOpen: true,
             onConfirm,
-            title: "Envoie de document par mail",
+            title: "Envoi de document par mail",
             message: `Êtes-vous sûr de vouloir transmettre le document "${placeholder}" par mail à ${young.email} ?`,
           });
         }}>

@@ -8,6 +8,7 @@ const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
 const CohortModel = require("../../models/cohort");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const { ERRORS } = require("../../utils/errors");
 
 const getCohesionCenter = async (young) => {
   let cohesionCenter;
@@ -85,6 +86,10 @@ const phase1 = async (young, batch = false) => {
   const meetingPoint = await getMeetingPoint(young);
   const departureDate = await getDepartureDateSession(meetingPoint, session, young, cohort);
   const returnDate = await getReturnDateSession(meetingPoint, session, young, cohort);
+
+  if (!cohesionCenter) {
+    throw { error: ERRORS.NO_COHESION_CENTER_FOUND };
+  }
 
   return html
     .replace(/{{TO}}/g, sanitizeAll(destinataireLabel(young, ministresData.ministres)))

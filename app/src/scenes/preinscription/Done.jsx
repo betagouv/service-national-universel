@@ -4,10 +4,10 @@ import GrayArrow from "@/assets/gray-arrow.svg";
 import { RiAttachmentFill } from "react-icons/ri";
 import plausibleEvent from "../../services/plausible";
 import DSFRContainer from "../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../components/dsfr/ui/buttons/SignupButtonContainer";
 import { capture } from "../../sentry";
 import { supportURL } from "@/config";
 import useAuth from "@/services/useAuth";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Done() {
   const { young, isCLE } = useAuth();
@@ -53,7 +53,7 @@ export default function Done() {
           <img src={GrayArrow} alt="Flèche" className="md:w-10 rotate-90 md:rotate-0 -scale-y-100 md:scale-100" />
         </div>
 
-        <SignupButtonContainer onClickNext={handleClick} labelNext="Finaliser mon inscription" />
+        <SignupButtons onClickNext={handleClick} labelNext="Finaliser mon inscription" />
       </DSFRContainer>
     </>
   );

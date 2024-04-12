@@ -12,10 +12,11 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import dayjs from "dayjs";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { environment, supportURL } from "@/config";
 import InfoMessage from "../components/InfoMessage";
+
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepConfirm() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -223,7 +224,7 @@ export default function StepConfirm() {
 
         {isEmailValidationEnabled && <InfoMessage>Nous allons vous envoyer un code pour activer votre adresse e-mail.</InfoMessage>}
 
-        <SignupButtonContainer
+        <SignupButtons
           onClickNext={() => onSubmit()}
           labelNext={isEmailValidationEnabled ? "Oui, recevoir un code d'activation par e-mail" : "Finaliser mon inscription"}
           disabled={isLoading}

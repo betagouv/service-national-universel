@@ -13,6 +13,12 @@ const Schema = new mongoose.Schema({
       description: "(migration) Identifiant dans l'ancienne base de données",
     },
   },
+  apiEngagementId: {
+    type: String,
+    documentation: {
+      description: "Identifiant de la candidature (Activity) dans l'API Engagement",
+    },
+  },
   youngId: {
     type: String,
     documentation: {

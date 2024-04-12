@@ -105,6 +105,9 @@ export const saveTitle = (selectedFilters, filters) => {
 };
 
 export function normalizeString(s) {
+  if (typeof s !== "string") {
+    return "";
+  }
   return s
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")

@@ -32,13 +32,11 @@ import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import { CniField } from "./components/CniField";
 import FieldSituationsParticulieres from "./components/FieldSituationsParticulieres";
-import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "./commons";
 import Check from "../../assets/icons/Check";
-import MiniSwitch from "./components/MiniSwitch";
 import FranceConnect from "../../assets/icons/FranceConnect";
 import SchoolEditor from "./components/SchoolEditor";
 import validator from "validator";
@@ -60,9 +58,9 @@ import { Link } from "react-router-dom";
 import { Button, ModalConfirmation } from "@snu/ds/admin";
 import { FaCheck } from "react-icons/fa6";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
-import { HiExclamation } from "react-icons/hi";
 import { isBefore } from "date-fns";
 import { ConfirmModalContent } from "./components/ConfirmModalContent";
+import { filterDataForYoungSection } from "./utils";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -584,31 +582,21 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   );
 }
 
-function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false, user }) {
+function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState({});
+  const [data, setData] = useState(filterDataForYoungSection(young, "identite"));
   const [saving, setSaving] = useState(false);
-  const [birthDate, setBirthDate] = useState({ day: "", month: "", year: "" });
+  const birthDate = getBirthDate();
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    if (young) {
-      setData({ ...young });
-    } else {
-      setData({});
-    }
-  }, [young]);
-
-  useEffect(() => {
-    setSectionMode(globalMode);
-  }, [globalMode]);
-
-  useEffect(() => {
+  function getBirthDate() {
     if (data && data.birthdateAt) {
       const date = dayjs(data.birthdateAt);
-      setBirthDate({ day: date.date(), month: date.format("MMMM"), year: date.year() });
+      return { day: date.date(), month: date.format("MMMM"), year: date.year() };
+    } else {
+      return { day: "", month: "", year: "" };
     }
-  }, [data]);
+  }
 
   function onSectionChangeMode(mode) {
     setSectionMode(mode === "default" ? globalMode : mode);
@@ -1156,7 +1144,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState({});
+  const [data, setData] = useState(filterDataForYoungSection(young, "parent"));
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [youngAge, setYoungAge] = useState(0);
@@ -1181,10 +1169,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
       setYoungAge(0);
     }
   }, [young]);
-
-  useEffect(() => {
-    setSectionMode(globalMode);
-  }, [globalMode]);
 
   function onSectionChangeMode(mode) {
     setSectionMode(mode === "default" ? globalMode : mode);
@@ -1231,21 +1215,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
 
         if (data.grade === GRADES.NOT_SCOLARISE) {
-          const request = await api.put(`/young-edition/${young._id}/situationparents`, {
-            schooled: "false",
-            schoolName: "",
-            schoolType: "",
-            schoolAddress: "",
-            schoolComplementAdresse: "",
-            schoolZip: "",
-            schoolCity: "",
-            schoolDepartment: "",
-            schoolRegion: "",
-            schoolCountry: "",
-            schoolLocation: null,
-            schoolId: "",
-            academy: "",
-          });
           data.schoolName = "";
           data.schoolType = "";
           data.schoolAddress = "";
@@ -1258,10 +1227,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           data.schoolLocation = null;
           data.schoolId = "";
           data.academy = "";
-
-          if (!request.ok) {
-            toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
-          }
         }
 
         const result = await api.put(`/young-edition/${young._id}/situationparents`, data);
