@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { AddButton, DeleteButton, MiniTitle, MoreButton } from "./commons";
+import { AddButton, DeleteButton } from "./commons";
 import api from "@/services/api";
 import { translate, download } from "snu-lib";
 import { toastr } from "react-redux-toastr";
