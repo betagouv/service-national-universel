@@ -1,5 +1,3 @@
-const redis = jest.createMockFromModule("redis");
-
 const data = {};
 
 const mockRedis = {
