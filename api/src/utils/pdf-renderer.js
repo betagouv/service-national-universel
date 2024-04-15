@@ -1,4 +1,6 @@
 const path = require("path");
+const { Writable } = require('node:stream');
+const { Buffer } = require('node:buffer');
 const fs = require("fs").promises;
 const { API_PDF_ENDPOINT, CERTIFICATE_TEMPLATES_ROOTDIR } = require("../config");
 const { timeout, getFile } = require("../utils");
@@ -30,6 +32,22 @@ async function getHtmlTemplate(type, template, young, contract) {
   if (type === "contract" && template === "2" && contract) return contractPhase2.render(contract);
   if (type === "droitImage" && template === "droitImage") return droitImage.render(young);
   throw new Error("Not implemented");
+}
+
+function _inMemoryWritableStream() {
+  return new Writable({
+    construct(callback) {
+      this.chunks = [];
+      this.toBuffer = () => {
+        return Buffer.concat(this.chunks);
+      };
+      callback();
+    },
+    write(chunk, encoding, callback) {
+      this.chunks.push(chunk);
+      callback();
+    },
+  });
 }
 
 function stream2buffer(stream) {
@@ -92,16 +110,9 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
 }
 
 async function generatePdfIntoBuffer({ type, template, young, contract }) {
-  // TODO create in memory writableStream and use generatePdfIntoStream
-  const html = await getHtmlTemplate(type, template, young, contract);
-  if (!html) {
-    throw new Error(ERRORS.NOT_FOUND);
-  }
-
-  const options = type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 };
-  const stream = await htmlToPdfStream(html, options);
-
-  return stream2buffer(stream);
+  const stream = _inMemoryWritableStream();
+  generatePdfIntoStream(stream, { type, template, young, contract });
+  return stream.toBuffer();
 }
 
 async function getCertificateTemplate(template) {
