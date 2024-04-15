@@ -18,15 +18,12 @@ afterAll(dbClose);
 describe("Meeting Point", () => {
   let res;
   let ligneToPoint;
-  // let meetingPoint;
 
   beforeEach(async () => {
-    // const pdr = await createPointDeRassemblementHelper();
     const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
     const sessionPhase1 = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
     const result = await createPointDeRassemblementWithBus(getNewPointDeRassemblementFixture(), cohesionCenter._id, sessionPhase1._id);
     ligneToPoint = result.ligneToPoint;
-    // meetingPoint = result.pdr;
   });
 
   afterEach(async () => {

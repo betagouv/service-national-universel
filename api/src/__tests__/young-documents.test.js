@@ -77,15 +77,15 @@ describe("Young", () => {
     });
   });
   // Todo
-  // describe("POST young/:id/documents/:key", () => {
-  //   it("should return 200 and new record should be sinserted into the db", async () => {
-  //     const young = await createYoungHelper(getNewYoungFixture());
-  //     const res = await request(getAppHelper()).post(`/young/${young._id}/documents/cniFiles`);
-  //     expect(res.status).toEqual(200);
-  //     const res2 = await request(getAppHelper()).get(`/young/${young._id}/documents/cniFiles`);
-  //     expect(res2.body).toBe();
-  //   });
-  // });
+  describe("POST young/:id/documents/:key", () => {
+    it.skip("should return 200 and new record should be sinserted into the db", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/cniFiles`);
+      expect(res.status).toEqual(200);
+      const res2 = await request(getAppHelper()).get(`/young/${young._id}/documents/cniFiles`);
+      expect(res2.body).toBe();
+    });
+  });
   describe("POST young/:id/documents/convocation/:template", () => {
     it("should return 404 when young is not found", async () => {
       const res = await request(getAppHelper()).post("/young/" + notExistingYoungId + "/documents/convocation/1");
@@ -160,7 +160,6 @@ describe("Young", () => {
         const res = await request(getAppHelper())
           .post("/young/" + young._id + "/documents/certificate/" + certificate + "/send-email")
           .send({ fileName: "test" });
-        // expect(res.body.e).toBe();
         expect(res.status).toBe(200);
       }
     });
