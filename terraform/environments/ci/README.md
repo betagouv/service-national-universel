@@ -26,7 +26,6 @@ The CI applications are supposed to reflect the most recent state of the **main*
 - https://app.ci.beta-snu.dev
 - https://admin.ci.beta-snu.dev
 
-
 ## Test environments
 
 A test environment is supposed to reflect the state of a specific development (Most recent state of a pull request).
@@ -35,11 +34,12 @@ It is dynamically generated when a pull request is opened, and destroyed when th
 
 Every update to the PR triggers updates on the test environments.
 
-Test environment are created only if the branch name of the PR follows on of these patterns:
+Test environment are created by default except if the branch name of the PR follows on of these patterns:
 
-- \*-ci-\*
-- ci-*
-- *-ci
+- \*-no-ci-\*
+- no-ci-\*
+- \*no-ci
+- equivalent with underscores
 
 Associated github workflows :
 
@@ -65,7 +65,6 @@ For example, if the branch name is **feat-1234-ci**, the applications can be acc
 ### Test environments backend
 
 Each test environment has its own terraform state, separated from the state of CI. (different **schema_name** in the Postgres backend)
-
 
 ## Bootstrap CI
 
