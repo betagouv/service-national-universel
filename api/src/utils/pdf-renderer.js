@@ -12,7 +12,6 @@ const { MINISTRES } = require("snu-lib");
 
 const TIMEOUT_PDF_SERVICE = 15000;
 
-const certificate = require("../templates/certificate");
 const form = require("../templates/form");
 const convocation = require("../templates/convocation");
 const contractPhase2 = require("../templates/contractPhase2");
@@ -24,10 +23,6 @@ const { generateCertifPhase3 } = require("../templates/certificate/phase3");
 const { generateCertifSNU } = require("../templates/certificate/snu");
 
 async function getHtmlTemplate(type, template, young, contract) {
-  if (type === "certificate" && template === "1") return await certificate.phase1(young); // WIP
-  if (type === "certificate" && template === "2") return certificate.phase2(young);
-  if (type === "certificate" && template === "3") return certificate.phase3(young);
-  if (type === "certificate" && template === "snu") return certificate.snu(young);
   if (type === "form" && template === "imageRight") return form.imageRight(young);
   if (type === "convocation" && template === "cohesion") return convocation.cohesion(young);
   if (type === "contract" && template === "2" && contract) return contractPhase2.render(contract);
