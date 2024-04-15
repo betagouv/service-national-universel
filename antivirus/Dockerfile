@@ -1,4 +1,4 @@
-FROM node:18.20.1-alpine as build
+FROM node:18.20-alpine as build
 
 ENV APP_NAME antivirus
 
@@ -12,7 +12,7 @@ RUN --mount=type=cache,target=/build/.npm/cache \
     npm install && \
     rm -rf node_modules/.cache .npm/cache
 
-FROM node:18.20.1-alpine as antivirus
+FROM node:18.20-alpine as antivirus
 
 ENV APP_NAME antivirus
 ENV ENV production
