@@ -13,12 +13,12 @@ jobs:
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
-        !((contains(github.head_ref, '-no-ci-') ||
+        !(contains(github.head_ref, '-no-ci-') ||
         startsWith(github.head_ref, 'no-ci-') ||
         endsWith(github.head_ref, 'no-ci') ||
         contains(github.head_ref, '_no_ci_') ||
         startsWith(github.head_ref, 'no_ci_') ||
-        endsWith(github.head_ref, '_no_ci')))
+        endsWith(github.head_ref, '_no_ci'))
       )
     runs-on: ubuntu-latest
     outputs:
