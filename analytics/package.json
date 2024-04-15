@@ -8,7 +8,8 @@
     "dev": "nodemon --watch src src/index.js",
     "lint": "eslint . --ext .js,.jsx",
     "lint:fix": "eslint --ext .js --fix src",
-    "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
+    "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
+    "clean": "rm -fr node_modules .turbo"
   },
   "engines": {
     "node": "^18.16.0",
