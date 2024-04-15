@@ -1,6 +1,7 @@
 const path = require("path");
 const { Writable } = require('node:stream');
 const { Buffer } = require('node:buffer');
+const { pipeline, finished } = require('node:stream/promises');
 const fs = require("fs").promises;
 const { API_PDF_ENDPOINT, CERTIFICATE_TEMPLATES_ROOTDIR } = require("../config");
 const { timeout, getFile } = require("../utils");
@@ -34,29 +35,20 @@ async function getHtmlTemplate(type, template, young, contract) {
   throw new Error("Not implemented");
 }
 
-function _inMemoryWritableStream() {
-  return new Writable({
-    construct(callback) {
-      this.chunks = [];
-      this.toBuffer = () => {
-        return Buffer.concat(this.chunks);
-      };
-      callback();
-    },
-    write(chunk, encoding, callback) {
-      this.chunks.push(chunk);
-      callback();
-    },
-  });
-}
+class InMemoryWritable extends Writable {
+  constructor(options) {
+    super(options);
+    this.chunks = [];
+  }
 
-function stream2buffer(stream) {
-  return new Promise((resolve, reject) => {
-    const buf = [];
-    stream.on("data", (chunk) => buf.push(chunk));
-    stream.on("end", () => resolve(Buffer.concat(buf)));
-    stream.on("error", (err) => reject(err));
-  });
+  toBuffer() {
+    return Buffer.concat(this.chunks);
+  }
+
+  _write(chunk, encoding, callback) {
+    this.chunks.push(chunk);
+    callback();
+  }
 }
 
 async function htmlToPdfStream(html, options) {
@@ -80,12 +72,6 @@ async function htmlToPdfStream(html, options) {
   }
 }
 
-async function htmlToPdfBuffer(html, options) {
-  const stream = await htmlToPdfStream(html, options);
-
-  return stream2buffer(stream);
-}
-
 async function generatePdfIntoStream(outStream, { type, template, young, contract }) {
   if (type === "certificate" && template === "1" && young) {
     return await generateCertifPhase1(outStream, young);
@@ -106,12 +92,13 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
 
   const options = type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 };
   const inStream = await htmlToPdfStream(html, options);
-  inStream.pipe(outStream);
+  await pipeline(inStream, outStream);
 }
 
-async function generatePdfIntoBuffer({ type, template, young, contract }) {
-  const stream = _inMemoryWritableStream();
-  generatePdfIntoStream(stream, { type, template, young, contract });
+async function generatePdfIntoBuffer(options) {
+  const stream = new InMemoryWritable();
+  await generatePdfIntoStream(stream, options);
+  await finished(stream);
   return stream.toBuffer();
 }
 
@@ -142,4 +129,4 @@ async function getAllCertificateTemplates() {
   }
 }
 
-module.exports = { getAllCertificateTemplates, generatePdfIntoStream, generatePdfIntoBuffer, htmlToPdfBuffer };
+module.exports = { getAllCertificateTemplates, generatePdfIntoStream, generatePdfIntoBuffer };
