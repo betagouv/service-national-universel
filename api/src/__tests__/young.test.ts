@@ -229,7 +229,6 @@ describe("Young", () => {
           }),
         )
         .mockReturnValue(Promise.resolve({}));
-      // @ts-expect-error mockReturnValue type
       fetch.mockReturnValue(
         Promise.resolve({
           status: 200,
