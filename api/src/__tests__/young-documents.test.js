@@ -128,23 +128,23 @@ describe("Young", () => {
         .send({ young });
       expect(res.status).toBe(200);
     });
-    // it("should return the convocation for dom tom", async () => {
-    //   const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-    //   const departmentService = await createDepartmentServiceHelper({
-    //     ...getNewDepartmentServiceFixture(),
-    //     department: "Guadeloupe",
-    //   });
-    //   const young = await createYoungHelper({
-    //     ...getNewYoungFixture(),
-    //     cohesionCenterId: cohesionCenter._id,
-    //     department: departmentService.department,
-    //   });
+    it.skip("should return the convocation for dom tom", async () => {
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+      const departmentService = await createDepartmentServiceHelper({
+        ...getNewDepartmentServiceFixture(),
+        department: "Guadeloupe",
+      });
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        cohesionCenterId: cohesionCenter._id,
+        department: departmentService.department,
+      });
 
-    //   const res = await request(getAppHelper())
-    //     .post("/young/" + young._id + "/documents/convocation/cohesion")
-    //     .send({ young });
-    //   expect(res.status).toBe(200);
-    // });
+      const res = await request(getAppHelper())
+        .post("/young/" + young._id + "/documents/convocation/cohesion")
+        .send({ young });
+      expect(res.status).toBe(200);
+    });
   });
   describe("POST /young/:id/documents/certificate/:template/send-email", () => {
     it("should return 404 when young is not found", async () => {
@@ -153,16 +153,16 @@ describe("Young", () => {
     });
 
     // todo : `const content = buffer.toString("base64");` doesnt work in test environment
-    // it("should return the certificate", async () => {
-    //   const young = await createYoungHelper(getNewYoungFixture());
-    //   const certificates = ["1", "2", "3", "snu"];
-    //   for (const certificate of certificates) {
-    //     const res = await request(getAppHelper())
-    //       .post("/young/" + young._id + "/documents/certificate/" + certificate + "/send-email")
-    //       .send({ fileName: "test" });
-    //     // expect(res.body.e).toBe();
-    //     expect(res.status).toBe(200);
-    //   }
-    // });
+    it.skip("should return the certificate", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const certificates = ["1", "2", "3", "snu"];
+      for (const certificate of certificates) {
+        const res = await request(getAppHelper())
+          .post("/young/" + young._id + "/documents/certificate/" + certificate + "/send-email")
+          .send({ fileName: "test" });
+        // expect(res.body.e).toBe();
+        expect(res.status).toBe(200);
+      }
+    });
   });
 });

@@ -11,17 +11,11 @@ const getNewMissionFixture = require("./fixtures/mission");
 const { createMissionHelper } = require("./helpers/mission");
 //young
 const getNewYoungFixture = require("./fixtures/young");
-const { getYoungsHelper, createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
-//cohesion center
-const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
-const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
-const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
-const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
+const { createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
 
 const { ROLES } = require("snu-lib");
 
 const jwt = require("jsonwebtoken");
-const { default: faker } = require("@faker-js/faker");
 const { createReferentHelper } = require("./helpers/referent");
 const getNewReferentFixture = require("./fixtures/referent");
 jest.mock("../sendinblue", () => ({
@@ -235,6 +229,7 @@ describe("Young", () => {
           }),
         )
         .mockReturnValue(Promise.resolve({}));
+      // @ts-expect-error mockReturnValue type
       fetch.mockReturnValue(
         Promise.resolve({
           status: 200,
@@ -280,88 +275,40 @@ describe("Young", () => {
       passport.user = previous;
     });
 
-    // it("should update QPV to true", async () => {
-    //   const { updatedYoung, response } = await selfUpdateYoung({
-    //     zip: "geoShouldWork",
-    //     city: "foo",
-    //     address: "bar",
-    //   });
-    //   expect(response.statusCode).toEqual(200);
-    //   expect(updatedYoung.qpv).toEqual("true");
-    // });
+    it.skip("should not cascade status to WITHDRAWN if not validated", async () => {
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        statusPhase1: "WAITING_AFFECTATION",
+        statusPhase2: "WAITING_REALISATION",
+        statusPhase3: "WAITING_REALISATION",
+      });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
+      const updatedYoung = response.body.data;
+      expect(response.statusCode).toEqual(200);
+      expect(updatedYoung.status).toEqual("WITHDRAWN");
+      expect(updatedYoung.statusPhase1).toEqual("WAITING_AFFECTATION");
+      expect(updatedYoung.statusPhase2).toEqual("WAITING_REALISATION");
+      expect(updatedYoung.statusPhase3).toEqual("WAITING_REALISATION");
+      passport.user = previous;
+    });
 
-    // it("should update QPV to false", async () => {
-    //   const { updatedYoung, response } = await selfUpdateYoung({
-    //     zip: "qpvNotShouldWork",
-    //     city: "foo",
-    //     address: "bar",
-    //   });
-    //   expect(response.statusCode).toEqual(200);
-    //   expect(updatedYoung.qpv).toEqual("false");
-    // });
-
-    // it("should not update QPV", async () => {
-    //   const { updatedYoung, response } = await selfUpdateYoung({ zip: "qpvShouldWork" });
-    //   expect(response.statusCode).toEqual(200);
-    //   expect(updatedYoung.qpv).toEqual("false");
-    // });
-
-    // it("should not cascade status to WITHDRAWN if not validated", async () => {
-    //   const young = await createYoungHelper({
-    //     ...getNewYoungFixture(),
-    //     statusPhase1: "WAITING_AFFECTATION",
-    //     statusPhase2: "WAITING_REALISATION",
-    //     statusPhase3: "WAITING_REALISATION",
-    //   });
-    //   const passport = require("passport");
-    //   const previous = passport.user;
-    //   passport.user = young;
-    //   const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
-    //   const updatedYoung = response.body.data;
-    //   expect(response.statusCode).toEqual(200);
-    //   expect(updatedYoung.status).toEqual("WITHDRAWN");
-    //   expect(updatedYoung.statusPhase1).toEqual("WAITING_AFFECTATION");
-    //   expect(updatedYoung.statusPhase2).toEqual("WAITING_REALISATION");
-    //   expect(updatedYoung.statusPhase3).toEqual("WAITING_REALISATION");
-    //   passport.user = previous;
-    // });
-    // it("should not cascade status to WITHDRAWN if validated", async () => {
-    //   const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase1: "DONE", statusPhase2: "VALIDATED", statusPhase3: "VALIDATED" });
-    //   const passport = require("passport");
-    //   const previous = passport.user;
-    //   passport.user = young;
-    //   const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
-    //   const updatedYoung = response.body.data;
-    //   expect(response.statusCode).toEqual(200);
-    //   expect(updatedYoung.status).toEqual("WITHDRAWN");
-    //   expect(updatedYoung.statusPhase1).toEqual("DONE");
-    //   expect(updatedYoung.statusPhase2).toEqual("VALIDATED");
-    //   expect(updatedYoung.statusPhase3).toEqual("VALIDATED");
-    //   passport.user = previous;
-    // });
-
-    // it("should update young birthCountry", async () => {
-    //   const { updatedYoung, response } = await selfUpdateYoung({ birthCountry: "HOP" });
-    //   expect(response.statusCode).toEqual(200);
-    //   expect(updatedYoung.birthCountry).toEqual("HOP");
-    // });
-
-    // it("should remove places when sending to cohesion center", async () => {
-    //   const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
-    //   const placesLeft = sessionPhase1.placesLeft;
-    //   const { updatedYoung, response } = await selfUpdateYoung(
-    //     {
-    //       sessionPhase1Id: sessionPhase1._id,
-    //     },
-    //     {
-    //       status: "VALIDATED",
-    //       statusPhase1: "DONE",
-    //     },
-    //   );
-    //   expect(response.statusCode).toEqual(200);
-    //   const updatedSessionPhase1 = await getSessionPhase1ById(updatedYoung.sessionPhase1Id);
-    //   expect(updatedSessionPhase1.placesLeft).toEqual(placesLeft - 1);
-    // });
+    it.skip("should not cascade status to WITHDRAWN if validated", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase1: "DONE", statusPhase2: "VALIDATED", statusPhase3: "VALIDATED" });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const response = await request(getAppHelper()).put("/young").send({ status: "WITHDRAWN" });
+      const updatedYoung = response.body.data;
+      expect(response.statusCode).toEqual(200);
+      expect(updatedYoung.status).toEqual("WITHDRAWN");
+      expect(updatedYoung.statusPhase1).toEqual("DONE");
+      expect(updatedYoung.statusPhase2).toEqual("VALIDATED");
+      expect(updatedYoung.statusPhase3).toEqual("VALIDATED");
+      passport.user = previous;
+    });
 
     it("should be only accessible by young", async () => {
       const passport = require("passport");
@@ -594,18 +541,18 @@ describe("Young", () => {
       passport.user = previous;
     });
 
-    // it("should not accept invalid body", async () => {
-    //   const young = await createYoungHelper(getNewYoungFixture());
-    //   const passport = require("passport");
-    //   const previous = passport.user;
-    //   passport.user = young;
+    it.skip("should not accept invalid body", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
 
-    //   const res = await request(getAppHelper())
-    //     .post(`/young/${young._id}/documents/cniFiles`)
-    //     .send({ body: JSON.stringify({ blablabla: ["e"] }) });
-    //   expect(res.status).toEqual(400);
-    //   passport.user = previous;
-    // });
+      const res = await request(getAppHelper())
+        .post(`/young/${young._id}/documents/cniFiles`)
+        .send({ body: JSON.stringify({ blablabla: ["e"] }) });
+      expect(res.status).toEqual(400);
+      passport.user = previous;
+    });
 
     it("should not accept invalid file name", async () => {
       const young = await createYoungHelper(getNewYoungFixture());

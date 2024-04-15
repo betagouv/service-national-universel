@@ -169,7 +169,7 @@ describe("Meeting point", () => {
 
     it("should return 500 when there's an error", async () => {
       const passport = require("passport");
-      const previous = passport.user;
+      // const previous = passport.user;
       passport.user = null;
       jest.spyOn(LigneBusModel, "find").mockImplementation(() => {
         throw new Error("test error");
@@ -372,7 +372,7 @@ describe("Meeting point", () => {
         },
       });
 
-      const schemaRepartition = await SchemaRepartitionModel.create({
+      await SchemaRepartitionModel.create({
         centerId: center._id,
         name: "Schema 1",
         fromRegion: "Île-de-France",
@@ -381,7 +381,7 @@ describe("Meeting point", () => {
         gatheringPlaces: [pdr1._id, pdr2._id],
       });
 
-      const young = await YoungModel.create({
+      await YoungModel.create({
         firstName: "John",
         lastName: "Doe",
         email: "john.doea@example.com",
