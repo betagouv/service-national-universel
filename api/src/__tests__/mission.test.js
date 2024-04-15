@@ -1,4 +1,3 @@
-const { faker } = require("@faker-js/faker");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const getNewMissionFixture = require("./fixtures/mission");
@@ -6,7 +5,7 @@ const getNewStructureFixture = require("./fixtures/structure");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { getMissionsHelper, getMissionByIdHelper, deleteMissionByIdHelper, createMissionHelper, expectMissionToEqual, notExisitingMissionId } = require("./helpers/mission");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
-const { deleteStructureByIdHelper, createStructureHelper, expectStructureToEqual, notExistingStructureId } = require("./helpers/structure");
+const { createStructureHelper, notExistingStructureId } = require("./helpers/structure");
 const getNewReferentFixture = require("./fixtures/referent");
 const { ROLES } = require("snu-lib");
 const { createYoungHelper } = require("./helpers/young");
