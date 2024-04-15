@@ -416,7 +416,7 @@ describe("Meeting point", () => {
     it("should return 403 when user is not authorized", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture() });
       const passport = require("passport");
-      const previous = passport.user;
+      // const previous = passport.user;
       passport.user = young;
       const center = await CohesionCenterModel.create({
         name: "Center 1",
@@ -455,7 +455,7 @@ describe("Meeting point", () => {
 
     it("should return 500 when there's an error", async () => {
       const passport = require("passport");
-      const previous = passport.user;
+      // const previous = passport.user;
       passport.user = null;
       jest.spyOn(LigneBusModel, "findById").mockImplementation(() => {
         throw new Error("test error");
@@ -522,7 +522,7 @@ describe("Meeting point", () => {
 
     it("should return 500 when there's an error", async () => {
       const passport = require("passport");
-      const previous = passport.user;
+      // const previous = passport.user;
       passport.user = null;
       jest.spyOn(LigneBusModel, "findById").mockImplementation(() => {
         throw new Error("test error");

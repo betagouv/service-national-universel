@@ -81,7 +81,7 @@ describe("Application", () => {
       const mission1 = await createMissionHelper(getNewMissionFixture());
       await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission1._id });
       const mission2 = await createMissionHelper(getNewMissionFixture());
-      const { priority, ...application } = getNewApplicationFixture();
+      const { ...application } = getNewApplicationFixture();
       const res = await request(getAppHelper())
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission2._id });
@@ -204,7 +204,7 @@ describe("Application", () => {
           missionId: mission._id,
           missionDuration: "1",
         });
-        const res = await request(getAppHelper()).put("/application").send({ priority: "1", status, _id: application._id.toString() });
+        await request(getAppHelper()).put("/application").send({ priority: "1", status, _id: application._id.toString() });
       }
       const updatedYoung = await getYoungByIdHelper(young._id);
       expect(updatedYoung.phase2NumberHoursEstimated).toBe("5");
