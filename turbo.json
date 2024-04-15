@@ -21,6 +21,9 @@
       "persistent": true,
       "outputs": ["dist/**", "build/**"]
     },
-    "lint": {}
+    "lint": {},
+    "clean": {
+      "cache": false
+    }
   }
 }

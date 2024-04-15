@@ -8,7 +8,8 @@
     "start": "node index.js",
     "lint": "eslint . --ext .js,.jsx",
     "lint:fix": "eslint . --ext .js --fix",
-    "lint:report": "eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
+    "lint:report": "eslint . --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
+    "clean": "rm -fr .turbo"
   },
   "author": "SNU",
   "license": "MIT",

@@ -50,6 +50,15 @@
       }
     },
     {
+      "label": "Clean dependencies",
+      "command": "npm run clean",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
       "label": "Start Admin Applications",
       "dependsOn": ["Start Lib", "Start DS", "Start Api", "Start Admin"],
       "problemMatcher": []
