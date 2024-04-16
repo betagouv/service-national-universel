@@ -58,7 +58,8 @@ const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
 const REDIS_URL = process.env.REDIS_URL || "";
 
-const CERTIFICATE_TEMPLATES_ROOTDIR = `${__dirname}/../public/images`;
+const PUBLIC_ROOTDIR = `${__dirname}/../public`;
+const CERTIFICATE_TEMPLATES_ROOTDIR = `${PUBLIC_ROOTDIR}/images`;
 const FONT_ROOTDIR = `${__dirname}/assets/fonts`;
 
 module.exports = {
@@ -105,6 +106,7 @@ module.exports = {
   API_ANTIVIRUS_ENDPOINT,
   API_ANTIVIRUS_TOKEN,
   REDIS_URL,
+  PUBLIC_ROOTDIR,
   CERTIFICATE_TEMPLATES_ROOTDIR,
   FONT_ROOTDIR,
   RELEASE,

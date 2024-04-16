@@ -15,18 +15,17 @@ const TIMEOUT_PDF_SERVICE = 15000;
 const form = require("../templates/form");
 const convocation = require("../templates/convocation");
 const contractPhase2 = require("../templates/contractPhase2");
-const droitImage = require("../templates/droitImage");
 
 const { generateCertifPhase1 } = require("../templates/certificate/phase1");
 const { generateCertifPhase2 } = require("../templates/certificate/phase2");
 const { generateCertifPhase3 } = require("../templates/certificate/phase3");
 const { generateCertifSNU } = require("../templates/certificate/snu");
+const { generateDroitImage } = require("../templates/droitImage");
 
 async function getHtmlTemplate(type, template, young, contract) {
   if (type === "form" && template === "imageRight") return form.imageRight(young);
   if (type === "convocation" && template === "cohesion") return convocation.cohesion(young);
   if (type === "contract" && template === "2" && contract) return contractPhase2.render(contract);
-  if (type === "droitImage" && template === "droitImage") return droitImage.render(young);
   throw new Error("Not implemented");
 }
 
@@ -79,6 +78,9 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
   }
   if (type === "certificate" && template === "snu" && young) {
     return generateCertifSNU(outStream, young);
+  }
+  if (type === "droitImage" && template === "droitImage" && young) {
+    return generateDroitImage(outStream, young);
   }
   const html = await getHtmlTemplate(type, template, young, contract);
   if (!html) {
