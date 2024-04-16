@@ -3,7 +3,7 @@
 Pull request format must respect this format:
 
 ```
-<type>(<scope>, <scope>): <Notion ID> - <description>
+<type>(<scope>, <scope>...): <Notion ID> - <description>
 ```
 
 Allowed types: `feat`, `fix`, `refactor`, `chore`.
@@ -11,7 +11,7 @@ Allowed scopes: `release`, `app`, `admin`, `misc`, `api`, `all`, `github`, `terr
 
 Notion ID, followed by a `-` is **mandatory** on types `refactor`, `feat` and `fix`.
 
-*If you really nead to bypass the pull request title validation, you can add the `bypass title` label to you PR.*
+*If you really need to bypass the pull request title validation, you can add the `bypass title` label to you PR.*
 
 
 **Description**
