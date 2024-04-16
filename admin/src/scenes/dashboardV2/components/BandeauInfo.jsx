@@ -3,7 +3,7 @@ import { HiInformationCircle } from "react-icons/hi";
 
 export default function BandeauInfo() {
   return (
-    <div className="h-[100px] mb-6 bg-sky-50 text-sky-600 border-sky-500 p-4 text-sm leading-5 border-l-4">
+    <div className="h-[100px] mb-6 bg-sky-50 text-sky-600 border-sky-500 p-4 text-sm leading-5 border-l-4 print:hidden">
       <div className="flex">
         <HiInformationCircle className="text-sky-500" size={24} />
         <p className="font-bold ml-3">Vous constatez une différence entre les résultats ?</p>

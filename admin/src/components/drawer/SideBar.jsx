@@ -257,7 +257,8 @@ const SideBar = (props) => {
   };
 
   return (
-    <div className={`${open ? "w-[250px]" : "w-[88px]"} ${test ? "max-h-[95vh] top-[5vh]" : "h-screen max-h-screen"} sticky flex flex-col inset-y-0 bg-[#25294F] z-40`}>
+    <div
+      className={`${open ? "w-[250px]" : "w-[88px]"} ${test ? "max-h-[95vh] top-[5vh]" : "h-screen max-h-screen"} sticky flex flex-col inset-y-0 bg-[#25294F] z-40 print:hidden`}>
       <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} />
         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
