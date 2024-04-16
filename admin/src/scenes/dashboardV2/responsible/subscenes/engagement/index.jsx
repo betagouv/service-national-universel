@@ -9,6 +9,8 @@ import ReactTooltip from "react-tooltip";
 import API from "@/services/api";
 import Loader from "@/components/Loader";
 import { toastr } from "react-redux-toastr";
+import { Page, Header } from "@snu/ds/admin";
+import { HiOutlineChartSquareBar } from "react-icons/hi";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -105,231 +107,234 @@ export default function Index() {
   }
 
   return (
-    <DashboardContainer active="engagement" availableTab={["general", "engagement"]}>
-      <div className="flex flex-col gap-8">
-        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Candidatures</h1>
-        <div className="flex flex-row gap-4">
-          <div className="flex flex-col gap-6  rounded-lg bg-white px-8 py-6 w-1/2 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-            <p className="text-base font-bold leading-5 text-gray-900">Candidatures à traiter</p>
-            <div className="flex w-full flex-wrap">
-              {loading && <Loader />}
-              {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
-              {!loading && !error && (
-                <div className="flex min-w-[30%] flex-col gap-2 w-full">
-                  <StatusText
-                    status="En attente de validation"
-                    nb={valuesApplication.APPLICATION.WAITING_VALIDATION?.nb || 0}
-                    percentage={valuesApplication.APPLICATION.WAITING_VALIDATION?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "WAITING_VALIDATION" })]}
-                    base="/volontaire/list/pending"
-                    icon={!!valuesApplication.APPLICATION.WAITING_VALIDATION?.nb}
-                  />
-                </div>
-              )}
-            </div>
-            <p className="text-base font-bold leading-5 text-gray-900">Autres candidatures</p>
-            <div className="flex w-full flex-wrap justify-between">
-              {loading && <Loader />}
-              {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
-              {!loading && !error && (
-                <div className="flex min-w-[30%] flex-col gap-2 w-full">
-                  {isPrepaMilitary ? (
+    <Page>
+      <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} />
+      <DashboardContainer active="engagement" availableTab={["general", "engagement"]}>
+        <div className="flex flex-col gap-8">
+          <h1 className="text-[28px] font-bold leading-8 text-gray-900">Candidatures</h1>
+          <div className="flex flex-row gap-4">
+            <div className="flex flex-col gap-6  rounded-lg bg-white px-8 py-6 w-1/2 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+              <p className="text-base font-bold leading-5 text-gray-900">Candidatures à traiter</p>
+              <div className="flex w-full flex-wrap">
+                {loading && <Loader />}
+                {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
+                {!loading && !error && (
+                  <div className="flex min-w-[30%] flex-col gap-2 w-full">
                     <StatusText
-                      status="En attente de verification d'éligibilité"
-                      nb={valuesApplication.APPLICATION.WAITING_VERIFICATION?.nb || 0}
-                      percentage={valuesApplication.APPLICATION.WAITING_VERIFICATION?.percentage || 0}
-                      filtersUrl={[queryString.stringify({ status: "WAITING_VERIFICATION" })]}
-                      base="/volontaire/list/all"
-                      tooltip={true}
+                      status="En attente de validation"
+                      nb={valuesApplication.APPLICATION.WAITING_VALIDATION?.nb || 0}
+                      percentage={valuesApplication.APPLICATION.WAITING_VALIDATION?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "WAITING_VALIDATION" })]}
+                      base="/volontaire/list/pending"
+                      icon={!!valuesApplication.APPLICATION.WAITING_VALIDATION?.nb}
                     />
-                  ) : null}
-                  <StatusText
-                    status="Refusée"
-                    nb={valuesApplication.APPLICATION.REFUSED?.nb || 0}
-                    percentage={valuesApplication.APPLICATION.REFUSED?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "REFUSED" })]}
-                    base="/volontaire/list/all"
-                  />
-                  <StatusText
-                    status="Annulée"
-                    nb={valuesApplication.APPLICATION.CANCEL?.nb || 0}
-                    percentage={valuesApplication.APPLICATION.CANCEL?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "CANCEL" })]}
-                    base="/volontaire/list/all"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col gap-6 rounded-lg bg-white px-8 py-6 w-1/2 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-            <div className="flex align-middle">
-              <p className="text-base font-bold leading-5 text-gray-900">Volontaires au sein de votre structure</p>
-              <div className="bg-blue-100 px-3 py-1 text-xs font-medium rounded-full ml-2 flex self-start">
-                <p className="text-blue-700">À suivre</p>
+                  </div>
+                )}
+              </div>
+              <p className="text-base font-bold leading-5 text-gray-900">Autres candidatures</p>
+              <div className="flex w-full flex-wrap justify-between">
+                {loading && <Loader />}
+                {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
+                {!loading && !error && (
+                  <div className="flex min-w-[30%] flex-col gap-2 w-full">
+                    {isPrepaMilitary ? (
+                      <StatusText
+                        status="En attente de verification d'éligibilité"
+                        nb={valuesApplication.APPLICATION.WAITING_VERIFICATION?.nb || 0}
+                        percentage={valuesApplication.APPLICATION.WAITING_VERIFICATION?.percentage || 0}
+                        filtersUrl={[queryString.stringify({ status: "WAITING_VERIFICATION" })]}
+                        base="/volontaire/list/all"
+                        tooltip={true}
+                      />
+                    ) : null}
+                    <StatusText
+                      status="Refusée"
+                      nb={valuesApplication.APPLICATION.REFUSED?.nb || 0}
+                      percentage={valuesApplication.APPLICATION.REFUSED?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "REFUSED" })]}
+                      base="/volontaire/list/all"
+                    />
+                    <StatusText
+                      status="Annulée"
+                      nb={valuesApplication.APPLICATION.CANCEL?.nb || 0}
+                      percentage={valuesApplication.APPLICATION.CANCEL?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "CANCEL" })]}
+                      base="/volontaire/list/all"
+                    />
+                  </div>
+                )}
               </div>
             </div>
-            <div className="flex w-full flex-wrap">
+            <div className="flex flex-col gap-6 rounded-lg bg-white px-8 py-6 w-1/2 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+              <div className="flex align-middle">
+                <p className="text-base font-bold leading-5 text-gray-900">Volontaires au sein de votre structure</p>
+                <div className="bg-blue-100 px-3 py-1 text-xs font-medium rounded-full ml-2 flex self-start">
+                  <p className="text-blue-700">À suivre</p>
+                </div>
+              </div>
+              <div className="flex w-full flex-wrap">
+                {loading && <Loader />}
+                {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
+                {!loading && !error && (
+                  <div className="flex min-w-[30%] flex-col gap-2 w-full">
+                    <StatusText
+                      status="Candidature approuvée"
+                      nb={valuesApplication.APPLICATION.VALIDATED?.nb || 0}
+                      percentage={valuesApplication.APPLICATION.VALIDATED?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "VALIDATED" })]}
+                      base="/volontaire/list/follow"
+                    />
+                    <StatusText
+                      status="Mission en cours"
+                      nb={valuesApplication.APPLICATION.IN_PROGRESS?.nb || 0}
+                      percentage={valuesApplication.APPLICATION.IN_PROGRESS?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "IN_PROGRESS" })]}
+                      base="/volontaire/list/follow"
+                    />
+                  </div>
+                )}
+              </div>
+              <p className="text-base font-bold leading-5 text-gray-900">Volontaires passés au sein de votre structure</p>
+              <div className="flex w-full flex-wrap">
+                {loading && <Loader />}
+                {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
+                {!loading && !error && (
+                  <div className="flex min-w-[30%] flex-col gap-2 w-full">
+                    <StatusText
+                      status="Mission effectué"
+                      nb={valuesApplication.APPLICATION.DONE?.nb || 0}
+                      percentage={valuesApplication.APPLICATION.DONE?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "DONE" })]}
+                      base="/volontaire/list/all"
+                    />
+                    <StatusText
+                      status="Mission Abandonnée"
+                      nb={valuesApplication.APPLICATION.ABANDON?.nb || 0}
+                      percentage={valuesApplication.APPLICATION.ABANDON?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "ABANDON" })]}
+                      base="/volontaire/list/all"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-6  rounded-lg bg-white px-8 py-6 w-full shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+            <p className="text-base font-bold leading-5 text-gray-900">Contrat d'engagement</p>
+            <div className="flex flex-wrap">
               {loading && <Loader />}
               {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
               {!loading && !error && (
-                <div className="flex min-w-[30%] flex-col gap-2 w-full">
-                  <StatusText
-                    status="Candidature approuvée"
-                    nb={valuesApplication.APPLICATION.VALIDATED?.nb || 0}
-                    percentage={valuesApplication.APPLICATION.VALIDATED?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "VALIDATED" })]}
-                    base="/volontaire/list/follow"
-                  />
-                  <StatusText
-                    status="Mission en cours"
-                    nb={valuesApplication.APPLICATION.IN_PROGRESS?.nb || 0}
-                    percentage={valuesApplication.APPLICATION.IN_PROGRESS?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "IN_PROGRESS" })]}
-                    base="/volontaire/list/follow"
-                  />
+                <div className="flex w-full m-min-[30%] gap-8 mx-4">
+                  <div className="w-1/3">
+                    <StatusText
+                      status="Brouillon"
+                      nb={valuesApplication.CONTRACT.DRAFT?.nb || 0}
+                      percentage={valuesApplication.CONTRACT.DRAFT?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ contractStatus: "DRAFT", status: statusForRedirectContract.join("~") })]}
+                      base="/volontaire/list/all"
+                      icon={!!valuesApplication.CONTRACT.DRAFT?.nb}
+                    />
+                  </div>
+                  <div className="flex  items-center justify-center">
+                    <div className="h-full w-[1px] border-r-[1px] border-gray-300" />
+                  </div>
+                  <div className="w-1/3">
+                    <StatusText
+                      status="Envoyés"
+                      nb={valuesApplication.CONTRACT.SENT?.nb || 0}
+                      percentage={valuesApplication.CONTRACT.SENT?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ contractStatus: "SENT", status: statusForRedirectContract.join("~") })]}
+                      base="/volontaire/list/all"
+                    />
+                  </div>
+                  <div className="flex  items-center justify-center">
+                    <div className="h-full w-[1px] border-r-[1px] border-gray-300" />
+                  </div>
+                  <div className="w-1/3">
+                    <StatusText
+                      status="Signés"
+                      nb={valuesApplication.CONTRACT.VALIDATED?.nb || 0}
+                      percentage={valuesApplication.CONTRACT.VALIDATED?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ contractStatus: "VALIDATED", status: statusForRedirectContract.join("~") })]}
+                      base="/volontaire/list/all"
+                    />
+                  </div>
                 </div>
               )}
             </div>
-            <p className="text-base font-bold leading-5 text-gray-900">Volontaires passés au sein de votre structure</p>
-            <div className="flex w-full flex-wrap">
-              {loading && <Loader />}
-              {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
-              {!loading && !error && (
-                <div className="flex min-w-[30%] flex-col gap-2 w-full">
-                  <StatusText
-                    status="Mission effectué"
-                    nb={valuesApplication.APPLICATION.DONE?.nb || 0}
-                    percentage={valuesApplication.APPLICATION.DONE?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "DONE" })]}
-                    base="/volontaire/list/all"
-                  />
-                  <StatusText
-                    status="Mission Abandonnée"
-                    nb={valuesApplication.APPLICATION.ABANDON?.nb || 0}
-                    percentage={valuesApplication.APPLICATION.ABANDON?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "ABANDON" })]}
-                    base="/volontaire/list/all"
-                  />
-                </div>
+          </div>
+          <h1 className="text-[28px] font-bold leading-8 text-gray-900">Missions</h1>
+          <div className="flex flex-col gap-6  rounded-lg bg-white px-8 py-6 w-full shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
+            <p className="text-base font-bold leading-5 text-gray-900">Statut des missions proposées par ma structure</p>
+            <div className="flex w-full flex-wrap justify-center gap-7">
+              {loadingMission && <Loader />}
+              {errorMission && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
+              {!loadingMission && !errorMission && (
+                <>
+                  <div className="flex min-w-[30%] flex-col gap-2">
+                    <StatusText
+                      status="En attente de validation"
+                      nb={valuesMission.WAITING_VALIDATION?.nb || 0}
+                      percentage={valuesMission.WAITING_VALIDATION?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "WAITING_VALIDATION" })]}
+                      base="/mission"
+                    />
+                    <StatusText
+                      status="En attente de correction"
+                      nb={valuesMission.WAITING_CORRECTION?.nb || 0}
+                      percentage={valuesMission.WAITING_CORRECTION?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "WAITING_CORRECTION" })]}
+                      base="/mission"
+                    />
+                    <StatusText
+                      status="Validée"
+                      nb={valuesMission.VALIDATED?.nb || 0}
+                      percentage={valuesMission.VALIDATED?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "VALIDATED" })]}
+                      base="/mission"
+                    />
+                    <StatusText
+                      status="Brouillon"
+                      nb={valuesMission.DRAFT?.nb || 0}
+                      percentage={valuesMission.DRAFT?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "DRAFT" })]}
+                      base="/mission"
+                    />
+                  </div>
+                  <div className="flex  items-center justify-center">
+                    <div className="h-full w-[1px] border-r-[1px] border-gray-300 mx-2" />
+                  </div>
+                  <div className="flex min-w-[30%] flex-col gap-2 justify-center">
+                    <StatusText
+                      status="Refusée"
+                      nb={valuesMission.REFUSED?.nb || 0}
+                      percentage={valuesMission.REFUSED?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "REFUSED" })]}
+                      base="/mission"
+                    />
+                    <StatusText
+                      status="Annulée"
+                      nb={valuesMission.CANCEL?.nb || 0}
+                      percentage={valuesMission.CANCEL?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "CANCEL" })]}
+                      base="/mission"
+                    />
+                    <StatusText
+                      status="Archivée"
+                      nb={valuesMission.ARCHIVED?.nb || 0}
+                      percentage={valuesMission.ARCHIVED?.percentage || 0}
+                      filtersUrl={[queryString.stringify({ status: "ARCHIVED" })]}
+                      base="/mission"
+                    />
+                  </div>
+                </>
               )}
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-6  rounded-lg bg-white px-8 py-6 w-full shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-          <p className="text-base font-bold leading-5 text-gray-900">Contrat d'engagement</p>
-          <div className="flex flex-wrap">
-            {loading && <Loader />}
-            {error && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
-            {!loading && !error && (
-              <div className="flex w-full m-min-[30%] gap-8 mx-4">
-                <div className="w-1/3">
-                  <StatusText
-                    status="Brouillon"
-                    nb={valuesApplication.CONTRACT.DRAFT?.nb || 0}
-                    percentage={valuesApplication.CONTRACT.DRAFT?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ contractStatus: "DRAFT", status: statusForRedirectContract.join("~") })]}
-                    base="/volontaire/list/all"
-                    icon={!!valuesApplication.CONTRACT.DRAFT?.nb}
-                  />
-                </div>
-                <div className="flex  items-center justify-center">
-                  <div className="h-full w-[1px] border-r-[1px] border-gray-300" />
-                </div>
-                <div className="w-1/3">
-                  <StatusText
-                    status="Envoyés"
-                    nb={valuesApplication.CONTRACT.SENT?.nb || 0}
-                    percentage={valuesApplication.CONTRACT.SENT?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ contractStatus: "SENT", status: statusForRedirectContract.join("~") })]}
-                    base="/volontaire/list/all"
-                  />
-                </div>
-                <div className="flex  items-center justify-center">
-                  <div className="h-full w-[1px] border-r-[1px] border-gray-300" />
-                </div>
-                <div className="w-1/3">
-                  <StatusText
-                    status="Signés"
-                    nb={valuesApplication.CONTRACT.VALIDATED?.nb || 0}
-                    percentage={valuesApplication.CONTRACT.VALIDATED?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ contractStatus: "VALIDATED", status: statusForRedirectContract.join("~") })]}
-                    base="/volontaire/list/all"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <h1 className="text-[28px] font-bold leading-8 text-gray-900">Missions</h1>
-        <div className="flex flex-col gap-6  rounded-lg bg-white px-8 py-6 w-full shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-          <p className="text-base font-bold leading-5 text-gray-900">Statut des missions proposées par ma structure</p>
-          <div className="flex w-full flex-wrap justify-center gap-7">
-            {loadingMission && <Loader />}
-            {errorMission && <div className="flex items-center justify-center p-8 text-center text-sm font-medium text-red-600">{errorMission}</div>}
-            {!loadingMission && !errorMission && (
-              <>
-                <div className="flex min-w-[30%] flex-col gap-2">
-                  <StatusText
-                    status="En attente de validation"
-                    nb={valuesMission.WAITING_VALIDATION?.nb || 0}
-                    percentage={valuesMission.WAITING_VALIDATION?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "WAITING_VALIDATION" })]}
-                    base="/mission"
-                  />
-                  <StatusText
-                    status="En attente de correction"
-                    nb={valuesMission.WAITING_CORRECTION?.nb || 0}
-                    percentage={valuesMission.WAITING_CORRECTION?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "WAITING_CORRECTION" })]}
-                    base="/mission"
-                  />
-                  <StatusText
-                    status="Validée"
-                    nb={valuesMission.VALIDATED?.nb || 0}
-                    percentage={valuesMission.VALIDATED?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "VALIDATED" })]}
-                    base="/mission"
-                  />
-                  <StatusText
-                    status="Brouillon"
-                    nb={valuesMission.DRAFT?.nb || 0}
-                    percentage={valuesMission.DRAFT?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "DRAFT" })]}
-                    base="/mission"
-                  />
-                </div>
-                <div className="flex  items-center justify-center">
-                  <div className="h-full w-[1px] border-r-[1px] border-gray-300 mx-2" />
-                </div>
-                <div className="flex min-w-[30%] flex-col gap-2 justify-center">
-                  <StatusText
-                    status="Refusée"
-                    nb={valuesMission.REFUSED?.nb || 0}
-                    percentage={valuesMission.REFUSED?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "REFUSED" })]}
-                    base="/mission"
-                  />
-                  <StatusText
-                    status="Annulée"
-                    nb={valuesMission.CANCEL?.nb || 0}
-                    percentage={valuesMission.CANCEL?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "CANCEL" })]}
-                    base="/mission"
-                  />
-                  <StatusText
-                    status="Archivée"
-                    nb={valuesMission.ARCHIVED?.nb || 0}
-                    percentage={valuesMission.ARCHIVED?.percentage || 0}
-                    filtersUrl={[queryString.stringify({ status: "ARCHIVED" })]}
-                    base="/mission"
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </DashboardContainer>
+      </DashboardContainer>
+    </Page>
   );
 }
 

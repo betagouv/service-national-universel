@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import { getCohortNames, departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
@@ -17,10 +16,16 @@ import { orderCohort } from "../../../../../components/filters-system-v2/compone
 import ExportEngagementReport from "./components/ExportEngagementReport";
 import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
 import { getCohortNameList } from "@/services/cohort.service";
+import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
+import { HiOutlineChartSquareBar, HiChartSquareBar, HiClipboardList } from "react-icons/hi";
+import BandeauInfo from "../../../components/BandeauInfo";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts);
+  const [modalExport, setModalExport] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingText, setLoadingText] = useState("0 %");
 
   const [selectedFilters, setSelectedFilters] = useState({
     status: [YOUNG_STATUS.VALIDATED],
@@ -115,33 +120,83 @@ export default function Index() {
 
   async function loadData() {}
 
+  const selectOptions = [
+    {
+      key: "1",
+      items: [
+        {
+          key: "1.1",
+          render: (
+            <>
+              <HiClipboardList size={30} />
+              <p>
+                Exporter le rapport <span>"Engagement"</span>
+              </p>
+            </>
+          ),
+          action: () => {
+            setModalExport(true);
+          },
+        },
+        {
+          key: "1.2",
+          render: (
+            <>
+              <HiChartSquareBar size={34} />
+              <p>
+                Exporter les statistiques <span>"Engagement"</span>
+              </p>
+            </>
+          ),
+          action: () => {
+            plausibleEvent("Dashboard/CTA - Exporter statistiques engagement");
+            print();
+          },
+        },
+      ],
+    },
+  ];
+
   return (
-    <DashboardContainer
-      availableTab={["general", "engagement", "sejour", "inscription"]}
-      active="engagement"
-      navChildren={
-        <div className="flex items-center gap-2">
-          <ExportEngagementReport filter={selectedFilters} />
-          <ButtonPrimary
-            className="text-sm"
-            onClick={() => {
-              plausibleEvent("Dashboard/CTA - Exporter statistiques engagement");
-              print();
-            }}>
-            Exporter les statistiques <span className="font-bold">“Engagement”</span>
-          </ButtonPrimary>
-        </div>
-      }>
-      <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-      <Section title="Volontaires">
-        <div className="flex">
-          <VolontairesStatutsDePhase filters={selectedFilters} className="mr-4 flex-[0_0_332px]" />
-          <VolontairesStatutsDivers filters={selectedFilters} className="grow" />
-        </div>
-        <VolontairesEquivalenceMig filters={selectedFilters} />
-      </Section>
-      <SectionStructures filters={selectedFilters} />
-      <SectionMissions filters={selectedFilters} />
-    </DashboardContainer>
+    <Page>
+      <BandeauInfo />
+      <Header
+        title="Tableau de bord"
+        breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]}
+        actions={[<DropdownButton title={"Exporter"} optionsGroup={selectOptions} key={"export"} position="right" />]}
+      />
+      <DashboardContainer availableTab={["general", "engagement", "sejour", "inscription"]} active="engagement">
+        <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
+        <Section title="Volontaires">
+          <div className="flex">
+            <VolontairesStatutsDePhase filters={selectedFilters} className="mr-4 flex-[0_0_332px]" />
+            <VolontairesStatutsDivers filters={selectedFilters} className="grow" />
+          </div>
+          <VolontairesEquivalenceMig filters={selectedFilters} />
+        </Section>
+        <SectionStructures filters={selectedFilters} />
+        <SectionMissions filters={selectedFilters} />
+      </DashboardContainer>
+      <ModalConfirmation
+        isOpen={modalExport}
+        onClose={() => {
+          setModalExport(false);
+        }}
+        className="md:max-w-[700px]"
+        title="Téléchargement"
+        text="En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)"
+        actions={[
+          { title: "Annuler", isCancel: true },
+          {
+            title: `${loading ? `Téléchargement ${loadingText}` : "Confirmer"}`,
+            disabled: loading,
+            onClick: () => {
+              plausibleEvent("Dashboard/CTA - Exporter rapport Engagement");
+              ExportEngagementReport({ filter: selectedFilters, user, setLoading, setLoadingText });
+            },
+          },
+        ]}
+      />
+    </Page>
   );
 }

@@ -10,6 +10,9 @@ import KeyNumbers from "./KeyNumbers";
 import InfoMessage from "./ui/InfoMessage";
 import Todos from "./Todos";
 import Objective from "../moderator-ref/subscenes/general/components/Objective";
+import BandeauInfo from "./BandeauInfo";
+import { HiOutlineChartSquareBar } from "react-icons/hi";
+import { Page, Header } from "@snu/ds/admin";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -44,17 +47,24 @@ export default function Index() {
         return ["general", "engagement", "sejour", "inscription"];
     }
   })();
+
+  const needMoreInfo = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+
   return (
-    <DashboardContainer active="general" availableTab={availableTab}>
-      <div className="flex flex-col gap-8 mb-4">
-        {message?.length ? message?.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
-        <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
-        <div className="flex w-full gap-4">
-          <Todos user={user} />
-          {user.role !== ROLES.HEAD_CENTER && <KeyNumbers role={user.role} />}
+    <Page>
+      {needMoreInfo && <BandeauInfo />}
+      <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} />
+      <DashboardContainer active="general" availableTab={availableTab}>
+        <div className="flex flex-col gap-8 mb-4">
+          {message?.length ? message?.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
+          <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
+          <div className="flex w-full gap-4">
+            <Todos user={user} />
+            {user.role !== ROLES.HEAD_CENTER && <KeyNumbers role={user.role} />}
+          </div>
+          {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && <Objective user={user} />}
         </div>
-        {[ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && <Objective user={user} />}
-      </div>
-    </DashboardContainer>
+      </DashboardContainer>
+    </Page>
   );
 }
