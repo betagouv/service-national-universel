@@ -4,6 +4,7 @@ const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
 const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
+const { generateBatchDroitImage } = require("../templates/droitImage");
 const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
@@ -14,8 +15,7 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter, sanitizeAll, getBaseUrl } = require("../utils");
-const Zip = require("adm-zip");
+const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -790,32 +790,8 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
     }
     // --- found youngs
     const youngs = await YoungModel.find({ sessionPhase1Id: session._id }).sort({ lastName: 1, firstName: 1 });
-    // --- start zip file
-    let zip = new Zip();
 
-    // --- build PDFS 10 by 10 and zip'em
-    const batchSize = 10;
-    const numBatches = Math.ceil(youngs.length / batchSize);
-    for (let i = 0; i < numBatches; i++) {
-      const batchStart = i * batchSize;
-      const batchEnd = Math.min(batchStart + batchSize, youngs.length);
-      const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-        const buffer = await generatePdfIntoBuffer({ type: "droitImage", template: "droitImage", young });
-        return { name: young.lastName + " " + young.firstName + " - Droits à l'image.pdf", buffer };
-      });
-      const pdfs = await Promise.all(pdfPromises);
-      pdfs.forEach((pdf) => {
-        zip.addFile(pdf.name, pdf.body);
-      });
-    }
-
-    // --- send zip file
-    res.set({
-      "content-disposition": `inline; filename="droits-image.zip"`,
-      "content-type": "application/zip",
-      "cache-control": "public, max-age=1",
-    });
-    res.status(200).end(zip.toBuffer());
+    generateBatchDroitImage(res, youngs);
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

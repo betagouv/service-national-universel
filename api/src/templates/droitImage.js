@@ -10,14 +10,26 @@ const FONT_ITALIC = `${FONT}_Italic`;
 const FILL_COLOR = "#444";
 const LIST_INDENT = 15;
 const MARGIN = 75;
-const SVG_BOX_PATH = "M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z";
-const SVG_CHECK_PATH = "M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z";
+
+const CHECKBOX_SIZE = 15;
+
+function checkBox(doc, x, y, checked = false) {
+  doc.lineWidth(1).fillColor("fff").roundedRect(x, y, CHECKBOX_SIZE, CHECKBOX_SIZE, 2).stroke().fillColor(FILL_COLOR);
+  if (checked) {
+    const center = CHECKBOX_SIZE / 2;
+    const gap = CHECKBOX_SIZE / 4;
+    doc
+      .lineWidth(1.5)
+      .lineCap("round")
+      .moveTo(x + gap, y + center)
+      .lineTo(x + center, y + CHECKBOX_SIZE - gap)
+      .lineTo(x + CHECKBOX_SIZE - gap, y + gap)
+      .stroke();
+  }
+}
 
 function render(doc, young) {
-  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
-  doc.registerFont(FONT_ITALIC, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
-
+  let _y;
   const hasParent2 = young.parent2Status !== undefined && young.parent2Status !== null && young.parent2Status.trim().length > 0;
   const allow = young.parent1AllowImageRights === "true" && (!hasParent2 || young.parent2AllowImageRights === "true");
 
@@ -59,16 +71,12 @@ function render(doc, young) {
     doc.moveDown();
   }
 
-  doc.save().translate(150, doc.y).path(SVG_BOX_PATH).restore();
-  doc.save().translate(350, doc.y).path(SVG_BOX_PATH).restore();
-  doc
-    .save()
-    .translate(allow ? 150 : 350, doc.y)
-    .path(SVG_CHECK_PATH)
-    .restore();
+  _y = doc.y;
+  checkBox(doc, 150, _y + 1, allow);
+  checkBox(doc, 350, _y + 1, !allow);
 
-  doc.text(hasParent2 ? " autorisons " : " autorise ", 170, undefined, { continued: true });
-  doc.text(hasParent2 ? " n'autorisons pas " : " autorisons ", 315, undefined);
+  doc.text(hasParent2 ? " autorisons " : " autorise ", 150 + 20, _y);
+  doc.text(hasParent2 ? " n'autorisons pas " : " n'autorise pas ", 350 + 20, _y);
 
   doc.moveDown();
 
@@ -121,10 +129,20 @@ function render(doc, young) {
 
   doc.moveDown();
 
-  doc.font(FONT_ITALIC).text(`${young.parent1FirstName} ${young.parent1LastName}`, { continued: true, paragraphGap: 10 });
-  doc.text(hasParent2 ? `${young.parent2FirstName} ${young.parent2LastName}` : "", 200).font(FONT);
-  doc.text(young.parent1ValidationDate ? `Validé le : ${datefns.format(young.parent1ValidationDate, "dd/MM/yyyy à HH:mm")}` : "", { continued: true });
-  doc.text(young.parent2ValidationDate ? `Validé le : ${datefns.format(young.parent2ValidationDate, "dd/MM/yyyy à HH:mm")}` : "", 200);
+  _y = doc.y;
+  doc.font(FONT_ITALIC);
+  doc.text(`${young.parent1FirstName} ${young.parent1LastName}`, MARGIN, _y);
+  if (hasParent2) {
+    doc.text(`${young.parent2FirstName} ${young.parent2LastName}`, 300, _y);
+  }
+  _y = doc.y;
+  doc.font(FONT);
+  if (young.parent1ValidationDate) {
+    doc.text(`Validé le : ${datefns.format(young.parent1ValidationDate, "dd/MM/yyyy à HH:mm")}`, MARGIN, _y);
+  }
+  if (young.parent2ValidationDate) {
+    doc.text(`Validé le : ${datefns.format(young.parent2ValidationDate, "dd/MM/yyyy à HH:mm")}`, 300, _y);
+  }
 
   doc.moveDown(4);
 
@@ -137,23 +155,47 @@ function render(doc, young) {
     );
 }
 
-function generateDroitImage(outStream, young) {
-  const random = Math.random();
-  console.time("RENDERING " + random);
+function initDocument(options = {}) {
   const doc = new PDFDocument({
     layout: "portrait",
     size: "A4",
     margins: {
       top: MARGIN,
-      bottom: 40,
+      bottom: 30,
       left: MARGIN,
       right: MARGIN,
     },
+    ...options,
   });
+
+  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
+  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
+  doc.registerFont(FONT_ITALIC, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
+
+  return doc;
+}
+
+function generateDroitImage(outStream, young) {
+  const random = Math.random();
+  console.time("RENDERING " + random);
+  const doc = initDocument();
   doc.pipe(outStream);
   render(doc, young);
   doc.end();
   console.timeEnd("RENDERING " + random);
 }
 
-module.exports = { generateDroitImage };
+function generateBatchDroitImage(outStream, youngs) {
+  const random = Math.random();
+  console.time("RENDERING " + random);
+  const doc = initDocument({ autoFirstPage: false });
+  doc.pipe(outStream);
+  for (const young of youngs) {
+    doc.addPage();
+    render(doc, young);
+  }
+  doc.end();
+  console.timeEnd("RENDERING " + random);
+}
+
+module.exports = { generateDroitImage, generateBatchDroitImage };

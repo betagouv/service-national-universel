@@ -427,7 +427,7 @@ export default function CenterYoungIndex() {
   const exportImageRights = async () => {
     try {
       const file = await api.openpdf(`/session-phase1/${focusedSession._id}/image-rights/export`, {});
-      download(file, "droits-a-l-image.zip");
+      download(file, "droits-a-l-image.pdf");
     } catch (e) {
       // We don't capture unauthorized. Just redirect.
       if (e?.message === "unauthorized") {
