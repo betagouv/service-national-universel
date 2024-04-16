@@ -19,6 +19,7 @@ export type Address = {
 
 interface proptype {
   label?: string;
+  readOnly: boolean;
   data: Address;
   updateData: (data: Address) => void;
   query: string;
@@ -28,6 +29,7 @@ interface proptype {
 
 export default function AddressForm({
   label = "Rechercher une adresse",
+  readOnly = false,
   data,
   updateData,
   query,
@@ -54,7 +56,9 @@ export default function AddressForm({
           label="Adresse"
           value={data.address}
           onChange={(value: string) => updateData({ ...data, address: value })}
-          disabled={data?.coordinatesAccuracyLevel === "housenumber"}
+          disabled={
+            readOnly || data?.coordinatesAccuracyLevel === "housenumber"
+          }
           className="col-span-2"
         />
         <Input
@@ -69,13 +73,15 @@ export default function AddressForm({
           disabled
           className="col-span-2 md:col-span-1"
         />
-        <button
-          onClick={resetData}
-          className="col-span-2 text-blue-600 hover:text-blue-800 ml-auto py-1 flex gap-2 items-center"
-        >
-          <RiSearchLine />
-          Rechercher une nouvelle adresse
-        </button>
+        {!readOnly && (
+          <button
+            onClick={resetData}
+            className="col-span-2 text-blue-600 hover:text-blue-800 ml-auto py-1 flex gap-2 items-center"
+          >
+            <RiSearchLine />
+            Rechercher une nouvelle adresse
+          </button>
+        )}
       </div>
     );
 
