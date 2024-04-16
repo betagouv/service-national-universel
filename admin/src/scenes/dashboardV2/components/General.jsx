@@ -56,7 +56,7 @@ export default function Index() {
       <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} />
       <DashboardContainer active="general" availableTab={availableTab}>
         <div className="flex flex-col gap-8 mb-4">
-          {message?.length ? message?.map((hit) => <InfoMessage key={hit._id} data={hit} />) : null}
+          {message?.map((hit) => <InfoMessage key={hit._id} data={hit} />)}
           <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
           <div className="flex w-full gap-4">
             <Todos user={user} />
