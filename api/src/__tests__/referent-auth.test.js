@@ -272,7 +272,7 @@ describe("Referent", () => {
     it("should return 401 when new password is identical as last password", async () => {
       const fixture = getNewReferentFixture();
       const token = await crypto.randomBytes(20).toString("hex");
-      const young = await createReferentHelper({
+      await createReferentHelper({
         ...fixture,
         email: fixture.email.toLowerCase(),
         forgotPasswordResetExpires: Date.now() + 1000 * 60 * 60 * 24 * 7,

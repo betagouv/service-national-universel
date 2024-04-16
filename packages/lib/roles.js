@@ -1,5 +1,8 @@
 import { region2department } from "./region-and-departments";
 
+const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
+const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
+
 const ROLES = {
   ADMIN: "admin",
   REFERENT_DEPARTMENT: "referent_department",
@@ -940,6 +943,8 @@ export {
   VISITOR_SUBROLES,
   VISITOR_SUB_ROLES_LIST,
   CENTER_ROLES,
+  DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS,
+  DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS,
   canInviteUser,
   canDeleteYoung,
   canEditYoung,

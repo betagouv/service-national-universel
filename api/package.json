@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "engines": {
-    "node": "^18.16.0",
-    "npm": "^9.5.1",
+    "node": "^18.20",
+    "npm": "^10.5",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "scripts": {
@@ -19,6 +19,7 @@
     "lint:fix": "eslint src --ext .js --fix",
     "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "doc": "node ./src/utils/generate-models-documentation.js",
+    "clean": "rm -fr node_modules .turbo",
     "build": "tsc -b ./tsconfig.json"
   },
   "author": "SELEGO",
@@ -41,7 +42,7 @@
     "dayjs": "^1.11.8",
     "dotenv": "^10.0.0",
     "eslint-plugin-jest": "^27.2.1",
-    "express": "^4.18.2",
+    "express": "^4.19.2",
     "express-fileupload": "^1.4.0",
     "file-type": "^16.5.3",
     "forcedomain": "^2.2.11",
@@ -61,7 +62,7 @@
     "password-validator": "^5.3.0",
     "pm2": "^5.3.0",
     "redis": "^4.6.5",
-    "sanitize-html": "^2.7.3",
+    "sanitize-html": "^2.12.1",
     "sib-api-v3-sdk": "^8.5.0",
     "snu-lib": "*",
     "uuid": "^9.0.0",

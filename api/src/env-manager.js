@@ -4,6 +4,7 @@ const { Secret, createClient } = require("@scaleway/sdk");
 
 async function loadEnv() {
   if (!process.env.DEV) return;
+  if (process.env.OFFLINE === "true") return require("dotenv").config({ path: path.resolve(__dirname, "../.env.local") });
 
   const client = createClient({
     accessKey: process.env.SCW_ACCESS_KEY,
