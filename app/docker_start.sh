@@ -26,8 +26,8 @@ sed '/<noscript> You need to enable JavaScript to run this app. <\/noscript>/a\
         "API_ENGAGEMENT_KEY":"$API_ENGAGEMENT_KEY" \
     }; \
 </script> \
-' index.html.template |
-    envsubst >index.html
+' index.html.template \
+| envsubst > index.html
 
 cd -
 

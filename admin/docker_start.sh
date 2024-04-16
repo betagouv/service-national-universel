@@ -22,8 +22,8 @@ sed '/<noscript> You need to enable JavaScript to run this app. <\/noscript>/a\
         "SENTRY_ON_ERROR_SAMPLE_RATE":"$SENTRY_ON_ERROR_SAMPLE_RATE" \
     }; \
 </script> \
-' index.html.template |
-    envsubst >index.html
+' index.html.template \
+| envsubst > index.html
 
 cd -
 
