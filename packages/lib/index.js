@@ -198,6 +198,7 @@ export {
   htmlCleaner,
 };
 
+export * from "./useAddress";
 export * from "./academy";
 export * from "./colors";
 export * from "./constants";
