@@ -23,7 +23,6 @@ const { generateCertifSNU } = require("../templates/certificate/snu");
 const { generateDroitImage } = require("../templates/droitImage");
 
 async function getHtmlTemplate(type, template, young, contract) {
-  if (type === "form" && template === "imageRight") return form.imageRight(young);
   if (type === "convocation" && template === "cohesion") return convocation.cohesion(young);
   if (type === "contract" && template === "2" && contract) return contractPhase2.render(contract);
   throw new Error("Not implemented");
