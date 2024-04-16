@@ -131,7 +131,6 @@ resource "scaleway_container" "api" {
     "CLE"                               = "true"
     "STAGING"                           = "true"
     "FOLDER_API"                        = "api"
-    "ENVIRONNEMENT"                     = "ci"
     "RELEASE"                           = var.api_image_tag
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
     "SENTRY_TRACING_SAMPLE_RATE"        = 0.1
