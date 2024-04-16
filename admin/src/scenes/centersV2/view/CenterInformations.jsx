@@ -3,13 +3,15 @@ import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
 import { Title } from "../components/commons";
 import { canCreateOrUpdateCohesionCenter, ROLES } from "../../../utils";
-import { canUpdateMeetingPoint, departmentToAcademy } from "snu-lib";
+import { useAddress, canUpdateMeetingPoint, departmentToAcademy } from "snu-lib";
 import Pencil from "../../../assets/icons/Pencil";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import ReactTooltip from "react-tooltip";
 import { useHistory } from "react-router-dom";
+import { AddressForm } from "@snu/ds/common";
+import { useDebounce } from "@uidotdev/usehooks";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 import api from "../../../services/api";
@@ -43,6 +45,9 @@ export default function Details({ center, setCenter, sessions }) {
   const user = useSelector((state) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalDelete, setModalDelete] = React.useState({ isOpen: false });
+  const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
 
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
@@ -258,29 +263,15 @@ export default function Details({ center, setCenter, sessions }) {
             <div className="flex flex-col gap-3">
               <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
 
-              <Field
+              <AddressForm
                 readOnly={!editInfo}
-                label="Adresse"
-                onChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
-                value={data.address}
-                error={errors?.address}
+                data={{ address: data.address, zip: data.zip, city: data.city }}
+                updateData={(address) => setData({ ...data, ...address })}
+                query={query}
+                setQuery={setQuery}
+                options={results}
               />
-              <div className="flex items-center gap-3">
-                <Field
-                  readOnly={!editInfo}
-                  label="Code postal"
-                  onChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
-                  value={data.zip}
-                  error={errors?.zip}
-                />
-                <Field
-                  readOnly={!editInfo}
-                  label="Ville"
-                  onChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
-                  value={data.city}
-                  error={errors?.city}
-                />
-              </div>
+
               {data.addressVerified && (
                 <>
                   <div className="flex items-center gap-3">
