@@ -13,6 +13,11 @@ Notion ID, followed by a `-` is **mandatory** on types `refactor`, `feat` and `f
 
 *If you really need to bypass the pull request title validation, you can add the `bypass title` label to you PR.*
 
+Examples of valid PR titles:
+- `chore(release): New version 1.3.3.7`
+- `refactor(api): 1789 - Removed monarchy from codebase`
+- `fix(api, app, admin): 1981 - User cannot delete each other accounts anymore.`
+
 
 **Description**
 
