@@ -11,6 +11,7 @@ import {
   Replay,
 } from "@sentry/react";
 import { RELEASE, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, environment } from "./config";
+console.log("🚀 ~ file: sentry.js:14 ~ environment:", environment);
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -25,7 +26,7 @@ function initSentry() {
     init({
       enabled: Boolean(SENTRY_URL),
       dsn: SENTRY_URL,
-      environment: environment,
+      environment,
       release: RELEASE,
       normalizeDepth: 16,
       transport: makeBrowserOfflineTransport(makeFetchTransport),

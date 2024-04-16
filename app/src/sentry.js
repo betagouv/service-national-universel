@@ -18,13 +18,15 @@ import { createBrowserHistory } from "history";
 const SentryRoute = withSentryRouting(Route);
 const history = createBrowserHistory();
 
+console.log("🚀 ~ file: sentry.js:14 ~ environment:", environment);
+
 function initSentry() {
   if (environment !== "development") {
     // Evite le spam sentry en local
     init({
       enabled: Boolean(SENTRY_URL),
       dsn: SENTRY_URL,
-      environment: environment,
+      environment,
       release: RELEASE,
       normalizeDepth: 16,
       transport: makeBrowserOfflineTransport(makeFetchTransport),
