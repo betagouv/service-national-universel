@@ -1,18 +1,19 @@
 import React, { useEffect } from "react";
-import { ROLES } from "snu-lib";
-import { capture } from "@/sentry";
-import { translate } from "snu-lib";
 import { toastr } from "react-redux-toastr";
-import api from "@/services/api";
 import { useSelector } from "react-redux";
+import { HiOutlineChartSquareBar } from "react-icons/hi";
+
+import { capture } from "@/sentry";
+import { Page, Header } from "@snu/ds/admin";
+import api from "@/services/api";
+import { ROLES, translate } from "snu-lib";
+
 import DashboardContainer from "./DashboardContainer";
 import KeyNumbers from "./KeyNumbers";
 import InfoMessage from "./ui/InfoMessage";
 import Todos from "./Todos";
 import Objective from "../moderator-ref/subscenes/general/components/Objective";
 import BandeauInfo from "./BandeauInfo";
-import { HiOutlineChartSquareBar } from "react-icons/hi";
-import { Page, Header } from "@snu/ds/admin";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);
@@ -56,7 +57,9 @@ export default function Index() {
       <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} />
       <DashboardContainer active="general" availableTab={availableTab}>
         <div className="flex flex-col gap-8 mb-4">
-          {message?.map((hit) => <InfoMessage key={hit._id} data={hit} />)}
+          {message?.map((hit) => (
+            <InfoMessage key={hit._id} message={hit.content} priority={hit.priority} />
+          ))}
           <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
           <div className="flex w-full gap-4">
             <Todos user={user} />

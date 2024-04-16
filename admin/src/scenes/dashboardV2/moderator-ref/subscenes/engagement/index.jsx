@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import DashboardContainer from "../../../components/DashboardContainer";
-import { FilterDashBoard } from "../../../components/FilterDashBoard";
+import { useSelector } from "react-redux";
+import { HiOutlineChartSquareBar, HiChartSquareBar, HiClipboardList } from "react-icons/hi";
+
 import { getCohortNames, departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
 import { YOUNG_STATUS } from "snu-lib/constants";
-import { useSelector } from "react-redux";
 import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib/academy";
 import { department2region, region2department } from "snu-lib/region-and-departments";
+import { getCohortNameList } from "@/services/cohort.service";
+import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
+
+import DashboardContainer from "../../../components/DashboardContainer";
+import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import Section from "../../../components/ui/Section";
 import VolontairesStatutsDePhase from "./components/VolontairesStatutsDePhase";
 import VolontairesStatutsDivers from "./components/VolontairesStatutsDivers";
@@ -15,9 +20,6 @@ import plausibleEvent from "../../../../../services/plausible";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import ExportEngagementReport from "./components/ExportEngagementReport";
 import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
-import { getCohortNameList } from "@/services/cohort.service";
-import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
-import { HiOutlineChartSquareBar, HiChartSquareBar, HiClipboardList } from "react-icons/hi";
 import BandeauInfo from "../../../components/BandeauInfo";
 
 export default function Index() {

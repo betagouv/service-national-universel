@@ -1,15 +1,17 @@
+import React, { useEffect, useState } from "react";
+import queryString from "query-string";
+import { useSelector } from "react-redux";
+import { HiOutlineChartSquareBar } from "react-icons/hi";
+
 import api from "@/services/api";
 import { getNewLink } from "@/utils";
-import queryString from "query-string";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { Page, Header } from "@snu/ds/admin";
+
 import DashboardContainer from "../../../components/DashboardContainer";
 import BoxWithPercentage from "../../../components/sejour/BoxWithPercentage";
 import Details from "@/scenes/dashboardV2/components/inscription/Details";
 import Presences from "../../../components/sejour/Presences";
 import StatusPhase1 from "../../../components/sejour/StatusPhase1";
-import { Page, Header } from "@snu/ds/admin";
-import { HiOutlineChartSquareBar } from "react-icons/hi";
 
 export default function Index() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);

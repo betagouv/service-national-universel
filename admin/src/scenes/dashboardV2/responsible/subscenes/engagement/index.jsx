@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { HiOutlineChartSquareBar } from "react-icons/hi";
+import { toastr } from "react-redux-toastr";
+import ReactTooltip from "react-tooltip";
 import { useSelector } from "react-redux";
 import queryString from "query-string";
 import { Link } from "react-router-dom";
+
 import { APPLICATION_STATUS, ROLES, getNewLink } from "@/utils";
-import DashboardContainer from "../../../components/DashboardContainer";
 import InformationCircle from "@/assets/icons/InformationCircle";
-import ReactTooltip from "react-tooltip";
 import API from "@/services/api";
 import Loader from "@/components/Loader";
-import { toastr } from "react-redux-toastr";
 import { Page, Header } from "@snu/ds/admin";
-import { HiOutlineChartSquareBar } from "react-icons/hi";
+
+import DashboardContainer from "../../../components/DashboardContainer";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);

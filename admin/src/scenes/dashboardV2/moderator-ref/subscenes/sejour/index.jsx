@@ -1,10 +1,13 @@
-import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
-import api from "@/services/api";
-import plausibleEvent from "@/services/plausible";
-import { getNewLink } from "@/utils";
 import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { HiOutlineChartSquareBar, HiChartSquareBar } from "react-icons/hi";
+
+import api from "@/services/api";
+import plausibleEvent from "@/services/plausible";
+import { getNewLink } from "@/utils";
+import { getCohortNameList } from "@/services/cohort.service";
+import { Page, Header, DropdownButton } from "@snu/ds/admin";
 import {
   getCohortNames,
   ROLES,
@@ -18,6 +21,7 @@ import {
   translatePhase1,
   getDepartmentNumber,
 } from "snu-lib";
+
 import DashboardContainer from "../../../components/DashboardContainer";
 import { FilterDashBoard } from "../../../components/FilterDashBoard";
 import { getDepartmentOptions, getFilteredDepartment } from "../../../components/common";
@@ -28,10 +32,8 @@ import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "../../../components/sejour/Presences";
 import StatusPhase1 from "../../../components/sejour/StatusPhase1";
 import TabSession from "./components/TabSession";
-import { getCohortNameList } from "@/services/cohort.service";
-import { Page, Header, DropdownButton } from "@snu/ds/admin";
+import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 import BandeauInfo from "../../../components/BandeauInfo";
-import { HiOutlineChartSquareBar, HiChartSquareBar } from "react-icons/hi";
 
 export default function Index() {
   const user = useSelector((state) => state.Auth.user);

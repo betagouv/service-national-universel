@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { HiOutlineChartSquareBar } from "react-icons/hi";
+
 import General from "@/scenes/dashboardV2/components/inscription/General";
 import { Page, Header } from "@snu/ds/admin";
-import { HiOutlineChartSquareBar } from "react-icons/hi";
 
 export default function Index() {
   const [selectedFilters, setSelectedFilters] = useState({

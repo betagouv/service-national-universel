@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import DashboardContainer from "../../../components/DashboardContainer";
-import BandeauInfo from "../../../components/BandeauInfo";
 import { HiOutlineChartSquareBar, HiChartSquareBar, HiClipboardList } from "react-icons/hi";
+
+import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
 import plausibleEvent from "../../../../../services/plausible";
 import ExportReport from "./ExportReport";
-
-import General from "@/scenes/dashboardV2/components/inscription/General";
-import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
+import DashboardContainer from "../../../components/DashboardContainer";
+import BandeauInfo from "../../../components/BandeauInfo";
+import General from "../../../components/inscription/General";
 
 export default function Index() {
   const [selectedFilters, setSelectedFilters] = useState({
