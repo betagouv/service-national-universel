@@ -15,7 +15,7 @@ import { GoTools } from "react-icons/go";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { formatToActualTime } from "snu-lib/date";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
-import { captureMessage, capture } from "../../sentry";
+import { captureMessage } from "../../sentry";
 
 export default function Signin() {
   const history = useHistory();
@@ -27,24 +27,7 @@ export default function Signin() {
   const [tooManyRequests, setTooManyRequests] = useState({ status: false, date: null });
 
   const { redirect, unauthorized } = queryString.parse(location.search);
-  const declencherErreur = () => {
-    try {
-      // Simule une erreur
-      fonctionInexsitante();
-    } catch (err) {
-      capture(err);
-    }
-  };
 
-  // Pour envoyer un message
-  const envoyerMessage = () => {
-    try {
-      // Simule une erreur
-      throw new Error("Erreur déclenchée pour test Sentry ADMIN2");
-    } catch (err) {
-      capture(err);
-    }
-  };
   if (user) return <Redirect to={redirect || "/"} />;
   if (unauthorized === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
@@ -121,6 +104,7 @@ export default function Signin() {
                           {tooManyRequests.date !== "-" ? `à ${tooManyRequests.date}.` : "demain."}. Revenez d'ici quelques minutes.
                         </div>
                       )}
+
                       <div className="self-stretch">
                         <label htmlFor="email" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                           E-mail
@@ -136,8 +120,6 @@ export default function Signin() {
                           onChange={handleChange}
                         />
                       </div>
-                      <button onClick={declencherErreur}>Déclencher une Erreur</button>
-                      <button onClick={envoyerMessage}>Envoyer un Message à Sentry</button>{" "}
                       <div className="self-stretch">
                         <label htmlFor="password" className="mb-2 inline-block text-xs font-medium uppercase text-brand-grey">
                           Mot de passe
