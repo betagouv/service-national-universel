@@ -51,6 +51,26 @@ export const getCohortSelectOptions = (cohorts, short = false) => {
   return cohorts.map((cohort) => ({ value: cohort.name, label: `${cohort.name} (${getCohortPeriod(cohort, true)})` }));
 };
 
+export const NewGetCohortPeriod = (cohort) => {
+  var startDate = new Date(cohort.dateStart);
+  var endDate = new Date(cohort.dateEnd);
+
+  var startDateformatOptions = {
+    day: "numeric",
+    month: "numeric",
+  };
+
+  var endDateformatOptions = {
+    day: "numeric",
+    month: "numeric",
+  };
+
+  var formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions).format(startDate);
+  var formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
+
+  return formattedStart + " > " + formattedEnd;
+};
+
 export const NewGetCohortSelectOptions = (cohorts) => {
   return cohorts.map((cohort) => ({
     value: cohort.name,
@@ -58,7 +78,7 @@ export const NewGetCohortSelectOptions = (cohorts) => {
       <div className="flex gap-2.5 py-2.5 ml-2">
         <HiUsers size={24} className="mt-0.5" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
         <p className="font-normal text-base">
-          <span className="text-gray-700 font-medium">{cohort.name + " "} </span> : <span className="text-gray-500 font-normal"> {getCohortPeriod(cohort)}</span>
+          <span className="text-gray-500 font-normal"> {NewGetCohortPeriod(cohort)}</span> <span className="text-gray-700 font-medium">{cohort.name + " "} </span>
         </p>
       </div>
     ),
