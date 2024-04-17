@@ -147,9 +147,9 @@ export default function SessionList({ center, sessions, user, focusedSession, on
 
   if (!sessions || sessions.length === 0) return null;
   return (
-    <div className="flex flex-col gap-8 mx-8">
-      <div className="flex items-center< justify-between">
-        <Title>Par cohort</Title>
+    <div className="flex flex-col gap-4 mx-8">
+      <div className="flex items-center justify-between">
+        <Title>Par séjour</Title>
         <div className="flex items-center">
           {isLoadingCohort && <Loader size="2rem" />}
           <Select
@@ -166,9 +166,10 @@ export default function SessionList({ center, sessions, user, focusedSession, on
           />
         </div>
       </div>
-      <div className="mb-8 rounded-lg bg-white z-0">
-        <div className="border-bottom flex items-center justify-end px-4 py-2">
-          {isSessionEditionOpen(user, focusedCohortData) ? (
+      <div className="flex flex-col px-8 py-4 gap-4 mb-8 rounded-lg bg-white z-0">
+        <div className="flex items-center justify-between">
+          <div className="text-lg font-medium leading-6 text-gray-900">Détails</div>
+          {isSessionEditionOpen(user, focusedCohortData) && (
             <>
               {!editingBottom ? (
                 <button
@@ -200,9 +201,9 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                 </div>
               )}
             </>
-          ) : null}
+          )}
         </div>
-        <div className="">
+        <div className="border-top">
           {center?._id && focusedSession?._id && (
             <div className="">
               <div className="flex border-b-[1px] border-b-gray-200">
