@@ -4,31 +4,32 @@ import { IoShieldCheckmarkOutline } from "react-icons/io5";
 
 import { Button, ModalConfirmation } from "@snu/ds/admin";
 
-export default function ForceConsentement({ young, onConstentChange }) {
+export default function ForceConsentement({ young, onConfirmConsent }) {
   const [imageRights, setImageRights] = useState(false);
   const [participationConsent, setParticipationConsent] = useState(false);
   const [modalConsent, setModalConsent] = useState(false);
 
   async function handleConfirmConsent() {
     setModalConsent(false);
-    onConstentChange(participationConsent, imageRights);
+    onConfirmConsent(participationConsent, imageRights);
   }
 
   return (
     <>
-      <div className="flex justify-end mt-4 border-t border-t-[#E5E7EB] p-4">
-        <Button
-          disabled={young.inscriptionStep2023 !== "WAITING_CONSENT" && young.reinscriptionStep2023 !== "WAITING_CONSENT"}
-          title="Accepter à la place des représentants légaux"
-          type="tertiary"
-          leftIcon={<FaCheck />}
-          onClick={() => setModalConsent(true)}
-        />
+      <div className="flex justify-end mt-4 border-t border-t-[#E5E7EB] py-4">
+        <div className="flex flex-col items-end gap-2">
+          <Button
+            disabled={young.inscriptionStep2023 !== "WAITING_CONSENT" && young.reinscriptionStep2023 !== "WAITING_CONSENT"}
+            title="Accepter à la place des représentants légaux"
+            type="modify"
+            leftIcon={<FaCheck />}
+            onClick={() => setModalConsent(true)}
+          />
+          {young.inscriptionStep2023 !== "WAITING_CONSENT" && young.reinscriptionStep2023 !== "WAITING_CONSENT" && (
+            <div className="text-end text-red-500 text-xs">Cette fonctionnalité est disponible dès l’inscription terminée !</div>
+          )}
+        </div>
       </div>
-      {young.inscriptionStep2023 !== "WAITING_CONSENT" && young.reinscriptionStep2023 !== "WAITING_CONSENT" && (
-        // TODO: intégrer la maquette
-        <div>la fonctionnalité sera disponible des que l’inscription du jeune sera terminée</div>
-      )}
       <ModalConfirmation
         isOpen={modalConsent}
         onClose={() => {

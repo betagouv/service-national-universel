@@ -6,7 +6,7 @@ type Ttype =
   | "secondary"
   | "tertiary"
   | "wired"
-  | "change"
+  | "modify"
   | "cancel";
 
 type OwnProps = {
@@ -84,7 +84,7 @@ const getStyles = ({ type }: { type: Ttype }) => {
         disabled: "text-blue-600/60 !border border-blue-600/60",
         loaderColor: "#2563eb",
       };
-    case "change":
+    case "modify":
       return {
         native: "h-8 py-2 !pl-[12px] !gap-1 text-xs",
         base: "text-blue-600 bg-blue-100 hover:bg-blue-200",

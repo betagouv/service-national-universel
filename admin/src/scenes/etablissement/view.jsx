@@ -255,7 +255,7 @@ export default function View() {
         </div>,
       ]
     : (user.subRole === SUB_ROLES.referent_etablissement || [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) && [
-        <Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />,
+        <Button key="change" type="modify" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />,
       ];
 
   if (!etablissement) return <Loader />;
@@ -291,7 +291,7 @@ export default function View() {
           [ROLES.ADMIN].includes(user.role) && (
             <Button
               key="update-contacts"
-              type="change"
+              type="modify"
               leftIcon={<HiOutlinePencil size={16} />}
               title="Modifier"
               onClick={() => {

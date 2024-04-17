@@ -481,7 +481,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
           </div>
         )}
         {[YOUNG_STATUS.IN_PROGRESS].includes(young.status) && [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && young.parentAllowSNU !== "true" && (
-          <ForceConsentement young={young} onConstentChange={handleConfirmConsent} />
+          <ForceConsentement young={young} onConfirmConsent={handleConfirmConsent} />
         )}
       </div>
       {confirmModal && (
