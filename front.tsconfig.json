@@ -18,10 +18,5 @@
     "moduleResolution": "NodeNext",
     "target": "ES2021"
   },
-  "ts-node": {
-    "swc": true,
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  },
   "extends": "@tsconfig/vite-react/tsconfig.json"
 }
