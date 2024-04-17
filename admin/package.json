@@ -69,6 +69,7 @@
   },
   "devDependencies": {
     "@sentry/vite-plugin": "^2.2.0",
+    "@types/react-redux-toastr": "^8.0.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "autoprefixer": "^10.4.13",
     "eslint": "8.56.0",
