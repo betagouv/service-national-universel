@@ -1,6 +1,6 @@
 const path = require("path");
 const { initDocument, getMinistres, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
-const { CERTIFICATE_TEMPLATES_ROOTDIR } = require("../../config");
+const { IMAGES_ROOTDIR } = require("../../config");
 
 function render(doc, young) {
   const d = young.statusPhase3ValidatedAt;
@@ -14,7 +14,7 @@ function render(doc, young) {
 
   doc.font(FONT).fontSize(FONT_SIZE).lineGap(LINE_GAP).fillColor(FILL_COLOR);
 
-  doc.image(path.join(CERTIFICATE_TEMPLATES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+  doc.image(path.join(IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
 
   doc
     .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 280, { continued: true })

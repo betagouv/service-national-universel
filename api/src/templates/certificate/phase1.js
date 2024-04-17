@@ -5,7 +5,7 @@ const SessionPhase1Model = require("../../models/sessionPhase1");
 const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
 const CohortModel = require("../../models/cohort");
-const { CERTIFICATE_TEMPLATES_ROOTDIR } = require("../../config");
+const { IMAGES_ROOTDIR } = require("../../config");
 const { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
 
 const getCohesionCenter = async (young) => {
@@ -65,7 +65,7 @@ function render(doc, young, session, cohort, cohesionCenter) {
 
   doc.font(FONT).fontSize(FONT_SIZE).lineGap(LINE_GAP).fillColor(FILL_COLOR);
 
-  doc.image(path.join(CERTIFICATE_TEMPLATES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+  doc.image(path.join(IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
 
   doc
     .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 280, { continued: true })

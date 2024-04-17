@@ -50,8 +50,8 @@
 
     TODO : A possible improvement would be to download templates at build time
   */
-  const { getAllCertificateTemplates } = require("./utils/pdf-renderer");
-  getAllCertificateTemplates();
+  const { getAllPdfTemplates } = require("./utils/pdf-renderer");
+  getAllPdfTemplates();
 
   if (process.env.NODE_ENV !== "test") {
     console.log("APP_URL", APP_URL);
