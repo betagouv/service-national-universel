@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { connect, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
-import classNames from "classnames";
+import cx from "classnames";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 
@@ -259,14 +259,15 @@ const SideBar = (props) => {
     }
   };
 
-  const widthClasses = classNames({ "w-[250px]": open }, { "w-[88px]": !open });
-
-  const heightClasses = classNames({ "max-h-[95vh]": test }, { "top-[5vh]": test }, { "h-screen": !test }, { "max-h-screen": !test });
-
-  const containerClasses = classNames("sticky", "flex", "flex-col", "inset-y-0", "bg-[#25294F]", "z-40", "print:hidden", widthClasses, heightClasses);
-
   return (
-    <div className={containerClasses}>
+    <div
+      className={cx(
+        "sticky flex flex-col inset-y-0 bg-[#25294F] z-40 print:hidden",
+        { "w-[250px]": open },
+        { "w-[88px]": !open },
+        { "top-[5vh] max-h-[95vh]": test },
+        { "h-screen max-h-screen": !test },
+      )}>
       <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} />
         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
