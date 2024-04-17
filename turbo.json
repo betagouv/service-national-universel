@@ -2,8 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "build": {
-      "outputs": [".dist/**", "!.dist/cache/**"],
-      "dependsOn": ["@snu/ds#build"]
+      "outputs": [".dist/**", "!.dist/cache/**"]
     },
     "@snu/ds#build": {
       "cache": false
