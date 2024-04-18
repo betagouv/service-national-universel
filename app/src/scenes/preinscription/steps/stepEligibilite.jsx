@@ -245,7 +245,7 @@ export default function StepEligibilite() {
             <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
               Date de naissance
               <DatePicker
-                value={new Date(data.birthDate)}
+                initialValue={new Date(data.birthDate)}
                 onChange={(date) => setData({ ...data, birthDate: date })}
                 disabled={isBirthdayModificationDisabled}
                 state={error.birthDate ? "error" : "default"}

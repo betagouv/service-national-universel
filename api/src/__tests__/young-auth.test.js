@@ -102,43 +102,43 @@ describe("Young", () => {
 
     // TODO - Put this code back next time a cohort is opened
 
-    // it("should return 200", async () => {
-    //   const fixture = getNewYoungFixture();
-    //   const email = fixture.email.toLowerCase();
-    //   res = await request(getAppHelper()).post("/young/signup").send({
-    //     email: email,
-    //     firstName: "foo",
-    //     lastName: "bar",
-    //     password: VALID_PASSWORD,
-    //     birthdateAt: fixture.birthdateAt,
-    //     schoolRegion: fixture.schoolRegion,
-    //     grade: fixture.grade,
-    //     frenchNationality: fixture.frenchNationality,
-    //     schooled: fixture.schooled,
-    //     cohort: fixture.cohort,
-    //   });
-    //   expect(res.status).toBe(200);
-    //   expect(res.body.token).toBeTruthy();
-    // });
+    it.skip("should return 200", async () => {
+      const fixture = getNewYoungFixture();
+      const email = fixture.email.toLowerCase();
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: email,
+        firstName: "foo",
+        lastName: "bar",
+        password: VALID_PASSWORD,
+        birthdateAt: fixture.birthdateAt,
+        schoolRegion: fixture.schoolRegion,
+        grade: fixture.grade,
+        frenchNationality: fixture.frenchNationality,
+        schooled: fixture.schooled,
+        cohort: fixture.cohort,
+      });
+      expect(res.status).toBe(200);
+      expect(res.body.token).toBeTruthy();
+    });
 
-    // it("should transform firstName and lastName", async () => {
-    //   const fixture = getNewYoungFixture();
-    //   res = await request(getAppHelper()).post("/young/signup").send({
-    //     email: fixture.email,
-    //     firstName: "foo",
-    //     lastName: "bar",
-    //     password: VALID_PASSWORD,
-    //     birthdateAt: fixture.birthdateAt,
-    //     schoolRegion: fixture.schoolRegion,
-    //     grade: fixture.grade,
-    //     frenchNationality: fixture.frenchNationality,
-    //     schooled: fixture.schooled,
-    //     cohort: fixture.cohort,
-    //   });
-    //   expect(res.body.user.firstName).toBe("Foo");
-    //   expect(res.body.user.lastName).toBe("BAR");
-    //   expect(res.body.user.email).toBe(fixture.email.toLowerCase());
-    // });
+    it.skip("should transform firstName and lastName", async () => {
+      const fixture = getNewYoungFixture();
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: fixture.email,
+        firstName: "foo",
+        lastName: "bar",
+        password: VALID_PASSWORD,
+        birthdateAt: fixture.birthdateAt,
+        schoolRegion: fixture.schoolRegion,
+        grade: fixture.grade,
+        frenchNationality: fixture.frenchNationality,
+        schooled: fixture.schooled,
+        cohort: fixture.cohort,
+      });
+      expect(res.body.user.firstName).toBe("Foo");
+      expect(res.body.user.lastName).toBe("BAR");
+      expect(res.body.user.email).toBe(fixture.email.toLowerCase());
+    });
 
     it("should return 409 when user already exists", async () => {
       const fixture = getNewYoungFixture();
@@ -303,7 +303,7 @@ describe("Young", () => {
     it("should return 401 when new password is identical as last password", async () => {
       const fixture = getNewYoungFixture();
       const token = await crypto.randomBytes(20).toString("hex");
-      const young = await createYoungHelper({
+      await createYoungHelper({
         ...fixture,
         email: fixture.email.toLowerCase(),
         forgotPasswordResetExpires: Date.now() + 1000 * 60 * 60 * 24 * 7,

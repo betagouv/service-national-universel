@@ -18,7 +18,8 @@
     "copy:dsfr": "copy-dsfr-to-public && only-include-used-icons",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint src --ext .js --fix",
-    "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif"
+    "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
+    "clean": "rm -fr node_modules .turbo build .swc"
   },
   "dependencies": {
     "@codegouvfr/react-dsfr": "^1.9.2",
@@ -82,8 +83,18 @@
     "vite": "^4.5.3"
   },
   "engines": {
-    "node": "^18.16.0",
-    "npm": "^9.5.1",
+    "node": "^18.20",
+    "npm": "^10.5",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
+  },
+  "optionalDependencies": {
+    "@swc/core": "^1.3.95",
+    "@swc/core-darwin-arm64": "^1.4.14",
+    "@swc/core-darwin-x64": "^1.4.14",
+    "@swc/core-linux-arm-gnueabihf": "^1.4.14",
+    "@swc/core-linux-arm64-gnu": "^1.4.14",
+    "@swc/core-linux-arm64-musl": "^1.4.14",
+    "@swc/core-linux-x64-gnu": "^1.4.14",
+    "@swc/core-linux-x64-musl": "^1.4.14"
   }
 }
