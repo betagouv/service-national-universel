@@ -1,6 +1,6 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { PUBLIC_ROOTDIR, FONT_ROOTDIR } = require("../config");
+const { PUBLIC_ROOTDIR, FONT_ROOTDIR } = require("../../config");
 const datefns = require("date-fns");
 
 const FONT = "Marianne";

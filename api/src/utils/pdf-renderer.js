@@ -18,7 +18,7 @@ const { generateCertifPhase1 } = require("../templates/certificate/phase1");
 const { generateCertifPhase2 } = require("../templates/certificate/phase2");
 const { generateCertifPhase3 } = require("../templates/certificate/phase3");
 const { generateCertifSNU } = require("../templates/certificate/snu");
-const { generateDroitImage } = require("../templates/droitImage");
+const { generateDroitImage } = require("../templates/droitImage/droitImage");
 const { generateCohesion } = require("../templates/convocation/cohesion");
 
 async function getHtmlTemplate(type, template, young, contract) {
