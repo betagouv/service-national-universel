@@ -12,17 +12,15 @@ const { MINISTRES } = require("snu-lib");
 
 const TIMEOUT_PDF_SERVICE = 15000;
 
-const contractPhase2 = require("../templates/contractPhase2");
-
 const { generateCertifPhase1 } = require("../templates/certificate/phase1");
 const { generateCertifPhase2 } = require("../templates/certificate/phase2");
 const { generateCertifPhase3 } = require("../templates/certificate/phase3");
 const { generateCertifSNU } = require("../templates/certificate/snu");
 const { generateDroitImage } = require("../templates/droitImage/droitImage");
 const { generateCohesion } = require("../templates/convocation/cohesion");
+const { generateContractPhase2 } = require("../templates/contract/phase2");
 
 async function getHtmlTemplate(type, template, young, contract) {
-  if (type === "contract" && template === "2" && contract) return contractPhase2.render(contract);
   throw new Error("Not implemented");
 }
 
@@ -81,6 +79,9 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
   }
   if (type === "convocation" && template === "cohesion" && young) {
     return generateCohesion(outStream, young);
+  }
+  if (type === "contract" && template === "2" && contract) {
+    return generateContractPhase2(outStream, contract);
   }
   const html = await getHtmlTemplate(type, template, young, contract);
   if (!html) {

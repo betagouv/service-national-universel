@@ -52,13 +52,9 @@ function getMailParams(type, template, young, contract) {
       message: "Vous trouverez en pièce-jointe de ce mail votre convocation au séjour de cohésion à présenter à votre arrivée au point de rassemblement.",
     };
   }
-
-  //todo: add other templates
-  // if (type === "form" && template === "imageRight") return { object: "", message: "" };
-  // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
 }
 
-router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:type/:template", async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
