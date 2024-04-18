@@ -19,7 +19,7 @@ export type Address = {
 
 interface proptype {
   label?: string;
-  readOnly: boolean;
+  readOnly?: boolean;
   data: Address;
   updateData: (data: Address) => void;
   query: string;
