@@ -286,7 +286,6 @@ function hasAccessToReinscription(young) {
 
 function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
   return (
-    young.cohort !== "à venir" &&
     ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
       (isInscriptionModificationOpen &&
         young.status === YOUNG_STATUS.WAITING_VALIDATION &&
