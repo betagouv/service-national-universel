@@ -13,12 +13,12 @@ export default defineConfig(({ mode }) => {
     plugins.push(
       sentryVitePlugin({
         org: "sentry",
-        project: mode === "production" ? "snu-production" : "snu-staging",
+        project: "snu-moncompte",
         authToken: env.SENTRY_AUTH_TOKEN,
         url: "https://sentry.selego.co/",
-        environment: "app",
+        environment: mode,
         deploy: {
-          env: "app",
+          env: mode,
         },
         validate: true,
         sourcemaps: {

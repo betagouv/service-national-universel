@@ -65,7 +65,7 @@
     );
   }
 
-  if (process.env.STAGING && !process.env.CLE) {
+  if (process.env.STAGING) {
     app.use(
       forceDomain({
         hostname: "api.beta-snu.dev",
