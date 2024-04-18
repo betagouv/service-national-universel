@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import {
+  useAddress,
   canCreateMeetingPoint,
   canDeleteMeetingPoint,
   canDeleteMeetingPointSession,
@@ -13,6 +14,8 @@ import {
   ROLES,
   START_DATE_SESSION_PHASE1,
 } from "snu-lib";
+import { AddressForm } from "@snu/ds/common";
+import { useDebounce } from "@uidotdev/usehooks";
 import Pencil from "../../assets/icons/Pencil";
 import Trash from "../../assets/icons/Trash";
 import Breadcrumbs from "../../components/Breadcrumbs";
@@ -46,6 +49,10 @@ export default function View(props) {
   const [nbYoung, setNbYoung] = React.useState([]);
   const [lines, setLines] = React.useState([]);
   const [pdrInSchema, setPdrInSchema] = React.useState(false);
+  const [query, setQuery] = useState("");
+
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
 
   useEffect(() => {
     (async () => {
@@ -347,29 +354,15 @@ export default function View(props) {
             <div className="flex w-[45%] flex-col justify-between">
               <div className="flex flex-col gap-3">
                 <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
-                <Field
-                  label={"Adresse"}
-                  onChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
-                  value={data.address}
-                  error={errors?.address}
+
+                <AddressForm
                   readOnly={!editInfo}
+                  data={{ address: data.address, zip: data.zip, city: data.city }}
+                  updateData={(address) => setData({ ...data, ...address })}
+                  query={query}
+                  setQuery={setQuery}
+                  options={results}
                 />
-                <div className="flex items-center gap-3">
-                  <Field
-                    label="Code postal"
-                    onChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
-                    value={data.zip}
-                    error={errors?.zip}
-                    readOnly={!editInfo}
-                  />
-                  <Field
-                    label="Ville"
-                    onChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
-                    value={data.city}
-                    error={errors?.city}
-                    readOnly={!editInfo}
-                  />
-                </div>
                 <div className="flex items-center gap-3">
                   <Field label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} readOnly={true} disabled={editInfo} />
                   <Field label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} readOnly={true} disabled={editInfo} />
