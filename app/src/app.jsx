@@ -50,11 +50,12 @@ import RepresentantsLegaux from "./scenes/representants-legaux";
 import Thanks from "./scenes/contact/Thanks";
 import ViewMessage from "./scenes/echanges/View";
 import ModalRI from "./components/modals/ModalRI";
+import Notice from "./components/ui/alerts/Notice";
 
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
 import { queryClient } from "./services/react-query";
-import { ENABLE_PM, YOUNG_STATUS, shouldReAcceptRI } from "./utils";
+import { ENABLE_PM, YOUNG_STATUS, shouldDisplayMaintenanceNotice, shouldReAcceptRI } from "./utils";
 import {
   youngCanChangeSession,
   inscriptionModificationOpenForYoungs,
@@ -285,6 +286,9 @@ const Espace = () => {
         <Navbar />
       </div>
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
+        {shouldDisplayMaintenanceNotice && (
+          <Notice>Maintenance planifiée jeudi 18 avril de 20h à minuit&nbsp;: vous ne serez pas en mesure d'accéder aux plateformes pendant cette période.</Notice>
+        )}
         <Switch>
           <SentryRoute exact path="/" component={Home} />
           <SentryRoute path="/account" component={Account} />

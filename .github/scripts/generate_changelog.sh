@@ -47,7 +47,11 @@ fi
 git log --pretty="%s" $rev_range > CHANGELOG.txt
 
 
-sed -E "s/(^.*: ([0-9]*)( -)?.*$)/\2\t\1/g" CHANGELOG.txt |
+sed -E -e 's/(^.*\): ([0-9]+) -.*$)/\2\t\1/g' \
+    -e '/^[^0-9]+.+$/s/(^.*\): ([0-9]+) ?-?.*$)/\2\t\1/g' \
+    -e '/^[^0-9]+.+$/s/(^.*\):? ?([0-9]+) -.*$)/\2\t\1/g' \
+    -e '/^[^0-9]+.+$/s/(^.*$)/\t\1/g' \
+    CHANGELOG.txt |
     sort -b > NOTION_ID_CHANGELOG.csv
 # NOTION_ID_CHANGELOG.csv is tab-separated with columns (Notion.identifiant, revision.log)
 

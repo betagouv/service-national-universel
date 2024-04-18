@@ -1,0 +1,5 @@
+const ERRORS = {
+  NO_COHESION_CENTER_FOUND: "NO_COHESION_CENTER_FOUND",
+};
+
+module.exports = { ERRORS };

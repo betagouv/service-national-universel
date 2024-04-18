@@ -25,95 +25,95 @@ afterAll(dbClose);
 
 describe("Application", () => {
   describe("POST /application", () => {
-    // it("should return 404 when young is not found", async () => {
-    //   const application = getNewApplicationFixture();
-    //   const res = await request(getAppHelper())
-    //     .post("/application")
-    //     .send({ ...application, youngId: notExistingYoungId, missionId: notExisitingMissionId });
-    //   expect(res.status).toBe(404);
-    // });
-    // it("should return 404 when mission is not found", async () => {
-    //   const young = await createYoungHelper(getNewYoungFixture());
-    //   const application = getNewApplicationFixture();
-    //   const res = await request(getAppHelper())
-    //     .post("/application")
-    //     .send({ ...application, youngId: young._id, missionId: notExisitingMissionId });
-    //   expect(res.status).toBe(404);
-    // });
-    // it("should only allow young to apply for themselves", async () => {
-    //   const lastYear = new Date().getFullYear() - 1;
-    //   const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", dateEnd: `${lastYear}-07-15T00:00:00.000Z` }));
-    //   const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
-    //   const secondYoung = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
-    //   const passport = require("passport");
-    //   const previous = passport.user;
-    //   passport.user = young;
-    //   const mission = await createMissionHelper(getNewMissionFixture());
-    //   const application = getNewApplicationFixture();
+    it.skip("should return 404 when young is not found", async () => {
+      const application = getNewApplicationFixture();
+      const res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: notExistingYoungId, missionId: notExisitingMissionId });
+      expect(res.status).toBe(404);
+    });
+    it("should return 404 when mission is not found", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const application = getNewApplicationFixture();
+      const res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: notExisitingMissionId });
+      expect(res.status).toBe(404);
+    });
+    it.skip("should only allow young to apply for themselves", async () => {
+      const lastYear = new Date().getFullYear() - 1;
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", dateEnd: `${lastYear}-07-15T00:00:00.000Z` }));
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const secondYoung = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = getNewApplicationFixture();
 
-    //   // Successful application
-    //   let res = await request(getAppHelper())
-    //     .post("/application")
-    //     .send({ ...application, youngId: young._id, missionId: mission._id });
-    //   expect(res.status).toBe(200);
-    //   expect(res.body.data.youngId).toBe(young._id.toString());
+      // Successful application
+      let res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id });
+      expect(res.status).toBe(200);
+      expect(res.body.data.youngId).toBe(young._id.toString());
 
-    //   // Failed application
-    //   res = await request(getAppHelper())
-    //     .post("/application")
-    //     .send({ ...application, youngId: secondYoung._id, missionId: mission._id });
-    //   expect(res.status).toBe(400);
+      // Failed application
+      res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: secondYoung._id, missionId: mission._id });
+      expect(res.status).toBe(400);
 
-    //   passport.user = previous;
-    // });
-    // it("should create an application when priority is given", async () => {
-    //   const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
-    //   const mission = await createMissionHelper(getNewMissionFixture());
-    //   const application = getNewApplicationFixture();
-    //   const res = await request(getAppHelper())
-    //     .post("/application")
-    //     .send({ ...application, youngId: young._id, missionId: mission._id });
-    //   expect(res.status).toBe(200);
-    //   expect(res.body.data.youngId).toBe(young._id.toString());
-    // });
-    // it("should create an application when no priority is given", async () => {
-    //   const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
-    //   const mission1 = await createMissionHelper(getNewMissionFixture());
-    //   await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission1._id });
-    //   const mission2 = await createMissionHelper(getNewMissionFixture());
-    //   const { priority, ...application } = getNewApplicationFixture();
-    //   const res = await request(getAppHelper())
-    //     .post("/application")
-    //     .send({ ...application, youngId: young._id, missionId: mission2._id });
-    //   expect(res.status).toBe(200);
-    //   expect(res.body.data.priority).toBe("2");
-    //   expect(res.body.data.youngId).toBe(young._id.toString());
-    // });
-    // it("should update young status", async () => {
-    //   const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
-    //   const mission = await createMissionHelper(getNewMissionFixture());
-    //   const application = getNewApplicationFixture();
-    //   const res = await request(getAppHelper())
-    //     .post("/application")
-    //     .send({ ...application, youngId: young._id, missionId: mission._id, status: "WAITING_VALIDATION" });
-    //   expect(res.status).toBe(200);
+      passport.user = previous;
+    });
+    it.skip("should create an application when priority is given", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = getNewApplicationFixture();
+      const res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id });
+      expect(res.status).toBe(200);
+      expect(res.body.data.youngId).toBe(young._id.toString());
+    });
+    it.skip("should create an application when no priority is given", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const mission1 = await createMissionHelper(getNewMissionFixture());
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission1._id });
+      const mission2 = await createMissionHelper(getNewMissionFixture());
+      const { ...application } = getNewApplicationFixture();
+      const res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission2._id });
+      expect(res.status).toBe(200);
+      expect(res.body.data.priority).toBe("2");
+      expect(res.body.data.youngId).toBe(young._id.toString());
+    });
+    it.skip("should update young status", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = getNewApplicationFixture();
+      const res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id, status: "WAITING_VALIDATION" });
+      expect(res.status).toBe(200);
 
-    //   const updatedYoung = await getYoungByIdHelper(young._id);
-    //   expect(updatedYoung.statusPhase2).toBe("IN_PROGRESS");
-    //   expect([...updatedYoung.phase2ApplicationStatus]).toStrictEqual(["WAITING_VALIDATION"]);
-    // });
-    // it("should update mission places left status", async () => {
-    //   const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
-    //   const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 100, placesTotal: 100 });
-    //   const application = getNewApplicationFixture();
-    //   const res = await request(getAppHelper())
-    //     .post("/application")
-    //     .send({ ...application, youngId: young._id, missionId: mission._id, status: "DONE" });
-    //   expect(res.status).toBe(200);
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung.statusPhase2).toBe("IN_PROGRESS");
+      expect([...updatedYoung.phase2ApplicationStatus]).toStrictEqual(["WAITING_VALIDATION"]);
+    });
+    it.skip("should update mission places left status", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ cohort: "Test", statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 100, placesTotal: 100 });
+      const application = getNewApplicationFixture();
+      const res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id, status: "DONE" });
+      expect(res.status).toBe(200);
 
-    //   const updatedMission = await getMissionByIdHelper(mission._id);
-    //   expect(updatedMission.placesLeft).toBe(99);
-    // });
+      const updatedMission = await getMissionByIdHelper(mission._id);
+      expect(updatedMission.placesLeft).toBe(99);
+    });
     it("should return 403 when young is under 15 years old", async () => {
       const year = new Date().getFullYear();
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", endDate: `${year - 1}-12-31T00:00:00.000Z` }));
@@ -204,7 +204,7 @@ describe("Application", () => {
           missionId: mission._id,
           missionDuration: "1",
         });
-        const res = await request(getAppHelper()).put("/application").send({ priority: "1", status, _id: application._id.toString() });
+        await request(getAppHelper()).put("/application").send({ priority: "1", status, _id: application._id.toString() });
       }
       const updatedYoung = await getYoungByIdHelper(young._id);
       expect(updatedYoung.phase2NumberHoursEstimated).toBe("5");

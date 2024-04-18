@@ -4,6 +4,7 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/SelectNext";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { Notice } from "@codegouvfr/react-dsfr/Notice";
 
 // Form
 import InputPhone from "./form/InputPhone";
@@ -37,4 +38,5 @@ export {
   SignupButtons,
   Field,
   List,
+  Notice,
 };

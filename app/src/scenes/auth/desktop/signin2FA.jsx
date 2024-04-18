@@ -13,6 +13,9 @@ import { BsShieldLock } from "react-icons/bs";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
+import { DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
+
+const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN = DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS / 60 / 1000;
 
 export default function Signin() {
   const [disabled, setDisabled] = React.useState(true);
@@ -56,7 +59,7 @@ export default function Signin() {
       setLoading(false);
       toastr.error(
         "(Double authentification) Code non reconnu.",
-        "Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de 10 minutes, veuillez retenter de vous connecter.",
+        `Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de ${DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN} minutes, veuillez retenter de vous connecter.`,
       );
     }
   };
@@ -81,7 +84,8 @@ export default function Signin() {
             Un mail contenant le code unique de connexion vous a été envoyé à l'adresse "<b>{email}</b>".
           </label>
           <label className="text-[14px] text-[#3A3A3A] mb-4">
-            Ce code est valable pendant 10 minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été transmis par mail.
+            Ce code est valable pendant {DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN} minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été
+            transmis par mail.
           </label>
           <label className="text-[14px] text-[#3A3A3A] mb-2">Saisir le code reçu par email</label>
           <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e)} />
