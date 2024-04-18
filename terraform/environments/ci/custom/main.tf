@@ -201,7 +201,7 @@ resource "scaleway_container" "admin" {
   }
 
   secret_environment_variables = {
-    "SENTRY_URL"                 = local.secrets.SENTRY_ADMIN
+    "SENTRY_URL"                 = local.secrets.SENTRY_URL
     "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
     "VITE_USERBACK_ACCESS_TOKEN" = local.secrets.USERBACK_ACCESS_TOKEN
   }
@@ -261,7 +261,7 @@ resource "scaleway_container" "app" {
   }
 
   secret_environment_variables = {
-    "SENTRY_URL"        = local.secrets.SENTRY_MONCOMPTE
+    "SENTRY_URL"        = local.secrets.SENTRY_URL
     "SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
   }
 }
