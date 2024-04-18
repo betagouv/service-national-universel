@@ -220,7 +220,7 @@ export default function StepProfil() {
           {isCLE && (
             <label className="w-full">
               Date de naissance
-              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} />
+              <DatePicker initialValue={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           )}
