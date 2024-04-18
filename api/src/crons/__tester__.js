@@ -22,6 +22,9 @@
     case "parent-revalidate-ri":
       await require("./parentRevalidateRI").handler();
       break;
+    case "dsnj":
+      await require("./dsnjExport/index").handler();
+      break;
   }
   process.exit(0);
 })();

@@ -2,6 +2,7 @@ export function filterDataForYoungSection(data, section) {
   let bodyYoungSection = {};
   if (section === "identite") {
     bodyYoungSection = {
+      _id: data._id,
       firstName: data.firstName,
       lastName: data.lastName,
       gender: data.gender,
@@ -28,6 +29,7 @@ export function filterDataForYoungSection(data, section) {
       foreignZip: data.foreignZip,
       foreignCity: data.foreignCity,
       foreignCountry: data.foreignCountry,
+      files: data.files,
     };
   } else if (section === "parent") {
     bodyYoungSection = {
