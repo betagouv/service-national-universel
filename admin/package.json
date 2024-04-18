@@ -28,6 +28,7 @@
     "@sentry/react": "^7.58.1",
     "@snu/ds": "*",
     "@tanstack/react-query": "^5.29.0",
+    "@uidotdev/usehooks": "^2.4.1",
     "@swc/plugin-styled-components": "1.5.111",
     "bootstrap": "4.6.2",
     "browser-image-resizer": "^2.4.1",
