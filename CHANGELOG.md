@@ -1,3 +1,36 @@
+# [1.402.0](https://github.com/betagouv/service-national-universel/compare/v1.401.0...v1.402.0) (2024-04-12)
+
+
+### Bug Fixes
+
+* **admin:** 664 - reduire la taille des requetes volontaires ([#3734](https://github.com/betagouv/service-national-universel/issues/3734)) ([556dfe9](https://github.com/betagouv/service-national-universel/commit/556dfe9c391bc9391c1d189f4999cc95ee3320a2))
+* **admin, api:** 1694 - Send new Brevo template when HTS switch to CL… ([#3711](https://github.com/betagouv/service-national-universel/issues/3711)) ([774b778](https://github.com/betagouv/service-national-universel/commit/774b77855d8454beaf9a4fe04286e1d7297463c5))
+* **admin/api:** 2200 - revoir les regles de validation manuelle de la phase 2 ([#3757](https://github.com/betagouv/service-national-universel/issues/3757)) ([560fa8c](https://github.com/betagouv/service-national-universel/commit/560fa8c809471d707bc77b4213503983012980dc))
+* **api:** 2199 Admin - Téléchargement d’une attestation 2022 ([#3713](https://github.com/betagouv/service-national-universel/issues/3713)) ([1fddd8e](https://github.com/betagouv/service-national-universel/commit/1fddd8e3ba874b86ac1a4801e3a29edc0c084cff))
+* **app, api:** update change-cohort email template ([#3762](https://github.com/betagouv/service-national-universel/issues/3762)) ([c7978b4](https://github.com/betagouv/service-national-universel/commit/c7978b4f48a5a75e94afd536055f5ec12eddc476))
+
+
+### Features
+
+* **admin:** 1982-ajouter un champ CNI invalide lors de la validation du jeune ([#3737](https://github.com/betagouv/service-national-universel/issues/3737)) ([fd47ee7](https://github.com/betagouv/service-national-universel/commit/fd47ee7f48f307349229d32681f1293b69f795fa))
+* **app, lib:** Add address search form with classic design ([#3678](https://github.com/betagouv/service-national-universel/issues/3678)) ([eec3f0c](https://github.com/betagouv/service-national-universel/commit/eec3f0cd72c9124daae6ba69f4ed19f9797e382f))
+
+# [1.401.0](https://github.com/betagouv/service-national-universel/compare/v1.400.0...v1.401.0) (2024-04-10)
+
+
+### Bug Fixes
+
+* **app:** 2138 - Fixed error on specialSituations Checkboxes. ([05b6397](https://github.com/betagouv/service-national-universel/commit/05b63977bd8875c700706c22ab71edf0d83d7a1d))
+* **app:** Fixed error on specialSituations Checkboxes - Part 2 ([532238c](https://github.com/betagouv/service-national-universel/commit/532238cc753a4b28fbc721645bf4964a07258ce7))
+
+
+### Features
+
+* **api:** 381 add typescript ([#3715](https://github.com/betagouv/service-national-universel/issues/3715)) ([bd3eda2](https://github.com/betagouv/service-national-universel/commit/bd3eda20ad9a6cacb8078c102d39c737bc518184))
+* **api,app,admin:** 2270 - Add RELEASE environment variable ([#3729](https://github.com/betagouv/service-national-universel/issues/3729)) ([3992ddd](https://github.com/betagouv/service-national-universel/commit/3992ddd95e257fd4ab78c882e19610eeb5c5eb5f))
+* **app, lib:** DSFR adjustments. ([#3698](https://github.com/betagouv/service-national-universel/issues/3698)) ([ba16e5d](https://github.com/betagouv/service-national-universel/commit/ba16e5d30757c541d270ccebe73d6da86d703f76))
+* **misc:** 2256 - Add notion task info to release changelog ([#3724](https://github.com/betagouv/service-national-universel/issues/3724)) ([6ec2677](https://github.com/betagouv/service-national-universel/commit/6ec2677c6fcb22d6a21f85975cfef4d90dd9aba7))
+
 # [1.400.0](https://github.com/betagouv/service-national-universel/compare/v1.399.1...v1.400.0) (2024-04-09)
 
 

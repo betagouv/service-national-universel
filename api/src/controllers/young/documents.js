@@ -130,6 +130,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
       type: Joi.string().required(),
       template: Joi.string().required(),
       contract_id: Joi.string(),
+      switchToCle: Joi.boolean(),
     })
       .unknown()
       .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
@@ -137,7 +138,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { id, type, template, fileName, contract_id } = value;
+    const { id, type, template, fileName, contract_id, switchToCle } = value;
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -183,13 +184,17 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     const content = buffer.toString("base64");
 
     let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
-    let cc = getCcOfYoung({ template: emailTemplate, young });
+    let params = { object, message };
+
+    if (switchToCle) {
+      emailTemplate = SENDINBLUE_TEMPLATES.young.PHASE_1_ATTESTATION_SWITCH_CLE;
+    }
 
     const mail = await sendTemplate(emailTemplate, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       attachment: [{ content, name: fileName }],
-      params: { object, message },
-      cc,
+      params,
+      cc: getCcOfYoung({ template: emailTemplate, young }),
     });
     res.status(200).send({ ok: true, data: mail });
   } catch (e) {

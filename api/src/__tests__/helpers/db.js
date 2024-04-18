@@ -1,16 +1,19 @@
+require("dotenv").config({ path: "./.env-testing" });
 const mongoose = require("mongoose");
-const MONGO_URL = "mongodb://localhost:27017/qwer";
+const { MONGO_URL } = require("../../config");
 jest.setTimeout(10_000);
 
 let db = null;
 
 const dbConnect = async () => {
   await mongoose.connect(MONGO_URL, {
+    appname: "TestSnu",
+    // * Remove when we update to mongoose 6 : https://stackoverflow.com/a/68962378
     useCreateIndex: true,
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false, // * https://stackoverflow.com/a/52572958
-    poolSize: 500,
+    // * ----
     maxPoolSize: 500,
     minPoolSize: 200,
     waitQueueTimeoutMS: 30_000,

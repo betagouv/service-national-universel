@@ -5,9 +5,9 @@ import Loader from "@/components/Loader";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import { API_RI } from "../commons";
 import api from "../../../services/api";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function RiConsentement({ parentId }) {
   const history = useHistory();
@@ -31,7 +31,7 @@ export default function RiConsentement({ parentId }) {
   const onSubmit = () => {
     handleAcceptRI();
   };
-  
+
   //   J’accepte le règlement intérieur
   if (!young) return <Loader />;
 
@@ -56,7 +56,7 @@ export default function RiConsentement({ parentId }) {
               </a>
               .
             </p>
-            <SignupButtonContainer onClickNext={onSubmit} labelNext="J’accepte le règlement intérieur" />
+            <SignupButtons onClickNext={onSubmit} labelNext="J’accepte le règlement intérieur" />
           </div>
         </DSFRContainer>
       </DSFRLayout>

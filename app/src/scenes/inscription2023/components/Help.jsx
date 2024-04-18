@@ -3,9 +3,11 @@ import arrowRightBlue from "../../../assets/arrowRightBlue.svg";
 import humanCooperation from "../../../assets/humanCooperation.svg";
 import { supportURL } from "@/config";
 
+import { Button } from "@snu/ds/dsfr";
+
 export default function Help({ supportLink = supportURL }) {
   return (
-    <a href={supportLink} target="_blank" rel="noreferrer" className="hover:text-[#161616]">
+    <Button className="mx-auto w-full hover:text-[#161616]" priority="tertiary no outline" onClick={() => window.open(supportLink, "_blank")?.focus()}>
       <div className="bg-[#F9F6F2] px-4 pt-4 pb-12 text-[#161616] md:hidden">
         <div className="flex justify-end">
           <img src={humanCooperation} alt="" />
@@ -28,6 +30,6 @@ export default function Help({ supportLink = supportURL }) {
         </div>
         <img src={arrowRightBlue} className="mr-8 h-6 w-6" />
       </div>
-    </a>
+    </Button>
   );
 }

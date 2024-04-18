@@ -13,6 +13,9 @@ import { GoTools } from "react-icons/go";
 import { BsShieldCheck } from "react-icons/bs";
 import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
 import { captureMessage } from "../../sentry";
+import { DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS } from "snu-lib";
+
+const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MIN = DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS / 60 / 1000;
 
 export default function Signin() {
   const dispatch = useDispatch();
@@ -51,7 +54,7 @@ export default function Signin() {
       console.log("ERROR", e);
       toastr.error(
         "(Double authentification) Code non reconnu.",
-        "Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de 10 minutes, veuillez retenter de vous connecter.",
+        `Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de ${DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MIN} minutes, veuillez retenter de vous connecter.`,
       );
     }
   };
@@ -88,7 +91,8 @@ export default function Signin() {
                       Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>«&nbsp;{email}&nbsp;»</b>.
                     </p>
                     <p className="self-stretch mb-2">
-                      Ce code est valable pendant <b>10 minutes</b>, si vous avez reçu plusieurs codes veuillez <b>utiliser le dernier</b> qui vous a été transmis par mail.
+                      Ce code est valable pendant <b>{DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MIN} minutes</b>, si vous avez reçu plusieurs codes veuillez <b>utiliser le dernier</b>
+                      qui vous a été transmis par mail.
                     </p>
                   </div>
                 </div>

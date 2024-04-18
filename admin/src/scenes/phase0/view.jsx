@@ -32,13 +32,11 @@ import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import { CniField } from "./components/CniField";
 import FieldSituationsParticulieres from "./components/FieldSituationsParticulieres";
-import ShieldCheck from "../../assets/icons/ShieldCheck";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import XCircle from "../../assets/icons/XCircle";
 import ConfirmationModal from "./components/ConfirmationModal";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "./commons";
 import Check from "../../assets/icons/Check";
-import MiniSwitch from "./components/MiniSwitch";
 import FranceConnect from "../../assets/icons/FranceConnect";
 import SchoolEditor from "./components/SchoolEditor";
 import validator from "validator";
@@ -60,6 +58,9 @@ import { Link } from "react-router-dom";
 import { Button, ModalConfirmation } from "@snu/ds/admin";
 import { FaCheck } from "react-icons/fa6";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
+import { isBefore } from "date-fns";
+import { ConfirmModalContent } from "./components/ConfirmModalContent";
+import { filterDataForYoungSection } from "./utils";
 
 const REJECTION_REASONS = {
   NOT_FRENCH: "Le volontaire n'est pas de nationalité française",
@@ -424,60 +425,20 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionMessage, setRejectionMessage] = useState("");
   const [error, setError] = useState(null);
+  const isDatePassed = young.latestCNIFileExpirationDate ? isBefore(new Date(young.latestCNIFileExpirationDate), new Date()) : false;
 
   async function validate() {
     try {
       if (young.source === YOUNG_SOURCE.CLE) {
-        return setConfirmModal({
-          icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-          title: (
-            <span>
-              Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur liste principale</strong>.
-            </span>
-          ),
-          message: `Souhaitez-vous confirmer l'action ?`,
-          type: "VALIDATED",
-          infoLink: {
-            href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
-            text: "Des questions sur ce fonctionnement ?",
-          },
-        });
+        return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate: 0, isDatePassed, young }));
       } else {
         const res = await api.get(`/inscription-goal/${young.cohort}/department/${young.department}`);
         if (!res.ok) throw new Error(res);
         const fillingRate = res.data;
         if (fillingRate >= 1) {
-          return setConfirmModal({
-            icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-            title: (
-              <span>
-                L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-                <strong className="text-bold">validé sur liste complémentaire</strong>.
-              </span>
-            ),
-            message: `Souhaitez-vous confirmer l'action ?`,
-            type: "SESSION_FULL",
-            infoLink: {
-              href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
-              text: "Des questions sur ce fonctionnement ?",
-            },
-          });
+          return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate, isDatePassed, young }));
         }
-        return setConfirmModal({
-          icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
-          title: (
-            <span>
-              L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-              <strong className="text-bold">validé sur liste principale</strong>.
-            </span>
-          ),
-          message: `Souhaitez-vous confirmer l'action ?`,
-          type: "VALIDATED",
-          infoLink: {
-            href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
-            text: "Des questions sur ce fonctionnement ?",
-          },
-        });
+        return setConfirmModal(ConfirmModalContent({ source: young.source, fillingRate, isDatePassed, young }));
       }
     } catch (e) {
       capture(e);
@@ -621,31 +582,21 @@ function FooterNoRequest({ processing, onProcess, young, footerClass }) {
   );
 }
 
-function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false, user }) {
+function SectionIdentite({ young, cohort, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, readonly = false }) {
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState({});
+  const [data, setData] = useState(filterDataForYoungSection(young, "identite"));
   const [saving, setSaving] = useState(false);
-  const [birthDate, setBirthDate] = useState({ day: "", month: "", year: "" });
+  const birthDate = getBirthDate();
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    if (young) {
-      setData({ ...young });
-    } else {
-      setData({});
-    }
-  }, [young]);
-
-  useEffect(() => {
-    setSectionMode(globalMode);
-  }, [globalMode]);
-
-  useEffect(() => {
+  function getBirthDate() {
     if (data && data.birthdateAt) {
       const date = dayjs(data.birthdateAt);
-      setBirthDate({ day: date.date(), month: date.format("MMMM"), year: date.year() });
+      return { day: date.date(), month: date.format("MMMM"), year: date.year() };
+    } else {
+      return { day: "", month: "", year: "" };
     }
-  }, [data]);
+  }
 
   function onSectionChangeMode(mode) {
     setSectionMode(mode === "default" ? globalMode : mode);
@@ -1193,7 +1144,7 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
   const [currentParent, setCurrentParent] = useState(1);
   const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
   const [sectionMode, setSectionMode] = useState(globalMode);
-  const [data, setData] = useState({});
+  const [data, setData] = useState(filterDataForYoungSection(young, "parent"));
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [youngAge, setYoungAge] = useState(0);
@@ -1218,10 +1169,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
       setYoungAge(0);
     }
   }, [young]);
-
-  useEffect(() => {
-    setSectionMode(globalMode);
-  }, [globalMode]);
 
   function onSectionChangeMode(mode) {
     setSectionMode(mode === "default" ? globalMode : mode);
@@ -1268,21 +1215,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
         if (data.parent2Phone) data.parent2Phone = trimmedPhones[2];
 
         if (data.grade === GRADES.NOT_SCOLARISE) {
-          const request = await api.put(`/young-edition/${young._id}/situationparents`, {
-            schooled: "false",
-            schoolName: "",
-            schoolType: "",
-            schoolAddress: "",
-            schoolComplementAdresse: "",
-            schoolZip: "",
-            schoolCity: "",
-            schoolDepartment: "",
-            schoolRegion: "",
-            schoolCountry: "",
-            schoolLocation: null,
-            schoolId: "",
-            academy: "",
-          });
           data.schoolName = "";
           data.schoolType = "";
           data.schoolAddress = "";
@@ -1295,10 +1227,6 @@ function SectionParents({ young, onStartRequest, currentRequest, onCorrectionReq
           data.schoolLocation = null;
           data.schoolId = "";
           data.academy = "";
-
-          if (!request.ok) {
-            toastr.error("Erreur !", "Nous n'avons pas pu enregistrer les modifications. Veuillez réessayer dans quelques instants.");
-          }
         }
 
         const result = await api.put(`/young-edition/${young._id}/situationparents`, data);

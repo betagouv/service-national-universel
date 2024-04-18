@@ -1,11 +1,10 @@
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
-const { createPointDeRassemblementHelper, createPointDeRassemblementWithBus, notExistingMeetingPointId } = require("./helpers/PlanDeTransport/pointDeRassemblement");
+const { createPointDeRassemblementWithBus, notExistingMeetingPointId } = require("./helpers/PlanDeTransport/pointDeRassemblement");
 const { createSessionPhase1 } = require("./helpers/sessionPhase1");
 const { createCohesionCenter } = require("./helpers/cohesionCenter");
 const getNewPointDeRassemblementFixture = require("./fixtures/PlanDeTransport/pointDeRassemblement");
-const { createMeetingPointHelper } = require("./helpers/meetingPoint");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
@@ -19,15 +18,12 @@ afterAll(dbClose);
 describe("Meeting Point", () => {
   let res;
   let ligneToPoint;
-  let meetingPoint;
 
   beforeEach(async () => {
-    // const pdr = await createPointDeRassemblementHelper();
     const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
     const sessionPhase1 = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
     const result = await createPointDeRassemblementWithBus(getNewPointDeRassemblementFixture(), cohesionCenter._id, sessionPhase1._id);
     ligneToPoint = result.ligneToPoint;
-    meetingPoint = result.pdr;
   });
 
   afterEach(async () => {

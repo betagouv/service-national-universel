@@ -10,7 +10,7 @@ import {
   makeFetchTransport,
   Replay,
 } from "@sentry/react";
-import { environment, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE } from "./config";
+import { environment, RELEASE, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -18,13 +18,16 @@ import { createBrowserHistory } from "history";
 const SentryRoute = withSentryRouting(Route);
 const history = createBrowserHistory();
 
+console.log("🚀 ~ file: sentry.js:14 ~ environment:", environment);
+
 function initSentry() {
   if (environment !== "development") {
     // Evite le spam sentry en local
     init({
       enabled: Boolean(SENTRY_URL),
       dsn: SENTRY_URL,
-      environment: "app",
+      environment,
+      release: RELEASE,
       normalizeDepth: 16,
       transport: makeBrowserOfflineTransport(makeFetchTransport),
       transportOptions: {

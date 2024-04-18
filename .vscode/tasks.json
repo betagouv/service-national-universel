@@ -33,7 +33,7 @@
     },
     {
       "label": "Install dependencies",
-      "command": "npm install && APP_NAME=\\!antivirus npm run build",
+      "command": "npm install",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -43,6 +43,15 @@
     {
       "label": "Build dependencies",
       "command": "APP_NAME=\\!antivirus npm run build",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Clean dependencies",
+      "command": "npm run clean",
       "type": "shell",
       "problemMatcher": [],
       "options": {

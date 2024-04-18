@@ -39,6 +39,7 @@ import { capture } from "../../sentry";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
+import { apiEngagement } from "./utils";
 
 export default function ViewDesktop() {
   const [mission, setMission] = useState();
@@ -60,6 +61,9 @@ export default function ViewDesktop() {
   const getMission = async () => {
     if (!id) return setMission(null);
     const { data } = await api.get(`/mission/${id}`);
+    if (data?.apiEngagementId && (!data.application || data.application?.status === APPLICATION_STATUS.WAITING_ACCEPTATION)) {
+      await apiEngagement(data.apiEngagementId);
+    }
     return setMission(data);
   };
 
@@ -81,6 +85,7 @@ export default function ViewDesktop() {
 
   useEffect(() => {
     getMission();
+    return localStorage.removeItem("jva_mission_click_id");
   }, []);
 
   React.useEffect(() => {

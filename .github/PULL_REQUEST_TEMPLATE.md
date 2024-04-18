@@ -1,3 +1,24 @@
+**Pull Request Title Rules**
+
+Pull request format must respect this format:
+
+```
+<type>(<scope>, <scope>...): <Notion ID> - <description>
+```
+
+Allowed types: `feat`, `fix`, `refactor`, `chore`.
+Allowed scopes: `release`, `app`, `admin`, `misc`, `api`, `all`, `github`, `terraform`, `kb`, `lib`.
+
+Notion ID, followed by a `-` is **mandatory** on types `refactor`, `feat` and `fix`.
+
+*If you really need to bypass the pull request title validation, you can add the `bypass title` label to you PR.*
+
+Examples of valid PR titles:
+- `chore(release): New version 1.3.3.7`
+- `refactor(api): 1789 - Removed monarchy from codebase`
+- `fix(api, app, admin): 1981 - User cannot delete each other accounts anymore.`
+
+
 **Description**
 
 <!-- Explain the **motivation** for making this change. What existing problem does the pull request solve? screenshot? -->
