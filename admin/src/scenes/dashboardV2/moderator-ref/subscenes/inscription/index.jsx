@@ -22,16 +22,14 @@ export default function Index() {
   const selectOptions = [
     {
       key: "1",
+      title: "Exporter",
       items: [
         {
           key: "1.1",
           render: (
-            <>
-              <HiClipboardList size={30} />
-              <p>
-                Exporter le rapport <span>"Inscription"</span>
-              </p>
-            </>
+            <p>
+              Le rapport <span>"Inscription"</span>
+            </p>
           ),
           action: () => {
             setModalExport(true);
@@ -40,12 +38,9 @@ export default function Index() {
         {
           key: "1.2",
           render: (
-            <>
-              <HiChartSquareBar size={34} />
-              <p>
-                Exporter les statistiques <span>"Inscription"</span>
-              </p>
-            </>
+            <p>
+              Les statistiques <span>"Inscription"</span>
+            </p>
           ),
           action: () => {
             plausibleEvent("Dashboard/CTA - Exporter statistiques inscriptions");

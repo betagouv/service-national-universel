@@ -139,16 +139,14 @@ export default function Index() {
   const selectOptions = [
     {
       key: "1",
+      title: "Exporter",
       items: [
         {
           key: "1.1",
           render: (
-            <>
-              <HiChartSquareBar size={34} />
-              <p>
-                Exporter les statistiques <span>"Séjour"</span>
-              </p>
-            </>
+            <p>
+              Les statistiques <span>"Séjour"</span>
+            </p>
           ),
           action: () => {
             plausibleEvent("Dashboard/CTA - Exporter statistiques séjour");

@@ -54,7 +54,7 @@ export default function Index() {
   return (
     <Page>
       {needMoreInfo && <BandeauInfo />}
-      <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} />
+      <Header title="Tableau de bord" breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Tableau de bord" }]} classNameDivTitle="h-[38px]" />
       <DashboardContainer active="general" availableTab={availableTab}>
         <div className="flex flex-col gap-8 mb-4">
           {message?.map((hit) => (
