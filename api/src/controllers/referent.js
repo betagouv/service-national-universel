@@ -671,7 +671,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohesionStayMedicalFileReceived: undefined,
     });
     if (value.source === YOUNG_SOURCE.CLE) {
-      const correctionRequestsFiltered = young.correctionRequestIds.filter((e) => e.field !== "CniFile");
+      const correctionRequestsFiltered = young.correctionRequestIds.filter((correction) => correction.field !== "CniFile");
       young.set({
         source: YOUNG_SOURCE.CLE,
         etablissementId: value.etablissementId,
