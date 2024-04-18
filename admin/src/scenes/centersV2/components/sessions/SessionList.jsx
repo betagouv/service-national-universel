@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import queryString from "query-string";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 
 import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen } from "snu-lib";
@@ -9,10 +10,12 @@ import { Select } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import { canCreateOrUpdateCohesionCenter, translate } from "@/utils";
 import api from "@/services/api";
+import { NewGetCohortSelectOptions } from "@/services/cohort.service";
 import dayjs from "@/utils/dayjs.utils";
 import Pencil from "@/assets/icons/Pencil";
+
 import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
-import { NewGetCohortSelectOptions } from "@/services/cohort.service";
+import Loader from "@/components/Loader";
 
 import { Title } from "../commons";
 import Field from "../Field";
@@ -20,7 +23,6 @@ import TimeSchedule from "../TimeSchedule";
 import PedagoProject from "../PedagoProject";
 import { toastr } from "react-redux-toastr";
 import OccupationCard from "./OccupationCard";
-import Loader from "@/components/Loader";
 
 function getQuerySessionId() {
   const { sessionId } = queryString.parse(location.search);
@@ -33,6 +35,7 @@ function getQuerySessionId() {
 
 export default function SessionList({ center, sessions, user, focusedSession, onFocusedSessionChange, onSessionsChange, onRefreshCenter, onCenterChange }) {
   const history = useHistory();
+  const cohorts = useSelector((state) => state.Cohorts);
 
   const [editingBottom, setEditingBottom] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,15 +43,8 @@ export default function SessionList({ center, sessions, user, focusedSession, on
   const [errors, setErrors] = useState({});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
 
-  const cohortList = useMemo(() => {
-    const cohorts = sessions?.map((session) => ({ name: session.cohort })) || [];
-    return NewGetCohortSelectOptions(cohorts);
-  }, [sessions]);
-
-  const cohort = useMemo(() => {
-    if (!focusedSession?.cohort) return cohortList?.[0]?.value;
-    return focusedSession?.cohort;
-  }, [cohortList, focusedSession]);
+  const cohortOptionsList = useMemo(() => NewGetCohortSelectOptions(cohorts.filter((c) => sessions.find((s) => s.cohort === c.name))), [cohorts, sessions]);
+  const cohort = focusedSession?.cohort ?? cohortOptionsList?.[0]?.value;
 
   useEffect(() => {
     const querySessionId = getQuerySessionId();
@@ -153,8 +149,8 @@ export default function SessionList({ center, sessions, user, focusedSession, on
         <div className="flex items-center">
           {isLoadingCohort && <Loader size="2rem" />}
           <Select
-            options={cohortList}
-            value={cohortList.find((e) => e.value === cohort)}
+            options={cohortOptionsList}
+            value={cohortOptionsList.find((e) => e.value === cohort)}
             defaultValue={cohort}
             maxMenuHeight={520}
             className="w-[500px]"
