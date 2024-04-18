@@ -1,10 +1,16 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { HiOutlinePencil } from "react-icons/hi";
+import dayjs from "dayjs";
+
+import { Button } from "@snu/ds/admin";
 
 import { PlainButton } from "../../plan-transport/components/Buttons";
-import Download from "../../../assets/icons/Download";
-import Pencil from "../../../assets/icons/Pencil";
+import Download from "@/assets/icons/Download";
+import Pencil from "@/assets/icons/Pencil";
 
 import DatePicker from "./DatePicker";
+import { ROLES } from "snu-lib";
 
 const BoxContent = ({ availableFrom, availableUntil, onChangeDate, onDownload, editable, isLoading }) => {
   const [isDatePickerOpen, setDatePickerOpen] = useState(false);
@@ -49,13 +55,48 @@ const BoxContent = ({ availableFrom, availableUntil, onChangeDate, onDownload, e
   );
 };
 
-const ExportBox = ({ title, availableFrom, availableUntil, onChangeDate, onDownload, editable = true, isDownloading = false }) => {
+export default function ExportBox({ title, availableFrom, availableUntil, onChangeDate, onDownload, editable = true, isDownloading = false }) {
+  const user = useSelector((state) => state.Auth.user);
+
+  const generateText = () => {
+    const now = dayjs();
+    const exportAvailableFrom = dayjs(availableFrom);
+    const exportAvailableUntil = dayjs(availableUntil);
+    console.log("availableFrom", availableFrom);
+    console.log("availableUntil", availableUntil);
+
+    switch (true) {
+      case now.isBefore(exportAvailableFrom):
+        return (
+          <p className="text-sm leading-5 font-normal text-gray-500">
+            Disponible à partir du : <span className="text-sm leading-5 font-bold text-gray-900">{availableFrom.format("YYYY-MM-DD")}</span>
+          </p>
+        );
+      case now.isAfter(exportAvailableFrom) && now.isBefore(exportAvailableUntil):
+        return (
+          <p className="text-sm leading-5 font-normal text-gray-500">
+            Générée le : <span className="text-sm leading-5 font-bold text-gray-900">{availableFrom.format("YYYY-MM-DD")}</span>
+            Disponible jusqu'au : <span className="text-sm leading-5 font-bold text-gray-900">{availableUntil.format("YYYY-MM-DD")}</span>
+          </p>
+        );
+      case now.isAfter(exportAvailableUntil):
+        return (
+          <p className="text-sm leading-5 font-normal text-gray-500">
+            Indisponible depuis le : <span className="text-sm leading-5 font-bold text-gray-900">{availableUntil.format("YYYY-MM-DD")}</span>
+          </p>
+        );
+    }
+  };
+
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  };
+
   return (
-    <div className="flex flex-1 flex-col rounded-lg bg-white p-6 shadow ">
-      <div className="mb-3 text-lg font-medium">{title}</div>
-      <BoxContent availableFrom={availableFrom} availableUntil={availableUntil} onChangeDate={onChangeDate} onDownload={onDownload} editable={editable} isLoading={isDownloading} />
+    <div className="flex flex-1 flex-col rounded-lg bg-white p-6 shadow text-gray-900">
+      <h1 className="text-lg leading-7 font-bold ">{title}</h1>
+      {generateText()}
+      {user.role === ROLES.ADMIN && <Button title="Modifier la date" type="tertiary" leftIcon={<HiOutlinePencil />} />}
     </div>
   );
-};
-
-export default ExportBox;
+}
