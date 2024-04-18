@@ -18,7 +18,7 @@ async function initDB() {
     maxPoolSize: 30,
     minPoolSize: 5,
     waitQueueTimeoutMS: 30_000,
-    tls: true, // Enable TLS
+    // tls: true, // Enable TLS
   };
 
   if (ENVIRONMENT === "production") {
