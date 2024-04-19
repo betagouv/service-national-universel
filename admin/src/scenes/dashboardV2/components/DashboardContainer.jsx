@@ -25,7 +25,9 @@ export default function DashboardContainer({ active = "general", availableTab, n
 const TabItem = ({ id, active, label, route, icon }) => {
   let Icon = icon;
   return (
-    <Link className={`cursor-pointer gap-1 h-9 pl-2.5 pr-[12px] text-gray-500 hover:text-gray-600 ${active === id && "border-b-2  border-blue-600 "}`} to={route}>
+    <Link
+      className={`cursor-pointer gap-1 h-9 pl-2.5 pr-[12px] text-gray-500 hover:text-blue-600 mb-[-1px] pb-[1px] ${active === id && "border-b-2  border-blue-500 "}`}
+      to={route}>
       <div className="flex items-center gap-1.5">
         <Icon size={20} className={`${active === id && "text-blue-600"}`} />
         <span className={`text-sm font-medium ${active === id && "text-blue-600"}`}>{label}</span>
