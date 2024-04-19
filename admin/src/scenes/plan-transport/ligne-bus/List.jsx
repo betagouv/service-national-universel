@@ -5,7 +5,6 @@ import { Link, useHistory } from "react-router-dom";
 import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-lib";
 import ArrowUp from "../../../assets/ArrowUp";
 import Comment from "../../../assets/comment";
-import History from "../../../assets/icons/History";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../../components/filters-system-v2";
 import Loader from "../../../components/Loader";
 import { capture } from "../../../sentry";
@@ -14,21 +13,19 @@ import { PlainButton } from "../components/Buttons";
 import { translateStatus } from "../components/commons";
 import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import ListPanel from "./modificationPanel/List";
-import { NewGetCohortSelectOptions } from "@/services/cohort.service";
-import { Button, Container, Header, Page, Navbar, DropdownButton, Select } from "@snu/ds/admin";
+import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
 import { HiOutlineChartSquareBar, HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 import Historic from "./Historic";
 import ListeDemandeModif from "./ListeDemandeModif";
 import plausibleEvent from "@/services/plausible";
-import { FaMagnifyingGlass } from "react-icons/fa6";
 import { FiFolderPlus } from "react-icons/fi";
+import SelectCohort from "@/components/cohorts/SelectCohort";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
   const cohorts = useSelector((state) => state.Cohorts);
-  const [cohortList, setCohortList] = useState([]);
   const urlParams = new URLSearchParams(window.location.search);
   const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : undefined;
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
@@ -37,7 +34,6 @@ export default function List() {
   const history = useHistory();
   const [showHistoric, setShowHistoric] = useState(false);
   const [showModifications, setShowModifications] = useState(false);
-  const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
 
   const [currentTab, setCurrentTab] = React.useState("aller");
   const [panel, setPanel] = React.useState({ open: false, id: null });
@@ -138,9 +134,7 @@ export default function List() {
   }, [selectedFilters]);
 
   useEffect(() => {
-    const cohortList = NewGetCohortSelectOptions(cohorts);
-    setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[0].value);
+    if (!cohort) setCohort(cohorts?.[0].name);
   }, []);
 
   const getPlanDetransport = async () => {
@@ -174,24 +168,13 @@ export default function List() {
         title="Plan de transport"
         breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Plan de transport" }]}
         actions={
-          <>
-            {isSelectMenuOpen && <FaMagnifyingGlass size={25} className="text-gray-400 mr-3" />}
-            <Select
-              options={cohortList}
-              value={cohortList.find((e) => e.value === cohort)}
-              defaultValue={cohort}
-              maxMenuHeight={520}
-              className="w-[500px]"
-              disabled={user.role === ROLES.HEAD_CENTER}
-              onMenuOpen={() => setIsSelectMenuOpen(true)}
-              onMenuClose={() => setIsSelectMenuOpen(false)}
-              onChange={(e) => {
-                setCohort(e.value);
-                setIsSelectMenuOpen(false);
-                history.replace({ search: `?cohort=${e.value}` });
-              }}
-            />
-          </>
+          <SelectCohort
+            cohort={cohort}
+            onChange={(cohortName) => {
+              setCohort(cohortName);
+              history.replace({ search: `?cohort=${cohortName}` });
+            }}
+          />
         }
       />
       {hasValue && (
