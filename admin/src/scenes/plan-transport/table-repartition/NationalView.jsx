@@ -1,45 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { ROLES } from "snu-lib";
-import Pencil from "../../../assets/icons/Pencil";
-import Breadcrumbs from "../../../components/Breadcrumbs";
-import Select from "../components/Select";
-import { capture } from "../../../sentry";
-import API from "../../../services/api";
-import { Loading, regionList, SubTitle, Title } from "../components/commons";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { parseQuery } from "../util";
-import useDocumentTitle from "../../../hooks/useDocumentTitle";
-import { getCohortSelectOptions } from "@/services/cohort.service";
 
-export default function National() {
-  useDocumentTitle("Table de répartition");
-  const user = useSelector((state) => state.Auth.user);
+import { ROLES } from "snu-lib";
+
+import { capture } from "@/sentry";
+import API from "@/services/api";
+
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+
+import Breadcrumbs from "@/components/Breadcrumbs";
+
+import { regionList, SubTitle, Title } from "../components/commons";
+import RegionRow from "./components/RegionRow";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
+export default function NationalView() {
+  const history = useHistory();
+
   const cohorts = useSelector((state) => state.Cohorts);
-  const [cohort, setCohort] = useState(getDefaultCohort());
-  const [cohortList, setCohortList] = useState([]);
+  const user = useSelector((state) => state.Auth.user);
+
+  const urlParams = new URLSearchParams(history.location.search);
+  useDocumentTitle("Table de répartition");
+
+  const [cohort, setCohort] = useState(urlParams.get("cohort") || cohorts?.[0]?.name);
   const [youngsByRegion, setYoungsByRegion] = useState([]);
   const [placesCenterByRegion, setPlacesCenterByRegion] = useState({});
   const [loadingQuery, setLoadingQuery] = useState(false);
   const [searchRegion, setSearchRegion] = useState("");
   const [regions, setRegions] = useState(regionList);
   const [data, setData] = useState([]);
-  const history = useHistory();
-
-  useEffect(() => {
-    const cohortList = getCohortSelectOptions(cohorts);
-    setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[0].value);
-  }, []);
-
-  function getDefaultCohort() {
-    const { cohort } = parseQuery(location.search);
-    if (cohort) {
-      return cohort;
-    }
-    return undefined;
-  }
 
   const getRepartitionRegion = async () => {
     try {
@@ -127,9 +119,9 @@ export default function National() {
     }
   };
 
-  const handleChangeCohort = (value) => {
-    setCohort(value);
-    history.push(`/table-repartition?cohort=${value}`);
+  const handleChangeCohort = (cohortName) => {
+    setCohort(cohortName);
+    history.replace({ search: `?cohort=${cohortName}` });
   };
 
   return (
@@ -141,7 +133,7 @@ export default function National() {
             <Title>Table de répartition</Title>
             {user.role == ROLES.ADMIN && <SubTitle>Assignez une ou des régions d’accueil à votre région</SubTitle>}
           </div>
-          <Select options={cohortList} value={cohort} onChange={handleChangeCohort} />
+          <SelectCohort cohort={cohort} onChange={handleChangeCohort} />
         </div>
         <div className="flex flex-col gap-2 rounded-lg bg-white pb-3">
           <div className="flex w-full items-center justify-between px-4 py-3">
@@ -166,7 +158,7 @@ export default function National() {
 
           {regions?.length ? (
             regions.map((region) => (
-              <Region
+              <RegionRow
                 key={"region" + region}
                 region={region}
                 youngsInRegion={youngsByRegion.find((r) => r.key === region)?.doc_count || 0}
@@ -192,115 +184,3 @@ export default function National() {
     </>
   );
 }
-
-const Region = ({ region, youngsInRegion, placesCenterByRegion, loadingQuery, onCreate, data, onDelete, cohort, user }) => {
-  const [open, setOpen] = React.useState(false);
-  const [assignRegion, setAssignRegion] = React.useState([]);
-  const [avancement, setAvancement] = React.useState(0);
-  const editDisabled = user.role !== ROLES.ADMIN;
-  const history = useHistory();
-
-  React.useEffect(() => {
-    let assignRegion = data.filter((e) => e.fromRegion === region) || [];
-    setAssignRegion(assignRegion);
-    setAvancement(assignRegion.length ? assignRegion[0].avancement : 0);
-  }, [data]);
-
-  return (
-    <>
-      <hr />
-      <div className="flex items-center px-4 py-2">
-        <div
-          className={`flex w-[30%] flex-col gap-1 ${assignRegion.length ? "cursor-pointer" : ""}`}
-          onClick={() => assignRegion.length && history.push(`/table-repartition/regional?cohort=${cohort}&region=${region}`)}>
-          <div className="text-base font-bold leading-6 text-[#242526]">{region}</div>
-          <div className="flex items-center text-xs leading-4 text-gray-800">{loadingQuery ? <Loading width="w-1/3" /> : `${youngsInRegion} volontaires`}</div>
-        </div>
-        <div className="w-[60%]">
-          {loadingQuery ? (
-            <Loading width="w-1/3" />
-          ) : (
-            <div className="relative flex flex-row flex-wrap items-center gap-2">
-              {assignRegion.map((assign, i) => (
-                <div key={i + "assign"} className="rounded-full bg-gray-100 p-2 text-xs text-gray-700">
-                  {assign.toRegion}
-                </div>
-              ))}
-              {!editDisabled && (
-                <>
-                  {assignRegion.length === 0 ? (
-                    <button className="cursor-pointer rounded-full bg-blue-600 px-2 py-1 text-xs leading-5 text-white hover:scale-105" onClick={() => setOpen(!open)}>
-                      À assigner
-                    </button>
-                  ) : (
-                    <div className="flex cursor-pointer items-center rounded-full bg-blue-600 p-2 hover:scale-105" onClick={() => setOpen(!open)}>
-                      <Pencil className="h-4 w-4 text-white" />
-                    </div>
-                  )}
-                  {open ? (
-                    <SelectHostRegion
-                      region={region}
-                      setOpen={setOpen}
-                      placesCenterByRegion={placesCenterByRegion}
-                      onCreate={onCreate}
-                      assignRegion={assignRegion}
-                      onDelete={onDelete}
-                    />
-                  ) : null}
-                </>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="w-[10%] text-center">
-          {loadingQuery ? (
-            <Loading width="w-2/3" />
-          ) : (
-            <div className="flex justify-center">
-              <div className={`rounded-lg px-2 py-1 text-xs font-bold uppercase leading-5 ${avancement === 100 ? "bg-[#E4F3EC] text-green-600" : "bg-[#E8EDFF] text-blue-600"}`}>
-                {avancement} %
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
-};
-
-const SelectHostRegion = ({ region, placesCenterByRegion, setOpen, onCreate, assignRegion, onDelete }) => {
-  const ref = React.useRef(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => {
-      document.removeEventListener("click", handleClickOutside, true);
-    };
-  }, []);
-
-  const onChange = (fromRegion, toRegion) => {
-    if (assignRegion.filter((e) => e.toRegion === toRegion)?.length !== 0) onDelete(fromRegion, toRegion);
-    else onCreate(fromRegion, toRegion);
-  };
-
-  return (
-    <div ref={ref} className="absolute top-[110%] left-[0px] z-50 flex h-60 w-[90%] flex-col overflow-y-auto rounded-lg bg-white py-2 shadow-ninaButton">
-      {regionList.map((r, i) => {
-        return (
-          <div key={r + i} className="flex cursor-pointer flex-row items-center justify-between px-3 py-2 hover:bg-gray-100" onClick={() => onChange(region, r)}>
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <input type={"checkbox"} checked={assignRegion.find((e) => e.toRegion === r) || false} readOnly />
-              {r}
-            </div>
-            <div className="text-sm uppercase text-gray-500">{placesCenterByRegion[r] ? placesCenterByRegion[r] : 0} places</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
