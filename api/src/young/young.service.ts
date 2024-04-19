@@ -11,7 +11,7 @@ type YoungPdfWithUniqueName = {
   youngName: string;
 };
 
-export const generateConvocationsForMultipleYoungs = async (youngs: YoungType[]) => {
+export const generateConvocationsForMultipleYoungs = async (youngs: YoungType[]): Promise<YoungPdfWithUniqueName[]> => {
   const youngPdfPromises = youngs.map(async (young) => {
     try {
       return await generateConvocationByYoung(young);
@@ -21,7 +21,7 @@ export const generateConvocationsForMultipleYoungs = async (youngs: YoungType[])
     }
   });
 
-  const filteredYoungPdfPromises = await Promise.all(youngPdfPromises).then((youngPdfs) => youngPdfs.filter((youngPdf) => youngPdf !== null));
+  const filteredYoungPdfPromises = await Promise.all(youngPdfPromises).then((youngPdfs) => youngPdfs.filter((youngPdf): youngPdf is YoungPdfWithUniqueName => youngPdf !== null));
   console.log(`Number of pdfs requested : ${youngs.length} - Filtered Young with pdf files : ${filteredYoungPdfPromises.length}`);
   return filteredYoungPdfPromises;
 };

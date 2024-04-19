@@ -13,9 +13,11 @@ export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsPdfs = await generateConvocationsForMultipleYoungs(youngsInClasse);
 
   return buildZip(
-    youngsPdfs.map((youngPdf) => ({
-      name: `${youngPdf.youngName}.pdf`,
-      buffer: youngPdf.buffer,
-    })),
+    youngsPdfs
+      .filter((youngPdf) => youngPdf !== null)
+      .map((youngPdf) => ({
+        name: `${youngPdf.youngName}.pdf`,
+        buffer: youngPdf.buffer,
+      })),
   );
 };

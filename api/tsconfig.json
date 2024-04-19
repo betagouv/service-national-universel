@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "strictNullChecks": true,
+    "skipLibCheck": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -11,9 +13,11 @@
     "outDir": "./src",
     "rootDir": "./src"
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "**/node_modules/*",
-    "src/__tests__/*",
+    "src/__tests__/*"
   ]
 }
