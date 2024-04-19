@@ -14,16 +14,16 @@ import {
   ROLES,
   START_DATE_SESSION_PHASE1,
 } from "snu-lib";
-import { Select } from "@snu/ds/admin";
 
-import { NewGetCohortSelectOptions } from "@/services/cohort.service";
+import { capture } from "@/sentry";
+import api from "@/services/api";
 
 import Pencil from "@/assets/icons/Pencil";
 import Trash from "@/assets/icons/Trash";
+
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Loader from "@/components/Loader";
-import { capture } from "@/sentry";
-import api from "@/services/api";
+import SelectCohort from "@/components/cohorts/SelectCohort";
 
 import VerifyAddress from "../phase0/components/VerifyAddress";
 import { Title } from "./components/common";
@@ -34,7 +34,6 @@ import ModalCreation from "./components/ModalCreation";
 export default function View(props) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
 
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -52,8 +51,6 @@ export default function View(props) {
   const [nbYoung, setNbYoung] = React.useState([]);
   const [lines, setLines] = React.useState([]);
   const [pdrInSchema, setPdrInSchema] = React.useState(false);
-
-  const cohortOptionsList = NewGetCohortSelectOptions(cohorts);
 
   useEffect(() => {
     (async () => {
@@ -408,15 +405,11 @@ export default function View(props) {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <Title>Par séjour</Title>
-              <Select
-                options={cohortOptionsList}
-                value={cohortOptionsList.find((option) => option.value === currentCohort)}
-                defaultValue={currentCohort}
-                maxMenuHeight={520}
-                className="w-[500px]"
-                onChange={(e) => {
-                  setCurrentCohort(e.value);
-                  history.replace({ search: `?cohort=${e.value}` });
+              <SelectCohort
+                cohort={currentCohort}
+                onChange={(cohortName) => {
+                  setCurrentCohort(cohortName);
+                  history.replace({ search: `?cohort=${cohortName}` });
                 }}
               />
             </div>
