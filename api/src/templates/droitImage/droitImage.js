@@ -1,6 +1,6 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { PUBLIC_ROOTDIR, FONT_ROOTDIR } = require("../../config");
+const { IMAGES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
 const datefns = require("date-fns");
 
 const FONT = "Marianne";
@@ -35,8 +35,8 @@ function render(doc, young) {
 
   doc.font(FONT);
 
-  doc.image(path.join(PUBLIC_ROOTDIR, "images/republique-francaise.png"), 0, 0);
-  doc.image(path.join(PUBLIC_ROOTDIR, "images/logo-snu.png"), 100, 15, { width: 40, height: 40 });
+  doc.image(path.join(IMAGES_ROOTDIR, "republique-francaise.png"), 0, 0);
+  doc.image(path.join(IMAGES_ROOTDIR, "logo-snu.png"), 100, 15, { width: 40, height: 40 });
 
   doc.fontSize(11).fillColor("#385EA9").text("AUTORISATION DE PRISE DE VUES D’UN MINEUR ET D’UTILISATION D'IMAGES", {
     paragraphGap: 10,

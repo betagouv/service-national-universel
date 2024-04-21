@@ -1,6 +1,6 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { PUBLIC_ROOTDIR, FONT_ROOTDIR } = require("../../config");
+const { IMAGES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
 const { formatDateFRTimezoneUTC } = require("snu-lib");
 
 const FONT = "Marianne";
@@ -29,7 +29,7 @@ function _page1(doc) {
 
   doc.moveDown(2)
   _y = doc.y
-  doc.image(path.join(PUBLIC_ROOTDIR, "images/logo-snu.png"), 40, _y, { width: 60, height: 60 });
+  doc.image(path.join(IMAGES_ROOTDIR, "logo-snu.png"), 40, _y, { width: 60, height: 60 });
 
   doc.font(FONT_BOLD).fontSize(FONT_SIZE_H1).text("Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)", 120, _y, {
     align: "center",
