@@ -21,10 +21,10 @@ async function initDB() {
     tls: true, // Enable TLS
   };
 
-  if (ENVIRONMENT === "production") {
-    options.maxPoolSize = 200;
-    options.minPoolSize = 50;
-  }
+  // if (ENVIRONMENT === "production") {
+  //   options.maxPoolSize = 200;
+  //   options.minPoolSize = 50;
+  // }
 
   try {
     await mongoose.connect(MONGO_URL, options);
