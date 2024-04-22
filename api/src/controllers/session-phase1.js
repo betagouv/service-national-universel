@@ -46,7 +46,6 @@ const fs = require("fs");
 const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const scanFile = require("../utils/virusScanner");
-const { generatePdfIntoBuffer } = require("../utils/pdf-renderer");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -267,16 +266,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     const cohort = await CohortModel.findOne({ name: session.cohort });
     generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
 
-    // const noticePdf = await getFile(`file/noticeImpression.pdf`);
-    // if (noticePdf) {
-    //   zip.addFile("01-notice-d'impression.pdf", noticePdf.Body);
-    // }
-
-    // res.set({
-    //   "content-disposition": `inline; filename="certificats.zip"`,
-    //   "content-type": "application/zip",
-    //   "cache-control": "public, max-age=1",
-    // });
   } catch (error) {
     console.log("error", error);
     capture(error);

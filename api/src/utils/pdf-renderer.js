@@ -1,16 +1,12 @@
 const path = require("path");
-const { Writable } = require('node:stream');
-const { Buffer } = require('node:buffer');
-const { pipeline, finished } = require('node:stream/promises');
+const { Writable } = require("node:stream");
+const { Buffer } = require("node:buffer");
+const { finished } = require("node:stream/promises");
 const fs = require("fs").promises;
-const { API_PDF_ENDPOINT, IMAGES_ROOTDIR } = require("../config");
-const { timeout, getFile } = require("../utils");
-const { capture } = require("../sentry");
+const { IMAGES_ROOTDIR } = require("../config");
+const { getFile } = require("../utils");
 const { ERRORS } = require("./index");
-const fetch = require("node-fetch");
 const { MINISTRES } = require("snu-lib");
-
-const TIMEOUT_PDF_SERVICE = 15000;
 
 const { generateCertifPhase1 } = require("../templates/certificate/phase1");
 const { generateCertifPhase2 } = require("../templates/certificate/phase2");
@@ -19,10 +15,6 @@ const { generateCertifSNU } = require("../templates/certificate/snu");
 const { generateDroitImage } = require("../templates/droitImage/droitImage");
 const { generateCohesion } = require("../templates/convocation/cohesion");
 const { generateContractPhase2 } = require("../templates/contract/phase2");
-
-async function getHtmlTemplate(type, template, young, contract) {
-  throw new Error("Not implemented");
-}
 
 class InMemoryWritable extends Writable {
   constructor(options) {
@@ -37,27 +29,6 @@ class InMemoryWritable extends Writable {
   _write(chunk, encoding, callback) {
     this.chunks.push(chunk);
     callback();
-  }
-}
-
-async function htmlToPdfStream(html, options) {
-  const _getPDF = async () => {
-    const response = await fetch(API_PDF_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-      body: JSON.stringify({ html, options }),
-    });
-    if (response.status && response.status !== 200) {
-      throw new Error("PDF_BAD_RESPONSE");
-    }
-    return response.body;
-  };
-
-  try {
-    return await timeout(_getPDF(), TIMEOUT_PDF_SERVICE);
-  } catch (error) {
-    capture(error);
-    throw new Error(ERRORS.PDF_ERROR);
   }
 }
 
@@ -83,14 +54,7 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
   if (type === "contract" && template === "2" && contract) {
     return generateContractPhase2(outStream, contract);
   }
-  const html = await getHtmlTemplate(type, template, young, contract);
-  if (!html) {
-    throw new Error(ERRORS.NOT_FOUND);
-  }
-
-  const options = type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 };
-  const inStream = await htmlToPdfStream(html, options);
-  await pipeline(inStream, outStream);
+  throw new Error(ERRORS.NOT_FOUND);
 }
 
 async function generatePdfIntoBuffer(options) {
@@ -109,7 +73,6 @@ async function getTemplate(template) {
     // in order to make them available for pdf generation
     const downloaded = await getFile(template);
 
-
     await handle.writeFile(downloaded.Body);
     await handle.close();
   } catch (err) {
@@ -127,10 +90,7 @@ async function getAllPdfTemplates() {
   }
 
   await fs.mkdir(path.join(IMAGES_ROOTDIR, "convocation"), { recursive: true });
-  for (const convoc of [
-    "convocation/convocation_template_base_2024_V2.png",
-    "convocation/convocation_template_base_NC.png",
-  ]) {
+  for (const convoc of ["convocation/convocation_template_base_2024_V2.png", "convocation/convocation_template_base_NC.png"]) {
     await getTemplate(convoc);
   }
 }
