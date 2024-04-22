@@ -2,9 +2,9 @@ name: Reset Container Endpoint (Scaleway)
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - scw-reset-endpoint
+  push:
+    branches:
+      - scw-reset-endpoint
 
 jobs:
   prepare:
