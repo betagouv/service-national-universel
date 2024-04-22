@@ -107,6 +107,39 @@ function schedule(crontab, name, handlers) {
   sentry_cron.schedule(crontab, _log(name, handlers), { name });
 }
 
+schedule("0 2 * * *", "missionPatches", missionPatches.handler);
+
+schedule("30 2 * * *", "applicationPatches", applicationPatches.handler);
+
+schedule("0 3 * * *", "youngPatches", youngPatches.handler);
+
+schedule("30 1 * * *", "structurePatches", structurePatches.handler);
+
+schedule("45 1 * * *", "missionEquivalencePatches", missionEquivalencePatches.handler);
+
+schedule("20 3 * * *", "classePatches", classePatches.handler);
+
+schedule("15 04 * * *", "dsnjExport", dsnjExport.handler);
+
+schedule("27 8 * * *", "parentConsentementReminder", parentConsentementReminder.handler);
+
+// Every Monday at 7:30am
+schedule("30 7 * * 1", "parentRevalidateRI", parentRevalidateRI.handler);
+
+// Every day at 11:00
+schedule("0 11 * * *", "reminderInscription", reminderInscription.handler);
+
+// Every day at 11:00
+schedule("0 11 * * *", "reminderWaitingCorrection", reminderWaitingCorrection.handler);
+
+// Every day at 10:00
+schedule("0 10 * * *", "reminderImageRightsParent2", reminderImageRightsParent2.handler);
+
+schedule("0 5 * * *", "refreshMaterializedViews", refreshMaterializedViews.handler);
+
+// tous les jours à 14h00
+schedule("2 14 * * *", "clotureMissionReminder", clotureMissionReminder.handler);
+
 schedule("0 9 * * 1", "applicationPending", applicationPending.handler);
 
 schedule("0 15 * * *", "deleteCNIAdnSpecificAmenagementType", deleteCNIAdnSpecificAmenagementType.handler);
@@ -134,36 +167,3 @@ schedule("0 1 * * *", "loginAttempts", loginAttempts.handler);
 schedule("45 2 * * *", "syncReferentSupport", syncReferentSupport.handler);
 
 schedule("15 1 * * *", "syncContactSupport", syncContactSupport.handler);
-
-schedule("30 1 * * *", "structurePatches", structurePatches.handler);
-
-schedule("45 1 * * *", "missionEquivalencePatches", missionEquivalencePatches.handler);
-
-schedule("0 2 * * *", "missionPatches", missionPatches.handler);
-
-schedule("30 2 * * *", "applicationPatches", applicationPatches.handler);
-
-schedule("0 3 * * *", "youngPatches", youngPatches.handler);
-
-schedule("20 3 * * *", "classePatches", classePatches.handler);
-
-schedule("15 04 * * *", "dsnjExport", dsnjExport.handler);
-
-schedule("27 8 * * *", "parentConsentementReminder", parentConsentementReminder.handler);
-
-// Every Monday at 7:30am
-schedule("30 7 * * 1", "parentRevalidateRI", parentRevalidateRI.handler);
-
-// Every day at 11:00
-schedule("0 11 * * *", "reminderInscription", reminderInscription.handler);
-
-// Every day at 11:00
-schedule("0 11 * * *", "reminderWaitingCorrection", reminderWaitingCorrection.handler);
-
-// Every day at 10:00
-schedule("0 10 * * *", "reminderImageRightsParent2", reminderImageRightsParent2.handler);
-
-schedule("0 5 * * *", "refreshMaterializedViews", refreshMaterializedViews.handler);
-
-// tous les jours à 14h00
-schedule("2 14 * * *", "clotureMissionReminder", clotureMissionReminder.handler);
