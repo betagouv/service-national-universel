@@ -206,7 +206,7 @@ const getCohortPeriod = (cohort, withBold = false) => {
   return `du ${formattedStart} au ${formattedEnd}`;
 };
 
-const getCohortPeriodForSwitcher = (cohort) => {
+const formatShortCohortPeriod = (cohort) => {
   var startDate = new Date(cohort.dateStart);
   var endDate = new Date(cohort.dateEnd);
 
@@ -224,6 +224,13 @@ const getCohortPeriodForSwitcher = (cohort) => {
   var formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
 
   return formattedStart + " > " + formattedEnd;
+};
+
+const formatCohortPeriod = (cohort, format = "short", withBold = false) => {
+  if (format === "short") {
+    return formatShortCohortPeriod(cohort);
+  }
+  return getCohortPeriod(cohort, withBold);
 };
 
 // includes old cohorts and 2023 july with specific dates for DROMS
@@ -325,7 +332,7 @@ export {
   oldSessions,
   getCohortYear,
   getCohortPeriod,
-  getCohortPeriodForSwitcher,
+  formatCohortPeriod,
   getCohortPeriodTemp,
   sessions2023CohortNames,
   getCohortNames,
