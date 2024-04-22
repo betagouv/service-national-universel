@@ -816,7 +816,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 
 // Delete one user (only admin can delete user)
 // And apparently referent in same geography as well (see canDeleteYoung())
-router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {

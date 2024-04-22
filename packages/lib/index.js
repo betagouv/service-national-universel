@@ -1,4 +1,4 @@
-import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
+import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "./constants";
 import translation from "./translation";
 import { ROLES } from "./roles";
 import sanitizeHtml from "sanitize-html";
@@ -142,8 +142,11 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id, source }
   return false;
 };
 
-const youngCanDeleteAccount = (young) => {
+const youngCanWithdraw = (young) => {
   if (young.source === YOUNG_SOURCE.CLE) return false;
+  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && [YOUNG_STATUS_PHASE2.VALIDATED].includes(young.statusPhase2)) {
+    return false;
+  }
   return true;
 };
 
@@ -190,7 +193,7 @@ export {
   canUpdateYoungStatus,
   canUserUpdateYoungStatus,
   youngCanChangeSession,
-  youngCanDeleteAccount,
+  youngCanWithdraw,
   isYoungInReinscription,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
