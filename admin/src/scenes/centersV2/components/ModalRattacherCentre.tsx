@@ -1,18 +1,21 @@
 import React, { useEffect } from "react";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+
 import { translate, isSessionEditionOpen } from "snu-lib";
 import { Select } from "@snu/ds/admin";
-import ModalTailwind from "../../../components/modals/ModalTailwind";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
+
+import ModalTailwind from "@/components/modals/ModalTailwind";
+import { capture } from "@/sentry";
+import api from "@/services/api";
+
 import Field from "./Field";
-import { useSelector } from "react-redux";
 
 export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
-  const cohorts = useSelector((state) => state.Cohorts);
+  const cohorts = useSelector((state: any) => state.Cohorts);
   const availableCohorts = isOpen ? cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name) : [];
 
   const refSelect = React.useRef(null);
@@ -34,7 +37,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   }, []);
 
   const [listCentre, setListCentre] = React.useState([]);
-  const [selectedCohort, setSelectedCohort] = React.useState();
+  const [selectedCohort, setSelectedCohort] = React.useState<string>();
   const [selectedCentre, setSelectedCentre] = React.useState(defaultCentre);
   const [placesTotal, setPlacesTotal] = React.useState("");
   const [search, setSearch] = React.useState("");
@@ -85,7 +88,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
         return setIsLoading(false);
       }
       setIsLoading(false);
-      toastr.success("La centre a été rattaché au séjour avec succès");
+      toastr.success("La centre a été rattaché au séjour avec succès", "");
       onCancel();
       if (onSucess) onSucess(selectedCohort);
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
@@ -93,7 +96,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
       setPlacesTotal("");
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de l'ajout de la session");
+      toastr.error("Oups, une erreur est survenue lors de l'ajout de la session", "");
       setIsLoading(false);
     }
   };
@@ -113,6 +116,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
               isSearchable
               isClearable
               closeMenuOnSelect
+              // @ts-expect-error type à revoir dans le DS
               value={selectedCohort ? { value: selectedCohort, label: selectedCohort } : null}
               onChange={(options) => {
                 setSelectedCohort(options?.value);

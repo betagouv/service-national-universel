@@ -1,6 +1,5 @@
-require("dotenv").config({ path: "./.env-testing" });
 const mongoose = require("mongoose");
-const { MONGO_URL } = require("../../config");
+const MONGO_URL = "mongodb://localhost:27017/qwer";
 jest.setTimeout(10_000);
 
 let db = null;

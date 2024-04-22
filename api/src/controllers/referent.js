@@ -658,9 +658,13 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     const { cohort, cohortChangeReason } = value;
 
+    let youngStatus = young.status;
+    if (cohort === "à venir ") {
+      youngStatus = getYoungStatus(young);
+    }
+
     const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
     if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
@@ -684,7 +688,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     }
 
     young.set({
-      status: getYoungStatus(young),
+      status: youngStatus,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
       cohort,
       originalCohort: previousYoung.cohort,
@@ -693,6 +697,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohesionStayMedicalFileReceived: undefined,
     });
     if (value.source === YOUNG_SOURCE.CLE) {
+      const correctionRequestsFiltered = young.correctionRequestIds.filter((correction) => correction.field !== "CniFile");
       young.set({
         source: YOUNG_SOURCE.CLE,
         etablissementId: value.etablissementId,
@@ -704,6 +709,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
+        correctionRequestIds: correctionRequestsFiltered,
       });
       if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
         young.set({
@@ -715,7 +721,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       if (value.source === YOUNG_SOURCE.VOLONTAIRE) {
         if (young.source !== YOUNG_SOURCE.VOLONTAIRE) {
           young.set({
-            status: getYoungStatus(young),
+            status: youngStatus,
             statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
             cniFiles: [],
             "files.cniFiles": [],

@@ -23,6 +23,21 @@ import Select from "../components/Select";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 
+type CenterInformationsError = {
+  name?: string;
+  address?: string;
+  city?: string;
+  zip?: string;
+  addressVerified?: string;
+  placesTotal?: string;
+  code2022?: string;
+  typology?: string;
+  domain?: string;
+  academy?: string;
+  centerDesignation?: string;
+  complement?: string;
+};
+
 const optionsTypology = [
   { label: "Public / État", value: "PUBLIC_ETAT" },
   { label: "Public / Collectivité territoriale", value: "PUBLIC_COLLECTIVITE" },
@@ -42,16 +57,16 @@ const optionsDomain = [
 export default function Details({ center, setCenter, sessions }) {
   const history = useHistory();
 
-  const user = useSelector((state) => state.Auth.user);
+  const user = useSelector((state: any) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalDelete, setModalDelete] = React.useState({ isOpen: false });
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
   const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const [modalDelete, setModalDelete] = React.useState<{ isOpen: boolean; title?: string; message?: string; onDelete?: () => void }>({ isOpen: false });
 
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
-  const [errors, setErrors] = React.useState({});
+  const [errors, setErrors] = React.useState<CenterInformationsError>({});
   const [data, setData] = useState(null);
   useDocumentTitle(`Fiche du centre - ${center?.name}`);
 
@@ -59,7 +74,7 @@ export default function Details({ center, setCenter, sessions }) {
     setData({ ...center, pmr: center?.pmr ? center.pmr : "false" });
   }, [center]);
 
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
+  const onVerifyAddress = (isConfirmed?) => (suggestion) => {
     setData({
       ...data,
       addressVerified: true,
@@ -75,7 +90,7 @@ export default function Details({ center, setCenter, sessions }) {
   const onSubmit = async () => {
     try {
       setIsLoading(true);
-      const error = {};
+      const error: CenterInformationsError = {};
       if (!data?.name) {
         error.name = "Le nom est obligatoire";
       }
@@ -111,7 +126,7 @@ export default function Details({ center, setCenter, sessions }) {
       const { ok, code, data: returnedData } = await api.put(`/cohesion-center/${center._id}`, data);
       if (!ok) {
         if (code === "ALREADY_EXISTS") {
-          toastr.error("Oups, le code du centre est déjà utilisé");
+          toastr.error("Oups, le code du centre est déjà utilisé", "");
         } else {
           toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
         }
@@ -121,13 +136,13 @@ export default function Details({ center, setCenter, sessions }) {
       setErrors({});
       setCenter(returnedData);
       setEditInfo(false);
-      toastr.success("Le centre a été modifié avec succès");
+      toastr.success("Le centre a été modifié avec succès", "");
     } catch (e) {
       capture(e);
       if (e.code === "ALREADY_EXISTS") {
-        toastr.error("Oups, le code du centre est déjà utilisé");
+        toastr.error("Oups, le code du centre est déjà utilisé", "");
       } else {
-        toastr.error("Oups, une erreur est survenue lors de la modification du centre");
+        toastr.error("Oups, une erreur est survenue lors de la modification du centre", "");
       }
       setIsLoading(false);
     }
@@ -140,11 +155,11 @@ export default function Details({ center, setCenter, sessions }) {
         toastr.error("Oups, une erreur est survenue lors de la suppression du centre", code);
         return setIsLoading(false);
       }
-      toastr.success("Le centre a bien été supprimé");
+      toastr.success("Le centre a bien été supprimé", "");
       history.push("/centre");
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression du centre");
+      toastr.error("Oups, une erreur est survenue lors de la suppression du centre", "");
       setIsLoading(false);
     }
   };
