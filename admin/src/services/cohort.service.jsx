@@ -50,17 +50,3 @@ export const getCohortSelectOptions = (cohorts, short = false) => {
   if (short) return cohorts.map((cohort) => ({ value: cohort.name, label: cohort.name }));
   return cohorts.map((cohort) => ({ value: cohort.name, label: `${cohort.name} (${getCohortPeriod(cohort, true)})` }));
 };
-
-export const NewGetCohortSelectOptions = (cohorts) => {
-  return cohorts.map((cohort) => ({
-    value: cohort.name,
-    label: (
-      <div className="flex gap-2.5 py-2.5 ml-2">
-        <HiUsers size={24} className="mt-0.5" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
-        <p className="font-normal text-base">
-          <span className="text-gray-700 font-medium">{cohort.name + " "} </span> : <span className="text-gray-500 font-normal"> {getCohortPeriod(cohort)}</span>
-        </p>
-      </div>
-    ),
-  }));
-};
