@@ -3,6 +3,8 @@ import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
+import { QueryClientProvider } from "@tanstack/react-query";
+
 import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 import * as Sentry from "@sentry/react";
 
@@ -54,6 +56,7 @@ import Footer from "./components/footer";
 
 import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
+import { queryClient } from "./services/react-query";
 
 import { adminURL } from "./config";
 import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
@@ -76,23 +79,25 @@ initApi();
 export default function App() {
   return (
     <Sentry.ErrorBoundary fallback={ApplicationError}>
-      <Router history={history}>
-        <ScrollToTop />
-        <div className="main">
-          <Switch>
-            {/* Aucune authentification nécessaire */}
-            <SentryRoute path="/validate" component={Validate} />
-            <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-            <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
-            <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-            <SentryRoute path="/creer-mon-compte" component={Signup} />
-            {/* Authentification accessoire */}
-            <SentryRoute path="/auth" component={Auth} />
-            {/* Page par default (404 et Home) */}
-            <SentryRoute path="/" component={Home} />
-          </Switch>
-        </div>
-      </Router>
+      <QueryClientProvider client={queryClient}>
+        <Router history={history}>
+          <ScrollToTop />
+          <div className="main">
+            <Switch>
+              {/* Aucune authentification nécessaire */}
+              <SentryRoute path="/validate" component={Validate} />
+              <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+              <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
+              <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
+              <SentryRoute path="/creer-mon-compte" component={Signup} />
+              {/* Authentification accessoire */}
+              <SentryRoute path="/auth" component={Auth} />
+              {/* Page par default (404 et Home) */}
+              <SentryRoute path="/" component={Home} />
+            </Switch>
+          </div>
+        </Router>
+      </QueryClientProvider>
     </Sentry.ErrorBoundary>
   );
 }
