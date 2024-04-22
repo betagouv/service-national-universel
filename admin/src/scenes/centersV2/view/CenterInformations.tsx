@@ -1,27 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
-import { Title } from "../components/commons";
-import { canCreateOrUpdateCohesionCenter, ROLES } from "../../../utils";
+import { useDebounce } from "@uidotdev/usehooks";
+
+import ReactTooltip from "react-tooltip";
+import { useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
+
 import { useAddress, canUpdateMeetingPoint, departmentToAcademy } from "snu-lib";
-import Pencil from "../../../assets/icons/Pencil";
+import { AddressForm } from "@snu/ds/common";
+
+import { AuthState } from "@/redux/auth/reducer";
+import { capture } from "@/sentry";
+import { canCreateOrUpdateCohesionCenter, ROLES } from "@/utils";
+import Pencil from "@/assets/icons/Pencil";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+import api from "@/services/api";
+
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
-import ReactTooltip from "react-tooltip";
-import { useHistory } from "react-router-dom";
-import { AddressForm } from "@snu/ds/common";
-import { useDebounce } from "@uidotdev/usehooks";
-import useDocumentTitle from "../../../hooks/useDocumentTitle";
-
-import api from "../../../services/api";
-
+import { Title } from "../components/commons";
 import Field from "../components/Field";
 import Toggle from "../components/Toggle";
 import Select from "../components/Select";
-
-import { toastr } from "react-redux-toastr";
-import { capture } from "../../../sentry";
 
 type CenterInformationsError = {
   name?: string;
@@ -57,7 +59,7 @@ const optionsDomain = [
 export default function Details({ center, setCenter, sessions }) {
   const history = useHistory();
 
-  const user = useSelector((state: any) => state.Auth.user);
+  const user = useSelector((state: AuthState) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
