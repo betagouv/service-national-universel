@@ -21,9 +21,9 @@ export default function StepDocuments() {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
-  const corrections = young?.correctionRequests
-    ?.filter((correctionRequest) => correctionRequest?.cohort === young?.cohort)
-    ?.filter((e) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
+  const corrections = young?.correctionRequests?.filter(
+    (correction) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(correction.field) && ["SENT", "REMINDED"].includes(correction.status),
+  );
   const disabledUpload = young?.files.cniFiles.length > 2;
 
   const IDs = [

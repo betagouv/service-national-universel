@@ -23,7 +23,7 @@ type OwnProps = {
   hideSelectedOptions?: boolean;
   isClearable?: boolean;
   isSearchable?: boolean;
-  onChange: () => void;
+  onChange?: (options: any) => void;
   onMenuOpen?: () => void;
   onMenuClose?: () => void;
   // async props
