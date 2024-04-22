@@ -1,6 +1,6 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { IMAGES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
+const { ENVIRONMENT, IMAGES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
 const dayjs = require("dayjs");
 require("dayjs/locale/fr");
 
@@ -81,7 +81,9 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
 
     doc.font(FONT).fillColor(FILL_COLOR).fontSize(9);
 
-    doc.image(path.join(IMAGES_ROOTDIR, getTemplate(young)), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+    if (ENVIRONMENT !== "testing") {
+        doc.image(path.join(IMAGES_ROOTDIR, getTemplate(young)), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+    }
 
     doc.font(FONT).text(`Paris, le ${formatStringDate(Date.now())}`, { align: 'right'});
     doc.moveDown(3);
