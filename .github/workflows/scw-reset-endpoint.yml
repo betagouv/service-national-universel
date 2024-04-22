@@ -8,7 +8,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-$(jq -r '.api_image_tag.value' output.json)
+    runs-on: ubuntu-latest
     outputs:
       env_name: ${{ steps.env_name.outputs.env_name }}
 
@@ -23,7 +23,7 @@ jobs:
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
   reset:
-    runs-on: ubuntu-$(jq -r '.api_image_tag.value' output.json)
+    runs-on: ubuntu-latest
     needs: [prepare]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref_name }}
