@@ -80,7 +80,7 @@ describe("Session Phase 1", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
-      const cohort = await createCohortHelper(
+      await createCohortHelper(
         getNewCohortFixture({
           name: sessionPhase1.cohort,
           sessionEditionOpenForReferentRegion: true,

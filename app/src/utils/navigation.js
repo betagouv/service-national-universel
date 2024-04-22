@@ -17,12 +17,14 @@ export const PREINSCRIPTION_STEPS = {
   SEJOUR: "SEJOUR",
   PROFIL: "PROFIL",
   CONFIRM: "CONFIRM",
+  NO_SEJOUR: "NO_SEJOUR",
 };
 
 export const REINSCRIPTION_STEPS = {
   ELIGIBILITE: "ELIGIBILITE",
   SEJOUR: "SEJOUR",
   CONFIRM: "CONFIRM",
+  NO_SEJOUR: "NO_SEJOUR",
 };
 
 export const CORRECTION_STEPS = {
@@ -52,12 +54,14 @@ export const PREINSCRIPTION_STEPS_LIST = [
   { name: PREINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
   { name: PREINSCRIPTION_STEPS.PROFIL, url: "profil" },
   { name: PREINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
+  { name: PREINSCRIPTION_STEPS.NO_SEJOUR, url: "no_sejour" },
 ];
 
 export const REINSCRIPTION_STEPS_LIST = [
   { name: REINSCRIPTION_STEPS.ELIGIBILITE, url: "eligibilite" },
   { name: REINSCRIPTION_STEPS.SEJOUR, url: "sejour" },
   { name: REINSCRIPTION_STEPS.CONFIRM, url: "confirm" },
+  { name: REINSCRIPTION_STEPS.NO_SEJOUR, url: "no_sejour" },
 ];
 
 export const CORRECTION_STEPS_LIST = [
@@ -235,7 +239,7 @@ export const getCorrectionByStep = (young, step) => {
   const correctionLink = getCorrectionLink(young);
   const keyList = correctionLink.find((link) => link.step === step);
   const corrections = young?.correctionRequests.reduce((acc, curr) => {
-    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field) && curr.cohort === young.cohort) {
+    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field)) {
       acc[curr.field] = curr.message;
     }
     return acc;

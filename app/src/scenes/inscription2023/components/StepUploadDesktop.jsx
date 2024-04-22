@@ -191,7 +191,8 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
         <label className="flex-start mt-2 flex w-full flex-col text-base">
           Date d&apos;expiration
           <DatePicker
-            value={date}
+            displayError
+            initialValue={date}
             onChange={(date) => {
               setDate(date);
               onChange && onChange();

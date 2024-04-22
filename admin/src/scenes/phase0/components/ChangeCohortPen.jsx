@@ -434,7 +434,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   // ⚠️ It's important to make sure the certificate is properly sent before changing the cohort
                   // Because afterwards, the certificate will no longer be accessible because we override lots of young's data
                   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) {
-                    await api.post(`/young/${young._id}/documents/certificate/1/send-email`, {
+                    await api.post(`/young/${young._id}/documents/certificate/1/send-email?switchToCle=true`, {
                       fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
                     });
                   }

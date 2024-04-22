@@ -166,18 +166,8 @@ export default function StepEligibilite() {
     }
 
     if (sessions.length === 0) {
-      if (isLoggedIn) {
-        const { ok, data, code } = await api.put("/young/reinscription/not-eligible");
-        if (!ok) {
-          capture(new Error(code));
-          setError({ text: "Impossible de vérifier votre éligibilité" });
-          setLoading(false);
-          return;
-        }
-        dispatch(setYoung(data));
-      }
-      setData({ ...data, message, step: STEPS.INELIGIBLE });
-      return history.push(`/${uri}/noneligible`);
+      setData({ ...data, message, step: STEPS.NO_SEJOUR });
+      return history.push(`/${uri}/no_sejour`);
     }
 
     setData({ ...data, sessions, step: STEPS.SEJOUR });
@@ -245,7 +235,7 @@ export default function StepEligibilite() {
             <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
               Date de naissance
               <DatePicker
-                value={new Date(data.birthDate)}
+                initialValue={new Date(data.birthDate)}
                 onChange={(date) => setData({ ...data, birthDate: date })}
                 disabled={isBirthdayModificationDisabled}
                 state={error.birthDate ? "error" : "default"}

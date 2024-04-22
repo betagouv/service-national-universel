@@ -38,7 +38,7 @@ jobs:
 
       - name: Prepare
         id: prepare
-        run : |
+        run: |
           env_name=$(.github/scripts/get_custom_env_name.sh ${{ steps.check.outputs.branch_name }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
@@ -62,28 +62,27 @@ jobs:
       branch_name: ${{ needs.prepare.outputs.branch_name }}
     secrets: inherit
 
-
-
   build:
     if: |
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
-        (contains(github.head_ref, '-ci-') ||
-        startsWith(github.head_ref, 'ci-') ||
-        endsWith(github.head_ref, '-ci') ||
-        contains(github.head_ref, '_ci_') ||
-        startsWith(github.head_ref, 'ci_') ||
-        endsWith(github.head_ref, '_ci'))
+        !(contains(github.head_ref, '-no-ci-') ||
+        startsWith(github.head_ref, 'no-ci-') ||
+        endsWith(github.head_ref, 'no-ci') ||
+        contains(github.head_ref, '_no_ci_') ||
+        startsWith(github.head_ref, 'no_ci_') ||
+        endsWith(github.head_ref, '_no_ci'))
       )
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [
-          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
-          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
-          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
-        ]
+        app:
+          [
+            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+          ]
 
     steps:
       - uses: actions/checkout@v4
@@ -201,7 +200,6 @@ jobs:
       - name: Validate terraform
         working-directory: ${{ env.custom_directory }}
         run: terraform validate -no-color
-
 
       - name: Terraform plan
         working-directory: ${{ env.custom_directory }}

@@ -1,3 +1,38 @@
+# [1.403.0](https://github.com/betagouv/service-national-universel/compare/v1.402.0...v1.403.0) (2024-04-19)
+
+
+### Bug Fixes
+
+* **admin:** 2348 - Disparition de la fonctionnalité d’affichage, de téléchargement et de téléversement des pièces d’identité depuis le profil des volontaires ([#3784](https://github.com/betagouv/service-national-universel/issues/3784)) ([5aa6ed9](https://github.com/betagouv/service-national-universel/commit/5aa6ed90f051d138abf7371c85e015ed127ef04b))
+* **api:** dsnj export ([#3781](https://github.com/betagouv/service-national-universel/issues/3781)) ([25f80f1](https://github.com/betagouv/service-national-universel/commit/25f80f1fe93951b04bda8c807f52f4ad48e0cb07))
+* **app:** VE pour connexion jeune ([#3768](https://github.com/betagouv/service-national-universel/issues/3768)) ([7d5b2e3](https://github.com/betagouv/service-national-universel/commit/7d5b2e33e0c6b89df3e4f0d98d5567feebaf36a1))
+
+
+### Features
+
+* **api:** Allow tls in production ([c4dea9e](https://github.com/betagouv/service-national-universel/commit/c4dea9eff9b15a84c12ab3611bb849124015156c))
+* **api,app,admin:** 2257 - fixes for "à venir" cohort ([#3730](https://github.com/betagouv/service-national-universel/issues/3730)) ([ede9904](https://github.com/betagouv/service-national-universel/commit/ede9904822327a4258387ac9d0f762009bdc3371))
+* **app:** Add maintenance notice [#3778](https://github.com/betagouv/service-national-universel/issues/3778) ([d141dc4](https://github.com/betagouv/service-national-universel/commit/d141dc46ad452ab6a0944bd73034a9ecefc29a50))
+* **github:** 2341 - Updated pull request template and pr-title-checker ([#3777](https://github.com/betagouv/service-national-universel/issues/3777)) ([a7b339c](https://github.com/betagouv/service-national-universel/commit/a7b339c61d9051d955616ae79c34330ab7dd14f5))
+* **terraform, admin, app:** 2236 - Sentry for app/admin ([#3780](https://github.com/betagouv/service-national-universel/issues/3780)) ([2f61f38](https://github.com/betagouv/service-national-universel/commit/2f61f3816f8897c7f0e843d97d1f8e44a7283ec4))
+
+# [1.402.0](https://github.com/betagouv/service-national-universel/compare/v1.401.0...v1.402.0) (2024-04-12)
+
+
+### Bug Fixes
+
+* **admin:** 664 - reduire la taille des requetes volontaires ([#3734](https://github.com/betagouv/service-national-universel/issues/3734)) ([556dfe9](https://github.com/betagouv/service-national-universel/commit/556dfe9c391bc9391c1d189f4999cc95ee3320a2))
+* **admin, api:** 1694 - Send new Brevo template when HTS switch to CL… ([#3711](https://github.com/betagouv/service-national-universel/issues/3711)) ([774b778](https://github.com/betagouv/service-national-universel/commit/774b77855d8454beaf9a4fe04286e1d7297463c5))
+* **admin/api:** 2200 - revoir les regles de validation manuelle de la phase 2 ([#3757](https://github.com/betagouv/service-national-universel/issues/3757)) ([560fa8c](https://github.com/betagouv/service-national-universel/commit/560fa8c809471d707bc77b4213503983012980dc))
+* **api:** 2199 Admin - Téléchargement d’une attestation 2022 ([#3713](https://github.com/betagouv/service-national-universel/issues/3713)) ([1fddd8e](https://github.com/betagouv/service-national-universel/commit/1fddd8e3ba874b86ac1a4801e3a29edc0c084cff))
+* **app, api:** update change-cohort email template ([#3762](https://github.com/betagouv/service-national-universel/issues/3762)) ([c7978b4](https://github.com/betagouv/service-national-universel/commit/c7978b4f48a5a75e94afd536055f5ec12eddc476))
+
+
+### Features
+
+* **admin:** 1982-ajouter un champ CNI invalide lors de la validation du jeune ([#3737](https://github.com/betagouv/service-national-universel/issues/3737)) ([fd47ee7](https://github.com/betagouv/service-national-universel/commit/fd47ee7f48f307349229d32681f1293b69f795fa))
+* **app, lib:** Add address search form with classic design ([#3678](https://github.com/betagouv/service-national-universel/issues/3678)) ([eec3f0c](https://github.com/betagouv/service-national-universel/commit/eec3f0cd72c9124daae6ba69f4ed19f9797e382f))
+
 # [1.401.0](https://github.com/betagouv/service-national-universel/compare/v1.400.0...v1.401.0) (2024-04-10)
 
 

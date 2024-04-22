@@ -194,7 +194,7 @@ function ExpirationDate({ corrections, category, young, date, setDate, setHasCha
       </div>
       <DatePicker
         displayError
-        value={date}
+        initialValue={date}
         onChange={(date) => {
           setDate(date);
           setHasChanged(true);

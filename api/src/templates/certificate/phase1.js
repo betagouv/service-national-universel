@@ -6,6 +6,7 @@ const CohesionCenterModel = require("../../models/cohesionCenter");
 const MeetingPointModel = require("../../models/meetingPoint");
 const CohortModel = require("../../models/cohort");
 const { IMAGES_ROOTDIR } = require("../../config");
+const { ERRORS } = require("../../utils/errors");
 const { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
 
 const getCohesionCenter = async (young) => {
@@ -47,6 +48,9 @@ async function fetchDataForYoung(young) {
 }
 
 function render(doc, young, session, cohort, cohesionCenter) {
+  if (!cohesionCenter) {
+    throw { error: ERRORS.NO_COHESION_CENTER_FOUND };
+  }
   const cohortEndDate = getCohortEndDate(young, cohort);
 
   const ministresData = getMinistres(cohortEndDate);

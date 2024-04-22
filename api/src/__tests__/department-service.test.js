@@ -1,7 +1,5 @@
 const request = require("supertest");
-const getNewReferentFixture = require("./fixtures/referent");
 const getNewDepartmentServiceFixture = require("./fixtures/departmentService");
-const { deleteReferentByIdHelper, createReferentHelper } = require("./helpers/referent");
 const {
   getDepartmentServicesHelper,
   deleteDepartmentServiceByIdHelper,

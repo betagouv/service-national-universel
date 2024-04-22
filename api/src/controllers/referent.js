@@ -15,6 +15,7 @@ const MissionModel = require("../models/mission");
 const ApplicationModel = require("../models/application");
 const SessionPhase1 = require("../models/sessionPhase1");
 const StructureModel = require("../models/structure");
+const MissionEquivalenceModel = require("../models/missionEquivalence");
 const AuthObject = require("../auth");
 const ReferentAuth = new AuthObject(ReferentModel);
 const patches = require("./patches");
@@ -44,6 +45,8 @@ const {
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
+  cancelPendingApplications,
+  cancelPendingEquivalence,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } = require("../utils/serializer");
@@ -73,13 +76,15 @@ const {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
   MILITARY_FILE_KEYS,
   department2region,
   formatPhoneNumberFromPhoneZone,
   canCheckIfRefExist,
   YOUNG_SOURCE,
   YOUNG_SOURCE_LIST,
-  STATUS_CLASSE,
+  APPLICATION_STATUS,
+  EQUIVALENCE_STATUS,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 const scanFile = require("../utils/virusScanner");
@@ -540,6 +545,23 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.populationDensity = populationDensity;
     }
 
+    // when changing statusPhase2, we check applications and equivalence
+    if (newYoung.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) {
+      const applications = await ApplicationModel.find({ youngId: young._id });
+      const pendingApplication = applications.filter((a) => [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION].includes(a.status));
+
+      const equivalences = await MissionEquivalenceModel.find({ youngId: young._id });
+      const pendingEquivalences = equivalences.filter((equivalence) =>
+        [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(equivalence.status),
+      );
+
+      await cancelPendingApplications(pendingApplication, req.user);
+      await cancelPendingEquivalence(pendingEquivalences, req.user);
+      if (pendingEquivalences.length > 0) {
+        newYoung.status_equivalence = EQUIVALENCE_STATUS.REFUSED;
+      }
+    }
+
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
@@ -636,9 +658,13 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     const { cohort, cohortChangeReason } = value;
 
+    let youngStatus = young.status;
+    if (cohort === "à venir ") {
+      youngStatus = getYoungStatus(young);
+    }
+
     const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, req.headers["x-user-timezone"] || null);
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
     if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
@@ -662,7 +688,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     }
 
     young.set({
-      status: getYoungStatus(young),
+      status: youngStatus,
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
       cohort,
       originalCohort: previousYoung.cohort,
@@ -671,6 +697,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohesionStayMedicalFileReceived: undefined,
     });
     if (value.source === YOUNG_SOURCE.CLE) {
+      const correctionRequestsFiltered = young.correctionRequestIds.filter((correction) => correction.field !== "CniFile");
       young.set({
         source: YOUNG_SOURCE.CLE,
         etablissementId: value.etablissementId,
@@ -682,6 +709,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
+        correctionRequestIds: correctionRequestsFiltered,
       });
       if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
         young.set({
@@ -693,7 +721,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       if (value.source === YOUNG_SOURCE.VOLONTAIRE) {
         if (young.source !== YOUNG_SOURCE.VOLONTAIRE) {
           young.set({
-            status: getYoungStatus(young),
+            status: youngStatus,
             statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
             cniFiles: [],
             "files.cniFiles": [],

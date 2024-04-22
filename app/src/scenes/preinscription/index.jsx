@@ -9,6 +9,7 @@ import StepNonEligible from "./steps/stepNonEligible";
 import StepSejour from "./steps/stepSejour";
 import StepProfil from "./steps/stepProfil";
 import StepConfirm from "./steps/stepConfirm";
+import StepNoSejour from "../preinscription/steps/stepNoSejour";
 import EmailValidation from "./EmailValidation";
 import Done from "./Done";
 
@@ -28,6 +29,7 @@ function renderStepResponsive(step) {
   if (step === STEPS.SEJOUR) return <StepSejour />;
   if (step === STEPS.PROFIL) return <StepProfil />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
+  if (step === STEPS.NO_SEJOUR) return <StepNoSejour />;
 }
 
 const Step = () => {
