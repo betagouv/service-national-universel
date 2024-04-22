@@ -697,6 +697,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       cohesionStayMedicalFileReceived: undefined,
     });
     if (value.source === YOUNG_SOURCE.CLE) {
+      const correctionRequestsFiltered = young.correctionRequestIds.filter((correction) => correction.field !== "CniFile");
       young.set({
         source: YOUNG_SOURCE.CLE,
         etablissementId: value.etablissementId,
@@ -708,6 +709,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
+        correctionRequestIds: correctionRequestsFiltered,
       });
       if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
         young.set({

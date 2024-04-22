@@ -239,7 +239,7 @@ export const getCorrectionByStep = (young, step) => {
   const correctionLink = getCorrectionLink(young);
   const keyList = correctionLink.find((link) => link.step === step);
   const corrections = young?.correctionRequests.reduce((acc, curr) => {
-    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field) && curr.cohort === young.cohort) {
+    if (["SENT", "REMINDED"].includes(curr.status) && keyList?.field.includes(curr.field)) {
       acc[curr.field] = curr.message;
     }
     return acc;
