@@ -1,11 +1,24 @@
-import React from "react";
+import React, { ChangeEventHandler } from "react";
+import ReactTooltip from "react-tooltip";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
-import { copyToClipboard } from "../../../utils";
-import ReactTooltip from "react-tooltip";
 import { MdInfoOutline } from "react-icons/md";
 
-export default function Field({ onChange, value, label, disabled = false, error, readOnly = false, copy, className = "", tooltips = null }) {
+import { copyToClipboard } from "../../../utils";
+
+interface Props {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  error?: string;
+  readOnly?: boolean;
+  copy?: string;
+  className?: string;
+  tooltips?: string | null;
+  onChange: ChangeEventHandler<HTMLInputElement>;
+}
+
+export default function Field({ onChange, value, label, disabled = false, error, readOnly = false, copy, className = "", tooltips = null }: Props) {
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
@@ -21,7 +34,7 @@ export default function Field({ onChange, value, label, disabled = false, error,
           <label className="my-0 text-xs text-gray-500">{label}</label>
 
           <MdInfoOutline data-tip data-for={tooltips} className="h-4 w-4 cursor-pointer text-gray-400" />
-          <ReactTooltip id={tooltips} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+          <ReactTooltip id={tooltips} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
             <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">{tooltips}</p>
           </ReactTooltip>
         </div>
