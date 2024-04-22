@@ -206,6 +206,33 @@ const getCohortPeriod = (cohort, withBold = false) => {
   return `du ${formattedStart} au ${formattedEnd}`;
 };
 
+const formatShortCohortPeriod = (cohort) => {
+  var startDate = new Date(cohort.dateStart);
+  var endDate = new Date(cohort.dateEnd);
+
+  var startDateformatOptions = {
+    day: "numeric",
+    month: "numeric",
+  };
+
+  var endDateformatOptions = {
+    day: "numeric",
+    month: "numeric",
+  };
+
+  var formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions).format(startDate);
+  var formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
+
+  return formattedStart + " > " + formattedEnd;
+};
+
+const formatCohortPeriod = (cohort, format = "short", withBold = false) => {
+  if (format === "short") {
+    return formatShortCohortPeriod(cohort);
+  }
+  return getCohortPeriod(cohort, withBold);
+};
+
 // includes old cohorts and 2023 july with specific dates for DROMS
 const getCohortPeriodTemp = (young) => {
   const { cohort, region } = young;
@@ -286,10 +313,10 @@ function hasAccessToReinscription(young) {
 
 function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
   return (
-    ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
-      (isInscriptionModificationOpen &&
-        young.status === YOUNG_STATUS.WAITING_VALIDATION &&
-        ((young.hasStartedReinscription && young.reinscriptionStep2023 !== "DONE") || (!young.hasStartedReinscription && young.inscriptionStep2023 !== "DONE"))))
+    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
+    (isInscriptionModificationOpen &&
+      young.status === YOUNG_STATUS.WAITING_VALIDATION &&
+      ((young.hasStartedReinscription && young.reinscriptionStep2023 !== "DONE") || (!young.hasStartedReinscription && young.inscriptionStep2023 !== "DONE")))
   );
 }
 
@@ -305,6 +332,7 @@ export {
   oldSessions,
   getCohortYear,
   getCohortPeriod,
+  formatCohortPeriod,
   getCohortPeriodTemp,
   sessions2023CohortNames,
   getCohortNames,
