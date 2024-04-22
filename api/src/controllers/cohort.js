@@ -6,9 +6,9 @@ const CohortModel = require("../models/cohort");
 const SessionPhase1Model = require("../models/sessionPhase1");
 
 const { capture } = require("../sentry");
-const { ERRORS, getFile, isReferent } = require("../utils");
+const { ERRORS, getFile } = require("../utils");
 const { decrypt } = require("../cryptoUtils");
-const { ROLES, isSuperAdmin, COHORT_TYPE } = require("snu-lib");
+const { ROLES, isSuperAdmin } = require("snu-lib");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
@@ -67,10 +67,6 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
 
     if (!cohort.dsnjExportDates) {
       cohort.dsnjExportDates = {};
-    }
-
-    if (cohort.dsnjExportDates[exportDateKey] && cohort.dsnjExportDates[exportDateKey] <= today) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     cohort.dsnjExportDates[exportDateKey] = date;

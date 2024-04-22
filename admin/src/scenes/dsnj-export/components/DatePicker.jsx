@@ -4,28 +4,31 @@ import fr from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 registerLocale("fr", fr);
 
-function MyDatePicker({ value, onChange = () => {}, className = "", disabled = false, isOpen = false, setOpen = () => {}, label, minDate = undefined }) {
+function MyDatePicker({ dateKey, onChangeDate, isOpen = false, onClose, minDate = undefined }) {
+  let leftPosition = "";
+  switch (dateKey) {
+    case "cohesionCenters":
+      leftPosition = "left-[28%]";
+      break;
+    case "youngsBeforeSession":
+      leftPosition = "left-[50%]";
+      break;
+    case "youngsAfterSession":
+      leftPosition = "left-[77%]";
+      break;
+  }
   return (
-    <div className={`flex ${className}`}>
-      <label className="mr-1 text-[#738297]">{`${label} :`}</label>
+    <div className={`flex absolute top-[30%] ${leftPosition}`}>
       <div>
         <DatePicker
           minDate={minDate}
-          onClickOutside={() => {
-            setOpen(false);
-          }}
-          onInputClick={() => {
-            setOpen(true);
-          }}
+          onClickOutside={onClose}
           open={isOpen}
           locale="fr"
-          selected={value}
           onChange={(value) => {
-            onChange(value);
-            setOpen(false);
+            onChangeDate(dateKey, value);
+            onClose();
           }}
-          placeholderText={"jj/mm/aaaa"}
-          disabled={disabled}
           className="w-full bg-[transparent]"
           dateFormat="dd/MM/yyyy"
         />
