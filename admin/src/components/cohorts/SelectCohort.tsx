@@ -2,12 +2,22 @@ import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { HiUsers } from "react-icons/hi";
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import cx from "classnames";
 
 import { formatCohortPeriod } from "snu-lib";
-import { Select } from "@snu/ds/admin";
+import { Select, BadgeNotif } from "@snu/ds/admin";
+import { CohortState } from "@/redux/cohorts";
 
-export default function SelectCohort({ cohort, filterFn, onChange }) {
-  const cohorts = useSelector((state) => state.Cohorts);
+interface Props {
+  cohort: string;
+  className?: string;
+  withBadge?: boolean;
+  filterFn?: (cohort: CohortState["Cohorts"][0]) => boolean;
+  onChange?: (cohortName: string) => void;
+}
+
+export default function SelectCohort({ cohort, withBadge, filterFn, onChange, className }: Props) {
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
 
@@ -19,10 +29,10 @@ export default function SelectCohort({ cohort, filterFn, onChange }) {
     return updatedCohorts.map((cohort) => ({
       value: cohort.name,
       label: (
-        <div className="flex gap-2.5 py-2.5 ml-2">
+        <div className="flex gap-2.5 p-2.5">
           <HiUsers size={24} className="mt-0.5" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
           <p className="font-normal text-base">
-            <span className="text-gray-500 font-normal"> {formatCohortPeriod(cohort, "short")}</span> <span className="text-gray-700 font-medium">{cohort.name + " "} </span>
+            <span className="text-gray-500 font-medium"> {formatCohortPeriod(cohort, "short")}</span> <span className="text-gray-900 font-bold">{`${cohort.name} `} </span>
           </p>
         </div>
       ),
@@ -32,19 +42,22 @@ export default function SelectCohort({ cohort, filterFn, onChange }) {
   const currentCohortName = cohort ?? options?.[0]?.value;
 
   return (
-    <>
+    <div className={cx("flex justify-end items-center w-[500px]", className)}>
       {isSelectMenuOpen && <FaMagnifyingGlass size={25} className="text-gray-400 mr-3" />}
       <Select
+        // @ts-expect-error type à revoir dans le DS
         options={options}
+        // @ts-expect-error type à revoir dans le DS
         value={options.find(({ value }) => value == currentCohortName)}
         defaultValue={currentCohortName}
         maxMenuHeight={520}
-        className="w-[500px]"
+        // className="w-[500px]"
         onChange={(e) => onChange(e.value)}
         closeMenuOnSelect
         onMenuOpen={() => setIsSelectMenuOpen(true)}
         onMenuClose={() => setIsSelectMenuOpen(false)}
+        badge={withBadge && <BadgeNotif count={options.length} />}
       />
-    </>
+    </div>
   );
 }

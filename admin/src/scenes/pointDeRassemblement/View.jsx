@@ -407,6 +407,7 @@ export default function View(props) {
               <Title>Par séjour</Title>
               <SelectCohort
                 cohort={currentCohort}
+                withBadge
                 onChange={(cohortName) => {
                   setCurrentCohort(cohortName);
                   history.replace({ search: `?cohort=${cohortName}` });
