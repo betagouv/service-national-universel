@@ -13,7 +13,7 @@ const fileUpload = require("express-fileupload");
 const redis = require("redis");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const config = require("../../config");
-const { capture } = require("../../sentry");
+const { capture, captureMessage } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const SessionPhase1 = require("../../models/sessionPhase1");
@@ -943,7 +943,20 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
-    res.status(200).send({ ok: true, data: serializeYoung(updatedYoung, updatedYoung) });
+    // If they are CLE, we notify the class referent.
+    if (young.cohort === YOUNG_SOURCE.CLE) {
+      const referent = await ReferentModel.findOne({ role: ROLES.REFERENT_CLASS, classeId: young.classeId });
+      if (referent) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: { youngFirstName: young.firstName, youngLastName: young.lastName, raisondesistement: withdrawnReason },
+        });
+      } else {
+        captureMessage(`Referent not found for class ${young.classeId}`);
+      }
+    }
+
+    res.status(200).send({ ok: true, data: serializeYoung(updatedYoung, updatedYoung), message: "Failed to notify class referent" });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

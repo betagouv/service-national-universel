@@ -61,7 +61,8 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
     }
   };
 
-  const { content, title, subTitle, confirmButtonName } = steps[action][step];
+  const filteredSteps = steps[action].filter((step) => step.parcours.includes(young.source));
+  const { content, title, subTitle, confirmButtonName } = filteredSteps[step];
 
   return (
     <Modal isOpen={isOpen} onClose={onCancel} className="w-full bg-white md:w-[512px]">
@@ -91,7 +92,7 @@ const WithdrawalModal = ({ isOpen, onCancel: onCancelProps, young }) => {
             subTitle={subTitle}
             confirmButtonName={confirmButtonName}
             onConfirm={() => setStep(step + 1)}
-            onBack={() => setStep(step - 1)}
+            onBack={filteredSteps[step - 1]?.content ? () => setStep(step - 1) : onCancel}
           />
         )}
         {content === CONTENT_CONFIRM && (
