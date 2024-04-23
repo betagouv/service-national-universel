@@ -146,6 +146,7 @@ export default function SessionList({ center, sessions, user, focusedSession, on
         <div className="flex items-center">
           <SelectCohort
             cohort={cohort}
+            withBadge
             filterFn={(c) => sessions.find((s) => s.cohort === c.name)}
             onChange={(cohortName) => {
               const session = sessions.find((s) => s.cohort === cohortName);

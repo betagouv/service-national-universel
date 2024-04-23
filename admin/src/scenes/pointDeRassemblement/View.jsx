@@ -407,6 +407,7 @@ export default function View(props) {
               <Title>Par séjour</Title>
               <SelectCohort
                 cohort={currentCohort}
+                filterFn={(c) => pdr.cohorts.find((name) => c.name === name)}
                 withBadge
                 onChange={(cohortName) => {
                   setCurrentCohort(cohortName);
