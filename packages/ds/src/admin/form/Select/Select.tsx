@@ -7,11 +7,16 @@ import Select, {
 import AsyncSelect from "react-select/async";
 import { HiChevronDown, HiOutlineExclamation } from "react-icons/hi";
 import { BsCheckLg } from "react-icons/bs";
+import { CSSObject } from "@emotion/react";
+
 import useReactSelectTheme from "./theme";
 
+export type SelectOption = { value: string; label: string | ReactElement };
+
 export type SelectProps = {
-  value: string | null;
-  options?: GroupBase<string>[];
+  // Fix type to allow only string and string[]
+  value: string | SelectOption | SelectOption[] | null;
+  options?: SelectOption[];
   defaultValue?: string | null;
   className?: string;
   placeholder?: string;
@@ -26,7 +31,9 @@ export type SelectProps = {
   hideSelectedOptions?: boolean;
   isClearable?: boolean;
   isSearchable?: boolean;
+  isOpen?: boolean;
   badge?: ReactElement;
+  controlCustomStyle?: CSSObject;
   onChange?: (options: any) => void;
   onMenuOpen?: () => void;
   onMenuClose?: () => void;
@@ -68,6 +75,7 @@ export default function SelectButton(props: SelectProps) {
     noOptionsMessage,
     loadOptions,
     defaultOptions = true,
+    isOpen,
     badge,
   } = props;
 
@@ -88,10 +96,10 @@ export default function SelectButton(props: SelectProps) {
   const MonoOption = (props: any) => {
     return (
       <components.Option {...props}>
-        <div className="flex justify-between">
-          <label className="cursor-pointer">{props.label}</label>
+        <div className="flex items-center justify-between w-full">
+          <div className="w-full cursor-pointer">{props.label}</div>
           {props.isSelected && (
-            <BsCheckLg size={20} color="#2563EB" className="my-auto" />
+            <BsCheckLg size={20} className="text-gray-600 my-auto" />
           )}
         </div>
       </components.Option>
@@ -116,7 +124,7 @@ export default function SelectButton(props: SelectProps) {
   const ValueContainerComponent = (props: ValueContainerProps<any, false>) => {
     if (!badge) return <components.ValueContainer {...props} />;
     return (
-      <div className="flex">
+      <div className="flex grow justify-between">
         <components.ValueContainer {...props} />
         {badge}
       </div>
@@ -173,9 +181,11 @@ export default function SelectButton(props: SelectProps) {
             value={value}
             onChange={onChange}
             components={currentComponents}
+            // @ts-ignore
             styles={customStyles}
             onMenuOpen={onMenuOpen}
             onMenuClose={onMenuClose}
+            menuIsOpen={isOpen}
           />
         ) : (
           <Select
@@ -195,9 +205,11 @@ export default function SelectButton(props: SelectProps) {
             classNamePrefix="select"
             onChange={onChange}
             components={currentComponents}
+            // @ts-ignore
             styles={customStyles}
             onMenuOpen={onMenuOpen}
             onMenuClose={onMenuClose}
+            menuIsOpen={isOpen}
           />
         )}
         {error && (

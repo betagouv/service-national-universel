@@ -29,11 +29,10 @@ export default function SelectCohort({ cohort, withBadge, filterFn, onChange, cl
     return updatedCohorts.map((cohort) => ({
       value: cohort.name,
       label: (
-        <div className="flex gap-2.5 p-2.5">
-          <HiUsers size={24} className="mt-0.5" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
-          <p className="font-normal text-base">
-            <span className="text-gray-500 font-medium"> {formatCohortPeriod(cohort, "short")}</span> <span className="text-gray-900 font-bold">{`${cohort.name} `} </span>
-          </p>
+        <div className="flex flex-nowrap items-center justify-start gap-1.5 p-2.5 w-full">
+          <HiUsers size={24} className="mt-0.5 mr-1 min-w-[24px]" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
+          <span className="text-gray-500 font-medium whitespace-nowrap">{formatCohortPeriod(cohort, "short")}</span>
+          <span className="text-gray-900 font-bold text-ellipsis overflow-hidden whitespace-nowrap">{`${cohort.name} `}</span>
         </div>
       ),
     }));
@@ -42,16 +41,21 @@ export default function SelectCohort({ cohort, withBadge, filterFn, onChange, cl
   const currentCohortName = cohort ?? options?.[0]?.value;
 
   return (
-    <div className={cx("flex justify-end items-center w-[500px]", className)}>
+    <div className={cx("flex justify-end items-center", className)}>
       {isSelectMenuOpen && <FaMagnifyingGlass size={25} className="text-gray-400 mr-3" />}
       <Select
-        // @ts-expect-error type à revoir dans le DS
         options={options}
-        // @ts-expect-error type à revoir dans le DS
         value={options.find(({ value }) => value == currentCohortName)}
         defaultValue={currentCohortName}
         maxMenuHeight={520}
-        // className="w-[500px]"
+        className="max-w-[450px]"
+        controlCustomStyle={{
+          border: "none",
+          boxShadow: "0px 0px 8px 0px rgba(0, 0, 0, 0.08)",
+          "&:hover": {
+            border: "none",
+          },
+        }}
         onChange={(e) => onChange(e.value)}
         closeMenuOnSelect
         onMenuOpen={() => setIsSelectMenuOpen(true)}

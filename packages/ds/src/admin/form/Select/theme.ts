@@ -11,6 +11,7 @@ export default function useReactSelectTheme({
   badge,
   disabled,
   readOnly,
+  controlCustomStyle,
 }: SelectProps) {
   const paddingStyle = label ? "16px 0 0 0" : "0";
 
@@ -39,19 +40,20 @@ export default function useReactSelectTheme({
         outlineOffset: "2px",
       }),
       borderRadius: "8px",
+      ...(controlCustomStyle || {}),
     }),
     option: (styles, { isSelected, isFocused }) => {
       return {
         ...styles,
-        backgroundColor: isSelected ? "#f3f4f6" : "white",
+        backgroundColor: isSelected ? "rgb(239 246 255)" : "white",
         color: "black",
         cursor: "pointer",
         fontWeight: isSelected ? "700" : "400",
         ":hover": {
-          backgroundColor: "#f3f4f6",
+          backgroundColor: "rgb(239 246 255)",
         },
         ...(isFocused && {
-          backgroundColor: "#f3f4f6",
+          backgroundColor: "rgb(239 246 255)",
         }),
       };
     },
@@ -91,7 +93,7 @@ export default function useReactSelectTheme({
       cursor: "pointer",
       padding: 0,
       paddingRight: 12,
-      paddingLeft: badge ? 0 : 12,
+      paddingLeft: badge ? 6 : 12,
       color: disabled || readOnly ? "#D1D5DB" : "#6B7280",
       marginRight: error ? "25px" : "0",
       "& svg": {
@@ -102,6 +104,10 @@ export default function useReactSelectTheme({
     menu: (styles) => ({
       ...styles,
       zIndex: 20,
+    }),
+    menuList: (styles) => ({
+      ...styles,
+      borderRadius: 4,
     }),
     clearIndicator: (styles) => ({
       ...styles,
