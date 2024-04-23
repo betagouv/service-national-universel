@@ -42,7 +42,7 @@ const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "";
 const QPV_USERNAME = process.env.QPV_USERNAME || "";
 const QPV_PASSWORD = process.env.QPV_PASSWORD || "";
 
-const API_ENGAGEMENT_URL = process.env.API_ENGAGEMENT_URL || "https://api.api-engagement.beta.gouv.fr";
+const API_ENGAGEMENT_URL = process.env.API_ENGAGEMENT_URL || "";
 const API_ENGAGEMENT_KEY = process.env.API_ENGAGEMENT_KEY || "";
 
 const API_ASSOCIATION_ES_ENDPOINT = process.env.API_ASSOCIATION_ES_ENDPOINT || "";
