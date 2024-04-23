@@ -48,7 +48,6 @@ const apiEngagement = {
     try {
       if (config.ENVIRONMENT !== "production") return;
 
-      // We only track application creation, validation and completion (not cancelation, refusal, etc.)
       if (!Object.keys(statusMap).includes(application.status)) return;
 
       if (!application.apiEngagementId) {
