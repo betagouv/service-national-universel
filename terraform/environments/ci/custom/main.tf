@@ -154,18 +154,11 @@ resource "scaleway_domain_record" "api" {
   ttl      = 300
 }
 
-# wait beetween DNS record creation and endpoint creation
-resource "time_sleep" "api_dns" {
-  depends_on = [scaleway_domain_record.api]
-
-  create_duration = "300s"
-}
-
 resource "scaleway_container_domain" "api" {
   container_id = scaleway_container.api.id
   hostname     = "${scaleway_domain_record.api.name}${scaleway_domain_record.api.dns_zone}"
 
-  depends_on = [time_sleep.api_dns]
+  depends_on = [scaleway_domain_record.api]
 }
 
 
@@ -215,18 +208,11 @@ resource "scaleway_domain_record" "admin" {
   ttl      = 300
 }
 
-# wait beetween DNS record creation and endpoint creation
-resource "time_sleep" "admin_dns" {
-  depends_on = [scaleway_domain_record.admin]
-
-  create_duration = "300s"
-}
-
 resource "scaleway_container_domain" "admin" {
   container_id = scaleway_container.admin.id
   hostname     = "${scaleway_domain_record.admin.name}${scaleway_domain_record.admin.dns_zone}"
 
-  depends_on = [time_sleep.admin_dns]
+  depends_on = [scaleway_domain_record.admin]
 }
 
 resource "scaleway_container" "app" {
@@ -274,19 +260,11 @@ resource "scaleway_domain_record" "app" {
   ttl      = 300
 }
 
-# wait beetween DNS record creation and endpoint creation
-resource "time_sleep" "app_dns" {
-  depends_on = [scaleway_domain_record.app]
-
-  create_duration = "300s"
-}
-
 resource "scaleway_container_domain" "app" {
   container_id = scaleway_container.app.id
   hostname     = "${scaleway_domain_record.app.name}${scaleway_domain_record.app.dns_zone}"
 
-
-  depends_on = [time_sleep.app_dns]
+  depends_on = [scaleway_domain_record.app]
 }
 
 output "api_endpoint" {
