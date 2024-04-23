@@ -7,7 +7,7 @@ export async function apiEngagement(missionId) {
   try {
     if (environment !== "production") return;
 
-    const url = `${API_ENGAGEMENT_URL}/v2/activity/${missionId}/${API_ENGAGEMENT_SNU_ID}/click`;
+    const url = `${API_ENGAGEMENT_URL}/v2/activity/${missionId}/${API_ENGAGEMENT_SNU_ID}/click?tag=MIG`;
     const options = { method: "POST" };
     const res = await fetch(url, options);
     const { ok, data, code } = await res.json();
