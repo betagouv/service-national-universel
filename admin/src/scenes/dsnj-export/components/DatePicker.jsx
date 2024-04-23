@@ -18,7 +18,11 @@ function MyDatePicker({ dateKey, onChangeDate, isOpen = false, onClose, minDate 
       break;
   }
   return (
-    <div className={`flex absolute top-[30%] ${leftPosition}`}>
+    <div className={cx("flex absolute top-[30%]", {
+       "left-[28%]": dateKey === "cohesionCenters",
+       "left-[50%]": dateKey === "youngsBeforeSession",
+       "left-[77%]": dateKey === "youngsAfterSession",
+    }}>
       <div>
         <DatePicker
           minDate={minDate}
