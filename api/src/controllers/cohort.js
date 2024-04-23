@@ -179,11 +179,8 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
     }
 
     const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey].setHours(0, 0, 0, 0));
-
-    const oneMonthAfter = cohort.dsnjExportDates[exportKey];
-    oneMonthAfter.setMonth(oneMonthAfter.getMonth() + 1);
-
-    const exportAvailableUntil = new Date(oneMonthAfter);
+    const exportAvailableUntil = new Date(cohort.dsnjExportDates[exportKey]);
+    exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
     const now = new Date();
 
     if (!exportAvailableFrom || now < exportAvailableFrom || now > exportAvailableUntil) {
