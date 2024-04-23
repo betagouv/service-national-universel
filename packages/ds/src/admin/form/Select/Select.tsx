@@ -34,6 +34,7 @@ export type SelectProps = {
   isOpen?: boolean;
   badge?: ReactElement;
   controlCustomStyle?: CSSObject;
+  optionCustomStyle?: CSSObject;
   onChange?: (options: any) => void;
   onMenuOpen?: () => void;
   onMenuClose?: () => void;

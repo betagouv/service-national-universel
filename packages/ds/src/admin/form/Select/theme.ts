@@ -12,6 +12,7 @@ export default function useReactSelectTheme({
   disabled,
   readOnly,
   controlCustomStyle,
+  optionCustomStyle,
 }: SelectProps) {
   const paddingStyle = label ? "16px 0 0 0" : "0";
 
@@ -55,6 +56,7 @@ export default function useReactSelectTheme({
         ...(isFocused && {
           backgroundColor: "rgb(239 246 255)",
         }),
+        ...(optionCustomStyle || {}),
       };
     },
     placeholder: (styles) => {
