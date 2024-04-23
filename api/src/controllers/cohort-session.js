@@ -8,7 +8,7 @@ const { validateId } = require("../utils/validator");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
 const passport = require("passport");
-const { ROLES } = require("snu-lib");
+const { ROLES, COHORT_TYPE } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
 
 // Takes either a young ID in route parameter or young data in request body (for edition or signup pages).
@@ -88,7 +88,7 @@ router.get("/isInscriptionOpen", async (req, res) => {
       if (!cohort) return res.status(400).send({ ok: true, data: false });
       return res.send({ ok: true, data: now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate) });
     }
-    const cohorts = await CohortModel.find({});
+    const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
     return res.send({
       ok: true,
       data: cohorts.some((cohort) => now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate)),
