@@ -58,6 +58,7 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         # comment every 'resource "scaleway_container_domain"'
         run: |
+          ls
           sed -i '' -E -e '/resource "scaleway_container_domain"/,/^}/s/^(.*)$/#\1/g' main.tf
           terraform apply -no-color -input=false -lock-timeout=15m -auto-approve \
             -var="api_image_tag=$(jq -r '.api_image_tag.value' output.json)" \
@@ -68,6 +69,7 @@ jobs:
         working-directory: ${{ env.custom_directory }}
         # uncomment every 'resource "scaleway_container_domain"'
         run: |
+          ls
           sed -i '' -E -e '/#resource "scaleway_container_domain"/,/#^}/s/^#(.*)$/\1/g' main.tf
           terraform apply -no-color -input=false -lock-timeout=15m -auto-approve \
             -var="api_image_tag=$(jq -r '.api_image_tag.value' output.json)" \
