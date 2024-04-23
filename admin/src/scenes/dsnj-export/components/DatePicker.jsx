@@ -3,26 +3,16 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import fr from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
 registerLocale("fr", fr);
+import cx from "classnames";
 
 function MyDatePicker({ dateKey, onChangeDate, isOpen = false, onClose, minDate = undefined }) {
-  let leftPosition = "";
-  switch (dateKey) {
-    case "cohesionCenters":
-      leftPosition = "left-[28%]";
-      break;
-    case "youngsBeforeSession":
-      leftPosition = "left-[50%]";
-      break;
-    case "youngsAfterSession":
-      leftPosition = "left-[77%]";
-      break;
-  }
   return (
-    <div className={cx("flex absolute top-[30%]", {
-       "left-[28%]": dateKey === "cohesionCenters",
-       "left-[50%]": dateKey === "youngsBeforeSession",
-       "left-[77%]": dateKey === "youngsAfterSession",
-    }}>
+    <div
+      className={cx("flex absolute top-[30%]", {
+        "left-[28%]": dateKey === "cohesionCenters",
+        "left-[50%]": dateKey === "youngsBeforeSession",
+        "left-[77%]": dateKey === "youngsAfterSession",
+      })}>
       <div>
         <DatePicker
           minDate={minDate}

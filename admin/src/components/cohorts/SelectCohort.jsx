@@ -6,7 +6,7 @@ import { FaMagnifyingGlass } from "react-icons/fa6";
 import { formatCohortPeriod } from "snu-lib";
 import { Select } from "@snu/ds/admin";
 
-export default function SelectCohort({ cohort, filterFn, onChange }) {
+export default function SelectCohort({ cohort, filterFn, onChange, disabled }) {
   const cohorts = useSelector((state) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
@@ -44,6 +44,7 @@ export default function SelectCohort({ cohort, filterFn, onChange }) {
         closeMenuOnSelect
         onMenuOpen={() => setIsSelectMenuOpen(true)}
         onMenuClose={() => setIsSelectMenuOpen(false)}
+        disabled={disabled}
       />
     </>
   );

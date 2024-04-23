@@ -2,16 +2,15 @@ import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
-import { FaMagnifyingGlass } from "react-icons/fa6";
 import { HiOutlineChartSquareBar, HiOutlineCalendar } from "react-icons/hi";
 import plausibleEvent from "@/services/plausible";
 
-import { ROLES, translate } from "snu-lib";
+import { translate } from "snu-lib";
 import dayjs from "dayjs";
 import api from "@/services/api";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
-import { Select, Page, Header, ModalConfirmation } from "@snu/ds/admin";
-import { NewGetCohortSelectOptions } from "@/services/cohort.service";
+import { Page, Header, ModalConfirmation } from "@snu/ds/admin";
+import SelectCohort from "@/components/cohorts/SelectCohort";
 
 import ExportBox from "./components/ExportBox";
 import DatePicker from "./components/DatePicker";
@@ -19,15 +18,12 @@ import DatePicker from "./components/DatePicker";
 const exportDateKeys = ["cohesionCenters", "youngsBeforeSession", "youngsAfterSession"];
 
 const DSNJExport = () => {
-  const user = useSelector((state) => state.Auth.user);
   const cohortList = useSelector((state) => state.Cohorts);
 
   const [currentCohort, setCurrentCohort] = useState(cohortList[0]);
   const cohortAddField = addFieldExportAvailableUntil(currentCohort);
-  const cohortOptions = NewGetCohortSelectOptions(cohortList);
 
   const [isLDownloadingByKey, setDownloadingByKey] = useState({});
-  const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
   const [isModalConfirmOpenByKey, setIsModalConfirmOpenByKey] = useState({});
   const [isDatePickerOpenByKey, setIsDatePickerOpenByKey] = useState({});
   const [currentKey, setCurrentKey] = useState(exportDateKeys[0]);
@@ -117,24 +113,12 @@ const DSNJExport = () => {
           title="Données centres & volontaires (DSNJ)"
           breadcrumb={[{ title: <HiOutlineChartSquareBar size={20} /> }, { title: "Séjours" }, { title: "Export DSNJ" }]}
           actions={
-            <>
-              {isSelectMenuOpen && <FaMagnifyingGlass size={25} className="text-gray-400 mr-3" />}
-              <Select
-                options={cohortOptions}
-                value={cohortOptions.find((e) => e.value === currentCohort.name)}
-                defaultValue={currentCohort.name}
-                maxMenuHeight={520}
-                className="w-[500px]"
-                disabled={user.role === ROLES.HEAD_CENTER}
-                closeMenuOnSelect={true}
-                onMenuOpen={() => setIsSelectMenuOpen(true)}
-                onMenuClose={() => setIsSelectMenuOpen(false)}
-                onChange={(e) => {
-                  setCurrentCohort(cohortList.find((cohort) => cohort.name === e.value));
-                  setIsSelectMenuOpen(false);
-                }}
-              />
-            </>
+            <SelectCohort
+              cohort={currentCohort.name}
+              onChange={(cohort) => {
+                setCurrentCohort(cohortList.find((c) => c.name === cohort));
+              }}
+            />
           }
         />
         <div className="flex gap-4">
