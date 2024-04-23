@@ -7,24 +7,8 @@ on:
       - scw-reset-endpoint
 
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    outputs:
-      env_name: ${{ steps.env_name.outputs.env_name }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Get custom-env name
-        id: env_name
-        run: |
-          env_name=$(.github/scripts/get_custom_env_name.sh ${{ github.ref_name }})
-          echo "env_name: $env_name"
-          echo "env_name=$env_name" >> $GITHUB_OUTPUT
-
   reset:
     runs-on: ubuntu-latest
-    needs: [prepare]
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref_name }}
       cancel-in-progress: false
@@ -39,11 +23,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get custom-env name
+        id: env_name
+        run: |
+          env_name=$(.github/scripts/get_custom_env_name.sh ${{ github.ref_name }})
+          echo "env_name: $env_name"
+          echo "env_name=$env_name" >> $GITHUB_OUTPUT
+
       - uses: hashicorp/setup-terraform@v3
 
       - name: Create custom env stack
         working-directory: ${{ env.custom_directory }}
-        run: sed -i.bak "s|###___ENV_NAME___###|${{ needs.prepare.outputs.env_name }}|g" main.tf
+        run: sed -i.bak "s|###___ENV_NAME___###|${{ steps.env_name.outputs.env_name }}|g" main.tf
         # the -i option replaces main.tf in-place creating a .bak backup file
 
       - name: Init terraform
