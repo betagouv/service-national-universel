@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
+// @ts-expect-error lib non ts
 import { useDebounce } from "@uidotdev/usehooks";
 
 import ReactTooltip from "react-tooltip";
