@@ -65,6 +65,13 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    const threeMonthsAfterCohortDateEnd = new Date(cohort.dateEnd);
+    threeMonthsAfterCohortDateEnd.setMonth(threeMonthsAfterCohortDateEnd.getMonth() + 3);
+
+    if (date > threeMonthsAfterCohortDateEnd) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     if (!cohort.dsnjExportDates) {
       cohort.dsnjExportDates = {};
     }
@@ -172,8 +179,11 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
     }
 
     const exportAvailableFrom = new Date(cohort.dsnjExportDates[exportKey].setHours(0, 0, 0, 0));
-    const exportAvailableUntil = new Date(cohort.dateEnd);
-    exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
+
+    const oneMonthAfter = cohort.dsnjExportDates[exportKey];
+    oneMonthAfter.setMonth(oneMonthAfter.getMonth() + 1);
+
+    const exportAvailableUntil = new Date(oneMonthAfter);
     const now = new Date();
 
     if (!exportAvailableFrom || now < exportAvailableFrom || now > exportAvailableUntil) {

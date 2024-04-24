@@ -5,7 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 registerLocale("fr", fr);
 import cx from "classnames";
 
-function MyDatePicker({ dateKey, onChangeDate, isOpen = false, onClose, minDate = undefined }) {
+function MyDatePicker({ dateKey, onChangeDate, isOpen = false, onClose, minDate = undefined, maxDate = undefined }) {
   return (
     <div
       className={cx("flex absolute top-[30%]", {
@@ -16,6 +16,7 @@ function MyDatePicker({ dateKey, onChangeDate, isOpen = false, onClose, minDate 
       <div>
         <DatePicker
           minDate={minDate}
+          maxDate={maxDate}
           onClickOutside={onClose}
           open={isOpen}
           locale="fr"

@@ -31,10 +31,11 @@ const DSNJExport = () => {
 
   useDocumentTitle("Export DSNJ");
   const todayPlusOneDay = dayjs().add(1, "day").toDate();
+  const threeMonthsAfterCohortDateEnd = dayjs(currentCohort.dateEnd).add(3, "month").toDate();
 
   function addFieldExportAvailableUntil(cohort) {
-    // export available until 1 month after the cohort
-    const exportsAvailableUntil = dayjs(cohort.dateEnd).add(1, "month").toISOString();
+    // export available until 4 month after the cohort end
+    const exportsAvailableUntil = dayjs(cohort.dateEnd).add(4, "month").toISOString();
     return {
       ...cohort,
       dsnjExportDates: {
@@ -153,6 +154,7 @@ const DSNJExport = () => {
           isOpen={isDatePickerOpenByKey[currentKey]}
           onClose={() => setIsDatePickerOpenByKey({ ...isDatePickerOpenByKey, [currentKey]: false })}
           minDate={todayPlusOneDay}
+          maxDate={threeMonthsAfterCohortDateEnd}
         />
         <ModalConfirmation
           isOpen={!!isModalConfirmOpenByKey[currentKey]}

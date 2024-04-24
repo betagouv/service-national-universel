@@ -6,14 +6,16 @@ import { Spinner } from "reactstrap";
 
 import { Button } from "@snu/ds/admin";
 import { ROLES } from "snu-lib";
+import { isNull } from "util";
 
 export default function ExportBox({ title, availableFrom, availableUntil, onClick, onDownload, isDownloading = false }) {
   const user = useSelector((state) => state.Auth.user);
   const now = dayjs();
   const exportAvailableFrom = availableFrom ? dayjs(availableFrom) : null;
   const exportAvailableUntil = dayjs(availableUntil);
-  const isExportAvailable =
-    now.isAfter(exportAvailableFrom) || (now.isSame(exportAvailableFrom, "day") && now.isBefore(exportAvailableUntil)) || now.isSame(exportAvailableUntil, "day");
+  const isExportAvailable = availableFrom
+    ? now.isAfter(exportAvailableFrom) || (now.isSame(exportAvailableFrom, "day") && now.isBefore(exportAvailableUntil)) || now.isSame(exportAvailableUntil, "day")
+    : false;
 
   const generateText = () => {
     switch (true) {
