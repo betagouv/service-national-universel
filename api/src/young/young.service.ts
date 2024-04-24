@@ -4,12 +4,11 @@ import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 const YoungModel = require("../models/young");
 const { generatePdfIntoBuffer } = require("../utils/pdf-renderer");
 
-type YoungPdfWithUniqueName = {
+type YoungPdf = {
   buffer: Buffer;
-  youngName: string;
 };
 
-export const generateConvocationsForMultipleYoungs = async (youngs: YoungType[]): Promise<YoungPdfWithUniqueName[]> => {
+export const generateConvocationsForMultipleYoungs = async (youngs: YoungType[]): Promise<YoungPdf[]> => {
   return await generatePdfIntoBuffer({
     type: YOUNG_DOCUMENT.CONVOCATION_BATCH,
     template: YOUNG_DOCUMENT_PHASE_TEMPLATE.COHESION,
