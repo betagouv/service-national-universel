@@ -8,7 +8,9 @@ function getEnv(name, fallback = undefined) {
   if (v !== undefined && v !== "") {
     return v;
   }
-  console.error(`Environment variable ${name} is not defined`);
+  if (import.meta.env.MODE !== "development") {
+    console.warn(`Environment variable ${name} is not defined`);
+  }
   return fallback;
 }
 
