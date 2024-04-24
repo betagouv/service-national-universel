@@ -135,16 +135,12 @@ async function getCohortValidationDate(cohortName) {
   }
 }
 
-async function getDepartureDateSession(meetingPoint, session, young, cohort) {
+function getDepartureDateSession(session, young, cohort) {
   // Compatibility with legacy sessions
-  const sessions2023 = await CohortModel.find({});
-  if (!sessions2023.map((e) => e.name).includes(young.cohort)) {
+  if (young.cohort in START_DATE_PHASE1) {
     return START_DATE_PHASE1[young.cohort];
   }
 
-  if (meetingPoint?.departuredDate) {
-    return new Date(meetingPoint?.departuredDate);
-  }
   if (session?.dateStart) {
     const sessionDateStart = new Date(session.dateStart);
     sessionDateStart.setHours(sessionDateStart.getHours() + 12);
@@ -158,16 +154,12 @@ async function getDepartureDateSession(meetingPoint, session, young, cohort) {
   return new Date(cohortDateStart);
 }
 
-async function getReturnDateSession(meetingPoint, session, young, cohort) {
-  const sessions2023 = await CohortModel.find({});
+function getReturnDateSession(session, young, cohort) {
   // Compatibility with legacy sessions
-  if (!sessions2023.map((e) => e.name).includes(young.cohort)) {
+  if (young.cohort in END_DATE_PHASE1) {
     return END_DATE_PHASE1[young.cohort];
   }
 
-  if (meetingPoint?.returnDate) {
-    return new Date(meetingPoint?.returnDate);
-  }
   if (session?.dateEnd) {
     const sessionDateEnd = new Date(session.dateEnd);
     sessionDateEnd.setHours(sessionDateEnd.getHours() + 12);

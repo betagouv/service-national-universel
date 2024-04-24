@@ -98,7 +98,6 @@ resource "scaleway_container" "api" {
     "API_ASSOCIATION_CELLAR_ENDPOINT"   = local.secrets.API_ASSOCIATION_CELLAR_ENDPOINT
     "API_ASSOCIATION_CELLAR_KEYID"      = local.secrets.API_ASSOCIATION_CELLAR_KEYID
     "API_ENGAGEMENT_URL"                = local.secrets.API_ENGAGEMENT_URL
-    "API_PDF_ENDPOINT"                  = local.secrets.API_PDF_ENDPOINT
     "BUCKET_NAME"                       = local.secrets.BUCKET_NAME
     "CELLAR_ENDPOINT"                   = local.secrets.CELLAR_ENDPOINT
     "CELLAR_ENDPOINT_SUPPORT"           = local.secrets.CELLAR_ENDPOINT_SUPPORT

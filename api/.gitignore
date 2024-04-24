@@ -4,5 +4,7 @@
 /src/scripts/
 *scripts*
 /coverage
+/public/images/certificates/
+/public/images/convocation/
 /dist
 tsconfig.tsbuildinfo

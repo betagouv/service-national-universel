@@ -30,14 +30,19 @@ const DSNJExport = () => {
 
   const getCohorts = async () => {
     const cohorts = cohortList.map(({ snuId, dateEnd, dsnjExportDates }) => {
-      // export available until 1 month after the cohort
-      const exportsAvailableUntil = new Date(dateEnd);
-      exportsAvailableUntil.setMonth(exportsAvailableUntil.getMonth() + 1);
+      const cohesionCentersAvailableUntil = dsnjExportDates?.cohesionCenters ? new Date(dsnjExportDates.cohesionCenters) : undefined;
+      cohesionCentersAvailableUntil?.setMonth(cohesionCentersAvailableUntil.getMonth() + 1);
+      const youngsBeforeSessionAvailableUntil = dsnjExportDates?.youngsBeforeSession ? new Date(dsnjExportDates.youngsBeforeSession) : undefined;
+      youngsBeforeSessionAvailableUntil?.setMonth(youngsBeforeSessionAvailableUntil.getMonth() + 1);
+      const youngsAfterSessionAvailableUntil = dsnjExportDates?.youngsAfterSession ? new Date(dsnjExportDates.youngsAfterSession) : undefined;
+      youngsAfterSessionAvailableUntil?.setMonth(youngsAfterSessionAvailableUntil.getMonth() + 1);
 
       return {
         id: snuId,
         dsnjExportDates: dsnjExportDates || {},
-        exportsAvailableUntil,
+        cohesionCentersAvailableUntil,
+        youngsBeforeSessionAvailableUntil,
+        youngsAfterSessionAvailableUntil,
       };
     });
     setCohorts(cohorts);
@@ -84,8 +89,8 @@ const DSNJExport = () => {
           <ExportBox
             editable={user.role === ROLES.ADMIN}
             title="Liste des centres"
-            availableFrom={cohort?.dsnjExportDates[exportDateKeys[0]] ? new Date(cohort?.dsnjExportDates[exportDateKeys[0]]) : undefined}
-            availableUntil={cohort?.exportsAvailableUntil}
+            availableFrom={cohort?.dsnjExportDates?.cohesionCenters ? new Date(cohort?.dsnjExportDates.cohesionCenters) : undefined}
+            availableUntil={cohort?.cohesionCentersAvailableUntil}
             onChangeDate={updateExportDate(exportDateKeys[0])}
             onDownload={download(exportDateKeys[0])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[0]]}
@@ -93,8 +98,8 @@ const DSNJExport = () => {
           <ExportBox
             editable={user.role === ROLES.ADMIN}
             title="Liste des volontaires affectés et sur liste complémentaire"
-            availableFrom={cohort?.dsnjExportDates[exportDateKeys[1]] ? new Date(cohort?.dsnjExportDates[exportDateKeys[1]]) : undefined}
-            availableUntil={cohort?.exportsAvailableUntil}
+            availableFrom={cohort?.dsnjExportDates?.youngsBeforeSession ? new Date(cohort?.dsnjExportDates.youngsBeforeSession) : undefined}
+            availableUntil={cohort?.youngsBeforeSessionAvailableUntil}
             onChangeDate={updateExportDate(exportDateKeys[1])}
             onDownload={download(exportDateKeys[1])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[1]]}
@@ -102,8 +107,8 @@ const DSNJExport = () => {
           <ExportBox
             editable={user.role === ROLES.ADMIN}
             title="Liste des volontaires après le séjour"
-            availableFrom={cohort?.dsnjExportDates[exportDateKeys[2]] ? new Date(cohort?.dsnjExportDates[exportDateKeys[2]]) : undefined}
-            availableUntil={cohort?.exportsAvailableUntil}
+            availableFrom={cohort?.dsnjExportDates?.youngsAfterSession ? new Date(cohort?.dsnjExportDates.youngsAfterSession) : undefined}
+            availableUntil={cohort?.youngsAfterSessionAvailableUntil}
             onChangeDate={updateExportDate(exportDateKeys[2])}
             onDownload={download(exportDateKeys[2])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[2]]}

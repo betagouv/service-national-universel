@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
+import { HiChevronDown, HiChevronUp } from "react-icons/hi";
+import { toastr } from "react-redux-toastr";
+
+import { ROLES } from "snu-lib";
+import { BadgeNotif } from "@snu/ds/admin";
+
+import API from "@/services/api";
+import { capture } from "@/sentry";
+
 import Inscription from "./ui/icons/Inscription";
 import CustomFilter from "./CustomFilter";
-import { HiChevronDown, HiChevronUp } from "react-icons/hi";
-import { capture } from "../../../sentry";
-import API from "../../../services/api";
 import Sejour from "./ui/icons/Sejour";
 import Engagement from "./ui/icons/Engagement";
-import { toastr } from "react-redux-toastr";
-import { ROLES } from "snu-lib";
 
 export default function KeyNumbers({ role }) {
   const [open, setOpen] = useState(false);
@@ -41,7 +45,7 @@ export default function KeyNumbers({ role }) {
       <div className="flex items-center justify-between pb-4">
         <div className="flex items-center gap-3">
           <div className="text-sm font-bold leading-5 text-gray-900">Chiffres clés</div>
-          <div className=" text-medium rounded-full bg-blue-50 px-2.5 py-0.5 text-sm leading-none text-blue-600">{notes?.length || 0}</div>
+          <BadgeNotif count={notes?.length || 0} />
         </div>
         <CustomFilter setFromDate={setStartDate} setToDate={setEndDate} notesPhase={phase} setNotesPhase={setPhase} role={role} />
       </div>
