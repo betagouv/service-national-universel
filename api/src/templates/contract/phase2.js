@@ -483,7 +483,7 @@ function _signature(doc, contract) {
   doc.moveDown(3);
 
   doc.font(FONT);
-  _y = doc.y;
+  let _y = doc.y;
 
   const COL1 = MARGIN;
   const COL2 = 300;
