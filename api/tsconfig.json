@@ -1,24 +1,6 @@
 {
+  "extends": "./build.tsconfig.json",
   "compilerOptions": {
-    "strictNullChecks": true,
-    "skipLibCheck": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "moduleResolution": "NodeNext",
-    "preserveWatchOutput": true,
-    "module": "NodeNext",
-    "target": "ES2021",
-    "outDir": "./src",
-    "rootDir": "./src",
     "allowJs": true
-  },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/node_modules/*",
-    "src/__tests__/*"
-  ]
+  }
 }

@@ -1,14 +1,9 @@
-import { YoungType } from "./young.type";
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
+import YoungModel from "../models/young";
+import { YoungType } from "./young.type";
+import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 
-const YoungModel = require("../models/young");
-const { generatePdfIntoBuffer } = require("../utils/pdf-renderer");
-
-type YoungPdf = {
-  buffer: Buffer;
-};
-
-export const generateConvocationsForMultipleYoungs = async (youngs: YoungType[]): Promise<YoungPdf[]> => {
+export const generateConvocationsForMultipleYoungs = async (youngs: YoungType[]): Promise<Buffer> => {
   return await generatePdfIntoBuffer({
     type: YOUNG_DOCUMENT.CONVOCATION_BATCH,
     template: YOUNG_DOCUMENT_PHASE_TEMPLATE.COHESION,
