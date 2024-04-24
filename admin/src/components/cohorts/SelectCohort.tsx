@@ -48,8 +48,15 @@ export default function SelectCohort({ cohort, withBadge, filterFn, onChange, cl
         value={options.find(({ value }) => value == currentCohortName)}
         defaultValue={currentCohortName}
         maxMenuHeight={520}
-        className="min-w-[350px] max-w-[450px]"
+        className="w-[450px] max-w-[450px]"
         controlCustomStyle={{
+          border: "none",
+          boxShadow: "0px 0px 8px 0px rgba(0, 0, 0, 0.08)",
+          "&:hover": {
+            border: "none",
+          },
+        }}
+        menuCustomStyle={{
           border: "none",
           boxShadow: "0px 0px 8px 0px rgba(0, 0, 0, 0.08)",
           "&:hover": {

@@ -12,6 +12,7 @@ export default function useReactSelectTheme({
   disabled,
   readOnly,
   controlCustomStyle,
+  menuCustomStyle,
   optionCustomStyle,
 }: SelectProps) {
   const paddingStyle = label ? "16px 0 0 0" : "0";
@@ -51,10 +52,10 @@ export default function useReactSelectTheme({
         cursor: "pointer",
         fontWeight: isSelected ? "700" : "400",
         ":hover": {
-          backgroundColor: "rgb(239 246 255)",
+          backgroundColor: "#f3f4f6",
         },
         ...(isFocused && {
-          backgroundColor: "rgb(239 246 255)",
+          backgroundColor: "#f3f4f6",
         }),
         ...(optionCustomStyle || {}),
       };
@@ -105,7 +106,13 @@ export default function useReactSelectTheme({
     }),
     menu: (styles) => ({
       ...styles,
+      border: "none",
+      boxShadow: "0px 0px 8px 0px rgba(0, 0, 0, 0.08)",
+      "&:hover": {
+        border: "none",
+      },
       zIndex: 20,
+      ...(menuCustomStyle || {}),
     }),
     menuList: (styles) => ({
       ...styles,
