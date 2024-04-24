@@ -10,6 +10,8 @@ let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:3000";
 let KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8084";
 const API_ANALYTICS_ENDPOINT = process.env.API_ANALYTICS_ENDPOINT || "http://localhost:8085";
 
+const COOKIE_OPTIONS = json.parse(process.env.COOKIE_OPTIONS)
+
 const RELEASE = process.env.RELEASE || "";
 
 const API_ANALYTICS_API_KEY = process.env.API_ANALYTICS_API_KEY || "api-key";
@@ -108,6 +110,7 @@ module.exports = {
   IMAGES_ROOTDIR,
   FONT_ROOTDIR,
   RELEASE,
+  COOKIE_OPTIONS,
 };
 
 function getEnvironment() {
