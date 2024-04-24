@@ -39,5 +39,9 @@ export function isStepDone(step, young) {
 }
 
 export const countOfStepsDone = (young) => {
-  return STEPS.filter((step) => isStepDone(step, young)).length;
+  return Object.values(STEPS).filter((step) => isStepDone(step, young)).length;
+};
+
+export const areAllStepsDone = (young) => {
+  return countOfStepsDone(young) === Object.values(STEPS).length;
 };
