@@ -214,7 +214,7 @@ export default function View() {
         <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} loading={isLoading} disabled={isLoading} />
       </div>
     ) : canEdit ? (
-      [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
+      [<Button key="change" type="modify" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
     ) : null;
   };
 

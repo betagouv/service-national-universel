@@ -8,7 +8,6 @@ let APP_URL = process.env.APP_URL || "http://localhost:8081";
 let ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
 let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:3000";
 let KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8084";
-const API_PDF_ENDPOINT = process.env.API_PDF_ENDPOINT || "http://localhost:8087/render";
 const API_ANALYTICS_ENDPOINT = process.env.API_ANALYTICS_ENDPOINT || "http://localhost:8085";
 
 const RELEASE = process.env.RELEASE || "";
@@ -42,7 +41,7 @@ const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "";
 const QPV_USERNAME = process.env.QPV_USERNAME || "";
 const QPV_PASSWORD = process.env.QPV_PASSWORD || "";
 
-const API_ENGAGEMENT_URL = process.env.API_ENGAGEMENT_URL || "https://api.api-engagement.beta.gouv.fr";
+const API_ENGAGEMENT_URL = process.env.API_ENGAGEMENT_URL || "";
 const API_ENGAGEMENT_KEY = process.env.API_ENGAGEMENT_KEY || "";
 
 const API_ASSOCIATION_ES_ENDPOINT = process.env.API_ASSOCIATION_ES_ENDPOINT || "";
@@ -57,6 +56,10 @@ const JVA_TOKEN = process.env.JVA_TOKEN || "";
 const JVA_API_KEY = process.env.JVA_API_KEY || "";
 
 const REDIS_URL = process.env.REDIS_URL || "";
+
+const PUBLIC_ROOTDIR = `${__dirname}/../public`;
+const IMAGES_ROOTDIR = `${PUBLIC_ROOTDIR}/images`;
+const FONT_ROOTDIR = `${__dirname}/assets/fonts`;
 
 module.exports = {
   LOCAL,
@@ -96,12 +99,14 @@ module.exports = {
   SLACK_BOT_CHANNEL,
   JVA_TOKEN,
   JVA_API_KEY,
-  API_PDF_ENDPOINT,
   API_ANALYTICS_ENDPOINT,
   API_ANALYTICS_API_KEY,
   API_ANTIVIRUS_ENDPOINT,
   API_ANTIVIRUS_TOKEN,
   REDIS_URL,
+  PUBLIC_ROOTDIR,
+  IMAGES_ROOTDIR,
+  FONT_ROOTDIR,
   RELEASE,
 };
 

@@ -355,7 +355,7 @@ class Auth {
 
       const shouldUse2FA = async () => {
         try {
-          // if (config.ENVIRONMENT === "development") return false;
+          if (config.ENVIRONMENT === "development") return false;
           if (config.ENVIRONMENT === "staging" && !user.email.match(regexp_exception_staging)) return false;
 
           const trustToken = req.cookies[`trust_token-${user._id}`];

@@ -37,7 +37,7 @@ import RadioUnchecked from "../../../../assets/radioUnchecked.svg";
 import Select from "./Select.jsx";
 import Toggle from "./Toggle";
 import Modal from "../../../../components/ui/modals/Modal";
-import useAddress from "@/services/useAddress";
+import { useAddress } from "snu-lib";
 import useAuth from "@/services/useAuth";
 
 const useOutsideClick = (callback) => {

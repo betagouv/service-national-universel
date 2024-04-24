@@ -3,7 +3,9 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
-const { capture, captureMessage } = require("../sentry");
+const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
+const { generateBatchDroitImage } = require("../templates/droitImage/droitImage");
+const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const CohortModel = require("../models/cohort");
@@ -13,8 +15,7 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter, timeout, sanitizeAll, getBaseUrl } = require("../utils");
-const Zip = require("adm-zip");
+const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -36,22 +37,15 @@ const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/se
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
-const path = require("path");
 const datefns = require("date-fns");
 const { fr } = require("date-fns/locale");
 const fileUpload = require("express-fileupload");
 const SessionPhase1 = require("../models/sessionPhase1");
 const FileType = require("file-type");
 const fs = require("fs");
-const config = require("../config");
 const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
-const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
-const fetch = require("node-fetch");
-const { phase1 } = require("../templates/certificate/index");
 const scanFile = require("../utils/virusScanner");
-
-const TIMEOUT_PDF_SERVICE = 15000;
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -240,24 +234,6 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
   }
 });
 
-async function generateBatchPDF(batchHtmlContent, batchIndex) {
-  const maxRetries = 3;
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const body = fs.readFileSync(path.resolve(__dirname, "../templates/certificate/bodyBatch.html"), "utf8");
-      const newhtml = body.replace(/{{BODY}}/g, batchHtmlContent.join("")).replace(/{{BASE_URL}}/g, sanitizeAll(getBaseUrl()));
-      const context = await timeout(getPDF(newhtml, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
-      return { name: `batch_${batchIndex}_certificat.pdf`, body: context };
-    } catch (e) {
-      console.log(`Attempt ${attempt} failed for batch ${batchIndex}`);
-      if (attempt === maxRetries) {
-        captureMessage("Failed to generate PDF", { extras: { batchIndex, error: e.message } });
-        throw new Error(`Failed to generate PDF for batch ${batchIndex}: ${e.message}`); // Rethrow or handle as appropriate
-      }
-    }
-  }
-}
-
 router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -287,37 +263,9 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    let zip = new Zip();
-    const batchSize = 20;
-    const batchOperations = [];
+    const cohort = await CohortModel.findOne({ name: session.cohort });
+    generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
 
-    for (let i = 0; i < youngs.length; i += batchSize) {
-      const batch = youngs.slice(i, i + batchSize);
-
-      // Generate HTML content for each young in the batch
-      const batchHtml = await Promise.all(batch.map((young) => phase1(young, true)));
-
-      // Add the PDF generation promise for the batch to the operations array
-      batchOperations.push(generateBatchPDF(batchHtml, i / batchSize + 1));
-    }
-
-    const pdfs = await Promise.all(batchOperations);
-
-    pdfs.forEach((pdf) => {
-      zip.addFile(pdf.name, pdf.body);
-    });
-
-    const noticePdf = await getFile(`file/noticeImpression.pdf`);
-    if (noticePdf) {
-      zip.addFile("01-notice-d'impression.pdf", noticePdf.Body);
-    }
-
-    res.set({
-      "content-disposition": `inline; filename="certificats.zip"`,
-      "content-type": "application/zip",
-      "cache-control": "public, max-age=1",
-    });
-    res.status(200).end(zip.toBuffer());
   } catch (error) {
     console.log("error", error);
     capture(error);
@@ -831,61 +779,13 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
     }
     // --- found youngs
     const youngs = await YoungModel.find({ sessionPhase1Id: session._id }).sort({ lastName: 1, firstName: 1 });
-    // --- start zip file
-    let zip = new Zip();
 
-    // --- build PDFS 10 by 10 and zip'em
-    const template = readTemplate();
-    const batchSize = 10;
-    const numBatches = Math.ceil(youngs.length / batchSize);
-    for (let i = 0; i < numBatches; i++) {
-      const batchStart = i * batchSize;
-      const batchEnd = Math.min(batchStart + batchSize, youngs.length);
-      const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-        const html = renderWithTemplate(young, template);
-        const body = await timeout(getPDF(html, { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
-        return { name: young.lastName + " " + young.firstName + " - Droits à l'image.pdf", body };
-      });
-      const pdfs = await Promise.all(pdfPromises);
-      pdfs.forEach((pdf) => {
-        zip.addFile(pdf.name, pdf.body);
-      });
-    }
-
-    // --- send zip file
-    res.set({
-      "content-disposition": `inline; filename="droits-image.zip"`,
-      "content-type": "application/zip",
-      "cache-control": "public, max-age=1",
-    });
-    res.status(200).end(zip.toBuffer());
+    generateBatchDroitImage(res, youngs);
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-async function getPDF(html, options) {
-  const response = await fetch(config.API_PDF_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-    body: JSON.stringify({ html, options }),
-  });
-  if (response.status && response.status !== 200) {
-    throw new Error("Error with PDF service");
-  }
-
-  return stream2buffer(response.body);
-}
-
-function stream2buffer(stream) {
-  return new Promise((resolve, reject) => {
-    const buf = [];
-    stream.on("data", (chunk) => buf.push(chunk));
-    stream.on("end", () => resolve(Buffer.concat(buf)));
-    stream.on("error", (err) => reject(err));
-  });
-}
 
 const formatDateTimeZone = (date) => {
   //set timezone to UTC

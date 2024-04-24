@@ -40,7 +40,18 @@
   const { initDB, closeDB } = require("./mongo");
   await initDB();
 
-  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, API_PDF_ENDPOINT, ENVIRONMENT } = require("./config.js");
+  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, ENVIRONMENT } = require("./config.js");
+
+  /*
+    Download all certificate templates when instance is starting,
+    making them available for PDF generation
+
+    These templates are sensitive data, so we can't treat theam as simple statics
+
+    TODO : A possible improvement would be to download templates at build time
+  */
+  const { getAllPdfTemplates } = require("./utils/pdf-renderer");
+  getAllPdfTemplates();
 
   if (process.env.NODE_ENV !== "test") {
     console.log("APP_URL", APP_URL);
@@ -48,7 +59,6 @@
     console.log("SUPPORT_URL", SUPPORT_URL);
     console.log("KNOWLEDGEBASE_URL", KNOWLEDGEBASE_URL);
     console.log("ANALYTICS_URL", API_ANALYTICS_ENDPOINT);
-    console.log("PDF_URL", API_PDF_ENDPOINT);
     console.log("ENVIRONMENT: ", ENVIRONMENT);
   }
 

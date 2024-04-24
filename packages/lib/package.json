@@ -27,5 +27,8 @@
   "dependencies": {
     "@rollup/plugin-commonjs": "^25.0.3",
     "sanitize-html": "^2.12.1"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.29.0"
   }
 }

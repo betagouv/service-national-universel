@@ -18,6 +18,7 @@ let adminURL = getEnv("ADMIN_URL", "http://localhost:8082");
 let supportURL = getEnv("SUPPORT_URL", "http://localhost:8083");
 let maintenance = getEnv("MAINTENANCE") === "true";
 let environment = getEnv("ENVIRONNEMENT");
+if (!environment) environment = import.meta.env.MODE;
 let RELEASE = getEnv("RELEASE");
 let SENTRY_URL = getEnv("SENTRY_URL");
 let SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 1.0);
