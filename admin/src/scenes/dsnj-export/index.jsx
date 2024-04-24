@@ -21,7 +21,6 @@ const DSNJExport = () => {
   const cohortList = useSelector((state) => state.Cohorts);
 
   const [currentCohort, setCurrentCohort] = useState(cohortList[0]);
-  const cohortAddField = addFieldExportAvailableUntil(currentCohort);
 
   const [isLDownloadingByKey, setDownloadingByKey] = useState({});
   const [isModalConfirmOpenByKey, setIsModalConfirmOpenByKey] = useState({});
@@ -33,17 +32,9 @@ const DSNJExport = () => {
   const todayPlusOneDay = dayjs().add(1, "day").toDate();
   const threeMonthsAfterCohortDateEnd = dayjs(currentCohort.dateEnd).add(3, "month").toDate();
 
-  function addFieldExportAvailableUntil(cohort) {
-    // export available until 4 month after the cohort end
-    const exportsAvailableUntil = dayjs(cohort.dateEnd).add(4, "month").toISOString();
-    return {
-      ...cohort,
-      dsnjExportDates: {
-        ...cohort.dsnjExportDates,
-        exportsAvailableUntil: exportsAvailableUntil,
-      },
-    };
-  }
+  const getExportAvailableUntilDate = (date) => {
+    return dayjs(date).add(1, "month").toDate();
+  };
 
   const translateKey = (key) => {
     switch (key) {
@@ -57,32 +48,30 @@ const DSNJExport = () => {
   };
 
   const generateText = (key, date) => {
-    const isNewExport = cohortAddField?.dsnjExportDates[key] === undefined;
+    const isNewExport = currentCohort?.dsnjExportDates[key] === undefined;
     const translatedKey = translateKey(isNewExport ? key : currentKey);
     const formattedDate = dayjs(isNewExport ? date : newExportDate).format("DD/MM/YYYY");
 
-    return (
-      <p className={isNewExport ? "" : "text-red-600 text-left mt-4"}>
-        {isNewExport ? (
-          <>
-            Vous vous apprêtez à rendre disponible à la DSNJ l'export des <span className="font-bold">{translatedKey}</span> le <span className="font-bold">{formattedDate}</span>.
-          </>
-        ) : (
-          <>
-            <span className="font-bold">Attention : </span>un nouvel export des <span className="font-bold">{translatedKey}</span> sera généré le{" "}
-            <span className="font-bold">{formattedDate}</span> avec les informations mises à jour. L’ancien export ne sera plus téléchargeable par la DSNJ :{" "}
-            <span className="underline">pensez à les prévenir qu’ils doivent à nouveau télécharger cet export !</span>
-          </>
-        )}
-      </p>
+    const textContent = isNewExport ? (
+      <>
+        Vous vous apprêtez à rendre disponible à la DSNJ l'export des <span className="font-bold">{translatedKey}</span> le <span className="font-bold">{formattedDate}</span>.
+      </>
+    ) : (
+      <>
+        <span className="font-bold">Attention : </span>un nouvel export des <span className="font-bold">{translatedKey}</span> sera généré le{" "}
+        <span className="font-bold">{formattedDate}</span> avec les informations mises à jour. L’ancien export ne sera plus téléchargeable par la DSNJ :{" "}
+        <span className="underline">pensez à les prévenir qu’ils doivent à nouveau télécharger cet export !</span>
+      </>
     );
+
+    return <p className={isNewExport ? "" : "text-red-600 text-left mt-4"}>{textContent}</p>;
   };
 
   const handleUpdateDate = async (key, date) => {
+    setIsModalConfirmOpenByKey({ ...isModalConfirmOpenByKey, [key]: false });
     const { ok, code, data: updatedCohort } = await api.put(`/cohort/${currentCohort._id}/export/${key}`, { date: dayjs(date).format("YYYY-MM-DD") });
     if (!ok) return toastr.error("Une erreur est survenue lors de l'enregistrement de la date d'export", translate(code));
     setCurrentCohort(updatedCohort);
-    setIsModalConfirmOpenByKey({ ...isModalConfirmOpenByKey, [key]: false });
   };
 
   const handleDownload = async (key) => {
@@ -125,24 +114,24 @@ const DSNJExport = () => {
         <div className="flex gap-4">
           <ExportBox
             title="Liste des centres"
-            availableFrom={cohortAddField?.dsnjExportDates[exportDateKeys[0]]}
-            availableUntil={cohortAddField?.dsnjExportDates?.exportsAvailableUntil}
+            availableFrom={currentCohort?.dsnjExportDates[exportDateKeys[0]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates[exportDateKeys[0]])}
             onClick={() => handleClick(exportDateKeys[0])}
             onDownload={() => handleDownload(exportDateKeys[0])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[0]]}
           />
           <ExportBox
             title="Liste des volontaires affectés et sur liste complémentaire"
-            availableFrom={cohortAddField?.dsnjExportDates[exportDateKeys[1]]}
-            availableUntil={cohortAddField?.dsnjExportDates?.exportsAvailableUntil}
+            availableFrom={currentCohort?.dsnjExportDates[exportDateKeys[1]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates[exportDateKeys[1]])}
             onClick={() => handleClick(exportDateKeys[1])}
             onDownload={() => handleDownload(exportDateKeys[1])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[1]]}
           />
           <ExportBox
             title="Liste des volontaires après le séjour"
-            availableFrom={cohortAddField?.dsnjExportDates[exportDateKeys[2]]}
-            availableUntil={cohortAddField?.dsnjExportDates?.exportsAvailableUntil}
+            availableFrom={currentCohort?.dsnjExportDates[exportDateKeys[2]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates[exportDateKeys[2]])}
             onClick={() => handleClick(exportDateKeys[2])}
             onDownload={() => handleDownload(exportDateKeys[2])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[2]]}

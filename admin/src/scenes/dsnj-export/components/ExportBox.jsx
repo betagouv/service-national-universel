@@ -6,7 +6,6 @@ import { Spinner } from "reactstrap";
 
 import { Button } from "@snu/ds/admin";
 import { ROLES } from "snu-lib";
-import { isNull } from "util";
 
 export default function ExportBox({ title, availableFrom, availableUntil, onClick, onDownload, isDownloading = false }) {
   const user = useSelector((state) => state.Auth.user);
@@ -18,31 +17,29 @@ export default function ExportBox({ title, availableFrom, availableUntil, onClic
     : false;
 
   const generateText = () => {
-    switch (true) {
-      case now.isBefore(exportAvailableFrom):
-        return (
-          <p className="text-sm leading-5 font-normal text-gray-500">
-            Disponible à partir du : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom.format("YYYY-MM-DD")}</span>
+    if (now.isBefore(exportAvailableFrom))
+      return (
+        <p className="text-sm leading-5 font-normal text-gray-500">
+          Disponible à partir du : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom.format("YYYY-MM-DD")}</span>
+        </p>
+      );
+    if (now.isAfter(exportAvailableFrom) || (now.isSame(exportAvailableFrom, "day") && now.isBefore(exportAvailableUntil)) || now.isSame(exportAvailableUntil, "day"))
+      return (
+        <div className="text-sm leading-5 font-normal text-gray-500 flex flex-col gap-2">
+          <p>
+            Générée le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom.format("YYYY-MM-DD")}</span>
           </p>
-        );
-      case now.isAfter(exportAvailableFrom) || (now.isSame(exportAvailableFrom, "day") && now.isBefore(exportAvailableUntil)) || now.isSame(exportAvailableUntil, "day"):
-        return (
-          <div className="text-sm leading-5 font-normal text-gray-500 flex flex-col gap-2">
-            <p>
-              Générée le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom.format("YYYY-MM-DD")}</span>
-            </p>
-            <p>
-              Disponible jusqu'au : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableUntil.format("YYYY-MM-DD")}</span>
-            </p>
-          </div>
-        );
-      case now.isAfter(exportAvailableUntil):
-        return (
-          <p className="text-sm leading-5 font-normal text-gray-500">
-            Indisponible depuis le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableUntil.format("YYYY-MM-DD")}</span>
+          <p>
+            Disponible jusqu'au : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableUntil.format("YYYY-MM-DD")}</span>
           </p>
-        );
-    }
+        </div>
+      );
+    if (now.isAfter(exportAvailableUntil))
+      return (
+        <p className="text-sm leading-5 font-normal text-gray-500">
+          Indisponible depuis le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableUntil.format("YYYY-MM-DD")}</span>
+        </p>
+      );
   };
 
   return (
