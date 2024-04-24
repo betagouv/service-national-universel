@@ -48,8 +48,8 @@ runs:
       shell: bash
       run: |
         docker build \
-          --build-arg RELEASE=${{ inputs.image_tag }}
-          --build-arg SENTRY_AUTH_TOKEN=${{ inputs.sentry_auth_token }}
+          --build-arg RELEASE=${{ inputs.image_tag }} \
+          --build-arg SENTRY_AUTH_TOKEN=${{ inputs.sentry_auth_token }} \
           -t ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag }} \
           -t ${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.image_tag_stable }} \
           --label "created_at=${{ steps.date.outputs.date }}" \
