@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useHistory, useParams } from "react-router-dom";
-import { useDebounce } from "@uidotdev/usehooks";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
 import { AddressForm } from "@snu/ds/common";
@@ -45,8 +44,7 @@ export default function View() {
   const [modalChangeContacts, setModalChangeContacts] = useState(false);
   const [query, setQuery] = useState("");
 
-  const debouncedQuery = useDebounce(query, 300);
-  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const { results } = useAddress({ query, options: { limit: 10 }, enabled: query.length > 2 });
   const history = useHistory();
   const firstLogin = localStorage.getItem("cle_referent_signup_first_time");
 

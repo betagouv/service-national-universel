@@ -2,15 +2,13 @@ import React, { useState } from "react";
 import Modal from "../../../../../../components/ui/modals/Modal";
 import ButtonPrimary from "../../../../../../components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../../../../components/ui/buttons/ButtonLight";
-import { useDebounce } from "@uidotdev/usehooks";
 import { useAddress } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 
 const AddressFormModalContent = ({ onCancel, onConfirm, isLoading }) => {
   const [data, setData] = useState({});
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 300);
-  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const { results } = useAddress({ query, options: { limit: 10 }, enabled: query.length > 2 });
 
   if (isLoading) {
     return <p className="animate-pulse text-center">Chargement</p>;

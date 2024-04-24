@@ -16,7 +16,6 @@ import {
   START_DATE_SESSION_PHASE1,
 } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
-import { useDebounce } from "@uidotdev/usehooks";
 
 import { capture } from "@/sentry";
 import api from "@/services/api";
@@ -56,8 +55,7 @@ export default function View(props) {
   const [pdrInSchema, setPdrInSchema] = React.useState(false);
   const [query, setQuery] = useState("");
 
-  const debouncedQuery = useDebounce(query, 300);
-  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const { results } = useAddress({ query, options: { limit: 10 }, enabled: query.length > 2 });
 
   useEffect(() => {
     (async () => {

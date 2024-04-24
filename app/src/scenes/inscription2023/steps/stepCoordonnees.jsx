@@ -17,7 +17,6 @@ import { getCorrectionByStep } from "../../../utils/navigation";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import useAuth from "@/services/useAuth";
-import { useDebounce } from "@uidotdev/usehooks";
 import { fr } from "@codegouvfr/react-dsfr";
 import { SignupButtons, BooleanRadioButtons, Checkbox, Button, Input, Select } from "@snu/ds/dsfr";
 
@@ -142,8 +141,6 @@ export default function StepCoordonnees() {
     reducedMobilityAccess,
     handicapInSameDepartment,
   } = data;
-
-  const debouncedBirthCity = useDebounce(birthCity, 200);
 
   const wasBornInFranceBool = wasBornInFrance === "true";
   const isFrenchResident = livesInFrance === "true";
@@ -275,9 +272,9 @@ export default function StepCoordonnees() {
   };
 
   const { results: birthCityZipSuggestions } = useAddress({
-    query: debouncedBirthCity,
+    query: birthCity,
     options: { type: "municipality" },
-    enabled: wasBornInFranceBool && debouncedBirthCity.length > 2,
+    enabled: wasBornInFranceBool && birthCity.length > 2,
   });
 
   const updateBirthCity = async (value) => {
