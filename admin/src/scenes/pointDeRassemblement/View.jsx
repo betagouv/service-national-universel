@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 
 import {
+  useAddress,
   canCreateMeetingPoint,
   canDeleteMeetingPoint,
   canDeleteMeetingPointSession,
@@ -14,6 +15,8 @@ import {
   ROLES,
   START_DATE_SESSION_PHASE1,
 } from "snu-lib";
+import { AddressForm } from "@snu/ds/common";
+import { useDebounce } from "@uidotdev/usehooks";
 
 import { capture } from "@/sentry";
 import api from "@/services/api";
@@ -51,6 +54,10 @@ export default function View(props) {
   const [nbYoung, setNbYoung] = React.useState([]);
   const [lines, setLines] = React.useState([]);
   const [pdrInSchema, setPdrInSchema] = React.useState(false);
+  const [query, setQuery] = useState("");
+
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
 
   useEffect(() => {
     (async () => {
@@ -354,29 +361,15 @@ export default function View(props) {
             <div className="flex w-[45%] flex-col justify-between">
               <div className="flex flex-col gap-3">
                 <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
-                <Field
-                  label={"Adresse"}
-                  onChange={(e) => setPdr({ ...pdr, address: e.target.value, addressVerified: false })}
-                  value={pdr.address}
-                  error={errors?.address}
+
+                <AddressForm
                   readOnly={!editInfo}
+                  data={{ address: pdr.address, zip: pdr.zip, city: pdr.city }}
+                  updateData={(address) => setPdr({ ...pdr, ...address })}
+                  query={query}
+                  setQuery={setQuery}
+                  options={results}
                 />
-                <div className="flex items-center gap-3">
-                  <Field
-                    label="Code postal"
-                    onChange={(e) => setPdr({ ...pdr, zip: e.target.value, addressVerified: false })}
-                    value={pdr.zip}
-                    error={errors?.zip}
-                    readOnly={!editInfo}
-                  />
-                  <Field
-                    label="Ville"
-                    onChange={(e) => setPdr({ ...pdr, city: e.target.value, addressVerified: false })}
-                    value={pdr.city}
-                    error={errors?.city}
-                    readOnly={!editInfo}
-                  />
-                </div>
                 <div className="flex items-center gap-3">
                   <Field label="Département" onChange={(e) => setPdr({ ...pdr, department: e.target.value })} value={pdr.department} readOnly={true} disabled={editInfo} />
                   <Field label="Région" onChange={(e) => setPdr({ ...pdr, region: e.target.value })} value={pdr.region} readOnly={true} disabled={editInfo} />

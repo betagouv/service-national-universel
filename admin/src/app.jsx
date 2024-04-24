@@ -4,10 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
-
 import { isFeatureEnabled, FEATURES_NAME } from "snu-lib";
 import * as Sentry from "@sentry/react";
 
+import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
 import CGU from "./scenes/CGU";
 import Alerte from "./scenes/alerte";
@@ -56,7 +56,6 @@ import Footer from "./components/footer";
 
 import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
-import { queryClient } from "./services/react-query";
 
 import { adminURL } from "./config";
 import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
