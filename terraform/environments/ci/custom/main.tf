@@ -32,10 +32,11 @@ variable "app_image_tag" {
 locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
-  domain         = "ci.beta-snu.dev"
-  api_hostname   = "api-${local.env}.${local.domain}"
-  admin_hostname = "admin-${local.env}.${local.domain}"
-  app_hostname   = "moncompte-${local.env}.${local.domain}"
+  domain         = "functions.fnc.fr-par.scw.cloud"
+  domain_prefix  = split("funcscw", scaleway_container_namespace.main.registry_endpoint)[1]
+  api_hostname   = "${local.domain_prefix}-api-${local.env}.${local.domain}"
+  admin_hostname = "${local.domain_prefix}-admin-${local.env}.${local.domain}"
+  app_hostname   = "${local.domain_prefix}-moncompte-${local.env}.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 

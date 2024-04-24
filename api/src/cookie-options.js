@@ -13,7 +13,8 @@ function cookieOptions(maxAge) {
     return { maxAge, httpOnly: true, secure: false, domain: "localhost", sameSite: "Lax" };
   } else if (config.ENVIRONMENT === "staging") {
     // Because we need a valid subdomain (does not work with cleverapps.io).
-    return { maxAge, httpOnly: true, secure: true, domain: ".beta-snu.dev", sameSite: "Lax" };
+    console.log("-fix-customenv.functions.fnc.fr-par.scw.cloud")
+    return { maxAge, httpOnly: true, secure: true, domain: "-fix-customenv.functions.fnc.fr-par.scw.cloud", sameSite: "Lax" };
   } else {
     return { maxAge, httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
   }
