@@ -29,7 +29,7 @@ router.post(
       const convocations = await generateConvocationsByClasseId(id);
       res.set({
         "content-length": convocations.length,
-        "content-disposition": `inline; filename="test.zip"`,
+        "content-disposition": `inline; filename="convocations.pdf"`,
         "content-type": "application/pdf",
         "cache-control": "public, max-age=1",
       });

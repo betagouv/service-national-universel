@@ -4,5 +4,5 @@ import { download } from "snu-lib";
 const url = "/classe/:id/convocations";
 export const downloadCertificatesByClassId = async (classeId) => {
   const file = await api.openpdf(url.replace(":id", classeId), {});
-  download(file, "Convocations.zip");
+  download(file, "convocations.pdf");
 };

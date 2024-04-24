@@ -11,7 +11,8 @@
     "module": "NodeNext",
     "target": "ES2021",
     "outDir": "./src",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "allowJs": true
   },
   "include": [
     "src/**/*.ts"
