@@ -1,3 +1,5 @@
+import validator from "validator";
+
 export function filterDataForYoungSection(data, section) {
   let bodyYoungSection = {};
   if (section === "identite") {
@@ -82,4 +84,20 @@ export function filterDataForYoungSection(data, section) {
   }
 
   return bodyYoungSection;
+}
+
+export function validateEmpty(value, name, errors, message = "Ne peut être vide") {
+  // console.log("test ", name, value, !value[name] || validator.isEmpty(value[name], { ignore_whitespace: true }));
+  if (!value[name] || validator.isEmpty(value[name], { ignore_whitespace: true })) {
+    errors[name] = message;
+    return false;
+  } else {
+    return true;
+  }
+}
+
+export function getCorrectionRequest(requests, field) {
+  return requests.find((req) => {
+    return req.field === field;
+  });
 }
