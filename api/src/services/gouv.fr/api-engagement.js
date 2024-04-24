@@ -2,6 +2,7 @@
 
 const { APPLICATION_STATUS } = require("snu-lib");
 const config = require("../../config");
+const { capture } = require("../../sentry");
 
 const statusMap = {
   [APPLICATION_STATUS.WAITING_VALIDATION]: "PENDING",
@@ -20,7 +21,7 @@ const apiEngagement = {
    */
   create: async (application, missionId, clickId) => {
     try {
-      if (!config.ENVIRONMENT !== "production") return;
+      if (config.ENVIRONMENT !== "production") return;
 
       // When a ref proposes a mission, it does not count as an application creation in API Engagement
       if (application.status === APPLICATION_STATUS.WAITING_ACCEPTATION) return;
@@ -40,7 +41,7 @@ const apiEngagement = {
 
       return data;
     } catch (e) {
-      console.error("Error while sending tracking data to API Engagement:", e);
+      capture(e, "Error while sending tracking data to API Engagement:");
     }
   },
 
