@@ -7,6 +7,23 @@ async function initDB() {
     throw new Error("ERROR CONNECTION. MONGO URL EMPTY");
   }
 
+  const db = mongoose.connection;
+
+  db.on("error", console.error.bind(console, "MONGODB: connection error:"));
+
+  db.on("connecting", () => console.log("MONGODB: connecting"));
+  db.on("open", () => console.log("MONGODB: open"));
+  db.on("connected", () => console.log("MONGODB: connected"));
+  db.on("disconnecting", () => console.log("MONGODB: disconnecting"));
+  db.on("disconnected", () => console.log("MONGODB: disconnected"));
+  db.on("reconnected", () => console.log("MONGODB: reconnected"));
+  db.on("close", () => console.log("MONGODB: close"));
+
+  db.on("fullsetup", () => console.log("MONGODB: fullsetup"));
+  db.on("all", () => console.log("MONGODB: all"));
+  db.on("reconnectFailed", () => console.log("MONGODB: reconnectFailed"));
+
+
   let options = {
     appname: "ApiSnu", // Add your application name
     // * Remove when we update to mongoose 6 : https://stackoverflow.com/a/68962378
@@ -32,17 +49,10 @@ async function initDB() {
     if (error.reason && error.reason.servers) {
       console.error(error.reason.servers);
     } else {
-      console.error("MongoDB connection error:", error);
+      console.error("MONGODB: connection error:", error);
     }
     throw error;
   }
-
-  const db = mongoose.connection;
-
-  db.on("error", console.error.bind(console, "MongoDB connection error:"));
-  db.on("disconnected", () => console.log("MongoDB disconnected"));
-  db.on("close", () => console.log("MongoDB close"));
-  db.once("open", () => console.log("MongoDB connection OK"));
 }
 
 async function closeDB() {
