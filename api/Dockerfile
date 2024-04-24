@@ -28,6 +28,10 @@ RUN npm install
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
+ARG RELEASE=""
+ENV RELEASE=${RELEASE}
+ARG SENTRY_AUTH_TOKEN=""
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 ENV APP_NAME api
 RUN npm run build
 
