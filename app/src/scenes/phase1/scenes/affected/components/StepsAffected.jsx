@@ -1,25 +1,17 @@
-import React, { cloneElement } from "react";
+import React from "react";
 import { HiBell } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import StepAgreement from "./step/stepAgreement";
 import StepConvocation from "./step/stepConvocation";
 import StepMedicalFile from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
+import { countOfStepsDone } from "../utils/steps.utils";
 
-export default function StepsAffected({ steps, center, session, meetingPoint, departureDate, returnDate }) {
+export default function StepsAffected({ affectationData }) {
   const young = useSelector((state) => state.Auth.young);
-  if (!young) return null;
+  if (!young) return <div />;
 
-  const total = steps.length;
-  const count = steps.filter((s) => s.isDone).length;
-  const allDone = count === total;
-
-  const components = {
-    PDR: <StepPDR center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />,
-    AGREEMENT: <StepAgreement departureDate={departureDate} returnDate={returnDate} />,
-    CONVOCATION: <StepConvocation center={center} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />,
-    MEDICAL_FILE: <StepMedicalFile />,
-  };
+  const allDone = countOfStepsDone(young) === 4;
 
   return (
     <section className={`order-3 m-[1rem] flex flex-col md:mx-[4rem] ${allDone ? "order-4" : "order-3"}`}>
@@ -31,10 +23,8 @@ export default function StepsAffected({ steps, center, session, meetingPoint, de
             </div>
           )}
           <div className="flex flex-col">
-            <h1 className="text-xl font-bold leading-7 md:text-base md:font-normal">{allDone ? "Bravo, vous avez fini !" : `${total} étapes pour continuer`}</h1>
-            <p className="text-sm leading-5 text-gray-500">
-              {count} sur {total} tâches réalisées
-            </p>
+            <h1 className="text-xl font-bold leading-7 md:text-base md:font-normal">{allDone ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
+            <p className="text-sm leading-5 text-gray-500">{countOfStepsDone(young)} sur 4 tâches réalisées</p>
           </div>
         </div>
 
@@ -45,25 +35,17 @@ export default function StepsAffected({ steps, center, session, meetingPoint, de
             </div>
           )}
           <div className="flex flex-col">
-            <h1 className="text-xl font-bold leading-7">{allDone ? "Bravo, vous avez fini !" : `${total} étapes pour continuer`}</h1>
-            <p className="text-sm leading-5 text-gray-500">
-              {count} sur {total} tâches réalisées
-            </p>
+            <h1 className="text-xl font-bold leading-7">{allDone ? "Bravo, vous avez fini !" : "4 étapes pour continuer"}</h1>
+            <p className="text-sm leading-5 text-gray-500">{countOfStepsDone(young)} sur 4 tâches réalisées</p>
           </div>
         </div>
       </article>
 
-      {/* Map over the steps and inject computed props into the component */}
       <div className="grid grid-cols-1 gap-4">
-        {steps.map((step) =>
-          cloneElement(components[step.id], {
-            key: step.id,
-            enabled: step.enabled,
-            isDone: step.isDone,
-            stepNumber: step.stepNumber,
-            ...components[step.id].props,
-          }),
-        )}
+        <StepPDR affectationData={affectationData} />
+        <StepAgreement affectationData={affectationData} />
+        <StepConvocation affectationData={affectationData} />
+        <StepMedicalFile />
       </div>
     </section>
   );
