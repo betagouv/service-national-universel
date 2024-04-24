@@ -66,6 +66,24 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
   })(req, res);
 });
 
+router.get("/isReInscriptionOpen", async (req, res) => {
+  const userTimezoneOffsetInMilliseconds = req.headers["x-user-timezone"] * 60 * 1000; // User's offset from UTC
+  // Adjust server's time for user's timezone
+  const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;
+  const now = new Date(adjustedTimeForUser);
+
+  try {
+    const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
+    return res.send({
+      ok: true,
+      data: cohorts.some((cohort) => now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate)),
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.get("/isInscriptionOpen", async (req, res) => {
   const { error, value } = Joi.object({
     sessionName: Joi.string(),
