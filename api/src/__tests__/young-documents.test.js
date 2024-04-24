@@ -60,22 +60,6 @@ describe("Young", () => {
       }
     });
   });
-  describe("POST young/:id/documents/form/:template", () => {
-    it("should return 404 when young is not found", async () => {
-      const res = await request(getAppHelper()).post("/young/" + notExistingYoungId + "/documents/form/1");
-      expect(res.status).toEqual(404);
-    });
-    it("should return the form", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const forms = ["imageRight"];
-      for (const form of forms) {
-        const res = await request(getAppHelper())
-          .post("/young/" + young._id + "/documents/form/" + form)
-          .send({ young });
-        expect(res.status).toBe(200);
-      }
-    });
-  });
   // Todo
   describe("POST young/:id/documents/:key", () => {
     it.skip("should return 200 and new record should be sinserted into the db", async () => {

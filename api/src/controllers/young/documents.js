@@ -1,26 +1,24 @@
 const express = require("express");
 const passport = require("passport");
 const Joi = require("joi");
-const fetch = require("node-fetch");
 const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const CohortObject = require("../../models/cohort");
 const ContractObject = require("../../models/contract");
 const ApplicationObject = require("../../models/application");
-const { ERRORS, isYoung, isReferent, getCcOfYoung, timeout, uploadFile, deleteFile, getFile } = require("../../utils");
+const { ERRORS, isYoung, isReferent, getCcOfYoung, uploadFile, deleteFile, getFile } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { FILE_KEYS, MILITARY_FILE_KEYS, SENDINBLUE_TEMPLATES, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
-const config = require("../../config");
 const fs = require("fs");
 const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
-const { getHtmlTemplate } = require("../../templates/utils");
 const mime = require("mime-types");
 const scanFile = require("../../utils/virusScanner");
+const { generatePdfIntoStream, generatePdfIntoBuffer } = require("../../utils/pdf-renderer");
 
 function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
@@ -54,15 +52,9 @@ function getMailParams(type, template, young, contract) {
       message: "Vous trouverez en pièce-jointe de ce mail votre convocation au séjour de cohésion à présenter à votre arrivée au point de rassemblement.",
     };
   }
-
-  //todo: add other templates
-  // if (type === "form" && template === "imageRight") return { object: "", message: "" };
-  // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
 }
 
-const TIMEOUT_PDF_SERVICE = 15000;
-
-router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:type/:template", async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
@@ -85,37 +77,8 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, type, applications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-    // Create html
-    const html = await getHtmlTemplate(type, template, young);
-    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const getPDF = async () =>
-      await fetch(config.API_PDF_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
-      }).then((response) => {
-        // ! On a retravaillé pour faire passer les tests
-        if (response.status && response.status !== 200) throw new Error("Error with PDF service");
-        res.set({
-          "content-length": response.headers.get("content-length"),
-          "content-disposition": `inline; filename="test.pdf"`,
-          "content-type": "application/pdf",
-          "cache-control": "public, max-age=1",
-        });
-        response.body.pipe(res);
-        if (res.statusCode !== 200) throw new Error("Error with PDF service");
-        response.body.on("error", (e) => {
-          capture(e);
-          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-        });
-      });
-    try {
-      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
-    } catch (e) {
-      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
-      capture(e);
-    }
+    await generatePdfIntoStream(res, { type, template, young });
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -159,30 +122,11 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    const html = await getHtmlTemplate(type, template, young, contract);
-    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const { object, message } = getMailParams(type, template, young, contract);
-
-    const getPDF = async () =>
-      await fetch(config.API_PDF_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-        body: JSON.stringify({ html, options: type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 } }),
-      }).then((response) => {
-        if (response.status !== 200) throw new Error("Error with PDF service");
-        return response.buffer();
-      });
-
-    let buffer;
-    try {
-      buffer = await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
-    } catch (e) {
-      capture(e);
-      return res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
-    }
+    const buffer = await generatePdfIntoBuffer({ type, template, young, contract });
 
     const content = buffer.toString("base64");
 
+    const { object, message } = getMailParams(type, template, young, contract);
     let emailTemplate = SENDINBLUE_TEMPLATES.young.DOCUMENT;
     let params = { object, message };
 
