@@ -7,6 +7,9 @@ export type AuthState = {
     user: {
       role: (typeof ROLES)[keyof typeof ROLES];
     };
+    sessionPhase1: {
+      cohort: string;
+    };
   };
 };
 
