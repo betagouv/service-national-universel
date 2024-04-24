@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => {
         authToken: env.SENTRY_AUTH_TOKEN,
         url: "https://sentry.selego.co/",
         environment: mode,
+        release: env.RELEASE,
         deploy: {
           env: mode,
         },
