@@ -1,4 +1,5 @@
 import { GroupBase, StylesConfig } from "react-select";
+import cx from "classnames";
 import { SelectProps } from "./Select";
 
 type CustomStyles = StylesConfig<string, boolean, GroupBase<string>>;
@@ -23,17 +24,17 @@ export default function useReactSelectTheme({
       cursor: "pointer",
       boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
       backgroundColor: disabled ? "#F9FAFB" : "white",
-      border: error
-        ? "1px solid #EF4444"
-        : isActive
-          ? "1px solid #3B82F6"
-          : "1px solid #E5E7EB",
+      border: cx({
+        "1px solid #EF4444": error,
+        "1px solid #3B82F6": !error && isActive,
+        "1px solid #E5E7EB": !error && !isActive,
+      }),
       "&:hover": {
-        border: error
-          ? "1px solid #EF4444"
-          : isActive
-            ? "1px solid #3B82F6"
-            : "1px solid #E5E7EB",
+        border: cx({
+          "1px solid #EF4444": error,
+          "1px solid #3B82F6": !error && isActive,
+          "1px solid #E5E7EB": !error && !isActive,
+        }),
       },
       ...(state.isFocused && {
         outline: "solid",
