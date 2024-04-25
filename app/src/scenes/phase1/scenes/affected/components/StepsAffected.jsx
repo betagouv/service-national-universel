@@ -7,7 +7,7 @@ import StepMedicalFile from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
 import { areAllStepsDone, countOfStepsDone } from "../utils/steps.utils";
 
-export default function StepsAffected({ affectationData }) {
+export default function StepsAffected({ data }) {
   const young = useSelector((state) => state.Auth.young);
   if (!young) return <div />;
 
@@ -40,9 +40,9 @@ export default function StepsAffected({ affectationData }) {
       </article>
 
       <div className="grid grid-cols-1 gap-4">
-        <StepPDR affectationData={affectationData} />
-        <StepAgreement affectationData={affectationData} />
-        <StepConvocation affectationData={affectationData} />
+        <StepPDR data={data} />
+        <StepAgreement data={data} />
+        <StepConvocation data={data} />
         <StepMedicalFile />
       </div>
     </section>

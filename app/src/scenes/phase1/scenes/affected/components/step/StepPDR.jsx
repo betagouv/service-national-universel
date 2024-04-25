@@ -11,9 +11,10 @@ import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, pdrChoiceExpired, pdrChoiceLi
 import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
 
-export default function StepPDR({ affectationData: { center, session, meetingPoint, departureDate, returnDate } }) {
+export default function StepPDR({ data: { center, session, meetingPoint, departureDate, returnDate } }) {
   const index = 1;
   const young = useSelector((state) => state.Auth.young);
+
   const [open, setOpen] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState([]);
 
@@ -46,7 +47,7 @@ export default function StepPDR({ affectationData: { center, session, meetingPoi
 
   if (isCle(young)) {
     return (
-      <StepCard state="done" index={index}>
+      <StepCard variant="done" index={index}>
         <p className="font-semibold text-sm">Confirmation du point de rendez-vous : vous n'avez rien à faire</p>
         <p className="leading-tight mt-1 text-sm text-gray-500">Vos informations de transport vers le centre vous seront transmises par votre établissement.</p>
       </StepCard>
@@ -55,7 +56,7 @@ export default function StepPDR({ affectationData: { center, session, meetingPoi
 
   if (young.meetingPointId) {
     return (
-      <StepCard state="done" index={index}>
+      <StepCard variant="done" index={index}>
         <div className="flex flex-col md:flex-row gap-3 justify-between text-sm">
           <div>
             <p className="font-semibold">Point de rassemblement</p>
@@ -84,7 +85,7 @@ export default function StepPDR({ affectationData: { center, session, meetingPoi
 
   if (young.deplacementPhase1Autonomous === "true") {
     return (
-      <StepCard state="done" index={index}>
+      <StepCard variant="done" index={index}>
         <div className="flex flex-col md:flex-row gap-3 justify-between text-sm">
           <div>
             <p className="font-semibold">Point de rassemblement</p>
@@ -113,7 +114,7 @@ export default function StepPDR({ affectationData: { center, session, meetingPoi
 
   if (young.transportInfoGivenByLocal === "true") {
     return (
-      <StepCard state="done" index={index}>
+      <StepCard variant="done" index={index}>
         <p className="font-semibold">Confirmation du point de rendez-vous : vous n'avez rien à faire</p>
         <p className="leading-tight my-2">Vos informations de transport vers le centre vous seront transmises par email.</p>
       </StepCard>
@@ -122,7 +123,7 @@ export default function StepPDR({ affectationData: { center, session, meetingPoi
 
   if (pdrChoiceExpired(young.cohort)) {
     return (
-      <StepCard state="disabled" index={index}>
+      <StepCard variant="disabled" index={index}>
         <p className="font-semibold text-gray-500">Date de choix dépassée</p>
         <p className="text-sm text-gray-500">Un point de rassemblement va vous être attribué par votre référent SNU</p>
       </StepCard>
@@ -130,7 +131,7 @@ export default function StepPDR({ affectationData: { center, session, meetingPoi
   }
 
   return (
-    <StepCard state="todo" index={index}>
+    <StepCard index={index}>
       <div className="flex flex-col md:flex-row gap-3 justify-between">
         <div>
           <p className="font-semibold leading-tight">Confirmez votre point de rassemblement</p>

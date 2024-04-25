@@ -42,14 +42,14 @@ export default function StepMedicalField() {
 
   if (!isEnabled) {
     return (
-      <StepCard state="disabled" index={index}>
+      <StepCard variant="disabled" index={index}>
         <p className="font-medium text-gray-400">Téléchargez votre fiche sanitaire</p>
       </StepCard>
     );
   }
 
   return (
-    <StepCard state={isDone ? "done" : "todo"} index={index}>
+    <StepCard variant={isDone ? "done" : ""} index={index}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold">Téléchargez votre fiche sanitaire</p>

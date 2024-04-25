@@ -1,8 +1,8 @@
 import React from "react";
 import { BsCheck2 } from "react-icons/bs";
 
-export function StepCard({ state = "todo", index, children }) {
-  if (state === "done") {
+export function StepCard({ variant, index, children }) {
+  if (variant === "done") {
     return (
       <div className="w-full flex items-center -ml-4">
         <div className="translate-x-5 flex-none flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500">
@@ -13,16 +13,7 @@ export function StepCard({ state = "todo", index, children }) {
     );
   }
 
-  if (state === "todo") {
-    return (
-      <div className="w-full flex items-center -ml-4">
-        <div className="translate-x-5 flex-none flex h-9 w-9 items-center justify-center rounded-full bg-white border text-sm">{index}</div>
-        <div className="w-full bg-white rounded-xl border-blue-600 border-[1px] p-8 md:px-10">{children}</div>
-      </div>
-    );
-  }
-
-  if (state === "disabled") {
+  if (variant === "disabled") {
     return (
       <div className="w-full flex items-center -ml-4">
         <div className="translate-x-5 flex-none flex h-9 w-9 items-center justify-center rounded-full bg-white border text-sm">{index}</div>
@@ -30,4 +21,11 @@ export function StepCard({ state = "todo", index, children }) {
       </div>
     );
   }
+
+  return (
+    <div className="w-full flex items-center -ml-4">
+      <div className="translate-x-5 flex-none flex h-9 w-9 items-center justify-center rounded-full bg-white border text-sm">{index}</div>
+      <div className="w-full bg-white rounded-xl border-blue-600 border-[1px] p-8 md:px-10">{children}</div>
+    </div>
+  );
 }

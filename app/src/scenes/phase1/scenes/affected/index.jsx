@@ -28,7 +28,7 @@ export default function Affected() {
   const cohort = getCohort(young.cohort);
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
-  const affectationData = { center, meetingPoint, session, departureDate, returnDate };
+  const data = { center, meetingPoint, session, departureDate, returnDate };
 
   useEffect(() => {
     if (!young.sessionPhase1Id) return;
@@ -99,7 +99,7 @@ export default function Affected() {
           </div>
         )}
 
-        <StepsAffected affectationData={affectationData} />
+        <StepsAffected data={data} />
         {!isCle(young) && <FaqAffected className={`${areAllStepsDone(young) ? "order-3" : "order-4"}`} />}
       </div>
 

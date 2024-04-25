@@ -13,7 +13,7 @@ import ConvocationModal from "../modals/ConvocationModal";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
 
-export default function StepConvocation({ affectationData: { center, meetingPoint, departureDate, returnDate } }) {
+export default function StepConvocation({ data: { center, meetingPoint, departureDate, returnDate } }) {
   const index = 3;
   const young = useSelector((state) => state.Auth.young);
   const isEnabled = isStepDone(STEPS.AGREEMENT, young);
@@ -60,14 +60,14 @@ export default function StepConvocation({ affectationData: { center, meetingPoin
 
   if (!isEnabled) {
     return (
-      <StepCard state="disabled" index={index}>
+      <StepCard variant="disabled" index={index}>
         <p className="font-medium text-gray-400">Téléchargez votre convocation</p>
       </StepCard>
     );
   }
 
   return (
-    <StepCard state={isDone ? "done" : "todo"} index={index}>
+    <StepCard variant={isDone ? "done" : ""} index={index}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold">Téléchargez votre convocation</p>

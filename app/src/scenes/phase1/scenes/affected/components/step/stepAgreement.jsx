@@ -4,7 +4,7 @@ import { AgreementModal } from "../modals/AgreementModal";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
 import { useSelector } from "react-redux";
 
-export default function StepAgreement({ affectationData: { departureDate, returnDate } }) {
+export default function StepAgreement({ data: { departureDate, returnDate } }) {
   const young = useSelector((state) => state.Auth.young);
   const index = 2;
   const isEnabled = isStepDone(STEPS.PDR, young);
@@ -13,7 +13,7 @@ export default function StepAgreement({ affectationData: { departureDate, return
 
   if (!isEnabled) {
     return (
-      <StepCard state="disabled" index={index}>
+      <StepCard variant="disabled" index={index}>
         <p className="font-medium text-gray-400">Confirmez votre participation au séjour</p>
       </StepCard>
     );
@@ -21,7 +21,7 @@ export default function StepAgreement({ affectationData: { departureDate, return
 
   if (isDone) {
     return (
-      <StepCard state="done" index={index}>
+      <StepCard variant="done" index={index}>
         <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
           <div>
             <p className="font-semibold">Confirmez votre participation au séjour</p>
@@ -39,7 +39,7 @@ export default function StepAgreement({ affectationData: { departureDate, return
   }
 
   return (
-    <StepCard state="todo" index={index}>
+    <StepCard index={index}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold text-gray-800">Confirmez votre participation au séjour</p>

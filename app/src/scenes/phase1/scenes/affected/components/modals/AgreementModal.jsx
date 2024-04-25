@@ -68,7 +68,7 @@ export function AgreementModal({ isOpen, setIsOpen, departureDate, returnDate })
                 </Link>
               </div>
             )}
-          </div>{" "}
+          </div>
         </div>
       </ModalContainer>
     </Modal>
