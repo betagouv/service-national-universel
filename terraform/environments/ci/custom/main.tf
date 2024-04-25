@@ -33,10 +33,10 @@ locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
   domain         = "functions.fnc.fr-par.scw.cloud"
-  domain_prefix  = split("funcscw", scaleway_container_namespace.main.registry_endpoint)[1]
-  api_hostname   = "${local.domain_prefix}-api-${local.env}.${local.domain}"
-  admin_hostname = "${local.domain_prefix}-admin-${local.env}.${local.domain}"
-  app_hostname   = "${local.domain_prefix}-moncompte-${local.env}.${local.domain}"
+  domain_prefix  = split("funcscw", data.scaleway_container_namespace.main.registry_endpoint)[1]
+  api_hostname   = "${local.domain_prefix}-${local.env}-api.${local.domain}"
+  admin_hostname = "${local.domain_prefix}-${local.env}-admin.${local.domain}"
+  app_hostname   = "${local.domain_prefix}-${local.env}-moncompte.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -64,16 +64,14 @@ data "scaleway_secret_version" "main" {
 }
 
 # Containers namespace
-resource "scaleway_container_namespace" "main" {
-  project_id  = data.scaleway_account_project.main.id
-  name        = "snu-custom"
-  description = "SNU container namespace for environment 'custom'"
+data "scaleway_container_namespace" "main" {
+  name = "snu-custom"
 }
 
 # Containers
 resource "scaleway_container" "api" {
-  name            = "api-${local.env}"
-  namespace_id    = scaleway_container_namespace.main.id
+  name            = "${local.env}-api"
+  namespace_id    = data.scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port            = 8080
   cpu_limit       = 768
@@ -145,8 +143,8 @@ resource "scaleway_container" "api" {
 
 
 resource "scaleway_container" "admin" {
-  name            = "admin-${local.env}"
-  namespace_id    = scaleway_container_namespace.main.id
+  name            = "${local.env}-admin"
+  namespace_id    = data.scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/admin:${var.admin_image_tag}"
   port            = 8080
   cpu_limit       = 256
@@ -181,8 +179,8 @@ resource "scaleway_container" "admin" {
 }
 
 resource "scaleway_container" "app" {
-  name            = "moncompte-${local.env}"
-  namespace_id    = scaleway_container_namespace.main.id
+  name            = "${local.env}-moncompte"
+  namespace_id    = data.scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
   port            = 8080
   cpu_limit       = 256
