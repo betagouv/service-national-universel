@@ -10,13 +10,14 @@ import { CohortState } from "@/redux/cohorts";
 
 interface Props {
   cohort: string;
-  className?: string;
+  sort?: string;
   withBadge?: boolean;
+  className?: string;
   filterFn?: (cohort: CohortState["Cohorts"][0]) => boolean;
   onChange?: (cohortName: string) => void;
 }
 
-export default function SelectCohort({ cohort, withBadge, filterFn, onChange, className }: Props) {
+export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, className }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
@@ -25,6 +26,9 @@ export default function SelectCohort({ cohort, withBadge, filterFn, onChange, cl
     let updatedCohorts = cohorts || [];
     if (filterFn) {
       updatedCohorts = updatedCohorts.filter(filterFn);
+    }
+    if (sort) {
+      updatedCohorts = updatedCohorts.sort((a, b) => new Date(b[sort]).getTime() - new Date(a[sort]).getTime());
     }
     return updatedCohorts.map((cohort) => ({
       value: cohort.name,
@@ -36,7 +40,7 @@ export default function SelectCohort({ cohort, withBadge, filterFn, onChange, cl
         </div>
       ),
     }));
-  }, [cohorts, filterFn]);
+  }, [cohorts, filterFn, sort]);
 
   const currentCohortName = cohort ?? options?.[0]?.value;
 
@@ -48,10 +52,16 @@ export default function SelectCohort({ cohort, withBadge, filterFn, onChange, cl
         value={options.find(({ value }) => value == currentCohortName)}
         defaultValue={currentCohortName}
         maxMenuHeight={520}
-        className="min-w-[350px] max-w-[450px]"
+        className="w-[450px] max-w-[450px]"
         controlCustomStyle={{
           border: "none",
           boxShadow: "0px 0px 8px 0px rgba(0, 0, 0, 0.08)",
+          "&:hover": {
+            border: "none",
+          },
+        }}
+        menuCustomStyle={{
+          border: "none",
           "&:hover": {
             border: "none",
           },

@@ -1,31 +1,37 @@
 import React, { useEffect, useState } from "react";
-import Breadcrumbs from "../../../components/Breadcrumbs";
-import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
-import { Box, BoxHeader, MiniTitle, Badge, AlertPoint, BigDigits, Loading, regionList } from "../components/commons";
-import { Link, useHistory, useLocation } from "react-router-dom";
-import ChevronRight from "../../../assets/icons/ChevronRight";
-import { formatRate, parseQuery } from "../util";
-import ExternalLink from "../../../assets/icons/ExternalLink";
-import People from "../../../assets/icons/People";
-import ProgressBar from "../components/ProgressBar";
-import ProgressArc from "../components/ProgressArc";
-import Select from "../components/Select";
-import FrenchMap from "../../../assets/icons/FrenchMap";
-import { capture } from "../../../sentry";
-import { toastr } from "react-redux-toastr";
-import API from "../../../services/api";
-import { department2region, getDepartmentNumber, region2department, ROLES } from "snu-lib";
-import SchemaEditor from "./SchemaEditor";
-import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
-import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
-import { getCohortByName } from "../../../services/cohort.service";
+import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
-import useDocumentTitle from "../../../hooks/useDocumentTitle";
-import Puzzle from "../../../assets/icons/Puzzle";
+import { Link, useHistory, useLocation } from "react-router-dom";
+
+import { department2region, getDepartmentNumber, region2department, ROLES } from "snu-lib";
+
+import { capture } from "@/sentry";
+import API from "@/services/api";
+import { getCohortByName } from "@/services/cohort.service";
 import dayjs from "@/utils/dayjs.utils";
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+
+import ChevronRight from "@/assets/icons/ChevronRight";
+import ExternalLink from "@/assets/icons/ExternalLink";
+import People from "@/assets/icons/People";
+import FrenchMap from "@/assets/icons/FrenchMap";
+import Puzzle from "@/assets/icons/Puzzle";
+
+import Breadcrumbs from "@/components/Breadcrumbs";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
+import { formatRate, parseQuery } from "../util";
+import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
+import { Box, BoxHeader, MiniTitle, Badge, AlertPoint, BigDigits, Loading, regionList } from "../components/commons";
+import ProgressBar from "../components/ProgressBar";
+import ProgressArc from "../components/ProgressArc";
+import Select from "../components/Select";
+import SchemaEditor from "./SchemaEditor";
+import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
 
 const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
 
@@ -33,6 +39,8 @@ export default function SchemaRepartition({ region, department }) {
   const history = useHistory();
   const location = useLocation();
   const { user } = useSelector((state) => state.Auth);
+  const cohortList = useSelector((state) => state.Cohorts);
+
   const [isNational, setIsNational] = useState(!region && !department);
   const [isDepartmental, setIsDepartmental] = useState(!!(region && department));
   const [cohort, setCohort] = useState(null);
@@ -46,9 +54,9 @@ export default function SchemaRepartition({ region, department }) {
     centers: 0,
     toRegions: [],
   });
+
   const [data, setData] = useState({ rows: getDefaultRows() });
-  const cohortList = useSelector((state) => state.Cohorts);
-  const [cohortOptions, setCohortOptions] = useState([]);
+  const [filteredCohortList, setFilteredCohortList] = useState([]);
 
   if (region) useDocumentTitle(`Schéma de répartition - ${region}`);
   if (department) useDocumentTitle(`Schéma de répartition - ${department}`);
@@ -67,41 +75,29 @@ export default function SchemaRepartition({ region, department }) {
     setIsDepartmental(!!(region && department));
   }, [region, department]);
 
-  function getDefaultCohort() {
-    const { cohort } = parseQuery(location.search);
-    if (cohort && cohortList && cohortOptions.find((c) => c.value === cohort)) {
-      return cohort;
-    } else {
-      return cohortOptions && cohortOptions.length > 0 ? cohortOptions[0].value : null;
-    }
-  }
-
   useEffect(() => {
+    let updatedCohortsList = [];
     if (cohortList !== null) {
-      setCohortOptions(
-        cohortList
-          .filter((c) => {
-            return (
-              [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) ||
-              (user.role === ROLES.REFERENT_DEPARTMENT && c.schemaAccessForReferentDepartment) ||
-              (user.role === ROLES.REFERENT_REGION && c.schemaAccessForReferentRegion)
-            );
-          })
-          .sort((a, b) => new Date(b.dateStart) - new Date(a.dateStart))
-          .map((c) => ({ value: c.name, label: formatCohortName(c) })),
-      );
-    } else {
-      setCohortOptions([]);
+      updatedCohortsList = cohortList.filter((c) => {
+        return (
+          [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) ||
+          (user.role === ROLES.REFERENT_DEPARTMENT && c.schemaAccessForReferentDepartment) ||
+          (user.role === ROLES.REFERENT_REGION && c.schemaAccessForReferentRegion)
+        );
+      });
     }
+    const { cohort } = parseQuery(location.search);
+    if (cohort && cohortList && updatedCohortsList.find((c) => c.name === cohort)) {
+      setCohort(cohort);
+    } else {
+      setCohort(updatedCohortsList?.[0]?.name || null);
+    }
+    setFilteredCohortList(updatedCohortsList);
   }, [cohortList]);
 
   useEffect(() => {
-    setCohort(getDefaultCohort());
-  }, [cohortOptions]);
-
-  useEffect(() => {
     if (cohort) {
-      loadData();
+      loadSchemaData();
     }
   }, [cohort]);
 
@@ -141,28 +137,6 @@ export default function SchemaRepartition({ region, department }) {
     setSummary({ capacity, total, assigned, intradepartmental, intradepartmentalAssigned, centers, toRegions });
   }, [data]);
 
-  function formatCohortName(cohort) {
-    let from;
-
-    if (cohort) {
-      const start = dayjs(cohort.dateStart);
-      const end = dayjs(cohort.dateEnd);
-
-      if (start.year() === end.year()) {
-        if (start.month() === end.month()) {
-          from = start.format("Do");
-        } else {
-          from = start.format("Do MMMM");
-        }
-      } else {
-        from = start.format("Do MMMM YYYY");
-      }
-      const to = end.format("Do MMMM YYYY");
-      return `${cohort.name} (du ${from} au ${to})`;
-    } else {
-      return "";
-    }
-  }
   function getDefaultRows() {
     if (department) {
       return [];
@@ -184,7 +158,7 @@ export default function SchemaRepartition({ region, department }) {
     };
   }
 
-  async function loadData() {
+  async function loadSchemaData() {
     try {
       setLoading(true);
       let url = "/schema-de-repartition";
@@ -346,9 +320,9 @@ export default function SchemaRepartition({ region, department }) {
     }
   };
 
-  const handleChangeCohort = (value) => {
-    setCohort(value);
-    history.replace({ pathname: location.pathname, search: `?cohort=${value}` });
+  const handleChangeCohort = (cohortName) => {
+    setCohort(cohortName);
+    history.replace({ pathname: location.pathname, search: `?cohort=${cohortName}` });
   };
 
   const handleChangeDepartment = (value) => {
@@ -368,14 +342,14 @@ export default function SchemaRepartition({ region, department }) {
             onGoToNational={goToNational}
             onGoToRegion={goToRegion}
           />
-          {cohortOptions.length > 0 && (
+          {filteredCohortList.length > 0 && (
             <div className="flex gap-4">
               {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
-              <Select options={cohortOptions} value={cohort} onChange={handleChangeCohort} />
+              <SelectCohort cohort={cohort} onChange={handleChangeCohort} sort="dateStart" filterFn={(c) => filteredCohortList.find(({ name }) => name === c.name)} />
             </div>
           )}
         </div>
-        {cohortOptions.length === 0 ? (
+        {filteredCohortList.length === 0 ? (
           <div className="flex justify-center items-center mt-[120px]">
             <div className="text-gray-900 flex flex-col items-center">
               <Puzzle />
@@ -402,7 +376,7 @@ export default function SchemaRepartition({ region, department }) {
                   cohort={cohort}
                   groups={data && data.groups ? data.groups : { intra: [], extra: [] }}
                   summary={summary}
-                  onChange={loadData}
+                  onChange={loadSchemaData}
                   user={user}
                 />
                 <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />

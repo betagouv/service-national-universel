@@ -9,6 +9,9 @@ const COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS = JWT_TRUST_TOKEN_MONCOMPTE_MA
 //!COOKIE need to be in milliseconds
 
 function cookieOptions(maxAge) {
+  if (config.CUSTOM_ENV_COOKIE) {
+    return { maxAge, httpOnly: true, secure: true, sameSite: "None" };
+  }
   if (config.ENVIRONMENT === "development") {
     return { maxAge, httpOnly: true, secure: false, domain: "localhost", sameSite: "Lax" };
   } else if (config.ENVIRONMENT === "staging") {
