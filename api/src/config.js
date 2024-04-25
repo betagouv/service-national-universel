@@ -1,4 +1,5 @@
 const ENVIRONMENT = getEnvironment();
+const CUSTOM_ENV_COOKIE = process.env.CUSTOM_ENV_COOKIE === "true" // TODO - remove this variable during env normalization
 const LOCAL = process.env.LOCAL === "true";
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 8080;
@@ -108,6 +109,7 @@ module.exports = {
   IMAGES_ROOTDIR,
   FONT_ROOTDIR,
   RELEASE,
+  CUSTOM_ENV_COOKIE,
 };
 
 function getEnvironment() {
