@@ -1,8 +1,10 @@
-import { MiniTitle } from "./commons";
-import Bin from "../../../assets/Bin";
 import React, { useEffect, useState } from "react";
-import ChevronDown from "../../../assets/icons/ChevronDown";
+
+import Bin from "@/assets/Bin";
+import ChevronDown from "@/assets/icons/ChevronDown";
 import dayjs from "@/utils/dayjs.utils";
+
+import { MiniTitle } from "./commons/MiniTitle";
 
 export default function CorrectionRequest({ name, label, correctionRequest, onChangeRequest, reasons, messagePlaceholder }) {
   const [requestText, setRequestText] = useState("");

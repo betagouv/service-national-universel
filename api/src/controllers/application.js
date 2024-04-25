@@ -163,7 +163,6 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     // On vérifie si les candidatures sont ouvertes.
     if (mission.visibility === "HIDDEN") {
-      console.log("visibility", mission.visibility);
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
@@ -175,7 +174,6 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (isYoung(req.user)) {
       const { canApply, message } = await getAuthorizationToApply(mission, young);
       if (!canApply) {
-        console.log(message);
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
       }
     }
@@ -216,6 +214,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
+    // Send tracking data to API Engagement
     if (mission.apiEngagementId) {
       const data = await apiEngagement.create(value, mission.apiEngagementId, clickId);
       value.apiEngagementId = data?._id;
@@ -372,6 +371,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     application.set(value);
 
     if (application.isJvaMission === "true") {
+      // When a young accepts a mission proposed by a ref, it counts as an application creation in API Engagement
       if (originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION && application.status === APPLICATION_STATUS.WAITING_VALIDATION) {
         const mission = await MissionObject.findById(application.missionId);
         const data = await apiEngagement.create(application, mission.apiEngagementId, null);

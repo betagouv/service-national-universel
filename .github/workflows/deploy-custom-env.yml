@@ -108,6 +108,7 @@ jobs:
           image_name: ${{matrix.app.name}}
           dockerfile_path: ${{matrix.app.name}}/Dockerfile
           image_tag: ${{matrix.app.tag}}
+          sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
   deploy:
     runs-on: ubuntu-latest

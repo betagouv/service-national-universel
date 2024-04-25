@@ -253,7 +253,7 @@ export default function CenterYoungIndex() {
     });
     try {
       const file = await api.openpdf(`/session-phase1/${sessionId}/certificate`, {});
-      download(file, "certificates.zip");
+      download(file, "certificates.pdf");
     } catch (e) {
       // We don't capture unauthorized. Just redirect.
       if (e?.message === "unauthorized") {
@@ -427,7 +427,7 @@ export default function CenterYoungIndex() {
   const exportImageRights = async () => {
     try {
       const file = await api.openpdf(`/session-phase1/${focusedSession._id}/image-rights/export`, {});
-      download(file, "droits-a-l-image.zip");
+      download(file, "droits-a-l-image.pdf");
     } catch (e) {
       // We don't capture unauthorized. Just redirect.
       if (e?.message === "unauthorized") {
@@ -480,7 +480,7 @@ export default function CenterYoungIndex() {
 
   return (
     <>
-      {user.role !== ROLES.HEAD_CENTER ? (
+      {true ? (
         <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre", to: `/centre/${id}` }, { label: "Liste des volontaires" }]} />
       ) : null}
       <div className="m-8">

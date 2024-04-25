@@ -24,7 +24,6 @@ const sessions2024CohortNames = [
   "CLE mars 2024 2",
   "CLE mai 2024",
   "CLE juin 2024",
-  "CLE mai 2024 Martinique",
   "CLE juin 2024 Martinique",
   "CLE février 2024 Réunion",
   "CLE GE1 2024",
@@ -71,7 +70,6 @@ const COHESION_STAY_START = {
   "CLE mars 2024 2": new Date("03/25/2024"),
   "CLE mai 2024": new Date("05/13/2024"),
   "CLE juin 2024": new Date("06/03/2024"),
-  "CLE mai 2024 Martinique": new Date("05/08/2024"),
   "CLE juin 2024 Martinique": new Date("05/26/2024"),
   "CLE février 2024 Réunion": new Date("02/12/2024"),
   "CLE GE1 2024": new Date("04/22/2024"),
@@ -107,7 +105,6 @@ const START_DATE_SESSION_PHASE1 = {
   "CLE mars 2024 1": new Date("03/11/2024"),
   "CLE mars 2024 2": new Date("03/25/2024"),
   "CLE mai 2024": new Date("05/13/2024"),
-  "CLE mai 2024 Martinique": new Date("05/08/2024"),
   "CLE juin 2024": new Date("06/03/2024"),
   "CLE juin 2024 Martinique": new Date("05/26/2024"),
   "CLE GE1 2024": new Date("04/22/2024"),
@@ -146,7 +143,6 @@ const COHESION_STAY_END = {
   "CLE mars 2024 1": new Date("03/23/2024"),
   "CLE mars 2024 2": new Date("04/06/2024"),
   "CLE mai 2024": new Date("05/25/2024"),
-  "CLE mai 2024 Martinique": new Date("05/20/2024"),
   "CLE juin 2024": new Date("06/14/2024"),
   "CLE juin 2024 Martinique": new Date("06/07/2024"),
   "CLE GE1 2024": new Date("05/04/2024"),
@@ -204,6 +200,33 @@ const getCohortPeriod = (cohort, withBold = false) => {
   if (withBold) return `du <b>${formattedStart} au ${formattedEnd}</b>`;
 
   return `du ${formattedStart} au ${formattedEnd}`;
+};
+
+const formatShortCohortPeriod = (cohort) => {
+  var startDate = new Date(cohort.dateStart);
+  var endDate = new Date(cohort.dateEnd);
+
+  var startDateformatOptions = {
+    day: "numeric",
+    month: "numeric",
+  };
+
+  var endDateformatOptions = {
+    day: "numeric",
+    month: "numeric",
+  };
+
+  var formattedStart = new Intl.DateTimeFormat("fr-FR", startDateformatOptions).format(startDate);
+  var formattedEnd = new Intl.DateTimeFormat("fr-FR", endDateformatOptions).format(endDate);
+
+  return formattedStart + " > " + formattedEnd;
+};
+
+const formatCohortPeriod = (cohort, format = "short", withBold = false) => {
+  if (format === "short") {
+    return formatShortCohortPeriod(cohort);
+  }
+  return getCohortPeriod(cohort, withBold);
 };
 
 // includes old cohorts and 2023 july with specific dates for DROMS
@@ -286,10 +309,10 @@ function hasAccessToReinscription(young) {
 
 function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
   return (
-    ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
-      (isInscriptionModificationOpen &&
-        young.status === YOUNG_STATUS.WAITING_VALIDATION &&
-        ((young.hasStartedReinscription && young.reinscriptionStep2023 !== "DONE") || (!young.hasStartedReinscription && young.inscriptionStep2023 !== "DONE"))))
+    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
+    (isInscriptionModificationOpen &&
+      young.status === YOUNG_STATUS.WAITING_VALIDATION &&
+      ((young.hasStartedReinscription && young.reinscriptionStep2023 !== "DONE") || (!young.hasStartedReinscription && young.inscriptionStep2023 !== "DONE")))
   );
 }
 
@@ -305,6 +328,7 @@ export {
   oldSessions,
   getCohortYear,
   getCohortPeriod,
+  formatCohortPeriod,
   getCohortPeriodTemp,
   sessions2023CohortNames,
   getCohortNames,

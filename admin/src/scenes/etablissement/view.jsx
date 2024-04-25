@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useHistory, useParams } from "react-router-dom";
+import { useDebounce } from "@uidotdev/usehooks";
 import { ProfilePic } from "@snu/ds";
 import { Page, Header, Container, Button, InputText, ModalConfirmation, Label, Select } from "@snu/ds/admin";
+import { AddressForm } from "@snu/ds/common";
 import { HiPlus, HiOutlinePencil, HiOutlineMail, HiOutlinePhone, HiCheckCircle, HiOutlineOfficeBuilding, HiOutlineX } from "react-icons/hi";
 import { MdOutlineContentCopy } from "react-icons/md";
 import InstitutionIcon from "@/components/drawer/icons/Institution";
-import { CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, translate } from "snu-lib";
+import { useAddress, CLE_TYPE_LIST, CLE_SECTOR_LIST, SUB_ROLES, ROLES, translate } from "snu-lib";
 import api from "@/services/api";
 import { IoAdd } from "react-icons/io5";
 import { capture } from "@/sentry";
@@ -41,7 +43,10 @@ export default function View() {
   const [modalCoordinator, setModalCoordinator] = useState(false);
   const [modalAddCoordinator, setModalAddCoordinator] = useState(false);
   const [modalChangeContacts, setModalChangeContacts] = useState(false);
+  const [query, setQuery] = useState("");
 
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
   const history = useHistory();
   const firstLogin = localStorage.getItem("cle_referent_signup_first_time");
 
@@ -255,7 +260,7 @@ export default function View() {
         </div>,
       ]
     : (user.subRole === SUB_ROLES.referent_etablissement || [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) && [
-        <Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />,
+        <Button key="change" type="modify" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />,
       ];
 
   if (!etablissement) return <Loader />;
@@ -291,7 +296,7 @@ export default function View() {
           [ROLES.ADMIN].includes(user.role) && (
             <Button
               key="update-contacts"
-              type="change"
+              type="modify"
               leftIcon={<HiOutlinePencil size={16} />}
               title="Modifier"
               onClick={() => {
@@ -349,23 +354,14 @@ export default function View() {
             <Label title="Nom de l’établissement" />
             <InputText className="mb-4" value={etablissement.name} disabled />
             <Label title="Adresse postale" />
-            <InputText
-              className="mb-3"
-              label="Numéro et nom de la voie"
-              value={etablissement.address}
+            <AddressForm
               readOnly={!edit}
-              active={edit}
-              error={errors.address}
-              onChange={(e) => setEtablissement({ ...etablissement, address: e.target.value })}
+              data={{ address: etablissement.address, zip: etablissement.zip, city: etablissement.city }}
+              updateData={(address) => setEtablissement({ ...etablissement, ...address })}
+              query={query}
+              setQuery={setQuery}
+              options={results}
             />
-            <div className="flex items-stretch justify-stretch gap-3 mb-3">
-              <InputText className="flex-1" label="Code postal" value={etablissement.zip} disabled />
-              <InputText className="flex-1" label="Ville" value={etablissement.city} disabled />
-            </div>
-            <div className="flex items-stretch justify-stretch gap-3 mb-3">
-              <InputText className="flex-1" label="Département" value={etablissement.department} disabled />
-              <InputText className="flex-1" label="Région" value={etablissement.region} disabled />
-            </div>
           </div>
           <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
           <div className="flex-1 shrink-0">

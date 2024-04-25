@@ -23,6 +23,7 @@ import {
   COHORT_TYPE,
   IS_INSCRIPTION_OPEN_CLE,
 } from "snu-lib";
+import { FUNCTIONAL_ERRORS } from "snu-lib/functionalErrors";
 import { useSelector } from "react-redux";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
@@ -33,6 +34,8 @@ import { IoWarningOutline } from "react-icons/io5";
 import { MdOutlineDangerous } from "react-icons/md";
 import plausibleEvent from "@/services/plausible";
 import dayjs from "dayjs";
+import { downloadCertificatesByClassId } from "@/services/convocation.service";
+import { usePendingAction } from "@/hooks/usePendingAction";
 
 export default function View() {
   const [classe, setClasse] = useState({});
@@ -46,6 +49,7 @@ export default function View() {
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [infoBus, setInfoBus] = useState(null);
+  const [isConvocationDownloading, handleConvocationDownload] = usePendingAction();
 
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts).filter((c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort));
@@ -192,6 +196,17 @@ export default function View() {
     history.push(`/volontaire/create?classeId=${classe._id}`);
   };
 
+  const handleCertificateDownload = () => {
+    const getErrorMessage = (error) => {
+      let errorMessage = "Téléchargement des convocations impossible";
+      if (FUNCTIONAL_ERRORS.TOO_MANY_YOUNGS_IN_CLASSE === error.code) {
+        errorMessage = "Le nombre de convocations est trop élevé";
+      }
+      return errorMessage;
+    };
+    handleConvocationDownload(downloadCertificatesByClassId(classe._id), "Téléchargement des convocations en cours", "Les convocations ont bien été téléchargées", getErrorMessage);
+  };
+
   const actionList = ({ edit, setEdit, canEdit }) => {
     return edit ? (
       <div className="flex items-center justify-end ml-6">
@@ -199,7 +214,7 @@ export default function View() {
         <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={sendInfo} loading={isLoading} disabled={isLoading} />
       </div>
     ) : canEdit ? (
-      [<Button key="change" type="change" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
+      [<Button key="change" type="modify" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
     ) : null;
   };
 
@@ -210,13 +225,23 @@ export default function View() {
       <Header
         title={classe.name || "Informations nécessaires"}
         titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status)} />}
-        breadcrumb={[{ title: <HiOutlineOfficeBuilding size={20} /> }, { title: "Mes classes", to: "/classes" }, { title: "Fiche de la classe" }]}
+        breadcrumb={[
+          { title: <HiOutlineOfficeBuilding size={20} /> },
+          {
+            title: "Mes classes",
+            to: "/classes",
+          },
+          { title: "Fiche de la classe" },
+        ]}
         actions={
-          ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) &&
-          IS_INSCRIPTION_OPEN_CLE && [
-            <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
-            <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
-          ]
+          (![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) &&
+            IS_INSCRIPTION_OPEN_CLE && [
+              <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={handleClick} />,
+              <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" onClick={() => setModalInvite(true)} />,
+            ]) ||
+          (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0 && [
+            <Button disabled={isConvocationDownloading} key="export" title="Exporter toutes les convocations" onClick={handleCertificateDownload} />,
+          ])
         }
       />
       <Container title="Informations générales" actions={actionList({ edit, setEdit, canEdit: rights.canEdit })}>
@@ -357,7 +382,13 @@ export default function View() {
       )}
 
       {(rights.showCenter || rights.showPDR) && (
-        <Container title="Séjour" actions={actionList({ edit: editStay, setEdit: setEditStay, canEdit: rights.canEditCenter || rights.canEditPDR })}>
+        <Container
+          title="Séjour"
+          actions={actionList({
+            edit: editStay,
+            setEdit: setEditStay,
+            canEdit: rights.canEditCenter || rights.canEditPDR,
+          })}>
           <div className="flex items-stretch justify-stretch">
             {rights.showCenter && (
               <div className="flex-1">
@@ -423,7 +454,12 @@ export default function View() {
                   className="mb-3"
                   placeholder={"Choisissez un point de rassemblement existant"}
                   loadOptions={(q) => searchPointDeRassemblements({ q, cohort: classe.cohort })}
-                  defaultOptions={() => searchPointDeRassemblements({ q: classe.etablissement?.name, cohort: classe.cohort })}
+                  defaultOptions={() =>
+                    searchPointDeRassemblements({
+                      q: classe.etablissement?.name,
+                      cohort: classe.cohort,
+                    })
+                  }
                   noOptionsMessage={"Aucun point de rassemblement ne correspond à cette recherche"}
                   isClearable={true}
                   closeMenuOnSelect={true}
@@ -432,7 +468,13 @@ export default function View() {
                       ? { label: `${classe.pointDeRassemblement?.name}, ${classe.pointDeRassemblement?.department}` }
                       : null
                   }
-                  onChange={(option) => setClasse({ ...classe, pointDeRassemblement: option?.pointDeRassemblement, pointDeRassemblementId: option?._id })}
+                  onChange={(option) =>
+                    setClasse({
+                      ...classe,
+                      pointDeRassemblement: option?.pointDeRassemblement,
+                      pointDeRassemblementId: option?._id,
+                    })
+                  }
                   error={errors.pointDeRassemblement}
                   isActive={editStay && rights.canEditPDR}
                   readOnly={!editStay || !rights.canEditPDR}
@@ -579,7 +621,12 @@ export default function View() {
         text="Cette action entraînera l'abandon de l'inscription de tous les élèves de cette classe."
         actions={[
           { title: "Annuler", isCancel: true },
-          { title: "Désister la classe", leftIcon: <MdOutlineDangerous size={20} />, onClick: onDelete, isDestructive: true },
+          {
+            title: "Désister la classe",
+            leftIcon: <MdOutlineDangerous size={20} />,
+            onClick: onDelete,
+            isDestructive: true,
+          },
         ]}
       />
       <Modal
@@ -625,7 +672,12 @@ const searchSessions = async ({ q, cohort }) => {
 
   const { responses } = await api.post(`/elasticsearch/sessionphase1/search?needCohesionCenterInfo=true`, query);
   return responses[0].hits.hits.map((hit) => {
-    return { value: hit._source, _id: hit._id, label: hit._source.cohesionCenter.name, session: { ...hit._source, _id: hit._id } };
+    return {
+      value: hit._source,
+      _id: hit._id,
+      label: hit._source.cohesionCenter.name,
+      session: { ...hit._source, _id: hit._id },
+    };
   });
 };
 
@@ -643,6 +695,11 @@ const searchPointDeRassemblements = async ({ q, cohort }) => {
 
   const { responses } = await api.post(`/elasticsearch/pointderassemblement/search`, query);
   return responses[0].hits.hits.map((hit) => {
-    return { value: hit._source, _id: hit._id, label: `${hit._source.name}, ${hit._source.department}`, pointDeRassemblement: { ...hit._source, _id: hit._id } };
+    return {
+      value: hit._source,
+      _id: hit._id,
+      label: `${hit._source.name}, ${hit._source.department}`,
+      pointDeRassemblement: { ...hit._source, _id: hit._id },
+    };
   });
 };

@@ -28,6 +28,10 @@ RUN npm install
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
+ARG RELEASE=""
+ENV RELEASE=${RELEASE}
+ARG SENTRY_AUTH_TOKEN=""
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 ENV APP_NAME api
 RUN npm run build
 
@@ -37,7 +41,8 @@ WORKDIR /app
 RUN addgroup --system --gid 1001 expressjs
 RUN adduser --system --uid 1001 expressjs
 USER expressjs
-COPY --from=installer /app .
+
+COPY --chown=expressjs:expressjs --from=installer /app .
 
 LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel" \
       org.opencontainers.image.description="This image provides a consistent and reproducible environment for the backend, ensuring it deploys faster and runs the same way regardless of the deployment environment."

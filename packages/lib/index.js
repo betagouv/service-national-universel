@@ -200,6 +200,7 @@ export {
   htmlCleaner,
 };
 
+export * from "./useAddress";
 export * from "./academy";
 export * from "./colors";
 export * from "./constants";
@@ -217,3 +218,4 @@ export * from "./translation";
 export * from "./transport-info";
 export * from "./young";
 export * from "./SNUpport";
+export * from "./functionalErrors";

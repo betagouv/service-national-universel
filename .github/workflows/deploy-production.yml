@@ -290,6 +290,7 @@ jobs:
 
   deploy_cc:
     needs: [prepare, copy_image]
+    environment: production # Needed for manual approval before deploy
     if: ${{ vars.DEPLOY_ON_CC == 'true' }}
     uses: ./.github/workflows/cc-deploy-production.yml
     with:
