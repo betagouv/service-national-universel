@@ -7,6 +7,7 @@ import { useHistory } from "react-router-dom";
 import { translate, isSessionEditionOpen } from "snu-lib";
 import { Select } from "@snu/ds/admin";
 
+import { CohortState } from "@/redux/cohorts";
 import ModalTailwind from "@/components/modals/ModalTailwind";
 import { capture } from "@/sentry";
 import api from "@/services/api";
@@ -15,7 +16,7 @@ import Field from "./Field";
 
 export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
-  const cohorts = useSelector((state: any) => state.Cohorts);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const availableCohorts = isOpen ? cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name) : [];
 
   const refSelect = React.useRef(null);
@@ -112,7 +113,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
             <Select
               className="w-full"
               placeholder={"Choisissez une cohorte"}
-              options={availableCohorts?.map((c) => ({ value: c, label: c }))}
+              options={availableCohorts.map((c) => ({ value: c, label: c }))}
               isSearchable
               isClearable
               closeMenuOnSelect

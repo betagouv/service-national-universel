@@ -25,7 +25,7 @@ export default function Filters({
   setSelectedFilters,
   paramData,
   setParamData,
-  defaultUrlParam = false,
+  defaultUrlParam = undefined,
   size,
 }) {
   const [search, setSearch] = useState("");
