@@ -943,6 +943,19 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
+    // If they are CLE, we notify the class referent.
+    try {
+      if (young.cohort === YOUNG_SOURCE.CLE) {
+        const referent = await ReferentModel.findOne({ role: ROLES.REFERENT_CLASS, classeId: young.classeId });
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: { youngFirstName: young.firstName, youngLastName: young.lastName, raisondesistement: withdrawnReason },
+        });
+      }
+    } catch (e) {
+      capture(e);
+    }
+
     res.status(200).send({ ok: true, data: serializeYoung(updatedYoung, updatedYoung) });
   } catch (error) {
     capture(error);

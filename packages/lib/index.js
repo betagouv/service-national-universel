@@ -143,7 +143,6 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id, source }
 };
 
 const youngCanWithdraw = (young) => {
-  if (young.source === YOUNG_SOURCE.CLE) return false;
   if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && [YOUNG_STATUS_PHASE2.VALIDATED].includes(young.statusPhase2)) {
     return false;
   }
