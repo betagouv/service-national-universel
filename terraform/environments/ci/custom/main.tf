@@ -87,7 +87,7 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "COOKIE_OPTIONS"                    = jsonencode({"domain"="functions.fnc.fr-par.scw.cloud", "sameSite"="None" })
+    "COOKIE_OPTIONS"                    = jsonencode({"domain"="functions.fnc.fr-par.scw.cloud", "sameSite"="Lax" })
     "APP_NAME"                          = "api"
     "ADMIN_URL"                         = "https://${local.admin_hostname}"
     "APP_URL"                           = "https://${local.app_hostname}"
