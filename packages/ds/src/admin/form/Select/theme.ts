@@ -1,4 +1,5 @@
 import { GroupBase, StylesConfig } from "react-select";
+import cx from "classnames";
 import { SelectProps } from "./Select";
 
 type CustomStyles = StylesConfig<string, boolean, GroupBase<string>>;
@@ -12,6 +13,7 @@ export default function useReactSelectTheme({
   disabled,
   readOnly,
   controlCustomStyle,
+  menuCustomStyle,
   optionCustomStyle,
 }: SelectProps) {
   const paddingStyle = label ? "16px 0 0 0" : "0";
@@ -22,17 +24,17 @@ export default function useReactSelectTheme({
       cursor: "pointer",
       boxShadow: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
       backgroundColor: disabled ? "#F9FAFB" : "white",
-      border: error
-        ? "1px solid #EF4444"
-        : isActive
-          ? "1px solid #3B82F6"
-          : "1px solid #E5E7EB",
+      border: cx({
+        "1px solid #EF4444": error,
+        "1px solid #3B82F6": !error && isActive,
+        "1px solid #E5E7EB": !error && !isActive,
+      }),
       "&:hover": {
-        border: error
-          ? "1px solid #EF4444"
-          : isActive
-            ? "1px solid #3B82F6"
-            : "1px solid #E5E7EB",
+        border: cx({
+          "1px solid #EF4444": error,
+          "1px solid #3B82F6": !error && isActive,
+          "1px solid #E5E7EB": !error && !isActive,
+        }),
       },
       ...(state.isFocused && {
         outline: "solid",
@@ -51,10 +53,10 @@ export default function useReactSelectTheme({
         cursor: "pointer",
         fontWeight: isSelected ? "700" : "400",
         ":hover": {
-          backgroundColor: "rgb(239 246 255)",
+          backgroundColor: "#f3f4f6",
         },
         ...(isFocused && {
-          backgroundColor: "rgb(239 246 255)",
+          backgroundColor: "#f3f4f6",
         }),
         ...(optionCustomStyle || {}),
       };
@@ -105,7 +107,13 @@ export default function useReactSelectTheme({
     }),
     menu: (styles) => ({
       ...styles,
+      border: "none",
+      boxShadow: "0px 0px 8px 0px rgba(0, 0, 0, 0.08)",
+      "&:hover": {
+        border: "none",
+      },
       zIndex: 20,
+      ...(menuCustomStyle || {}),
     }),
     menuList: (styles) => ({
       ...styles,

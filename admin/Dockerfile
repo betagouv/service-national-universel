@@ -37,6 +37,10 @@ COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 COPY front.tsconfig.json front.tsconfig.json
 
+ARG RELEASE=""
+ENV RELEASE=${RELEASE}
+ARG SENTRY_AUTH_TOKEN=""
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
 ENV APP_NAME admin
 RUN npm run build
 

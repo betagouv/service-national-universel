@@ -1,33 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { BsChevronDown } from "react-icons/bs";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
+
 import { ROLES } from "snu-lib";
-import Breadcrumbs from "../../../components/Breadcrumbs";
+
+import useDocumentTitle from "@/hooks/useDocumentTitle";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
 import { Loading, SubTitle, Title } from "../components/commons";
-import Select from "../components/Select";
+
 import { InTable } from "./components/InTable";
 import { OutTable } from "./components/OutTable";
-import useDocumentTitle from "../../../hooks/useDocumentTitle";
-import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function Regional() {
-  const [cohortList, setCohortList] = useState([]);
+  const history = useHistory();
+
   const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts);
-  const urlParams = new URLSearchParams(window.location.search);
+
+  const urlParams = new URLSearchParams(history.location.search);
   const region = urlParams.get("region");
   useDocumentTitle(`Table de répartition - ${region}`);
-  const [cohort, setCohort] = React.useState(urlParams.get("cohort"));
+
+  const [cohort, setCohort] = useState(urlParams.get("cohort") || cohorts?.[0]?.name);
 
   const [openReverseView, setOpenReverseView] = useState(false);
 
-  useEffect(() => {
-    const cohortList = getCohortSelectOptions(cohorts);
-    setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[0].value);
-  }, []);
-
-  if (!cohort) return <Loading />;
+  if (!cohort || !region) return <Loading />;
 
   return (
     <>
@@ -42,7 +43,7 @@ export default function Regional() {
             </div>
             {user.role !== ROLES.REFERENT_DEPARTMENT && <SubTitle>Assignez les départements d&apos;accueil des volontaires de {region}</SubTitle>}
           </div>
-          <Select options={cohortList} value={cohort} onChange={(e) => setCohort(e)} />
+          <SelectCohort cohort={cohort} onChange={setCohort} />
         </div>
 
         {/* TABLE */}

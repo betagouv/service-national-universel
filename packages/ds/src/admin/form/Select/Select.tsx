@@ -34,6 +34,7 @@ export type SelectProps = {
   isOpen?: boolean;
   badge?: ReactElement;
   controlCustomStyle?: CSSObject;
+  menuCustomStyle?: CSSObject;
   optionCustomStyle?: CSSObject;
   onChange?: (options: any) => void;
   onMenuOpen?: () => void;
@@ -100,7 +101,7 @@ export default function SelectButton(props: SelectProps) {
         <div className="flex items-center justify-between w-full">
           <div className="w-full cursor-pointer">{props.label}</div>
           {props.isSelected && (
-            <BsCheckLg size={20} className="text-gray-600 my-auto" />
+            <BsCheckLg size={20} className="text-blue-600 my-auto" />
           )}
         </div>
       </components.Option>

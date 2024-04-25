@@ -3,7 +3,7 @@ import { Spinner, Button } from "reactstrap";
 import styled from "styled-components";
 import { colors } from "../../utils";
 
-export default function LoadingButton({ loading, children, disabled, loadingText, ...rest }) {
+export default function LoadingButton({ loading, children, disabled = false, loadingText = null, ...rest }) {
   return (
     <VioletButtonHeader
       disabled={loading || disabled}

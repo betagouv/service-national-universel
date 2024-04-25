@@ -114,6 +114,7 @@ jobs:
           dockerfile_path: ${{ matrix.app.name }}/Dockerfile
           image_tag: ${{ matrix.app.tag }}
           image_tag_stable: hotfix
+          sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
   deploy_staging:
     runs-on: ubuntu-latest
