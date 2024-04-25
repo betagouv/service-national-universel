@@ -64,7 +64,7 @@
 
   const app = express();
   const registerSentryErrorHandler = initSentryMiddlewares(app);
-  // app.use(helmet());
+  app.use(helmet());
 
   if (process.env.PRODUCTION) {
     app.use(

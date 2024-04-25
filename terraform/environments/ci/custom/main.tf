@@ -87,7 +87,7 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "COOKIE_OPTIONS"                    = jsonencode({"domain"="functions.fnc.fr-par.scw.cloud", "sameSite"="Lax" })
+    "COOKIE_OPTIONS"                    = jsonencode({"sameSite"="None" })
     "APP_NAME"                          = "api"
     "ADMIN_URL"                         = "https://${local.admin_hostname}"
     "APP_URL"                           = "https://${local.app_hostname}"
@@ -181,7 +181,7 @@ resource "scaleway_container" "admin" {
 }
 
 resource "scaleway_container" "app" {
-  name            = "app-${local.env}"
+  name            = "moncompte-${local.env}"
   namespace_id    = scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
   port            = 8080
