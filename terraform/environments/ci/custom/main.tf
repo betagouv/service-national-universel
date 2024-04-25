@@ -87,12 +87,12 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "COOKIE_OPTIONS"                    = jsonencode({"sameSite"="None" })
     "APP_NAME"                          = "api"
     "ADMIN_URL"                         = "https://${local.admin_hostname}"
     "APP_URL"                           = "https://${local.app_hostname}"
     "CLE"                               = "true"
     "STAGING"                           = "true"
+    "CUSTOM_ENV_COOKIE"                 = "true"
     "FOLDER_API"                        = "api"
     "RELEASE"                           = var.api_image_tag
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8

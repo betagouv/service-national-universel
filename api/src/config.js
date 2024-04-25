@@ -1,4 +1,5 @@
 const ENVIRONMENT = getEnvironment();
+const CUSTOM_ENV_COOKIE = process.env.CUSTOM_ENV_COOKIE === "true" // TODO - remove this variable during env normalization
 const LOCAL = process.env.LOCAL === "true";
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 8080;
@@ -9,8 +10,6 @@ let ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
 let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:3000";
 let KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8084";
 const API_ANALYTICS_ENDPOINT = process.env.API_ANALYTICS_ENDPOINT || "http://localhost:8085";
-
-const COOKIE_OPTIONS = JSON.parse(process.env.COOKIE_OPTIONS)
 
 const RELEASE = process.env.RELEASE || "";
 
@@ -110,7 +109,7 @@ module.exports = {
   IMAGES_ROOTDIR,
   FONT_ROOTDIR,
   RELEASE,
-  COOKIE_OPTIONS,
+  CUSTOM_ENV_COOKIE,
 };
 
 function getEnvironment() {
