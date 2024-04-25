@@ -480,7 +480,7 @@ export default function CenterYoungIndex() {
 
   return (
     <>
-      {user.role !== ROLES.HEAD_CENTER ? (
+      {true ? (
         <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre", to: `/centre/${id}` }, { label: "Liste des volontaires" }]} />
       ) : null}
       <div className="m-8">

@@ -1,32 +1,35 @@
 import React from "react";
-import { IoWarningOutline } from "react-icons/io5";
-import { HiOutlineInformationCircle, HiOutlineExclamationCircle } from "react-icons/hi";
+import { HiInformationCircle, HiExclamationCircle, HiExclamation } from "react-icons/hi";
+import cx from "classnames";
 
-export default function InfoMessage({ bg = "", Icon = null, message = "", data = null }) {
-  if (data) {
-    switch (data.priority) {
-      case "normal":
-        bg = "bg-blue-800";
-        Icon = HiOutlineInformationCircle;
-        break;
-      case "important":
-        bg = "bg-yellow-700";
-        Icon = HiOutlineExclamationCircle;
-        break;
-      case "urgent":
-        bg = "bg-red-800";
-        Icon = IoWarningOutline;
-        break;
-      default:
-        bg = "bg-blue-800";
-        Icon = HiOutlineInformationCircle;
-        break;
-    }
-    message = data.content;
+export default function InfoMessage({ message, priority }) {
+  let Icon = null;
+  switch (priority) {
+    case "normal":
+      Icon = HiInformationCircle;
+      break;
+    case "important":
+      Icon = HiExclamationCircle;
+      break;
+    case "urgent":
+      Icon = HiExclamation;
+      break;
   }
   return (
-    <div className={`flex items-center gap-4 rounded-xl ${bg} p-4 text-base leading-5 text-white`}>
-      <Icon className="h-10 w-10 text-white stroke-[1.5px]" />
+    <div
+      className={cx("flex items-center gap-4 h-14 p-4 text-sm leading-5 font-medium border-l-4", {
+        "bg-sky-50 text-sky-600 border-sky-600": priority === "normal",
+        "bg-amber-50 text-amber-600 border-amber-600": priority === "important",
+        "bg-rose-50 text-rose-600 border-rose-600": priority === "urgent",
+      })}>
+      <Icon
+        className={cx("mt-1", {
+          "text-sky-600": priority === "normal",
+          "text-amber-600": priority === "important",
+          "text-rose-600": priority === "urgent",
+        })}
+        size={24}
+      />
       <span>{message}</span>
     </div>
   );

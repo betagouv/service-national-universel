@@ -100,6 +100,12 @@ resource "scaleway_container_namespace" "main" {
   description = "SNU container namespace for environment '${local.env}'"
 }
 
+resource "scaleway_container_namespace" "custom" {
+  project_id  = scaleway_account_project.main.id
+  name        = "snu-custom"
+  description = "SNU container namespace for environment 'custom'"
+}
+
 # Containers
 
 # DNS zone

@@ -66,7 +66,7 @@ async function getQPV(postcode: string, commune: string, adresse: string): Promi
   }
 }
 
-async function getDensity(cityCode: string): Promise<string> {
+async function getDensity(cityCode: string): Promise<string | undefined> {
   try {
     if (!cityCode) {
       console.log("City Code is not set");
