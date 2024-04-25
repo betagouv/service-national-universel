@@ -16,14 +16,19 @@ import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
+import { RiInformationFill } from "react-icons/ri";
+import useAuth from "@/services/useAuth";
+import WithdrawalModal from "@/scenes/account/components/WithdrawalModal";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
+  const { isCLE } = useAuth();
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
   const [session, setSession] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const cohort = getCohort(young.cohort);
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
@@ -105,6 +110,7 @@ export default function Affected() {
             onClose={() => setShowInfoMessage(false)}
           />
         )}
+        <WithdrawalModal isOpen={isOpen} onCancel={() => setIsOpen(false)} young={young} />
 
         <header className="items-between order-1 flex flex-col px-4 py-4 md:!px-8 lg:flex-row lg:justify-between lg:!px-16">
           <div>
@@ -118,14 +124,29 @@ export default function Affected() {
 
           <CenterInfo center={center} />
         </header>
+
         {allDone && (
-          <div className="order-3 flex-none gap-6 grid grid-cols-1 md:grid-cols-3">
-            <div>
-              <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
+          <div className="order-3">
+            <div className="flex-none gap-6 grid grid-cols-1 md:grid-cols-3">
+              <div>
+                <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
+              </div>
+              <div className="col-span-2">
+                <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
+              </div>
             </div>
-            <div className="col-span-2">
-              <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
-            </div>
+
+            {isCLE && (
+              <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2 md:m-16">
+                <div>
+                  <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
+                  <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
+                </div>
+                <button className="text-blue-600 underline underline-offset-2" onClick={() => setIsOpen(true)}>
+                  Se désister du SNU.
+                </button>
+              </div>
+            )}
           </div>
         )}
 
