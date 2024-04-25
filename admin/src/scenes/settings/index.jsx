@@ -4,30 +4,34 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
-import { isSuperAdmin, ROLES, COHORT_TYPE } from "snu-lib";
-import logo from "../../assets/logo-snu.png";
-import Breadcrumbs from "../../components/Breadcrumbs";
-import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
-import { capture } from "../../sentry";
-import api from "../../services/api";
-import DatePickerInput from "../../components/ui/forms/dateForm/DatePickerInput";
-import InputText from "../../components/ui/forms/InputText";
-import InputTextarea from "../../components/ui/forms/InputTextarea";
-import Select from "../../components/forms/Select";
-import SimpleToggle from "../../components/ui/forms/dateForm/SimpleToggle";
-import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
-import { settings, uselessSettings } from "./utils";
-import NumberInput from "../../components/ui/forms/NumberInput";
-import { getCohortSelectOptions } from "@/services/cohort.service";
+
+import { isSuperAdmin, ROLES, COHORT_TYPE } from "snu-lib";
 import { Container } from "@snu/ds/admin";
+
+import api from "@/services/api";
+
+import { capture } from "@/sentry";
+import logo from "@/assets/logo-snu.png";
+
+import Breadcrumbs from "@/components/Breadcrumbs";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
+import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
+import InputText from "@/components/ui/forms/InputText";
+import InputTextarea from "@/components/ui/forms/InputTextarea";
+import SimpleToggle from "@/components/ui/forms/dateForm/SimpleToggle";
+import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
+import NumberInput from "@/components/ui/forms/NumberInput";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
+import { settings, uselessSettings } from "./utils";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
-  const cohorts = useSelector((state) => state.Cohorts);
+
   const urlParams = new URLSearchParams(window.location.search);
+
   const [cohort, setCohort] = useState(urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : null);
-  const [cohortList, setCohortList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const readOnly = !isSuperAdmin(user);
   const [noChange, setNoChange] = useState(true);
@@ -66,8 +70,6 @@ export default function Settings() {
   };
 
   useEffect(() => {
-    const cohortList = getCohortSelectOptions(cohorts, true);
-    setCohortList(cohortList);
     if (!cohort) {
       setCohort("Février 2024 - C");
     }
@@ -137,17 +139,13 @@ export default function Settings() {
       <div className="flex w-full flex-col px-8 pb-8">
         <div className="flex items-center justify-between py-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrage dynamique</div>
-          <div className="flex w-[258px] items-center">
-            <Select
-              label="Cohorte"
-              options={cohortList}
-              selected={cohortList.find((e) => e.value === cohort)}
-              setSelected={(e) => {
-                setCohort(e.value);
-                history.replace({ search: `?cohort=${encodeURIComponent(e.value)}` });
-              }}
-            />
-          </div>
+          <SelectCohort
+            cohort={cohort}
+            onChange={(cohortName) => {
+              setCohort(cohortName);
+              history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` });
+            }}
+          />
         </div>
         <div className="flex w-full flex-col gap-8">
           {/* Informations générales */}
