@@ -55,7 +55,7 @@ export function AgreementModal({ isOpen, setIsOpen, departureDate, returnDate })
                 Valider
               </button>
             </div>
-            {isCle(young) && (
+            {!isCle(young) && (
               <div className="flex flex-col rounded-2xl border-[1px] border-gray-100 py-5 px-5 shadow-sm w-80">
                 <h1 className="pb-4 text-xl font-bold leading-7">J&apos;ai changé d&apos;avis</h1>
                 <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({transportDatesToString(departureDate, returnDate)})</p>
