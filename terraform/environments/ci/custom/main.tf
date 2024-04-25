@@ -29,6 +29,7 @@ variable "app_image_tag" {
   nullable = false
 }
 
+# On recupere le nom du namespace en se basant sur le nom du registry lie au namespace car scaleway utilise toujours le meme pattern pour creer l'url du custom env
 locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
