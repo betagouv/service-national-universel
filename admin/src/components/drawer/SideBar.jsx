@@ -1,7 +1,12 @@
 import React, { useEffect } from "react";
 import { connect, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
+import cx from "classnames";
+import { HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiOutlineCommandLine } from "react-icons/hi2";
+
 import { FEATURES_NAME, ROLES, isFeatureEnabled, totalClosedTickets, totalNewTickets, totalOpenedTickets } from "snu-lib";
+
 import Header from "./components/Header";
 import MultiNavItem from "./components/MultiNavItem";
 import SimpleNavItem from "./components/SimpleNavItem";
@@ -25,8 +30,6 @@ import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
 import InstitutionIcon from "./icons/Institution";
 import StudentIcon from "./icons/Student";
-import { HiOutlineOfficeBuilding } from "react-icons/hi";
-import { HiOutlineCommandLine } from "react-icons/hi2";
 import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, itemsDev, volontaireHeadCenterRegex } from "./utils";
 import useDevice from "../../hooks/useDevice";
 
@@ -257,7 +260,14 @@ const SideBar = (props) => {
   };
 
   return (
-    <div className={`${open ? "w-[250px]" : "w-[88px]"} ${test ? "max-h-[95vh] top-[5vh]" : "h-screen max-h-screen"} sticky flex flex-col inset-y-0 bg-[#25294F] z-40`}>
+    <div
+      className={cx(
+        "sticky flex flex-col inset-y-0 bg-[#25294F] z-40 print:hidden",
+        { "w-[250px]": open },
+        { "w-[88px]": !open },
+        { "top-[5vh] max-h-[95vh]": test },
+        { "h-screen max-h-screen": !test },
+      )}>
       <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} />
         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
