@@ -11,7 +11,6 @@ import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import ReactTooltip from "react-tooltip";
 import { useHistory } from "react-router-dom";
 import { AddressForm } from "@snu/ds/common";
-import { useDebounce } from "@uidotdev/usehooks";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 
 import api from "../../../services/api";
@@ -60,8 +59,7 @@ export default function Details({ center, setCenter, sessions }) {
   const user = useSelector((state: any) => state.Auth.user);
   const [modalVisible, setModalVisible] = useState(false);
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 300);
-  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const { results } = useAddress({ query, options: { limit: 10 }, enabled: query.length > 2 });
   const [modalDelete, setModalDelete] = React.useState<{ isOpen: boolean; title?: string; message?: string; onDelete?: () => void }>({ isOpen: false });
 
   const [isLoading, setIsLoading] = useState(false);

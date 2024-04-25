@@ -1,16 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { department2region, departmentLookUp } from "./region-and-departments";
+import { useDebounce } from "@uidotdev/usehooks";
 
 const baseURL = "https://api-adresse.data.gouv.fr/search/?q=";
 
+
 export function useAddress({ query, options = {}, enabled = true }) {
-  let url = baseURL + encodeURIComponent(query);
+
+  const debouncedQuery = useDebounce(query, 300);
+  let url = baseURL + encodeURIComponent(debouncedQuery);
   for (const [key, value] of Object.entries(options)) {
     url += `&${key}=${encodeURIComponent(value)}`;
   }
 
   const { data, isError, isPending } = useQuery({
-    queryKey: ["address", query],
+    queryKey: ["address", debouncedQuery],
     queryFn: async ({ signal }) => {
       const res = await fetch(url, { signal });
       if (!res.ok) {

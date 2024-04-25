@@ -8,7 +8,6 @@ import validator from "validator";
 
 import { useAddress, MISSION_STATUS } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
-import { useDebounce } from "@uidotdev/usehooks";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 import InfoCircleMission from "@/assets/icons/InfoCircleMission";
 
@@ -48,8 +47,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const [query, setQuery] = useState("");
 
-  const debouncedQuery = useDebounce(query, 300);
-  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const { results } = useAddress({ query, options: { limit: 10 }, enabled: query.length > 2 });
 
   const thresholdPendingReached = mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5;
   const valuesToCheck =

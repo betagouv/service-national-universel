@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useAddress, canCreateStructure, translate } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
-import { useDebounce } from "@uidotdev/usehooks";
 import API from "../../../services/api";
 import { ROLES, getNetworkOptions, legalStatus, typesStructure } from "../../../utils";
 
@@ -52,8 +51,7 @@ function StructureForm({ structure, setStructure }) {
   const [errors, setErrors] = useState({});
   const [query, setQuery] = useState("");
 
-  const debouncedQuery = useDebounce(query, 300);
-  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const { results } = useAddress({ query, options: { limit: 10 }, enabled: query.length > 2 });
 
   const legalStatusOptions = legalStatus.map((e) => ({ label: translate(e), value: e }));
   const structureTypesOptions = data.legalStatus && data.legalStatus !== "OTHER" ? typesStructure[data.legalStatus].map((e) => ({ label: e, value: e })) : [];

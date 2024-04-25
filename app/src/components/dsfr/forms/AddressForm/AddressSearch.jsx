@@ -3,13 +3,11 @@ import AddressDropdown from "./AddressDropdown";
 import { RiSearchLine } from "react-icons/ri";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import { useAddress } from "snu-lib";
-import { useDebounce } from "@uidotdev/usehooks";
 import { Input } from "@snu/ds/dsfr";
 
 export default function AddressSearch({ updateData, label, error }) {
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 300);
-  const { results, isError, isPending } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
+  const { results, isError, isPending } = useAddress({ query, options: { limit: 10 }, enabled: query.length > 2 });
   const dropdownRef = useRef(null);
 
   useEffect(() => {
