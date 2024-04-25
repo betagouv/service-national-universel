@@ -32,6 +32,8 @@ const DSNJExport = () => {
   const todayPlusOneDay = dayjs().add(1, "day").toDate();
   const threeMonthsAfterCohortDateEnd = dayjs(currentCohort.dateEnd).add(3, "month").toDate();
 
+  console.log(currentCohort);
+
   const getExportAvailableUntilDate = (date) => {
     if (!date) return null;
     return dayjs(date).add(1, "month").toDate();
