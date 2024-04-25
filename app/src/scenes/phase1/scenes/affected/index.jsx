@@ -19,6 +19,7 @@ import TodoBackpack from "./components/TodoBackpack";
 import { RiInformationFill } from "react-icons/ri";
 import useAuth from "@/services/useAuth";
 import WithdrawalModal from "@/scenes/account/components/WithdrawalModal";
+import plausibleEvent from "@/services/plausible";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
@@ -84,6 +85,11 @@ export default function Affected() {
 
   const allDone = stepsWithEnabled.every((s) => s.isDone);
 
+  function handleClick() {
+    plausibleEvent("CLE affecte - desistement");
+    setIsOpen(true);
+  }
+
   if (allDone) {
     window.scrollTo(0, 0);
   }
@@ -110,7 +116,6 @@ export default function Affected() {
             onClose={() => setShowInfoMessage(false)}
           />
         )}
-        <WithdrawalModal isOpen={isOpen} onCancel={() => setIsOpen(false)} young={young} />
 
         <header className="items-between order-1 flex flex-col px-4 py-4 md:!px-8 lg:flex-row lg:justify-between lg:!px-16">
           <div>
@@ -137,15 +142,18 @@ export default function Affected() {
             </div>
 
             {isCLE && (
-              <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2 md:m-16">
-                <div>
-                  <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
-                  <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
+              <>
+                <WithdrawalModal isOpen={isOpen} onCancel={handleClick} young={young} />
+                <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2 md:m-16">
+                  <div>
+                    <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
+                    <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
+                  </div>
+                  <button className="text-blue-600 underline underline-offset-2" onClick={() => setIsOpen(true)}>
+                    Se désister du SNU.
+                  </button>
                 </div>
-                <button className="text-blue-600 underline underline-offset-2" onClick={() => setIsOpen(true)}>
-                  Se désister du SNU.
-                </button>
-              </div>
+              </>
             )}
           </div>
         )}
