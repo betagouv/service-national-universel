@@ -41,7 +41,7 @@ export default function Index({ ...props }) {
 
   const getDetail = () => {
     let mode = [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) ? "correction" : "readonly";
-    if (![ROLES.ADMIN].includes(user.role) && young.source === YOUNG_SOURCE.CLE && new Date() > new Date(cohort?.instructionEndDate)) {
+    if (new Date() > new Date(cohort?.instructionEndDate)) {
       mode = "readonly";
     }
     return <VolontairePhase0View young={young} onChange={getYoung} globalMode={mode} />;
