@@ -3,6 +3,7 @@ import React, { Fragment } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
 import { normalizeString } from "./utils";
+import { SubFilter } from "@/components/filters-system-v2/components/Filter";
 
 // file used to show the popover for the all the possible values of a filter
 
@@ -10,7 +11,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData }) {
+export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, subFilters }) {
   return (
     <Popover>
       <Popover.Button
@@ -29,16 +30,34 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
           <BsChevronRight className="text-gray-400" />
         </div>
       </Popover.Button>
-      <DropDown isShowing={isShowing} filter={filter} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} data={data} setParamData={setParamData} />
+      <DropDown
+        isShowing={isShowing}
+        filter={filter}
+        selectedFilters={selectedFilters}
+        setSelectedFilters={setSelectedFilters}
+        data={data}
+        setParamData={setParamData}
+        subFilters={subFilters}
+      />
     </Popover>
   );
 }
 
-export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData }) => {
+type DropDownProps = {
+  isShowing: any;
+  filter: any;
+  selectedFilters: any;
+  setSelectedFilters: any;
+  data: any;
+  inListFilter?: boolean;
+  setParamData: any;
+  subFilters?: SubFilter | null;
+};
+
+export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData, subFilters }: DropDownProps) => {
   const [search, setSearch] = React.useState("");
   const [optionsVisible, setOptionsVisible] = React.useState(data || []);
   const ref = React.useRef(null);
-
   React.useEffect(() => {
     if (!data) return;
     let temp = data;
@@ -154,7 +173,10 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                       {optionsVisible
                         ?.sort((a, b) => {
                           if (filter?.translate) {
-                            return filter.translate(a.key)?.toString().localeCompare(filter.translate(b.key)?.toString());
+                            return filter
+                              .translate(a.key)
+                              ?.toString()
+                              .localeCompare(filter.translate(b.key)?.toString());
                           }
                           a.key.toString().localeCompare(b.key.toString());
                         })

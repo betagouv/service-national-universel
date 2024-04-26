@@ -8,8 +8,8 @@ export type SubFilterPopOverProps = {
   setSelectedFilters: any;
   setParamData: any;
   dataFilter: { [key: string]: DataFilter };
-  setFilter: any;
-  filter: any;
+  setFilter?: any;
+  filter?: any;
 };
 
 export type DataFilter = {
@@ -32,6 +32,7 @@ export const SubFilterPopOver = ({ selectedFilters, setSelectedFilters, setParam
             isShowing={isShowingSubFilter === subFilter.name}
             setIsShowing={(value) => setIsShowingSubFilter(value)}
             setParamData={setParamData}
+            subFilters={subFilters}
           />
         );
       })}
