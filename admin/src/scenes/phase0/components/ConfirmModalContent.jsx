@@ -27,7 +27,6 @@ export function ConfirmModalContent({ source, fillingRate, isDatePassed, young }
       );
     }
   };
-
   return {
     icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
     title: (
@@ -42,7 +41,7 @@ export function ConfirmModalContent({ source, fillingRate, isDatePassed, young }
       </>
     ),
     message: `Souhaitez-vous confirmer l'action ?`,
-    type: "VALIDATED",
+    type: fillingRate >= 1 ? "WAITING_LIST" : "VALIDATED",
     infoLink: {
       href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
       text: "Des questions sur ce fonctionnement ?",
