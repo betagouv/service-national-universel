@@ -60,7 +60,8 @@ export const getCohortGroups = (): SubFilter => {
         parentGroup: "Cohorte",
         missingLabel: "Non renseigné",
         sort: (e) => e,
-        filter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
+        filter: (e) => e,
+        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
       },
       {
         title: "HTS 2024",
@@ -68,7 +69,8 @@ export const getCohortGroups = (): SubFilter => {
         parentGroup: "Cohorte",
         missingLabel: "Non renseigné",
         sort: (e) => e,
-        filter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => !cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024"))
+        filter: (e) => e,
+        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => !cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
       },
       {
         title: "2024",
@@ -76,16 +78,45 @@ export const getCohortGroups = (): SubFilter => {
         parentGroup: "Cohorte",
         missingLabel: "Non renseigné",
         sort: (e) => e,
-        filter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("2024")),
+        filter: (e) => e,
+        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("2024")),
+      },
+      {
+        title: "2023",
+        name: CohortGroup._2023,
+        parentGroup: "Cohorte",
+        missingLabel: "Non renseigné",
+        sort: (e) => e,
+        filter: (e) => e,
+        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("2023")),
+      },
+      {
+        title: "2022 et -",
+        name: CohortGroup.LOWER_THAN_2022,
+        parentGroup: "Cohorte",
+        missingLabel: "Non renseigné",
+        sort: (e) => e,
+        filter: (e) => e,
+        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("2022") || cohort.key.toLowerCase().includes("2021")),
+      },
+      {
+        title: "à venir",
+        name: CohortGroup.COMING_SOON,
+        parentGroup: "Cohorte",
+        missingLabel: "Non renseigné",
+        sort: (e) => e,
+        filter: (e) => e,
+        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("à venir")),
       },
     ],
   };
 };
 
 export enum CohortGroup {
-  CLE_2024 = "cle_2024",
-  HTS_2024 = "hts_2024",
+  CLE_2024 = "CLE_2024",
+  HTS_2024 = "HTS_2024",
   _2024 = "2024",
   _2023 = "2023",
-  LOWER_THAN_2022 = "< 2022",
+  LOWER_THAN_2022 = "LOWER_THAN_2022",
+  COMING_SOON = "COMING_SOON",
 }

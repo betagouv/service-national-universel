@@ -10,4 +10,5 @@ export type Filter = {
   missingLabel: string;
   sort: (e: any) => any;
   filter: (data?: any) => any;
+  filterSubFilter: (data?: any) => any;
 };
