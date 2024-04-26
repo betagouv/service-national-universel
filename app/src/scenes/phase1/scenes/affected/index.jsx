@@ -113,13 +113,13 @@ export default function Affected() {
 
             {isCLE && (
               <>
-                <WithdrawalModal isOpen={isOpen} onCancel={handleClick} young={young} />
+                <WithdrawalModal isOpen={isOpen} onCancel={() => setIsOpen(false)} young={young} />
                 <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2 md:m-16">
                   <div>
                     <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
                     <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
                   </div>
-                  <button className="text-blue-600 underline underline-offset-2" onClick={() => setIsOpen(true)}>
+                  <button className="text-blue-600 underline underline-offset-2" onClick={handleClick}>
                     Se désister du SNU.
                   </button>
                 </div>
