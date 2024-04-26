@@ -117,6 +117,18 @@ export default function Filters({
 
   const updateOnParamChange = useCallback(
     debounce(async (selectedFilters, paramData, location, route, size) => {
+      // let newSelectedFilters = { ...selectedFilters };
+      // if (subFilters) {
+      //   console.log("Filters - subFilters", subFilters);
+      //   console.log("Filters - selectedFilters", selectedFilters);
+      //   subFilters.filters.map((filter: Filter) => {
+      //     // if (selectedFilters[filter.name]) {
+      //     newSelectedFilters[subFilters.key].filter = [...selectedFilters[subFilters.key]?.filter, ...(selectedFilters[filter.name]?.filter || [])];
+      //     // }
+      //   });
+      //   console.log("Filters - selectedFilters 22222", selectedFilters);
+      //   // setSelectedFilters(newSelectedFilters);
+      // }
       buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort, size).then((res) => {
         if (!res) return;
         setDataFilter({ ...dataFilter, ...res.newFilters });
@@ -269,13 +281,10 @@ export default function Filters({
                                           subFilters={subFilters}
                                           dataFilter={dataFilter}
                                           setFilter={setFilter}
-                                          filter={filter}
                                         />
                                       ),
                                     };
                                   }
-                                  // console.log("Filters - filter", customItem);
-                                  // console.log("Filters - data", dataFilter[item?.name]);
                                   return (
                                     <FilterPopOver
                                       key={item.title}
