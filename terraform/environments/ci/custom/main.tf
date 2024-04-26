@@ -37,7 +37,7 @@ locals {
   domain_prefix  = split("funcscw", data.scaleway_container_namespace.main.registry_endpoint)[1]
   api_hostname   = "${local.domain_prefix}-${local.env}-api.${local.domain}"
   admin_hostname = "${local.domain_prefix}-${local.env}-admin.${local.domain}"
-  app_hostname   = "${local.domain_prefix}-${local.env}-moncompte.${local.domain}"
+  app_hostname   = "${local.domain_prefix}-${local.env}-app.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -180,7 +180,7 @@ resource "scaleway_container" "admin" {
 }
 
 resource "scaleway_container" "app" {
-  name            = "${local.env}-moncompte"
+  name            = "${local.env}-app"
   namespace_id    = data.scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
   port            = 8080
