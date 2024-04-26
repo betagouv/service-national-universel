@@ -38,12 +38,7 @@ locals {
   api_hostname   = "${local.domain_prefix}-${local.env}-api.${local.domain}"
   admin_hostname = "${local.domain_prefix}-${local.env}-admin.${local.domain}"
   app_hostname   = "${local.domain_prefix}-${local.env}-app.${local.domain}"
-  secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
-}
-
-# Project
-data "scaleway_account_project" "main" {
-  project_id = local.project_id
+  secrets        = jsondecode(base64decode(data.scaleway_secret_version.latest.data))
 }
 
 # Registry
@@ -55,13 +50,34 @@ data "scaleway_registry_namespace" "main" {
 # Secrets
 resource "scaleway_secret" "custom" {
   name        = "snu-${local.env}"
-  project_id  = data.scaleway_account_project.main.id
+  project_id  = local.project_id
   description = "Secrets for environment '${local.env}'"
 }
 
-data "scaleway_secret_version" "main" {
+data "scaleway_secret" "ci" {
+  name = "snu-ci"
+  project_id  = local.project_id
+}
+
+data "scaleway_secret_version" "ci_latest" {
+  secret_id = data.scaleway_secret.ci.id
+  revision  = "latest_enabled"
+}
+
+resource "scaleway_secret_version" "initial" {
+  secret_id   = scaleway_secret.custom.id
+  data        = base64decode(data.scaleway_secret_version.ci_latest.data)
+
+  lifecycle {
+    ignore_changes = [data]
+  }
+}
+
+data "scaleway_secret_version" "latest" {
   secret_id = scaleway_secret.custom.id
   revision  = "latest_enabled"
+
+  depends_on = [scaleway_secret_version.initial]
 }
 
 # Containers namespace

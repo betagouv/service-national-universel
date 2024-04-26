@@ -123,7 +123,6 @@ jobs:
       PGUSER: ${{ secrets.SCW_CI_BACKEND_USER }}
       PGPASSWORD: ${{ secrets.SCW_CI_BACKEND_PASSWORD }}
       custom_directory: ./terraform/environments/ci/custom
-      scw_endpoint: "https://api.scaleway.com/secret-manager/v1alpha1"
 
     steps:
       - uses: actions/checkout@v4
@@ -140,63 +139,6 @@ jobs:
       - name: Init terraform
         working-directory: ${{ env.custom_directory }}
         run: terraform init
-
-      - name: Check if secret exists
-        id: check_secret
-        working-directory: ${{ env.custom_directory }}
-        run: |
-          if terraform state show 'scaleway_secret.custom' ; then
-              echo "has_secret=1" >> $GITHUB_OUTPUT
-          else
-              echo "has_secret=0" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Get CI project & secret ID
-        id: ci_outputs
-        if: steps.check_secret.outputs.has_secret == '0'
-        working-directory: "${{ env.custom_directory }}/../"
-        run: |
-          terraform init
-          long_secret_id=$(terraform output -raw secret_id)
-          region=$(cut -d "/" -f 1 <<< $long_secret_id)
-          secret_id=$(cut -d "/" -f 2 <<< $long_secret_id)
-          project_id=$(terraform output -raw project_id)
-          echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
-          echo "project_id=$project_id" >> $GITHUB_OUTPUT
-          echo "region=$region" >> $GITHUB_OUTPUT
-          echo "Project ID: $project_id - Secret ID: $secret_id"
-
-      - name: Create secret
-        id: create_secret
-        if: steps.check_secret.outputs.has_secret == '0'
-        working-directory: ${{ env.custom_directory }}
-        run: |
-          echo "Create secret for custom environment"
-          secret_id=$(curl -s -X POST \
-            -H "X-Auth-Token: $SCW_SECRET_KEY" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "name": "snu-${{ needs.prepare.outputs.env_name }}",
-              "project_id": "${{ steps.ci_outputs.outputs.project_id }}"
-            }' \
-            "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets" | jq -r ".id" )
-          echo "$secret_id"
-          echo "secret_id=$secret_id" >> $GITHUB_OUTPUT
-          echo "Retreive ci secret latest revision"
-          data=$(curl -s -X GET \
-            -H "X-Auth-Token: $SCW_SECRET_KEY" \
-            "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/${{ steps.ci_outputs.outputs.secret_id }}/versions/latest_enabled/access" | jq -r ".data")
-          echo "Create a new revision for custom environment"
-          curl -s -X POST \
-            -H "X-Auth-Token: $SCW_SECRET_KEY" \
-            -H "Content-Type: application/json" \
-            -d "{\"data\":\"${data}\"}" \
-            "${{ env.scw_endpoint }}/regions/${{ steps.ci_outputs.outputs.region }}/secrets/$secret_id/versions"
-
-      - name: Import secret
-        if: steps.check_secret.outputs.has_secret == '0'
-        working-directory: ${{ env.custom_directory }}
-        run: sed -i.bak "s|###___SECRET_ID___###|${{ steps.ci_outputs.outputs.region }}/${{ steps.create_secret.outputs.secret_id }}|g" imports.tf
 
       - name: Validate terraform
         working-directory: ${{ env.custom_directory }}
@@ -220,7 +162,7 @@ jobs:
             -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Add comment to PR
-        if: github.event_name == 'pull_request' && steps.check_secret.outputs.has_secret == '0'
+        if: github.event_name == 'pull_request' && github.event.pull_request.comments == 0
         working-directory: ${{ env.custom_directory }}
         env:
           URL: ${{ github.event.pull_request.comments_url }}
