@@ -3,7 +3,7 @@ import React, { Fragment } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
 import { normalizeString } from "./utils";
-import { SubFilter } from "@/components/filters-system-v2/components/Filter";
+import { Filter, SubFilter } from "@/components/filters-system-v2/components/Filter";
 
 // file used to show the popover for the all the possible values of a filter
 
@@ -125,10 +125,29 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     } else {
       newFilters = [value];
     }
-    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: newFilters } });
+    const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: newFilters } };
+
+    if (subFilters) {
+      syncHighOrderFilter(newSelectedFilters);
+    }
+    setSelectedFilters(newSelectedFilters);
+  };
+
+  const syncHighOrderFilter = (newSelectedFilters) => {
+    if (!subFilters) return;
+    newSelectedFilters[subFilters.key].filter = [];
+    for (const filter of subFilters.filters) {
+      if (newSelectedFilters[filter.name] && newSelectedFilters[subFilters.key]) {
+        newSelectedFilters[subFilters.key].filter = [...newSelectedFilters[subFilters.key].filter, ...(newSelectedFilters[filter.name].filter || [])];
+      }
+    }
   };
   const handleDelete = () => {
-    setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: [] } });
+    const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: [] } };
+    if (subFilters) {
+      syncHighOrderFilter(newSelectedFilters);
+    }
+    setSelectedFilters(newSelectedFilters);
   };
 
   const handleCustomComponent = (value) => {
