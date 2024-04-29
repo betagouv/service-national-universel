@@ -1,7 +1,7 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { isCle } from "./young";
-import { getZonedDate } from "./date";
+import { getZonedDate } from "./utils/date";
 
 const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "2022" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
 
@@ -274,9 +274,7 @@ function inscriptionCreationOpenForYoungs(cohort) {
 }
 
 function shouldForceRedirectToReinscription(young) {
-  return (
-    young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status)
-  );
+  return young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status);
 }
 
 const isCohortTooOld = (young) => ["2019", "2020"].includes(young.cohort);

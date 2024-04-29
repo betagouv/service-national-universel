@@ -3,9 +3,9 @@ import { useSelector } from "react-redux";
 import { HiOutlineChartSquareBar, HiChartSquareBar, HiClipboardList } from "react-icons/hi";
 
 import { getCohortNames, departmentList, regionList, ROLES, translateInscriptionStatus, getDepartmentNumber } from "snu-lib";
-import { YOUNG_STATUS } from "snu-lib/constants";
-import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib/academy";
-import { department2region, region2department } from "snu-lib/region-and-departments";
+import { YOUNG_STATUS } from "snu-lib";
+import { academyList, academyToDepartments, departmentToAcademy } from "snu-lib";
+import { department2region, region2department } from "snu-lib";
 import { getCohortNameList } from "@/services/cohort.service";
 import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 

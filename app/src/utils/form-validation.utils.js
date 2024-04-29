@@ -1,4 +1,4 @@
-import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
+import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
 import validator from "validator";
 
 const requiredErrorMessage = "Ce champ est obligatoire.";

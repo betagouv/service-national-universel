@@ -2,8 +2,7 @@ import fetchRetry from "fetch-retry";
 
 import { capture } from "../sentry";
 import { apiURL } from "../config";
-import { createFormDataForFileUpload } from "snu-lib";
-import { ERRORS } from "snu-lib/errors";
+import { createFormDataForFileUpload, ERRORS } from "snu-lib";
 
 let fetch = window.fetch;
 

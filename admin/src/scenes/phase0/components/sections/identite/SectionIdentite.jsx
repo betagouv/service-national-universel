@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { ERRORS } from "snu-lib/errors";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
+import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE } from "snu-lib";
 
-import { translate, YOUNG_STATUS, YOUNG_SOURCE } from "snu-lib";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
 import { getCorrectionRequest, validateEmpty, filterDataForYoungSection } from "../../../utils";

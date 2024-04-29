@@ -13,8 +13,7 @@ import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
-import { formatToActualTime } from "snu-lib/date";
-import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
+import { formatToActualTime, isValidRedirectUrl } from "snu-lib";
 import { captureMessage } from "../../sentry";
 
 export default function Signin() {

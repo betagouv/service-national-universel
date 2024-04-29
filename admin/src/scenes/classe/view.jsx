@@ -24,7 +24,7 @@ import {
   IS_INSCRIPTION_OPEN_CLE,
   formatDateFRTimezoneUTC,
 } from "snu-lib";
-import { FUNCTIONAL_ERRORS } from "snu-lib/functionalErrors";
+import { FUNCTIONAL_ERRORS } from "snu-lib";
 import { useSelector } from "react-redux";
 import { getRights, statusClassForBadge } from "./utils";
 import { appURL } from "@/config";
