@@ -80,6 +80,7 @@ const {
   formatPhoneNumberFromPhoneZone,
   translateFileStatusPhase1,
   canCheckIfRefExist,
+  canUpdateInscriptionGoals,
   YOUNG_SOURCE,
   YOUNG_SOURCE_LIST,
   APPLICATION_STATUS,
@@ -87,6 +88,9 @@ const {
   YOUNG_SITUATIONS,
   CLE_FILIERE_LIST,
 } = require("snu-lib");
+
+const { FILLING_RATE_LIMIT, getFillingRate } = require("../services/inscription-goal");
+
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 const scanFile = require("../utils/virusScanner");
 const { getMimeFromBuffer, getMimeFromFile } = require("../utils/file");
@@ -491,6 +495,14 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     if (!canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
+
+    // Vérification des objectifs à la validation d'un jeune
+    if (value.status === "VALIDATED" && young.status !== "VALIDATED" && (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)) {
+      const fillingRate = await getFillingRate(young.department, young.cohort);
+      if (fillingRate >= FILLING_RATE_LIMIT) {
+        return res.status(400).send({ ok: false, code: ERRORS.INSCRIPTION_GOAL_REACHED, fillingRate });
+      }
+    }
 
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
