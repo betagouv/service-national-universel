@@ -85,7 +85,7 @@ jobs:
     secrets: inherit
 
   build:
-    needs: [prepare, run_tests_api]
+    needs: [prepare, run_tests_api, run_tests_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
