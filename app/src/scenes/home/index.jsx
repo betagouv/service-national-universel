@@ -32,11 +32,13 @@ export default function Home() {
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
     if (hasAccessToReinscription(young)) {
+      if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
+        return <AvenirCohort />;
+      }
+      if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+        return <FutureCohort />;
+      }
       return <WaitingReinscription />;
-    }
-
-    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
-      return <AvenirCohort />;
     }
 
     const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
@@ -81,10 +83,6 @@ export default function Home() {
           return <ValidatedV2 />;
         }
       }
-    }
-
-    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
-      return <FutureCohort />;
     }
 
     return <Default />;
