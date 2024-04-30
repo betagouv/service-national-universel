@@ -1,6 +1,8 @@
 import { regionsListDROMS } from "./region-and-departments";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
 import { isCle } from "./young";
+import { getZonedDate } from "./date";
+
 const oldSessions = [{ name: "2019" }, { name: "2020" }, { name: "2021" }, { name: "2022" }, { name: "Février 2022" }, { name: "Juin 2022" }, { name: "Juillet 2022" }];
 
 const sessions2023CohortNames = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Juin 2023", "Juillet 2023", "Octobre 2023 - NC"];
@@ -184,8 +186,9 @@ const getCohortYear = (cohort) => cohort?.dateStart?.slice(0, 4);
 
 const getCohortPeriod = (cohort, withBold = false) => {
   if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
-  const startDate = new Date(cohort.dateStart);
-  const endDate = new Date(cohort.dateEnd);
+  const startDate = getZonedDate(cohort.dateStart);
+  const endDate = getZonedDate(cohort.dateEnd);
+
   const endDateformatOptions = { year: "numeric", month: "long", day: "numeric" };
   const startDateformatOptions = { day: "numeric" };
   if (startDate.getMonth() !== endDate.getMonth()) {
@@ -203,8 +206,9 @@ const getCohortPeriod = (cohort, withBold = false) => {
 };
 
 const formatShortCohortPeriod = (cohort) => {
-  var startDate = new Date(cohort.dateStart);
-  var endDate = new Date(cohort.dateEnd);
+  if (!cohort.dateStart || !cohort.dateEnd) return cohort.name || cohort;
+  const startDate = getZonedDate(cohort.dateStart);
+  const endDate = getZonedDate(cohort.dateEnd);
 
   var startDateformatOptions = {
     day: "numeric",

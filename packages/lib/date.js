@@ -1,3 +1,5 @@
+const { toZonedTime } = require("date-fns-tz");
+
 const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 
 const formatDay = (date) => {
@@ -143,6 +145,11 @@ const formatDateForPostGre = (date) => {
   const day = d.getDate().toString().padStart(2, "0");
 
   return `${year}-${month}-${day}`;
+};
+
+export const getZonedDate = (date, timeZone = "Europe/Paris") => {
+  const zonedDate = toZonedTime(new Date(date), timeZone);
+  return zonedDate;
 };
 
 export {
