@@ -2,8 +2,13 @@ import React from "react";
 import { HiInformationCircle, HiExclamationCircle, HiExclamation } from "react-icons/hi";
 import cx from "classnames";
 
-export default function InfoMessage({ message, priority }) {
-  let Icon = null;
+interface Props {
+  message: string;
+  priority?: "normal" | "important" | "urgent";
+}
+
+export default function InfoMessage({ message, priority }: Props) {
+  let Icon = HiInformationCircle;
   switch (priority) {
     case "normal":
       Icon = HiInformationCircle;
