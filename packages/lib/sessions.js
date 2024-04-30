@@ -284,9 +284,6 @@ function hasAccessToReinscription(young) {
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
-  if (new Date(young.createdAt) > new Date(2023, 9, 1)) {
-    return false;
-  }
   if (isCohortTooOld(young)) {
     return false;
   }
