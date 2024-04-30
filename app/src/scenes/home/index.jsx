@@ -18,6 +18,7 @@ import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
+import AvenirCohort from "./AvenirCohort";
 import { isCohortTooOld } from "snu-lib";
 
 export default function Home() {
@@ -32,6 +33,10 @@ export default function Home() {
 
     if (hasAccessToReinscription(young)) {
       return <WaitingReinscription />;
+    }
+
+    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
+      return <AvenirCohort />;
     }
 
     const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
