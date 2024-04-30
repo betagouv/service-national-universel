@@ -2,13 +2,14 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import path from "path";
+import { visualizer } from "rollup-plugin-visualizer";
 
 // eslint-disable-next-line no-unused-vars
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), "");
-  const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
+  const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] }), visualizer()];
   if (mode !== "development") {
     plugins.push(
       sentryVitePlugin({
@@ -41,7 +42,26 @@ export default defineConfig(({ mode }) => {
       port: 8081,
     },
     plugins: plugins,
-    build: { sourcemap: mode === "development" ? false : true, outDir: "build" },
+    build: {
+      sourcemap: mode === "development" ? false : true,
+      outDir: "build",
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            "react-dom": ["react-dom"],
+            "react-router-dom": ["react-router-dom"],
+            "react-redux": ["react-redux"],
+            "react-router": ["react-router"],
+            "react-redux-toastr": ["react-redux-toastr"],
+            "react-select": ["react-select"],
+            reactstrap: ["reactstrap"],
+            "@sentry/react": ["@sentry/react"],
+            "@codegouvfr/react-dsfr": ["@codegouvfr/react-dsfr"],
+            "tanstack/react-query": ["@tanstack/react-query"],
+          },
+        },
+      },
+    },
     optimizeDeps: {
       include: ["@sentry/react", "snu-lib", "@snu/ds"],
       force: true,
