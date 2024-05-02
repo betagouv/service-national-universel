@@ -261,17 +261,19 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                       <ToggleDate
                         label="Dates spécifiques"
                         tooltipText={
-                          focusedCohortData ? (
-                            <p>
-                              Les dates de cette session diffèrent des dates officielles :{" "}
-                              <strong>{`${dayjs(focusedCohortData.dateStart).format("DD")} - ${dayjs(focusedCohortData.dateEnd).format("DD MMMM YYYY")}`}</strong>.
-                            </p>
-                          ) : null
+                          <p>
+                            Les dates de cette session diffèrent des dates officielles :{" "}
+                            <strong>{`${dayjs(focusedCohortData?.dateStart).format("DD")} - ${dayjs(focusedCohortData?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
+                          </p>
                         }
                         readOnly={!editingBottom || !canPutSpecificDateOnSessionPhase1(user)}
                         value={editingBottom ? editInfoSession.hasSpecificDate : focusedSession.hasSpecificDate}
                         onChange={() => setEditInfoSession({ ...editInfoSession, hasSpecificDate: !editInfoSession.hasSpecificDate })}
-                        range={getSpecificDate()}
+                        range={
+                          editingBottom
+                            ? { from: editInfoSession.dateStart, to: editInfoSession.dateEnd }
+                            : { from: focusedSession.dateStart || focusedCohortData?.dateStart, to: focusedSession.dateEnd || focusedCohortData?.dateEnd }
+                        }
                         onChangeRange={(range) => {
                           setEditInfoSession({
                             ...editInfoSession,
