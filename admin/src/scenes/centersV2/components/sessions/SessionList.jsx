@@ -230,7 +230,7 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                       error={errors.placesTotal}
                       readOnly={!editingBottom || !canCreateOrUpdateCohesionCenter(user)}
                       label="Places ouvertes"
-                      value={editInfoSession.placesTotal}
+                      value={editingBottom ? editInfoSession.placesTotal : focusedSession.placesTotal}
                       onChange={(e) => setEditInfoSession({ ...editInfoSession, placesTotal: e.target.value })}
                       tooltips={
                         "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
