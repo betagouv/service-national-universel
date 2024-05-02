@@ -137,7 +137,7 @@
   app.use("/classe", require("./controllers/cle/classe"));
   app.use("/cle", require("./controllers/cle"));
   app.use("/cohesion-center", require("./controllers/cohesion-center"));
-  app.use("/cohort", require("./controllers/cohort"));
+  app.use("/cohort", require("./controllers/cohort/cohort.controller.js"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
   app.use("/contract", require("./controllers/contract"));
   app.use("/correction-request", require("./controllers/correction-request"));

@@ -10,6 +10,7 @@ const CohortModel = require("../models/cohort");
 const passport = require("passport");
 const { ROLES, COHORT_TYPE } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
+const { isReInscriptionOpen, isInscriptionOpen } = require("./cohort/cohort.service");
 
 // Takes either a young ID in route parameter or young data in request body (for edition or signup pages).
 // Minimum data required: birthdateAt, zip || department and (if schooled) grade.
@@ -67,16 +68,12 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
 });
 
 router.get("/isReInscriptionOpen", async (req, res) => {
-  const userTimezoneOffsetInMilliseconds = req.headers["x-user-timezone"] * 60 * 1000; // User's offset from UTC
-  // Adjust server's time for user's timezone
-  const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;
-  const now = new Date(adjustedTimeForUser);
-
   try {
-    const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
+    const data = await isReInscriptionOpen();
+
     return res.send({
       ok: true,
-      data: cohorts.some((cohort) => now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate)),
+      data,
     });
   } catch (error) {
     capture(error);
@@ -92,24 +89,14 @@ router.get("/isInscriptionOpen", async (req, res) => {
     .validate(req.query, { stripUnknown: true });
 
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-  const { sessionName: cohortName } = value;
-
-  const userTimezoneOffsetInMilliseconds = req.headers["x-user-timezone"] * 60 * 1000; // User's offset from UTC
-
-  // Adjust server's time for user's timezone
-  const adjustedTimeForUser = new Date().getTime() - userTimezoneOffsetInMilliseconds;
-  const now = new Date(adjustedTimeForUser);
+  const { sessionName } = value;
 
   try {
-    if (cohortName) {
-      const cohort = await CohortModel.findOne({ name: cohortName });
-      if (!cohort) return res.status(400).send({ ok: true, data: false });
-      return res.send({ ok: true, data: now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate) });
-    }
-    const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
+    const data = await isInscriptionOpen(sessionName);
+
     return res.send({
       ok: true,
-      data: cohorts.some((cohort) => now > new Date(cohort.inscriptionStartDate) && now < new Date(cohort.inscriptionEndDate)),
+      data,
     });
   } catch (error) {
     capture(error);
