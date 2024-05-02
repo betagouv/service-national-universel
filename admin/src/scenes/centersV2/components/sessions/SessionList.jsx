@@ -201,7 +201,6 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                 <OccupationCard
                   canBeDeleted={focusedSession.canBeDeleted}
                   placesTotal={focusedSession.placesTotal}
-                  placesTotalModified={editInfoSession.placesTotal}
                   placesLeft={focusedSession.placesLeft}
                   user={user}
                   modalDelete={modalDelete}
