@@ -33,9 +33,9 @@ export default function Home() {
   const [reinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [reinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
 
-  const fetchInscriptionOpen = async () => {
+  const fetchReInscriptionOpen = async () => {
     try {
-      const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen`);
+      const { ok, data, code } = await API.get(`/cohort-session/isReInscriptionOpen`);
       if (!ok) {
         capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
@@ -48,7 +48,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchInscriptionOpen();
+    fetchReInscriptionOpen();
   }, []);
 
   if (reinscriptionOpenLoading) return <Loader />;

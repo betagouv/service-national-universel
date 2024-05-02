@@ -14,6 +14,8 @@ export default function InfoMessage({ message, priority }) {
     case "urgent":
       Icon = HiExclamation;
       break;
+    default:
+      Icon = HiInformationCircle;
   }
   return (
     <div
