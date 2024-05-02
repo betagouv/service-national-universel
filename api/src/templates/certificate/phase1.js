@@ -89,9 +89,9 @@ function render(doc, young, session, cohort, cohesionCenter) {
     .font(FONT_BOLD)
     .text("phase 1", { continued: true })
     .font(FONT)
-    .text(" du Service National Universel.")
-    .moveDown()
-    .text(`Fait le ${DATE}`);
+    .text(" du Service National Universel.");
+  doc.y += 12;
+  doc.text(`Fait le ${DATE}`);
 }
 
 async function generateCertifPhase1(outStream, young) {
