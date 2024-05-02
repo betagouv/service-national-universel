@@ -138,25 +138,6 @@ export default function SessionList({ center, sessions, user, focusedSession, on
     }
   };
 
-  const getSpecificDate = () => {
-    if (editingBottom && editInfoSession?.hasSpecificDate) {
-      return {
-        from: editInfoSession?.dateStart || focusedCohortData.dateStart,
-        to: editInfoSession?.dateEnd || focusedCohortData.dateEnd,
-      };
-    }
-    if (!editingBottom && focusedSession?.hasSpecificDate) {
-      return {
-        from: focusedSession.dateStart,
-        to: focusedSession.dateEnd,
-      };
-    }
-    return {
-      from: undefined,
-      to: undefined,
-    };
-  };
-
   if (!sessions || sessions.length === 0) return null;
   return (
     <div className="flex flex-col gap-4 mx-8">
