@@ -1,8 +1,9 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
-const esClient = require("../es");
-const patchHistory = require("mongoose-patch-history").default;
+const { isAfter, isWithinInterval } = require("date-fns");
 const { COHORT_TYPE, COHORT_TYPE_LIST } = require("snu-lib");
+const patchHistory = require("mongoose-patch-history").default;
+const esClient = require("../es");
 
 const MODELNAME = "cohort";
 
@@ -295,6 +296,14 @@ Schema.virtual("fromUser").set(function (fromUser) {
     const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
     this._user = { _id, role, department, region, email, firstName, lastName, model };
   }
+});
+
+Schema.virtual("isInscriptionOpen").get(function () {
+  const now = new Date();
+  const start = this.inscriptionStartDate;
+  const end = this.inscriptionEndDate;
+  if (!start || !end || isAfter(start, end)) return false;
+  return isWithinInterval(now, { start, end });
 });
 
 Schema.pre("save", function (next) {
