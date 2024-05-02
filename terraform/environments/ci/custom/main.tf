@@ -29,13 +29,15 @@ variable "app_image_tag" {
   nullable = false
 }
 
+# On recupere le nom du namespace en se basant sur le nom du registry lie au namespace car scaleway utilise toujours le meme pattern pour creer l'url du custom env
 locals {
   env            = "###___ENV_NAME___###"
   project_id     = "1b29c5d9-9723-400a-aa8b-0c85ae3567f7"
-  domain         = "ci.beta-snu.dev"
-  api_hostname   = "api-${local.env}.${local.domain}"
-  admin_hostname = "admin-${local.env}.${local.domain}"
-  app_hostname   = "moncompte-${local.env}.${local.domain}"
+  domain         = "functions.fnc.fr-par.scw.cloud"
+  domain_prefix  = split("funcscw", data.scaleway_container_namespace.main.registry_endpoint)[1]
+  api_hostname   = "${local.domain_prefix}-${local.env}-api.${local.domain}"
+  admin_hostname = "${local.domain_prefix}-${local.env}-admin.${local.domain}"
+  app_hostname   = "${local.domain_prefix}-${local.env}-app.${local.domain}"
   secrets        = jsondecode(base64decode(data.scaleway_secret_version.main.data))
 }
 
@@ -47,12 +49,6 @@ data "scaleway_account_project" "main" {
 # Registry
 data "scaleway_registry_namespace" "main" {
   name = "snu-ci"
-}
-
-# DNS zone
-data "scaleway_domain_zone" "main" {
-  domain    = "ci.beta-snu.dev"
-  subdomain = ""
 }
 
 
@@ -69,16 +65,14 @@ data "scaleway_secret_version" "main" {
 }
 
 # Containers namespace
-resource "scaleway_container_namespace" "main" {
-  project_id  = data.scaleway_account_project.main.id
-  name        = "snu-${local.env}"
-  description = "SNU container namespace for environment '${local.env}'"
+data "scaleway_container_namespace" "main" {
+  name = "snu-custom"
 }
 
 # Containers
 resource "scaleway_container" "api" {
   name            = "${local.env}-api"
-  namespace_id    = scaleway_container_namespace.main.id
+  namespace_id    = data.scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port            = 8080
   cpu_limit       = 768
@@ -97,6 +91,7 @@ resource "scaleway_container" "api" {
     "APP_URL"                           = "https://${local.app_hostname}"
     "CLE"                               = "true"
     "STAGING"                           = "true"
+    "CUSTOM_ENV_COOKIE"                 = "true"
     "FOLDER_API"                        = "api"
     "RELEASE"                           = var.api_image_tag
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
@@ -145,27 +140,12 @@ resource "scaleway_container" "api" {
   }
 }
 
-resource "scaleway_domain_record" "api" {
-  dns_zone = data.scaleway_domain_zone.main.id
-  name     = "api-${local.env}"
-  type     = "CNAME"
-  data     = "${scaleway_container.api.domain_name}."
-  ttl      = 300
-}
-
-resource "scaleway_container_domain" "api" {
-  container_id = scaleway_container.api.id
-  hostname     = "${scaleway_domain_record.api.name}${scaleway_domain_record.api.dns_zone}"
-
-  depends_on = [scaleway_domain_record.api]
-}
-
 
 
 
 resource "scaleway_container" "admin" {
   name            = "${local.env}-admin"
-  namespace_id    = scaleway_container_namespace.main.id
+  namespace_id    = data.scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/admin:${var.admin_image_tag}"
   port            = 8080
   cpu_limit       = 256
@@ -199,24 +179,9 @@ resource "scaleway_container" "admin" {
   }
 }
 
-resource "scaleway_domain_record" "admin" {
-  dns_zone = data.scaleway_domain_zone.main.id
-  name     = "admin-${local.env}"
-  type     = "CNAME"
-  data     = "${scaleway_container.admin.domain_name}."
-  ttl      = 300
-}
-
-resource "scaleway_container_domain" "admin" {
-  container_id = scaleway_container.admin.id
-  hostname     = "${scaleway_domain_record.admin.name}${scaleway_domain_record.admin.dns_zone}"
-
-  depends_on = [scaleway_domain_record.admin]
-}
-
 resource "scaleway_container" "app" {
   name            = "${local.env}-app"
-  namespace_id    = scaleway_container_namespace.main.id
+  namespace_id    = data.scaleway_container_namespace.main.id
   registry_image  = "${data.scaleway_registry_namespace.main.endpoint}/app:${var.app_image_tag}"
   port            = 8080
   cpu_limit       = 256
@@ -249,21 +214,6 @@ resource "scaleway_container" "app" {
     "SENTRY_URL"        = local.secrets.SENTRY_MONCOMPTE
     "SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
   }
-}
-
-resource "scaleway_domain_record" "app" {
-  dns_zone = data.scaleway_domain_zone.main.id
-  name     = "moncompte-${local.env}"
-  type     = "CNAME"
-  data     = "${scaleway_container.app.domain_name}."
-  ttl      = 300
-}
-
-resource "scaleway_container_domain" "app" {
-  container_id = scaleway_container.app.id
-  hostname     = "${scaleway_domain_record.app.name}${scaleway_domain_record.app.dns_zone}"
-
-  depends_on = [scaleway_domain_record.app]
 }
 
 output "api_endpoint" {

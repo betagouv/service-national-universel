@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const passport = require("passport");
-const CohortModel = require("../models/cohort");
-const SessionPhase1Model = require("../models/sessionPhase1");
+const CohortModel = require("../../models/cohort");
+const SessionPhase1Model = require("../../models/sessionPhase1");
 
 const { capture } = require("../sentry");
 const { ERRORS, getFile, deleteFile } = require("../utils");

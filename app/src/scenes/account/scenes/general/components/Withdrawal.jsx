@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "snu-lib";
+import { YOUNG_STATUS } from "snu-lib";
 import WithdrawalModal from "../../../components/WithdrawalModal";
 
 const Withdrawal = ({ young }) => {
-  const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
   const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
-  const getWithdrawalButtonLabel = () => (mandatoryPhasesDone ? "Supprimer mon compte" : inscriptionStatus ? "Abandonner mon inscription" : "Se désister du SNU");
+  const getWithdrawalButtonLabel = () => (inscriptionStatus ? "Abandonner mon inscription" : "Se désister du SNU");
 
   const search = useLocation().search;
   const isWithdrawalModalOpenDefault = new URLSearchParams(search).get("desistement") === "1";
