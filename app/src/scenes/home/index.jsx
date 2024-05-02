@@ -1,4 +1,4 @@
-import { React } from "react";
+import { React, useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription } from "../../utils";
@@ -20,11 +20,38 @@ import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
 import AvenirCohort from "./AvenirCohort";
 import { isCohortTooOld } from "snu-lib";
+import { capture } from "@/sentry";
+import { toastr } from "react-redux-toastr";
+import API from "@/services/api";
+import Loader from "@/components/Loader";
 
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
+
+  const [reinscriptionOpen, setReinscriptionOpen] = useState(false);
+  const [reinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
+
+  const fetchInscriptionOpen = async () => {
+    try {
+      const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen`);
+      if (!ok) {
+        capture(new Error(code));
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
+      setReinscriptionOpen(data);
+      setReinscriptionOpenLoading(false);
+    } catch (e) {
+      setReinscriptionOpenLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInscriptionOpen();
+  }, []);
+
+  if (reinscriptionOpenLoading) return <Loader />;
 
   if (!young) return <Redirect to="/auth" />;
 
@@ -34,16 +61,18 @@ export default function Home() {
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
     if (hasAccessToReinscription(young)) {
-      if (hasWithdrawn) {
-        return <Withdrawn />;
+      if (!reinscriptionOpen) {
+        if (hasWithdrawn) {
+          return <Withdrawn />;
+        }
+        if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
+          return <AvenirCohort />;
+        }
+        if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+          return <FutureCohort />;
+        }
       }
-      if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
-        return <AvenirCohort />;
-      }
-      if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
-        return <FutureCohort />;
-      }
-      return <WaitingReinscription />;
+      return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
     }
 
     if (hasWithdrawn) {
