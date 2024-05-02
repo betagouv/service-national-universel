@@ -49,14 +49,16 @@ const Badge = ({ open }) => {
 
   return (
     <div
-      className={cx(`absolute top-[5px] h-[18px] border-[1px] border-white rounded-full text-white text-[10px] align-middle px-1 uppercase`, {
+      className={cx("absolute top-[5px] h-[18px] border-[1px] border-white rounded-full flex justify-center items-center px-1", {
         "right-[10px]": open,
         "right-1/2 transform translate-x-1/2": !open,
         "bg-red-500": isStaging,
         "bg-blue-500": isDevelopment,
       })}>
-      {isDevelopment && "Dev"}
-      {isStaging && "Test"}
+      <div className="leading-none uppercase text-[10px] text-white">
+        {isDevelopment && "DEV"}
+        {!isDevelopment && "TEST"}
+      </div>
     </div>
   );
 };
