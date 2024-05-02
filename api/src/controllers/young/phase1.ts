@@ -4,35 +4,34 @@
  * ROUTES
  *   POST  /young/:youngId/phase1/dispense        -> Passe le statut d'un jeune en dispensé
  */
+import express, { Response } from "express";
+import passport from "passport";
+import Joi from "joi";
 
-const express = require("express");
-const passport = require("passport");
+import { canEditPresenceYoung, ROLES, canAssignManually, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, REFERENT_DEPARTMENT_SUBROLE, getDepartmentByZip } from "snu-lib";
+
+import { ADMIN_URL } from "@/config";
+import { capture } from "@/sentry";
+import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "@/utils";
+import { serializeYoung, serializeSessionPhase1 } from "@/utils/serializer";
+import { sendTemplate } from "@/sendinblue";
+
+import YoungModel from "@/models/young";
+import SessionPhase1Model from "@/models/sessionPhase1";
+import PointDeRassemblementModel from "@/models/PlanDeTransport/pointDeRassemblement";
+import LigneBusModel from "@/models/PlanDeTransport/ligneBus";
+import CohortModel from "@/models/cohort";
+import ReferentModel from "@/models/referent";
+import DepartmentServiceModel from "@/models/departmentService";
+import { IDepartementService } from "@/models/departementService.type";
+import CohesionCenterModel from "@/models/cohesionCenter";
+import { ICohesionCenter } from "@/models/cohesionCenter.type";
+
+import { UserRequest } from "@/controllers/request";
+
 const router = express.Router({ mergeParams: true });
-const Joi = require("joi");
-const {
-  canEditPresenceYoung,
-  ROLES,
-  canAssignManually,
-  SENDINBLUE_TEMPLATES,
-  YOUNG_STATUS,
-  YOUNG_STATUS_PHASE1,
-  REFERENT_DEPARTMENT_SUBROLE,
-  getDepartmentByZip,
-} = require("snu-lib");
-const { ADMIN_URL, ENVIRONMENT } = require("../../config");
-const { capture } = require("../../sentry");
-const YoungModel = require("../../models/young");
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const CohortModel = require("../../models/cohort");
-const ReferentModel = require("../../models/referent");
-const DepartmentServiceModel = require("../../models/departmentService");
-const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } = require("../../utils");
-const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
-const { sendTemplate } = require("../../sendinblue");
 
-router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const allowedKeys = ["self-going", "ref-select", "young-select", "local"];
     const { error, value } = Joi.object({
@@ -59,7 +58,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // check if referent is allowed to edit this young --> Todo with cohort
-    if (!canEditPresenceYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditPresenceYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (young.status === YOUNG_STATUS.WITHDRAWN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -131,7 +130,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
   }
 });
 
-router.post("/dispense", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/dispense", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       statusPhase1MotifDetail: Joi.string().required(),
@@ -150,7 +149,7 @@ router.post("/dispense", passport.authenticate("referent", { session: false, fai
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canEditPresenceYoung(req.user, young)) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     // passage en dispensé unqiuement si séjour non réalisé
@@ -165,7 +164,7 @@ router.post("/dispense", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       departSejourMotif: Joi.string().required(),
@@ -185,7 +184,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canEditPresenceYoung(req.user, young)) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -210,9 +209,9 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
 
     // si toujours rien on envoie a son contact Convocation
 
-    let contactsConv = [];
+    let contactsConv: IDepartementService["contacts"] = [];
     if (!managers.length && !secretariat.length) {
-      const serviceDep = await DepartmentServiceModel.find({ department: young.department });
+      const serviceDep: IDepartementService[] | null = await DepartmentServiceModel.find({ department: young.department });
       if (!serviceDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       contactsConv = serviceDep[0].contacts.filter((contact) => contact.cohort === young.cohort);
       contactsConv = contactsConv.map((contact) => {
@@ -229,8 +228,10 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     }
     const sendContact = managers.length ? managers : secretariat.length ? secretariat : contactsConv;
 
+    const center: ICohesionCenter | null = await CohesionCenterModel.findById(young.cohesionCenterId);
+
     let template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
-    const mail = await sendTemplate(template, {
+    await sendTemplate(template, {
       emailTo: sendContact.map((referent) => ({
         name: `${referent.firstName} ${referent.lastName}`,
         email: referent.email,
@@ -238,8 +239,8 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
       params: {
         youngFirstName: young.firstName,
         youngLastName: young.lastName,
-        centreName: young.cohesionCenterName,
-        centreDepartement: getDepartmentByZip(young.cohesionCenterZip),
+        centreName: center?.name || young.cohesionCenterName,
+        centreDepartement: center?.department || getDepartmentByZip(young.cohesionCenterZip),
         departureReason: departSejourMotif,
         departureNote: departSejourMotifComment,
         cta: `${ADMIN_URL}/volontaire/${young._id}`,
@@ -253,7 +254,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
   }
 });
 
-router.put("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -266,7 +267,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canEditPresenceYoung(req.user, young)) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -283,7 +284,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived", "youngPhase1Agreement", "isTravelingByPlane"];
     const { error, value } = Joi.object({
@@ -306,7 +307,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canEditPresenceYoung(req.user, young)) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
