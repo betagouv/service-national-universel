@@ -149,6 +149,7 @@ export default function SessionList({ center, sessions, user, focusedSession, on
             withBadge
             filterFn={(c) => sessions.find((s) => s.cohort === c.name)}
             onChange={(cohortName) => {
+              setEditingBottom(false);
               const session = sessions.find((s) => s.cohort === cohortName);
               if (session) onFocusedSessionChange(session);
               history.replace({ search: `?cohort=${cohortName}` });
