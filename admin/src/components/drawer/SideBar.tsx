@@ -281,7 +281,7 @@ const SideBar = ({ sessionsList }) => {
         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
         {[ROLES.HEAD_CENTER].includes(user?.role) && <Session />}
         <div className={cx("flex flex-col flex-[1_1_auto]", { "overflow-y-hidden": open })}>
-          <div className={cx("flex-1 max-h-full", { "overflow-y-auto": open })}>
+          <div className={cx("flex-1 max-h-full", { "overflow-y-auto no-scrollbar": open })}>
             <div className="flex flex-col items-center !mt-1">
               {getItems().map((Component, index) => (
                 <Component key={"nav-item" + index} />
