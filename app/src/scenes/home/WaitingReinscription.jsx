@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
-export default function WaitingReinscription(reinscriptionOpen) {
+export default function WaitingReinscription({ reinscriptionOpen }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
