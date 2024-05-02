@@ -4,11 +4,22 @@ import { HiOutlinePencil } from "react-icons/hi";
 import dayjs from "dayjs";
 
 import { ROLES } from "snu-lib";
-
 import { Button } from "@snu/ds/admin";
 
-export default function ExportBox({ title, availableFrom, availableUntil, onClick, onDownload, isDownloading = false }) {
-  const user = useSelector((state) => state.Auth.user);
+import { AuthState } from "@/redux/auth/reducer";
+
+interface Props {
+  title: string;
+  availableFrom?: Date;
+  availableUntil?: Date;
+  isDownloading?: boolean;
+  onClick: React.MouseEventHandler;
+  onDownload: React.MouseEventHandler;
+}
+
+export default function ExportBox({ title, availableFrom, availableUntil, onClick, onDownload, isDownloading = false }: Props) {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
   const now = dayjs().startOf("day");
   const exportAvailableFrom = availableFrom ? dayjs(availableFrom).startOf("day") : null;
   const exportAvailableUntil = dayjs(availableUntil).startOf("day");

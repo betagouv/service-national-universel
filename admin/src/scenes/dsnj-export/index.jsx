@@ -55,19 +55,21 @@ const DSNJExport = () => {
     const translatedKey = translateKey(isNewExport ? key : currentKey);
     const formattedDate = dayjs(isNewExport ? date : newExportDate).format("DD/MM/YYYY");
 
-    const textContent = isNewExport ? (
-      <>
-        Vous vous apprêtez à rendre disponible à la DSNJ l'export des <span className="font-bold">{translatedKey}</span> le <span className="font-bold">{formattedDate}</span>.
-      </>
-    ) : (
-      <>
-        <span className="font-bold">Attention : </span>un nouvel export des <span className="font-bold">{translatedKey}</span> sera généré le{" "}
-        <span className="font-bold">{formattedDate}</span> avec les informations mises à jour. L’ancien export ne sera plus téléchargeable par la DSNJ :{" "}
-        <span className="underline">pensez à les prévenir qu’ils doivent à nouveau télécharger cet export !</span>
-      </>
+    return (
+      <p className={!isNewExport && "text-red-600 text-left mt-4"}>
+        {isNewExport ? (
+          <>
+            Vous vous apprêtez à rendre disponible à la DSNJ l'export des <span className="font-bold">{translatedKey}</span> le <span className="font-bold">{formattedDate}</span>.
+          </>
+        ) : (
+          <>
+            <span className="font-bold">Attention : </span>un nouvel export des <span className="font-bold">{translatedKey}</span> sera généré le{" "}
+            <span className="font-bold">{formattedDate}</span> avec les informations mises à jour. L’ancien export ne sera plus téléchargeable par la DSNJ :{" "}
+            <span className="underline">pensez à les prévenir qu’ils doivent à nouveau télécharger cet export !</span>
+          </>
+        )}
+      </p>
     );
-
-    return <p className={isNewExport ? "" : "text-red-600 text-left mt-4"}>{textContent}</p>;
   };
 
   const handleUpdateDate = async (key, date) => {
