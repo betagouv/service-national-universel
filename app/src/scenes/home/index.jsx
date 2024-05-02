@@ -29,9 +29,14 @@ export default function Home() {
   if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
+    const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
+
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
     if (hasAccessToReinscription(young)) {
+      if (hasWithdrawn) {
+        return <Withdrawn />;
+      }
       if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
         return <AvenirCohort />;
       }
@@ -41,12 +46,9 @@ export default function Home() {
       return <WaitingReinscription />;
     }
 
-    const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
-
     if (hasWithdrawn) {
       return <Withdrawn />;
     }
-
     const hasCompletedPhase2 = [YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(young.statusPhase2);
     const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
 
