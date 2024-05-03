@@ -9,7 +9,7 @@ const CohortModel = require("../../models/cohort");
 const SessionPhase1Model = require("../../models/sessionPhase1");
 const { capture } = require("../../sentry");
 const { ERRORS, getFile, deleteFile } = require("../../utils");
-const { decrypt } = require("../../SNUpportcryptoUtils");
+const { decrypt } = require("../../cryptoUtils");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
