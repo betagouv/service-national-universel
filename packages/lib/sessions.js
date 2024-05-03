@@ -271,7 +271,7 @@ function inscriptionCreationOpenForYoungs(cohort) {
 
 function shouldForceRedirectToReinscription(young) {
   return (
-    young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REINSCRIPTION].includes(young.status)
+    young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status)
   );
 }
 
@@ -282,9 +282,6 @@ function hasAccessToReinscription(young) {
     return false;
   }
   if (young.departSejourMotif === "Exclusion") {
-    return false;
-  }
-  if (new Date(young.createdAt) > new Date(2023, 9, 1)) {
     return false;
   }
   if (isCohortTooOld(young)) {
