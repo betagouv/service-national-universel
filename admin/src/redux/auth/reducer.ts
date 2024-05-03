@@ -6,10 +6,15 @@ export type AuthState = {
   Auth: {
     user: {
       role: (typeof ROLES)[keyof typeof ROLES];
+      structureId: string;
+      subRole?: string;
     };
     sessionPhase1: {
+      _id: string;
       cohort: string;
+      cohesionCenterId: string;
     };
+    previousSigninToken?: string;
   };
 };
 

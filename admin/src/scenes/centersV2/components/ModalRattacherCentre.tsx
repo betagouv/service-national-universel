@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import { translate, isSessionEditionOpen } from "snu-lib";
 import { Select } from "@snu/ds/admin";
 
-import { CohortState } from "@/redux/cohorts";
+import { CohortState } from "@/redux/cohorts/reducer";
 import ModalTailwind from "@/components/modals/ModalTailwind";
 import { capture } from "@/sentry";
 import api from "@/services/api";

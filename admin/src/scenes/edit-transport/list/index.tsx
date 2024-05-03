@@ -8,7 +8,7 @@ import { ROLES, translate } from "snu-lib";
 import { BusLine, Young } from "@/types";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { CohortState } from "@/redux/cohorts";
+import { CohortState } from "@/redux/cohorts/reducer";
 import { AuthState } from "@/redux/auth/reducer";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
