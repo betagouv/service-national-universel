@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
 
-import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen } from "snu-lib";
+import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen, canEditSanitaryEmailContact, patternEmailAcademy } from "snu-lib";
 
 import { capture } from "@/sentry";
 import { canCreateOrUpdateCohesionCenter, translate } from "@/utils";
@@ -42,6 +42,7 @@ export default function SessionList({ center, sessions, user, focusedSession, on
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
 
   const cohort = focusedSession?.cohort ?? cohorts?.[0]?.name;
+  const cohortInfo = cohorts.find((c) => c.name === cohort);
 
   useEffect(() => {
     const querySessionId = getQuerySessionId();
@@ -100,6 +101,12 @@ export default function SessionList({ center, sessions, user, focusedSession, on
     } else {
       editInfoSession.dateStart = null;
       editInfoSession.dateEnd = null;
+    }
+    if (editInfoSession.sanitaryContactEmail) {
+      const regex = new RegExp(patternEmailAcademy);
+      if (!regex.test(editInfoSession.sanitaryContactEmail)) {
+        errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
+      }
     }
 
     setErrors(errorsObject);
@@ -270,6 +277,23 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                   </div>
                 </div>
               </div>
+              {center?._id && focusedSession?._id && center.region === "Provence-Alpes-Côte d'Azur" && (
+                <div className="flex flex-row justify-center items-center w-full mt-2">
+                  <div className="w-1/2">
+                    <Field
+                      error={errors.sanitaryContactEmail}
+                      readOnly={!editingBottom || !canEditSanitaryEmailContact(user, cohortInfo)}
+                      disabled={!canEditSanitaryEmailContact(user, cohortInfo)}
+                      label="Adresse email académique"
+                      value={editingBottom ? editInfoSession.sanitaryContactEmail : focusedSession.sanitaryContactEmail}
+                      onChange={(e) => setEditInfoSession({ ...editInfoSession, sanitaryContactEmail: e.target.value })}
+                      tooltips={
+                        "Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
+                      }
+                    />
+                  </div>
+                </div>
+              )}
               <div className="flex mx-4 mt-4 gap-2 pb-4 justify-center">
                 <PedagoProject session={focusedSession} className="p-1" onSessionChanged={handleSessionChange} />
                 <TimeSchedule session={focusedSession} className="p-1" onSessionChanged={handleSessionChange} />

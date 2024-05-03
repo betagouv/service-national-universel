@@ -173,6 +173,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  sanitaryContactEmail: {
+    type: String,
+    documentation: {
+      description: "email nécessaire pour envoyer la fiche sanitaire au centre de la sessions",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
