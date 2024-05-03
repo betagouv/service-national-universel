@@ -1,4 +1,4 @@
-const { toZonedTime } = require("date-fns-tz");
+import { toZonedTime } from "date-fns-tz";
 
 const MONTHS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 
