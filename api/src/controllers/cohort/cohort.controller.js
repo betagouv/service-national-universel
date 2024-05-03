@@ -178,7 +178,7 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    let cohort = await CohortModel.findOne({ snuId: id });
+    let cohort = await CohortModel.findById(id);
     if (!cohort) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }

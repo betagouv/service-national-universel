@@ -51,7 +51,7 @@ const DSNJExport = () => {
   };
 
   const generateText = (key, date) => {
-    const isNewExport = currentCohort?.dsnjExportDates[key] === undefined;
+    const isNewExport = currentCohort?.dsnjExportDates?.[key] === undefined;
     const translatedKey = translateKey(isNewExport ? key : currentKey);
     const formattedDate = dayjs(isNewExport ? date : newExportDate).format("DD/MM/YYYY");
 
@@ -119,24 +119,24 @@ const DSNJExport = () => {
         <div className="flex gap-4">
           <ExportBox
             title="Liste des centres"
-            availableFrom={currentCohort?.dsnjExportDates[exportDateKeys[0]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates[exportDateKeys[0]])}
+            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[0]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[0]])}
             onClick={() => handleClick(exportDateKeys[0])}
             onDownload={() => handleDownload(exportDateKeys[0])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[0]]}
           />
           <ExportBox
             title="Liste des volontaires affectés et sur liste complémentaire"
-            availableFrom={currentCohort?.dsnjExportDates[exportDateKeys[1]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates[exportDateKeys[1]])}
+            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[1]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[1]])}
             onClick={() => handleClick(exportDateKeys[1])}
             onDownload={() => handleDownload(exportDateKeys[1])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[1]]}
           />
           <ExportBox
             title="Liste des volontaires après le séjour"
-            availableFrom={currentCohort?.dsnjExportDates[exportDateKeys[2]]}
-            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates[exportDateKeys[2]])}
+            availableFrom={currentCohort?.dsnjExportDates?.[exportDateKeys[2]]}
+            availableUntil={getExportAvailableUntilDate(currentCohort?.dsnjExportDates?.[exportDateKeys[2]])}
             onClick={() => handleClick(exportDateKeys[2])}
             onDownload={() => handleDownload(exportDateKeys[2])}
             isDownloading={!!isLDownloadingByKey[exportDateKeys[2]]}
