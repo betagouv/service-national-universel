@@ -286,7 +286,7 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                       readOnly={!editingBottom || !canEditSanitaryEmailContact(user, cohortInfo)}
                       disabled={!canEditSanitaryEmailContact(user, cohortInfo)}
                       label="Adresse email académique"
-                      value={editingBottom ? editInfoSession.sanitaryContactEmail ?? "" : focusedSession?.sanitaryContactEmail ?? ""}
+                      value={editingBottom ? editInfoSession.sanitaryContactEmail : focusedSession?.sanitaryContactEmail}
                       onChange={(e) => setEditInfoSession({ ...editInfoSession, sanitaryContactEmail: e.target.value })}
                       tooltips={
                         "Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
