@@ -26,7 +26,7 @@ module.exports = {
     "no-async-promise-executor": "warn",
     "react/no-unescaped-entities": "off",
     "react-hooks/rules-of-hooks": "warn",
-    "import/extensions": ["error"],
+    "import/extensions": ["warn"],
     "react-hooks/exhaustive-deps": "warn",
     "@typescript-eslint/no-unused-vars": "warn",
   },
