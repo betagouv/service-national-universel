@@ -137,7 +137,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
     doc.font(FONT).text("Le ", MARGIN + 100, undefined, { continued: true });
     doc.font(FONT_BOLD).text(dayjs(departureDate).locale("fr-FR").format("dddd DD MMMM YYYY"));
     doc.font(FONT).text("A ", { continued: true });
-    doc.font(FONT_BOLD).text(meetingPoint ? ligneToPoint.meetingHour : "16:00");
+    doc.font(FONT_BOLD).text(meetingPoint && ligneToPoint?.meetingHour ? ligneToPoint.meetingHour : "16:00");
     doc.font(FONT).text("Au ", { continued: true });
     doc.font(FONT_BOLD).text(getMeetingAddress(young, meetingPoint, center));
     if (ligneBus) {
