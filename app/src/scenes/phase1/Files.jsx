@@ -1,25 +1,45 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { YOUNG_STATUS_PHASE1 } from "../../utils";
 import FileCard from "./components/FileCard";
 import MedicalFileModal from "./components/MedicalFileModal";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
+import { CDN_BASE_URL } from "../representants-legaux/commons";
+import FileIcon from "@/assets/FileIcon";
+import ButtonExternalLinkPrimary from "@/components/ui/buttons/ButtonExternalLinkPrimary";
+
+function getStatusPhase1(young) {
+  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
+    return YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
+  }
+  return young.statusPhase1;
+}
 
 export default function DocumentsPhase1({ young }) {
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
-  const [youngStatusPhase1, setYoungStatusPhase1] = useState(young.statusPhase1);
+  const youngStatusPhase1 = getStatusPhase1(young);
 
-  useEffect(() => {
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) {
-      if (cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
-        setYoungStatusPhase1(YOUNG_STATUS_PHASE1.AFFECTED);
-      } else {
-        setYoungStatusPhase1(YOUNG_STATUS_PHASE1.WAITING_AFFECTATION);
-      }
-    } else {
-      setYoungStatusPhase1(young.statusPhase1);
-    }
-  }, [young]);
+  // TODO: find a better way to implement feature flags
+  if (young.cohort === "Juin 2024 - 2" && young.region === "Provence-Alpes-Côte d'Azur") {
+    return (
+      <section>
+        <h3 className="text-base font-semibold">Document à préparer</h3>
+        <p className="text-sm mt-2">Complétez votre fiche sanitaire et préparez vos documents annexes.</p>
+        <div className="flex gap-4">
+          <div className="bg-gray-50 rounded-lg p-3 w-64 mt-3 flex flex-col gap-3 items-center">
+            <FileIcon filled={young.cohesionStayMedicalFileDownload === "true"} icon="sanitaire" />
+            <p className="text-lg font-bold">Fiche sanitaire</p>
+            <p className="text-xs bg-blue-100 text-blue-800 rounded w-fit px-1">Obligatoire</p>
+            <p className="text-sm text-center">La consigne pour transmettre la fiche sanitaire sera précisée lors de l'affectation</p>
+            <ButtonExternalLinkPrimary href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} className="w-full">
+              Télécharger
+            </ButtonExternalLinkPrimary>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
+  // TODO: Delete after test
   return (
     <section>
       <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
