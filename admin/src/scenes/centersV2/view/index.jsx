@@ -11,13 +11,14 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Loader from "@/components/Loader";
 import CenterInformations from "./CenterInformations";
 import SessionList from "../components/sessions/SessionList";
+import { capture } from "@/sentry";
 
 export default function Index() {
-  const { user } = useSelector((state) => state.Auth);
   const { id } = useParams();
+  const { user } = useSelector((state) => state.Auth);
   const [center, setCenter] = useState();
   const [sessions, setSessions] = useState();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -41,7 +42,7 @@ export default function Index() {
         setCenter(centerResponse.data);
         setSessions(sessionFiltered);
       } catch (e) {
-        console.log(e);
+        capture(e);
         toastr.error("Oups, une erreur est survenue", e.message);
       } finally {
         setLoading(false);
@@ -50,9 +51,7 @@ export default function Index() {
   }, [id]);
 
   if (loading) return <Loader />;
-
   if (!center || !sessions) return <div />;
-
   return (
     <>
       {user.role !== ROLES.HEAD_CENTER && <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
