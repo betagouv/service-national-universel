@@ -117,7 +117,6 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
               isSearchable
               isClearable
               closeMenuOnSelect
-              // @ts-expect-error type à revoir dans le DS
               value={selectedCohort ? { value: selectedCohort, label: selectedCohort } : null}
               onChange={(options) => {
                 setSelectedCohort(options?.value);

@@ -8,7 +8,7 @@ const StructureModel = require("../../models/structure");
 const MissionEquivalenceModel = require("../../models/missionEquivalence");
 const MissionEquivalencePatchModel = require("./models/missionEquivalencePatch");
 
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;

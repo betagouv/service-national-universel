@@ -7,6 +7,7 @@ import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { toastr } from "react-redux-toastr";
 
+import { translate } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 import api from "@/services/api";
 

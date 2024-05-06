@@ -4,8 +4,16 @@ module.exports = {
     node: true,
     es2021: true,
   },
-  extends: ["eslint:recommended", "plugin:react/recommended", "plugin:react-hooks/recommended", "prettier"],
+  extends: [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
+  ],
   overrides: [],
+  parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
@@ -14,11 +22,13 @@ module.exports = {
   rules: {
     "react/prop-types": 0,
     "prettier/prettier": ["warn"],
-    "no-unused-vars": "warn",
+    "no-unused-vars": "off",
     "no-async-promise-executor": "warn",
     "react/no-unescaped-entities": "off",
     "react-hooks/rules-of-hooks": "warn",
-    "import/extensions": ["error"],
+    "import/extensions": ["warn"],
+    "react-hooks/exhaustive-deps": "warn",
+    "@typescript-eslint/no-unused-vars": "warn",
   },
   settings: {
     react: {

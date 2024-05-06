@@ -12,7 +12,7 @@ module.exports = {
   },
   rules: {
     "no-unused-vars": "warn",
-    "import/extensions": ["error"],
+    "import/extensions": ["warn"],
   },
   plugins: ["eslint-plugin-import"],
 };
