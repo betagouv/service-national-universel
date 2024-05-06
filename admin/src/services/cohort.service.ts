@@ -60,7 +60,7 @@ export const getCohortGroups = (): SubFilter => {
         parentGroup: "Cohorte",
         parentFilter: "cohort",
         missingLabel: "Non renseigné",
-        sort: (e) => e,
+        sort: (data) => data,
         filter: (e) => e,
         filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
       },

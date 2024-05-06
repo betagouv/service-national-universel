@@ -9,7 +9,7 @@ export type Filter = {
   parentGroup: string;
   parentFilter: string;
   missingLabel: string;
-  sort: (e: any) => any;
+  sort: (data: any[]) => any;
   filter: (data?: any) => any;
   filterSubFilter: (data?: any) => any;
 };

@@ -135,7 +135,7 @@ export default function VolontaireList() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
-              subFilters={getCohortGroups()}
+              subFilters={[getCohortGroups()]}
             />
             <SortOption
               sortOptions={[

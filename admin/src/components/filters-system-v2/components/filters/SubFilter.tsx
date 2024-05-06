@@ -4,7 +4,7 @@ import { Filter, SubFilter } from "../Filter";
 
 export type SubFilterPopOverProps = {
   selectedFilters: { [key: string]: { filter: string[] } };
-  subFilters: SubFilter;
+  subFilter: SubFilter;
   setSelectedFilters: any;
   setParamData: any;
   dataFilter: { [key: string]: DataFilter };
@@ -16,23 +16,22 @@ export type DataFilter = {
   key: string;
 };
 
-export const SubFilterPopOver = ({ selectedFilters, setSelectedFilters, setParamData, subFilters, dataFilter, setFilter, filter }: SubFilterPopOverProps) => {
+export const SubFilterPopOver = ({ selectedFilters, setSelectedFilters, setParamData, subFilter, dataFilter, setFilter, filter }: SubFilterPopOverProps) => {
   const [isShowingSubFilter, setIsShowingSubFilter] = useState(false);
   return (
     <>
-      {subFilters.filters.map((subFilter: Filter) => {
-        const dataOnDropDown: DataFilter = subFilter?.filterSubFilter(dataFilter);
+      {subFilter.filters.map((filter: Filter) => {
+        const dataOnDropDown: DataFilter = filter?.filterSubFilter(dataFilter);
         return (
           <FilterPopOver
-            key={"sub-" + subFilter.name}
-            filter={subFilter}
+            key={"sub-" + filter.name}
+            filter={filter}
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
             data={dataOnDropDown}
-            isShowing={isShowingSubFilter === subFilter.name}
             setIsShowing={(value) => setIsShowingSubFilter(value)}
             setParamData={setParamData}
-            subFilters={subFilters}
+            subFilter={subFilter}
           />
         );
       })}
