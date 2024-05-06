@@ -114,6 +114,7 @@ jobs:
           dockerfile_path: ${{ matrix.app.name }}/Dockerfile
           image_tag: ${{ matrix.app.tag }}
           image_tag_stable: hotfix
+          sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
   deploy_staging:
     runs-on: ubuntu-latest
@@ -241,7 +242,6 @@ jobs:
 
   deploy_cc:
     needs: [prepare, build]
-    environment: production # Needed for manual approval before deploy
     if: ${{ vars.DEPLOY_ON_CC == 'true' }}
     uses: ./.github/workflows/cc-deploy-production.yml
     with:

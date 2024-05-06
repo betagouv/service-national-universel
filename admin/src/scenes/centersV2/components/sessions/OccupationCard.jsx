@@ -1,26 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import { canCreateOrUpdateCohesionCenter } from "@/utils";
 import Trash from "@/assets/icons/Trash";
 
 import ModalConfirmDelete from "../ModalConfirmDelete";
 
-export default function OccupationCard({ placesLeft, placesTotalModified, placesTotal, canBeDeleted, user, handleSessionDelete, modalDelete, setModalDelete }) {
+export default function OccupationCard({ placesLeft, placesTotal, canBeDeleted, user, handleSessionDelete, modalDelete, setModalDelete }) {
   let height = `h-0`;
-  const getOccupationPercentage = () => {
-    if (isNaN(placesTotalModified) || placesTotalModified === "" || placesTotalModified < 0) return 0.1;
-    const percentage = (((placesTotal - placesLeft) * 100) / placesTotalModified).toFixed(2);
-    if (percentage < 0 || percentage === Number.NEGATIVE_INFINITY) return 0.1;
-    if (isNaN(percentage)) return 0.1;
-    return percentage;
-  };
-  const [occupationPercentage, setOccupationPercentage] = useState(0);
-  const placesLeftModified = !isNaN(placesLeft + parseInt(placesTotalModified) - placesTotal) ? placesLeft + parseInt(placesTotalModified) - placesTotal : 0;
-  useEffect(() => {
-    setOccupationPercentage(getOccupationPercentage());
-  }, [placesTotalModified]);
+  const occupationPercentage = ((placesTotal - placesLeft) * 100) / placesTotal;
 
-  if (occupationPercentage < 20) height = "h-[20%]";
+  if (occupationPercentage === 0) height = "h-[10%]";
+  else if (occupationPercentage < 20) height = "h-[20%]";
   else if (occupationPercentage < 30) height = "h-[30%]";
   else if (occupationPercentage < 40) height = "h-[40%]";
   else if (occupationPercentage < 50) height = "h-[50%]";
@@ -33,7 +23,7 @@ export default function OccupationCard({ placesLeft, placesTotalModified, places
   let bgColor = "bg-blue-800";
   if (occupationPercentage > 100) bgColor = "bg-red-500";
   if (isNaN(occupationPercentage)) return <></>;
-  return occupationPercentage ? (
+  return (
     <div className="flex flex-1 flex-col items-center justify-center py-4 px-8">
       <ModalConfirmDelete
         isOpen={modalDelete.isOpen}
@@ -65,7 +55,7 @@ export default function OccupationCard({ placesLeft, placesTotalModified, places
             <div className="h-6 w-2 rounded-full bg-gray-200" />
             <div>
               <div className="text-xs font-normal">Places libres</div>
-              <div className="text-base font-bold">{placesLeftModified}</div>
+              <div className="text-base font-bold">{placesLeft}</div>
             </div>
           </div>
         </div>
@@ -87,5 +77,5 @@ export default function OccupationCard({ placesLeft, placesTotalModified, places
         </div>
       )}
     </div>
-  ) : null;
+  );
 }

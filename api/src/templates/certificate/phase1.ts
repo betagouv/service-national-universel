@@ -1,13 +1,15 @@
-const path = require("path");
-const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
-const { getCohortEndDate, transportDatesToString } = require("snu-lib");
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const CohesionCenterModel = require("../../models/cohesionCenter");
-const MeetingPointModel = require("../../models/meetingPoint");
-const CohortModel = require("../../models/cohort");
-const { ENVIRONMENT, IMAGES_ROOTDIR } = require("../../config");
-const { ERRORS } = require("../../utils/errors");
-const { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
+import path from "path";
+import { getDepartureDateSession, getReturnDateSession } from "../../utils/cohort";
+import { getCohortEndDate, transportDatesToString } from "snu-lib";
+import SessionPhase1Model from "../../models/sessionPhase1";
+import CohesionCenterModel from "../../models/cohesionCenter";
+import MeetingPointModel from "../../models/meetingPoint";
+import CohortModel from "../../models/cohort";
+import { ENVIRONMENT, IMAGES_ROOTDIR } from "../../config";
+import { ERRORS } from "../../utils/errors";
+import { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } from "./utils";
+
+import type PDFDocument from "pdfkit";
 
 const getCohesionCenter = async (young) => {
   let cohesionCenter;
@@ -47,13 +49,14 @@ async function fetchDataForYoung(young) {
   return { session, cohort, cohesionCenter };
 }
 
-function render(doc, young, session, cohort, cohesionCenter) {
+function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter) {
   if (!cohesionCenter) {
     throw { error: ERRORS.NO_COHESION_CENTER_FOUND };
   }
   const cohortEndDate = getCohortEndDate(young, cohort);
 
   const ministresData = getMinistres(cohortEndDate);
+  if (!ministresData) throw { error: "NO_MINISTRES_FOUND" };
   const template = ministresData.template;
   const cohesionCenterLocation = getCohesionCenterLocation(cohesionCenter);
   const departureDate = getDepartureDateSession(session, young, cohort);
@@ -72,7 +75,6 @@ function render(doc, young, session, cohort, cohesionCenter) {
   if (ENVIRONMENT !== "testing") {
     doc.image(path.join(IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
   }
-
   doc
     .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 280, { continued: true })
     .font(FONT_BOLD)
@@ -89,9 +91,9 @@ function render(doc, young, session, cohort, cohesionCenter) {
     .font(FONT_BOLD)
     .text("phase 1", { continued: true })
     .font(FONT)
-    .text(" du Service National Universel.")
-    .moveDown()
-    .text(`Fait le ${DATE}`);
+    .text(" du Service National Universel.");
+  doc.y += 12;
+  doc.text(`Fait le ${DATE}`);
 }
 
 async function generateCertifPhase1(outStream, young) {

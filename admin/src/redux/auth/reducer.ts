@@ -1,4 +1,22 @@
+import { ROLES } from "@/utils";
 import { authActions } from "./actions";
+
+export type AuthState = {
+  // TODO: use API route response
+  Auth: {
+    user: {
+      role: (typeof ROLES)[keyof typeof ROLES];
+      structureId: string;
+      subRole?: string;
+    };
+    sessionPhase1: {
+      _id: string;
+      cohort: string;
+      cohesionCenterId: string;
+    };
+    previousSigninToken?: string;
+  };
+};
 
 const SS_KEY_PREVIOUS_SIGNIN = "previousSigninToken";
 

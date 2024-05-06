@@ -2,35 +2,36 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+
 import { ROLES, translate } from "snu-lib";
 
-import LigneDeBus from "./Ligne-de-bus";
-import Breadcrumbs from "../../../components/Breadcrumbs";
-import { Filters, ResultTable } from "../../../components/filters-system-v2";
-import Loader from "../../../components/Loader";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
-import Select from "../components/Select";
+import { BusLine, Young } from "@/types";
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import { CohortState } from "@/redux/cohorts/reducer";
+import { AuthState } from "@/redux/auth/reducer";
+
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { Filters, ResultTable } from "@/components/filters-system-v2";
+import Loader from "@/components/Loader";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
 import { Title } from "../../plan-transport/components/commons";
+import LigneDeBus from "./Ligne-de-bus";
 import TooltipDeleteButtonPlan from "./components/TooltipDeleteButtonPlan";
-import { getCohortSelectOptions } from "@/services/cohort.service";
 
 export default function List() {
-  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
-  const cohorts = useSelector((state) => state.Cohorts);
-  const urlParams = new URLSearchParams(window.location.search);
-  const defaultCohort = user.role === ROLES.ADMIN && sessionPhase1 ? sessionPhase1.cohort : undefined;
-  const [cohort, setCohort] = useState(urlParams.get("cohort") || defaultCohort);
-  const [cohortList, setCohortList] = useState();
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasValue, setHasValue] = useState(false);
   const history = useHistory();
 
-  useEffect(() => {
-    const cohortList = getCohortSelectOptions(cohorts);
-    setCohortList(cohortList);
-    if (!cohort) setCohort(cohortList[0].value);
-  }, []);
+  const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const defaultCohort = user.role === ROLES.ADMIN && sessionPhase1 ? sessionPhase1.cohort : cohorts?.[0]?.name;
+
+  const [cohort, setCohort] = useState(urlParams.get("cohort") || defaultCohort);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasValue, setHasValue] = useState(false);
 
   const getPlanDetransport = async () => {
     try {
@@ -43,7 +44,7 @@ export default function List() {
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus", "");
     }
   };
 
@@ -63,12 +64,11 @@ export default function List() {
       <div className="flex w-[calc(100vw-240px)] flex-col px-8">
         <div className="flex items-center justify-between px-8 py-8">
           <Title>Edit plan de transport</Title>
-          <Select
-            options={cohortList}
-            value={cohort}
-            onChange={(e) => {
-              setCohort(e);
-              history.replace({ search: `?cohort=${e}` });
+          <SelectCohort
+            cohort={cohort}
+            onChange={(cohortName) => {
+              setCohort(cohortName);
+              history.replace({ search: `?cohort=${cohortName}` });
             }}
           />
         </div>
@@ -85,15 +85,16 @@ export default function List() {
 }
 
 const ReactiveList = ({ cohort }) => {
-  const { user } = useSelector((state) => state.Auth);
+  const history = useHistory();
+
   const [lines, setLines] = useState([]);
-  const pageId = "edittransport";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({ page: 0 });
-  const [youngs, setYoungs] = useState();
-  const [allLines, setAllLines] = useState();
-  const history = useHistory();
+  const [youngs, setYoungs] = useState<Young[]>();
+  const [allLines, setAllLines] = useState<BusLine[]>();
   const [size, setSize] = useState(10);
+
+  const pageId = "edittransport";
 
   useEffect(() => {
     try {
@@ -118,12 +119,12 @@ const ReactiveList = ({ cohort }) => {
         const res = await api.post("/edit-transport/youngs", { ligneIds, cohort });
         if (res.ok) {
           setYoungs(res.data);
-        } else toastr.error("Oups, une erreur est survenue lors de la récupération des jeunes");
+        } else toastr.error("Oups, une erreur est survenue lors de la récupération des jeunes", "");
       };
       getYoungs();
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des jeunes");
+      toastr.error("Oups, une erreur est survenue lors de la récupération des jeunes", "");
     }
   }, [allLines]);
 

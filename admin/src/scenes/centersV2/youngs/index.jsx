@@ -4,22 +4,23 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
-import { COHORTS_BEFORE_JULY_2023, ES_NO_LIMIT, download, getDepartmentNumber } from "snu-lib";
 import * as XLSX from "xlsx";
-import Bus from "../../../assets/icons/Bus";
-import ClipboardList from "../../../assets/icons/ClipboardList";
-import Menu from "../../../assets/icons/Menu";
-import PencilAlt from "../../../assets/icons/PencilAlt";
-import Profil from "../../../assets/icons/Profil";
-import ShieldCheck from "../../../assets/icons/ShieldCheck";
-import Warning from "../../../assets/icons/Warning";
-import Breadcrumbs from "../../../components/Breadcrumbs";
-import SelectAction from "../../../components/SelectAction";
-import { currentFilterAsUrl } from "../../../components/filters-system-v2/components/filters/utils";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
+
+import { COHORTS_BEFORE_JULY_2023, download, getDepartmentNumber } from "snu-lib";
+
+import Bus from "@/assets/icons/Bus";
+import ClipboardList from "@/assets/icons/ClipboardList";
+import Menu from "@/assets/icons/Menu";
+import PencilAlt from "@/assets/icons/PencilAlt";
+import Profil from "@/assets/icons/Profil";
+import ShieldCheck from "@/assets/icons/ShieldCheck";
+import Warning from "@/assets/icons/Warning";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import SelectAction from "@/components/SelectAction";
+import { currentFilterAsUrl } from "@/components/filters-system-v2/components/filters/utils";
+import { capture } from "@/sentry";
+import api from "@/services/api";
 import {
-  ROLES,
   departmentLookUp,
   formatDateFR,
   formatDateFRTimezoneUTC,
@@ -30,7 +31,8 @@ import {
   translateFileStatusPhase1,
   translatePhase1,
   youngCheckinField,
-} from "../../../utils";
+} from "@/utils";
+
 import ModalExportMail from "../components/modals/ModalExportMail";
 import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
@@ -42,7 +44,6 @@ export default function CenterYoungIndex() {
   const [filter, setFilter] = useState({});
   const [urlParams, setUrlParams] = useState("");
   const user = useSelector((state) => state.Auth.user);
-  const [loading, setLoading] = useState();
   const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState();
   const [focusedSession, setFocusedSession] = useState(null);
   const [hasYoungValidated, setHasYoungValidated] = useState(false);
@@ -306,7 +307,7 @@ export default function CenterYoungIndex() {
 
       const youngs = data.data;
 
-      let response = await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`);
+      let response = youngs.length > 0 ? await api.get(`/point-de-rassemblement/center/${id}/cohort/${youngs[0].cohort}`) : null;
       const meetingPoints = response ? response.data.meetingPoints : [];
       const ligneBus = response ? response.data.ligneBus : [];
 
@@ -480,16 +481,13 @@ export default function CenterYoungIndex() {
 
   return (
     <>
-      {user.role !== ROLES.HEAD_CENTER ? (
-        <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre", to: `/centre/${id}` }, { label: "Liste des volontaires" }]} />
-      ) : null}
+      <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre", to: `/centre/${id}` }, { label: "Liste des volontaires" }]} />
       <div className="m-8">
         <div className="flex items-center justify-between">
           <div className="mb-4 text-2xl font-bold">Volontaires</div>
           <div className="flex items-center gap-2">
             {hasYoungValidated && (
               <button
-                disabled={loading}
                 onClick={() => viewAttestation()}
                 className="flex cursor-pointer items-center justify-between gap-3 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white disabled:cursor-wait disabled:opacity-50">
                 Exporter les attestations
@@ -603,12 +601,11 @@ const TabItem = ({ to, title, icon, extraIcon, extraTooltip }) => (
   </NavLink>
 );
 
-const transformData = async ({ data, centerId }) => {
-  let all = data;
+const transformData = async ({ data: all, centerId }) => {
   let resultCenter = await api.get(`/cohesion-center/${centerId}`);
   const center = resultCenter ? resultCenter.data : {};
 
-  let response = await api.get(`/point-de-rassemblement/center/${centerId}/cohort/${all[0].cohort}`);
+  let response = all.length > 0 ? await api.get(`/point-de-rassemblement/center/${centerId}/cohort/${all[0].cohort}`) : null;
   const meetingPoints = response ? response.data.meetingPoints : [];
   const ligneBus = response ? response.data.ligneBus : [];
 

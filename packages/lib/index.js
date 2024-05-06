@@ -1,4 +1,4 @@
-import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants";
+import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "./constants";
 import translation from "./translation";
 import { ROLES } from "./roles";
 import sanitizeHtml from "sanitize-html";
@@ -127,8 +127,7 @@ function canUserUpdateYoungStatus(actor) {
 
 const SESSIONPHASE1ID_CANCHANGESESSION = ["627cd8b873254d073af93147", "6274e6359ea0ba074acf6557"];
 
-const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id, source }) => {
-  //   console.log([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(status), "alorss?");
+const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id, source, departSejourMotif }) => {
   if (source === YOUNG_SOURCE.CLE) return false;
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(status)) return true;
   if ([YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(statusPhase1) && status === YOUNG_STATUS.VALIDATED) {
@@ -138,12 +137,14 @@ const youngCanChangeSession = ({ statusPhase1, status, sessionPhase1Id, source }
     return true;
   }
 
-  if (statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return true;
+  if (statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && departSejourMotif !== "Exclusion") return true;
   return false;
 };
 
-const youngCanDeleteAccount = (young) => {
-  if (young.source === YOUNG_SOURCE.CLE) return false;
+const youngCanWithdraw = (young) => {
+  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && [YOUNG_STATUS_PHASE2.VALIDATED].includes(young.statusPhase2)) {
+    return false;
+  }
   return true;
 };
 
@@ -190,7 +191,7 @@ export {
   canUpdateYoungStatus,
   canUserUpdateYoungStatus,
   youngCanChangeSession,
-  youngCanDeleteAccount,
+  youngCanWithdraw,
   isYoungInReinscription,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
@@ -216,3 +217,4 @@ export * from "./translation";
 export * from "./transport-info";
 export * from "./young";
 export * from "./SNUpport";
+export * from "./functionalErrors";

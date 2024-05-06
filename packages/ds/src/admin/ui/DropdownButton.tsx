@@ -86,7 +86,7 @@ export default function DropdownButton({
 
   return (
     <div ref={ref}>
-      <div className="relative">
+      <div className="relative print:hidden">
         {/* select item */}
         {mode === "badge" ? (
           <Badge

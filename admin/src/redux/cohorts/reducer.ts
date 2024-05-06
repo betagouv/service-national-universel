@@ -1,3 +1,5 @@
+import { COHORTS_ACTIONS } from "./actions";
+
 const initialState = [];
 
 export type CohortState = {
@@ -11,7 +13,7 @@ export type CohortState = {
 
 const reducer = (oldState = initialState, action) => {
   switch (action.type) {
-    case "SET_COHORTS":
+    case COHORTS_ACTIONS.SET_COHORTS:
       return action.payload.sort((a, b) => new Date(b.dateStart).getTime() - new Date(a.dateEnd).getTime());
     default:
       return oldState;

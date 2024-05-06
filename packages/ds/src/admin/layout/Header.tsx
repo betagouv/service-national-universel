@@ -5,6 +5,7 @@ import { HiChevronRight } from "react-icons/hi";
 type OwnProps = {
   title: string;
   className?: string;
+  classNameDivTitle?: string;
   breadcrumb?: Array<{
     title: string | React.ReactNode;
     to: string;
@@ -17,6 +18,7 @@ type OwnProps = {
 export default function Header({
   title,
   className,
+  classNameDivTitle,
   breadcrumb,
   titleComponent,
   children,
@@ -41,7 +43,9 @@ export default function Header({
                     {item.title}
                   </NavLink>
                 ) : (
-                  <div className="leading-[20px] whitespace-nowrap">{item.title}</div>
+                  <div className="leading-[20px] whitespace-nowrap">
+                    {item.title}
+                  </div>
                 )}
               </div>
               {index < breadcrumb.length - 1 ? (
@@ -54,9 +58,8 @@ export default function Header({
         </div>
       )}
 
-      <div className="flex items-end justify-between">
+      <div className={"flex items-end justify-between " + classNameDivTitle}>
         <div className="flex flex-col items-start justify-start">
-
           {/* Title */}
           <div className="flex items-center justify-start">
             <h1 className="text-[30px] font-bold leading-9 text-ds-gray-900">

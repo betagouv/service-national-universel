@@ -182,8 +182,6 @@ export default function VolontairePhase0View({ young, onChange, globalMode }) {
   async function processRegistration(state, data) {
     setProcessing(true);
     try {
-      if (state === "SESSION_FULL") state = "WAITING_LIST";
-
       let body = {
         lastStatusAt: Date.now(),
         phase: "INSCRIPTION",

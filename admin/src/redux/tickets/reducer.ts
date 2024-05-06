@@ -1,3 +1,18 @@
+import { TICKETS_ACTIONS } from "./actions";
+
+export type TicketsState = {
+  // TODO: use API route response
+  Tickets: {
+    tickets: {
+      _id: "NEW" | "CLOSED" | "OPEN";
+      total: number;
+    }[];
+    new: number;
+    open: number;
+    closed: number;
+  };
+};
+
 const initialState = {
   tickets: null,
   new: 0,
@@ -7,7 +22,7 @@ const initialState = {
 
 const reducer = (oldState = initialState, action) => {
   switch (action.type) {
-    case "FETCH_TICKETS":
+    case TICKETS_ACTIONS.FETCH_TICKETS:
       return {
         ...oldState,
         tickets: action.payload.tickets,

@@ -1,3 +1,64 @@
+# [1.405.0](https://github.com/betagouv/service-national-universel/compare/v1.404.0...v1.405.0) (2024-05-03)
+
+
+### Bug Fixes
+
+* **admin:** 2272 - Correction de la scrollbar sur le menu ([#3823](https://github.com/betagouv/service-national-universel/issues/3823)) ([8116dad](https://github.com/betagouv/service-national-universel/commit/8116dad10597bec53e8fc385c2cd13633b87a3a6))
+* **admin:** 2446 - Fix info message component [#3830](https://github.com/betagouv/service-national-universel/issues/3830) ([2a2e080](https://github.com/betagouv/service-national-universel/commit/2a2e080ad63dd94d62198745365d4c8faca97546))
+* **admin:** 2446 - info message default value and empty filter ([#3826](https://github.com/betagouv/service-national-universel/issues/3826)) ([f766f09](https://github.com/betagouv/service-national-universel/commit/f766f09bf05b7f711177cdb0b81f26c330e6e76a))
+* **admin:** Corrections de l'affichage des données de session ([#3832](https://github.com/betagouv/service-national-universel/issues/3832)) ([c4a6c9d](https://github.com/betagouv/service-national-universel/commit/c4a6c9d81064f9a998836d33405326923f6674f7))
+* **admin:** sentry - centerrs young undefined ([#3836](https://github.com/betagouv/service-national-universel/issues/3836)) ([45b7932](https://github.com/betagouv/service-national-universel/commit/45b79325933591a434e0d1ee376f62e028d3a1d1))
+* **api:** Gestion des MimeType inconnu ([#3825](https://github.com/betagouv/service-national-universel/issues/3825)) ([ac9fb29](https://github.com/betagouv/service-national-universel/commit/ac9fb29d2df445db7bfe537298da23a1f985a08e))
+
+
+### Features
+
+* **admin,api:** 2194- Refonte export DSNJ ([#3795](https://github.com/betagouv/service-national-universel/issues/3795)) ([3b946fc](https://github.com/betagouv/service-national-universel/commit/3b946fc92c567550887566a759d924978c51da23)), closes [#3782](https://github.com/betagouv/service-national-universel/issues/3782) [#3783](https://github.com/betagouv/service-national-universel/issues/3783) [#3784](https://github.com/betagouv/service-national-universel/issues/3784) [#3780](https://github.com/betagouv/service-national-universel/issues/3780) [#3750](https://github.com/betagouv/service-national-universel/issues/3750) [#3787](https://github.com/betagouv/service-national-universel/issues/3787) [#3730](https://github.com/betagouv/service-national-universel/issues/3730) [#3784](https://github.com/betagouv/service-national-universel/issues/3784) [#3781](https://github.com/betagouv/service-national-universel/issues/3781) [#3768](https://github.com/betagouv/service-national-universel/issues/3768) [#3730](https://github.com/betagouv/service-national-universel/issues/3730) [#3778](https://github.com/betagouv/service-national-universel/issues/3778) [#3777](https://github.com/betagouv/service-national-universel/issues/3777) [#3780](https://github.com/betagouv/service-national-universel/issues/3780) [#3761](https://github.com/betagouv/service-national-universel/issues/3761) [#3786](https://github.com/betagouv/service-national-universel/issues/3786) [#3797](https://github.com/betagouv/service-national-universel/issues/3797) [#3779](https://github.com/betagouv/service-national-universel/issues/3779) [#3791](https://github.com/betagouv/service-national-universel/issues/3791)
+* **app:** 2335 - New screen for young on 'a venir' cohort when reinscription is closed ([#3827](https://github.com/betagouv/service-national-universel/issues/3827)) ([bd68f24](https://github.com/betagouv/service-national-universel/commit/bd68f2450791dd7b0ecfabe2ffd10aeac3433711))
+* **app, api:** 2056 - Automate reinscription closing. ([#3804](https://github.com/betagouv/service-national-universel/issues/3804)) ([2d82cc9](https://github.com/betagouv/service-national-universel/commit/2d82cc95ee844d746b4f3670431ba1e8b25bc0e2))
+
+# [1.404.0](https://github.com/betagouv/service-national-universel/compare/v1.403.0...v1.404.0) (2024-04-26)
+
+
+### Bug Fixes
+
+* **admin:** 2370 - WAITING LIST when goals are full  ([#3820](https://github.com/betagouv/service-national-universel/issues/3820)) ([b499a26](https://github.com/betagouv/service-national-universel/commit/b499a26093204f3cc87b16ac05df692157348f61))
+* **api:** 1234 - change cohort for CLE ([#3808](https://github.com/betagouv/service-national-universel/issues/3808)) ([23338e4](https://github.com/betagouv/service-national-universel/commit/23338e4a31db9aa45cc299dccc5ddd78ab04254c))
+* **api:** 2390 - Fix isInscriptionOpen route [#3802](https://github.com/betagouv/service-national-universel/issues/3802) ([b0cd88e](https://github.com/betagouv/service-national-universel/commit/b0cd88e9bf19f307a415ebb4c9aad095ba9d8c15))
+* **api:** Tracking JVA [#3811](https://github.com/betagouv/service-national-universel/issues/3811) ([7a35c12](https://github.com/betagouv/service-national-universel/commit/7a35c1261cc38cf0459ceef8a444daed0cdfbf05))
+* **api:** Typo in contract.phase2 ([bca2150](https://github.com/betagouv/service-national-universel/commit/bca215052086cc17aef905b691a298b3484513e0))
+* **api, admin:** 2342 - Export DSNJ ([#3803](https://github.com/betagouv/service-national-universel/issues/3803)) ([42acf30](https://github.com/betagouv/service-national-universel/commit/42acf307d4abade5bbbc70d6b127350d572797af))
+* **api, app:** 2099 - display correction requests from previous cohorts ([#3761](https://github.com/betagouv/service-national-universel/issues/3761)) ([f136140](https://github.com/betagouv/service-national-universel/commit/f13614017198debbfa344b14753398f5fb1e343b))
+* **api,app:** 2349 - Fix tracking for API Engagement ([#3801](https://github.com/betagouv/service-national-universel/issues/3801)) ([9725887](https://github.com/betagouv/service-national-universel/commit/97258875aeb4eeab4a1bf349bb1a4f24a071eb93))
+* **api,app:** Retours QA sur évolutions désistement et parcours CLE [#3819](https://github.com/betagouv/service-national-universel/issues/3819) ([587d165](https://github.com/betagouv/service-national-universel/commit/587d1657adba0d0c2efa2c7ff00707c6a97a974b))
+* **app, admin:** Fallback environment if not defined ([da6ea4c](https://github.com/betagouv/service-national-universel/commit/da6ea4c97b63052c3b6697d07ea9bfabcd06d2b8))
+* **lib:** 2400 - remove CLE mai 2024 Martinique ([#3805](https://github.com/betagouv/service-national-universel/issues/3805)) ([66f3e63](https://github.com/betagouv/service-national-universel/commit/66f3e63b48564d833aa1ca3faafadf1f54c0cd70))
+
+
+### Features
+
+* **admin:** 2090 - Bloquer validation consentement par autrui ([#3772](https://github.com/betagouv/service-national-universel/issues/3772)) ([2a295f6](https://github.com/betagouv/service-national-universel/commit/2a295f689b38313f063fe8542605f1f56676ad92))
+* **admin:** 2178 - Refonte design dashboard et ajout d'un bandeau informatif ([#3774](https://github.com/betagouv/service-national-universel/issues/3774)) ([6512dd8](https://github.com/betagouv/service-national-universel/commit/6512dd843be1a72a1fea94492ed0e2f350b8befa))
+* **admin:** 2253 - Objectifs - Mise à jour sélecteur de cohort ([#3800](https://github.com/betagouv/service-national-universel/issues/3800)) ([dcc8806](https://github.com/betagouv/service-national-universel/commit/dcc8806240539f399ab10cc9f7aec518ce5edc54))
+* **admin:** 2253 - Paramétrage dynamique - Mise à jour sélecteur de cohort ([#3799](https://github.com/betagouv/service-national-universel/issues/3799)) ([7560ff0](https://github.com/betagouv/service-national-universel/commit/7560ff0b93e944a5a341a6a523d137be18ebe4f1))
+* **admin:** 2253 - pdt cohort switcher ([#3790](https://github.com/betagouv/service-national-universel/issues/3790)) ([41c14af](https://github.com/betagouv/service-national-universel/commit/41c14afc407532bd2429baa219aff0135233acf3))
+* **admin:** 2253 - Schema de repartition - Mise à jour selecteur de cohort ([#3792](https://github.com/betagouv/service-national-universel/issues/3792)) ([a9a55d7](https://github.com/betagouv/service-national-universel/commit/a9a55d7c77e982f3753a48150b6793e61afdbee0))
+* **admin:** 2261 - Centres - Mise à jour selecteur de cohort ([#3775](https://github.com/betagouv/service-national-universel/issues/3775)) ([f769b52](https://github.com/betagouv/service-national-universel/commit/f769b52b032556e7dbc56b9dc4892a174a07aad2))
+* **admin:** 2261 - PDR - Mise à jour selecteur de cohort ([#3788](https://github.com/betagouv/service-national-universel/issues/3788)) ([a590d8d](https://github.com/betagouv/service-national-universel/commit/a590d8d98dee5f2a8d9b8d6e194a814ab49bafa8))
+* **admin, api:** 2158 - download classroom convocation ci ([#3763](https://github.com/betagouv/service-national-universel/issues/3763)) ([ac8dc50](https://github.com/betagouv/service-national-universel/commit/ac8dc50aa1b8ecfd51af48aa0fa63cc83f0c8625))
+* **api,app:** 2347 - Remove self delete for youngs ([#3793](https://github.com/betagouv/service-national-universel/issues/3793)) ([25f52f9](https://github.com/betagouv/service-national-universel/commit/25f52f94f26ca9461cc967a1482521e04ed6a090))
+* **api,app,admin:** 2183 - PDFkit integration ([#3699](https://github.com/betagouv/service-national-universel/issues/3699)) ([d5fdc9b](https://github.com/betagouv/service-national-universel/commit/d5fdc9b49f162a7dcc18ccf7afd6f3d823d56246))
+* **app:** 2203 - 2247 - corrected "Dans ma valise" link, changed je-veux-aider image. ([#3786](https://github.com/betagouv/service-national-universel/issues/3786)) ([706e88a](https://github.com/betagouv/service-national-universel/commit/706e88a73d266676273dd56fbf7341c3dabb7e03))
+* **app:** 2283 - CLE - Add confirmation step for affected users ([#3806](https://github.com/betagouv/service-national-universel/issues/3806)) ([bb5e5ab](https://github.com/betagouv/service-national-universel/commit/bb5e5ab0c79674c04aba2529dfdfd68249fa8f27))
+* **app:** 2318 - Add withdrawal dialog on Affected and Waiting affectation pages ([#3815](https://github.com/betagouv/service-national-universel/issues/3815)) ([22c531c](https://github.com/betagouv/service-national-universel/commit/22c531c1ac8626f8f7954cd8a952a6ea7b7f44db))
+* **app:** 2398 - Allow CLE users to withdraw ([#3794](https://github.com/betagouv/service-national-universel/issues/3794)) ([382ce7d](https://github.com/betagouv/service-national-universel/commit/382ce7d6dc1e0033bf67ced8d8d1282a451ee4d7))
+* **app, admin, lib:** 2164 - Using AddressForm on Admin. ([#3776](https://github.com/betagouv/service-national-universel/issues/3776)) ([351727d](https://github.com/betagouv/service-national-universel/commit/351727d225528269d7f0e81f64681f2c723d6678))
+
+
+### Reverts
+
+* **misc): "chore(misc:** front sentry config ([#3807](https://github.com/betagouv/service-national-universel/issues/3807))" ([2243c03](https://github.com/betagouv/service-national-universel/commit/2243c0326cc8cae273fc29a304eb8305bc3d6c13))
+
 # [1.403.0](https://github.com/betagouv/service-national-universel/compare/v1.402.0...v1.403.0) (2024-04-19)
 
 

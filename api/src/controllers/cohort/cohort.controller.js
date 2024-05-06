@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const passport = require("passport");
-const CohortModel = require("../models/cohort");
-const SessionPhase1Model = require("../models/sessionPhase1");
 
-const { capture } = require("../sentry");
-const { ERRORS, getFile, isReferent } = require("../utils");
-const { decrypt } = require("../cryptoUtils");
-const { ROLES, isSuperAdmin, COHORT_TYPE } = require("snu-lib");
+const { ROLES, isSuperAdmin } = require("snu-lib");
+
+const CohortModel = require("../../models/cohort");
+const SessionPhase1Model = require("../../models/sessionPhase1");
+const { capture } = require("../../sentry");
+const { ERRORS, getFile, deleteFile } = require("../../utils");
+const { decrypt } = require("../../cryptoUtils");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
@@ -60,17 +61,24 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    let cohort = await CohortModel.findOne({ snuId: id });
+    let cohort = await CohortModel.findById(id);
     if (!cohort) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!cohort.dsnjExportDates) {
-      cohort.dsnjExportDates = {};
+    const threeMonthsAfterCohortDateEnd = new Date(cohort.dateEnd);
+    threeMonthsAfterCohortDateEnd.setMonth(threeMonthsAfterCohortDateEnd.getMonth() + 3);
+
+    if (date > threeMonthsAfterCohortDateEnd) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    if (cohort.dsnjExportDates[exportDateKey] && cohort.dsnjExportDates[exportDateKey] <= today) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (cohort.dsnjExportDates[exportDateKey]) {
+      await deleteFile(`dsnj/${cohort.snuId}/${exportDateKey}.xlsx`);
+    }
+
+    if (!cohort.dsnjExportDates) {
+      cohort.dsnjExportDates = {};
     }
 
     cohort.dsnjExportDates[exportDateKey] = date;
@@ -170,7 +178,7 @@ router.get("/:id/export/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.D
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    let cohort = await CohortModel.findOne({ snuId: id });
+    let cohort = await CohortModel.findById(id);
     if (!cohort) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }

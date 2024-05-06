@@ -1,10 +1,20 @@
 import React, { useEffect } from "react";
-import { connect, useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { FEATURES_NAME, ROLES, isFeatureEnabled, totalClosedTickets, totalNewTickets, totalOpenedTickets } from "snu-lib";
-import Header from "./components/Header";
-import MultiNavItem from "./components/MultiNavItem";
-import SimpleNavItem from "./components/SimpleNavItem";
+import cx from "classnames";
+import { HiOutlineOfficeBuilding } from "react-icons/hi";
+import { HiOutlineCommandLine } from "react-icons/hi2";
+
+import { FEATURES_NAME, ROLES, isFeatureEnabled } from "snu-lib";
+
+import api from "@/services/api";
+import useDevice from "@/hooks/useDevice";
+import ticketsAction from "@/redux/tickets/actions";
+import { AuthState } from "@/redux/auth/reducer";
+import { TicketsState } from "@/redux/tickets/reducer";
+
+import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, itemsDev, volontaireHeadCenterRegex } from "./utils";
+
 import AdminIcon from "./icons/Admin";
 import ContenuIcon from "./icons/Contenu";
 import DashboardIcon from "./icons/Dashboard";
@@ -12,27 +22,28 @@ import EngagementIcon from "./icons/Engagement";
 import InscriptionIcon from "./icons/Inscription";
 import SejourIcon from "./icons/Sejour";
 import VolontaireIcon from "./icons/Volontaire";
-import api from "../../services/api";
-import SNUpportBox from "./components/SNUpportBox";
-import SwitchSession from "./components/SwitchSession";
-import Profil from "./components/Profil";
 import SchemaIcon from "./icons/Schema";
 import MapIcon from "./icons/Map";
 import FlagIcon from "./icons/Flag";
 import GlobeIcon from "./icons/Globe";
-import InviteHeader from "./components/invite";
 import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
 import InstitutionIcon from "./icons/Institution";
 import StudentIcon from "./icons/Student";
-import { HiOutlineOfficeBuilding } from "react-icons/hi";
-import { HiOutlineCommandLine } from "react-icons/hi2";
-import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, itemsDev, volontaireHeadCenterRegex } from "./utils";
-import useDevice from "../../hooks/useDevice";
+
+import Header from "./components/Header";
+import MultiNavItem from "./components/MultiNavItem";
+import SimpleNavItem from "./components/SimpleNavItem";
+import SNUpportBox from "./components/SNUpportBox";
+import SwitchSession from "./components/SwitchSession";
+import Profil from "./components/Profil";
+import InviteHeader from "./components/invite";
 
 //Css !important becuse of bootstrap override
 
-const SideBar = (props) => {
+const SideBar = ({ sessionsList }) => {
+  const dispatch = useDispatch();
+
   //Location
   const location = useLocation();
   const exactPath = location.pathname;
@@ -41,14 +52,14 @@ const SideBar = (props) => {
 
   //State
   const [open, setOpen] = React.useState(false);
-  const test = useSelector((state) => state.Auth.previousSigninToken);
+  const test = useSelector((state: AuthState) => state.Auth.previousSigninToken);
   const [openInvite, setOpenInvite] = React.useState(false);
   const [dropDownOpen, setDropDownOpen] = React.useState("");
 
   //Redux
-  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
-  const newTickets = useSelector((state) => state.Tickets.new);
-  const openedTickets = useSelector((state) => state.Tickets.open);
+  const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
+  const newTickets = useSelector((state: TicketsState) => state.Tickets.new);
+  const openedTickets = useSelector((state: TicketsState) => state.Tickets.open);
 
   //Check if the sidebar is open or not in the local storage
   useEffect(() => {
@@ -58,7 +69,7 @@ const SideBar = (props) => {
 
   //Close the sidebar if the device becomes mobile
   useEffect(() => {
-    if (device === "mobile") setOpen(false);
+    setOpen(device !== "mobile");
   }, [device]);
 
   //Fetch tickets count
@@ -68,7 +79,7 @@ const SideBar = (props) => {
       try {
         const { data: tickets } = await api.get("/SNUpport/ticketscount");
         if (tickets) {
-          props.dispatchTickets(tickets);
+          dispatch(ticketsAction.updateTickets(tickets));
         }
       } catch (error) {
         console.log(error);
@@ -80,7 +91,7 @@ const SideBar = (props) => {
 
   //Special components
   const Tickets = () => <SNUpportBox newTickets={newTickets} openedTickets={openedTickets} sideBarOpen={open} />;
-  const Session = () => <SwitchSession sideBarOpen={open} sessionsList={props.sessionsList} sessionPhase1={sessionPhase1} />;
+  const Session = () => <SwitchSession sideBarOpen={open} sessionsList={sessionsList} sessionPhase1={sessionPhase1} />;
 
   //NavLinks
   const Dashboard = () => (
@@ -257,13 +268,20 @@ const SideBar = (props) => {
   };
 
   return (
-    <div className={`${open ? "w-[250px]" : "w-[88px]"} ${test ? "max-h-[95vh] top-[5vh]" : "h-screen max-h-screen"} sticky flex flex-col inset-y-0 bg-[#25294F] z-40`}>
+    <div
+      className={cx(
+        "sticky flex flex-col inset-y-0 bg-[#25294F] z-40 print:hidden",
+        { "w-[250px]": open },
+        { "w-[88px]": !open },
+        { "top-[5vh] max-h-[95vh]": test },
+        { "h-screen max-h-screen": !test },
+      )}>
       <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} />
         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
         {[ROLES.HEAD_CENTER].includes(user?.role) && <Session />}
-        <div className={`flex flex-col flex-[1_1_auto] ${open && "overflow-y-hidden"}`}>
-          <div className={`flex-1 max-h-full ${open && "overflow-y-scroll"}`}>
+        <div className={cx("flex flex-col flex-[1_1_auto]", { "overflow-y-hidden": open })}>
+          <div className={cx("flex-1 max-h-full", { "overflow-y-auto no-scrollbar": open })}>
             <div className="flex flex-col items-center !mt-1">
               {getItems().map((Component, index) => (
                 <Component key={"nav-item" + index} />
@@ -274,25 +292,10 @@ const SideBar = (props) => {
         <Profil sideBarOpen={open} user={user} setOpenInvite={setOpenInvite} />
       </div>
       {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-        <InviteHeader role={user.role} label="Inviter un nouvel utilisateur" open={openInvite} setOpen={() => setOpenInvite(false)} />
+        <InviteHeader label="Inviter un nouvel utilisateur" open={openInvite} setOpen={() => setOpenInvite(false)} />
       )}
     </div>
   );
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  dispatchTickets: (tickets) => {
-    dispatch({
-      type: "FETCH_TICKETS",
-      payload: {
-        tickets,
-        new: totalNewTickets(tickets),
-        open: totalOpenedTickets(tickets),
-        closed: totalClosedTickets(tickets),
-      },
-    });
-  },
-});
-
-let container = connect(null, mapDispatchToProps)(SideBar);
-export default container;
+export default SideBar;

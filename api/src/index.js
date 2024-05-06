@@ -134,10 +134,9 @@
   app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
   app.use("/application", require("./controllers/application"));
   app.use("/bus", require("./controllers/bus"));
-  app.use("/classe", require("./controllers/cle/classe"));
   app.use("/cle", require("./controllers/cle"));
   app.use("/cohesion-center", require("./controllers/cohesion-center"));
-  app.use("/cohort", require("./controllers/cohort"));
+  app.use("/cohort", require("./controllers/cohort/cohort.controller.js"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
   app.use("/contract", require("./controllers/contract"));
   app.use("/correction-request", require("./controllers/correction-request"));
@@ -170,6 +169,7 @@
   app.use("/young", require("./controllers/young/index"));
   app.use("/young-edition", require("./controllers/young-edition"));
   app.use("/SNUpport", require("./controllers/SNUpport"));
+  app.use("/classe", require("./classe/classe.controller"));
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));

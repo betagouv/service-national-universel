@@ -3,6 +3,10 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
+const datefns = require("date-fns");
+const { fr } = require("date-fns/locale");
+const fileUpload = require("express-fileupload");
+
 const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
 const { generateBatchDroitImage } = require("../templates/droitImage/droitImage");
 const { capture } = require("../sentry");
@@ -37,15 +41,12 @@ const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/se
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
 const { ADMIN_URL } = require("../config");
-const datefns = require("date-fns");
-const { fr } = require("date-fns/locale");
-const fileUpload = require("express-fileupload");
 const SessionPhase1 = require("../models/sessionPhase1");
-const FileType = require("file-type");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const scanFile = require("../utils/virusScanner");
+const { getMimeFromFile } = require("../utils/file");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -265,7 +266,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
     const cohort = await CohortModel.findOne({ name: session.cohort });
     generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
-
   } catch (error) {
     console.log("error", error);
     capture(error);
@@ -541,8 +541,8 @@ router.post(
       const file = files[0];
 
       const { name, tempFilePath, mimetype, size } = file;
-      const filetype = await FileType.fromFile(tempFilePath);
-      const mimeFromMagicNumbers = filetype ? filetype.mime : "application/pdf";
+      const filetype = await getMimeFromFile(tempFilePath);
+      const mimeFromMagicNumbers = filetype || "application/pdf";
       const validTypes = ["image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
