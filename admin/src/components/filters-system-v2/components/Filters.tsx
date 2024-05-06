@@ -26,7 +26,7 @@ type FiltersProps = {
   setParamData: (data: any) => void;
   defaultUrlParam?: boolean;
   size: number;
-  subFilters?: SubFilter;
+  subFilters?: SubFilter[];
 };
 
 function classNames(...classes) {
@@ -78,6 +78,7 @@ export default function Filters({
 
     // Click outside handler (close popover)
     const handleClickOutside = (event) => {
+      // @ts-ignore
       if (ref.current && !ref.current.contains(event.target) && refFilter.current && !refFilter.current.contains(event.target)) {
         setIsShowing(false);
       }
@@ -104,12 +105,13 @@ export default function Filters({
         setCategories([]);
         return;
       }
-      const newCategories = [];
+      const newCategories: any[] = [];
       filtersVisible?.forEach((f) => {
         if (!newCategories.includes(f.parentGroup)) {
           newCategories.push(f.parentGroup);
         }
       });
+      // @ts-ignore
       setCategories(newCategories);
     },
     [filtersVisible],
@@ -117,18 +119,6 @@ export default function Filters({
 
   const updateOnParamChange = useCallback(
     debounce(async (selectedFilters, paramData, location, route, size) => {
-      // let newSelectedFilters = { ...selectedFilters };
-      // if (subFilters) {
-      //   console.log("Filters - subFilters", subFilters);
-      //   console.log("Filters - selectedFilters", selectedFilters);
-      //   subFilters.filters.map((filter: Filter) => {
-      //     // if (selectedFilters[filter.name]) {
-      //     newSelectedFilters[subFilters.key].filter = [...selectedFilters[subFilters.key]?.filter, ...(selectedFilters[filter.name]?.filter || [])];
-      //     // }
-      //   });
-      //   console.log("Filters - selectedFilters 22222", selectedFilters);
-      //   // setSelectedFilters(newSelectedFilters);
-      // }
       buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort, size).then((res) => {
         if (!res) return;
         setDataFilter({ ...dataFilter, ...res.newFilters });
@@ -270,7 +260,9 @@ export default function Filters({
                                 ?.filter((f) => f.parentGroup === category)
                                 ?.map((item) => {
                                   let customItem = item;
-                                  if (subFilters && item.name === subFilters.key) {
+                                  const currentSubFilter = subFilters?.find((subFilter) => subFilter.key === item.name);
+
+                                  if (subFilters && currentSubFilter && item.name === currentSubFilter?.key) {
                                     customItem = {
                                       ...item,
                                       customComponent: (setFilter, filter) => (
@@ -278,7 +270,7 @@ export default function Filters({
                                           selectedFilters={selectedFilters}
                                           setSelectedFilters={setSelectedFilters}
                                           setParamData={setParamData}
-                                          subFilters={subFilters}
+                                          subFilter={currentSubFilter}
                                           dataFilter={dataFilter}
                                           setFilter={setFilter}
                                         />

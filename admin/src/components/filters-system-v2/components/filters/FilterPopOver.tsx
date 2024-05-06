@@ -11,7 +11,18 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, subFilters }) {
+type FilterPopOverProps = {
+  filter: Filter;
+  data: any;
+  selectedFilters: any;
+  setSelectedFilters: any;
+  isShowing?: any;
+  setIsShowing: any;
+  setParamData: any;
+  subFilter?: SubFilter;
+};
+
+export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, subFilter }: FilterPopOverProps) {
   return (
     <Popover>
       <Popover.Button
@@ -37,7 +48,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
         setSelectedFilters={setSelectedFilters}
         data={data}
         setParamData={setParamData}
-        subFilters={subFilters}
+        subFilter={subFilter}
       />
     </Popover>
   );
@@ -51,10 +62,10 @@ type DropDownProps = {
   data: any;
   inListFilter?: boolean;
   setParamData: any;
-  subFilters?: SubFilter | null;
+  subFilter?: SubFilter | null;
 };
 
-export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData, subFilters }: DropDownProps) => {
+export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData, subFilter }: DropDownProps) => {
   const [search, setSearch] = React.useState("");
   const [optionsVisible, setOptionsVisible] = React.useState(data || []);
   const ref = React.useRef(null);
@@ -99,6 +110,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
+      // @ts-ignore
       if (ref.current && !ref.current.contains(event.target)) {
         setParamData((oldvalue) => {
           return { ...oldvalue, isShowing: "else" };
@@ -123,28 +135,29 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
         newFilters = selectedFilters[filter?.name]?.filter?.concat(value);
       }
     } else {
+      // @ts-ignore
       newFilters = [value];
     }
     const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: newFilters } };
 
-    if (subFilters) {
+    if (subFilter) {
       syncHighOrderFilter(newSelectedFilters);
     }
     setSelectedFilters(newSelectedFilters);
   };
 
   const syncHighOrderFilter = (newSelectedFilters) => {
-    if (!subFilters) return;
-    newSelectedFilters[subFilters.key].filter = [];
-    for (const filter of subFilters.filters) {
-      if (newSelectedFilters[filter.name] && newSelectedFilters[subFilters.key]) {
-        newSelectedFilters[subFilters.key].filter = [...newSelectedFilters[subFilters.key].filter, ...(newSelectedFilters[filter.name].filter || [])];
+    if (!subFilter) return;
+    newSelectedFilters[subFilter.key].filter = [];
+    for (const filter of subFilter.filters) {
+      if (newSelectedFilters[filter.name] && newSelectedFilters[subFilter.key]) {
+        newSelectedFilters[subFilter.key].filter = [...newSelectedFilters[subFilter.key].filter, ...(newSelectedFilters[filter.name].filter || [])];
       }
     }
   };
   const handleDelete = () => {
     const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: [] } };
-    if (subFilters) {
+    if (subFilter) {
       syncHighOrderFilter(newSelectedFilters);
     }
     setSelectedFilters(newSelectedFilters);
@@ -153,7 +166,6 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const handleCustomComponent = (value) => {
     setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: value } });
   };
-
   return (
     <Transition
       as={Fragment}
@@ -165,7 +177,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
       leaveFrom="opacity-100 translate-y-0"
       leaveTo="opacity-0 translate-y-1">
       <Popover.Panel className={`absolute left-[101%] z-20 w-[305px] ${inListFilter ? "-translate-y-[36px]" : "translate-y-[4px]"}`}>
-        <div ref={ref} className="rounded-lg shadow-lg ">
+        <div key={filter?.title} ref={ref} className="rounded-lg shadow-lg ">
           <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
             <div className="mb-1 flex items-center justify-between py-2 px-3">
               <p className="text-xs font-light leading-5 text-gray-500">{filter?.title}</p>
@@ -197,15 +209,17 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                               ?.toString()
                               .localeCompare(filter.translate(b.key)?.toString());
                           }
-                          a.key.toString().localeCompare(b.key.toString());
+                          return a.key.toString().localeCompare(b.key.toString());
                         })
 
                         ?.map((option) => {
                           const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
                           const showCount = filter?.showCount === false ? false : true;
-
                           return (
-                            <div className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50" key={option.key} onClick={() => handleSelect(option.key)}>
+                            <div
+                              className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50"
+                              key={`${option.key}-${filter.title}`}
+                              onClick={() => handleSelect(option.key)}>
                               <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
                                 {/* Avoid react alert by using onChange even if empty */}
                                 <input type="checkbox" checked={optionSelected} onChange={() => {}} />
