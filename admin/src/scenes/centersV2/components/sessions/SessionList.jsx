@@ -34,7 +34,7 @@ function getQuerySessionId() {
 export default function SessionList({ center, sessions, user, focusedSession, onFocusedSessionChange, onSessionsChange, onRefreshCenter, onCenterChange }) {
   const history = useHistory();
   const cohorts = useSelector((state) => state.Cohorts);
-  console.log(focusedSession);
+
   const [editingBottom, setEditingBottom] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editInfoSession, setEditInfoSession] = useState({});
