@@ -54,7 +54,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
         errors.mail = errorEmail;
       }
 
-      if (data.mail && !validator.isMobilePhone(data.phone)) {
+      if (data.phone && !validator.isMobilePhone(data.phone)) {
         errors.phone = errorPhone;
       }
 
