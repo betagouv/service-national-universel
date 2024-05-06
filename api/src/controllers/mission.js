@@ -10,7 +10,7 @@ const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 // eslint-disable-next-line no-unused-vars
-const { ERRORS, isYoung } = require("../utils/index.js");
+const { ERRORS, isYoung } = require("../utils/index");
 const { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } = require("../services/application");
 const { getTutorName } = require("../services/mission");
 const { validateId, validateMission } = require("../utils/validator");

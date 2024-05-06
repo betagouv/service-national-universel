@@ -5,7 +5,7 @@ const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const StructureModel = require("../../models/structure");
 const StructurePatchModel = require("./models/structurePatch");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;

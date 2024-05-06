@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config");
 const { getAccessToken } = require("./utils");
 
 let token;
