@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen, canEditSanitaryEmailContact, patternEmailAcademy } from "snu-lib";
@@ -18,54 +19,57 @@ import TimeSchedule from "../TimeSchedule";
 import PedagoProject from "../PedagoProject";
 import { toastr } from "react-redux-toastr";
 import OccupationCard from "./OccupationCard";
-import { useHistory } from "react-router-dom";
 
 export default function SessionList({ center, setCenter, sessions, setSessions, user }) {
   const history = useHistory();
   const cohorts = useSelector((state) => state.Cohorts);
   let params = new URLSearchParams(location.search);
 
-  const [selectedCohort, setSelectedCohort] = useState(params.get("cohorte") || sessions[0]?.cohort || "wesh");
+  const [selectedCohort, setSelectedCohort] = useState(params.get("cohorte") || sessions[0]?.cohort);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formValues, setFormValues] = useState({});
+  const [values, setValues] = useState({});
   const [errors, setErrors] = useState({});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
 
-  const session = sessions.find((session) => session.cohort === selectedCohort);
   const cohort = cohorts.find((cohort) => cohort.name === selectedCohort);
+  const session = sessions.find((session) => session.cohort === selectedCohort);
+  const updateSession = (session) => {
+    setSessions(sessions.map((s) => (s._id === session._id ? session : s)));
+  };
 
-  const onSubmitBottom = async () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setLoading(true);
     const errorsObject = {};
-    if (isNaN(formValues.placesTotal) || formValues.placesTotal === "") {
+    if (isNaN(values.placesTotal) || values.placesTotal === "") {
       errorsObject.placesTotal = "Le nombre de places est incorrect";
-    } else if (formValues.placesTotal > center.placesTotal) {
+    } else if (values.placesTotal > center.placesTotal) {
       errorsObject.placesTotal = "Le nombre de places ne peut pas être supérieur à la capacité du centre";
-    } else if (formValues.placesTotal < session.placesTotal - session.placesLeft) {
+    } else if (values.placesTotal < session.placesTotal - session.placesLeft) {
       errorsObject.placesTotal = "Le nombre de places total est inférieur au nombre d'inscrits";
     }
 
-    if (formValues.hasSpecificDate) {
-      if (!formValues.dateStart || !formValues.dateEnd) {
+    if (values.hasSpecificDate) {
+      if (!values.dateStart || !values.dateEnd) {
         errorsObject.date = "La date de début et de fin sont obligatoires";
-      } else if (formValues.dateStart > formValues.dateEnd) {
+      } else if (values.dateStart > values.dateEnd) {
         errorsObject.date = "La date de début doit être antérieure à la date de fin";
       }
     } else {
-      formValues.dateStart = null;
-      formValues.dateEnd = null;
+      values.dateStart = null;
+      values.dateEnd = null;
     }
-    if (formValues.sanitaryContactEmail) {
+    if (values.sanitaryContactEmail) {
       const regex = new RegExp(patternEmailAcademy);
-      if (!regex.test(formValues.sanitaryContactEmail)) {
+      if (!regex.test(values.sanitaryContactEmail)) {
         errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
       }
     }
 
     setErrors(errorsObject);
     if (Object.keys(errorsObject).length > 0) return setLoading(false);
-    const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, formValues);
+    const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, values);
     if (!ok) {
       toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
       return setLoading(false);
@@ -74,7 +78,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
     setLoading(false);
     setEditing(false);
     setErrors({});
-    setSessions(sessions.map((session) => (session._id === data._id ? data : session)));
+    setValues({});
+    updateSession(data);
   };
 
   const handleSessionDelete = async () => {
@@ -97,6 +102,14 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
     }
   };
 
+  const handleToggleDate = () => {
+    if (values.dateStart && values.dateEnd) {
+      setValues({ ...values, dateStart: null, dateEnd: null });
+    } else {
+      setValues({ ...values, dateStart: session.dateStart || cohort?.dateStart, dateEnd: session.dateEnd || cohort?.dateEnd });
+    }
+  };
+
   if (!sessions || sessions.length === 0) return null;
   return (
     <div className="flex flex-col gap-4 mx-8">
@@ -104,11 +117,12 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
         <Title>Par séjour</Title>
         <div className="flex items-center">
           <SelectCohort
-            cohort={cohort.name}
+            cohort={selectedCohort}
             withBadge
             filterFn={(c) => sessions.find((s) => s.cohort === c.name)}
             onChange={(cohortName) => {
               setEditing(false);
+              setValues({});
               setSelectedCohort(cohortName);
               history.replace({ search: `?cohort=${cohortName}` });
             }}
@@ -122,6 +136,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
             <>
               {!editing ? (
                 <button
+                  type="button"
                   className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={() => setEditing(true)}
                   disabled={loading}>
@@ -131,10 +146,11 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
               ) : (
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() => {
                       setEditing(false);
-                      setFormValues(session);
+                      setValues(session);
                       setErrors({});
                     }}
                     disabled={loading}>
@@ -142,7 +158,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                   </button>
                   <button
                     className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                    onClick={onSubmitBottom}
+                    type="submit"
+                    form="session-form"
                     disabled={loading}>
                     <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                     Enregistrer les changements
@@ -152,9 +169,9 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
             </>
           )}
         </div>
-        <div className="border-top">
-          {center?._id && session?._id && (
-            <div className="">
+        {center?._id && session?._id && (
+          <div className="border-top">
+            <form onSubmit={handleSubmit} id="session-form">
               <div className="flex border-b-[1px] border-b-gray-200">
                 {/* // Taux doccupation */}
                 <OccupationCard
@@ -169,15 +186,15 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                 {/* // liste des volontaires */}
                 <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 border-x-[1px] border-gray-200 bg-white">
                   <div className="flex w-full flex-1 items-center justify-center">
-                    <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${session._id}/general`)}>
+                    <Link className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" to={`/centre/${center._id}/${session._id}/general`}>
                       Voir les volontaires
-                    </button>
+                    </Link>
                   </div>
                   <div className="w-full border-b-[1px] border-gray-200" />
                   <div className="flex flex-1 items-center justify-center">
-                    <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${session._id}/equipe`)}>
+                    <Link className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" to={`/centre/${center._id}/${session._id}/equipe`}>
                       Voir l&apos;équipe
-                    </button>
+                    </Link>
                   </div>
                 </div>
 
@@ -188,8 +205,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                       error={errors.placesTotal}
                       readOnly={!editing || !canCreateOrUpdateCohesionCenter(user)}
                       label="Places ouvertes"
-                      value={editing ? formValues.placesTotal : session.placesTotal}
-                      onChange={(e) => setFormValues({ ...formValues, placesTotal: e.target.value })}
+                      value={values.placesTotal || session.placesTotal}
+                      onChange={(e) => setValues({ ...values, placesTotal: e.target.value })}
                       tooltips={
                         "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
                       }
@@ -207,21 +224,10 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                           </p>
                         }
                         readOnly={!editing || !canPutSpecificDateOnSessionPhase1(user)}
-                        value={editing ? formValues.hasSpecificDate : session.hasSpecificDate}
-                        onChange={() => setFormValues({ ...formValues, hasSpecificDate: !formValues.hasSpecificDate })}
-                        range={
-                          editing
-                            ? { from: formValues.dateStart, to: formValues.dateEnd }
-                            : { from: session.dateStart || cohort?.dateStart, to: session.dateEnd || cohort?.dateEnd }
-                        }
-                        onChangeRange={(range) => {
-                          setFormValues({
-                            ...formValues,
-                            hasSpecificDate: range?.from !== undefined || range?.to !== undefined,
-                            dateStart: range?.from,
-                            dateEnd: range?.to,
-                          });
-                        }}
+                        value={editing ? !!values.dateStart : !!session.dateStart}
+                        onChange={handleToggleDate}
+                        range={editing ? { from: values.dateStart, to: values.dateEnd } : { from: session.dateStart, to: session.dateEnd }}
+                        onChangeRange={(range) => setValues({ ...values, dateStart: range?.from, dateEnd: range?.to })}
                       />
                       {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
                     </div>
@@ -237,8 +243,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                       readOnly={!editing || !canEditSanitaryEmailContact(user, cohort)}
                       disabled={!canEditSanitaryEmailContact(user, cohort)}
                       label="Adresse email académique"
-                      value={editing ? formValues.sanitaryContactEmail : session?.sanitaryContactEmail}
-                      onChange={(e) => setFormValues({ ...formValues, sanitaryContactEmail: e.target.value })}
+                      value={editing ? values.sanitaryContactEmail : session?.sanitaryContactEmail}
+                      onChange={(e) => setValues({ ...values, sanitaryContactEmail: e.target.value })}
                       tooltips={
                         "Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
                       }
@@ -246,13 +252,13 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                   </div>
                 </div>
               )}
-              <div className="flex mx-4 mt-4 gap-2 pb-4 justify-center">
-                <PedagoProject session={session} className="p-1" onSessionChanged={(c) => params.set(c)} />
-                <TimeSchedule session={session} className="p-1" onSessionChanged={(c) => params.set(c)} />
-              </div>
+            </form>
+            <div className="flex mx-4 mt-4 gap-2 pb-4 justify-center">
+              <PedagoProject session={session} className="p-1" setSession={updateSession} />
+              <TimeSchedule session={session} className="p-1" setSession={updateSession} />
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
