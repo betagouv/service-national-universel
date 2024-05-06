@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-undef
 module.exports = {
   env: {
     browser: true,
@@ -11,7 +10,7 @@ module.exports = {
     ecmaVersion: "latest",
     sourceType: "module",
   },
-  plugins: ["react", "react-hooks", "prettier"],
+  plugins: ["react", "react-hooks", "eslint-plugin-import", "prettier"],
   rules: {
     "react/prop-types": 0,
     "prettier/prettier": ["warn"],
@@ -19,6 +18,7 @@ module.exports = {
     "no-async-promise-executor": "warn",
     "react/no-unescaped-entities": "off",
     "react-hooks/rules-of-hooks": "warn",
+    "import/extensions": ["error"],
   },
   settings: {
     react: {
