@@ -1,7 +1,6 @@
-import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { COHESION_STAY_START } from "snu-lib";
@@ -15,15 +14,9 @@ import CenterInformations from "./CenterInformations";
 import SessionList from "../components/sessions/SessionList";
 
 export default function Index({ ...props }) {
-  const history = useHistory();
-  const { user, sessionPhase1: sessionPhase1Redux } = useSelector((state) => state.Auth);
-
+  const { user } = useSelector((state) => state.Auth);
   const [center, setCenter] = useState();
-  const [sessions, setSessions] = useState([]);
-  const [focusedSession, setFocusedSession] = useState(null);
-
-  const query = queryString.parse(location.search);
-  const { cohorte: cohortQueryUrl } = query;
+  const [sessions, setSessions] = useState();
 
   useEffect(() => {
     (async () => {
@@ -33,13 +26,13 @@ export default function Index({ ...props }) {
       const centerResponse = await api.get(`/cohesion-center/${id}`);
       if (!centerResponse.ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(centerResponse.code));
-        return history.push("/center");
+        return <Redirect to="/centre" />;
       }
       setCenter(centerResponse.data);
     })();
   }, [props.match.params.id]);
 
-  const getCenter = (blockFocus = false) => {
+  const getCenter = () => {
     (async () => {
       if (!center || !center?.cohorts) return;
       const allSessions = await api.get(`/cohesion-center/${center._id}/session-phase1`);
@@ -55,7 +48,7 @@ export default function Index({ ...props }) {
         }
       }
       if (allSessions.data.length === 0) setSessions([]);
-      const focusedCohort = cohortQueryUrl || sessionPhase1Redux?.cohort || allSessions?.data[allSessions?.data.length - 1]?.cohort;
+
       if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
         allSessions.data = allSessions.data.map((session) => {
           return {
@@ -65,8 +58,6 @@ export default function Index({ ...props }) {
         });
         allSessions.data.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
         setSessions(allSessions.data);
-
-        if (!blockFocus) setFocusedSession(allSessions.data.find((s) => s.cohort === focusedCohort) || allSessions?.data[allSessions?.data.length - 1]);
       } else {
         const sessionFiltered = allSessions.data
           .filter((session) => session.headCenterId === user._id)
@@ -77,16 +68,7 @@ export default function Index({ ...props }) {
             };
           });
         sessionFiltered.sort((a, b) => COHESION_STAY_START[a.cohort] - COHESION_STAY_START[b.cohort]);
-        const blockedSession = sessionFiltered.find((s) => s.cohort === focusedCohort);
-        if (user.role === ROLES.HEAD_CENTER) {
-          if (blockedSession) {
-            setSessions([blockedSession]);
-            setFocusedSession(blockedSession);
-            return;
-          }
-        }
         setSessions(sessionFiltered);
-        if (!blockFocus) setFocusedSession(blockedSession || allSessions?.data[0]);
       }
     })();
   };
@@ -94,22 +76,13 @@ export default function Index({ ...props }) {
     getCenter();
   }, [center]);
 
-  if (!center) return <Loader />;
+  if (!center || !sessions) return <Loader />;
 
   return (
     <>
       {user.role !== ROLES.HEAD_CENTER && <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
       <CenterInformations center={center} setCenter={setCenter} sessions={sessions} />
-      <SessionList
-        center={center}
-        sessions={sessions}
-        user={user}
-        focusedSession={focusedSession}
-        onFocusedSessionChange={setFocusedSession}
-        onSessionsChange={setSessions}
-        onRefreshCenter={() => getCenter(true)}
-        onCenterChange={setCenter}
-      />
+      <SessionList center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} user={user} />
     </>
   );
 }

@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from "react";
-import queryString from "query-string";
-import { useHistory } from "react-router-dom";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { useQuery } from "@tanstack/react-query";
 
 import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen, canEditSanitaryEmailContact, patternEmailAcademy } from "snu-lib";
 
 import { capture } from "@/sentry";
-import { canCreateOrUpdateCohesionCenter, translate } from "@/utils";
+import { canCreateOrUpdateCohesionCenter } from "@/utils";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
 import Pencil from "@/assets/icons/Pencil";
@@ -21,121 +18,76 @@ import TimeSchedule from "../TimeSchedule";
 import PedagoProject from "../PedagoProject";
 import { toastr } from "react-redux-toastr";
 import OccupationCard from "./OccupationCard";
+import { useHistory } from "react-router-dom";
 
-function getQuerySessionId() {
-  const { sessionId } = queryString.parse(location.search);
-  if (sessionId) {
-    return sessionId;
-  } else {
-    return null;
-  }
-}
-
-export default function SessionList({ center, sessions, user, focusedSession, onFocusedSessionChange, onSessionsChange, onRefreshCenter, onCenterChange }) {
+export default function SessionList({ center, setCenter, sessions, setSessions, user }) {
   const history = useHistory();
   const cohorts = useSelector((state) => state.Cohorts);
+  let params = new URLSearchParams(location.search);
 
-  const [editingBottom, setEditingBottom] = useState(false);
+  const [selectedCohort, setSelectedCohort] = useState(params.get("cohorte") || sessions[0]?.cohort || "wesh");
+  const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [editInfoSession, setEditInfoSession] = useState({});
+  const [formValues, setFormValues] = useState({});
   const [errors, setErrors] = useState({});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
 
-  const cohort = focusedSession?.cohort ?? cohorts?.[0]?.name;
-  const cohortInfo = cohorts.find((c) => c.name === cohort);
-
-  useEffect(() => {
-    const querySessionId = getQuerySessionId();
-    if (querySessionId) {
-      const session = sessions.find((s) => s._id === querySessionId);
-      if (session) {
-        onFocusedSessionChange(session);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessions]);
-
-  const { data: focusedCohortData } = useQuery({
-    queryKey: ["cohort", focusedSession?.cohort],
-    queryFn: async () => {
-      const { ok, data, code } = await api.get(`/cohort/${focusedSession?.cohort}`);
-      if (!ok || !data) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte", translate(code));
-        return null;
-      } else {
-        // TODO: clean form workflow
-        setEditInfoSession(data);
-        return data;
-      }
-    },
-    enabled: !!focusedSession?.cohort,
-  });
-
-  function handleSessionChange(newSession) {
-    const index = sessions.findIndex((s) => s._id === newSession._id);
-    if (index >= 0) {
-      const newAllSessions = [...sessions];
-      newAllSessions.splice(index, 1, newSession);
-      onSessionsChange(newAllSessions);
-      onFocusedSessionChange(newSession);
-    }
-  }
+  const session = sessions.find((session) => session.cohort === selectedCohort);
+  const cohort = cohorts.find((cohort) => cohort.name === selectedCohort);
 
   const onSubmitBottom = async () => {
     setLoading(true);
     const errorsObject = {};
-    if (isNaN(editInfoSession.placesTotal) || editInfoSession.placesTotal === "") {
+    if (isNaN(formValues.placesTotal) || formValues.placesTotal === "") {
       errorsObject.placesTotal = "Le nombre de places est incorrect";
-    } else if (editInfoSession.placesTotal > center.placesTotal) {
+    } else if (formValues.placesTotal > center.placesTotal) {
       errorsObject.placesTotal = "Le nombre de places ne peut pas être supérieur à la capacité du centre";
-    } else if (editInfoSession.placesTotal < focusedSession.placesTotal - focusedSession.placesLeft) {
+    } else if (formValues.placesTotal < session.placesTotal - session.placesLeft) {
       errorsObject.placesTotal = "Le nombre de places total est inférieur au nombre d'inscrits";
     }
 
-    if (editInfoSession.hasSpecificDate) {
-      if (!editInfoSession.dateStart || !editInfoSession.dateEnd) {
+    if (formValues.hasSpecificDate) {
+      if (!formValues.dateStart || !formValues.dateEnd) {
         errorsObject.date = "La date de début et de fin sont obligatoires";
-      } else if (editInfoSession.dateStart > editInfoSession.dateEnd) {
+      } else if (formValues.dateStart > formValues.dateEnd) {
         errorsObject.date = "La date de début doit être antérieure à la date de fin";
       }
     } else {
-      editInfoSession.dateStart = null;
-      editInfoSession.dateEnd = null;
+      formValues.dateStart = null;
+      formValues.dateEnd = null;
     }
-    if (editInfoSession.sanitaryContactEmail) {
+    if (formValues.sanitaryContactEmail) {
       const regex = new RegExp(patternEmailAcademy);
-      if (!regex.test(editInfoSession.sanitaryContactEmail)) {
+      if (!regex.test(formValues.sanitaryContactEmail)) {
         errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
       }
     }
 
     setErrors(errorsObject);
     if (Object.keys(errorsObject).length > 0) return setLoading(false);
-    const { ok, code, data: returnedData } = await api.put(`/session-phase1/${focusedSession._id}`, editInfoSession);
+    const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, formValues);
     if (!ok) {
       toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
       return setLoading(false);
     }
     toastr.success("La session a bien été modifiée avec succès");
     setLoading(false);
+    setEditing(false);
     setErrors({});
-    // faut aussi change le state sessions
-    onFocusedSessionChange({ ...returnedData, hasSpecificDate: returnedData?.dateStart && returnedData?.dateEnd ? true : false });
-    onRefreshCenter();
-    setEditingBottom(false);
+    setSessions(sessions.map((session) => (session._id === data._id ? data : session)));
   };
 
   const handleSessionDelete = async () => {
     try {
       setLoading(true);
-      const { ok, code } = await api.remove(`/session-phase1/${focusedSession._id}`);
+      const { ok, code } = await api.remove(`/session-phase1/${session._id}`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression de la session", code);
         return setLoading(false);
       }
       setLoading(false);
       setModalDelete({ isOpen: false });
-      onCenterChange({ ...center, cohorts: center.cohorts.filter((c) => c !== focusedSession.cohort) });
+      setCenter({ ...center, cohorts: center.cohorts.filter((c) => c !== session.cohort) });
       return toastr.success("La session a bien été supprimée");
     } catch (e) {
       capture(e);
@@ -152,13 +104,12 @@ export default function SessionList({ center, sessions, user, focusedSession, on
         <Title>Par séjour</Title>
         <div className="flex items-center">
           <SelectCohort
-            cohort={cohort}
+            cohort={cohort.name}
             withBadge
             filterFn={(c) => sessions.find((s) => s.cohort === c.name)}
             onChange={(cohortName) => {
-              setEditingBottom(false);
-              const session = sessions.find((s) => s.cohort === cohortName);
-              if (session) onFocusedSessionChange(session);
+              setEditing(false);
+              setSelectedCohort(cohortName);
               history.replace({ search: `?cohort=${cohortName}` });
             }}
           />
@@ -167,12 +118,12 @@ export default function SessionList({ center, sessions, user, focusedSession, on
       <div className="flex flex-col px-8 py-4 gap-4 mb-8 rounded-lg bg-white z-0">
         <div className="flex items-center justify-between">
           <div className="text-lg font-medium leading-6 text-gray-900">Détails</div>
-          {isSessionEditionOpen(user, focusedCohortData) && (
+          {isSessionEditionOpen(user, cohort) && (
             <>
-              {!editingBottom ? (
+              {!editing ? (
                 <button
                   className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => setEditingBottom(true)}
+                  onClick={() => setEditing(true)}
                   disabled={loading}>
                   <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                   Modifier
@@ -182,8 +133,8 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                   <button
                     className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() => {
-                      setEditingBottom(false);
-                      setEditInfoSession(focusedSession);
+                      setEditing(false);
+                      setFormValues(session);
                       setErrors({});
                     }}
                     disabled={loading}>
@@ -202,14 +153,14 @@ export default function SessionList({ center, sessions, user, focusedSession, on
           )}
         </div>
         <div className="border-top">
-          {center?._id && focusedSession?._id && (
+          {center?._id && session?._id && (
             <div className="">
               <div className="flex border-b-[1px] border-b-gray-200">
                 {/* // Taux doccupation */}
                 <OccupationCard
-                  canBeDeleted={focusedSession.canBeDeleted}
-                  placesTotal={focusedSession.placesTotal}
-                  placesLeft={focusedSession.placesLeft}
+                  canBeDeleted={session.canBeDeleted}
+                  placesTotal={session.placesTotal}
+                  placesLeft={session.placesLeft}
                   user={user}
                   modalDelete={modalDelete}
                   setModalDelete={setModalDelete}
@@ -218,13 +169,13 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                 {/* // liste des volontaires */}
                 <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 border-x-[1px] border-gray-200 bg-white">
                   <div className="flex w-full flex-1 items-center justify-center">
-                    <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/general`)}>
+                    <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${session._id}/general`)}>
                       Voir les volontaires
                     </button>
                   </div>
                   <div className="w-full border-b-[1px] border-gray-200" />
                   <div className="flex flex-1 items-center justify-center">
-                    <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${focusedSession._id}/equipe`)}>
+                    <button className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" onClick={() => history.push(`/centre/${center._id}/${session._id}/equipe`)}>
                       Voir l&apos;équipe
                     </button>
                   </div>
@@ -235,10 +186,10 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                   <div className="flex w-80 flex-1 items-center justify-center ">
                     <Field
                       error={errors.placesTotal}
-                      readOnly={!editingBottom || !canCreateOrUpdateCohesionCenter(user)}
+                      readOnly={!editing || !canCreateOrUpdateCohesionCenter(user)}
                       label="Places ouvertes"
-                      value={editingBottom ? editInfoSession.placesTotal : focusedSession.placesTotal}
-                      onChange={(e) => setEditInfoSession({ ...editInfoSession, placesTotal: e.target.value })}
+                      value={editing ? formValues.placesTotal : session.placesTotal}
+                      onChange={(e) => setFormValues({ ...formValues, placesTotal: e.target.value })}
                       tooltips={
                         "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
                       }
@@ -252,20 +203,20 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                         tooltipText={
                           <p>
                             Les dates de cette session diffèrent des dates officielles :{" "}
-                            <strong>{`${dayjs(focusedCohortData?.dateStart).format("DD")} - ${dayjs(focusedCohortData?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
+                            <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                           </p>
                         }
-                        readOnly={!editingBottom || !canPutSpecificDateOnSessionPhase1(user)}
-                        value={editingBottom ? editInfoSession.hasSpecificDate : focusedSession.hasSpecificDate}
-                        onChange={() => setEditInfoSession({ ...editInfoSession, hasSpecificDate: !editInfoSession.hasSpecificDate })}
+                        readOnly={!editing || !canPutSpecificDateOnSessionPhase1(user)}
+                        value={editing ? formValues.hasSpecificDate : session.hasSpecificDate}
+                        onChange={() => setFormValues({ ...formValues, hasSpecificDate: !formValues.hasSpecificDate })}
                         range={
-                          editingBottom
-                            ? { from: editInfoSession.dateStart, to: editInfoSession.dateEnd }
-                            : { from: focusedSession.dateStart || focusedCohortData?.dateStart, to: focusedSession.dateEnd || focusedCohortData?.dateEnd }
+                          editing
+                            ? { from: formValues.dateStart, to: formValues.dateEnd }
+                            : { from: session.dateStart || cohort?.dateStart, to: session.dateEnd || cohort?.dateEnd }
                         }
                         onChangeRange={(range) => {
-                          setEditInfoSession({
-                            ...editInfoSession,
+                          setFormValues({
+                            ...formValues,
                             hasSpecificDate: range?.from !== undefined || range?.to !== undefined,
                             dateStart: range?.from,
                             dateEnd: range?.to,
@@ -277,17 +228,17 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                   </div>
                 </div>
               </div>
-              {center?._id && focusedSession?._id && center.region === "Provence-Alpes-Côte d'Azur" && cohort === "Juin 2024 - 2" && (
+              {center?._id && session?._id && center.region === "Provence-Alpes-Côte d'Azur" && cohort === "Juin 2024 - 2" && (
                 <div className="flex flex-row justify-center items-center w-full mt-2">
                   <div className="w-1/2">
                     <label>Réception des fiches sanitaires (facultatif)</label>
                     <Field
                       error={errors.sanitaryContactEmail}
-                      readOnly={!editingBottom || !canEditSanitaryEmailContact(user, cohortInfo)}
-                      disabled={!canEditSanitaryEmailContact(user, cohortInfo)}
+                      readOnly={!editing || !canEditSanitaryEmailContact(user, cohort)}
+                      disabled={!canEditSanitaryEmailContact(user, cohort)}
                       label="Adresse email académique"
-                      value={editingBottom ? editInfoSession.sanitaryContactEmail : focusedSession?.sanitaryContactEmail}
-                      onChange={(e) => setEditInfoSession({ ...editInfoSession, sanitaryContactEmail: e.target.value })}
+                      value={editing ? formValues.sanitaryContactEmail : session?.sanitaryContactEmail}
+                      onChange={(e) => setFormValues({ ...formValues, sanitaryContactEmail: e.target.value })}
                       tooltips={
                         "Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
                       }
@@ -296,8 +247,8 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                 </div>
               )}
               <div className="flex mx-4 mt-4 gap-2 pb-4 justify-center">
-                <PedagoProject session={focusedSession} className="p-1" onSessionChanged={handleSessionChange} />
-                <TimeSchedule session={focusedSession} className="p-1" onSessionChanged={handleSessionChange} />
+                <PedagoProject session={session} className="p-1" onSessionChanged={(c) => params.set(c)} />
+                <TimeSchedule session={session} className="p-1" onSessionChanged={(c) => params.set(c)} />
               </div>
             </div>
           )}
