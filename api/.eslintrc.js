@@ -15,6 +15,7 @@ module.exports = {
     "no-unused-vars": "warn",
     "no-inner-declarations": "warn",
     "jest/no-conditional-expect": "warn",
+    "import/extensions": ["error"],
   },
-  plugins: ["jest", "prettier"],
+  plugins: ["eslint-plugin-import", "jest", "prettier"],
 };
