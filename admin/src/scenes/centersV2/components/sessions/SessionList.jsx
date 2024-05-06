@@ -277,9 +277,10 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                   </div>
                 </div>
               </div>
-              {center?._id && focusedSession?._id && center.region === "Provence-Alpes-Côte d'Azur" && (
+              {center?._id && focusedSession?._id && center.region === "Provence-Alpes-Côte d'Azur" && cohort === "Juin 2024 - 2" && (
                 <div className="flex flex-row justify-center items-center w-full mt-2">
                   <div className="w-1/2">
+                    <label>Réception des fiches sanitaires (facultatif)</label>
                     <Field
                       error={errors.sanitaryContactEmail}
                       readOnly={!editingBottom || !canEditSanitaryEmailContact(user, cohortInfo)}
