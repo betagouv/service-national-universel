@@ -192,7 +192,7 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
       "Commune volontaire": city,
       "Téléphone volontaire": phoneZone ? `${PHONE_ZONES[phoneZone].code} ${phone}` : phone,
       "Statut professionnel": situationTranslations[situation] || situation,
-      "ID du centre": cohesionCenter ? cohesionCenter._id.toString() : "",
+      "ID du centre": cohesionCenter && cohesionCenter._id ? cohesionCenter._id.toString() : "",
       "Libellé du centre": cohesionCenter ? cohesionCenter.name : "",
       "Date début session": dayjs(departureDate).locale("fr-FR").format("D/M/YYYY"),
       "Validation séjour (Validation phase 1)": afterSession ? (statusPhase1 === "DONE" ? "Oui" : "Non") : "null",
