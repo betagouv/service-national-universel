@@ -12,7 +12,7 @@ const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const DepartmentServiceModel = require("../../models/departmentService");
 const { getDepartureDateSession, getReturnDateSession } = require("../../utils/cohort");
-const { formatStringDate, formatStringDateTimezoneUTC, regionsListDROMS, transportDatesToString, YOUNG_STATUS } = require("snu-lib");
+const { formatStringDate, formatStringDateTimezoneUTC, transportDatesToString, YOUNG_STATUS, FUNCTIONAL_ERRORS } = require("snu-lib");
 const { capture } = require("../../sentry");
 
 const FONT = "Marianne";
@@ -257,15 +257,14 @@ async function generateCohesion(outStream, young) {
 async function generateBatchCohesion(outStream, youngs) {
   const random = Math.random();
   console.time("RENDERING " + random);
-  const validatedYoungs = youngs.filter((young) => young.status === YOUNG_STATUS.VALIDATED);
+  const validatedYoungsWithSession = youngs.filter((young) => young.status === YOUNG_STATUS.VALIDATED && young.sessionPhase1Id);
   const doc = initDocument({ autoFirstPage: false });
   doc.pipe(outStream);
-  let commonYoungData = await getYoungCommonData(validatedYoungs);
-
-  for (const young of validatedYoungs) {
+  let commonYoungData = await getYoungCommonData(validatedYoungsWithSession);
+  for (const young of validatedYoungsWithSession) {
     try {
-      doc.addPage();
       controlYoungCoherence(young);
+      doc.addPage();
       render(doc, { young, ...commonYoungData });
     } catch (error) {
       capture(error);
@@ -278,18 +277,15 @@ async function generateBatchCohesion(outStream, youngs) {
 function controlYoungCoherence(young) {
   if (!["AFFECTED", "DONE", "NOT_DONE"].includes(young.statusPhase1)) throw `young ${young.id} not affected`;
   if (!young.sessionPhase1Id || (!isLocalTransport(young) && !young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.source !== "CLE"))
-    throw `young ${young.id} unauthorized`;
+    capture(`young ${young.id} unauthorized`);
 }
 
 async function getYoungCommonData(youngs) {
-  let commonYoungData = {};
   if (!youngs || youngs.length === 0) {
-    throw `youngs is empty`;
+    throw FUNCTIONAL_ERRORS.NO_YOUNG_IN_EXPECTED_STATUS;
   }
 
-  commonYoungData = await fetchDataForYoung(youngs[0]);
-
-  return commonYoungData;
+  return await fetchDataForYoung(youngs[0]);
 }
 
 module.exports = { generateCohesion, generateBatchCohesion };
