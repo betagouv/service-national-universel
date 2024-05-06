@@ -55,7 +55,7 @@ jobs:
       branch_name: ${{ needs.prepare.outputs.target_branch }}
     secrets: inherit
 
- run_tests_front:
+  run_tests_front:
     needs: prepare
     uses: ./.github/workflows/run-tests-front.yml
     with:
