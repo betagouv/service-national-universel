@@ -1,15 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-// const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const cohesionCenterModel = require("../../models/cohesionCenter");
-const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const ReferentModel = require("../../models/referent");
-const CohortModel = require("../../models/cohort");
+
+const {
+  ReferentModel,
+  CohortModel,
+  SchemaDeRepartitionModel,
+  CohesionCenterModel,
+  PlanTransportModel,
+  PointDeRassemblementModel,
+  LigneBusModel,
+  LigneToPointModel,
+} = require("../../models");
+
 const {
   canViewLigneBus,
   canEditLigneBusTeam,
@@ -66,7 +69,7 @@ router.get("/cohort/:cohort", passport.authenticate("referent", { session: false
     const ligneBus = await LigneBusModel.find({ cohort: { $in: [cohort] }, deletedAt: { $exists: false } });
     let arrayCenter = [];
     ligneBus.map((l) => (arrayCenter = arrayCenter.concat(l.centerId)));
-    const centers = await cohesionCenterModel.find({ _id: { $in: arrayCenter } });
+    const centers = await CohesionCenterModel.find({ _id: { $in: arrayCenter } });
     return res.status(200).send({ ok: true, data: { ligneBus, centers } });
   } catch (error) {
     capture(error);
@@ -507,7 +510,7 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
     const ligneBus = await LigneBusModel.findById(id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const listGroup = await schemaRepartitionModel.find({ centerId: ligneBus.centerId });
+    const listGroup = await SchemaDeRepartitionModel.find({ centerId: ligneBus.centerId });
 
     let idPDR = [];
     for (let group of listGroup) {
@@ -673,7 +676,7 @@ async function getInfoBus(line) {
     meetingsPointsDetail.push({ ...line._doc, ...pointDeRassemblement._doc });
   }
 
-  const centerDetail = await cohesionCenterModel.findById(line.centerId);
+  const centerDetail = await CohesionCenterModel.findById(line.centerId);
 
   return { ...line._doc, meetingsPointsDetail, centerDetail };
 }
@@ -944,7 +947,7 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     const pdrs = await PointDeRassemblementModel.find({ _id: ligne.meetingPointsIds });
     if (!pdrs?.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const center = await cohesionCenterModel.findById(ligne.centerId);
+    const center = await CohesionCenterModel.findById(ligne.centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const departmentListToNotify = pdrs.map((pdr) => pdr.department);
