@@ -11,7 +11,7 @@ import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl, normalizeString } from "./filters/utils";
 import { debounce } from "../../../utils";
 import { sub } from "date-fns";
-import { SubFilter } from "./Filter";
+import { CustomFilter } from "./Filter";
 import { SubFilterPopOver } from "./filters/SubFilter";
 
 type FiltersProps = {
@@ -26,7 +26,7 @@ type FiltersProps = {
   setParamData: (data: any) => void;
   defaultUrlParam?: boolean;
   size: number;
-  subFilters?: SubFilter[];
+  subFilters?: CustomFilter[];
 };
 
 function classNames(...classes) {

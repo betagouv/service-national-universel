@@ -3,7 +3,8 @@ import React, { Fragment } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
 import { normalizeString } from "./utils";
-import { Filter, SubFilter } from "@/components/filters-system-v2/components/Filter";
+import { Filter, CustomFilter } from "@/components/filters-system-v2/components/Filter";
+import { SubFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/SubFilter";
 
 // file used to show the popover for the all the possible values of a filter
 
@@ -19,7 +20,7 @@ type FilterPopOverProps = {
   isShowing?: any;
   setIsShowing: any;
   setParamData: any;
-  subFilter?: SubFilter;
+  subFilter?: CustomFilter;
 };
 
 export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, subFilter }: FilterPopOverProps) {
@@ -38,6 +39,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
               {selectedFilters[filter?.name]?.filter?.length}
             </div>
           )}
+          {subFilter && <SubFilterCount dataOnDropDown={data}></SubFilterCount>}
           <BsChevronRight className="text-gray-400" />
         </div>
       </Popover.Button>
@@ -62,7 +64,7 @@ type DropDownProps = {
   data: any;
   inListFilter?: boolean;
   setParamData: any;
-  subFilter?: SubFilter | null;
+  subFilter?: CustomFilter | null;
 };
 
 export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData, subFilter }: DropDownProps) => {
@@ -109,6 +111,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   }, [search]);
 
   React.useEffect(() => {
+    syncSubFilter(subFilter, selectedFilters);
     const handleClickOutside = (event) => {
       // @ts-ignore
       if (ref.current && !ref.current.contains(event.target)) {
@@ -141,24 +144,26 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: newFilters } };
 
     if (subFilter) {
-      syncHighOrderFilter(newSelectedFilters);
+      syncRootFilter(subFilter, newSelectedFilters);
     }
     setSelectedFilters(newSelectedFilters);
   };
-
-  const syncHighOrderFilter = (newSelectedFilters) => {
+  const syncSubFilter = (subFilter: CustomFilter | undefined | null, selectedFilters) => {
     if (!subFilter) return;
-    newSelectedFilters[subFilter.key].filter = [];
+    let newSelectedFilters = {};
     for (const filter of subFilter.filters) {
-      if (newSelectedFilters[filter.name] && newSelectedFilters[subFilter.key]) {
-        newSelectedFilters[subFilter.key].filter = [...newSelectedFilters[subFilter.key].filter, ...(newSelectedFilters[filter.name].filter || [])];
+      if (selectedFilters[filter.parentFilter]) {
+        const keys = filter.filterRootFilter(selectedFilters[filter.parentFilter]?.filter.map((f) => ({ key: f }))).map((f) => f.key);
+        newSelectedFilters = { ...newSelectedFilters, [filter.name]: { filter: keys } };
       }
     }
+    setSelectedFilters({ ...selectedFilters, ...newSelectedFilters });
   };
+
   const handleDelete = () => {
     const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: [] } };
     if (subFilter) {
-      syncHighOrderFilter(newSelectedFilters);
+      syncRootFilter(subFilter, newSelectedFilters);
     }
     setSelectedFilters(newSelectedFilters);
   };

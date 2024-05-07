@@ -1,6 +1,6 @@
 import { getCohortPeriod, translate } from "snu-lib";
 import API from "./api";
-import { SubFilter } from "@/components/filters-system-v2/components/Filter";
+import { CustomFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 
 export const getCohortByName = async (cohortName) => {
   try {
@@ -50,7 +50,7 @@ export const getCohortSelectOptions = (cohorts, short = false) => {
   return cohorts.map((cohort) => ({ value: cohort.name, label: `${cohort.name} (${getCohortPeriod(cohort, true)})` }));
 };
 
-export const getCohortGroups = (): SubFilter => {
+export const getCohortGroups = (): CustomFilter => {
   return {
     key: "cohort",
     filters: [
@@ -62,7 +62,7 @@ export const getCohortGroups = (): SubFilter => {
         missingLabel: "Non renseigné",
         sort: (data) => data,
         filter: (e) => e,
-        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
+        filterRootFilter: (dataFiltered: DataFilter[]) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
       },
       {
         title: "HTS 2024",
@@ -72,18 +72,18 @@ export const getCohortGroups = (): SubFilter => {
         missingLabel: "Non renseigné",
         sort: (e) => e,
         filter: (e) => e,
-        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => !cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
+        filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => !cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
       },
-      {
-        title: "2024",
-        name: CohortGroup._2024,
-        parentGroup: "Cohorte",
-        parentFilter: "cohort",
-        missingLabel: "Non renseigné",
-        sort: (e) => e,
-        filter: (e) => e,
-        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("2024")),
-      },
+      // {
+      //   title: "2024",
+      //   name: CohortGroup._2024,
+      //   parentGroup: "Cohorte",
+      //   parentFilter: "cohort",
+      //   missingLabel: "Non renseigné",
+      //   sort: (e) => e,
+      //   filter: (e) => e,
+      //   filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("2024")),
+      // },
       {
         title: "2023",
         name: CohortGroup._2023,
@@ -92,7 +92,7 @@ export const getCohortGroups = (): SubFilter => {
         missingLabel: "Non renseigné",
         sort: (e) => e,
         filter: (e) => e,
-        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("2023")),
+        filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("2023")),
       },
       {
         title: "2022 et -",
@@ -102,7 +102,7 @@ export const getCohortGroups = (): SubFilter => {
         missingLabel: "Non renseigné",
         sort: (e) => e,
         filter: (e) => e,
-        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("2022") || cohort.key.toLowerCase().includes("2021")),
+        filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("2022") || cohort.key.toLowerCase().includes("2021")),
       },
       {
         title: "à venir",
@@ -112,7 +112,7 @@ export const getCohortGroups = (): SubFilter => {
         missingLabel: "Non renseigné",
         sort: (e) => e,
         filter: (e) => e,
-        filterSubFilter: (dataFiltered) => dataFiltered?.cohort?.filter((cohort) => cohort.key.toLowerCase().includes("à venir")),
+        filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("à venir")),
       },
     ],
   };
