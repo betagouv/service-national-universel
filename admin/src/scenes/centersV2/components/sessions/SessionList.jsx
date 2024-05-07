@@ -36,6 +36,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
   const session = sessions.find((session) => {
     return session.cohort === selectedCohort;
   });
+  console.log(center.region, cohort);
   const updateSession = (newSession) => {
     setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
   };
@@ -44,6 +45,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
     setValues({});
     setErrors({});
   };
+
+  console.log(!canEditSanitaryEmailContact(user, cohort));
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -221,14 +224,14 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                   </div>
                 </div>
               </div>
-              {center.region === "Provence-Alpes-Côte d'Azur" && cohort === "Juin 2024 - 2" && (
+              {center.region === "Provence-Alpes-Côte d'Azur" && cohort.name === "Juin 2024 - 2" && (
                 <div className="flex flex-row justify-center items-center w-full mt-2">
                   <div className="w-1/2">
                     <label>Réception des fiches sanitaires (facultatif)</label>
                     <Field
                       error={errors.sanitaryContactEmail}
-                      readOnly={!editing || !canEditSanitaryEmailContact(user, cohort)}
-                      disabled={!canEditSanitaryEmailContact(user, cohort)}
+                      readOnly={!editing || canEditSanitaryEmailContact(user, cohort)}
+                      disabled={canEditSanitaryEmailContact(user, cohort)}
                       label="Adresse email académique"
                       value={values.sanitaryContactEmail || session?.sanitaryContactEmail}
                       onChange={(e) => setValues({ ...values, sanitaryContactEmail: e.target.value })}
