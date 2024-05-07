@@ -230,8 +230,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                     <label>Réception des fiches sanitaires (facultatif)</label>
                     <Field
                       error={errors.sanitaryContactEmail}
-                      readOnly={!editing || canEditSanitaryEmailContact(user, cohort)}
-                      disabled={canEditSanitaryEmailContact(user, cohort)}
+                      readOnly={!editing || !canEditSanitaryEmailContact(user, cohort)}
+                      disabled={!canEditSanitaryEmailContact(user, cohort)}
                       label="Adresse email académique"
                       value={values.sanitaryContactEmail || session?.sanitaryContactEmail}
                       onChange={(e) => setValues({ ...values, sanitaryContactEmail: e.target.value })}
