@@ -347,7 +347,7 @@ function canSeeYoungInfo(actor) {
 function canEditSanitaryEmailContact(actor, cohort) {
   if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER].includes(actor.role) && !cohort.isAssignmentAnnouncementsOpenForYoung) {
     return true;
-  } else if (ROLES.ADMIN) {
+  } else if ([ROLES.ADMIN].includes(actor.role)) {
     return true;
   } else {
     return false;
