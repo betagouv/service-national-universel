@@ -111,7 +111,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   }, [search]);
 
   React.useEffect(() => {
-    syncSubFilter(subFilter, selectedFilters);
+    syncSubFilter(subFilter);
     const handleClickOutside = (event) => {
       // @ts-ignore
       if (ref.current && !ref.current.contains(event.target)) {
@@ -148,7 +148,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     }
     setSelectedFilters(newSelectedFilters);
   };
-  const syncSubFilter = (subFilter: CustomFilter | undefined | null, selectedFilters) => {
+  const syncSubFilter = (subFilter: CustomFilter | undefined | null) => {
     if (!subFilter) return;
     let newSelectedFilters = {};
     for (const filter of subFilter.filters) {
@@ -162,6 +162,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
 
   const handleDelete = () => {
     const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: [] } };
+
     if (subFilter) {
       syncRootFilter(subFilter, newSelectedFilters);
     }
