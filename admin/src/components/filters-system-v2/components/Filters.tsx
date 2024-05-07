@@ -265,6 +265,7 @@ export default function Filters({
                                   if (subFilters && currentSubFilter && item.name === currentSubFilter?.key) {
                                     customItem = {
                                       ...item,
+                                      allowEmpty: false,
                                       customComponent: (setFilter, filter) => (
                                         <SubFilterPopOver
                                           selectedFilters={selectedFilters}

@@ -13,7 +13,7 @@ export type SubFilterPopOverProps = {
 };
 
 export const isEverySubValueChecked = (filter: Filter, selectedFilters, dataOnDropDown: DataFilter[]) => {
-  return selectedFilters[filter.name]?.filter?.length === dataOnDropDown.length || false;
+  return (dataOnDropDown.length !== 0 && selectedFilters[filter.name]?.filter?.length === dataOnDropDown.length) || false;
 };
 
 export const syncRootFilter = (subFilter: CustomFilter, newSelectedFilters: { [key: string]: { filter: string[] } }) => {
@@ -37,7 +37,6 @@ export const SubFilterPopOver = ({ selectedFilters, setSelectedFilters, setParam
     const newSelectedFilters = {
       ...selectedFilters,
       [filter.name]: { filter: newSubFilters },
-      // [filter.parentFilter]: { ...selectedFilters[filter.parentFilter], filter: [...selectedFilters[filter.parentFilter].filter, ...newSubFilters] },
     };
     syncRootFilter(subFilter, newSelectedFilters);
 
@@ -47,19 +46,17 @@ export const SubFilterPopOver = ({ selectedFilters, setSelectedFilters, setParam
   return (
     <>
       {subFilter.filters.map((filter: Filter) => {
-        // console.log("dataFilter", dataFilter);
         const dataOnDropDown: DataFilter[] = filter?.filterRootFilter(dataFilter[filter.parentFilter]);
 
         return (
-          // <div className="flex cursor-pointer items-center justify-between px-3 hover:bg-gray-50" key={`${filter.title}`}>
-          //   <div className="flex items-center text-sm leading-5 text-gray-700">
-          <div className="flex">
+          <div className="flex cursor-pointer items-center px-3 hover:bg-gray-50" key={`${filter.title}`}>
             <input
               key={"input-sub-" + filter.name}
               type="checkbox"
               checked={isEverySubValueChecked(filter, selectedFilters, dataOnDropDown)}
               onChange={() => check(filter, dataOnDropDown)}
             />
+
             <FilterPopOver
               key={"sub-" + filter.name}
               filter={filter}
