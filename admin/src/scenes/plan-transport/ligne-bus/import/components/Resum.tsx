@@ -1,15 +1,26 @@
 import React from "react";
-import { PlainButton } from "../../../components/Buttons";
-import { capture } from "../../../../../sentry";
 import { toastr } from "react-redux-toastr";
-import api from "../../../../../services/api";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { COHORT_TYPE } from "snu-lib";
 import { HiExclamation } from "react-icons/hi";
 
-export default function Resum({ summary, cohort, addLigne }) {
-  const cohorts = useSelector((state) => state.Cohorts);
+import { COHORT_TYPE } from "snu-lib";
+
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import { CohortState } from "@/redux/cohorts/reducer";
+
+import { PlainButton } from "../../../components/Buttons";
+import { ImportSummaryResponse } from "../type";
+
+interface Props {
+  cohort: string;
+  addLigne?: string;
+  summary: ImportSummaryResponse | null;
+}
+
+export default function Resum({ summary, cohort, addLigne }: Props) {
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const currentCohort = cohorts.find((c) => c.name === cohort);
   const [isLoading, setIsLoading] = React.useState(false);
   const history = useHistory();

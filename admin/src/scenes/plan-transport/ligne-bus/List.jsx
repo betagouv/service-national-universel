@@ -2,26 +2,30 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
+import { FiFolderPlus } from "react-icons/fi";
+import { HiOutlineChartSquareBar, HiOutlineAdjustments } from "react-icons/hi";
+import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
+import { GoPlus } from "react-icons/go";
+
 import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-lib";
-import ArrowUp from "../../../assets/ArrowUp";
-import Comment from "../../../assets/comment";
-import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../../components/filters-system-v2";
-import Loader from "../../../components/Loader";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
+import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
+
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import plausibleEvent from "@/services/plausible";
+
+import ArrowUp from "@/assets/ArrowUp";
+import Comment from "@/assets/comment";
+import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
+import Loader from "@/components/Loader";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
 import { PlainButton } from "../components/Buttons";
 import { translateStatus } from "../components/commons";
 import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import ListPanel from "./modificationPanel/List";
-import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
-import { HiOutlineChartSquareBar, HiOutlineAdjustments } from "react-icons/hi";
-import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
-import { GoPlus } from "react-icons/go";
 import Historic from "./Historic";
 import ListeDemandeModif from "./ListeDemandeModif";
-import plausibleEvent from "@/services/plausible";
-import { FiFolderPlus } from "react-icons/fi";
-import SelectCohort from "@/components/cohorts/SelectCohort";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);

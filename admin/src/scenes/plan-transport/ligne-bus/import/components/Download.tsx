@@ -1,14 +1,24 @@
 import React from "react";
-import { BsDownload } from "react-icons/bs";
-import { PlainButton } from "../../../components/Buttons";
-import { CDN_BASE_URL } from "../../../../../utils";
 import { useSelector } from "react-redux";
+import { BsDownload } from "react-icons/bs";
+
 import { COHORT_TYPE } from "snu-lib";
 
-export default function Download({ nextStep, addLigne, cohort }) {
-  const cohorts = useSelector((state) => state.Cohorts);
+import { CDN_BASE_URL } from "@/utils";
+import { CohortState } from "@/redux/cohorts/reducer";
+
+import { PlainButton } from "../../../components/Buttons";
+
+interface Props {
+  cohort: string;
+  addLigne?: string;
+  onNextStep: () => void;
+}
+
+export default function Download({ cohort, addLigne, onNextStep }: Props) {
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
+
   const currentCohort = cohorts.find((c) => c.name === cohort);
-  console.log(currentCohort.type, COHORT_TYPE.CLE);
 
   return (
     <>
@@ -18,7 +28,7 @@ export default function Download({ nextStep, addLigne, cohort }) {
           <p className="mx-auto text-sm leading-5 font-normal text-gray-500">Aucune ligne déjà existante ne sera remplacée.</p>
           <p className="mx-auto text-sm leading-5 font-normal text-gray-500">Aucune suppression ne sera effectuée si une ligne n’existe pas dans le fichier partiel.</p>
           <p className="mx-auto text-sm leading-5 font-normal text-gray-500">Chaque nouvelle ligne détectée sera ajoutée.</p>
-          <PlainButton className="w-52 mx-auto mt-6" onClick={nextStep}>
+          <PlainButton className="w-52 mx-auto mt-6" onClick={onNextStep}>
             Suivant
           </PlainButton>
         </div>
@@ -36,7 +46,7 @@ export default function Download({ nextStep, addLigne, cohort }) {
               <BsDownload className="text-blue-600" />
               Télécharger le modèle
             </a>
-            <PlainButton className="w-52" onClick={nextStep}>
+            <PlainButton className="w-52" onClick={onNextStep}>
               Suivant
             </PlainButton>
           </div>

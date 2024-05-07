@@ -1,16 +1,26 @@
-import React, { useRef, useState } from "react";
+import React, { ChangeEvent, useRef, useState } from "react";
+import ReactLoading from "react-loading";
+import { GrCircleInformation } from "react-icons/gr";
+import { HiOutlineChevronDown, HiOutlineDocumentAdd } from "react-icons/hi";
+
+import { MIME_TYPES, PDT_IMPORT_ERRORS_TRANSLATION } from "snu-lib";
+
+import api from "@/services/api";
+import { capture } from "@/sentry";
+
 import { PlainButton } from "../../../components/Buttons";
 import ExcelColor from "../../components/Icons/ExcelColor.png";
-import ReactLoading from "react-loading";
-import { HiOutlineChevronDown, HiOutlineDocumentAdd } from "react-icons/hi";
-import { GrCircleInformation } from "react-icons/gr";
-import { MIME_TYPES, PDT_IMPORT_ERRORS_TRANSLATION } from "snu-lib";
-import api from "../../../../../services/api";
-import { capture } from "../../../../../sentry";
+import { ImportSummaryResponse } from "../type";
 
 const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 
-export default function Import({ cohort, onFileVerified, addLigne }) {
+interface Props {
+  cohort: string;
+  addLigne?: string;
+  onFileVerified: (summary: ImportSummaryResponse) => void;
+}
+
+export default function Import({ cohort, onFileVerified, addLigne }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [importErrors, setImportErrors] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -18,7 +28,7 @@ export default function Import({ cohort, onFileVerified, addLigne }) {
   const [importedFileName, setImportedFileName] = useState(null);
   const fileInput = useRef(null);
 
-  function importFile(e) {
+  function importFile(e: MouseEvent) {
     e.preventDefault();
     setUploadError(null);
     if (fileInput && fileInput.current) {
@@ -26,7 +36,7 @@ export default function Import({ cohort, onFileVerified, addLigne }) {
     }
   }
 
-  async function upload(e) {
+  async function handleUpload(e: ChangeEvent<HTMLInputElement>) {
     if (!e?.target?.files?.length) return;
     const file = e.target.files[0];
     setUploadError(null);
@@ -121,7 +131,7 @@ export default function Import({ cohort, onFileVerified, addLigne }) {
                 <HiOutlineDocumentAdd className="mt-0.5 mr-2" size={20} />
                 Téléversez votre fichier
               </PlainButton>
-              <input type="file" accept={MIME_TYPES.EXCEL} ref={fileInput} onChange={upload} className="hidden" />
+              <input type="file" accept={MIME_TYPES.EXCEL} ref={fileInput} onChange={handleUpload} className="hidden" />
               {uploadError && <div className="mt-8 text-center text-sm font-bold text-red-900">{uploadError}</div>}
             </>
           ) : (
