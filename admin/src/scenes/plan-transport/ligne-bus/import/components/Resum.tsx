@@ -30,14 +30,14 @@ export default function Resum({ summary, cohort, addLigne }: Props) {
     try {
       const { ok } = await api.post(`/plan-de-transport/import/${summary._id}/execute`, {});
       if (!ok) {
-        toastr.error("Impossible d'importer le plan de transport. Veuillez réessayer dans quelques instants.");
+        toastr.error("Impossible d'importer le plan de transport. Veuillez réessayer dans quelques instants.", "");
       } else {
-        toastr.success("Import réussi.");
+        toastr.success("Import réussi.", "");
         history.push(`/ligne-de-bus?cohort=${cohort}`);
       }
     } catch (err) {
       capture(err);
-      toastr.error("Une erreur interne est survenue pendant l'import. Veuillez réessayer dans quelques instants.");
+      toastr.error("Une erreur interne est survenue pendant l'import. Veuillez réessayer dans quelques instants.", "");
     }
     setIsLoading(false);
   }

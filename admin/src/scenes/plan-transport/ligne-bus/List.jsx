@@ -400,6 +400,7 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
                     "TEMPS DE ROUTE": data.travelTime,
                     "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
                     "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
+                    "LIGNES FUSIONNÉE": data.mergedBusIds?.join(",") || "",
                   };
                 });
               }}

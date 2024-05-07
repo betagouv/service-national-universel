@@ -1,11 +1,12 @@
-const { ERRORS } = require("../../utils");
 const { PDT_IMPORT_ERRORS, departmentLookUp } = require("snu-lib");
 const XLSX = require("xlsx");
 const mongoose = require("mongoose");
-const CohesionCenterModel = require("../../models/cohesionCenter");
-const PdrModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const ClasseModel = require("../../models/cle/classe");
+
+const { ERRORS } = require("../utils");
+const CohesionCenterModel = require("../models/cohesionCenter");
+const PdrModel = require("../models/PlanDeTransport/pointDeRassemblement");
+const SessionPhase1Model = require("../models/sessionPhase1");
+const ClasseModel = require("../models/cle/classe");
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
@@ -15,7 +16,7 @@ export interface PdtLine {
   [key: string]: string;
 }
 
-export const validatePdtExcel = async (
+export const validatePdtFile = async (
   filePath: string,
   cohortName: string,
   isCle: boolean,
@@ -63,6 +64,7 @@ export const validatePdtExcel = async (
     "PAUSE DÉJEUNER ALLER": [],
     "PAUSE DÉJEUNER RETOUR": [],
     "TEMPS DE ROUTE": [],
+    "LIGNES FUSIONNÉE": [],
   };
 
   if (isCle) {
@@ -226,6 +228,9 @@ export const validatePdtExcel = async (
     if (line["TEMPS DE ROUTE"] && !isValidTime(line["TEMPS DE ROUTE"])) {
       errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
     }
+    if (line["LIGNES FUSIONNÉE"] && line["LIGNES FUSIONNÉE"].split(",").length > 5) {
+      errors["LIGNES FUSIONNÉE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+    }
     if (isCle) {
       if (!line["ID CLASSE"]) {
         errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
@@ -325,14 +330,6 @@ export const validatePdtExcel = async (
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
     const pdrIds = getLinePdrIds(line);
-    // const pdrIds: string[] = [];
-    // let currentLinePDRCount = 0;
-    // for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-    //   if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
-    //     pdrIds.push(line[`ID PDR ${pdrNumber}`]);
-    //     currentLinePDRCount++;
-    //   }
-    // }
     if (pdrIds.length > maxPdrOnLine) {
       maxPdrOnLine = pdrIds.length;
     }
@@ -343,8 +340,8 @@ export const validatePdtExcel = async (
       }
     }
   }
-
-  return { ok: true, lines, errors };
+  const hasError = Object.values(errors).some((error) => error.length > 0);
+  return { ok: !hasError, lines, errors };
 };
 
 export const computeImportSummary = (lines: PdtLine[]) => {

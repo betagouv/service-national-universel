@@ -57,18 +57,18 @@ router.post(
       const validTypes = [MIME_TYPES.EXCEL];
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
-        return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+        return res.status(400).send({ ok: false, code: ERRORS.UNSUPPORTED_TYPE });
       }
 
       const scanResult = await scanFile(tempFilePath, name, req.user.id);
       if (scanResult.infected) {
-        return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        return res.status(400).send({ ok: false, code: ERRORS.FILE_INFECTED });
       }
 
       const isCle = cohort.type === COHORT_TYPE.CLE;
       const { lines, errors, ok, code } = await validatePdtFile(tempFilePath, cohort.name, isCle);
       if (!ok) {
-        return res.status(200).send({ ok: false, code: code || ERRORS.INVALID_BODY, errors });
+        return res.status(400).send({ ok: false, code: code || ERRORS.INVALID_BODY, errors });
       }
 
       const { centerCount, classeCount, pdrCount, maxPdrOnLine } = computeImportSummary(lines);
@@ -79,7 +79,7 @@ router.post(
       // Send response (summary)
       res.status(200).send({
         ok: true,
-        data: { cohort, busLineCount: lines.length, centerCount, classeCount, pdrCount, _id, maxPdrOnLine },
+        data: { _id, busLineCount: lines.length, centerCount, classeCount, pdrCount, maxPdrOnLine, cohort },
       });
     } catch (error) {
       capture(error);
@@ -154,6 +154,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         sessionId: session?._id.toString(),
         meetingPointsIds: pdrIds,
         classeId: line["ID CLASSE"] ? line["ID CLASSE"] : undefined,
+        mergedBusIds: line["LIGNES FUSIONNÉE"] ? line["LIGNES FUSIONNÉE"].split(",") : [],
       };
       const newBusLine = new LigneBusModel(busLineData);
       const busLine = await newBusLine.save();
