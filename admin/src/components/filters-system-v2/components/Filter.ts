@@ -1,4 +1,4 @@
-export type SubFilter = {
+export type CustomFilter = {
   key: string;
   filters: Filter[];
 };
@@ -11,5 +11,10 @@ export type Filter = {
   missingLabel: string;
   sort: (data: any[]) => any;
   filter: (data?: any) => any;
-  filterSubFilter: (data?: any) => any;
+  filterRootFilter: (data?: DataFilter[]) => any;
+};
+
+export type DataFilter = {
+  key: string;
+  doc_count: number;
 };
