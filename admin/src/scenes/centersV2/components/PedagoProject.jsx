@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Download from "../../../assets/icons/Download";
 import EmptyFileIcon from "../../../assets/icons/EmptyFileIcon";
 import { PlainButton, BorderButton } from "../../phase0/components/Buttons";
@@ -6,22 +6,14 @@ import ModalPedagoProject from "./modals/ModalPedagoProject";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import queryString from "query-string";
 import { ROLES } from "snu-lib/roles";
 import { useSelector } from "react-redux";
 import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
 
-export default function PedagoProject({ session, className = "", onSessionChanged }) {
-  const [modalOpened, setModalOpened] = useState(false);
+export default function PedagoProject({ session, setSession, className = "" }) {
+  const params = new URLSearchParams(window.location.search);
+  const [modalOpened, setModalOpened] = useState(params.get("pedagoProject") === "true");
   const currentUser = useSelector((state) => state.Auth.user);
-
-  useEffect(() => {
-    const { pedagoProject } = queryString.parse(location.search);
-    if (pedagoProject === "true") {
-      setModalOpened(true);
-    }
-  }, []);
-
   const hasPedagoProject = session.pedagoProjectFiles && session.pedagoProjectFiles.length > 0;
 
   async function sendReminder() {
@@ -64,7 +56,7 @@ export default function PedagoProject({ session, className = "", onSessionChange
           </div>
         </div>
       </div>
-      {modalOpened && <ModalPedagoProject session={session} onCancel={() => setModalOpened(false)} onChanged={onSessionChanged} />}
+      {modalOpened && <ModalPedagoProject session={session} setSession={setSession} onCancel={() => setModalOpened(false)} />}
     </div>
   );
 }
