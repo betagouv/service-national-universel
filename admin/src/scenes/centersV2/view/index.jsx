@@ -64,9 +64,10 @@ export default function Index() {
 function filterSessions(sessions, user) {
   if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
     return sessions;
-  } else {
+  } else if (user.role === ROLES.HEAD_CENTER) {
     return sessions.filter((session) => session?.headCenterId === user._id);
   }
+  return [];
 }
 
 async function populateSessions(sessions) {
