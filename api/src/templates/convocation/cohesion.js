@@ -46,8 +46,11 @@ async function fetchDataForYoung(young) {
   cohort.dateStart.setMinutes(cohort.dateStart.getMinutes() - cohort.dateStart.getTimezoneOffset());
   cohort.dateEnd.setMinutes(cohort.dateEnd.getMinutes() - cohort.dateEnd.getTimezoneOffset());
 
-  const service = await DepartmentServiceModel.findOne({ department: young.department });
-  if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
+  let service = null;
+  if (young.source !== "CLE") {
+    service = await DepartmentServiceModel.findOne({ department: young.department });
+    if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
+  }
 
   let meetingPoint = null;
   let ligneToPoint = null;
