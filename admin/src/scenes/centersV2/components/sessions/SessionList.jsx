@@ -166,82 +166,84 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
             </>
           )}
         </div>
-        <div className="border-top">
-          <form onSubmit={handleSubmit} id="session-form">
-            <div className="flex border-b-[1px] border-b-gray-200">
-              {/* // Taux doccupation */}
-              <OccupationCard session={session} user={user} modalDelete={modalDelete} setModalDelete={setModalDelete} handleSessionDelete={handleSessionDelete} />
-              {/* // liste des volontaires */}
-              <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 border-x-[1px] border-gray-200 bg-white">
-                <div className="flex w-full flex-1 items-center justify-center">
-                  <Link className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" to={`/centre/${center._id}/${session._id}/general`}>
-                    Voir les volontaires
-                  </Link>
+        <>
+          <div className="border-top">
+            <form onSubmit={handleSubmit} id="session-form">
+              <div className="flex border-b-[1px] border-b-gray-200">
+                {/* // Taux doccupation */}
+                <OccupationCard session={session} user={user} modalDelete={modalDelete} setModalDelete={setModalDelete} handleSessionDelete={handleSessionDelete} />
+                {/* // liste des volontaires */}
+                <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 border-x-[1px] border-gray-200 bg-white">
+                  <div className="flex w-full flex-1 items-center justify-center">
+                    <Link className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" to={`/centre/${center._id}/${session._id}/general`}>
+                      Voir les volontaires
+                    </Link>
+                  </div>
+                  <div className="w-full border-b-[1px] border-gray-200" />
+                  <div className="flex flex-1 items-center justify-center">
+                    <Link className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" to={`/centre/${center._id}/${session._id}/equipe`}>
+                      Voir l&apos;équipe
+                    </Link>
+                  </div>
                 </div>
-                <div className="w-full border-b-[1px] border-gray-200" />
-                <div className="flex flex-1 items-center justify-center">
-                  <Link className="rounded-md px-4 py-2 text-sm hover:bg-gray-100" to={`/centre/${center._id}/${session._id}/equipe`}>
-                    Voir l&apos;équipe
-                  </Link>
-                </div>
-              </div>
 
-              {/* // info */}
-              <div className="flex max-w-xl flex-1 flex-col items-center justify-around bg-white">
-                <div className="flex w-80 flex-1 items-center justify-center ">
-                  <Field
-                    error={errors.placesTotal}
-                    readOnly={!editing || !canCreateOrUpdateCohesionCenter(user)}
-                    label="Places ouvertes"
-                    value={values.placesTotal || session.placesTotal}
-                    onChange={(e) => setValues({ ...values, placesTotal: e.target.value })}
-                    tooltips="C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
-                  />
-                </div>
-                <div className="w-full border-b-[1px] h-[1px] border-gray-200" />
-                <div className="flex flex-1 items-center justify-center w-80">
-                  <div className="flex flex-col w-full">
-                    <ToggleDate
-                      label="Dates spécifiques"
-                      tooltipText={
-                        <p>
-                          Les dates de cette session diffèrent des dates officielles :{" "}
-                          <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
-                        </p>
-                      }
-                      readOnly={!editing || !canPutSpecificDateOnSessionPhase1(user)}
-                      value={editing ? !!values.dateStart : !!session.dateStart}
-                      onChange={handleToggleDate}
-                      range={editing ? { from: values.dateStart, to: values.dateEnd } : { from: session.dateStart, to: session.dateEnd }}
-                      onChangeRange={(range) => setValues({ ...values, dateStart: range?.from, dateEnd: range?.to })}
+                {/* // info */}
+                <div className="flex max-w-xl flex-1 flex-col items-center justify-around bg-white">
+                  <div className="flex w-80 flex-1 items-center justify-center ">
+                    <Field
+                      error={errors.placesTotal}
+                      readOnly={!editing || !canCreateOrUpdateCohesionCenter(user)}
+                      label="Places ouvertes"
+                      value={values.placesTotal || session.placesTotal}
+                      onChange={(e) => setValues({ ...values, placesTotal: e.target.value })}
+                      tooltips="C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
                     />
-                    {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
+                  </div>
+                  <div className="w-full border-b-[1px] h-[1px] border-gray-200" />
+                  <div className="flex flex-1 items-center justify-center w-80">
+                    <div className="flex flex-col w-full">
+                      <ToggleDate
+                        label="Dates spécifiques"
+                        tooltipText={
+                          <p>
+                            Les dates de cette session diffèrent des dates officielles :{" "}
+                            <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
+                          </p>
+                        }
+                        readOnly={!editing || !canPutSpecificDateOnSessionPhase1(user)}
+                        value={editing ? !!values.dateStart : !!session.dateStart}
+                        onChange={handleToggleDate}
+                        range={editing ? { from: values.dateStart, to: values.dateEnd } : { from: session.dateStart, to: session.dateEnd }}
+                        onChangeRange={(range) => setValues({ ...values, dateStart: range?.from, dateEnd: range?.to })}
+                      />
+                      {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            {center.region === "Provence-Alpes-Côte d'Azur" && cohort === "Juin 2024 - 2" && (
-              <div className="flex flex-row justify-center items-center w-full mt-2">
-                <div className="w-1/2">
-                  <label>Réception des fiches sanitaires (facultatif)</label>
-                  <Field
-                    error={errors.sanitaryContactEmail}
-                    readOnly={!editing || !canEditSanitaryEmailContact(user, cohort)}
-                    disabled={!canEditSanitaryEmailContact(user, cohort)}
-                    label="Adresse email académique"
-                    value={values.sanitaryContactEmail || session?.sanitaryContactEmail}
-                    onChange={(e) => setValues({ ...values, sanitaryContactEmail: e.target.value })}
-                    tooltips="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
-                  />
+              {center.region === "Provence-Alpes-Côte d'Azur" && cohort === "Juin 2024 - 2" && (
+                <div className="flex flex-row justify-center items-center w-full mt-2">
+                  <div className="w-1/2">
+                    <label>Réception des fiches sanitaires (facultatif)</label>
+                    <Field
+                      error={errors.sanitaryContactEmail}
+                      readOnly={!editing || !canEditSanitaryEmailContact(user, cohort)}
+                      disabled={!canEditSanitaryEmailContact(user, cohort)}
+                      label="Adresse email académique"
+                      value={values.sanitaryContactEmail || session?.sanitaryContactEmail}
+                      onChange={(e) => setValues({ ...values, sanitaryContactEmail: e.target.value })}
+                      tooltips="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
-          </form>
-          <div className="flex mx-4 mt-4 gap-2 pb-4 justify-center">
-            <PedagoProject session={session} className="p-1" setSession={updateSession} />
-            <TimeSchedule session={session} className="p-1" setSession={updateSession} />
+              )}
+            </form>
+            <div className="flex mx-4 mt-4 gap-2 pb-4 justify-center">
+              <PedagoProject session={session} className="p-1" setSession={updateSession} />
+              <TimeSchedule session={session} className="p-1" setSession={updateSession} />
+            </div>
           </div>
-        </div>
+        </>
       </div>
     </div>
   );
