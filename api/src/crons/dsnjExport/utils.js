@@ -168,12 +168,6 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
       }
     }
 
-    if (Object.keys(cohesionCenter).length === 0) {
-      const isSessionValid = await SessionPhase1Model.findOne({ _id: sessionPhase1Id }).select({ cohort: 1 });
-      if (isSessionValid.cohort !== cohort.name) {
-        throw new Error(`Young as not the same cohort ${cohort.name} as his session: ${isSessionValid.cohort}`);
-      }
-    }
     const session = sessions.find(({ _id }) => _id.toString() === sessionPhase1Id);
     const departureDate = getDepartureDate(young, session, cohort);
 
