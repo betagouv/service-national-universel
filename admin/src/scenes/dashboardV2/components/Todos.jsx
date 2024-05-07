@@ -32,19 +32,19 @@ export default function Todos({ user }) {
 
   const updateStats = async () => {
     const response = await api.post("/elasticsearch/dashboard/general/todo");
-    const s = response.data;
     const filteredStats = {};
-
-    // Remove empty values
-    Object.entries(s).forEach(([key, value]) => {
-      const filteredValue = {};
-      Object.entries(value).forEach(([subKey, item]) => {
-        if (item !== 0 && (!Array.isArray(item) || item.length > 0)) {
-          filteredValue[subKey] = item;
-        }
+    if (response.data) {
+      // Remove empty values
+      Object.entries(response.data).forEach(([key, value]) => {
+        const filteredValue = {};
+        Object.entries(value).forEach(([subKey, item]) => {
+          if (item !== 0 && (!Array.isArray(item) || item.length > 0)) {
+            filteredValue[subKey] = item;
+          }
+        });
+        filteredStats[key] = filteredValue;
       });
-      filteredStats[key] = filteredValue;
-    });
+    }
 
     setStats(filteredStats);
   };
