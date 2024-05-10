@@ -24,7 +24,7 @@ type FiltersProps = {
   setSelectedFilters: (filters: any) => void;
   paramData: any;
   setParamData: (data: any) => void;
-  defaultUrlParam?: boolean;
+  defaultUrlParam?: string;
   size: number;
   intermediateFilters?: IIntermediateFilter[];
 };
