@@ -1,9 +1,9 @@
 export type IIntermediateFilter = {
   key: string;
-  filters: Filter[];
+  filters: RowFilter[];
 };
 
-export type Filter = {
+export type RowFilter = {
   title: string;
   name: string;
   parentGroup: string;
