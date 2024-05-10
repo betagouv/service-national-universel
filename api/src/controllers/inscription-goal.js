@@ -103,7 +103,7 @@ router.get("/:cohort/department/:department", passport.authenticate("referent", 
     return res.status(200).send({ ok: true, data: fillingRate });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: error  });
   }
 });
 
