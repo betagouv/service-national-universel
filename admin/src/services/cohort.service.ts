@@ -74,16 +74,6 @@ export const getCohortGroups = (): CustomFilter => {
         filter: (e) => e,
         filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => !cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
       },
-      // {
-      //   title: "2024",
-      //   name: CohortGroup._2024,
-      //   parentGroup: "Cohorte",
-      //   parentFilter: "cohort",
-      //   missingLabel: "Non renseigné",
-      //   sort: (e) => e,
-      //   filter: (e) => e,
-      //   filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("2024")),
-      // },
       {
         title: "2023",
         name: CohortGroup._2023,
@@ -118,10 +108,14 @@ export const getCohortGroups = (): CustomFilter => {
   };
 };
 
+export const getCohortGroupsWithKey = (key: string) => ({
+  key: key,
+  filters: getCohortGroups().filters.map((filter) => ({ ...filter, parentFilter: key })),
+});
+
 export enum CohortGroup {
   CLE_2024 = "CLE_2024",
   HTS_2024 = "HTS_2024",
-  _2024 = "2024",
   _2023 = "2023",
   LOWER_THAN_2022 = "LOWER_THAN_2022",
   COMING_SOON = "COMING_SOON",
