@@ -49,24 +49,25 @@ export const SubFilterPopOver = ({ selectedFilters, setSelectedFilters, setParam
         const dataOnDropDown: DataFilter[] = filter?.filterRootFilter(dataFilter[filter.parentFilter]);
 
         return (
-          <div className="flex cursor-pointer items-center px-3 hover:bg-gray-50" key={`${filter.title}`}>
+          <div className="flex cursor-pointer px-3 hover:bg-gray-50" key={`${filter.title}`}>
             <input
               key={"input-sub-" + filter.name}
               type="checkbox"
               checked={isEverySubValueChecked(filter, selectedFilters, dataOnDropDown)}
               onChange={() => check(filter, dataOnDropDown)}
             />
-
-            <FilterPopOver
-              key={"sub-" + filter.name}
-              filter={filter}
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-              data={dataOnDropDown}
-              setIsShowing={(value) => setIsShowingSubFilter(value)}
-              setParamData={setParamData}
-              subFilter={subFilter}
-            />
+            <div className="flex-grow">
+              <FilterPopOver
+                key={"sub-" + filter.name}
+                filter={filter}
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+                data={dataOnDropDown}
+                setIsShowing={(value) => setIsShowingSubFilter(value)}
+                setParamData={setParamData}
+                subFilter={subFilter}
+              />
+            </div>
           </div>
         );
       })}

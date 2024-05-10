@@ -24,22 +24,23 @@ type FilterPopOverProps = {
 };
 
 export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, subFilter }: FilterPopOverProps) {
+  const xSpacing = subFilter ? "px-2" : "px-4";
   return (
     <Popover>
       <Popover.Button
         onClick={() => setIsShowing(filter.name)}
         className={classNames(
           isShowing ? "bg-gray-100 font-bold" : "",
-          "flex w-full cursor-pointer items-center justify-between rounded-lg py-2 px-4 outline-none transition duration-150 ease-in-out hover:bg-gray-50",
+          `flex w-full cursor-pointer items-center justify-between rounded-lg py-2 ${xSpacing} outline-none transition duration-150 ease-in-out hover:bg-gray-50`,
         )}>
         <p className="text-sm leading-5 text-gray-700 text-left">{filter.title}</p>
         <div className="flex items-center gap-2">
+          {subFilter && <SubFilterCount dataOnDropDown={data}></SubFilterCount>}
           {selectedFilters[filter?.name]?.filter?.length > 0 && (
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-normal text-blue-600">
               {selectedFilters[filter?.name]?.filter?.length}
             </div>
           )}
-          {subFilter && <SubFilterCount dataOnDropDown={data}></SubFilterCount>}
           <BsChevronRight className="text-gray-400" />
         </div>
       </Popover.Button>
