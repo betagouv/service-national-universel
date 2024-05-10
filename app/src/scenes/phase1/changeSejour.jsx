@@ -72,7 +72,7 @@ export default function ChangeSejour() {
         const res = await api.get(`/inscription-goal/${newSejour}/department/${young.department}/reached`);
         if (!res.ok) throw new Error(res);
         const isGoalReached = res.data;
-        if (!isGoalReached) {
+        if (!isGoalReached || newSejour === "à venir") {
           setmodalConfirmControlOk(true);
         } else {
           setmodalConfirmGoalReached(true);
