@@ -9,25 +9,8 @@ import ViewPopOver from "./filters/SavedViewPopOver";
 
 import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl, normalizeString } from "./filters/utils";
-import { debounce } from "../../../utils";
-import { sub } from "date-fns";
-import { IIntermediateFilter } from "./Filter";
+import { debounce } from "@/utils";
 import { IntermediateFilter } from "./filters/IntermediateFilter";
-
-type FiltersProps = {
-  route: string;
-  pageId: string;
-  filters: any[];
-  searchPlaceholder?: string;
-  setData: (data: any) => void;
-  selectedFilters: any;
-  setSelectedFilters: (filters: any) => void;
-  paramData: any;
-  setParamData: (data: any) => void;
-  defaultUrlParam?: string;
-  size: number;
-  intermediateFilters?: IIntermediateFilter[];
-};
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -46,7 +29,7 @@ export default function Filters({
   defaultUrlParam = undefined,
   size,
   intermediateFilters = undefined,
-}: FiltersProps) {
+}) {
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState({});
   const [filtersVisible, setFiltersVisible] = useState(filters);
@@ -77,7 +60,6 @@ export default function Filters({
 
     // Click outside handler (close popover)
     const handleClickOutside = (event) => {
-      // @ts-ignore
       if (ref.current && !ref.current.contains(event.target) && refFilter.current && !refFilter.current.contains(event.target)) {
         setIsShowing(false);
       }
@@ -104,13 +86,12 @@ export default function Filters({
         setCategories([]);
         return;
       }
-      const newCategories: any[] = [];
+      const newCategories = [];
       filtersVisible?.forEach((f) => {
         if (!newCategories.includes(f.parentGroup)) {
           newCategories.push(f.parentGroup);
         }
       });
-      // @ts-ignore
       setCategories(newCategories);
     },
     [filtersVisible],
@@ -121,7 +102,7 @@ export default function Filters({
       buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort, size).then((res) => {
         if (!res) return;
         setDataFilter({ ...dataFilter, ...res.newFilters });
-        const newParamData: any = {
+        const newParamData = {
           count: res.count,
           filters: { ...dataFilter, ...res.newFilters },
         };
@@ -236,7 +217,6 @@ export default function Filters({
                         {savedView.length > 0 && (
                           <ViewPopOver
                             setIsShowing={(value) => setIsShowing(value)}
-                            //@ts-ignore
                             isShowing={isShowing === "view"}
                             savedView={savedView}
                             handleSelect={handleSelectUrl}

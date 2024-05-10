@@ -9,9 +9,9 @@ export type RowFilter = {
   parentGroup: string;
   parentFilter: string;
   missingLabel: string;
-  sort: (data: any[]) => any;
-  filter: (data?: any) => any;
-  filterRootFilter: (data?: DataFilter[]) => any;
+  sort: (data: DataFilter[]) => DataFilter;
+  filter: (data?: DataFilter) => DataFilter;
+  filterRootFilter: (data?: DataFilter[]) => DataFilter[];
 };
 
 export type DataFilter = {

@@ -1,6 +1,7 @@
 import { getCohortPeriod, translate } from "snu-lib";
 import API from "./api";
 import { IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
+import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
 
 export const getCohortByName = async (cohortName) => {
   try {
@@ -60,7 +61,7 @@ export const getCohortGroups = (): IIntermediateFilter => {
         parentGroup: "Cohorte",
         parentFilter: "cohort",
         missingLabel: "Non renseigné",
-        sort: (data) => data,
+        sort: (data) => orderCohort(data),
         filter: (e) => e,
         filterRootFilter: (dataFiltered: DataFilter[]) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
       },
@@ -70,7 +71,7 @@ export const getCohortGroups = (): IIntermediateFilter => {
         parentGroup: "Cohorte",
         parentFilter: "cohort",
         missingLabel: "Non renseigné",
-        sort: (e) => e,
+        sort: (data) => orderCohort(data),
         filter: (e) => e,
         filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => !cohort.key.toLowerCase().includes("cle") && cohort.key.toLowerCase().includes("2024")),
       },
@@ -80,7 +81,7 @@ export const getCohortGroups = (): IIntermediateFilter => {
         parentGroup: "Cohorte",
         parentFilter: "cohort",
         missingLabel: "Non renseigné",
-        sort: (e) => e,
+        sort: (data) => orderCohort(data),
         filter: (e) => e,
         filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("2023")),
       },
@@ -90,7 +91,7 @@ export const getCohortGroups = (): IIntermediateFilter => {
         parentGroup: "Cohorte",
         parentFilter: "cohort",
         missingLabel: "Non renseigné",
-        sort: (e) => e,
+        sort: (data) => orderCohort(data),
         filter: (e) => e,
         filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("2022") || cohort.key.toLowerCase().includes("2021")),
       },
@@ -100,7 +101,7 @@ export const getCohortGroups = (): IIntermediateFilter => {
         parentGroup: "Cohorte",
         parentFilter: "cohort",
         missingLabel: "Non renseigné",
-        sort: (e) => e,
+        sort: (data) => orderCohort(data),
         filter: (e) => e,
         filterRootFilter: (dataFiltered) => dataFiltered?.filter((cohort) => cohort.key.toLowerCase().includes("à venir")),
       },

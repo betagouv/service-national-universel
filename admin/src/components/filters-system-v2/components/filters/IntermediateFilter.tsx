@@ -27,7 +27,7 @@ export const syncRootFilter = (intermediateFilter: IIntermediateFilter, newSelec
 };
 
 export const IntermediateFilter = ({ selectedFilters, setSelectedFilters, setParamData, intermediateFilter, dataFilter, setFilter, filter }: IntermediateFilterProps) => {
-  const [isShowingIntermediateFilter, setIsShowingIntermediateFilter] = useState(false);
+  const [isShowingIntermediateFilter, setIsShowingIntermediateFilter] = useState("");
 
   const check = (filter: RowFilter, dataOnDropDown: DataFilter[]) => {
     let newIntermediateFilters = dataOnDropDown.map((data) => data.key);
