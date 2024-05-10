@@ -261,8 +261,9 @@ export default function Filters({
                                 ?.map((item) => {
                                   let customItem = item;
                                   const currentSubFilter = subFilters?.find((subFilter) => subFilter.key === item.name);
-
+                                  console.log("currentSubFilter !!!!!!!!!!!!!!!", currentSubFilter);
                                   if (subFilters && currentSubFilter && item.name === currentSubFilter?.key) {
+                                    console.log("inside currentSubFilter");
                                     customItem = {
                                       ...item,
                                       allowEmpty: false,

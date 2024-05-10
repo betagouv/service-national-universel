@@ -11,6 +11,7 @@ import { Link, useHistory } from "react-router-dom";
 import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function List() {
   const [classes, setClasses] = useState(null);
@@ -137,6 +138,7 @@ export default function List() {
                 paramData={paramData}
                 setParamData={setParamData}
                 size={size}
+                subFilters={[getCohortGroups()]}
               />
               <SortOption
                 sortOptions={[
