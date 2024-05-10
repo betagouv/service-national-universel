@@ -8,7 +8,6 @@
     "isolatedModules": true,
     "jsx": "react",
     "strict": false,
-    "strictNullChecks":true,
     "forceConsistentCasingInFileNames": true,
     "downlevelIteration": true,
     "noFallthroughCasesInSwitch": true,
