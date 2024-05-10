@@ -285,7 +285,7 @@ export default function Inscription() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
-              subFilters={[getCohortGroups()]}
+              intermediateFilters={[getCohortGroups()]}
             />
             <SortOption
               sortOptions={[

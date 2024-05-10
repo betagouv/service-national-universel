@@ -3,8 +3,8 @@ import React, { Fragment } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
 import { normalizeString } from "./utils";
-import { Filter, CustomFilter } from "@/components/filters-system-v2/components/Filter";
-import { SubFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/SubFilter";
+import { Filter, IIntermediateFilter } from "@/components/filters-system-v2/components/Filter";
+import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
 
 // file used to show the popover for the all the possible values of a filter
 
@@ -20,11 +20,11 @@ type FilterPopOverProps = {
   isShowing?: any;
   setIsShowing: any;
   setParamData: any;
-  subFilter?: CustomFilter;
+  intermediateFilter?: IIntermediateFilter;
 };
 
-export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, subFilter }: FilterPopOverProps) {
-  const xSpacing = subFilter ? "px-2" : "px-4";
+export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, intermediateFilter }: FilterPopOverProps) {
+  const xSpacing = intermediateFilter ? "px-2" : "px-4";
   return (
     <Popover>
       <Popover.Button
@@ -35,7 +35,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
         )}>
         <p className="text-sm leading-5 text-gray-700 text-left">{filter.title}</p>
         <div className="flex items-center gap-2">
-          {subFilter && <SubFilterCount dataOnDropDown={data}></SubFilterCount>}
+          {intermediateFilter && <IntermediateFilterCount dataOnDropDown={data}></IntermediateFilterCount>}
           {selectedFilters[filter?.name]?.filter?.length > 0 && (
             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-normal text-blue-600">
               {selectedFilters[filter?.name]?.filter?.length}
@@ -51,7 +51,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
         setSelectedFilters={setSelectedFilters}
         data={data}
         setParamData={setParamData}
-        subFilter={subFilter}
+        intermediateFilter={intermediateFilter}
       />
     </Popover>
   );
@@ -65,10 +65,10 @@ type DropDownProps = {
   data: any;
   inListFilter?: boolean;
   setParamData: any;
-  subFilter?: CustomFilter | null;
+  intermediateFilter?: IIntermediateFilter | null;
 };
 
-export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData, subFilter }: DropDownProps) => {
+export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData, intermediateFilter }: DropDownProps) => {
   const [search, setSearch] = React.useState("");
   const [optionsVisible, setOptionsVisible] = React.useState(data || []);
   const ref = React.useRef(null);
@@ -112,7 +112,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   }, [search]);
 
   React.useEffect(() => {
-    syncSubFilter(subFilter);
+    syncIntermediateFilter(intermediateFilter);
     const handleClickOutside = (event) => {
       // @ts-ignore
       if (ref.current && !ref.current.contains(event.target)) {
@@ -144,15 +144,15 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     }
     const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: newFilters } };
 
-    if (subFilter) {
-      syncRootFilter(subFilter, newSelectedFilters);
+    if (intermediateFilter) {
+      syncRootFilter(intermediateFilter, newSelectedFilters);
     }
     setSelectedFilters(newSelectedFilters);
   };
-  const syncSubFilter = (subFilter: CustomFilter | undefined | null) => {
-    if (!subFilter) return;
+  const syncIntermediateFilter = (intermediateFilter: IIntermediateFilter | undefined | null) => {
+    if (!intermediateFilter) return;
     let newSelectedFilters = {};
-    for (const filter of subFilter.filters) {
+    for (const filter of intermediateFilter.filters) {
       if (selectedFilters[filter.parentFilter]) {
         const keys = filter.filterRootFilter(selectedFilters[filter.parentFilter]?.filter.map((f) => ({ key: f }))).map((f) => f.key);
         newSelectedFilters = { ...newSelectedFilters, [filter.name]: { filter: keys } };
@@ -164,8 +164,8 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const handleDelete = () => {
     const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: [] } };
 
-    if (subFilter) {
-      syncRootFilter(subFilter, newSelectedFilters);
+    if (intermediateFilter) {
+      syncRootFilter(intermediateFilter, newSelectedFilters);
     }
     setSelectedFilters(newSelectedFilters);
   };

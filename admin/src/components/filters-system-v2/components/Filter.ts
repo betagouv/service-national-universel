@@ -1,4 +1,4 @@
-export type CustomFilter = {
+export type IIntermediateFilter = {
   key: string;
   filters: Filter[];
 };
