@@ -1,3 +1,22 @@
+# [1.406.0](https://github.com/betagouv/service-national-universel/compare/v1.405.0...v1.406.0) (2024-05-10)
+
+
+### Bug Fixes
+
+* **admin:** sentry - Fix PDT bus validation ([#3842](https://github.com/betagouv/service-national-universel/issues/3842)) ([c506c9f](https://github.com/betagouv/service-national-universel/commit/c506c9f5df15c375955ff81c5d5b6eda73aa47bd))
+* **admin:** sentry - handle dashboard todo empty ([#3843](https://github.com/betagouv/service-national-universel/issues/3843)) ([68521b5](https://github.com/betagouv/service-national-universel/commit/68521b5e983b6e65e0aec9ffb1be0266aa82c145))
+* **admin:** sentry - head center session undefined ([#3835](https://github.com/betagouv/service-national-universel/issues/3835)) ([03dd694](https://github.com/betagouv/service-national-universel/commit/03dd694fee90cde418b6210b8abe6b95b33a90f4))
+* **api:** bug crons dsnjExport cohesionCenterId undefined ([#3839](https://github.com/betagouv/service-national-universel/issues/3839)) ([70cea42](https://github.com/betagouv/service-national-universel/commit/70cea420e168eb32bf0855df5b5b34ad161b7965))
+* **api:** bug dsnjexport  alerting youngCohort != sessionCohort ([#3849](https://github.com/betagouv/service-national-universel/issues/3849)) ([c22f616](https://github.com/betagouv/service-national-universel/commit/c22f61692dbcdf551a57bb6d8ee315dd6c9f2e26))
+* **api:** Do not get department service for convocation template ([c066c19](https://github.com/betagouv/service-national-universel/commit/c066c19ed7e5474b8a98794b2589caf7f48c4f21))
+* **api:** Gestion des MimeType inconnu ([#3825](https://github.com/betagouv/service-national-universel/issues/3825)) - fix import ([f2b7987](https://github.com/betagouv/service-national-universel/commit/f2b7987fad3c3e09e4f5be3ab15c5ba27ac6db3c))
+* **sentry:** 45336 - Fixed meetingHour null case. ([#3840](https://github.com/betagouv/service-national-universel/issues/3840)) ([e0363a3](https://github.com/betagouv/service-national-universel/commit/e0363a39a4e6d7ec48cc2efe41b0fa3295b1fcf5))
+
+
+### Features
+
+* **api:** 2158 - use common young data to generate convocation ([#3838](https://github.com/betagouv/service-national-universel/issues/3838)) ([5c4e87b](https://github.com/betagouv/service-national-universel/commit/5c4e87b06a15c30e36a8e5e17c3eb1ca03993770))
+
 # [1.405.0](https://github.com/betagouv/service-national-universel/compare/v1.404.0...v1.405.0) (2024-05-03)
 
 
