@@ -1,9 +1,9 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment } from "react";
+import React, { Fragment, ReactElement } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
 import { normalizeString } from "./utils";
-import { RowFilter, IIntermediateFilter } from "@/components/filters-system-v2/components/Filter";
+import { RowFilter, IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
 
 // file used to show the popover for the all the possible values of a filter
@@ -11,16 +11,15 @@ import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-sy
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
-
 type FilterPopOverProps = {
   filter: RowFilter;
-  data: any;
-  selectedFilters: any;
-  setSelectedFilters: any;
-  isShowing?: any;
-  setIsShowing: any;
-  setParamData: any;
   intermediateFilter?: IIntermediateFilter;
+  data: DataFilter[];
+  selectedFilters: { [key: string]: { filter: string[] } };
+  setSelectedFilters: (filters: { [key: string]: { filter: string[] } }) => void;
+  setIsShowing: (filterName: string) => void;
+  isShowing?: boolean;
+  setParamData: (data: unknown) => void;
 };
 
 export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, intermediateFilter }: FilterPopOverProps) {
@@ -58,13 +57,20 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
 }
 
 type DropDownProps = {
-  isShowing: any;
-  filter: any;
-  selectedFilters: any;
-  setSelectedFilters: any;
-  data: any;
+  isShowing: boolean;
+  filter: RowFilter & {
+    missingLabel?: string;
+    showCount?: boolean;
+    allowEmpty?: boolean;
+    customComponent?: (handleCustomComponent: (value: string) => void, selectedFilters: string[]) => ReactElement;
+    translate?: (key: string) => string;
+    isSingle?: boolean;
+  };
+  selectedFilters: { [key: string]: { filter: string[] } };
+  setSelectedFilters: (filters: { [key: string]: { filter: string[] } }) => void;
+  data: DataFilter[];
   inListFilter?: boolean;
-  setParamData: any;
+  setParamData: (data: unknown) => void;
   intermediateFilter?: IIntermediateFilter | null;
 };
 
@@ -74,7 +80,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const ref = React.useRef(null);
   React.useEffect(() => {
     if (!data) return;
-    let temp = data;
+    const temp = data;
     if (filter?.filter) {
       temp.filter(filter.filter);
     }
@@ -114,7 +120,6 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   React.useEffect(() => {
     syncIntermediateFilter(intermediateFilter);
     const handleClickOutside = (event) => {
-      // @ts-ignore
       if (ref.current && !ref.current.contains(event.target)) {
         setParamData((oldvalue) => {
           return { ...oldvalue, isShowing: "else" };
@@ -139,7 +144,6 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
         newFilters = selectedFilters[filter?.name]?.filter?.concat(value);
       }
     } else {
-      // @ts-ignore
       newFilters = [value];
     }
     const newSelectedFilters = { ...selectedFilters, [filter?.name]: { filter: newFilters } };
@@ -154,6 +158,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     let newSelectedFilters = {};
     for (const filter of intermediateFilter.filters) {
       if (selectedFilters[filter.parentFilter]) {
+        // @ts-ignore
         const keys = filter.filterRootFilter(selectedFilters[filter.parentFilter]?.filter.map((f) => ({ key: f }))).map((f) => f.key);
         newSelectedFilters = { ...newSelectedFilters, [filter.name]: { filter: keys } };
       }
@@ -172,6 +177,21 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
 
   const handleCustomComponent = (value) => {
     setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: value } });
+  };
+
+  const sortOptions = (optionsVisible: DataFilter[]) => {
+    // @ts-ignore
+    return optionsVisible?.sort((a, b) => {
+      if (filter?.translate) {
+        return filter
+          .translate(a.key)
+          ?.toString()
+          .localeCompare(filter.translate(b.key)?.toString());
+      }
+      if (intermediateFilter) {
+        return filter?.sort(optionsVisible);
+      }
+    });
   };
   return (
     <Transition
@@ -208,36 +228,25 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                     </div>
                   ) : (
                     <>
-                      {optionsVisible
-                        ?.sort((a, b) => {
-                          if (filter?.translate) {
-                            return filter
-                              .translate(a.key)
-                              ?.toString()
-                              .localeCompare(filter.translate(b.key)?.toString());
-                          }
-                          return a.key.toString().localeCompare(b.key.toString());
-                        })
-
-                        ?.map((option) => {
-                          const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
-                          const showCount = filter?.showCount === false ? false : true;
-                          return (
-                            <div
-                              className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50"
-                              key={`${option.key}-${filter.title}`}
-                              onClick={() => handleSelect(option.key)}>
-                              <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
-                                {/* Avoid react alert by using onChange even if empty */}
-                                <input type="checkbox" checked={optionSelected} onChange={() => {}} />
-                                <div className={`${optionSelected && "font-bold"}`}>
-                                  {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
-                                </div>
+                      {sortOptions(optionsVisible)?.map((option) => {
+                        const optionSelected = selectedFilters[filter?.name] && selectedFilters[filter?.name].filter?.includes(option?.key);
+                        const showCount = filter?.showCount === false ? false : true;
+                        return (
+                          <div
+                            className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50"
+                            key={`${option.key}-${filter.title}`}
+                            onClick={() => handleSelect(option.key)}>
+                            <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
+                              {/* Avoid react alert by using onChange even if empty */}
+                              <input type="checkbox" checked={optionSelected} onChange={() => {}} />
+                              <div className={`${optionSelected && "font-bold"}`}>
+                                {option.key === "N/A" ? filter.missingLabel : filter?.translate ? filter.translate(option?.key) : option?.key}
                               </div>
-                              {showCount && <div className="text-xs leading-5 text-gray-500">{option.doc_count}</div>}
                             </div>
-                          );
-                        })}
+                            {showCount && <div className="text-xs leading-5 text-gray-500">{option.doc_count}</div>}
+                          </div>
+                        );
+                      })}
                     </>
                   )}
                 </div>
