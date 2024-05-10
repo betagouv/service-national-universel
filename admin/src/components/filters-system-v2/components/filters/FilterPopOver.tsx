@@ -3,7 +3,7 @@ import React, { Fragment } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
 import { normalizeString } from "./utils";
-import { Filter, IIntermediateFilter } from "@/components/filters-system-v2/components/Filter";
+import { RowFilter, IIntermediateFilter } from "@/components/filters-system-v2/components/Filter";
 import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
 
 // file used to show the popover for the all the possible values of a filter
@@ -13,7 +13,7 @@ function classNames(...classes) {
 }
 
 type FilterPopOverProps = {
-  filter: Filter;
+  filter: RowFilter;
   data: any;
   selectedFilters: any;
   setSelectedFilters: any;

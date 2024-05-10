@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import FilterPopOver from "./FilterPopOver";
-import { Filter, IIntermediateFilter, DataFilter } from "../Filter";
+import { RowFilter, IIntermediateFilter, DataFilter } from "../Filter";
 
 export type IntermediateFilterProps = {
   selectedFilters: { [key: string]: { filter: string[] } };
@@ -12,7 +12,7 @@ export type IntermediateFilterProps = {
   filter?: any;
 };
 
-export const isEverySubValueChecked = (filter: Filter, selectedFilters, dataOnDropDown: DataFilter[]) => {
+export const isEverySubValueChecked = (filter: RowFilter, selectedFilters, dataOnDropDown: DataFilter[]) => {
   return (dataOnDropDown.length !== 0 && selectedFilters[filter.name]?.filter?.length === dataOnDropDown.length) || false;
 };
 
@@ -29,7 +29,7 @@ export const syncRootFilter = (intermediateFilter: IIntermediateFilter, newSelec
 export const IntermediateFilter = ({ selectedFilters, setSelectedFilters, setParamData, intermediateFilter, dataFilter, setFilter, filter }: IntermediateFilterProps) => {
   const [isShowingIntermediateFilter, setIsShowingIntermediateFilter] = useState(false);
 
-  const check = (filter: Filter, dataOnDropDown: DataFilter[]) => {
+  const check = (filter: RowFilter, dataOnDropDown: DataFilter[]) => {
     let newIntermediateFilters = dataOnDropDown.map((data) => data.key);
     if (isEverySubValueChecked(filter, selectedFilters, dataOnDropDown)) {
       newIntermediateFilters = [];
@@ -45,7 +45,7 @@ export const IntermediateFilter = ({ selectedFilters, setSelectedFilters, setPar
 
   return (
     <>
-      {intermediateFilter.filters.map((filter: Filter) => {
+      {intermediateFilter.filters.map((filter: RowFilter) => {
         const dataOnDropDown: DataFilter[] = filter?.filterRootFilter(dataFilter[filter.parentFilter]);
 
         return (
