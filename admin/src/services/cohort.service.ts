@@ -1,6 +1,6 @@
 import { getCohortPeriod, translate } from "snu-lib";
 import API from "./api";
-import { CustomFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
+import { IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 
 export const getCohortByName = async (cohortName) => {
   try {
@@ -50,7 +50,7 @@ export const getCohortSelectOptions = (cohorts, short = false) => {
   return cohorts.map((cohort) => ({ value: cohort.name, label: `${cohort.name} (${getCohortPeriod(cohort, true)})` }));
 };
 
-export const getCohortGroups = (): CustomFilter => {
+export const getCohortGroups = (): IIntermediateFilter => {
   return {
     key: "cohort",
     filters: [

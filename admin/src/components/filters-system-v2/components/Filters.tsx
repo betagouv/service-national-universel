@@ -11,8 +11,8 @@ import api from "../../../services/api";
 import { buildQuery, getURLParam, currentFilterAsUrl, normalizeString } from "./filters/utils";
 import { debounce } from "../../../utils";
 import { sub } from "date-fns";
-import { CustomFilter } from "./Filter";
-import { SubFilterPopOver } from "./filters/SubFilter";
+import { IIntermediateFilter } from "./Filter";
+import { IntermediateFilter } from "./filters/IntermediateFilter";
 
 type FiltersProps = {
   route: string;
@@ -26,7 +26,7 @@ type FiltersProps = {
   setParamData: (data: any) => void;
   defaultUrlParam?: boolean;
   size: number;
-  subFilters?: CustomFilter[];
+  intermediateFilters?: IIntermediateFilter[];
 };
 
 function classNames(...classes) {
@@ -45,7 +45,7 @@ export default function Filters({
   setParamData,
   defaultUrlParam = undefined,
   size,
-  subFilters = undefined,
+  intermediateFilters = undefined,
 }: FiltersProps) {
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState({});
@@ -54,7 +54,6 @@ export default function Filters({
   const [savedView, setSavedView] = useState([]);
   const [firstLoad, setFirstLoad] = useState(true);
   const [isShowing, setIsShowing] = useState(false);
-  const [isShowingSubFilter, setIsShowingSubFilter] = useState(false);
 
   const location = useLocation();
   const history = useHistory();
@@ -260,19 +259,17 @@ export default function Filters({
                                 ?.filter((f) => f.parentGroup === category)
                                 ?.map((item) => {
                                   let customItem = item;
-                                  const currentSubFilter = subFilters?.find((subFilter) => subFilter.key === item.name);
-                                  console.log("currentSubFilter !!!!!!!!!!!!!!!", currentSubFilter);
-                                  if (subFilters && currentSubFilter && item.name === currentSubFilter?.key) {
-                                    console.log("inside currentSubFilter");
+                                  const intermediateFilter = intermediateFilters?.find((intermediateFilter) => intermediateFilter.key === item.name);
+                                  if (intermediateFilters && intermediateFilter && item.name === intermediateFilter?.key) {
                                     customItem = {
                                       ...item,
                                       allowEmpty: false,
                                       customComponent: (setFilter, filter) => (
-                                        <SubFilterPopOver
+                                        <IntermediateFilter
                                           selectedFilters={selectedFilters}
                                           setSelectedFilters={setSelectedFilters}
                                           setParamData={setParamData}
-                                          subFilter={currentSubFilter}
+                                          intermediateFilter={intermediateFilter}
                                           dataFilter={dataFilter}
                                           setFilter={setFilter}
                                         />

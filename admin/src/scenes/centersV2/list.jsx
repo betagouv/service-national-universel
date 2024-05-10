@@ -142,7 +142,7 @@ const ListSession = ({ firstSession }) => {
             paramData={paramData}
             setParamData={setParamData}
             size={size}
-            subFilters={[getCohortGroups()]}
+            intermediateFilters={[getCohortGroups()]}
           />
           <ExportComponent
             title="Exporter"
@@ -292,7 +292,7 @@ const ListCenter = ({ firstSession }) => {
             paramData={paramData}
             setParamData={setParamData}
             size={size}
-            subFilters={[getCohortGroupsWithKey("cohorts")]}
+            intermediateFilters={[getCohortGroupsWithKey("cohorts")]}
           />
           <ExportComponent
             title="Exporter"

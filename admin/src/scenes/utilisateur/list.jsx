@@ -166,7 +166,7 @@ export default function List() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
-              subFilters={[getCohortGroupsWithKey("cohorts")]}
+              intermediateFilters={[getCohortGroupsWithKey("cohorts")]}
             />
             <SortOption
               sortOptions={[

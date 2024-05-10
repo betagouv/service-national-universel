@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import FilterPopOver from "./FilterPopOver";
-import { Filter, CustomFilter, DataFilter } from "../Filter";
+import { Filter, IIntermediateFilter, DataFilter } from "../Filter";
 
-export type SubFilterPopOverProps = {
+export type IntermediateFilterProps = {
   selectedFilters: { [key: string]: { filter: string[] } };
-  subFilter: CustomFilter;
+  intermediateFilter: IIntermediateFilter;
   setSelectedFilters: any;
   setParamData: any;
   dataFilter: { [key: string]: DataFilter[] };
@@ -16,56 +16,56 @@ export const isEverySubValueChecked = (filter: Filter, selectedFilters, dataOnDr
   return (dataOnDropDown.length !== 0 && selectedFilters[filter.name]?.filter?.length === dataOnDropDown.length) || false;
 };
 
-export const syncRootFilter = (subFilter: CustomFilter, newSelectedFilters: { [key: string]: { filter: string[] } }) => {
-  if (!subFilter) return;
-  newSelectedFilters[subFilter.key].filter = [];
-  for (const filter of subFilter.filters) {
-    if (newSelectedFilters[filter.name] && newSelectedFilters[subFilter.key]) {
-      newSelectedFilters[subFilter.key].filter = [...newSelectedFilters[subFilter.key].filter, ...(newSelectedFilters[filter.name].filter || [])];
+export const syncRootFilter = (intermediateFilter: IIntermediateFilter, newSelectedFilters: { [key: string]: { filter: string[] } }) => {
+  if (!intermediateFilter) return;
+  newSelectedFilters[intermediateFilter.key].filter = [];
+  for (const filter of intermediateFilter.filters) {
+    if (newSelectedFilters[filter.name] && newSelectedFilters[intermediateFilter.key]) {
+      newSelectedFilters[intermediateFilter.key].filter = [...newSelectedFilters[intermediateFilter.key].filter, ...(newSelectedFilters[filter.name].filter || [])];
     }
   }
 };
 
-export const SubFilterPopOver = ({ selectedFilters, setSelectedFilters, setParamData, subFilter, dataFilter, setFilter, filter }: SubFilterPopOverProps) => {
-  const [isShowingSubFilter, setIsShowingSubFilter] = useState(false);
+export const IntermediateFilter = ({ selectedFilters, setSelectedFilters, setParamData, intermediateFilter, dataFilter, setFilter, filter }: IntermediateFilterProps) => {
+  const [isShowingIntermediateFilter, setIsShowingIntermediateFilter] = useState(false);
 
   const check = (filter: Filter, dataOnDropDown: DataFilter[]) => {
-    let newSubFilters = dataOnDropDown.map((data) => data.key);
+    let newIntermediateFilters = dataOnDropDown.map((data) => data.key);
     if (isEverySubValueChecked(filter, selectedFilters, dataOnDropDown)) {
-      newSubFilters = [];
+      newIntermediateFilters = [];
     }
     const newSelectedFilters = {
       ...selectedFilters,
-      [filter.name]: { filter: newSubFilters },
+      [filter.name]: { filter: newIntermediateFilters },
     };
-    syncRootFilter(subFilter, newSelectedFilters);
+    syncRootFilter(intermediateFilter, newSelectedFilters);
 
     setSelectedFilters(newSelectedFilters);
   };
 
   return (
     <>
-      {subFilter.filters.map((filter: Filter) => {
+      {intermediateFilter.filters.map((filter: Filter) => {
         const dataOnDropDown: DataFilter[] = filter?.filterRootFilter(dataFilter[filter.parentFilter]);
 
         return (
           <div className="flex cursor-pointer px-3 hover:bg-gray-50" key={`${filter.title}`}>
             <input
-              key={"input-sub-" + filter.name}
+              key={"input-intermediate-" + filter.name}
               type="checkbox"
               checked={isEverySubValueChecked(filter, selectedFilters, dataOnDropDown)}
               onChange={() => check(filter, dataOnDropDown)}
             />
             <div className="flex-grow">
               <FilterPopOver
-                key={"sub-" + filter.name}
+                key={"intermediate-" + filter.name}
                 filter={filter}
                 selectedFilters={selectedFilters}
                 setSelectedFilters={setSelectedFilters}
                 data={dataOnDropDown}
-                setIsShowing={(value) => setIsShowingSubFilter(value)}
+                setIsShowing={(value) => setIsShowingIntermediateFilter(value)}
                 setParamData={setParamData}
-                subFilter={subFilter}
+                intermediateFilter={intermediateFilter}
               />
             </div>
           </div>
@@ -74,10 +74,10 @@ export const SubFilterPopOver = ({ selectedFilters, setSelectedFilters, setParam
     </>
   );
 };
-export type SubFilterCountProps = {
+export type IntermediateFilterCountProps = {
   dataOnDropDown: DataFilter[];
 };
-export const SubFilterCount = ({ dataOnDropDown }: SubFilterCountProps) => {
+export const IntermediateFilterCount = ({ dataOnDropDown }: IntermediateFilterCountProps) => {
   const docCount = dataOnDropDown?.reduce((acc, curr) => acc + curr.doc_count, 0);
   return <div className=" justify-content-end text-xs leading-5 text-gray-500">{docCount}</div>;
 };
