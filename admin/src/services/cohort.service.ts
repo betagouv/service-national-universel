@@ -51,15 +51,15 @@ export const getCohortSelectOptions = (cohorts, short = false) => {
   return cohorts.map((cohort) => ({ value: cohort.name, label: `${cohort.name} (${getCohortPeriod(cohort, true)})` }));
 };
 
-export const getCohortGroups = (): IIntermediateFilter => {
+export const getCohortGroups = (parentFilterKey: string = "cohort"): IIntermediateFilter => {
   return {
-    key: "cohort",
+    key: parentFilterKey,
     filters: [
       {
         title: "CLE 2024",
         name: CohortGroup.CLE_2024,
         parentGroup: "Cohorte",
-        parentFilter: "cohort",
+        parentFilter: parentFilterKey,
         missingLabel: "Non renseigné",
         sort: (data) => orderCohort(data),
         filter: (data: DataFilter) => data,
@@ -69,7 +69,7 @@ export const getCohortGroups = (): IIntermediateFilter => {
         title: "HTS 2024",
         name: CohortGroup.HTS_2024,
         parentGroup: "Cohorte",
-        parentFilter: "cohort",
+        parentFilter: parentFilterKey,
         missingLabel: "Non renseigné",
         sort: (data) => orderCohort(data),
         filter: (data: DataFilter) => data,
@@ -79,7 +79,7 @@ export const getCohortGroups = (): IIntermediateFilter => {
         title: "2023",
         name: CohortGroup._2023,
         parentGroup: "Cohorte",
-        parentFilter: "cohort",
+        parentFilter: parentFilterKey,
         missingLabel: "Non renseigné",
         sort: (data) => orderCohort(data),
         filter: (data: DataFilter) => data,
@@ -89,7 +89,7 @@ export const getCohortGroups = (): IIntermediateFilter => {
         title: "2022 et -",
         name: CohortGroup.LOWER_THAN_2022,
         parentGroup: "Cohorte",
-        parentFilter: "cohort",
+        parentFilter: parentFilterKey,
         missingLabel: "Non renseigné",
         sort: (data) => orderCohort(data),
         filter: (data: DataFilter) => data,
@@ -99,7 +99,7 @@ export const getCohortGroups = (): IIntermediateFilter => {
         title: "à venir",
         name: CohortGroup.COMING_SOON,
         parentGroup: "Cohorte",
-        parentFilter: "cohort",
+        parentFilter: parentFilterKey,
         missingLabel: "Non renseigné",
         sort: (data) => orderCohort(data),
         filter: (data: DataFilter) => data,
@@ -108,11 +108,6 @@ export const getCohortGroups = (): IIntermediateFilter => {
     ],
   };
 };
-
-export const getCohortGroupsWithKey = (key: string) => ({
-  key: key,
-  filters: getCohortGroups().filters.map((filter) => ({ ...filter, parentFilter: key })),
-});
 
 export enum CohortGroup {
   CLE_2024 = "CLE_2024",
