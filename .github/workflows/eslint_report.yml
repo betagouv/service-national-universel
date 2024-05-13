@@ -27,7 +27,6 @@ jobs:
             "app",
             "send-in-blue",
             "packages/lib",
-            "pdf",
             "knowledge-base-public",
             "analytics",
           ]
