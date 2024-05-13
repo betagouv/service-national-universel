@@ -61,7 +61,6 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
     }
     if (values.sanitaryContactEmail) {
       const regex = new RegExp(patternEmailAcademy);
-      console.log(validateEmailAcademique(values.sanitaryContactEmail), values.sanitaryContactEmail);
       if (!regex.test(values.sanitaryContactEmail)) {
         errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
       } else if (!validateEmailAcademique(values.sanitaryContactEmail)) {
