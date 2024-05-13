@@ -24,7 +24,7 @@ export default function Header({ open, setOpen }: Props) {
       }),
     );
 
-    setOpen(!open);
+    setOpen?.(!open);
   };
   return (
     <>

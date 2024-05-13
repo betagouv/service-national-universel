@@ -34,13 +34,13 @@ export default function ExportBox({ title, availableFrom, availableUntil, onClic
       <div className="flex-grow h-1/5">
         {isBefore && (
           <p className="text-sm leading-5 font-normal text-gray-500">
-            Disponible à partir du : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom.format("YYYY-MM-DD")}</span>
+            Disponible à partir du : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom?.format("YYYY-MM-DD")}</span>
           </p>
         )}
         {isAvailable && (
           <div className="text-sm leading-5 font-normal text-gray-500 flex flex-col gap-2">
             <p>
-              Générée le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom.format("YYYY-MM-DD")}</span>
+              Générée le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom?.format("YYYY-MM-DD")}</span>
             </p>
             <p>
               Disponible jusqu'au : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableUntil.format("YYYY-MM-DD")}</span>
