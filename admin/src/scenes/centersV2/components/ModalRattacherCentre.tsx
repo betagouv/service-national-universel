@@ -89,6 +89,10 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
       toastr.error("L’adresse email ne semble pas valide.", "Veuillez vérifier qu’il s’agit bien d’une adresse académique.");
       return;
     }
+    if (!selectedCentre) {
+      toastr.error("Veuillez sélectionner un centre", "");
+      return;
+    }
     try {
       setIsLoading(true);
       const { ok, code, data } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
