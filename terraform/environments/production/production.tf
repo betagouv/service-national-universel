@@ -61,6 +61,7 @@ resource "scaleway_container" "api" {
 
   environment_variables = {
     "APP_NAME"                          = "api"
+    "API_URL"                           = "https://${local.api_hostname}"
     "ADMIN_URL"                         = "https://${local.admin_hostname}"
     "APP_URL"                           = "https://${local.app_hostname}"
     "ENVIRONMENT"                       = "production"

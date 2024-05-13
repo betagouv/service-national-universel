@@ -1,9 +1,10 @@
-const ENVIRONMENT = process.env.ENVIRONMENT || "development"
+const ENVIRONMENT = getEnvironment();
 const LOCAL = process.env.LOCAL === "true";
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 8080;
 const secret = process.env.SECRET || "not-so-secret";
 
+let API_URL = process.env.API_URL || "http://localhost:8080";
 let APP_URL = process.env.APP_URL || "http://localhost:8081";
 let ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
 let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:3000";
@@ -66,6 +67,7 @@ module.exports = {
   PORT,
   MONGO_URL,
   secret,
+  API_URL,
   APP_URL,
   ADMIN_URL,
   SUPPORT_URL,
@@ -111,8 +113,11 @@ module.exports = {
 };
 
 function getEnvironment() {
-  if (process.env.STAGING === "true") return "staging";
-  else if (process.env.PRODUCTION === "true") return "production";
-  else if (process.env.TESTING === "true" || process.env.NODE_ENV === "test") return "testing";
-  return "development";
+  if (process.env.NODE_ENV === "test") {
+    return "testing"
+  }
+  if (['production', 'staging', 'ci', 'custom'].includes(process.env.ENVIRONMENT)) {
+    return process.env.ENVIRONMENT;
+  }
+  return "development"; // local
 }
