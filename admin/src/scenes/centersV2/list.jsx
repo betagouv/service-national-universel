@@ -26,7 +26,7 @@ import { useHistory, useParams } from "react-router-dom";
 import ModalRattacherCentre from "./components/ModalRattacherCentre";
 
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
-import { getCohortGroups, getCohortGroupsWithKey } from "@/services/cohort.service";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -292,7 +292,7 @@ const ListCenter = ({ firstSession }) => {
             paramData={paramData}
             setParamData={setParamData}
             size={size}
-            intermediateFilters={[getCohortGroupsWithKey("cohorts")]}
+            intermediateFilters={[getCohortGroups("cohorts")]}
           />
           <ExportComponent
             title="Exporter"

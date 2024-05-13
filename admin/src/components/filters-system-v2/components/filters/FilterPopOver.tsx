@@ -5,6 +5,7 @@ import Trash from "../../../../assets/icons/Trash";
 import { normalizeString } from "./utils";
 import { RowFilter, IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
+import cx from "classnames";
 
 // file used to show the popover for the all the possible values of a filter
 
@@ -24,15 +25,15 @@ type FilterPopOverProps = {
 };
 
 export default function FilterPopOver({ filter, data, selectedFilters, setSelectedFilters, isShowing, setIsShowing, setParamData, intermediateFilter }: FilterPopOverProps) {
-  const xSpacing = intermediateFilter ? "px-2" : "px-4";
   return (
     <Popover>
       <Popover.Button
         onClick={() => setIsShowing(filter.name)}
-        className={classNames(
-          isShowing ? "bg-gray-100 font-bold" : "",
-          `flex w-full cursor-pointer items-center justify-between rounded-lg py-2 ${xSpacing} outline-none transition duration-150 ease-in-out hover:bg-gray-50`,
-        )}>
+        className={cx(`flex w-full cursor-pointer items-center justify-between rounded-lg py-2 outline-none transition duration-150 ease-in-out hover:bg-gray-50`, {
+          "bg-gray-100 font-bold": isShowing,
+          "px-2": intermediateFilter,
+          "px-4": !intermediateFilter,
+        })}>
         <p className="text-sm leading-5 text-gray-700 text-left">{filter.title}</p>
         <div className="flex items-center gap-2">
           {intermediateFilter && <IntermediateFilterCount dataOnDropDown={data}></IntermediateFilterCount>}

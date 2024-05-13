@@ -22,7 +22,7 @@ import { ROLES, canDeleteReferent, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
 import { signinAs } from "@/utils/signinAs";
-import { getCohortGroupsWithKey } from "@/services/cohort.service";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function List() {
   const [responsable, setResponsable] = useState(null);
@@ -167,7 +167,7 @@ export default function List() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
-              intermediateFilters={[getCohortGroupsWithKey("cohorts")]}
+              intermediateFilters={[getCohortGroups("cohorts")]}
             />
             <SortOption
               sortOptions={[
