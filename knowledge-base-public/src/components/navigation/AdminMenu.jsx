@@ -8,7 +8,6 @@ import Link from "next/link";
 import { Popover, Transition } from "@headlessui/react";
 import { translateRoleBDC } from "../../utils/constants";
 import { HiOutlineLogout, HiOutlineUser, HiCheck } from "react-icons/hi";
-import { environment } from "../../config";
 
 export default function AdminMenu() {
   const { mutate, user: originalUser } = useUser();
