@@ -69,10 +69,14 @@ export default function ChangeSejour() {
           toastr.error("Il n'y a pas de département pour ce jeune");
           throw new Error("Department is undefined");
         }
+        if (newSejour === "à venir") {
+          setmodalConfirmControlOk(true);
+          return;
+        }
         const res = await api.get(`/inscription-goal/${newSejour}/department/${young.department}/reached`);
         if (!res.ok) throw new Error(res);
         const isGoalReached = res.data;
-        if (!isGoalReached || newSejour === "à venir") {
+        if (!isGoalReached) {
           setmodalConfirmControlOk(true);
         } else {
           setmodalConfirmGoalReached(true);
