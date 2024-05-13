@@ -66,7 +66,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
         errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
       } else if (!validateEmailAcademique(values.sanitaryContactEmail)) {
         errorsObject.sanitaryContactEmail =
-          "Cette adresse email académique n'existe pas ou n'est pas référencé. Veuillez vérifier qu’il s’agit bien d’une adresse académique valide.";
+          "Cette adresse email académique n'existe pas ou n'est pas référencée. Veuillez vérifier qu’il s’agit bien d’une adresse académique valide.";
       }
     }
     if (Object.keys(errorsObject).length > 0) {
