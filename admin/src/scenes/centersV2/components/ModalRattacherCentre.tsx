@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
-import { translate, isSessionEditionOpen, patternEmailAcademy } from "snu-lib";
+import { translate, isSessionEditionOpen, validateEmailAcademique } from "snu-lib";
 import { Select } from "@snu/ds/admin";
 
 import { CohortState } from "@/redux/cohorts/reducer";
@@ -68,8 +68,7 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
   }, [search, selectedCohort]);
 
   const onSubmit = async () => {
-    const regex = new RegExp(patternEmailAcademy);
-    if (email && !regex.test(email)) {
+    if (email && !validateEmailAcademique(email)) {
       toastr.error("L’adresse email ne semble pas valide.", "Veuillez vérifier qu’il s’agit bien d’une adresse académique.");
       return;
     }

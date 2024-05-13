@@ -23,18 +23,19 @@ import OccupationCard from "./OccupationCard";
 export default function SessionList({ center, setCenter, sessions, setSessions, user }) {
   const history = useHistory();
   const cohorts = useSelector((state) => state.Cohorts);
-  const params = new URLSearchParams(location.search);
 
-  const selectedCohort = params.get("cohorte") || sessions[0]?.cohort;
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({});
   const [errors, setErrors] = useState({});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
 
+  const params = new URLSearchParams(location.search);
+  const selectedCohort = params.get("cohorte") || sessions[0]?.cohort;
   const cohort = cohorts.find((cohort) => cohort.name === selectedCohort);
   const session = sessions.find((session) => session.cohort === selectedCohort);
-  const updateSession = (newSession) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
+  const setSession = (newSession) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
+
   const resetForm = () => {
     setEditing(false);
     setValues({});
@@ -75,7 +76,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
       return setLoading(false);
     }
     toastr.success("La session a bien été modifiée avec succès");
-    updateSession(data);
+    setSession(data);
     resetForm();
     setLoading(false);
   };
@@ -234,8 +235,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
               )}
             </form>
             <div className="flex mx-4 mt-4 gap-2 pb-4 justify-center">
-              <PedagoProject session={session} className="p-1" setSession={updateSession} />
-              <TimeSchedule session={session} className="p-1" setSession={updateSession} />
+              <PedagoProject session={session} className="p-1" setSession={setSession} />
+              <TimeSchedule session={session} className="p-1" setSession={setSession} />
             </div>
           </div>
         </>
