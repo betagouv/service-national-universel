@@ -75,7 +75,6 @@
         protocol: "https",
       }),
     );
-    return process.env.ENVIRONMENT;
   }
 
   // eslint-disable-next-line no-unused-vars
