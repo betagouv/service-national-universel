@@ -62,7 +62,7 @@ fi
 
 if [[ $SCW_REGION == "" ]]
 then
-    echo "SCW_ORGANIZATION_ID is not defined"
+    echo "SCW_REGION is not defined"
     exit 1
 fi
 
