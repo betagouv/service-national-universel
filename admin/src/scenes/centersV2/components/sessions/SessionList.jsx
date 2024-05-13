@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen, canEditSanitaryEmailContact, patternEmailAcademy } from "snu-lib";
+import { canPutSpecificDateOnSessionPhase1, isSessionEditionOpen, canEditSanitaryEmailContact, patternEmailAcademy, validateEmailAcademique } from "snu-lib";
 
 import { capture } from "@/sentry";
 import { canCreateOrUpdateCohesionCenter } from "@/utils";
@@ -61,8 +61,12 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
     }
     if (values.sanitaryContactEmail) {
       const regex = new RegExp(patternEmailAcademy);
+      console.log(validateEmailAcademique(values.sanitaryContactEmail), values.sanitaryContactEmail);
       if (!regex.test(values.sanitaryContactEmail)) {
         errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
+      } else if (!validateEmailAcademique(values.sanitaryContactEmail)) {
+        errorsObject.sanitaryContactEmail =
+          "Cette adresse email académique n'existe pas ou n'est pas référencé. Veuillez vérifier qu’il s’agit bien d’une adresse académique valide.";
       }
     }
     if (Object.keys(errorsObject).length > 0) {

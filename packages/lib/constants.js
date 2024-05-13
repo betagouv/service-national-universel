@@ -532,6 +532,42 @@ const FILE_STATUS_PHASE1 = {
   VALIDATED: "VALIDATED",
 };
 
+const ACADEMIQUE_DOMAINS = [
+  "ac-clermont.fr",
+  "ac-grenoble.fr",
+  "ac-besancon.fr",
+  "ac-dijon.fr",
+  "ac-rennes.fr",
+  "ac-orleans-tours.fr",
+  "ac-corse.fr",
+  "ac-nancy-metz.fr",
+  "ac-reims.fr",
+  "ac-strasbourg.fr",
+  "ac-guadeloupe.fr",
+  "ac-guyane.fr",
+  "ac-amiens.fr",
+  "ac-lille.fr",
+  "ac-creteil.fr",
+  "ac-paris.fr",
+  "ac-versailles.fr",
+  "ac-reunion.fr",
+  "ac-martinique.fr",
+  "ac-mayotte.fr",
+  "ac-normandie.fr",
+  "ac-bordeaux.fr",
+  "ac-limoges.fr",
+  "ac-poitiers.fr",
+  "ac-noumea.nc",
+  "ac-montpellier.fr",
+  "ac-toulouse.fr",
+  "ac-nantes.fr",
+  "ac-polynesie.pf",
+  "ac-aix-marseille.fr",
+  "ac-nice.fr",
+  "ac-spm.fr",
+  "ac-lyon.fr",
+];
+
 const MINISTRES = [
   {
     date_end: "07-25-2020",
@@ -1028,6 +1064,7 @@ export {
   IS_INSCRIPTION_OPEN_CLE,
   IS_CREATION_CLASSE_OPEN_CLE,
   REGLEMENT_INTERIEUR_VERSION,
+  ACADEMIQUE_DOMAINS,
 };
 export default {
   YOUNG_STATUS,
@@ -1094,4 +1131,5 @@ export default {
   IS_INSCRIPTION_OPEN_CLE,
   IS_CREATION_CLASSE_OPEN_CLE,
   REGLEMENT_INTERIEUR_VERSION,
+  ACADEMIQUE_DOMAINS,
 };
