@@ -12,10 +12,7 @@ function cookieOptions(maxAge) {
   if (config.ENVIRONMENT === "custom") {
     return { maxAge, httpOnly: true, secure: true, sameSite: "None" };
   }
-  if (config.ENVIRONMENT === "ci") {
-    return { maxAge, httpOnly: true, secure: true, domain: ".ci.beta-snu.dev", sameSite: "Lax" };
-  }
-  if (config.ENVIRONMENT === "staging") {
+  if (config.ENVIRONMENT === "staging" || config.ENVIRONMENT === "ci") {
     // Because we need a valid subdomain (does not work with cleverapps.io).
     return { maxAge, httpOnly: true, secure: true, domain: ".beta-snu.dev", sameSite: "Lax" };
   }
