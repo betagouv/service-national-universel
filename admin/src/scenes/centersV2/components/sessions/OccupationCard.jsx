@@ -5,9 +5,9 @@ import Trash from "@/assets/icons/Trash";
 
 import ModalConfirmDelete from "../ModalConfirmDelete";
 
-export default function OccupationCard({ placesLeft, placesTotal, canBeDeleted, user, handleSessionDelete, modalDelete, setModalDelete }) {
+export default function OccupationCard({ session, user, handleSessionDelete, modalDelete, setModalDelete }) {
   let height = `h-0`;
-  const occupationPercentage = ((placesTotal - placesLeft) * 100) / placesTotal;
+  const occupationPercentage = ((session.placesTotal - session.placesLeft) * 100) / session.placesTotal;
 
   if (occupationPercentage === 0) height = "h-[10%]";
   else if (occupationPercentage < 20) height = "h-[20%]";
@@ -48,14 +48,14 @@ export default function OccupationCard({ placesLeft, placesTotal, canBeDeleted, 
             <div className="h-6 w-2 rounded-full bg-blue-800" />
             <div>
               <div className="text-xs font-normal">Places occupées</div>
-              <div className="text-base font-bold">{placesTotal - placesLeft}</div>
+              <div className="text-base font-bold">{session.placesTotal - session.placesLeft}</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-6 w-2 rounded-full bg-gray-200" />
             <div>
               <div className="text-xs font-normal">Places libres</div>
-              <div className="text-base font-bold">{placesLeft}</div>
+              <div className="text-base font-bold">{session.placesLeft}</div>
             </div>
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function OccupationCard({ placesLeft, placesTotal, canBeDeleted, 
       {canCreateOrUpdateCohesionCenter(user) && (
         <div
           onClick={() => {
-            canBeDeleted &&
+            session.canBeDeleted &&
               setModalDelete({
                 isOpen: true,
                 title: "Supprimer la session",
@@ -71,9 +71,9 @@ export default function OccupationCard({ placesLeft, placesTotal, canBeDeleted, 
                 onDelete: handleSessionDelete,
               });
           }}
-          className={`mt-3 flex w-full flex-row items-center justify-end gap-2 ${canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>
-          <Trash className={`${canBeDeleted ? "text-red-400" : "text-gray-400"}`} width={14} height={14} />
-          <div className={`${canBeDeleted ? "text-gray-800" : "text-gray-500"} text-xs`}>Supprimer le séjour</div>
+          className={`mt-3 flex w-full flex-row items-center justify-end gap-2 ${session.canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>
+          <Trash className={session.canBeDeleted ? "text-red-400" : "text-gray-400"} width={14} height={14} />
+          <div className={`${session.canBeDeleted ? "text-gray-800" : "text-gray-500"} text-xs`}>Supprimer le séjour</div>
         </div>
       )}
     </div>

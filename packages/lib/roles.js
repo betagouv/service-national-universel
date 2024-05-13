@@ -344,6 +344,16 @@ function canSeeYoungInfo(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
 }
 
+function canEditSanitaryEmailContact(actor, cohort) {
+  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER].includes(actor.role) && !cohort.isAssignmentAnnouncementsOpenForYoung) {
+    return true;
+  } else if ([ROLES.ADMIN].includes(actor.role)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function isSessionEditionOpen(actor, cohort) {
   switch (actor?.role) {
     case ROLES.ADMIN:
@@ -1070,4 +1080,5 @@ export {
   canSearchStudent,
   canDeleteClasse,
   canAllowSNU,
+  canEditSanitaryEmailContact,
 };

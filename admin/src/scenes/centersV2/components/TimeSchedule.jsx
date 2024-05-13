@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Download from "../../../assets/icons/Download";
 import { PlainButton, BorderButton } from "../../phase0/components/Buttons";
 import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
@@ -6,22 +6,14 @@ import ModalTimeSchedule from "./modals/ModalTimeSchedule";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import queryString from "query-string";
 import { ROLES } from "snu-lib/roles";
 import { useSelector } from "react-redux";
 import EmptyFileIcon from "../../../assets/icons/EmptyFileIcon";
 
-export default function TimeSchedule({ session, className = "", onSessionChanged }) {
-  const [modalOpened, setModalOpened] = useState(false);
+export default function TimeSchedule({ session, setSession, className = "" }) {
+  const params = new URLSearchParams(window.location.search);
+  const [modalOpened, setModalOpened] = useState(params.get("timeschedule") === "true");
   const currentUser = useSelector((state) => state.Auth.user);
-
-  useEffect(() => {
-    const { timeschedule } = queryString.parse(location.search);
-    if (timeschedule === "true") {
-      setModalOpened(true);
-    }
-  }, []);
-
   const hasTimeSchedule = session.timeScheduleFiles && session.timeScheduleFiles.length > 0;
 
   async function sendReminder() {
@@ -63,7 +55,7 @@ export default function TimeSchedule({ session, className = "", onSessionChanged
           </div>
         </div>
       </div>
-      {modalOpened && <ModalTimeSchedule session={session} onCancel={() => setModalOpened(false)} onChanged={onSessionChanged} />}
+      {modalOpened && <ModalTimeSchedule session={session} setSession={setSession} onCancel={() => setModalOpened(false)} />}
     </div>
   );
 }

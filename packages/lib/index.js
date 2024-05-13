@@ -1,4 +1,4 @@
-import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "./constants";
+import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ACADEMIQUE_DOMAINS } from "./constants";
 import translation from "./translation";
 import { ROLES } from "./roles";
 import sanitizeHtml from "sanitize-html";
@@ -164,7 +164,13 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
-const patternEmailAcademy = "^[a-zA-Z0-9._+-]+@ac-[a-zA-Z]{1,}.fr$";
+const patternEmailAcademy = "^[a-zA-Z0-9._+-]+@ac-([a-zA-Z]+-)*[a-zA-Z]+.fr$";
+
+const validateEmailAcademique = (email) => {
+  const domain = email.split("@")[1];
+  if (!domain) return false;
+  return ACADEMIQUE_DOMAINS.includes(domain);
+};
 
 const htmlCleaner = (text) => {
   return sanitizeHtml(text, {
@@ -197,6 +203,7 @@ export {
   formatMessageForReadingInnerHTML,
   patternEmailAcademy,
   htmlCleaner,
+  validateEmailAcademique,
 };
 
 export * from "./useAddress";

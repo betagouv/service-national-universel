@@ -45,50 +45,7 @@ const inviteReferent = async (referent, { role, user }, etablissement) => {
   });
 };
 
-const ACADEMIQUE_DOMAINS = [
-  "ac-clermont.fr",
-  "ac-grenoble.fr",
-  "ac-besancon.fr",
-  "ac-dijon.fr",
-  "ac-rennes.fr",
-  "ac-orleans-tours.fr",
-  "ac-corse.fr",
-  "ac-nancy-metz.fr",
-  "ac-reims.fr",
-  "ac-strasbourg.fr",
-  "ac-guadeloupe.fr",
-  "ac-guyane.fr",
-  "ac-amiens.fr",
-  "ac-lille.fr",
-  "ac-creteil.fr",
-  "ac-paris.fr",
-  "ac-versailles.fr",
-  "ac-reunion.fr",
-  "ac-martinique.fr",
-  "ac-mayotte.fr",
-  "ac-normandie.fr",
-  "ac-bordeaux.fr",
-  "ac-limoges.fr",
-  "ac-poitiers.fr",
-  "ac-noumea.nc",
-  "ac-montpellier.fr",
-  "ac-toulouse.fr",
-  "ac-nantes.fr",
-  "ac-polynesie.pf",
-  "ac-aix-marseille.fr",
-  "ac-nice.fr",
-  "ac-spm.fr",
-  "ac-lyon.fr",
-];
-
-const validateEmailAcademique = (email) => {
-  const domain = email.split("@")[1];
-  if (!domain) return false;
-  return ACADEMIQUE_DOMAINS.includes(domain);
-};
-
 module.exports = {
   findOrCreateReferent,
   inviteReferent,
-  validateEmailAcademique,
 };
