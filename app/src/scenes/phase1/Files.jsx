@@ -6,6 +6,7 @@ import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts
 import { CDN_BASE_URL } from "../representants-legaux/commons";
 import FileIcon from "@/assets/FileIcon";
 import ButtonExternalLinkPrimary from "@/components/ui/buttons/ButtonExternalLinkPrimary";
+import { YOUNG_STATUS } from "snu-lib";
 
 function getStatusPhase1(young) {
   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
@@ -19,7 +20,7 @@ export default function DocumentsPhase1({ young }) {
   const youngStatusPhase1 = getStatusPhase1(young);
 
   // TODO: find a better way to implement feature flags
-  if (young.cohort === "Juin 2024 - 2" && young.region === "Provence-Alpes-Côte d'Azur") {
+  if (young.status === YOUNG_STATUS.VALIDATED && young.cohort === "Juin 2024 - 2" && young.region === "Provence-Alpes-Côte d'Azur") {
     return (
       <section>
         <h3 className="text-base font-semibold">Document à préparer</h3>
