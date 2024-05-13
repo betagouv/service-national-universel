@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { BiHandicap } from "react-icons/bi";
 // @ts-expect-error lib non ts
@@ -18,7 +18,6 @@ import Pencil from "@/assets/icons/Pencil";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import api from "@/services/api";
 
-import VerifyAddress from "../../phase0/components/VerifyAddress";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import { Title } from "../components/commons";
@@ -57,7 +56,7 @@ const optionsDomain = [
   { label: "", value: "" },
 ];
 
-export default function Details({ center, setCenter, sessions }) {
+export default function Details({ center, setCenter, sessions, setSessions }) {
   const history = useHistory();
 
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -70,26 +69,9 @@ export default function Details({ center, setCenter, sessions }) {
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
   const [errors, setErrors] = React.useState<CenterInformationsError>({});
-  const [data, setData] = useState(null);
+  const [data, setData] = useState({ ...center, academy: departmentToAcademy[center.department], pmr: center?.pmr ? center.pmr : "false" });
   useDocumentTitle(`Fiche du centre - ${center?.name}`);
 
-  useEffect(() => {
-    setData({ ...center, pmr: center?.pmr ? center.pmr : "false" });
-  }, [center]);
-
-  const onVerifyAddress = (isConfirmed?) => (suggestion) => {
-    setData({
-      ...data,
-      addressVerified: true,
-      region: suggestion.region,
-      department: suggestion.department,
-      location: suggestion.location,
-      address: isConfirmed ? suggestion.address : data.address,
-      zip: isConfirmed ? suggestion.zip : data.zip,
-      city: isConfirmed ? suggestion.city : data.city,
-      academy: departmentToAcademy[suggestion.department],
-    });
-  };
   const onSubmit = async () => {
     try {
       setIsLoading(true);
@@ -106,9 +88,6 @@ export default function Details({ center, setCenter, sessions }) {
       if (!data?.zip) {
         error.zip = "Le code postal est obligatoire";
       }
-      if (!data?.addressVerified) {
-        error.addressVerified = "L'adresse n'a pas été vérifiée";
-      }
       if (!data?.placesTotal || isNaN(data?.placesTotal)) {
         error.placesTotal = "Le nombre de places est incorrect";
       }
@@ -117,7 +96,7 @@ export default function Details({ center, setCenter, sessions }) {
       }
       if (!data?.typology) error.typology = "La typologie est obligatoire";
       if (!data?.domain) error.domain = "Le domaine est obligatoire";
-      if (!data?.academy) error.academy = "Veuillez vérifier l'adresse du centre";
+      data.academy = departmentToAcademy[data.department];
 
       // check session
       const canUpdateSession = sessions.filter((s) => s.placesTotal > data.placesTotal).length === 0;
@@ -166,18 +145,18 @@ export default function Details({ center, setCenter, sessions }) {
       setIsLoading(false);
     }
   };
+
+  const handleSuccess = async (newSession) => {
+    setCenter({ ...center, cohorts: [...center.cohorts, newSession.cohort] });
+    setSessions([...sessions, newSession]);
+    history.push(`?cohorte=${newSession.cohort}`);
+  };
+
   if (!data) return <></>;
   return (
     <div className="m-8 flex flex-col gap-6">
       {/*TODO : SET Centre par défaut + cohorte disponible ?*/}
-      <ModalRattacherCentre
-        editable={false}
-        defaultCentre={center}
-        isOpen={modalVisible}
-        onSucess={(newCohort) => setCenter({ ...center, cohorts: [...center.cohorts, newCohort] })}
-        onCancel={() => setModalVisible(false)}
-        user={user}
-      />
+      <ModalRattacherCentre editable={false} defaultCentre={center} isOpen={modalVisible} onSuccess={handleSuccess} onCancel={() => setModalVisible(false)} user={user} />
       <ModalConfirmDelete
         isOpen={modalDelete.isOpen}
         title={modalDelete.title}
@@ -283,44 +262,30 @@ export default function Details({ center, setCenter, sessions }) {
 
               <AddressForm
                 readOnly={!editInfo}
-                data={{ address: data.address, zip: data.zip, city: data.city }}
-                updateData={(address) => setData({ ...data, ...address })}
+                data={{
+                  address: data.address,
+                  zip: data.zip,
+                  city: data.city,
+                  department: data.department,
+                  region: data.region,
+                  location: data.location,
+                  coordinatesAccuracyLevel: data.coordinatesAccuracyLevel,
+                  addressVerified: data.addressVerified,
+                }}
+                updateData={(newData) => setData({ ...data, ...newData, academy: departmentToAcademy[newData.department] })}
                 query={query}
                 setQuery={setQuery}
                 options={results}
               />
 
-              {data.addressVerified && (
+              {data.address && (
                 <>
                   <div className="flex items-center gap-3">
-                    <Field readOnly={!editInfo} label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} disabled={true} />
-                    <Field readOnly={!editInfo} label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} disabled={true} />
+                    <Field label="Département" value={data.department} disabled />
+                    <Field label="Région" value={data.region} disabled />
                   </div>
-                  <Field
-                    readOnly={!editInfo}
-                    label="Académie"
-                    onChange={(e) => setData({ ...data, academy: e.target.value })}
-                    value={"Académie de " + data.academy}
-                    disabled={true}
-                    error={errors?.academy}
-                  />
+                  <Field label="Académie" value={"Académie de " + data.academy} disabled />
                 </>
-              )}
-              {editInfo && (
-                <div className="flex flex-col gap-2 ">
-                  <VerifyAddress
-                    address={data.address}
-                    zip={data.zip}
-                    city={data.city}
-                    onSuccess={onVerifyAddress(true)}
-                    onFail={onVerifyAddress()}
-                    isVerified={data.addressVerified === true}
-                    buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
-                    verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse, code postal et ville."
-                    verifyButtonText="Vérifier l'adresse du centre"
-                  />
-                  {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
-                </div>
               )}
             </div>
           </div>

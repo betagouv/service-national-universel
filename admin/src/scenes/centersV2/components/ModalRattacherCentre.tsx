@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
-import { translate, isSessionEditionOpen } from "snu-lib";
+import { translate, isSessionEditionOpen, patternEmailAcademy } from "snu-lib";
 import { Select } from "@snu/ds/admin";
 
 import { CohortState } from "@/redux/cohorts/reducer";
@@ -14,7 +14,7 @@ import api from "@/services/api";
 
 import Field from "./Field";
 
-export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
+export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user, defaultCentre = null, editable = true }) {
   const history = useHistory();
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const availableCohorts = isOpen ? cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name) : [];
@@ -41,14 +41,11 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   const [selectedCohort, setSelectedCohort] = React.useState<string>();
   const [selectedCentre, setSelectedCentre] = React.useState(defaultCentre);
   const [placesTotal, setPlacesTotal] = React.useState("");
+  const [email, setEmail] = React.useState("");
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
-  const [disabled, setDisabled] = React.useState(true);
   const [isLoading, setIsLoading] = React.useState(false);
-
-  useEffect(() => {
-    if (defaultCentre) setSelectedCentre(defaultCentre);
-  }, [defaultCentre]);
+  const disabled = !selectedCohort || !selectedCentre || placesTotal === "" || isLoading;
 
   React.useEffect(() => {
     if (!refInput.current) return;
@@ -56,10 +53,6 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
       refInput.current.focus();
     }
   }, [open]);
-
-  React.useEffect(() => {
-    setDisabled(!selectedCohort || !selectedCentre || placesTotal === "");
-  }, [selectedCentre, selectedCohort, placesTotal]);
 
   React.useEffect(() => {
     if (selectedCohort) {
@@ -75,10 +68,14 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
   }, [search, selectedCohort]);
 
   const onSubmit = async () => {
+    const regex = new RegExp(patternEmailAcademy);
+    if (email && !regex.test(email)) {
+      toastr.error("L’adresse email ne semble pas valide.", "Veuillez vérifier qu’il s’agit bien d’une adresse académique.");
+      return;
+    }
     try {
       setIsLoading(true);
-
-      const { ok, code } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
+      const { ok, code, data } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
         cohort: selectedCohort,
         placesTotal,
         status,
@@ -91,7 +88,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
       setIsLoading(false);
       toastr.success("La centre a été rattaché au séjour avec succès", "");
       onCancel();
-      if (onSucess) onSucess(selectedCohort);
+      if (onSuccess) onSuccess(data);
       history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
       setSelectedCohort("");
       setPlacesTotal("");
@@ -197,6 +194,18 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                     }
                   />
                 </div>
+              )}
+              {selectedCentre?.region === "Provence-Alpes-Côte d'Azur" && selectedCohort === "Juin 2024 - 2" && (
+                <Field
+                  type="email"
+                  label="Réception des fiches sanitaires (facultatif)"
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                  tooltips={
+                    "Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
+                  }
+                  className="mt-4"
+                />
               )}
             </>
           ) : null}

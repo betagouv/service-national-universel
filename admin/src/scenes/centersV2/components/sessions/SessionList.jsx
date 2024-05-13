@@ -25,7 +25,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
   const cohorts = useSelector((state) => state.Cohorts);
   const params = new URLSearchParams(location.search);
 
-  const [selectedCohort, setSelectedCohort] = useState(params.get("cohorte") || sessions[0]?.cohort);
+  const selectedCohort = params.get("cohorte") || sessions[0]?.cohort;
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({});
@@ -33,12 +33,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
 
   const cohort = cohorts.find((cohort) => cohort.name === selectedCohort);
-  const session = sessions.find((session) => {
-    return session.cohort === selectedCohort;
-  });
-  const updateSession = (newSession) => {
-    setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
-  };
+  const session = sessions.find((session) => session.cohort === selectedCohort);
+  const updateSession = (newSession) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
   const resetForm = () => {
     setEditing(false);
     setValues({});
@@ -92,6 +88,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
       setLoading(false);
       setModalDelete({ isOpen: false });
       setCenter({ ...center, cohorts: center.cohorts.filter((cohort) => cohort !== session.cohort) });
+      setSessions(sessions.filter((s) => s._id !== session._id));
+      history.push({ search: `?cohorte=${center.cohorts[0]}` });
       return toastr.success("La session a bien été supprimée");
     } catch (e) {
       capture(e);
@@ -109,22 +107,16 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
     }
   };
 
-  if (!sessions || sessions.length === 0) return null;
+  const handleSelect = (cohortName) => {
+    history.push(`?cohorte=${cohortName}`);
+  };
+
   return (
     <div className="flex flex-col gap-4 mx-8">
       <div className="flex items-center justify-between">
         <Title>Par séjour</Title>
         <div className="flex items-center">
-          <SelectCohort
-            cohort={selectedCohort}
-            withBadge
-            filterFn={(c) => sessions.find((s) => s.cohort === c.name)}
-            onChange={(cohortName) => {
-              resetForm();
-              setSelectedCohort(cohortName);
-              history.replace({ search: `?cohort=${cohortName}` });
-            }}
-          />
+          <SelectCohort cohort={selectedCohort} withBadge filterFn={(c) => sessions.find((s) => s.cohort === c.name)} onChange={handleSelect} />
         </div>
       </div>
       <div className="flex flex-col px-8 py-4 gap-4 mb-8 rounded-lg bg-white z-0">
