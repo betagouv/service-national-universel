@@ -31,7 +31,6 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
   const [errors, setErrors] = useState({});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
 
-  const params = new URLSearchParams(location.search);
   const selectedCohort = params.get("cohorte") || sessions[0]?.cohort;
   const cohort = cohorts.find((cohort) => cohort.name === selectedCohort);
   const session = sessions.find((session) => session.cohort === selectedCohort);
