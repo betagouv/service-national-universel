@@ -66,7 +66,7 @@
   const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
-  if (process.env.PRODUCTION) {
+  if (ENVIRONMENT === "production") {
     app.use(
       forceDomain({
         hostname: "api.snu.gouv.fr",
@@ -75,7 +75,7 @@
     );
   }
 
-  if (process.env.STAGING && !process.env.CLE) {
+  if (ENVIRONMENT === "staging") {
     app.use(
       forceDomain({
         hostname: "api.beta-snu.dev",
@@ -224,7 +224,7 @@
     }
   });
 
-  if (process.env.STAGING === "true") {
+  if (process.env.ENVIRONMENT !== "production") {
     app.get("/test_error_double_res_send", (req, res) => {
       res.send("TEST ERROR");
       res.send("TEST ERROR 2");

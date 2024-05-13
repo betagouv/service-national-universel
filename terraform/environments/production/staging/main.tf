@@ -86,8 +86,7 @@ resource "scaleway_container" "api" {
     "APP_NAME"                          = "api"
     "ADMIN_URL"                         = "https://${local.admin_hostname}"
     "APP_URL"                           = "https://${local.app_hostname}"
-    "CLE"                               = "true"
-    "STAGING"                           = "true"
+    "ENVIRONMENT"                       = "staging"
     "FOLDER_API"                        = "api"
     "RELEASE"                           = var.api_image_tag
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.8
@@ -161,11 +160,10 @@ resource "scaleway_container" "admin" {
   environment_variables = {
     "NGINX_HOSTNAME"             = local.admin_hostname
     "APP_NAME"                   = "admin"
-    "STAGING"                    = "true"
+    "ENVIRONMENT"                = "staging"
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
-    "ENVIRONNEMENT"              = "staging"
     "RELEASE"                    = var.admin_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.1
     "SENTRY_TRACING_SAMPLE_RATE" = 0.1
@@ -202,11 +200,10 @@ resource "scaleway_container" "app" {
   environment_variables = {
     "NGINX_HOSTNAME"             = local.app_hostname
     "APP_NAME"                   = "app"
-    "STAGING"                    = "true"
+    "ENVIRONMENT"                = "staging"
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
-    "ENVIRONNEMENT"              = "staging"
     "RELEASE"                    = var.app_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.1
     "SENTRY_TRACING_SAMPLE_RATE" = 0.1
