@@ -224,7 +224,7 @@
     }
   });
 
-  if (process.env.ENVIRONMENT !== "production") {
+  if (ENVIRONMENT !== "production") {
     app.get("/test_error_double_res_send", (req, res) => {
       res.send("TEST ERROR");
       res.send("TEST ERROR 2");
