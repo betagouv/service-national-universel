@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import { translate, isSessionEditionOpen } from "snu-lib";
 import { Select } from "@snu/ds/admin";
 
-import { CohortState } from "@/redux/cohorts";
+import { CohortState } from "@/redux/cohorts/reducer";
 import ModalTailwind from "@/components/modals/ModalTailwind";
 import { capture } from "@/sentry";
 import api from "@/services/api";
@@ -117,7 +117,6 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
               isSearchable
               isClearable
               closeMenuOnSelect
-              // @ts-expect-error type à revoir dans le DS
               value={selectedCohort ? { value: selectedCohort, label: selectedCohort } : null}
               onChange={(options) => {
                 setSelectedCohort(options?.value);

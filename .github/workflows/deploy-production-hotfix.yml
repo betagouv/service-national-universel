@@ -77,8 +77,15 @@ jobs:
       branch_name: ${{ needs.prepare.outputs.target_branch }}
     secrets: inherit
 
+  run_tests_front:
+    needs: prepare
+    uses: ./.github/workflows/run-tests-front.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.branch_name }}
+    secrets: inherit
+
   build:
-    needs: [prepare, run_tests_api]
+    needs: [prepare, run_tests_api, run_tests_front]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -242,7 +249,6 @@ jobs:
 
   deploy_cc:
     needs: [prepare, build]
-    environment: production # Needed for manual approval before deploy
     if: ${{ vars.DEPLOY_ON_CC == 'true' }}
     uses: ./.github/workflows/cc-deploy-production.yml
     with:

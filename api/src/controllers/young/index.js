@@ -8,9 +8,9 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const mime = require("mime-types");
 const fs = require("fs");
-const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const redis = require("redis");
+
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const config = require("../../config");
 const { capture } = require("../../sentry");
@@ -38,6 +38,7 @@ const {
   deleteFile,
   updateSeatsTakenInBusLine,
 } = require("../../utils");
+const { getMimeFromFile, getMimeFromBuffer } = require("../../utils/file");
 const { sendTemplate, unsync } = require("../../sendinblue");
 const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
@@ -59,7 +60,7 @@ const {
   YOUNG_STATUS_PHASE2,
   YOUNG_SOURCE,
   youngCanChangeSession,
-  youngCanDeleteAccount,
+  youngCanWithdraw,
   REGLEMENT_INTERIEUR_VERSION,
 } = require("snu-lib");
 const { APP_URL } = require("../../config");
@@ -188,7 +189,7 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype } = currentFile;
-        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
@@ -913,7 +914,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!youngCanDeleteAccount(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!youngCanWithdraw(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
     const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
@@ -975,7 +976,7 @@ router.put("/abandon", passport.authenticate("young", { session: false, failWith
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!youngCanDeleteAccount(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!youngCanWithdraw(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
     const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
@@ -1188,8 +1189,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
 
     let mimeFromFile = null;
     try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
+      mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {
       capture(e);
     }

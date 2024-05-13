@@ -11,9 +11,13 @@ import { StepCard } from "../StepCard";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import ConvocationModal from "../modals/ConvocationModal";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
+import { STEPS, isStepDone } from "../../utils/steps.utils";
 
-export default function StepConvocation({ center, meetingPoint, departureDate, returnDate, enabled, isDone, stepNumber }) {
+export default function StepConvocation({ data: { center, meetingPoint, departureDate, returnDate } }) {
+  const index = 3;
   const young = useSelector((state) => state.Auth.young);
+  const isEnabled = isStepDone(STEPS.AGREEMENT, young);
+  const isDone = isStepDone(STEPS.CONVOCATION, young);
   const dispatch = useDispatch();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [openConvocation, setOpenConvocation] = useState(false);
@@ -54,16 +58,16 @@ export default function StepConvocation({ center, meetingPoint, departureDate, r
     }
   };
 
-  if (!enabled) {
+  if (!isEnabled) {
     return (
-      <StepCard state="disabled" stepNumber={3}>
+      <StepCard variant="disabled" index={index}>
         <p className="font-medium text-gray-400">Téléchargez votre convocation</p>
       </StepCard>
     );
   }
 
   return (
-    <StepCard state={isDone ? "done" : "todo"} stepNumber={stepNumber}>
+    <StepCard variant={isDone ? "done" : ""} index={index}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold">Téléchargez votre convocation</p>

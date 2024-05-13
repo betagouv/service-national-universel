@@ -22,6 +22,7 @@ import {
   translateStatusClasse,
   COHORT_TYPE,
   IS_INSCRIPTION_OPEN_CLE,
+  formatDateFRTimezoneUTC,
 } from "snu-lib";
 import { FUNCTIONAL_ERRORS } from "snu-lib/functionalErrors";
 import { useSelector } from "react-redux";
@@ -268,10 +269,10 @@ export default function View() {
                   <p className="text-left text-sm  text-gray-800">Dates</p>
                   <div className="flex items-center">
                     <p className="text-left text-xs text-gray-500 flex-1">
-                      Début : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateStart).format("DD/MM/YYYY") : ""}</strong>
+                      Début : <strong>{formatDateFRTimezoneUTC(cohorts?.find((c) => c.name === classe?.cohort)?.dateStart)}</strong>
                     </p>
                     <p className="text-left text-xs text-gray-500 flex-1">
-                      Fin : <strong>{classe?.cohort ? dayjs(cohorts.find((c) => c.name === classe?.cohort)?.dateEnd).format("DD/MM/YYYY") : ""}</strong>
+                      Fin : <strong>{formatDateFRTimezoneUTC(cohorts?.find((c) => c.name === classe?.cohort)?.dateEnd)}</strong>
                     </p>
                   </div>
                 </div>

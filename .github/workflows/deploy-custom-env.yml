@@ -62,6 +62,13 @@ jobs:
       branch_name: ${{ needs.prepare.outputs.branch_name }}
     secrets: inherit
 
+  run_tests_front:
+    needs: prepare
+    uses: ./.github/workflows/run-tests-front.yml
+    with:
+      branch_name: ${{ needs.prepare.outputs.branch_name }}
+    secrets: inherit
+
   build:
     if: |
       github.event_name == 'workflow_dispatch' ||

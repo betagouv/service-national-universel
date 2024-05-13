@@ -11,7 +11,7 @@
 
   const fs = require("fs");
 
-  const { PORT: port, GENERATE_LOCALLY } = require("./config.js");
+  const { PORT: port, GENERATE_LOCALLY } = require("./config");
 
   const initBrowser = async () => {
     try {

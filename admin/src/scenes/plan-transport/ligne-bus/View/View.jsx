@@ -2,7 +2,9 @@ import React from "react";
 import { HiOutlineBell, HiOutlineChatAlt } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+
 import { ROLES, canExportLigneBus, isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
+
 import Bus from "../../../../assets/icons/Bus";
 import Breadcrumbs from "../../../../components/Breadcrumbs";
 import Loader from "../../../../components/Loader";
@@ -19,7 +21,6 @@ import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
 import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
-import { AiOutlineExclamationCircle } from "react-icons/ai";
 
 export default function View(props) {
   const [data, setData] = React.useState(null);
@@ -218,8 +219,7 @@ export default function View(props) {
         </div>
         {data.delayedForth === "true" || data.delayedBack === "true" ? (
           <InfoMessage
-            bg="bg-[#B45309]"
-            Icon={AiOutlineExclamationCircle}
+            priority="important"
             message={`Le départ de cette ligne de bus est retardé ${
               data.delayedForth === "true" && data.delayedBack === "true" ? "à l'aller et au retour" : data.delayedForth === "true" ? "à l'aller" : "au retour"
             }.`}

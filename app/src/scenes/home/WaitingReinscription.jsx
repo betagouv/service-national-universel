@@ -1,38 +1,14 @@
 import plausibleEvent from "@/services/plausible";
 import Img3 from "../../assets/homePhase2Desktop.png";
 import Img2 from "../../assets/homePhase2Mobile.png";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import Loader from "@/components/Loader";
-import { capture } from "@/sentry";
-import { toastr } from "react-redux-toastr";
-import API from "@/services/api";
 
-export default function WaitingReinscription() {
+export default function WaitingReinscription({ reinscriptionOpen }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
-  const [reinscriptionOpen, setReinscriptionOpen] = useState(false);
-  const [reinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
-
-  const fetchInscriptionOpen = async () => {
-    try {
-      const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      setReinscriptionOpen(data);
-      setReinscriptionOpenLoading(false);
-    } catch (e) {
-      setReinscriptionOpenLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchInscriptionOpen();
-  }, []);
 
   let textPrecision;
   let textSecond;
@@ -44,21 +20,16 @@ export default function WaitingReinscription() {
       textSecond = "Pour la valider, inscrivez-vous pour participer à un prochain séjour !";
     }
   } else {
-    if (young.status === YOUNG_STATUS.WAITING_LIST && young.cohort === "à venir")
-      textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
-    else if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
-    else if (young.cohort === "à venir")
-      textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
-    else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
-      textPrecision = "Vous n'avez pas pu participer au séjour de cohésion.";
-    else return;
+    if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
+    else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
+      textPrecision = "Vous n’avez pas réalisé votre séjour de cohésion";
+      textSecond = "Votre phase 1 n’est donc pas validée";
+    } else return;
   }
   const onClickEligibilte = async () => {
     plausibleEvent("Phase0/CTA reinscription - home page");
     return history.push("/reinscription");
   };
-
-  if (reinscriptionOpenLoading) return <Loader />;
 
   return (
     <>

@@ -40,6 +40,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const ref = React.useRef(null);
 
   React.useEffect(() => {
+    if (!data) return;
     let temp = data;
     if (filter?.filter) {
       temp.filter(filter.filter);
@@ -48,8 +49,8 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
       filter.sort(temp);
     }
 
-    const naIndex = data.findIndex((item) => item.key === "N/A");
-    const emptyIndex = data.findIndex((item) => item.key === "");
+    const naIndex = data.findIndex((item) => item?.key === "N/A");
+    const emptyIndex = data.findIndex((item) => item?.key === "");
 
     // Concatenate the arrays if both 'N/A' and '' are found
     if (naIndex !== -1 && emptyIndex !== -1) {
@@ -62,7 +63,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
     }
 
     setOptionsVisible(temp);
-  }, [data]);
+  }, [data, filter]);
 
   React.useEffect(() => {
     // normalize search

@@ -10,9 +10,13 @@ import { StepCard } from "../StepCard";
 import { HiMail, HiOutlineDownload, HiOutlineInformationCircle } from "react-icons/hi";
 import { setYoung } from "@/redux/auth/actions";
 import { useDispatch, useSelector } from "react-redux";
+import { STEPS, isStepDone } from "../../utils/steps.utils";
 
-export default function StepMedicalField({ enabled, isDone, stepNumber }) {
+export default function StepMedicalField() {
+  const index = 4;
   const young = useSelector((state) => state.Auth.young);
+  const isEnabled = isStepDone(STEPS.CONVOCATION, young);
+  const isDone = isStepDone(STEPS.MEDICAL_FILE, young);
   const dispatch = useDispatch();
   const [isSendEmailConfirmationModalOpen, setSendEmailConfirmationModalOpen] = useState(false);
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
@@ -36,16 +40,16 @@ export default function StepMedicalField({ enabled, isDone, stepNumber }) {
     if (ok) dispatch(setYoung(data));
   };
 
-  if (!enabled) {
+  if (!isEnabled) {
     return (
-      <StepCard state="disabled" stepNumber={stepNumber}>
+      <StepCard variant="disabled" index={index}>
         <p className="font-medium text-gray-400">Téléchargez votre fiche sanitaire</p>
       </StepCard>
     );
   }
 
   return (
-    <StepCard state={isDone ? "done" : "todo"} stepNumber={stepNumber}>
+    <StepCard variant={isDone ? "done" : ""} index={index}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold">Téléchargez votre fiche sanitaire</p>

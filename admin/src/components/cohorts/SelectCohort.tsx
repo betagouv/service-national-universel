@@ -6,7 +6,7 @@ import cx from "classnames";
 
 import { formatCohortPeriod } from "snu-lib";
 import { Select, BadgeNotif } from "@snu/ds/admin";
-import { CohortState } from "@/redux/cohorts";
+import { CohortState } from "@/redux/cohorts/reducer";
 
 interface Props {
   cohort: string;

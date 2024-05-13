@@ -149,6 +149,7 @@ export default function SessionList({ center, sessions, user, focusedSession, on
             withBadge
             filterFn={(c) => sessions.find((s) => s.cohort === c.name)}
             onChange={(cohortName) => {
+              setEditingBottom(false);
               const session = sessions.find((s) => s.cohort === cohortName);
               if (session) onFocusedSessionChange(session);
               history.replace({ search: `?cohort=${cohortName}` });
@@ -201,7 +202,6 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                 <OccupationCard
                   canBeDeleted={focusedSession.canBeDeleted}
                   placesTotal={focusedSession.placesTotal}
-                  placesTotalModified={editInfoSession.placesTotal}
                   placesLeft={focusedSession.placesLeft}
                   user={user}
                   modalDelete={modalDelete}
@@ -230,7 +230,7 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                       error={errors.placesTotal}
                       readOnly={!editingBottom || !canCreateOrUpdateCohesionCenter(user)}
                       label="Places ouvertes"
-                      value={editInfoSession.placesTotal}
+                      value={editingBottom ? editInfoSession.placesTotal : focusedSession.placesTotal}
                       onChange={(e) => setEditInfoSession({ ...editInfoSession, placesTotal: e.target.value })}
                       tooltips={
                         "C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
@@ -243,20 +243,19 @@ export default function SessionList({ center, sessions, user, focusedSession, on
                       <ToggleDate
                         label="Dates spécifiques"
                         tooltipText={
-                          focusedCohortData ? (
-                            <p>
-                              Les dates de cette session diffèrent des dates officielles :{" "}
-                              <strong>{`${dayjs(focusedCohortData.dateStart).format("DD")} - ${dayjs(focusedCohortData.dateEnd).format("DD MMMM YYYY")}`}</strong>.
-                            </p>
-                          ) : null
+                          <p>
+                            Les dates de cette session diffèrent des dates officielles :{" "}
+                            <strong>{`${dayjs(focusedCohortData?.dateStart).format("DD")} - ${dayjs(focusedCohortData?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
+                          </p>
                         }
                         readOnly={!editingBottom || !canPutSpecificDateOnSessionPhase1(user)}
-                        value={editInfoSession.hasSpecificDate}
+                        value={editingBottom ? editInfoSession.hasSpecificDate : focusedSession.hasSpecificDate}
                         onChange={() => setEditInfoSession({ ...editInfoSession, hasSpecificDate: !editInfoSession.hasSpecificDate })}
-                        range={{
-                          from: editInfoSession?.dateStart || undefined,
-                          to: editInfoSession?.dateEnd || undefined,
-                        }}
+                        range={
+                          editingBottom
+                            ? { from: editInfoSession.dateStart, to: editInfoSession.dateEnd }
+                            : { from: focusedSession.dateStart || focusedCohortData?.dateStart, to: focusedSession.dateEnd || focusedCohortData?.dateEnd }
+                        }
                         onChangeRange={(range) => {
                           setEditInfoSession({
                             ...editInfoSession,

@@ -1,0 +1,3 @@
+export const COHORTS_ACTIONS = {
+  SET_COHORTS: "SET_COHORTS",
+};
