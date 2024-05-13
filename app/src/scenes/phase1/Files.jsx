@@ -24,16 +24,14 @@ export default function DocumentsPhase1({ young }) {
       <section>
         <h3 className="text-base font-semibold">Document à préparer</h3>
         <p className="text-sm mt-2">Complétez votre fiche sanitaire et préparez vos documents annexes.</p>
-        <div className="flex gap-4">
-          <div className="bg-gray-50 rounded-lg p-3 w-64 mt-3 flex flex-col gap-3 items-center">
-            <FileIcon filled={young.cohesionStayMedicalFileDownload === "true"} icon="sanitaire" />
-            <p className="text-lg font-bold">Fiche sanitaire</p>
-            <p className="text-xs bg-blue-100 text-blue-800 rounded w-fit px-1">Obligatoire</p>
-            <p className="text-sm text-center">La consigne pour transmettre la fiche sanitaire sera précisée lors de l'affectation</p>
-            <ButtonExternalLinkPrimary href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} className="w-full">
-              Télécharger
-            </ButtonExternalLinkPrimary>
-          </div>
+        <div className="bg-gray-50 rounded-lg p-3 w-full md:w-64 mt-4 flex flex-col gap-3 items-center">
+          <FileIcon filled={true} icon="sanitaire" />
+          <p className="text-lg font-bold">Fiche sanitaire</p>
+          <p className="text-xs bg-blue-100 text-blue-800 rounded w-fit px-1">Obligatoire</p>
+          <p className="text-xs text-center">La consigne pour transmettre la fiche sanitaire sera précisée lors de l'affectation.</p>
+          <ButtonExternalLinkPrimary href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} className="w-full">
+            Télécharger
+          </ButtonExternalLinkPrimary>
         </div>
       </section>
     );
