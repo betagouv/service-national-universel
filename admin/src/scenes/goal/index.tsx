@@ -18,8 +18,8 @@ export default function Goal() {
 
   const [inscriptionGoals, setInscriptionGoals] = useState<{ department: string; region: string; max: null | number }[]>();
   const [loading, setLoading] = useState(false);
-  const [blocsOpened, setBlocsOpened] = useState([]);
-  const [cohort, setCohort] = useState(null);
+  const [blocsOpened, setBlocsOpened] = useState<string[]>([]);
+  const [cohort, setCohort] = useState<string | null>(null);
 
   useEffect(() => {
     if (!cohort) setCohort("Février 2024 - C");

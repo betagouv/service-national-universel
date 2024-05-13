@@ -9,7 +9,7 @@
   };
 
   if (process.env.RUN_CRONS) {
-    const { PORT } = require("./config.js");
+    const { PORT } = require("./config");
     const { initSentry } = require("./sentry");
     initSentry();
     const { initDB } = require("./mongo");
@@ -40,7 +40,7 @@
   const { initDB, closeDB } = require("./mongo");
   await initDB();
 
-  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, ENVIRONMENT } = require("./config.js");
+  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, ENVIRONMENT } = require("./config");
 
   /*
     Download all certificate templates when instance is starting,
@@ -136,7 +136,7 @@
   app.use("/bus", require("./controllers/bus"));
   app.use("/cle", require("./controllers/cle"));
   app.use("/cohesion-center", require("./controllers/cohesion-center"));
-  app.use("/cohort", require("./controllers/cohort/cohort.controller.js"));
+  app.use("/cohort", require("./controllers/cohort/cohort.controller"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
   app.use("/contract", require("./controllers/contract"));
   app.use("/correction-request", require("./controllers/correction-request"));

@@ -6,7 +6,7 @@ const NodeClam = require("clamscan");
 
 const { initSentry, capture } = require("./sentry");
 
-const { PORT: port, RELEASE, CLAMSCAN_CONFIG } = require("./config.js");
+const { PORT: port, RELEASE, CLAMSCAN_CONFIG } = require("./config");
 
 const app = express();
 

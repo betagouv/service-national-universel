@@ -49,7 +49,7 @@ export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChan
       {isSelectMenuOpen && <FaMagnifyingGlass size={25} className="text-gray-400 mr-3" />}
       <Select
         options={options}
-        value={options.find(({ value }) => value == currentCohortName)}
+        value={options.find(({ value }) => value == currentCohortName) || null}
         defaultValue={currentCohortName}
         maxMenuHeight={520}
         className="w-[450px] max-w-[450px]"
@@ -67,11 +67,11 @@ export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChan
           },
         }}
         optionCustomStyle={{ paddingTop: 3, paddingBottom: 3 }}
-        onChange={(e) => onChange(e.value)}
+        onChange={(e) => onChange?.(e.value)}
         closeMenuOnSelect
         onMenuOpen={() => setIsSelectMenuOpen(true)}
         onMenuClose={() => setIsSelectMenuOpen(false)}
-        badge={withBadge && <BadgeNotif count={options.length} />}
+        badge={withBadge ? <BadgeNotif count={options.length} /> : undefined}
       />
     </div>
   );

@@ -3,6 +3,9 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const { ObjectId } = require("mongoose").Types;
+const fs = require("fs");
+const fileUpload = require("express-fileupload");
+const mime = require("mime-types");
 
 const { capture, captureMessage } = require("../sentry");
 const ApplicationObject = require("../models/application");
@@ -13,9 +16,7 @@ const YoungObject = require("../models/young");
 const CohortObject = require("../models/cohort");
 const ReferentObject = require("../models/referent");
 const { decrypt, encrypt } = require("../cryptoUtils");
-const fs = require("fs");
-const FileType = require("file-type");
-const fileUpload = require("express-fileupload");
+
 const { sendTemplate } = require("../sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
@@ -44,11 +45,11 @@ const {
   getReferentManagerPhase2,
   updateYoungApplicationFilesType,
 } = require("../utils");
-const mime = require("mime-types");
 const patches = require("./patches");
 const scanFile = require("../utils/virusScanner");
 const { getAuthorizationToApply } = require("../services/application");
 const { apiEngagement } = require("../services/gouv.fr/api-engagement");
+const { getMimeFromBuffer, getMimeFromFile } = require("../utils/file");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
@@ -766,7 +767,7 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype } = currentFile;
-        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
@@ -828,8 +829,7 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
 
     let mimeFromFile = null;
     try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
+      mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {
       //
     }

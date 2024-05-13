@@ -4,7 +4,7 @@ import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
 import { useSelector } from "react-redux";
-import { supportURL } from "../../../config.js";
+import { supportURL } from "../../../config";
 
 export default function Header() {
   const openedTickets = useSelector((state) => state.Tickets.open);

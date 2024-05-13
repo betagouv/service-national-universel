@@ -23,6 +23,7 @@ import OccupationCard from "./OccupationCard";
 export default function SessionList({ center, setCenter, sessions, setSessions, user }) {
   const history = useHistory();
   const cohorts = useSelector((state) => state.Cohorts);
+  const params = new URLSearchParams(location.search);
 
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);

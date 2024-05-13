@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { MONGO_URL, ENVIRONMENT } = require("./config.js");
+const { MONGO_URL, ENVIRONMENT } = require("./config");
 
 // Set up default mongoose connection
 async function initDB() {
@@ -22,7 +22,6 @@ async function initDB() {
   db.on("fullsetup", () => console.log("MONGODB: fullsetup"));
   db.on("all", () => console.log("MONGODB: all"));
   db.on("reconnectFailed", () => console.log("MONGODB: reconnectFailed"));
-
 
   let options = {
     appname: "ApiSnu", // Add your application name

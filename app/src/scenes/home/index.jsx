@@ -1,4 +1,4 @@
-import { React } from "react";
+import { React, useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription } from "../../utils";
@@ -18,28 +18,66 @@ import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
+import AvenirCohort from "./AvenirCohort";
 import { isCohortTooOld } from "snu-lib";
+import { capture } from "@/sentry";
+import { toastr } from "react-redux-toastr";
+import API from "@/services/api";
+import Loader from "@/components/Loader";
 
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const cohort = getCohort(young.cohort);
 
+  const [reinscriptionOpen, setReinscriptionOpen] = useState(false);
+  const [reinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
+
+  const fetchReInscriptionOpen = async () => {
+    try {
+      const { ok, data, code } = await API.get(`/cohort-session/isReInscriptionOpen`);
+      if (!ok) {
+        capture(new Error(code));
+        return toastr.error("Oups, une erreur est survenue", code);
+      }
+      setReinscriptionOpen(data);
+      setReinscriptionOpenLoading(false);
+    } catch (e) {
+      setReinscriptionOpenLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchReInscriptionOpen();
+  }, []);
+
+  if (reinscriptionOpenLoading) return <Loader />;
+
   if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
+    const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
+
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
     if (hasAccessToReinscription(young)) {
-      return <WaitingReinscription />;
+      if (!reinscriptionOpen) {
+        if (hasWithdrawn) {
+          return <Withdrawn />;
+        }
+        if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
+          return <AvenirCohort />;
+        }
+        if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+          return <FutureCohort />;
+        }
+      }
+      return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
     }
-
-    const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
 
     if (hasWithdrawn) {
       return <Withdrawn />;
     }
-
     const hasCompletedPhase2 = [YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(young.statusPhase2);
     const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
 
@@ -76,10 +114,6 @@ export default function Home() {
           return <ValidatedV2 />;
         }
       }
-    }
-
-    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
-      return <FutureCohort />;
     }
 
     return <Default />;
