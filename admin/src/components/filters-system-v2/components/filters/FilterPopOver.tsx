@@ -11,6 +11,7 @@ import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-sy
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
+
 type FilterPopOverProps = {
   filter: RowFilter;
   intermediateFilter?: IIntermediateFilter;
@@ -57,7 +58,7 @@ export default function FilterPopOver({ filter, data, selectedFilters, setSelect
 }
 
 type DropDownProps = {
-  isShowing: boolean;
+  isShowing: boolean | undefined;
   filter: RowFilter & {
     missingLabel?: string;
     showCount?: boolean;
@@ -77,7 +78,7 @@ type DropDownProps = {
 export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData, intermediateFilter }: DropDownProps) => {
   const [search, setSearch] = React.useState("");
   const [optionsVisible, setOptionsVisible] = React.useState(data || []);
-  const ref = React.useRef(null);
+  const ref: React.MutableRefObject<any> = React.useRef(null);
   React.useEffect(() => {
     if (!data) return;
     const temp = data;
@@ -135,7 +136,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
   const handleSelect = (value) => {
     // check si c'est un isSingle (un seul filtre possible)
     if (filter?.isSingle) return setSelectedFilters({ ...selectedFilters, [filter?.name]: { filter: [value] } });
-    let newFilters = [];
+    let newFilters: any[] = [];
     // store localement les filtres
     if (selectedFilters[filter?.name]) {
       if (selectedFilters[filter?.name]?.filter?.includes(value)) {
