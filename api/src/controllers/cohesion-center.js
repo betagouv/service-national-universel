@@ -101,6 +101,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
       placesTotal: Joi.number().required(),
+      email: Joi.string().email().required(),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -129,6 +130,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       nameCentre: center.name,
       cityCentre: center.city,
       zipCentre: center.zip,
+      sanitaryContactEmail: value.email,
     });
     center.set({ cohorts: newCohorts });
     await center.save({ fromUser: req.user });

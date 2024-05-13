@@ -98,7 +98,7 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
       const { ok, code, data } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
         cohort: selectedCohort,
         placesTotal,
-        status,
+        email,
       });
 
       if (!ok) {
