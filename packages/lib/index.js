@@ -164,7 +164,7 @@ const formatPhoneNumberFR = (tel) => {
   return formatted;
 };
 
-const patternEmailAcademy = "^[a-zA-Z0-9._+-]+@ac-[a-zA-Z]{1,}.fr$";
+const patternEmailAcademy = "^[a-zA-Z0-9._+-]+@ac-([a-zA-Z]+-)*[a-zA-Z]+.fr$";
 
 const htmlCleaner = (text) => {
   return sanitizeHtml(text, {
