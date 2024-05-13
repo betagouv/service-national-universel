@@ -16,9 +16,10 @@
     "postinstall": "npm run copy:dsfr",
     "predev": "only-include-used-icons",
     "copy:dsfr": "copy-dsfr-to-public && only-include-used-icons",
-    "lint": "eslint src --ext .js,.jsx",
-    "lint:fix": "eslint src --ext .js --fix",
-    "lint:report": "eslint src --ext .js --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
+    "check-types": "tsc -p tsconfig.ci.json --emitDeclarationOnly",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src --ext .js,.ts --fix",
+    "lint:report": "eslint src --ext .js,.ts --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
     "clean": "rm -fr node_modules .turbo build .swc"
   },
   "dependencies": {

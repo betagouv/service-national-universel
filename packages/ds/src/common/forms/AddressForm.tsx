@@ -20,8 +20,8 @@ export type Address = {
 interface proptype {
   label?: string;
   readOnly?: boolean;
-  data: Address;
-  updateData: (data: Address) => void;
+  data: Partial<Address>;
+  updateData: (data: Partial<Address>) => void;
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   options: Address[];

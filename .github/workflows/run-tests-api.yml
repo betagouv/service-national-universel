@@ -30,14 +30,13 @@ jobs:
       - name: Install packages
         run: npm ci
 
-      - name: Lint code
-        working-directory: api
-        continue-on-error: true
-        run: npm run lint
-
       - name: Build lib
         continue-on-error: false
         run: npm run build -w packages/lib
+
+      - name: Lint code
+        working-directory: api
+        run: npm run lint
 
       - name: Test and Send coverage
         uses: paambaati/codeclimate-action@v2.7.5

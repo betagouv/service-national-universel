@@ -7,6 +7,7 @@ import { useHistory } from "react-router-dom";
 import { translate, isSessionEditionOpen } from "snu-lib";
 import { Select } from "@snu/ds/admin";
 
+import { User } from "@/types";
 import { CohortState } from "@/redux/cohorts/reducer";
 import ModalTailwind from "@/components/modals/ModalTailwind";
 import { capture } from "@/sentry";
@@ -14,14 +15,30 @@ import api from "@/services/api";
 
 import Field from "./Field";
 
-export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }) {
+interface Centre {
+  _id: string;
+  name: string;
+  department: string;
+  region: string;
+}
+
+interface Props {
+  isOpen?: boolean;
+  onSucess: (cohortName?: string) => void;
+  onCancel: () => void;
+  user: User;
+  defaultCentre?: Centre | null;
+  editable?: boolean;
+}
+
+export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user, defaultCentre = null, editable = true }: Props) {
   const history = useHistory();
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const availableCohorts = isOpen ? cohorts.filter((c) => isSessionEditionOpen(user, c)).map((c) => c.name) : [];
 
-  const refSelect = React.useRef(null);
-  const refInput = React.useRef(null);
-  const refContainer = React.useRef(null);
+  const refSelect = React.useRef<HTMLDivElement>(null);
+  const refInput = React.useRef<HTMLInputElement>(null);
+  const refContainer = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -37,7 +54,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
     };
   }, []);
 
-  const [listCentre, setListCentre] = React.useState([]);
+  const [listCentre, setListCentre] = React.useState<Centre[]>([]);
   const [selectedCohort, setSelectedCohort] = React.useState<string>();
   const [selectedCentre, setSelectedCentre] = React.useState(defaultCentre);
   const [placesTotal, setPlacesTotal] = React.useState("");
@@ -78,7 +95,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
     try {
       setIsLoading(true);
 
-      const { ok, code } = await api.put(`/cohesion-center/${selectedCentre._id}/session-phase1`, {
+      const { ok, code } = await api.put(`/cohesion-center/${selectedCentre?._id}/session-phase1`, {
         cohort: selectedCohort,
         placesTotal,
         status,
@@ -92,7 +109,7 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
       toastr.success("La centre a été rattaché au séjour avec succès", "");
       onCancel();
       if (onSucess) onSucess(selectedCohort);
-      history.push(`/centre/${selectedCentre._id}?cohorte=${selectedCohort}`);
+      history.push(`/centre/${selectedCentre?._id}?cohorte=${selectedCohort}`);
       setSelectedCohort("");
       setPlacesTotal("");
     } catch (e) {
@@ -117,7 +134,6 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
               isSearchable
               isClearable
               closeMenuOnSelect
-              // @ts-expect-error type à revoir dans le DS
               value={selectedCohort ? { value: selectedCohort, label: selectedCohort } : null}
               onChange={(options) => {
                 setSelectedCohort(options?.value);
@@ -158,15 +174,15 @@ export default function ModalRattacherCentre({ isOpen, onSucess, onCancel, user,
                   </div>
                   {listCentre.map((centre) => (
                     <div
-                      key={centre._id}
+                      key={centre?._id}
                       onClick={() => {
                         setSelectedCentre(centre);
                         setOpen(false);
                       }}
                       className="flex cursor-pointer flex-col rounded-lg py-1 px-2 hover:bg-gray-50">
-                      <div className="text-sm leading-5 text-gray-900">{centre.name}</div>
+                      <div className="text-sm leading-5 text-gray-900">{centre?.name}</div>
                       <div className="text-sm leading-5 text-gray-500">
-                        {centre.department} • {centre.region}
+                        {centre?.department} • {centre?.region}
                       </div>
                     </div>
                   ))}

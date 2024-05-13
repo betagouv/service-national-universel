@@ -1,14 +1,10 @@
-import { ROLES } from "@/utils";
 import { authActions } from "./actions";
+import { User } from "@/types";
 
 export type AuthState = {
   // TODO: use API route response
   Auth: {
-    user: {
-      role: (typeof ROLES)[keyof typeof ROLES];
-      structureId: string;
-      subRole?: string;
-    };
+    user: User;
     sessionPhase1: {
       _id: string;
       cohort: string;

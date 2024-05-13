@@ -364,7 +364,7 @@ function ConsentementForm({ young, token, step, parentId }) {
                     <div className="mb-3">
                       <p>
                         Cette autorisation est valable pour une utilisation sur l’ensemble du parcours du service national universel, tant durant le séjour de cohésion que dans le
-                        cadre de la mobilisation du volontaire au titre de la réserve du SNU :{" "}
+                        cadre de la mobilisation du volontaire au titre de la réserve du SNU :{" "}
                       </p>
                       <div className="ml-4 mt-2 mb-2">
                         <li>pour une durée de 5 ans à compter de la signature de la présente ;</li>

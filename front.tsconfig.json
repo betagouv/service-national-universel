@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "composite": true,
     "allowJs": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -13,10 +14,16 @@
     "noUnusedParameters": false,
     "noUnusedLocals": false,
     "noImplicitReturns": true,
+    "strictNullChecks": true,
     "allowSyntheticDefaultImports": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "target": "ES2021"
+    "target": "ES2021",
+    "skipLibCheck": true,
+    "noEmitOnError": true,
+    "noEmit": false
   },
+  "include": [],
+  "files": [],
   "extends": "@tsconfig/vite-react/tsconfig.json"
 }
