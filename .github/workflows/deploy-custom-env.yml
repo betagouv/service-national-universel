@@ -161,6 +161,11 @@ jobs:
             -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
             -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
+      - name: Debug
+        run: |
+          echo ${{ github.event.pull_request.comments }}
+          echo ${{ github.event.pull_request }}
+
       - name: Add comment to PR
         if: github.event_name == 'pull_request' && github.event.pull_request.comments == 0
         working-directory: ${{ env.custom_directory }}
