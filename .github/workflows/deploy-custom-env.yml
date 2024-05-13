@@ -162,7 +162,7 @@ jobs:
             -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Add comment to PR
-        if: github.event_name == 'pull_request' && github.event.action == "opened"
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
         working-directory: ${{ env.custom_directory }}
         env:
           URL: ${{ github.event.pull_request.comments_url }}
