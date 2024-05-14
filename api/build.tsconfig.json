@@ -12,8 +12,9 @@
     "target": "ES2021",
     "outDir": "./src",
     "rootDir": "./src",
+    "baseUrl": "src",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./*"]
     }
   },
   "include": ["src/**/*.ts"],

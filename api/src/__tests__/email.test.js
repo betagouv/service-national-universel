@@ -3,8 +3,6 @@ const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { ROLES } = require("snu-lib");
 
-jest.setTimeout(10_000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 

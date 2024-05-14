@@ -23,8 +23,6 @@ jest.mock("../utils", () => ({
   getSignedUrl: () => "",
 }));
 
-jest.setTimeout(10_000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 

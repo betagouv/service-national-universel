@@ -10,24 +10,24 @@ import Joi from "joi";
 
 import { canEditPresenceYoung, ROLES, canAssignManually, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, REFERENT_DEPARTMENT_SUBROLE, getDepartmentByZip } from "snu-lib";
 
-import { ADMIN_URL } from "@/config";
-import { capture } from "@/sentry";
-import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "@/utils";
-import { serializeYoung, serializeSessionPhase1 } from "@/utils/serializer";
-import { sendTemplate } from "@/sendinblue";
+import { ADMIN_URL } from "../../config";
+import { capture } from "../../sentry";
+import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "../../utils";
+import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
+import { sendTemplate } from "../../sendinblue";
 
-import YoungModel from "@/models/young";
-import SessionPhase1Model from "@/models/sessionPhase1";
-import PointDeRassemblementModel from "@/models/PlanDeTransport/pointDeRassemblement";
-import LigneBusModel from "@/models/PlanDeTransport/ligneBus";
-import CohortModel from "@/models/cohort";
-import ReferentModel from "@/models/referent";
-import DepartmentServiceModel from "@/models/departmentService";
-import { IDepartementService } from "@/models/departementService.type";
-import CohesionCenterModel from "@/models/cohesionCenter";
-import { ICohesionCenter } from "@/models/cohesionCenter.type";
+import YoungModel from "../../models/young";
+import SessionPhase1Model from "../../models/sessionPhase1";
+import PointDeRassemblementModel from "../../models/PlanDeTransport/pointDeRassemblement";
+import LigneBusModel from "../../models/PlanDeTransport/ligneBus";
+import CohortModel from "../../models/cohort";
+import ReferentModel from "../../models/referent";
+import DepartmentServiceModel from "../../models/departmentService";
+import { IDepartementService } from "../../models/departementService.type";
+import CohesionCenterModel from "../../models/cohesionCenter";
+import { ICohesionCenter } from "../../models/cohesionCenter.type";
 
-import { UserRequest } from "@/controllers/request";
+import { UserRequest } from "../../controllers/request";
 
 const router = express.Router({ mergeParams: true });
 
