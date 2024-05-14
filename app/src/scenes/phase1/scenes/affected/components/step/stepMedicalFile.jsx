@@ -1,39 +1,19 @@
 import React, { useState } from "react";
 import api from "../../../../../../services/api";
-import { SENDINBLUE_TEMPLATES } from "../../../../../../utils";
-import { toastr } from "react-redux-toastr";
-import { CDN_BASE_URL } from "../../../../../representants-legaux/commons";
-
-import ConfirmationModal from "../../../../../../components/ui/modals/ConfirmationModal";
 import MedicalFileModal from "../../../../components/MedicalFileModal";
 import { StepCard } from "../StepCard";
-import { HiMail, HiOutlineDownload, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineInformationCircle } from "react-icons/hi";
 import { setYoung } from "@/redux/auth/actions";
 import { useDispatch, useSelector } from "react-redux";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
 
-export default function StepMedicalField() {
+export default function StepMedicalField({ data }) {
   const index = 4;
   const young = useSelector((state) => state.Auth.young);
   const isEnabled = isStepDone(STEPS.CONVOCATION, young);
   const isDone = isStepDone(STEPS.MEDICAL_FILE, young);
   const dispatch = useDispatch();
-  const [isSendEmailConfirmationModalOpen, setSendEmailConfirmationModalOpen] = useState(false);
-  const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
-
-  const handleMail = async () => {
-    try {
-      const { ok } = await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`, {
-        object: `Fiche sanitaire à compléter`,
-        message: "Vous trouverez téléchargeable ci-dessous la fiche sanitaire à compléter.",
-        link: CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf" + "?utm_campaign=transactionnel+telecharger+docum&utm_source=notifauto&utm_medium=mail+410+telecharger",
-      });
-      if (ok) toastr.success(`Document envoyé à ${young.email}`, "");
-      else toastr.error("Erreur lors de l'envoi du document", "");
-    } catch (error) {
-      toastr.error("Erreur lors de l'envoi du document", "");
-    }
-  };
+  const [open, setOpen] = useState(false);
 
   const updateDocumentInformation = async () => {
     const { ok, data } = await api.put("/young/phase1/cohesionStayMedical", { cohesionStayMedicalFileDownload: "true" });
@@ -48,48 +28,25 @@ export default function StepMedicalField() {
     );
   }
 
+  // if (data.session.sanitaryContactEmail) {
+  //   return;
+  // }
+
   return (
     <StepCard variant={isDone ? "done" : ""} index={index}>
-      <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
+      <div className="flex items-center flex-col md:flex-row justify-between text-sm">
         <div>
-          <p className="font-semibold">Téléchargez votre fiche sanitaire</p>
-          <p className="mt-1 text-gray-500">Si vous ne l’avez pas déjà fait, vous devez renseigner votre fiche sanitaire et la remettre à votre arrivée au centre de séjour.</p>
+          <p className="font-semibold">
+            Téléchargez votre fiche sanitaire
+            <span className="text-xs bg-blue-100 text-blue-800 rounded w-fit px-1 ml-2">Obligatoire</span>
+          </p>
+          <p className="mt-1 text-gray-500">Complétez votre fiche sanitaire et remettez là à votre arrivée au centre du séjour.</p>
         </div>
-        <div className="w-full md:w-auto mt-1 md:mt-0 flex flex-col md:flex-row-reverse gap-2">
-          <a
-            href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"}
-            onClick={updateDocumentInformation}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`w-full text-sm px-4 py-2 shadow-sm rounded flex gap-2 justify-center ${
-              isDone ? "border hover:bg-gray-100 text-gray-600" : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}>
-            <HiOutlineDownload className="h-5 w-5" />
-            Télécharger
-          </a>
-
-          <button
-            onClick={() => setSendEmailConfirmationModalOpen(true)}
-            className="w-full text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
-            <HiMail className="h-5 w-5" />
-            <p className="md:hidden">Envoyer par mail</p>
-          </button>
-
-          <button onClick={() => setMedicalFileModalOpen(true)} className="w-full text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
-            <HiOutlineInformationCircle className="h-5 w-5" />
-            <p className="md:hidden">Afficher le mode d'emploi</p>
-          </button>
-        </div>
+        <button onClick={() => setOpen(true)} className="w-64 text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
+          Ouvrir le mode d'emploi
+        </button>
       </div>
-      <MedicalFileModal title={"Mode d’emploi de la fiche sanitaire"} isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
-      <ConfirmationModal
-        isOpen={isSendEmailConfirmationModalOpen}
-        onCancel={() => setSendEmailConfirmationModalOpen(false)}
-        onClose={() => setSendEmailConfirmationModalOpen(false)}
-        onConfirm={handleMail}
-        title="Envoi de document par mail"
-        subTitle={`Vous allez recevoir le lien de téléchargement de la fiche sanitaire par mail à l'adresse ${young.email}.`}
-      />
+      <MedicalFileModal title="Comment transmettre ma fiche sanitaire ?" isOpen={open} onClose={() => setOpen(false)} />
     </StepCard>
   );
 }

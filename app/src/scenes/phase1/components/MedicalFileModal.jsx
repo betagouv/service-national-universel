@@ -6,22 +6,22 @@ import { SENDINBLUE_TEMPLATES } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
 import API from "../../../services/api";
 import { CDN_BASE_URL } from "../../representants-legaux/commons";
-import { HiOutlineDownload, HiOutlineMail, HiOutlineX } from "react-icons/hi";
-import ButtonExternalLinkPrimary from "../../../components/ui/buttons/ButtonExternalLinkPrimary";
-import ButtonPrimaryOutline from "../../../components/ui/buttons/ButtonPrimaryOutline";
+import { HiOutlineDownload, HiMail, HiOutlineX } from "react-icons/hi";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
+import ButtonLinkLight from "@/components/ui/buttons/ButtonLinkLight";
 import ButtonLight from "../../../components/ui/buttons/ButtonLight";
-import ExternalLink from "../../../components/ui/buttons/ExternalLink";
 import EnumeratedList from "./EnumeratedList";
 import ConfirmationModal from "../../../components/ui/modals/ConfirmationModal";
 
-const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche sanitaire" }) => {
+const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche sanitaire", email = "" }) => {
   const [open, setOpen] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
 
-  const updateDocumentInformation = async () => {
+  const handleClick = async () => {
     const { ok, data } = await API.put("/young/phase1/cohesionStayMedical", { cohesionStayMedicalFileDownload: "true" });
     if (ok) dispatch(setYoung(data));
+    onClose;
   };
 
   const handleConfirm = async () => {
@@ -51,58 +51,43 @@ const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche 
         subTitle={`Vous allez recevoir le lien de téléchargement de la fiche sanitaire par mail à l'adresse ${young.email}.`}
       />
       <div className="p-4 md:p-6">
-        <div className="flex flex-col md:items-center md:px-6">
+        <div className="flex flex-col md:items-center">
           <HiOutlineX onClick={onClose} className="h-5 w-5 self-end md:hidden" />
-          <h1 className="mb-4 font-medium text-gray-900 md:self-center md:text-lg">{title}</h1>
+          <h1 className="mb-2 font-medium text-gray-900 md:self-center md:text-xl">{title}</h1>
           <EnumeratedList
             className="self-start"
             items={[
-              { title: "Faites remplir la fiche", description: "par un de vos représentants légaux." },
               {
-                title: "Joignez-y les documents requis",
-                description: "et mettre dans une enveloppe portant la mention",
-                detail: "“A l’attention du référent sanitaire, Pli Confidentiel”.",
+                title: "Télécharger la fiche sanitaire et la faire compléter",
+                description: "par un de vos représentants légaux.",
+                actions: (
+                  <div className="flex gap-2 mt-2">
+                    <ButtonLinkLight href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"} target="_blank" rel="noreferrer">
+                      <HiOutlineDownload className="mr-1 h-5 w-5 text-gray-500 flex-none" />
+                      Télécharger
+                    </ButtonLinkLight>
+                    <ButtonLight onClick={() => setOpen(true)}>
+                      <HiMail className="mr-1 h-5 w-5 text-gray-500 flex-none" />
+                      Recevoir sur ma boîte mail
+                    </ButtonLight>
+                  </div>
+                ),
               },
-              { title: "Remettez l’enveloppe à l’arrivée au séjour", description: "à l’équipe d’encadrement sur place." },
+              {
+                title: "Se munir des documents annexes",
+                description: "mentionnés dans la fiche sanitaire (attestation de vaccination, attestation de sécurité sociale, documents éventuels...)",
+              },
+              {
+                title: "Remettre l’ensemble des documents en mains propres",
+                description: "à l’équipe d’encadrement à l’arrivée au séjour, dans une enveloppe portant la mention “À l’attention du référent sanitaire, Pli Confidentiel”",
+                className: "bg-blue-50 rounded-lg",
+              },
             ]}
           />
-          <ButtonExternalLinkPrimary
-            className="flex w-full items-center justify-center"
-            href={CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf"}
-            onClick={updateDocumentInformation}
-            target="_blank"
-            rel="noreferrer">
-            <HiOutlineDownload className="mr-1 h-5 w-5 text-blue-200" />
-            {young.cohesionStayMedicalFileDownload === "true" ? `Télécharger de nouveau` : `Télécharger`}
-          </ButtonExternalLinkPrimary>
-          <ButtonPrimaryOutline
-            className="mt-3 flex w-full items-center justify-center"
-            onClick={() => {
-              setOpen(true);
-            }}>
-            <HiOutlineMail className="mr-1 h-5 w-5 text-blue-600" />
-            Recevoir par email
-          </ButtonPrimaryOutline>
-          <div className="my-6 h-[1px] w-full bg-gray-200"></div>
-          <p className="text-[13px] text-gray-800">
-            Rappel <strong>(sauf en Nouvelle-Calédonie)</strong> : Entre 15 et 16 ans, vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant. Il est
-            fortement recommandé de le faire avant votre séjour de cohésion.
-          </p>
-          <ExternalLink
-            className="mt-2 self-start"
-            rel="noreferrer"
-            href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-lenfant-et-de-ladolescent/examen-medical-propose-ladolescent-entre-15-et-16-ans">
-            Plus d&apos;informations sur le bilan de santé obligatoire
-          </ExternalLink>
-          <ExternalLink
-            className="mt-3 self-start"
-            href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/note_relatives_aux_informations_d_ordre_sanitaire_2022.pdf">
-            Note relative aux informations d&apos;ordre sanitaire
-          </ExternalLink>
         </div>
-        <ButtonLight className="mt-10 hidden w-full md:block" onClick={onClose}>
-          Fermer
-        </ButtonLight>
+        <ButtonPrimary className="mt-6 hidden w-full md:block" onClick={handleClick}>
+          J'ai compris
+        </ButtonPrimary>
       </div>
     </Modal>
   );
