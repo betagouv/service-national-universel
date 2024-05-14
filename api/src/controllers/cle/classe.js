@@ -140,21 +140,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         cohesionCenterId: value.cohesionCenterId,
         pointDeRassemblementId: value.pointDeRassemblementId,
       });
-
-      if (classe.sessionId && classe.cohesionCenterId && classe.pointDeRassemblementId && classe.status === STATUS_CLASSE.VALIDATED) {
-        const youngs = await YoungModel.find({ classeId: classe._id });
-        await Promise.all(
-          youngs.map((y) => {
-            y.set({
-              sessionPhase1Id: value.sessionId,
-              cohesionCenterId: value.cohesionCenterId,
-              meetingPointId: value.pointDeRassemblementId,
-              statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
-            });
-            return y.save({ fromUser: req.user });
-          }),
-        );
-      }
     }
 
     classe = await classe.save({ fromUser: req.user });
