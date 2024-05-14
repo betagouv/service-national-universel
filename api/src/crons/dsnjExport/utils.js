@@ -8,7 +8,6 @@ const YoungModel = require("../../models/young");
 
 const { uploadFile } = require("../../utils");
 const { encrypt } = require("../../cryptoUtils");
-import { capture } from "../../sentry";
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
