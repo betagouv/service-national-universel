@@ -16,17 +16,17 @@ const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 
 interface Props {
   cohort: string;
-  addLigne?: string;
+  addLigne?: string | null;
   onFileVerified: (summary: ImportSummaryResponse) => void;
 }
 
 export default function Import({ cohort, onFileVerified, addLigne }: Props) {
   const [isLoading, setIsLoading] = useState(false);
-  const [importErrors, setImportErrors] = useState(false);
+  const [importErrors, setImportErrors] = useState<boolean | null>(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
-  const [importedFileName, setImportedFileName] = useState(null);
-  const fileInput = useRef(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [importedFileName, setImportedFileName] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   function importFile(e: MouseEvent) {
     e.preventDefault();

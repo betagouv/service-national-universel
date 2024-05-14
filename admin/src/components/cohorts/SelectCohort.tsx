@@ -9,7 +9,7 @@ import { Select, BadgeNotif } from "@snu/ds/admin";
 import { CohortState } from "@/redux/cohorts/reducer";
 
 interface Props {
-  cohort: string;
+  cohort?: string | null;
   sort?: string;
   withBadge?: boolean;
   disabled?: boolean;

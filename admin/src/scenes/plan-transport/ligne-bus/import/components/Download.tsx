@@ -11,7 +11,7 @@ import { PlainButton } from "../../../components/Buttons";
 
 interface Props {
   cohort: string;
-  addLigne?: string;
+  addLigne?: string | null;
   onNextStep: () => void;
 }
 
