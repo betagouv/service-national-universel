@@ -4,34 +4,41 @@
  * ROUTES
  *   POST  /young/:youngId/phase1/dispense        -> Passe le statut d'un jeune en dispensé
  */
-import express, { Response } from "express";
-import passport from "passport";
-import Joi from "joi";
 
-import { canEditPresenceYoung, ROLES, canAssignManually, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, REFERENT_DEPARTMENT_SUBROLE, getDepartmentByZip } from "snu-lib";
+const express = require("express");
+const passport = require("passport");
+const Joi = require("joi");
 
-import { ADMIN_URL } from "../../config";
-import { capture } from "../../sentry";
-import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "../../utils";
-import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
-import { sendTemplate } from "../../sendinblue";
+const {
+  canEditPresenceYoung,
+  ROLES,
+  canAssignManually,
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+  REFERENT_DEPARTMENT_SUBROLE,
+  getDepartmentByZip,
+} = require("snu-lib");
 
-import YoungModel from "../../models/young";
-import SessionPhase1Model from "../../models/sessionPhase1";
-import PointDeRassemblementModel from "../../models/PlanDeTransport/pointDeRassemblement";
-import LigneBusModel from "../../models/PlanDeTransport/ligneBus";
-import CohortModel from "../../models/cohort";
-import ReferentModel from "../../models/referent";
-import DepartmentServiceModel from "../../models/departmentService";
-import { IDepartementService } from "../../models/departementService.type";
-import CohesionCenterModel from "../../models/cohesionCenter";
-import { ICohesionCenter } from "../../models/cohesionCenter.type";
+const { ADMIN_URL } = require("../../config");
+const { capture } = require("../../sentry");
+const { sendTemplate } = require("../../sendinblue");
 
-import { UserRequest } from "../../controllers/request";
+const YoungModel = require("../../models/young");
+const SessionPhase1Model = require("../../models/sessionPhase1");
+const CohesionCenterModel = require("../../models/cohesionCenter");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const CohortModel = require("../../models/cohort");
+const ReferentModel = require("../../models/referent");
+const DepartmentServiceModel = require("../../models/departmentService");
+
+const { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } = require("../../utils");
+const { serializeYoung, serializeSessionPhase1 } = require("../../utils/serializer");
 
 const router = express.Router({ mergeParams: true });
 
-router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.post("/affectation", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const allowedKeys = ["self-going", "ref-select", "young-select", "local"];
     const { error, value } = Joi.object({
@@ -130,7 +137,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
   }
 });
 
-router.post("/dispense", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.post("/dispense", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       statusPhase1MotifDetail: Joi.string().required(),
@@ -164,7 +171,7 @@ router.post("/dispense", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.post("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       departSejourMotif: Joi.string().required(),
@@ -209,9 +216,9 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
 
     // si toujours rien on envoie a son contact Convocation
 
-    let contactsConv: IDepartementService["contacts"] = [];
+    let contactsConv = [];
     if (!managers.length && !secretariat.length) {
-      const serviceDep: IDepartementService[] | null = await DepartmentServiceModel.find({ department: young.department });
+      const serviceDep = await DepartmentServiceModel.find({ department: young.department });
       if (!serviceDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       contactsConv = serviceDep[0].contacts.filter((contact) => contact.cohort === young.cohort);
       contactsConv = contactsConv.map((contact) => {
@@ -228,7 +235,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     }
     const sendContact = managers.length ? managers : secretariat.length ? secretariat : contactsConv;
 
-    const center: ICohesionCenter | null = await CohesionCenterModel.findById(young.cohesionCenterId);
+    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
 
     let template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
     await sendTemplate(template, {
@@ -254,7 +261,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
   }
 });
 
-router.put("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.put("/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -284,7 +291,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived", "youngPhase1Agreement", "isTravelingByPlane"];
     const { error, value } = Joi.object({
