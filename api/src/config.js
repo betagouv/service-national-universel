@@ -3,11 +3,14 @@ const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 8080;
 const secret = process.env.SECRET || "not-so-secret";
 
-let API_URL = process.env.API_URL || "http://localhost:8080";
-let APP_URL = process.env.APP_URL || "http://localhost:8081";
-let ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
-let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:3000";
-let KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8084";
+const API_URL = process.env.API_URL || "http://localhost:8080";
+const APP_URL = process.env.APP_URL || "http://localhost:8081";
+const ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
+
+const SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:3000";
+const SUPPORT_APIKEY = process.env.SUPPORT_APIKEY || "";
+
+const KNOWLEDGEBASE_URL = process.env.KNOWLEDGEBASE_URL || "http://localhost:8084";
 const API_ANALYTICS_ENDPOINT = process.env.API_ANALYTICS_ENDPOINT || "http://localhost:8085";
 
 const RELEASE = process.env.RELEASE || "";
@@ -24,6 +27,13 @@ const SENDINBLUEKEY = process.env.SENDINBLUEKEY || "";
 const SENTRY_URL = process.env.SENTRY_URL || "";
 const SENTRY_TRACING_SAMPLE_RATE = process.env.SENTRY_TRACING_SAMPLE_RATE || "";
 const SENTRY_PROFILE_SAMPLE_RATE = process.env.SENTRY_PROFILE_SAMPLE_RATE || "";
+
+const DIAGORIENTE_URL = process.env.DIAGORIENTE_URL || "";
+const DIAGORIENTE_TOKEN = process.env.DIAGORIENTE_TOKEN || "";
+
+const FRANCE_CONNECT_URL = process.env.FRANCE_CONNECT_URL || "";
+const FRANCE_CONNECT_CLIENT_ID = process.env.FRANCE_CONNECT_CLIENT_ID || "";
+const FRANCE_CONNECT_CLIENT_SECRET = process.env.FRANCE_CONNECT_CLIENT_SECRET || "";
 
 const CELLAR_ENDPOINT = process.env.CELLAR_ENDPOINT || "";
 const CELLAR_KEYID = process.env.CELLAR_KEYID || "";
@@ -61,6 +71,8 @@ const PUBLIC_ROOTDIR = `${__dirname}/../public`;
 const IMAGES_ROOTDIR = `${PUBLIC_ROOTDIR}/images`;
 const FONT_ROOTDIR = `${__dirname}/assets/fonts`;
 
+const ENABLE_SENDINBLUE = process.env.OFFLINE !== "true"
+
 module.exports = {
   PORT,
   MONGO_URL,
@@ -69,6 +81,7 @@ module.exports = {
   APP_URL,
   ADMIN_URL,
   SUPPORT_URL,
+  SUPPORT_APIKEY,
   KNOWLEDGEBASE_URL,
   ENVIRONMENT,
   ES_ENDPOINT,
@@ -108,6 +121,12 @@ module.exports = {
   IMAGES_ROOTDIR,
   FONT_ROOTDIR,
   RELEASE,
+  ENABLE_SENDINBLUE,
+  DIAGORIENTE_URL,
+  DIAGORIENTE_TOKEN,
+  FRANCE_CONNECT_URL,
+  FRANCE_CONNECT_CLIENT_ID,
+  FRANCE_CONNECT_CLIENT_SECRET,
 };
 
 function getEnvironment() {
