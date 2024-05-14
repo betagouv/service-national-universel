@@ -209,7 +209,6 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                 <div className="flex max-w-xl flex-1 flex-col items-center justify-around bg-white">
                   <div className="flex w-80 flex-1 items-center justify-center ">
                     <Field
-                      type="number"
                       error={errors.placesTotal}
                       readOnly={!values || !canCreateOrUpdateCohesionCenter(user)}
                       label="Places ouvertes"

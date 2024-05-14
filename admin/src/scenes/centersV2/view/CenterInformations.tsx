@@ -18,39 +18,15 @@ import Pencil from "@/assets/icons/Pencil";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import api from "@/services/api";
 
+import { Center } from "@/types";
 import ModalRattacherCentre from "../components/ModalRattacherCentre";
 import ModalConfirmDelete from "../components/ModalConfirmDelete";
 import { Title } from "../components/commons";
 import Field from "../components/Field";
 import Toggle from "../components/Toggle";
 import Select from "../components/Select";
-import { Address } from "@snu/ds/common";
 
-type CenterInformationsData = {
-  _id?: string;
-  name?: string;
-  placesTotal?: string | number;
-  pmr?: string;
-  code2022?: string;
-  typology?: string;
-  domain?: string;
-  academy?: string;
-  centerDesignation?: string;
-  complement?: string;
-} & Address;
-
-type Error = {
-  name?: string;
-  address?: string;
-  city?: string;
-  zip?: string;
-  placesTotal?: string;
-  code2022?: string;
-  typology?: string;
-  domain?: string;
-  centerDesignation?: string;
-  complement?: string;
-};
+type Error = { [key: string]: string };
 
 const optionsTypology = [
   { label: "Public / État", value: "PUBLIC_ETAT" },
@@ -81,7 +57,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
   const [isLoading, setIsLoading] = useState(false);
   const [editInfo, setEditInfo] = React.useState(false);
   const [errors, setErrors] = React.useState<Error>({});
-  const [data, setData] = useState<CenterInformationsData>({ ...center, academy: departmentToAcademy[center.department], pmr: center?.pmr ? center.pmr : "false" });
+  const [data, setData] = useState<Center>({ ...center, academy: departmentToAcademy[center.department], pmr: center?.pmr ? center.pmr : "false" });
   useDocumentTitle(`Fiche du centre - ${center?.name}`);
 
   const onSubmit = async () => {
@@ -280,9 +256,6 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                   city: data.city,
                   department: data.department,
                   region: data.region,
-                  location: data.location,
-                  coordinatesAccuracyLevel: data.coordinatesAccuracyLevel,
-                  addressVerified: data.addressVerified,
                 }}
                 updateData={(newData) => setData({ ...data, ...newData, academy: departmentToAcademy[newData.department] })}
                 query={query}
@@ -293,10 +266,10 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
               {data.address && (
                 <>
                   <div className="flex items-center gap-3">
-                    <Field label="Département" value={data.department} disabled />
-                    <Field label="Région" value={data.region} disabled />
+                    <Field label="Département" value={data.department} disabled onChange={() => {}} />
+                    <Field label="Région" value={data.region} disabled onChange={() => {}} />
                   </div>
-                  <Field label="Académie" value={"Académie de " + data.academy} disabled />
+                  <Field label="Académie" value={"Académie de " + data.academy} disabled onChange={() => {}} />
                 </>
               )}
             </div>
@@ -345,9 +318,9 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                 <Field
                   readOnly={!editInfo}
                   label="Capacité maximale d'accueil"
-                  onChange={(e) => setData({ ...data, placesTotal: e.target.value })}
-                  value={data.placesTotal as string}
-                  error={errors?.placesTotal as string}
+                  onChange={(e) => setData({ ...data, placesTotal: parseInt(e.target.value) })}
+                  value={data.placesTotal}
+                  error={errors?.placesTotal}
                   tooltips={
                     "C’est la capacité d’hébergement maximale du centre, qui dépend du bâti. Elle doit être supérieure ou égale au nombre de places ouvertes sur un séjour donné"
                   }

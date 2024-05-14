@@ -15,11 +15,10 @@ interface Props {
   copy?: string;
   className?: string;
   tooltips?: string | null;
-  onChange?: ChangeEventHandler<HTMLInputElement>;
-  type?: "text" | "password" | "email" | "number";
+  onChange: ChangeEventHandler<HTMLInputElement>;
 }
 
-export default function Field({ onChange = () => {}, value, label, disabled = false, error, readOnly = false, copy, className = "", tooltips = null, type = "text" }: Props) {
+export default function Field({ onChange = () => {}, value, label, disabled = false, error, readOnly = false, copy, className = "", tooltips = null }: Props) {
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
@@ -53,14 +52,7 @@ export default function Field({ onChange = () => {}, value, label, disabled = fa
             {copied ? <HiCheckCircle className="h-4 w-4 text-green-500" /> : <BiCopy className="h-4 w-4 text-gray-400" />}
           </div>
         )}
-        <input
-          className={`w-full ${disabled ? "bg-gray-100" : ""} ${readOnly && "cursor-default"}`}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          readOnly={readOnly}
-          type={type}
-        />
+        <input className={`w-full ${disabled ? "bg-gray-100" : ""} ${readOnly && "cursor-default"}`} value={value} onChange={onChange} disabled={disabled} readOnly={readOnly} />
       </div>
       {error && <div className="text-[#EF4444]">{error}</div>}
     </div>

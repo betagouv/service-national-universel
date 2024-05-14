@@ -10,12 +10,29 @@ export type User = {
 };
 
 export type Center = {
-  _id: string;
-  name: string;
-  department: string;
-  region: string;
-  placesTotal: number;
+  academy: string;
+  address: string;
+  addressVerified: string;
+  centerDesignation: string;
+  city: string;
+  code: string;
+  code2022: string;
   cohorts: string[];
+  complement: string;
+  createdAt: string;
+  department: string;
+  domain: string;
+  name: string;
+  placesTotal: number;
+  pmr: string;
+  region: string;
+  sessionStatus: string[];
+  typology: string;
+  updatedAt: string;
+  waitingList: string[];
+  zip: string;
+  __v: number;
+  _id: string;
 };
 
 export type Session = {
