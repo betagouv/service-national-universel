@@ -8,7 +8,6 @@
     "mobile:open": "vite --host 0.0.0.0 --open",
     "tailwind": "npx tailwindcss -i ./src/index.css -o ./src/tailwindcss.css --watch",
     "start": "vite",
-    "install": "node src/build-only-on-clevercloud.js",
     "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build",
     "preview": "vite preview",
     "postinstall": "npm run copy:dsfr",
