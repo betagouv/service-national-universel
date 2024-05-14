@@ -37,8 +37,6 @@ jest.mock("../sendinblue", () => ({
   sendTemplate: () => Promise.resolve(),
 }));
 
-jest.setTimeout(10_000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 

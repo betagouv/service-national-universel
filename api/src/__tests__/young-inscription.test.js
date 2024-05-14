@@ -15,8 +15,6 @@ jest.mock("../sendinblue", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-jest.setTimeout(10_000);
-
 describe("Young", () => {
   describe("PUT /young/inscription2023/eligibilite", () => {
     it("Should return 404 when young is not found", async () => {

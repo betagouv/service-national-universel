@@ -30,8 +30,6 @@ jest.mock("../sendinblue", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-jest.setTimeout(10_000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 

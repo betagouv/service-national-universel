@@ -29,8 +29,6 @@ jest.mock("../cryptoUtils", () => ({
   encrypt: () => Buffer.from("test"),
 }));
 
-jest.setTimeout(10_000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 
