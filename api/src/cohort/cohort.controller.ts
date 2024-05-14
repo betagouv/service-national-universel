@@ -5,12 +5,12 @@ const passport = require("passport");
 
 const { ROLES, isSuperAdmin } = require("snu-lib");
 
-const CohortModel = require("../../models/cohort");
-const SessionPhase1Model = require("../../models/sessionPhase1");
-const { capture } = require("../../sentry");
-const { ERRORS, getFile, deleteFile } = require("../../utils");
-const { decrypt } = require("../../cryptoUtils");
-const { validateCohortDynamicParameterDto } = require("./cohortDto.validator");
+const CohortModel = require("../models/cohort");
+const SessionPhase1Model = require("../models/sessionPhase1");
+const { capture } = require("../sentry");
+const { ERRORS, getFile, deleteFile } = require("../utils");
+const { decrypt } = require("../cryptoUtils");
+const { validateCohortDto } = require("./cohort.validator");
 
 const EXPORT_COHESION_CENTERS = "cohesionCenters";
 const EXPORT_YOUNGS_BEFORE_SESSION = "youngsBeforeSession";
@@ -104,7 +104,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    let query = {};
+    let query: any = {};
     if (value.type) query.type = value.type;
     const cohorts = await CohortModel.find(query);
     return res.status(200).send({ ok: true, data: cohorts });
@@ -231,7 +231,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       capture(idError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { error: bodyError, value: body } = validateCohortDynamicParameterDto(req.body);
+    const { error: bodyError, value: body } = validateCohortDto(req.body);
     if (bodyError) {
       capture(bodyError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });

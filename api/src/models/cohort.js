@@ -215,21 +215,21 @@ const Schema = new mongoose.Schema({
   informationsConvoyage: {
     editionOpenForReferentRegion: {
       type: Boolean,
-      default: false,
+      default: true,
       documentation: {
         description: "Ouverture ou fermeture de l'édition des informations de convoyage pour les référents régionaux",
       },
     },
     editionOpenForReferentDepartment: {
       type: Boolean,
-      default: false,
+      default: true,
       documentation: {
         description: "Ouverture ou fermeture de l'édition des informations de convoyage pour les référents départementaux",
       },
     },
     editionOpenForHeadOfCenter: {
       type: Boolean,
-      default: false,
+      default: true,
       documentation: {
         description: "Ouverture ou fermeture de l'édition des informations de convoyage pour les chefs de centre",
       },

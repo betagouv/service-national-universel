@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-export const validateCohortDynamicParameterDto = (dto): Joi.ValidationResult => {
+export const validateCohortDto = (dto): Joi.ValidationResult => {
   return Joi.object({
     // Informations générales
     dateStart: Joi.date().required(),
