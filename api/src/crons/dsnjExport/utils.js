@@ -35,11 +35,11 @@ const genderTranslation = {
   female: "Féminin",
 };
 
-const findCohesionCenterBySessionId = (sessionId, sessions, centers) => {
+const findCohesionCenterBySessionId = (sessionId, sessions, centers, young) => {
   const session = sessions.find(({ _id }) => {
     return _id.toString() === sessionId.toString();
   });
-  if (!session) throw new Error("Session not found for ID: " + sessionId);
+  if (!session) throw new Error(`Session not found for young: ${young._id} with sessionId: ${sessionId}`);
   return centers.find(({ _id }) => _id.toString() === session.cohesionCenterId.toString());
 };
 
@@ -163,7 +163,7 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
     if (sessionPhase1Id) {
       cohesionCenter = cohesionCenterParSessionId[sessionPhase1Id];
       if (!cohesionCenter) {
-        cohesionCenter = findCohesionCenterBySessionId(sessionPhase1Id, sessions, cohesionCenters);
+        cohesionCenter = findCohesionCenterBySessionId(sessionPhase1Id, sessions, cohesionCenters, young);
         cohesionCenterParSessionId[sessionPhase1Id] = cohesionCenter;
       }
     }
