@@ -112,21 +112,20 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
     const lines = importData.lines;
     const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
 
+    // Vérification des lignes existantes (ne sont modifié que les nouvelles)
     const newLines = [];
     const promises = [];
-
     for (const line of importData.lines) {
       promises.push(PlanTransportModel.findOne({ cohort: importData.cohort, busId: line["NUMERO DE LIGNE"] }));
     }
-
-    const results = await Promise.all(promises);
-
-    for (let i = 0; i < results.length; i++) {
-      if (!results[i]) {
+    const oldLines = await Promise.all(promises);
+    for (let i = 0; i < oldLines.length; i++) {
+      if (!oldLines[i]) {
         newLines.push(importData.lines[i]);
       }
     }
 
+    // import des nouvelles lignes
     for (const line of newLines) {
       const pdrIds = [];
       for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
@@ -158,6 +157,15 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       };
       const newBusLine = new LigneBusModel(busLineData);
       const busLine = await newBusLine.save();
+
+      // Mise à jour des lignes fusionnées existantes
+      for (const mergedBusId of busLineData.mergedBusIds) {
+        const oldMergeLine = await LigneBusModel.findOne({ busId: mergedBusId });
+        if (oldMergeLine) {
+          oldMergeLine.set({ mergedBusIds: busLineData.mergedBusIds });
+          await oldMergeLine.save();
+        }
+      }
 
       const lineToPointWithCorrespondance = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc, pdrNumber) => {
         if (pdrNumber > 1 && !line[`ID PDR ${pdrNumber}`]) return acc;
@@ -232,6 +240,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         classe.set({ ligneId: busLine._id });
         await classe.save();
       }
+
       await PlanTransportModel.create({
         _id: busLine._id,
         cohort: busLine.cohort,

@@ -367,14 +367,14 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
                   for (let i = 0; i < maxPDRs; i++) {
                     const pdr = data.pointDeRassemblements?.[i];
                     const num = i + 1;
-                    pdrs[`N° DU DEPARTEMENT DU PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
+                    pdrs[`N° DE DEPARTEMENT PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
                     pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
                     pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
                     pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                     pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
                     pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
                     pdrs[`HEURE DE CONVOCATION AU PDR ${num}`] = pdr?.meetingHour || "";
-                    pdrs[`HEURE DE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
+                    pdrs[`HEURE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
                     pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
                   }
 
@@ -394,10 +394,10 @@ const returnSelect = (cohort, filterArray, selectedFilters, user) => {
                     "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
 
                     "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
-                    "CAPACITÉ TOTALE LIGNE": data.totalCapacity,
+                    "CAPACITE TOTALE LIGNE": data.totalCapacity,
                     "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
                     "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
-                    "TEMPS DE ROUTE": data.travelTime,
+                    "TEMPS DE ROUTE": data.travelTime.includes(":") ? data.travelTime : `${data.travelTime}:00`,
                     "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
                     "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
                     "LIGNES FUSIONNÉE": data.mergedBusIds?.join(",") || "",

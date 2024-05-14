@@ -32,8 +32,8 @@ export const validatePdtFile = async (
   const lines = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: null });
 
   if (lines.length < 1) {
+    console.log("workbook Sheets 'ALLER-RETOUR' is missing or empty");
     return { ok: false, code: ERRORS.INVALID_BODY };
-    // return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
   }
 
   // Count columns that start with "ID PDR" to know how many PDRs there are.
@@ -228,8 +228,23 @@ export const validatePdtFile = async (
     if (line["TEMPS DE ROUTE"] && !isValidTime(line["TEMPS DE ROUTE"])) {
       errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
     }
-    if (line["LIGNES FUSIONNÉE"] && line["LIGNES FUSIONNÉE"].split(",").length > 5) {
-      errors["LIGNES FUSIONNÉE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+    if (line["LIGNES FUSIONNÉE"]) {
+      const mergedLines = line["LIGNES FUSIONNÉE"].split(",");
+      if (mergedLines.length > 5) {
+        errors["LIGNES FUSIONNÉE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+      }
+      for (const mergedLine of mergedLines) {
+        let found = false;
+        for (const [i, line] of lines.entries()) {
+          if (line["NUMERO DE LIGNE"] === mergedLine) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          errors["LIGNES FUSIONNÉE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_MERGED_LINE_ID, extra: mergedLine });
+        }
+      }
     }
     if (isCle) {
       if (!line["ID CLASSE"]) {

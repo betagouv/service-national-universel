@@ -42,7 +42,7 @@ export default function Index(props) {
     <div className="flex w-full flex-col px-8 pb-8 ">
       <div className="flex items-center justify-between py-8">
         <Title>{addLigne ? "Importer des lignes supplémentaires" : "Importer mon plan de transport"}</Title>
-        <SelectCohort cohort={cohort} disabled={true} />
+        <SelectCohort cohort={cohort} disabled />
       </div>
       <div className="mt-4 flex w-full flex-col">
         <NavBar steps={steps} />
