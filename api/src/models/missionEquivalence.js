@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const esClient = require("../es");
 const MODELNAME = "missionequivalence";
 const { UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { generateRandomName, generateRandomEmail, generateAddress, starify } = require("../utils/anonymise");
@@ -151,7 +149,6 @@ Schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
