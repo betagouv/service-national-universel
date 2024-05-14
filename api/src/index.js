@@ -1,4 +1,7 @@
 (async () => {
+  console.log("Before error")
+  throw new Error("Break")
+  console.log("After error")
   require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
   // ! Ignore specific error
