@@ -60,11 +60,7 @@ then
     exit 1
 fi
 
-if [[ $SCW_REGION == "" ]]
-then
-    echo "SCW_REGION is not defined"
-    exit 1
-fi
+region=fr-par
 
 set -o pipefail
 
@@ -79,7 +75,7 @@ fi
 
 curl -sX GET \
     -H "X-Auth-Token: $SCW_SECRET_KEY" \
-    "https://api.scaleway.com/secret-manager/v1beta1/regions/$SCW_REGION/secrets-by-path/versions/$revision/access?project_id=$project_id&secret_name=$secret_name" \
+    "https://api.scaleway.com/secret-manager/v1beta1/regions/$region/secrets-by-path/versions/$revision/access?project_id=$project_id&secret_name=$secret_name" \
 | jq -er '.data' \
 | base64 --decode \
 | jq
