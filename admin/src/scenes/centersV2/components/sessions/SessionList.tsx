@@ -21,23 +21,7 @@ import { toastr } from "react-redux-toastr";
 import OccupationCard from "./OccupationCard";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { AuthState } from "@/redux/auth/reducer";
-
-type Session = {
-  _id: string;
-  cohort: string;
-  placesTotal: number;
-  placesLeft: number;
-  dateStart: string | null;
-  dateEnd: string | null;
-  email: string;
-};
-
-type Center = {
-  _id: string;
-  region: string;
-  placesTotal: number;
-  cohorts: string[];
-};
+import { Center, Session } from "@/types";
 
 type Props = {
   center: Center;

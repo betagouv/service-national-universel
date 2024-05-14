@@ -8,3 +8,22 @@ export type User = {
   structureId: string;
   subRole?: string;
 };
+
+export type Center = {
+  _id: string;
+  name: string;
+  department: string;
+  region: string;
+  placesTotal: number;
+  cohorts: string[];
+};
+
+export type Session = {
+  _id: string;
+  cohort: string;
+  placesTotal: number;
+  placesLeft: number;
+  dateStart: string | null;
+  dateEnd: string | null;
+  email: string;
+};
