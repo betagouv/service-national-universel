@@ -31,9 +31,7 @@ type Props = {
 };
 
 type Errors = {
-  placesTotal?: string;
-  date?: string;
-  email?: string;
+  [Key: string]: string;
 };
 
 export default function SessionList({ center, setCenter, sessions, setSessions }: Props) {
@@ -65,12 +63,13 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     if (values.dateStart && values.dateEnd && values.dateStart > values.dateEnd) {
       errorsObject.date = "La date de début doit être antérieure à la date de fin";
     }
-    if (values.email) {
+    if (values.sanitaryContactEmail) {
       const regex = new RegExp(patternEmailAcademy);
-      if (!regex.test(values.email)) {
-        errorsObject.email = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
-      } else if (!validateEmailAcademique(values.email)) {
-        errorsObject.email = "Cette adresse email académique n'existe pas ou n'est pas référencée. Veuillez vérifier qu’il s’agit bien d’une adresse académique valide.";
+      if (!regex.test(values.sanitaryContactEmail)) {
+        errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
+      } else if (!validateEmailAcademique(values.sanitaryContactEmail)) {
+        errorsObject.sanitaryContactEmail =
+          "Cette adresse email académique n'existe pas ou n'est pas référencée. Veuillez vérifier qu’il s’agit bien d’une adresse académique valide.";
       }
     }
     if (Object.keys(errorsObject).length > 0) {
@@ -253,13 +252,13 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                   <div className="w-1/2">
                     <label>Réception des fiches sanitaires (facultatif)</label>
                     <Field
-                      error={errors.email}
+                      error={errors.sanitaryContactEmail}
                       readOnly={!values || !canEditSanitaryEmailContact(user, cohort)}
                       disabled={!canEditSanitaryEmailContact(user, cohort)}
                       label="Adresse email académique"
-                      value={values?.email || session?.email}
+                      value={values?.sanitaryContactEmail || session?.sanitaryContactEmail}
                       onChange={(e) => {
-                        if (values) setValues({ ...values, email: e.target.value });
+                        if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
                       }}
                       tooltips="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
                     />

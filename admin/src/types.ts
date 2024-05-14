@@ -25,5 +25,5 @@ export type Session = {
   placesLeft: number;
   dateStart: string | null;
   dateEnd: string | null;
-  email: string;
+  sanitaryContactEmail: string;
 };
