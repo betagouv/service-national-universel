@@ -212,7 +212,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       error={errors.placesTotal}
                       readOnly={!values || !canCreateOrUpdateCohesionCenter(user)}
                       label="Places ouvertes"
-                      value={values?.placesTotal || session.placesTotal}
+                      value={values?.placesTotal?.toString() || session.placesTotal.toString()}
                       onChange={(e) => {
                         if (values) setValues({ ...values, placesTotal: parseInt(e.target.value) });
                       }}

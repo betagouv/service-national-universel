@@ -7,7 +7,7 @@ import { MdInfoOutline } from "react-icons/md";
 import { copyToClipboard } from "../../../utils";
 
 interface Props {
-  value: string | number;
+  value: string;
   label: string;
   disabled?: boolean;
   error?: string;
@@ -18,7 +18,7 @@ interface Props {
   onChange: ChangeEventHandler<HTMLInputElement>;
 }
 
-export default function Field({ onChange = () => {}, value, label, disabled = false, error, readOnly = false, copy, className = "", tooltips = null }: Props) {
+export default function Field({ onChange, value, label, disabled = false, error, readOnly = false, copy, className = "", tooltips = null }: Props) {
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
