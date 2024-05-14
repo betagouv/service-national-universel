@@ -40,11 +40,7 @@ const findCohesionCenterBySessionId = (sessionId, sessions, centers) => {
   const session = sessions.find(({ _id }) => {
     return _id.toString() === sessionId.toString();
   });
-  if (!session) {
-    const error = new Error("Session not found for ID: " + sessionId);
-    capture(error);
-    throw error;
-  }
+  if (!session) throw new Error("Session not found for ID: " + sessionId);
   return centers.find(({ _id }) => _id.toString() === session.cohesionCenterId.toString());
 };
 
