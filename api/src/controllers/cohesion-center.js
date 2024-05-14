@@ -101,7 +101,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
       placesTotal: Joi.number().required(),
-      email: Joi.string().email().required(),
+      email: Joi.string().email().allow(null, ""),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {

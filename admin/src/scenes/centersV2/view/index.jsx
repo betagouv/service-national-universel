@@ -56,7 +56,7 @@ export default function Index() {
     <>
       {user.role !== ROLES.HEAD_CENTER && <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
       <CenterInformations center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} />
-      <SessionList center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} user={user} />
+      <SessionList center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} />
     </>
   );
 }

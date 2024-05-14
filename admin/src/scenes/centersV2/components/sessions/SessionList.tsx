@@ -19,49 +19,74 @@ import TimeSchedule from "../TimeSchedule";
 import PedagoProject from "../PedagoProject";
 import { toastr } from "react-redux-toastr";
 import OccupationCard from "./OccupationCard";
+import { CohortState } from "@/redux/cohorts/reducer";
+import { AuthState } from "@/redux/auth/reducer";
 
-export default function SessionList({ center, setCenter, sessions, setSessions, user }) {
+type Session = {
+  _id: string;
+  cohort: string;
+  placesTotal: number;
+  placesLeft: number;
+  dateStart: string | null;
+  dateEnd: string | null;
+  email: string;
+};
+
+type Center = {
+  _id: string;
+  region: string;
+  placesTotal: number;
+  cohorts: string[];
+};
+
+type Props = {
+  center: Center;
+  setCenter: React.Dispatch<React.SetStateAction<Center>>;
+  sessions: Session[];
+  setSessions: React.Dispatch<React.SetStateAction<Session[]>>;
+};
+
+type Errors = {
+  placesTotal?: string;
+  date?: string;
+  email?: string;
+};
+
+export default function SessionList({ center, setCenter, sessions, setSessions }: Props) {
   const history = useHistory();
-  const cohorts = useSelector((state) => state.Cohorts);
-  const params = new URLSearchParams(location.search);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const selectedCohort = new URLSearchParams(location.search).get("cohorte") || sessions[0]?.cohort;
+  const cohort = cohorts.find((cohort) => cohort.name === selectedCohort) || cohorts[0];
+  const session = sessions.find((session) => session.cohort === selectedCohort) || sessions[0];
+  const setSession = (newSession: Session) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
 
-  const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [values, setValues] = useState({});
-  const [errors, setErrors] = useState({});
+  const [values, setValues] = useState<Session | null>(null);
+  const [errors, setErrors] = useState<Errors>({});
   const [modalDelete, setModalDelete] = useState({ isOpen: false });
 
-  const selectedCohort = params.get("cohorte") || sessions[0]?.cohort;
-  const cohort = cohorts.find((cohort) => cohort.name === selectedCohort);
-  const session = sessions.find((session) => session.cohort === selectedCohort);
-  const setSession = (newSession) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
-
-  const resetForm = () => {
-    setEditing(false);
-    setValues({});
-    setErrors({});
-  };
-
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const errorsObject = {};
-    if (isNaN(values.placesTotal) || values.placesTotal === "") {
+    if (!values) return;
+
+    const errorsObject: Errors = {};
+    if (isNaN(values.placesTotal)) {
       errorsObject.placesTotal = "Le nombre de places est incorrect";
     } else if (values.placesTotal > center.placesTotal) {
       errorsObject.placesTotal = "Le nombre de places ne peut pas être supérieur à la capacité du centre";
     } else if (values.placesTotal < session.placesTotal - session.placesLeft) {
       errorsObject.placesTotal = "Le nombre de places total est inférieur au nombre d'inscrits";
     }
-    if (values.dateStart > values.dateEnd) {
+    if (values.dateStart && values.dateEnd && values.dateStart > values.dateEnd) {
       errorsObject.date = "La date de début doit être antérieure à la date de fin";
     }
-    if (values.sanitaryContactEmail) {
+    if (values.email) {
       const regex = new RegExp(patternEmailAcademy);
-      if (!regex.test(values.sanitaryContactEmail)) {
-        errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
-      } else if (!validateEmailAcademique(values.sanitaryContactEmail)) {
-        errorsObject.sanitaryContactEmail =
-          "Cette adresse email académique n'existe pas ou n'est pas référencée. Veuillez vérifier qu’il s’agit bien d’une adresse académique valide.";
+      if (!regex.test(values.email)) {
+        errorsObject.email = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
+      } else if (!validateEmailAcademique(values.email)) {
+        errorsObject.email = "Cette adresse email académique n'existe pas ou n'est pas référencée. Veuillez vérifier qu’il s’agit bien d’une adresse académique valide.";
       }
     }
     if (Object.keys(errorsObject).length > 0) {
@@ -70,15 +95,23 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
     }
 
     setLoading(true);
-    const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, values);
-    if (!ok) {
-      toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
-      return setLoading(false);
+    try {
+      const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, values);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
+        setLoading(false);
+        return;
+      }
+      toastr.success("La session a bien été modifiée avec succès", "");
+      setSession(data);
+      setValues(null);
+      setErrors({});
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la modification du centre", "");
+    } finally {
+      setLoading(false);
     }
-    toastr.success("La session a bien été modifiée avec succès");
-    setSession(data);
-    resetForm();
-    setLoading(false);
   };
 
   const handleSessionDelete = async () => {
@@ -87,31 +120,37 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
       const { ok, code } = await api.remove(`/session-phase1/${session._id}`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression de la session", code);
-        return setLoading(false);
+        setLoading(false);
+        return;
       }
       setLoading(false);
       setModalDelete({ isOpen: false });
       setCenter({ ...center, cohorts: center.cohorts.filter((cohort) => cohort !== session.cohort) });
       setSessions(sessions.filter((s) => s._id !== session._id));
       history.push({ search: `?cohorte=${center.cohorts[0]}` });
-      return toastr.success("La session a bien été supprimée");
+      toastr.success("La session a bien été supprimée", "");
     } catch (e) {
       capture(e);
       setLoading(false);
       setModalDelete({ isOpen: false });
-      return toastr.error("Oups, une erreur est survenue lors de la suppression de la session");
+      toastr.error("Oups, une erreur est survenue lors de la suppression de la session", "");
     }
   };
 
   const handleToggleDate = () => {
+    if (!values) return;
     if (values.dateStart && values.dateEnd) {
       setValues({ ...values, dateStart: null, dateEnd: null });
     } else {
-      setValues({ ...values, dateStart: session.dateStart || cohort?.dateStart, dateEnd: session.dateEnd || cohort?.dateEnd });
+      setValues({
+        ...values,
+        dateStart: session?.dateStart || cohort?.dateStart || new Date().toDateString(),
+        dateEnd: session?.dateEnd || cohort?.dateEnd || new Date().toDateString(),
+      });
     }
   };
 
-  const handleSelect = (cohortName) => {
+  const handleSelect = (cohortName: string) => {
     history.push(`?cohorte=${cohortName}`);
   };
 
@@ -120,7 +159,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
       <div className="flex items-center justify-between">
         <Title>Par séjour</Title>
         <div className="flex items-center">
-          <SelectCohort cohort={selectedCohort} withBadge filterFn={(c) => sessions.find((s) => s.cohort === c.name)} onChange={handleSelect} />
+          <SelectCohort cohort={selectedCohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} />
         </div>
       </div>
       <div className="flex flex-col px-8 py-4 gap-4 mb-8 rounded-lg bg-white z-0">
@@ -128,14 +167,11 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
           <div className="text-lg font-medium leading-6 text-gray-900">Détails</div>
           {isSessionEditionOpen(user, cohort) && (
             <>
-              {!editing ? (
+              {!values ? (
                 <button
                   type="button"
                   className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => {
-                    setEditing(true);
-                    setValues(session);
-                  }}
+                  onClick={() => setValues(session)}
                   disabled={loading}>
                   <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                   Modifier
@@ -145,7 +181,10 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                   <button
                     type="button"
                     className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    onClick={resetForm}
+                    onClick={() => {
+                      setValues(null);
+                      setErrors({});
+                    }}
                     disabled={loading}>
                     Annuler
                   </button>
@@ -153,7 +192,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                     className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                     type="submit"
                     form="session-form"
-                    disabled={loading}>
+                    disabled={!values || loading}>
                     <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                     Enregistrer les changements
                   </button>
@@ -187,11 +226,14 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                 <div className="flex max-w-xl flex-1 flex-col items-center justify-around bg-white">
                   <div className="flex w-80 flex-1 items-center justify-center ">
                     <Field
+                      type="number"
                       error={errors.placesTotal}
-                      readOnly={!editing || !canCreateOrUpdateCohesionCenter(user)}
+                      readOnly={!values || !canCreateOrUpdateCohesionCenter(user)}
                       label="Places ouvertes"
-                      value={values.placesTotal || session.placesTotal}
-                      onChange={(e) => setValues({ ...values, placesTotal: e.target.value })}
+                      value={values?.placesTotal || session.placesTotal}
+                      onChange={(e) => {
+                        if (values) setValues({ ...values, placesTotal: parseInt(e.target.value) });
+                      }}
                       tooltips="C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
                     />
                   </div>
@@ -206,11 +248,16 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                             <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                           </p>
                         }
-                        readOnly={!editing || !canPutSpecificDateOnSessionPhase1(user)}
-                        value={editing ? !!values.dateStart : !!session.dateStart}
+                        readOnly={!values || !canPutSpecificDateOnSessionPhase1(user)}
+                        value={values ? !!values?.dateStart : !!session.dateStart}
                         onChange={handleToggleDate}
-                        range={editing ? { from: values.dateStart, to: values.dateEnd } : { from: session.dateStart, to: session.dateEnd }}
-                        onChangeRange={(range) => setValues({ ...values, dateStart: range?.from, dateEnd: range?.to })}
+                        range={{
+                          from: values?.dateStart || session.dateStart,
+                          to: values?.dateEnd || session.dateEnd,
+                        }}
+                        onChangeRange={(range: { to: string; from: string }) => {
+                          if (values) setValues({ ...values, dateStart: range?.from, dateEnd: range?.to });
+                        }}
                       />
                       {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
                     </div>
@@ -222,12 +269,14 @@ export default function SessionList({ center, setCenter, sessions, setSessions, 
                   <div className="w-1/2">
                     <label>Réception des fiches sanitaires (facultatif)</label>
                     <Field
-                      error={errors.sanitaryContactEmail}
-                      readOnly={!editing || !canEditSanitaryEmailContact(user, cohort)}
+                      error={errors.email}
+                      readOnly={!values || !canEditSanitaryEmailContact(user, cohort)}
                       disabled={!canEditSanitaryEmailContact(user, cohort)}
                       label="Adresse email académique"
-                      value={values.sanitaryContactEmail || session?.sanitaryContactEmail}
-                      onChange={(e) => setValues({ ...values, sanitaryContactEmail: e.target.value })}
+                      value={values?.email || session?.email}
+                      onChange={(e) => {
+                        if (values) setValues({ ...values, email: e.target.value });
+                      }}
                       tooltips="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
                     />
                   </div>
