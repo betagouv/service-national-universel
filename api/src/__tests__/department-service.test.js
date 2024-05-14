@@ -12,8 +12,6 @@ const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper } = require("./helpers/young");
 
-jest.setTimeout(10_000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 

@@ -10,8 +10,6 @@ const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
 const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
 
-jest.setTimeout(10000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 
