@@ -1,5 +1,4 @@
 const ENVIRONMENT = getEnvironment();
-const LOCAL = process.env.LOCAL === "true";
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.PORT || 8080;
 const secret = process.env.SECRET || "not-so-secret";
@@ -63,7 +62,6 @@ const IMAGES_ROOTDIR = `${PUBLIC_ROOTDIR}/images`;
 const FONT_ROOTDIR = `${__dirname}/assets/fonts`;
 
 module.exports = {
-  LOCAL,
   PORT,
   MONGO_URL,
   secret,
