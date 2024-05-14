@@ -4,8 +4,6 @@ const getAppHelper = require("./helpers/app");
 const { createBusHelper, notExistingBusId } = require("./helpers/bus");
 const { dbConnect, dbClose } = require("./helpers/db");
 
-jest.setTimeout(10_000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 

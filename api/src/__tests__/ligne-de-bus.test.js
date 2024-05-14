@@ -14,7 +14,6 @@ const { createYoungHelper } = require("./helpers/young");
 const getNewYoungFixture = require("./fixtures/young");
 const { createPointDeRassemblementWithBus } = require("./helpers/PlanDeTransport/pointDeRassemblement");
 
-jest.setTimeout(100000);
 beforeAll(dbConnect);
 
 const mockModelMethodWithError = (model, method) => {

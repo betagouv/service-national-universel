@@ -650,7 +650,7 @@ async function addingDayToDate(days, dateStart) {
   }
 }
 
-async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort, user }) {
+async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort = null, user }) {
   let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"];
   let youngCohort = cohort;
   if (!cohort) {

@@ -11,13 +11,12 @@
     "moduleResolution": "NodeNext",
     "target": "ES2021",
     "outDir": "./src",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/node_modules/*",
-    "src/__tests__/*"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/node_modules/*", "src/__tests__/*"]
 }
