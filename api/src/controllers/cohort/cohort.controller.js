@@ -282,6 +282,11 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
       validationDate: Joi.date().allow(null, ""),
       validationDateForTerminaleGrade: Joi.date().allow(null, ""),
       daysToValidateForTerminalGrade: Joi.number().allow(null, ""),
+      informationsConvoyage: Joi.object({
+        editionOpenForReferentRegion: Joi.boolean(),
+        editionOpenForReferentDepartment: Joi.boolean(),
+        editionOpenForTransporter: Joi.boolean(),
+      }).allow(null),
     }).validate(req.body, { stripUnknown: true });
     if (bodyError) {
       capture(bodyError);
