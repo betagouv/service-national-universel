@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { department2region, departmentLookUp } from "./region-and-departments";
+import { department2region, departmentLookUp } from "../region-and-departments";
 
 const baseURL = "https://api-adresse.data.gouv.fr/search/?q=";
 

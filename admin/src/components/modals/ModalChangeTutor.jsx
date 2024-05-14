@@ -3,7 +3,7 @@ import { Modal } from "reactstrap";
 import { translate } from "../../utils";
 
 import { toastr } from "react-redux-toastr";
-import { formatStringDateTimezoneUTC } from "snu-lib/date";
+import { formatStringDateTimezoneUTC } from "snu-lib";
 import CloseSvg from "../../assets/Close";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import CursorClick from "../../assets/icons/CursorClick";

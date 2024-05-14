@@ -6,7 +6,7 @@ import ModalPedagoProject from "./modals/ModalPedagoProject";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { ROLES } from "snu-lib/roles";
+import { ROLES } from "snu-lib";
 import { useSelector } from "react-redux";
 import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
 

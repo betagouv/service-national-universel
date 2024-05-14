@@ -6,7 +6,7 @@ import ModalTimeSchedule from "./modals/ModalTimeSchedule";
 import { toastr } from "react-redux-toastr";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { ROLES } from "snu-lib/roles";
+import { ROLES } from "snu-lib";
 import { useSelector } from "react-redux";
 import EmptyFileIcon from "../../../assets/icons/EmptyFileIcon";
 

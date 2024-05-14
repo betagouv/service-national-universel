@@ -15,7 +15,7 @@ import { capture } from "@/sentry";
 import { toastr } from "react-redux-toastr";
 import { copyToClipboard } from "@/utils";
 import validator from "validator";
-import { ERRORS } from "snu-lib/errors";
+import { ERRORS } from "snu-lib";
 import Loader from "@/components/Loader";
 
 export default function View() {
