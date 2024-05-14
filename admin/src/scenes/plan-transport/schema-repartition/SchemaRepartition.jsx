@@ -3,32 +3,30 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import ReactTooltip from "react-tooltip";
-import { Link, useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
-import { department2region, getDepartmentNumber, region2department, ROLES } from "snu-lib";
+import { department2region, region2department, ROLES } from "snu-lib";
 
 import { capture } from "@/sentry";
 import API from "@/services/api";
-import { getCohortByName } from "@/services/cohort.service";
 import dayjs from "@/utils/dayjs.utils";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 
-import ChevronRight from "@/assets/icons/ChevronRight";
-import ExternalLink from "@/assets/icons/ExternalLink";
-import People from "@/assets/icons/People";
-import FrenchMap from "@/assets/icons/FrenchMap";
 import Puzzle from "@/assets/icons/Puzzle";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
-import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
-import { formatRate, parseQuery } from "../util";
+import BoxVolontaires from "./components/BoxVolontaires";
+import BoxAffectation from "./components/BoxAffectation";
+import BoxDisponibilite from "./components/BoxDisponibilite";
+import BoxCentres from "./components/BoxCentres";
+import DetailTable from "./components/DetailTable";
+import { exportSRCLE } from "./utils";
+
+import { parseQuery } from "../util";
 import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
-import { Box, BoxHeader, MiniTitle, Badge, AlertPoint, BigDigits, Loading, regionList } from "../components/commons";
-import ProgressBar from "../components/ProgressBar";
-import ProgressArc from "../components/ProgressArc";
+import { Loading, regionList } from "../components/commons";
 import Select from "../components/Select";
 import SchemaEditor from "./SchemaEditor";
 import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
@@ -57,6 +55,7 @@ export default function SchemaRepartition({ region, department }) {
 
   const [data, setData] = useState({ rows: getDefaultRows() });
   const [filteredCohortList, setFilteredCohortList] = useState([]);
+  const [exportLoading, setExportLoading] = useState(false);
 
   if (region) useDocumentTitle(`Schéma de répartition - ${region}`);
   if (department) useDocumentTitle(`Schéma de répartition - ${department}`);
@@ -208,14 +207,13 @@ export default function SchemaRepartition({ region, department }) {
   }
 
   async function exportDetail() {
-    try {
+    if (user.role === ROLES.TRANSPORTER) {
+      await exportSRCLE(cohort);
+    } else {
       const groups = await loadExportData();
       const result = await exportExcelSheet(groups);
       const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
       FileSaver.saveAs(new Blob([buffer], { type: ExcelFileType }), result.fileName);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des données. Nous ne pouvons exporter les données.");
     }
   }
 
@@ -389,263 +387,4 @@ export default function SchemaRepartition({ region, department }) {
       </div>
     </div>
   );
-}
-
-function BoxVolontaires({ summary, className = "", loading }) {
-  return (
-    <Box>
-      <div className={`mb-[10px] flex items-center ${className}`}>
-        <MiniTitle>Volontaires</MiniTitle>
-        {!loading && summary.intradepartmental > 0 && (
-          <>
-            <Badge className="mx-[8px]">{formatRate(summary.assigned, summary.total)} affectés</Badge>
-            <Link to="">
-              <ExternalLink className="hover:text[#000000] text-[#9CA3AF]" />
-            </Link>
-          </>
-        )}
-      </div>
-      {loading ? (
-        <Loading />
-      ) : (
-        <div className="flex items-center">
-          <People className="text-[#9CA3AF]" />
-          <BigDigits className="mx-[8px]">{summary.total}</BigDigits>
-          {summary.intradepartmental > 0 ? (
-            <div className="">dont {summary.intradepartmental} intra-départemental</div>
-          ) : (
-            <Badge>{formatRate(summary.assigned, summary.total)} affectés</Badge>
-          )}
-        </div>
-      )}
-    </Box>
-  );
-}
-
-function BoxAffectation({ summary, className = "", loading }) {
-  return (
-    <Box className={className}>
-      <MiniTitle className="mb-[10px]">Affectation des volontaires</MiniTitle>
-      {loading ? (
-        <Loading />
-      ) : (
-        <>
-          <ProgressBar total={summary.total} value={summary.assigned} className="my-[10px]" />
-          <div className="flex items-center">
-            <div className="mr-[16px] flex items-center text-[12px] leading-[14px] text-[#1F2937]">
-              <div className="h-[7px] w-[7px] rounded-[100px] bg-[#303958]" />
-              <b className="mx-[5px]">{summary.assigned}</b>
-              affectés
-            </div>
-            <div className="mr-[16px] flex items-center text-[12px] leading-[14px] text-[#1F2937]">
-              <div className="h-[7px] w-[7px] rounded-[100px] bg-[#E5E7EB]" />
-              <b className="mx-[5px]">{Math.max(0, summary.total - summary.assigned)}</b>
-              <span>restants</span>
-            </div>
-          </div>
-        </>
-      )}
-    </Box>
-  );
-}
-
-function BoxDisponibilite({ summary, className = "", loading, isNational }) {
-  return (
-    <Box className={`flex-column flex justify-between pb-[0px] ${className}`}>
-      <div>
-        <MiniTitle className="mb-[10px]">Disponibilité des places</MiniTitle>
-        {loading ? (
-          <Loading />
-        ) : (
-          <>
-            {!isNational && summary.toRegions && <div className="mb-[10px] text-[13px] leading-[1.3em] text-[#6B7280]">{summary.toRegions.map((r) => r.name).join(", ")}</div>}
-            <div className="flex">
-              <Badge className="">{summary.capacity} places</Badge>
-            </div>
-          </>
-        )}
-      </div>
-      <div className="mt-[30px] h-[130px]">
-        {loading ? (
-          <Loading />
-        ) : (
-          <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={Math.max(0, summary.capacity - summary.assigned)} />
-        )}
-      </div>
-    </Box>
-  );
-}
-
-function BoxCentres({ summary, className = "", loading, isNational, isDepartmental, user }) {
-  return (
-    <Box className={`overflow-hidden ${className}`}>
-      <FrenchMap className="absolute right-[-40px] top-[30px] z-[0]" />
-      <MiniTitle className="mb-[10px] flex items-center">
-        {isDepartmental ? (
-          <>
-            <span className="mr-[8px]">Régions d&apos;accueil</span>
-            {loading ? <Loading width="w-1/3" /> : <Badge>{summary.centers} CENTRES</Badge>}
-          </>
-        ) : (
-          "Centres"
-        )}
-      </MiniTitle>
-      {!isDepartmental && <>{loading ? <Loading width="w-1/3" /> : <BigDigits>{summary.centers}</BigDigits>}</>}
-      {!isNational && loading ? (
-        <Loading width="w-1/3" />
-      ) : (
-        <ul className="mb-6 list-none">
-          {summary.toRegions.map((region) => (
-            <React.Fragment key={region.name}>
-              <li className="mt-[12px] text-[15px] font-bold leading-[18px] text-[#171725]">{region.name}</li>
-              {isDepartmental && (
-                <li className="text-[12px], mt-[2px] leading-[14px] text-[#1F2937]">
-                  {region.departments.map((department) => `${department} (${getDepartmentNumber(department)})`).join(", ")}
-                </li>
-              )}
-            </React.Fragment>
-          ))}
-        </ul>
-      )}
-      {user.role !== ROLES.TRANSPORTER && (
-        <Link to="/table-repartition" className="absolute right-[20px] bottom-[14px] flex items-center text-[12px] text-[#2563EB] hover:text-[#000000]">
-          Table de répartition <ChevronRight className="ml-[5px]" />
-        </Link>
-      )}
-    </Box>
-  );
-}
-
-function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort: cohortName, user }) {
-  const [isUserAuthorizedToExportData, setIsUserAuthorizedToExportData] = useState(false);
-
-  function goToRow(row) {
-    onGoToRow && onGoToRow(row);
-  }
-
-  const checkIfUserIsAuthorizedToExportData = async () => {
-    const { data: cohort } = await getCohortByName(cohortName);
-    if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {
-      setIsUserAuthorizedToExportData(false);
-      return;
-    }
-    setIsUserAuthorizedToExportData(true);
-  };
-
-  useEffect(() => {
-    checkIfUserIsAuthorizedToExportData();
-  }, [cohortName]);
-
-  return (
-    <Box className={className}>
-      <BoxHeader title="">
-        <span data-tip data-tip-disable={false} data-for="export-data">
-          <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
-            Exporter
-          </ButtonPrimary>
-          <ReactTooltip
-            disable={isUserAuthorizedToExportData}
-            id="export-data"
-            type="light"
-            place="top"
-            effect="solid"
-            className="custom-tooltip-radius !opacity-100 !shadow-md"
-            tooltipRadius="6">
-            <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-              L&apos;export n&apos;est pas disponible au téléchargement. Contactez-nous pour plus d&apos;information
-            </p>
-          </ReactTooltip>
-        </span>
-      </BoxHeader>
-      <div className="">
-        <table className="w-[100%]">
-          <thead className="text-[11px] uppercase leading-[16px] text-[#7E858C]">
-            <tr className="border-b-[1px] border-b-[#F4F5FA]">
-              <th className="py-[17px] pr-[16px] font-medium">{isNational ? "Régions" : "Départements"}</th>
-              <th className="py-[17px] pr-[16px] font-medium">Volontaires</th>
-              <th className="py-[17px] pr-[16px] font-medium">Places restantes</th>
-              <th className="py-[17px] pr-[16px] font-medium">Volontaires en intra-départemental</th>
-              <th className="py-[17px] font-medium">Places restantes dans le département</th>
-            </tr>
-          </thead>
-          <tbody className="text-[14px] font-medium leading-[16px] text-[#1F2937]">
-            {rows.map((row) => (
-              <tr key={row.name} className="border-b-[1px] border-b-[#F4F5FA] hover:bg-[#F2F5FC]" onClick={() => goToRow(row)}>
-                <td className="whitespace-nowrap py-[17px] px-[9px] text-[15px] font-bold text-[#242526]">
-                  {row.name} {!isNational ? `(${getDepartmentNumber(row.name)})` : null}
-                </td>
-                <td className="py-[17px] px-[8px]">
-                  {loading ? (
-                    <Loading />
-                  ) : (
-                    <div className="flex items-center">
-                      <div className="mr-[8px]">{row.total}</div>
-                      <Badge className="">{formatRate(row.assigned, row.total)} affectés</Badge>
-                    </div>
-                  )}
-                </td>
-                <td className="py-[17px] px-[8px]">
-                  {loading ? (
-                    <Loading />
-                  ) : (
-                    <div className="flex items-center">
-                      <AlertPoint threshold={50} value={row.capacity - row.assigned} />
-                      <span>{Math.max(0, row.capacity - row.assigned)}</span>
-                    </div>
-                  )}
-                </td>
-                <td className="py-[17px] px-[8px]">
-                  {loading ? (
-                    <Loading />
-                  ) : (
-                    <div className="flex items-center">
-                      <div className="">{row.intradepartmental}</div>
-                      {row.intradepartmental > 0 && (
-                        <Badge mode={row.intradepartmentalAssigned === row.intradepartmental ? "green" : "blue"} className="ml-2">
-                          {formatRate(row.intradepartmentalAssigned, row.intradepartmental)} affectés
-                        </Badge>
-                      )}
-                      {user.role !== ROLES.TRANSPORTER && (
-                        <Link
-                          to={getIntradepartmentalYoungsLink(isNational ? row.name : null, isNational ? null : row.name, cohortName)}
-                          className="ml-2"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                          }}>
-                          <ExternalLink className="text-[#9CA3AF]" />
-                        </Link>
-                      )}
-                    </div>
-                  )}
-                </td>
-                <td className="py-[17px] px-[8px]">
-                  {loading ? (
-                    <Loading />
-                  ) : (
-                    <div className="flex items-center">
-                      <AlertPoint threshold={0} value={row.intraCapacity - row.intradepartmentalAssigned} />
-                      {Math.max(0, row.intraCapacity - row.intradepartmentalAssigned)}
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Box>
-  );
-}
-
-function getIntradepartmentalYoungsLink(region, department, cohort) {
-  let url =
-    "/volontaire?STATUS=" + encodeURIComponent('["VALIDATED"]') + "&COHORT=" + encodeURIComponent('["' + cohort + '"]') + "&SAME_DEPARTMENT=" + encodeURIComponent('["true"]');
-
-  if (department) {
-    url += "&DEPARTMENT=" + encodeURIComponent('["' + department + '"]');
-  } else if (region) {
-    url += "&REGION=" + encodeURIComponent('["' + region + '"]');
-  }
-
-  return url;
 }
