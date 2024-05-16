@@ -1,7 +1,8 @@
 import Joi from "joi";
+import { CohortDto } from "./cohortDto";
 
-export const validateCohortDto = (dto): Joi.ValidationResult => {
-  return Joi.object({
+export const validateCohortDto = (dto: CohortDto): Joi.ValidationResult<CohortDto> => {
+  return Joi.object<CohortDto>({
     // Informations générales
     dateStart: Joi.date().required(),
     dateEnd: Joi.date().required(),

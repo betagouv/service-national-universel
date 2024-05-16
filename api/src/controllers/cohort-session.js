@@ -10,7 +10,7 @@ const CohortModel = require("../models/cohort");
 const passport = require("passport");
 const { ROLES, COHORT_TYPE } = require("snu-lib");
 const { ADMIN_URL } = require("../config");
-const { isReInscriptionOpen, isInscriptionOpen } = require("../cohort/cohort.service");
+const { isReInscriptionOpen, isInscriptionOpen } = require("../cohort/cohortService");
 
 // Takes either a young ID in route parameter or young data in request body (for edition or signup pages).
 // Minimum data required: birthdateAt, zip || department and (if schooled) grade.
