@@ -268,6 +268,10 @@ export default function CenterYoungIndex() {
   };
 
   const exportData = async () => {
+    if (!focusedSession) {
+      toastr.error("Aucune session selectionné", { timeOut: 10000 });
+      return;
+    }
     const data = await api.post(`/elasticsearch/young/by-session/${focusedSession._id}/export?needSchoolInfo=true`, {
       filters: Object.entries(filter).reduce((e, [key, value]) => {
         if (value.filter.length === 1 && value.filter[0] === "") return e;
