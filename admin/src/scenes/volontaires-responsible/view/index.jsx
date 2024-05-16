@@ -3,14 +3,9 @@ import { Switch } from "react-router-dom";
 import { SentryRoute } from "../../../sentry";
 
 import Phase2Contract from "./phase2Contract";
-import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
 
 import api from "../../../services/api";
 import Application from "./application";
-import Details from "./Details";
-import Wrapper from "./wrapper";
-import { ENABLE_PM } from "../../../utils";
-import { environment } from "../../../config";
 
 export default function VolontaireResponsible({ ...props }) {
   const [young, setYoung] = useState();
