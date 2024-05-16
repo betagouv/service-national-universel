@@ -20,7 +20,7 @@ const CohorteModel = require("../../models/cohort");
 const scanFile = require("../../utils/virusScanner");
 const { getMimeFromFile } = require("../../utils/file");
 
-const { validatePdtFile, computeImportSummary } = require("../../pdt/pdtService");
+const { validatePdtFile, computeImportSummary } = require("../../pdt/import/pdtImportService");
 const { formatTime } = require("../../pdt/import/utils");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.

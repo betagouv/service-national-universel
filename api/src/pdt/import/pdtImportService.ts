@@ -3,10 +3,10 @@ import mongoose from "mongoose";
 
 import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 
-import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, CleClasseModel } from "../models";
-import { ERRORS } from "../utils";
+import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, CleClasseModel } from "../../models";
+import { ERRORS } from "../../utils";
 
-import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./import/utils";
+import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./utils";
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
@@ -270,32 +270,34 @@ export const validatePdtFile = async (
     }
   }
   // Check duplicate "NUMERO DE LIGNE"
-  const duplicateLines = lines.reduce((acc, line) => {
-    if (line["NUMERO DE LIGNE"]) {
-      // @ts-expect-error typage colonnes
-      acc[line["NUMERO DE LIGNE"]] = (acc[line["NUMERO DE LIGNE"]] || 0) + 1;
-    }
-    return acc;
-  }, {});
+  const duplicateLines = lines.reduce(
+    (acc, line) => {
+      if (line["NUMERO DE LIGNE"]) {
+        acc[line["NUMERO DE LIGNE"]] = (acc[line["NUMERO DE LIGNE"]] || 0) + 1;
+      }
+      return acc;
+    },
+    {} as { [key: string]: number },
+  );
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
-    // @ts-expect-error typage colonnes
     if (line["NUMERO DE LIGNE"] && duplicateLines[line["NUMERO DE LIGNE"]] > 1) {
       errors["NUMERO DE LIGNE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_BUSNUM, extra: line["NUMERO DE LIGNE"] });
     }
   }
   // Check duplicates "ID CLASSE"
-  const duplicateClasses = lines.reduce((acc, line) => {
-    if (line["ID CLASSE"]) {
-      // @ts-expect-error typage colonnes
-      acc[line["ID CLASSE"]] = (acc[line["ID CLASSE"]] || 0) + 1;
-    }
-    return acc;
-  }, {});
+  const duplicateClasses = lines.reduce(
+    (acc, line) => {
+      if (line["ID CLASSE"]) {
+        acc[line["ID CLASSE"]] = (acc[line["ID CLASSE"]] || 0) + 1;
+      }
+      return acc;
+    },
+    {} as { [key: string]: number },
+  );
 
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
-    // @ts-expect-error typage colonnes
     if (line["ID CLASSE"] && duplicateClasses[line["ID CLASSE"]] > 1) {
       errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_CLASSE, extra: line["ID CLASSE"] });
     }
