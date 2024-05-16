@@ -727,7 +727,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       scope: `openid given_name family_name email`,
       redirect_uri: `${config.APP_URL}/${value.callback}`,
       response_type: "code",
-      client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
+      client_id: config.FRANCE_CONNECT_CLIENT_ID,
       state: crypto.randomBytes(20).toString("hex"),
       nonce: crypto.randomBytes(20).toString("hex"),
       acr_values: "eidas1",
@@ -743,7 +743,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 
     await redisClient.disconnect();
 
-    const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
+    const url = `${config.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
     return res.status(200).send({ ok: true, data: { url } });
   } catch (error) {
     capture(error);
@@ -765,12 +765,12 @@ router.post("/france-connect/user-info", async (req, res) => {
     const body = {
       grant_type: "authorization_code",
       redirect_uri: `${config.APP_URL}/${value.callback}`,
-      client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
-      client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
+      client_id: config.FRANCE_CONNECT_CLIENT_ID,
+      client_secret: config.FRANCE_CONNECT_CLIENT_SECRET,
       code: value.code,
     };
 
-    const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
+    const tokenResponse = await fetch(`${config.FRANCE_CONNECT_URL}/token`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: queryString.stringify(body),
@@ -801,7 +801,7 @@ router.post("/france-connect/user-info", async (req, res) => {
     }
 
     // … then get user info.
-    const userInfoResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/userinfo`, {
+    const userInfoResponse = await fetch(`${config.FRANCE_CONNECT_URL}/userinfo`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token["access_token"]}` },
     });

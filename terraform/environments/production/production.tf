@@ -61,10 +61,10 @@ resource "scaleway_container" "api" {
 
   environment_variables = {
     "APP_NAME"                          = "api"
+    "API_URL"                           = "https://${local.api_hostname}"
     "ADMIN_URL"                         = "https://${local.admin_hostname}"
     "APP_URL"                           = "https://${local.app_hostname}"
-    "CLE"                               = "true"
-    "PRODUCTION"                        = "true"
+    "ENVIRONMENT"                       = "production"
     "FOLDER_API"                        = "api"
     "RELEASE"                           = var.api_image_tag
     "SENTRY_PROFILE_SAMPLE_RATE"        = 0.2
@@ -145,11 +145,10 @@ resource "scaleway_container" "admin" {
   environment_variables = {
     "NGINX_HOSTNAME"             = local.admin_hostname
     "APP_NAME"                   = "admin"
-    "PROD"                       = "true"
+    "ENVIRONMENT"                = "production"
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
-    "ENVIRONNEMENT"              = "production"
     "RELEASE"                    = var.admin_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.005
     "SENTRY_TRACING_SAMPLE_RATE" = 0.01
@@ -186,11 +185,10 @@ resource "scaleway_container" "app" {
   environment_variables = {
     "NGINX_HOSTNAME"             = local.app_hostname
     "APP_NAME"                   = "app"
-    "PROD"                       = "true"
+    "ENVIRONMENT"                = "production"
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
-    "ENVIRONNEMENT"              = "production"
     "RELEASE"                    = var.app_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.005
     "SENTRY_TRACING_SAMPLE_RATE" = 0.01
