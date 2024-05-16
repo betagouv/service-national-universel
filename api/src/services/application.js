@@ -135,6 +135,14 @@ const getAuthorizationToApply = async (mission, young) => {
     refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
   }
 
+  if (mission.placesLeft === 0) {
+    refusalMessages.push("La mission est déjà complète.");
+  }
+
+  if (mission.visibility === "HIDDEN") {
+    refusalMessages.push("La structure a fermé les candidatures pour cette mission.");
+  }
+
   const applicationsCount = await ApplicationModel.countDocuments({
     youngId: young._id,
     status: { $in: [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION] },
