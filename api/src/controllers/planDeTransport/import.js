@@ -20,7 +20,8 @@ const CohorteModel = require("../../models/cohort");
 const scanFile = require("../../utils/virusScanner");
 const { getMimeFromFile } = require("../../utils/file");
 
-const { validatePdtFile, computeImportSummary, formatTime } = require("../../pdt/pdt-service");
+const { validatePdtFile, computeImportSummary } = require("../../pdt/pdtService");
+const { formatTime } = require("../../pdt/import/utils");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
 router.post(
@@ -153,7 +154,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         sessionId: session?._id.toString(),
         meetingPointsIds: pdrIds,
         classeId: line["ID CLASSE"] ? line["ID CLASSE"] : undefined,
-        mergedBusIds: line["LIGNES FUSIONNÉE"] ? line["LIGNES FUSIONNÉE"].split(",") : [],
+        mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"].split(",") : [],
       };
       const newBusLine = new LigneBusModel(busLineData);
       const busLine = await newBusLine.save();

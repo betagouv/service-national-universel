@@ -1,12 +1,12 @@
-const { PDT_IMPORT_ERRORS, departmentLookUp } = require("snu-lib");
-const XLSX = require("xlsx");
-const mongoose = require("mongoose");
+import XLSX from "xlsx";
+import mongoose from "mongoose";
 
-const { ERRORS } = require("../utils");
-const CohesionCenterModel = require("../models/cohesionCenter");
-const PdrModel = require("../models/PlanDeTransport/pointDeRassemblement");
-const SessionPhase1Model = require("../models/sessionPhase1");
-const ClasseModel = require("../models/cle/classe");
+import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
+
+import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, CleClasseModel } from "../models";
+import { ERRORS } from "../utils";
+
+import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./import/utils";
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
@@ -29,7 +29,7 @@ export const validatePdtFile = async (
   // PARSING DU FICHIER
   const workbook = XLSX.readFile(filePath);
   const worksheet = workbook.Sheets["ALLER-RETOUR"];
-  const lines = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: null });
+  const lines = XLSX.utils.sheet_to_json<{ [key: string]: string }>(worksheet, { raw: false, defval: null });
 
   if (lines.length < 1) {
     console.log("workbook Sheets 'ALLER-RETOUR' is missing or empty");
@@ -64,7 +64,7 @@ export const validatePdtFile = async (
     "PAUSE DÉJEUNER ALLER": [],
     "PAUSE DÉJEUNER RETOUR": [],
     "TEMPS DE ROUTE": [],
-    "LIGNES FUSIONNÉE": [],
+    "LIGNES FUSIONNÉES": [],
   };
 
   if (isCle) {
@@ -228,10 +228,10 @@ export const validatePdtFile = async (
     if (line["TEMPS DE ROUTE"] && !isValidTime(line["TEMPS DE ROUTE"])) {
       errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
     }
-    if (line["LIGNES FUSIONNÉE"]) {
-      const mergedLines = line["LIGNES FUSIONNÉE"].split(",");
+    if (line["LIGNES FUSIONNÉES"]) {
+      const mergedLines = line["LIGNES FUSIONNÉES"].split(",");
       if (mergedLines.length > 5) {
-        errors["LIGNES FUSIONNÉE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+        errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
       }
       for (const mergedLine of mergedLines) {
         let found = false;
@@ -242,7 +242,7 @@ export const validatePdtFile = async (
           }
         }
         if (!found) {
-          errors["LIGNES FUSIONNÉE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_MERGED_LINE_ID, extra: mergedLine });
+          errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_MERGED_LINE_ID, extra: mergedLine });
         }
       }
     }
@@ -272,12 +272,14 @@ export const validatePdtFile = async (
   // Check duplicate "NUMERO DE LIGNE"
   const duplicateLines = lines.reduce((acc, line) => {
     if (line["NUMERO DE LIGNE"]) {
+      // @ts-expect-error typage colonnes
       acc[line["NUMERO DE LIGNE"]] = (acc[line["NUMERO DE LIGNE"]] || 0) + 1;
     }
     return acc;
   }, {});
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
+    // @ts-expect-error typage colonnes
     if (line["NUMERO DE LIGNE"] && duplicateLines[line["NUMERO DE LIGNE"]] > 1) {
       errors["NUMERO DE LIGNE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_BUSNUM, extra: line["NUMERO DE LIGNE"] });
     }
@@ -285,6 +287,7 @@ export const validatePdtFile = async (
   // Check duplicates "ID CLASSE"
   const duplicateClasses = lines.reduce((acc, line) => {
     if (line["ID CLASSE"]) {
+      // @ts-expect-error typage colonnes
       acc[line["ID CLASSE"]] = (acc[line["ID CLASSE"]] || 0) + 1;
     }
     return acc;
@@ -292,6 +295,7 @@ export const validatePdtFile = async (
 
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
+    // @ts-expect-error typage colonnes
     if (line["ID CLASSE"] && duplicateClasses[line["ID CLASSE"]] > 1) {
       errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_CLASSE, extra: line["ID CLASSE"] });
     }
@@ -315,7 +319,7 @@ export const validatePdtFile = async (
     for (const [i, line] of lines.entries()) {
       const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
       if (line["ID CLASSE"] && mongoose.Types.ObjectId.isValid(line["ID CLASSE"])) {
-        const classe = await ClasseModel.findById(line["ID CLASSE"]);
+        const classe = await CleClasseModel.findById(line["ID CLASSE"]);
         if (!classe) {
           errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CLASSE_ID, extra: line["ID CLASSE"] });
         }
@@ -328,7 +332,7 @@ export const validatePdtFile = async (
     for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
       if (line[`ID PDR ${pdrNumber}`]) {
         if (mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
-          const pdr = await PdrModel.findOne({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
+          const pdr = await PointDeRassemblementModel.findOne({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
           if (!pdr) {
             errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
           } else if ((pdr?.department || "").toLowerCase() !== departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]?.toLowerCase()) {
@@ -417,35 +421,3 @@ const getLinePdrIds = (line) => {
   }
   return pdrIds;
 };
-
-function isValidDate(date) {
-  return date.match(/^[0-9]{2}\/[0-9]{2}\/202[0-9]$/);
-}
-
-export function formatTime(time) {
-  let [hours, minutes] = time.split(":");
-  hours = hours.length === 1 ? "0" + hours : hours;
-  return `${hours}:${minutes}`;
-}
-
-function isValidTime(time) {
-  const test = formatTime(time);
-  console.log(test);
-  return test.match(/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/);
-}
-
-function isValidNumber(number) {
-  return number.match(/^[0-9]+$/);
-}
-
-function isValidBoolean(b) {
-  return b
-    .trim()
-    .toLowerCase()
-    .match(/^(oui|non)$/);
-}
-
-function isValidDepartment(department) {
-  const ids = Object.keys(departmentLookUp);
-  return ids.includes((department || "").toUpperCase());
-}
