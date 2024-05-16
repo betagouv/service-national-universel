@@ -81,17 +81,19 @@ const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche 
           </div>
         </li>
 
-        <li className="flex bg-blue-50 rounded-lg px-2 py-4 gap-3">
+        <li className="flex bg-blue-50 rounded-xl px-3 py-4 gap-3">
           <div>
             <span className="flex h-8 w-8 bg-white shrink-0 items-center justify-center rounded-full border border-gray-200 text-sm text-gray-700">3</span>
           </div>
-          {email}
-
           {email ? (
             <div className="text-sm">
               <p className="font-bold text-gray-900">Envoyer l'ensemble des documents par e-mail</p>
               <p className="text-gray-700">
-                à <a href={`mailto:{email}`}>{email}</a> avant votre arrivé au séjour
+                à{" "}
+                <a href={`mailto:${email}`} className="text-blue-600 underline underline-offset-2">
+                  {email}
+                </a>{" "}
+                avant votre arrivé au séjour
               </p>
               <ul className="m-2 p-3 border rounded-xl list-disc list-inside">
                 <li>Les pièces jointes doivent peser moins de 10 Mo.</li>
