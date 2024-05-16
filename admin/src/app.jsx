@@ -57,7 +57,7 @@ import Footer from "./components/footer";
 import { SentryRoute, capture, history, initSentry } from "./sentry";
 import api, { initApi } from "./services/api";
 
-import { adminURL } from "./config";
+import { adminURL, environment } from "./config";
 import { COHESION_STAY_END, ROLES, ROLES_LIST } from "./utils";
 
 import ModalCGU from "./components/modals/ModalCGU";
@@ -256,8 +256,8 @@ const Home = () => {
                 <RestrictedRoute path="/mes-eleves" component={VolontaireCle} />
                 <RestrictedRoute path="/mes-contacts" component={Contact} />
                 {/* Only for developper eyes... */}
-                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} /> : null}
-                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
+                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/develop-assets" component={DevelopAssetsPresentationPage} /> : null}
+                {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
                 {/* DASHBOARD */}
                 <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
                 {/* Default route (redirection de la home et 404) */}

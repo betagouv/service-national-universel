@@ -7,7 +7,6 @@ import { getCohort } from "../../utils/cohorts";
 import Clock from "../../assets/icons/Clock";
 import { translate, getCohortPeriod } from "snu-lib";
 import JDMA from "../../components/JDMA";
-import { environment } from "../../config";
 import plausibleEvent from "../../services/plausible";
 
 export default function WaitingList() {
@@ -15,9 +14,7 @@ export default function WaitingList() {
   const cohort = getCohort(young.cohort);
 
   function handleClick() {
-    if (environment === "production") {
-      plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) });
-    }
+    plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) });
   }
 
   return (
