@@ -6,7 +6,7 @@ import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, CleClasseModel } from "../../models";
 import { ERRORS } from "../../utils";
 
-import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./utils";
+import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
