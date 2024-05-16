@@ -135,7 +135,7 @@ const getAuthorizationToApply = async (mission, young) => {
     refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
   }
 
-  if (mission.placesLeft === 0 || mission.placesStatus === "FULL") {
+  if (mission.placesLeft === 0) {
     refusalMessages.push("La mission est déjà complète.");
   }
 
