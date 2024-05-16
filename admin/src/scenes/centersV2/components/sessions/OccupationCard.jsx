@@ -61,7 +61,8 @@ export default function OccupationCard({ session, user, handleSessionDelete, mod
         </div>
       </div>
       {canCreateOrUpdateCohesionCenter(user) && (
-        <div
+        <button
+          type="button"
           onClick={() => {
             session.canBeDeleted &&
               setModalDelete({
@@ -74,7 +75,7 @@ export default function OccupationCard({ session, user, handleSessionDelete, mod
           className={`mt-3 flex w-full flex-row items-center justify-end gap-2 ${session.canBeDeleted ? "cursor-pointer" : "cursor-default"}`}>
           <Trash className={session.canBeDeleted ? "text-red-400" : "text-gray-400"} width={14} height={14} />
           <div className={`${session.canBeDeleted ? "text-gray-800" : "text-gray-500"} text-xs`}>Supprimer le séjour</div>
-        </div>
+        </button>
       )}
     </div>
   );
