@@ -1,10 +1,10 @@
-import { YOUNG_STATUS_PHASE1 } from "./constants";
+import { YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { regionsListDROMS } from "./region-and-departments";
 
 const TRANSPORT_TIMES = {
   ALONE_ARRIVAL_HOUR: "16:00",
   ALONE_DEPARTURE_HOUR: "11:00",
-}
+};
 
 /**
  * @param {Object} young
@@ -101,8 +101,8 @@ function getReturnHour(meetingPoint = null) {
 /**
  * Get the transport dates and returns a formatted string
  * e.g "du 5 au 17 juillet 2023"
- * @param {date} departureDate 
- * @param {date} returnDate 
+ * @param {date} departureDate
+ * @param {date} returnDate
  * @returns {string}
  */
 const transportDatesToString = (departureDate, returnDate) => {
@@ -115,16 +115,7 @@ const transportDatesToString = (departureDate, returnDate) => {
   })}`;
 };
 
-export {
-  TRANSPORT_TIMES,
-  getDepartureDate,
-  getGlobalDepartureDate,
-  getReturnDate,
-  getGlobalReturnDate,
-  getMeetingHour,
-  getReturnHour,
-  transportDatesToString,
-}
+export { TRANSPORT_TIMES, getDepartureDate, getGlobalDepartureDate, getReturnDate, getGlobalReturnDate, getMeetingHour, getReturnHour, transportDatesToString };
 
 export default {
   TRANSPORT_TIMES,
@@ -135,4 +126,4 @@ export default {
   getMeetingHour,
   getReturnHour,
   transportDatesToString,
-}
+};

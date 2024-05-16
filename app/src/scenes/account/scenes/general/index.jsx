@@ -4,7 +4,7 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { Link, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { youngCanChangeSession, youngCanWithdraw } from "snu-lib";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { PHONE_ZONES } from "snu-lib";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "@/redux/auth/actions";
 import { validateEmail, validatePhoneNumber } from "@/utils/form-validation.utils";

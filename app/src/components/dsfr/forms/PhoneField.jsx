@@ -1,6 +1,6 @@
 import React from "react";
 import ErrorMessage from "./ErrorMessage";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { PHONE_ZONES } from "snu-lib";
 import { HiChevronDown } from "react-icons/hi";
 
 const PhoneField = ({

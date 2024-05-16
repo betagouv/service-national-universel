@@ -4,8 +4,6 @@ const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
 
-jest.setTimeout(10_000);
-
 jest.mock("node-fetch");
 
 beforeAll(dbConnect);

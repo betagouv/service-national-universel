@@ -607,12 +607,6 @@ function inSevenDays() {
   return Date.now() + 86400000 * 7;
 }
 
-const getBaseUrl = () => {
-  if (ENVIRONMENT === "staging") return "https://api.beta-snu.dev";
-  if (ENVIRONMENT === "production") return "https://api.snu.gouv.fr";
-  return "http://localhost:8080";
-};
-
 const getCcOfYoung = ({ template, young }) => {
   if (!young || !template) return [];
   let cc = [];
@@ -650,7 +644,7 @@ async function addingDayToDate(days, dateStart) {
   }
 }
 
-async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort, user }) {
+async function autoValidationSessionPhase1Young({ young, sessionPhase1, cohort = null, user }) {
   let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"];
   let youngCohort = cohort;
   if (!cohort) {
@@ -995,7 +989,6 @@ module.exports = {
   isYoung,
   isReferent,
   inSevenDays,
-  getBaseUrl,
   updateYoungPhase2Hours,
   updateStatusPhase2,
   getSignedUrlForApiAssociation,

@@ -90,7 +90,7 @@ export default function WaitingAffectation() {
         <Files young={young} />
         <hr className="mx-auto mt-12 mb-7 w-full" />
         <CheckYourSpamSection />
-        {!isCLE ?? <FaqSection />}
+        {!isCLE && <FaqSection />}
         <TestimonialsSection />
         <section className="mt-12 pb-32 md:mt-32">
           <h2 className="mb-8 text-center text-xl font-bold">Envie d&apos;en savoir plus sur le séjour de cohésion ?</h2>

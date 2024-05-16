@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import PencilAlt from "../../../assets/icons/PencilAlt";
 import InputPhone from "../../../components/ui/forms/InputPhone";
 import useMouseOver from "../../../hooks/useMouseOver";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { PHONE_ZONES } from "snu-lib";
 import SectionContext from "../context/SectionContext";
 import CorrectedRequest from "./CorrectedRequest";
 import CorrectionRequest from "./CorrectionRequest";

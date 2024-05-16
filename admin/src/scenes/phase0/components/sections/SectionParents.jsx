@@ -6,7 +6,7 @@ import { Button } from "@snu/ds/admin";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
+import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib";
 
 import { FieldsGroup } from "../FieldsGroup";
 import Field from "../Field";

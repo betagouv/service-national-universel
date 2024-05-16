@@ -8,7 +8,7 @@ import { capture } from "@/sentry";
 import { useHistory, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, ROLES } from "snu-lib";
+import { translateGrade, GRADES, YOUNG_STATUS, getCohortPeriod, getCohortYear, isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
 import MiniSwitch from "../phase0/components/MiniSwitch";
@@ -22,7 +22,6 @@ import VerifyAddress from "../phase0/components/VerifyAddress";
 import FieldSituationsParticulieres from "../phase0/components/FieldSituationsParticulieres";
 import Check from "@/assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
-import { isPhoneNumberWellFormated, PHONE_ZONES } from "snu-lib/phone-number";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 
 export default function Create() {

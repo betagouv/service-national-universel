@@ -12,7 +12,7 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
+import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib";
 // import Input from "../components/Input";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";

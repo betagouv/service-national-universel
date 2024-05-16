@@ -55,8 +55,8 @@ export default function Index() {
   return (
     <>
       {user.role !== ROLES.HEAD_CENTER && <Breadcrumbs items={[{ label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
-      <CenterInformations center={center} setCenter={setCenter} sessions={sessions} />
-      <SessionList center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} user={user} />
+      <CenterInformations center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} />
+      <SessionList center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} />
     </>
   );
 }
@@ -64,9 +64,10 @@ export default function Index() {
 function filterSessions(sessions, user) {
   if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(user.role)) {
     return sessions;
-  } else {
+  } else if (user.role === ROLES.HEAD_CENTER) {
     return sessions.filter((session) => session?.headCenterId === user._id);
   }
+  return [];
 }
 
 async function populateSessions(sessions) {

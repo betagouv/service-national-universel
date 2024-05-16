@@ -40,7 +40,7 @@
   const { initDB, closeDB } = require("./mongo");
   await initDB();
 
-  const { PORT, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, ENVIRONMENT } = require("./config");
+  const { PORT, API_URL, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, ENVIRONMENT } = require("./config");
 
   /*
     Download all certificate templates when instance is starting,
@@ -53,7 +53,8 @@
   const { getAllPdfTemplates } = require("./utils/pdf-renderer");
   getAllPdfTemplates();
 
-  if (process.env.NODE_ENV !== "test") {
+  if (ENVIRONMENT !== "testing") {
+    console.log("API_URL", API_URL);
     console.log("APP_URL", APP_URL);
     console.log("ADMIN_URL", ADMIN_URL);
     console.log("SUPPORT_URL", SUPPORT_URL);
@@ -66,19 +67,11 @@
   const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
-  if (process.env.PRODUCTION) {
+  if (['production', 'staging', 'ci', 'custom'].includes(ENVIRONMENT)) {
+    const url = new URL(API_URL)
     app.use(
       forceDomain({
-        hostname: "api.snu.gouv.fr",
-        protocol: "https",
-      }),
-    );
-  }
-
-  if (process.env.STAGING && !process.env.CLE) {
-    app.use(
-      forceDomain({
-        hostname: "api.beta-snu.dev",
+        hostname: url.hostname,
         protocol: "https",
       }),
     );
@@ -224,7 +217,7 @@
     }
   });
 
-  if (process.env.STAGING === "true") {
+  if (ENVIRONMENT !== "production") {
     app.get("/test_error_double_res_send", (req, res) => {
       res.send("TEST ERROR");
       res.send("TEST ERROR 2");

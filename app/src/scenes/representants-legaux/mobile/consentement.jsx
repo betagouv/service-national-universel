@@ -20,7 +20,7 @@ import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress, getDataForConsentStep } from "../utils";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
-import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
+import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
 import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Consentement({ step, parentId }) {

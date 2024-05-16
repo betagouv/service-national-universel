@@ -4,8 +4,9 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  extends: ["eslint:recommended", "plugin:jest/recommended"],
-  plugins: ["jest", "prettier"],
+  extends: ["eslint:recommended", "plugin:jest/recommended", "plugin:@typescript-eslint/recommended"],
+  plugins: ["jest", "prettier", "eslint-plugin-import", "@typescript-eslint"],
+  parser: "@typescript-eslint/parser",
   overrides: [],
   parserOptions: {
     ecmaVersion: "latest",
@@ -14,6 +15,7 @@ module.exports = {
   rules: {
     "no-unused-vars": "warn",
     "import/extensions": ["warn"],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/ban-ts-comment": "warn",
   },
-  plugins: ["eslint-plugin-import"],
 };
