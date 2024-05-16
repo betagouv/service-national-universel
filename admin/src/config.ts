@@ -1,0 +1,31 @@
+function getEnv(name: string, fallback?: string | number) {
+  const runtime = globalThis.runtime_env || {};
+  let v = runtime[name];
+  if (v !== undefined && v !== "") {
+    return v;
+  }
+  // @ts-expect-error import.meta
+  v = import.meta.env[`VITE_${name}`];
+  if (v !== undefined && v !== "") {
+    return v;
+  }
+  // @ts-expect-error import.meta
+  if (import.meta.env.MODE !== "development") {
+    console.warn(`Environment variable ${name} is not defined`);
+  }
+  return fallback;
+}
+
+const apiURL = getEnv("API_URL", "http://localhost:8080");
+const appURL = getEnv("APP_URL", "http://localhost:8081");
+const adminURL = getEnv("ADMIN_URL", "http://localhost:8082");
+const supportURL = getEnv("SUPPORT_URL", "http://localhost:8083");
+const maintenance = getEnv("MAINTENANCE") === "true";
+const environment: "production" | "staging" | "ci" | "custom" | "testing" | "development" = getEnv("ENVIRONMENT", "development");
+const RELEASE = getEnv("RELEASE");
+const SENTRY_URL = getEnv("SENTRY_URL");
+const SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 1.0);
+const SENTRY_SESSION_SAMPLE_RATE = getEnv("SENTRY_SESSION_SAMPLE_RATE", 1.0);
+const SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("SENTRY_ON_ERROR_SAMPLE_RATE", 1.0);
+
+export { apiURL, appURL, RELEASE, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_ON_ERROR_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };

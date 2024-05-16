@@ -24,8 +24,7 @@ WORKDIR /app
 # First install dependencies (as they change less often)
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
-# command sh -c node src/build-only-on-clevercloud.js
-COPY --from=builder /app/out/full/admin/src/build-only-on-clevercloud.js ./admin/src/build-only-on-clevercloud.js
+
 # copy:dsfr
 RUN mkdir ./admin/public
 # snu-lib rollup -c

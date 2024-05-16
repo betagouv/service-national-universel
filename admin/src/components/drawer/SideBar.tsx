@@ -12,6 +12,7 @@ import useDevice from "@/hooks/useDevice";
 import ticketsAction from "@/redux/tickets/actions";
 import { AuthState } from "@/redux/auth/reducer";
 import { TicketsState } from "@/redux/tickets/reducer";
+import { environment } from "../../config";
 
 import { centerHeadCenterRegex, itemsAdministrateur, itemsEngagement, itemsSejourAdmin, itemsSejourGod, itemsSejourRef, itemsDev, volontaireHeadCenterRegex } from "./utils";
 
@@ -230,7 +231,7 @@ const SideBar = ({ sessionsList }) => {
   //Components to display depending on user role
   const godItems = [Dashboard, Volontaire, Inscriptions, SejoursGod, Engagement, Utilisateurs, Dev];
   const adminItems = [Dashboard, Volontaire, Inscriptions, SejoursAdmin, Engagement, Utilisateurs];
-  isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role) && adminItems.push(Dev);
+  isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) && adminItems.push(Dev);
   const refItems = [Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
   const headCenterItems = [Dashboard, VolontaireHeadCenter, CentresHeadCenter, PlanDeTransport, Contenus, Utilisateurs];
   const transporteurItems = [Point, Centre, Schema, PlanDeTransport];

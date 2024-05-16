@@ -6,5 +6,7 @@ import ProfilePic from "./ui/ProfilePic";
 
 // Form
 import AddressForm from "./forms/AddressForm";
+import { Address } from "./forms/AddressForm";
 
 export { PHONE_ZONES, ProfilePic, AddressForm };
+export type { Address };
