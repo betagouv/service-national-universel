@@ -8,7 +8,7 @@ export default function BoxAffectation({ summary, className = "", loading }) {
     <Box className={className}>
       <MiniTitle className="mb-[10px]">Affectation des volontaires</MiniTitle>
       {loading ? (
-        <Loading />
+        <Loading width={"w-full"} />
       ) : (
         <>
           <ProgressBar total={summary.total} value={summary.assigned} className="my-[10px]" />

@@ -39,7 +39,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
       await onExportDetail();
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des données. Nous ne pouvons exporter les données.");
+      toastr.error("Erreur", "Oups, une erreur est survenue lors de la récupération des données. Nous ne pouvons exporter les données.");
     } finally {
       setExportLoading(false);
     }
@@ -50,14 +50,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
       <BoxHeader title="Schéma de répartition">
         <span data-tip data-tip-disable={false} data-for="export-data">
           <Button title="Exporter" onClick={() => handleClickedExport()} loading={exportLoading} disabled={!isUserAuthorizedToExportData} />
-          <ReactTooltip
-            disable={isUserAuthorizedToExportData}
-            id="export-data"
-            type="light"
-            place="top"
-            effect="solid"
-            className="custom-tooltip-radius !opacity-100 !shadow-md"
-            tooltipRadius="6">
+          <ReactTooltip disable={isUserAuthorizedToExportData} id="export-data" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
             <p className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
               L&apos;export n&apos;est pas disponible au téléchargement. Contactez-nous pour plus d&apos;information
             </p>
@@ -84,7 +77,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
                   </td>
                   <td className="py-[17px] px-[8px]">
                     {loading ? (
-                      <Loading />
+                      <Loading width={"w-full"} />
                     ) : (
                       <div className="flex items-center">
                         <div className="mr-[8px]">{row.total}</div>
@@ -94,7 +87,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
                   </td>
                   <td className="py-[17px] px-[8px]">
                     {loading ? (
-                      <Loading />
+                      <Loading width={"w-full"} />
                     ) : (
                       <div className="flex items-center">
                         <AlertPoint threshold={50} value={row.capacity - row.assigned} />
@@ -104,7 +97,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
                   </td>
                   <td className="py-[17px] px-[8px]">
                     {loading ? (
-                      <Loading />
+                      <Loading width={"w-full"} />
                     ) : (
                       <div className="flex items-center">
                         <div className="">{row.intradepartmental}</div>
@@ -128,7 +121,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
                   </td>
                   <td className="py-[17px] px-[8px]">
                     {loading ? (
-                      <Loading />
+                      <Loading width={"w-full"} />
                     ) : (
                       <div className="flex items-center">
                         <AlertPoint threshold={0} value={row.intraCapacity - row.intradepartmentalAssigned} />

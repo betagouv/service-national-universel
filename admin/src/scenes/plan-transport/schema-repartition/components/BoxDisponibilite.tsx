@@ -9,7 +9,7 @@ export default function BoxDisponibilite({ summary, className = "", loading, isN
       <div>
         <MiniTitle className="mb-[10px]">Disponibilité des places</MiniTitle>
         {loading ? (
-          <Loading />
+          <Loading width={"w-full"} />
         ) : (
           <>
             {!isNational && summary.toRegions && <div className="mb-[10px] text-[13px] leading-[1.3em] text-[#6B7280]">{summary.toRegions.map((r) => r.name).join(", ")}</div>}
@@ -21,7 +21,7 @@ export default function BoxDisponibilite({ summary, className = "", loading, isN
       </div>
       <div className="mt-[30px] h-[130px]">
         {loading ? (
-          <Loading />
+          <Loading width={"w-full"} />
         ) : (
           <ProgressArc total={summary.capacity} value={summary.assigned} legend="Places libres" hilight={Math.max(0, summary.capacity - summary.assigned)} />
         )}

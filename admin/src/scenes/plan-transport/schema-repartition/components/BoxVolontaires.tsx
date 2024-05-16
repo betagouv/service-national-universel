@@ -21,7 +21,7 @@ export default function BoxVolontaires({ summary, className = "", loading }) {
         )}
       </div>
       {loading ? (
-        <Loading />
+        <Loading width={"w-full"} />
       ) : (
         <div className="flex items-center">
           <People className="text-[#9CA3AF]" />
