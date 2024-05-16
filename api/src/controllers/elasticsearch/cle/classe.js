@@ -8,7 +8,7 @@ const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const EtablissementModel = require("../../../models/cle/etablissement");
-import CohortModel from "../../../models/cohort";
+const CohortModel = require("../../../models/cohort");
 const { serializeReferents } = require("../../../utils/es-serializer");
 const { YOUNG_STATUS, STATUS_CLASSE } = require("snu-lib");
 
