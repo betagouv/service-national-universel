@@ -12,7 +12,7 @@ import Pencil from "@/assets/icons/Pencil";
 
 import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 import SelectCohort from "@/components/cohorts/SelectCohort";
-
+import { Container, InputText, Label } from "@snu/ds/admin";
 import { Title } from "../commons";
 import Field from "../Field";
 import TimeSchedule from "../TimeSchedule";
@@ -136,6 +136,86 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const handleSelect = (cohortName: string) => {
     history.push(`?cohorte=${cohortName}`);
   };
+
+  return (
+    <div className="mx-8 my-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="m-0 font-medium text-2xl">Par séjour</h2>
+        <SelectCohort cohort={selectedCohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} key="selectCohort" />
+      </div>
+      <Container
+        title="Détails"
+        actions={[
+          isSessionEditionOpen(user, cohort) && (
+            <>
+              {values ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => {
+                      setValues(null);
+                      setErrors({});
+                    }}
+                    disabled={loading}>
+                    Annuler
+                  </button>
+                  <button
+                    className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    type="submit"
+                    form="session-form"
+                    disabled={!values || loading}>
+                    <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
+                    Enregistrer les changements
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={() => setValues(session)}
+                  disabled={loading}>
+                  <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
+                  Modifier
+                </button>
+              )}
+            </>
+          ),
+        ]}>
+        <div className="grid grid-cols-2">
+          <div>
+            <OccupationCard session={session} user={user} modalDelete={modalDelete} setModalDelete={setModalDelete} handleSessionDelete={handleSessionDelete} />
+            <Label
+              title="Places ouvertes"
+              name="placesTotal"
+              tooltip="C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
+            />
+            <InputText
+              name="placesTotal"
+              value={values?.placesTotal?.toString() || session.placesTotal.toString()}
+              onChange={(e) => {
+                if (values) setValues({ ...values, placesTotal: parseInt(e.target.value) });
+              }}
+            />
+            {center.region === "Provence-Alpes-Côte d'Azur" && cohort.name === "Juin 2024 - 2" && (
+              <>
+                <Label title="Réception des fiches sanitaires (facultatif)" name="sanitaryContactEmail" tooltip="" className="mt-4 mb-2" />
+                <InputText
+                  label="Adresse email académique"
+                  name="sanitaryContactEmail"
+                  value={values?.sanitaryContactEmail || session?.sanitaryContactEmail}
+                  onChange={(e) => {
+                    if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
+                  }}
+                />
+              </>
+            )}
+          </div>
+          <div>yo</div>
+        </div>
+      </Container>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-4 mx-8">
