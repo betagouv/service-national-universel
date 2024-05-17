@@ -1,11 +1,74 @@
-(async () => {
-  // console.log("Before error")
-  // throw new Error("Break")
-  // console.log("After error")
-  console.log("Before return")
-  return
-  console.log("After return")
-  require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
+const http = require("http");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const events = require("events");
+
+const cookieParser = require("cookie-parser");
+const helmet = require("helmet");
+const passport = require("passport");
+const validateCustomHeader = require("./middlewares/validateCustomHeader");
+const loggingMiddleware = require("./middlewares/loggingMiddleware");
+const { forceDomain } = require("forcedomain");
+const requestIp = require("request-ip"); // Import request-ip package
+const express = require("express");
+const { createTerminus } = require("@godaddy/terminus");
+
+const { PORT, API_URL, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, ENVIRONMENT } = require("./config");
+const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
+const { initDB, closeDB } = require("./mongo");
+const { getAllPdfTemplates } = require("./utils/pdf-renderer");
+const { scheduleCrons } = require("./crons");
+const { initPassport } = require("./passport");
+
+// constrollers
+const ctl_alerte_message = require("./controllers/dashboard/alerte-message");
+const ctl_application = require("./controllers/application");
+const ctl_bus = require("./controllers/bus");
+const ctl_cle = require("./controllers/cle");
+const ctl_cohesion_center = require("./controllers/cohesion-center");
+const ctl_cohort = require("./controllers/cohort/cohort.controller");
+const ctl_cohort_session = require("./controllers/cohort-session");
+const ctl_contract = require("./controllers/contract");
+const ctl_correction_request = require("./controllers/correction-request");
+const ctl_dashboard_engagement = require("./controllers/dashboard/engagement");
+const ctl_demande_de_modification = require("./controllers/planDeTransport/demande-de-modification");
+const ctl_department_service = require("./controllers/department-service");
+const ctl_diagoriente = require("./controllers/diagoriente");
+const ctl_edit_transport = require("./controllers/planDeTransport/edit-transport");
+const ctl_elasticsearch = require("./controllers/elasticsearch");
+const ctl_email = require("./controllers/email");
+const ctl_event = require("./controllers/event");
+const ctl_filters = require("./controllers/filters");
+const ctl_gouv_fr = require("./controllers/gouv.fr");
+const ctl_inscription_goal = require("./controllers/inscription-goal");
+const ctl_ligne_de_bus = require("./controllers/planDeTransport/ligne-de-bus");
+const ctl_ligne_to_point = require("./controllers/planDeTransport/ligne-to-point");
+const ctl_mission = require("./controllers/mission");
+const ctl_pdt_import = require("./controllers/planDeTransport/import");
+const ctl_point_de_rassemblement = require("./controllers/planDeTransport/point-de-rassemblement");
+const ctl_program = require("./controllers/program");
+const ctl_referent = require("./controllers/referent");
+const ctl_representants_legaux = require("./controllers/representants-legaux");
+const ctl_schema_de_repartition = require("./controllers/planDeTransport/schema-de-repartition");
+const ctl_session_phase1 = require("./controllers/session-phase1");
+const ctl_signin = require("./controllers/signin");
+const ctl_structure = require("./controllers/structure");
+const ctl_table_de_repartition = require("./controllers/planDeTransport/table-de-repartition");
+const ctl_tags = require("./controllers/tags");
+const ctl_waiting_list = require("./controllers/waiting-list");
+const ctl_young = require("./controllers/young/index");
+const ctl_young_edition = require("./controllers/young-edition");
+const ctl_SNUpport = require("./controllers/SNUpport");
+const ctl_classe = require("./classe/classe.controller");
+//services
+const svc_jeveuxaider = require("./services/jeveuxaider");
+
+// process.on("unhandledRejection", (err) => {
+//   console.error(err);
+//   process.exit(1);
+// });
+async function main() {
+  events.EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
   // ! Ignore specific error
   const originalConsoleError = console.error;
@@ -15,14 +78,10 @@
   };
 
   if (process.env.RUN_CRONS) {
-    const { PORT } = require("./config");
-    const { initSentry } = require("./sentry");
     initSentry();
-    const { initDB } = require("./mongo");
     await initDB();
-    require("./crons");
+    scheduleCrons();
     // Serverless containers requires running http server
-    const express = require("express");
     const app = express();
     app.listen(PORT, () => console.log("Listening on port " + PORT));
     return;
@@ -30,23 +89,7 @@
 
   await require("./env-manager")();
 
-  const { initSentryMiddlewares, capture } = require("./sentry");
-
-  const bodyParser = require("body-parser");
-  const cors = require("cors");
-
-  const express = require("express");
-  const cookieParser = require("cookie-parser");
-  const helmet = require("helmet");
-  const passport = require("passport");
-  const validateCustomHeader = require("./middlewares/validateCustomHeader");
-  const loggingMiddleware = require("./middlewares/loggingMiddleware");
-  const { forceDomain } = require("forcedomain");
-  const requestIp = require("request-ip"); // Import request-ip package
-  const { initDB, closeDB } = require("./mongo");
   await initDB();
-
-  const { PORT, API_URL, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, ENVIRONMENT } = require("./config");
 
   /*
     Download all certificate templates when instance is starting,
@@ -56,7 +99,6 @@
 
     TODO : A possible improvement would be to download templates at build time
   */
-  const { getAllPdfTemplates } = require("./utils/pdf-renderer");
   getAllPdfTemplates();
 
   if (ENVIRONMENT !== "testing") {
@@ -121,7 +163,7 @@
 
   // WARNING : CleverCloud only
   if (process.env.RUN_CRONS_CC && ENVIRONMENT === "production" && process.env.CC_DEPLOYMENT_ID && process.env.INSTANCE_NUMBER === "0") {
-    require("./crons");
+    scheduleCrons();
   }
 
   app.use(cookieParser());
@@ -130,48 +172,48 @@
 
   app.use(passport.initialize());
 
-  app.use("/alerte-message", require("./controllers/dashboard/alerte-message"));
-  app.use("/application", require("./controllers/application"));
-  app.use("/bus", require("./controllers/bus"));
-  app.use("/cle", require("./controllers/cle"));
-  app.use("/cohesion-center", require("./controllers/cohesion-center"));
-  app.use("/cohort", require("./controllers/cohort/cohort.controller"));
-  app.use("/cohort-session", require("./controllers/cohort-session"));
-  app.use("/contract", require("./controllers/contract"));
-  app.use("/correction-request", require("./controllers/correction-request"));
-  app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
-  app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
-  app.use("/department-service", require("./controllers/department-service"));
-  app.use("/diagoriente", require("./controllers/diagoriente"));
-  app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
-  app.use("/elasticsearch", require("./controllers/elasticsearch"));
-  app.use("/email", require("./controllers/email"));
-  app.use("/event", require("./controllers/event"));
-  app.use("/filters", require("./controllers/filters"));
-  app.use("/gouv.fr", require("./controllers/gouv.fr"));
-  app.use("/inscription-goal", require("./controllers/inscription-goal"));
-  app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
-  app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
-  app.use("/mission", require("./controllers/mission"));
-  app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));
-  app.use("/point-de-rassemblement", require("./controllers/planDeTransport/point-de-rassemblement"));
-  app.use("/program", require("./controllers/program"));
-  app.use("/referent", require("./controllers/referent"));
-  app.use("/representants-legaux", require("./controllers/representants-legaux"));
-  app.use("/schema-de-repartition", require("./controllers/planDeTransport/schema-de-repartition"));
-  app.use("/session-phase1", require("./controllers/session-phase1"));
-  app.use("/signin", require("./controllers/signin"));
-  app.use("/structure", require("./controllers/structure"));
-  app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de-repartition"));
-  app.use("/tags", require("./controllers/tags"));
-  app.use("/waiting-list", require("./controllers/waiting-list"));
-  app.use("/young", require("./controllers/young/index"));
-  app.use("/young-edition", require("./controllers/young-edition"));
-  app.use("/SNUpport", require("./controllers/SNUpport"));
-  app.use("/classe", require("./classe/classe.controller"));
+  app.use("/alerte-message", ctl_alerte_message);
+  app.use("/application", ctl_application);
+  app.use("/bus", ctl_bus);
+  app.use("/cle", ctl_cle);
+  app.use("/cohesion-center", ctl_cohesion_center);
+  app.use("/cohort", ctl_cohort);
+  app.use("/cohort-session", ctl_cohort_session);
+  app.use("/contract", ctl_contract);
+  app.use("/correction-request", ctl_correction_request);
+  app.use("/dashboard/engagement", ctl_dashboard_engagement);
+  app.use("/demande-de-modification", ctl_demande_de_modification);
+  app.use("/department-service", ctl_department_service);
+  app.use("/diagoriente", ctl_diagoriente);
+  app.use("/edit-transport", ctl_edit_transport);
+  app.use("/elasticsearch", ctl_elasticsearch);
+  app.use("/email", ctl_email);
+  app.use("/event", ctl_event);
+  app.use("/filters", ctl_filters);
+  app.use("/gouv.fr", ctl_gouv_fr);
+  app.use("/inscription-goal", ctl_inscription_goal);
+  app.use("/ligne-de-bus", ctl_ligne_de_bus);
+  app.use("/ligne-to-point", ctl_ligne_to_point);
+  app.use("/mission", ctl_mission);
+  app.use("/plan-de-transport/import", ctl_pdt_import);
+  app.use("/point-de-rassemblement", ctl_point_de_rassemblement);
+  app.use("/program", ctl_program);
+  app.use("/referent", ctl_referent);
+  app.use("/representants-legaux", ctl_representants_legaux);
+  app.use("/schema-de-repartition", ctl_schema_de_repartition);
+  app.use("/session-phase1", ctl_session_phase1);
+  app.use("/signin", ctl_signin);
+  app.use("/structure", ctl_structure);
+  app.use("/table-de-repartition", ctl_table_de_repartition);
+  app.use("/tags", ctl_tags);
+  app.use("/waiting-list", ctl_waiting_list);
+  app.use("/young", ctl_young);
+  app.use("/young-edition", ctl_young_edition);
+  app.use("/SNUpport", ctl_SNUpport);
+  app.use("/classe", ctl_classe);
 
   //services
-  app.use("/jeveuxaider", require("./services/jeveuxaider"));
+  app.use("/jeveuxaider", svc_jeveuxaider);
 
   app.get("/memory-stats", async (req, res) => {
     // ! Memory usage
@@ -243,12 +285,9 @@
   registerSentryErrorHandler();
   app.use(handleError);
 
-  require("./passport")();
+  initPassport();
 
   // * Use Terminus for graceful shutdown when using Docker
-  const { createTerminus } = require("@godaddy/terminus");
-  const http = require("http");
-
   const server = http.createServer(app);
 
   function onSignal() {
@@ -275,4 +314,6 @@
   createTerminus(server, options);
 
   server.listen(PORT, () => console.log("Listening on port " + PORT));
-})();
+};
+
+main();

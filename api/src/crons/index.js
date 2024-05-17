@@ -107,63 +107,69 @@ function schedule(crontab, name, handlers) {
   sentry_cron.schedule(crontab, _log(name, handlers), { name });
 }
 
-schedule("0 2 * * *", "missionPatches", missionPatches.handler);
+function scheduleCrons() {
+  schedule("0 2 * * *", "missionPatches", missionPatches.handler);
 
-schedule("30 2 * * *", "applicationPatches", applicationPatches.handler);
+  schedule("30 2 * * *", "applicationPatches", applicationPatches.handler);
 
-schedule("0 3 * * *", "youngPatches", youngPatches.handler);
+  schedule("0 3 * * *", "youngPatches", youngPatches.handler);
 
-schedule("30 1 * * *", "structurePatches", structurePatches.handler);
+  schedule("30 1 * * *", "structurePatches", structurePatches.handler);
 
-schedule("45 1 * * *", "missionEquivalencePatches", missionEquivalencePatches.handler);
+  schedule("45 1 * * *", "missionEquivalencePatches", missionEquivalencePatches.handler);
 
-schedule("20 3 * * *", "classePatches", classePatches.handler);
+  schedule("20 3 * * *", "classePatches", classePatches.handler);
 
-schedule("15 04 * * *", "dsnjExport", dsnjExport.handler);
+  schedule("15 04 * * *", "dsnjExport", dsnjExport.handler);
 
-schedule("27 8 * * *", "parentConsentementReminder", parentConsentementReminder.handler);
+  schedule("27 8 * * *", "parentConsentementReminder", parentConsentementReminder.handler);
 
-// Every Monday at 7:30am
-schedule("30 7 * * 1", "parentRevalidateRI", parentRevalidateRI.handler);
+  // Every Monday at 7:30am
+  schedule("30 7 * * 1", "parentRevalidateRI", parentRevalidateRI.handler);
 
-// Every day at 11:00
-schedule("0 11 * * *", "reminderInscription", reminderInscription.handler);
+  // Every day at 11:00
+  schedule("0 11 * * *", "reminderInscription", reminderInscription.handler);
 
-// Every day at 11:00
-schedule("0 11 * * *", "reminderWaitingCorrection", reminderWaitingCorrection.handler);
+  // Every day at 11:00
+  schedule("0 11 * * *", "reminderWaitingCorrection", reminderWaitingCorrection.handler);
 
-// Every day at 10:00
-schedule("0 10 * * *", "reminderImageRightsParent2", reminderImageRightsParent2.handler);
+  // Every day at 10:00
+  schedule("0 10 * * *", "reminderImageRightsParent2", reminderImageRightsParent2.handler);
 
-schedule("0 5 * * *", "refreshMaterializedViews", refreshMaterializedViews.handler);
+  schedule("0 5 * * *", "refreshMaterializedViews", refreshMaterializedViews.handler);
 
-// tous les jours à 14h00
-schedule("2 14 * * *", "clotureMissionReminder", clotureMissionReminder.handler);
+  // tous les jours à 14h00
+  schedule("2 14 * * *", "clotureMissionReminder", clotureMissionReminder.handler);
 
-schedule("0 9 * * 1", "applicationPending", applicationPending.handler);
+  schedule("0 9 * * 1", "applicationPending", applicationPending.handler);
 
-schedule("0 15 * * *", "deleteCNIAdnSpecificAmenagementType", deleteCNIAdnSpecificAmenagementType.handler);
+  schedule("0 15 * * *", "deleteCNIAdnSpecificAmenagementType", deleteCNIAdnSpecificAmenagementType.handler);
 
-schedule("0 9 * * 1", "noticePushMission", noticePushMission.handler);
+  schedule("0 9 * * 1", "noticePushMission", noticePushMission.handler);
 
-// everyday at 0200
-schedule(everyHours(6), "apiEngagement", apiEngagement.handler);
+  // everyday at 0200
+  schedule(everyHours(6), "apiEngagement", apiEngagement.handler);
 
-// everyday at 0200
-schedule("0 0 * * *", "deleteInactiveRefs", deleteInactiveRefs.handler);
+  // everyday at 0200
+  schedule("0 0 * * *", "deleteInactiveRefs", deleteInactiveRefs.handler);
 
-schedule(everyHours(6), "jeVeuxAiderDaily", jeVeuxAiderDaily.handler);
+  schedule(everyHours(6), "jeVeuxAiderDaily", jeVeuxAiderDaily.handler);
 
-schedule("0 6 * * *", "contratRelance", contratRelance.handler);
+  schedule("0 6 * * *", "contratRelance", contratRelance.handler);
 
-schedule("0 8 * * *", "missionOutdated", [missionOutdated.handler, missionOutdated.handlerNotice1Week]);
+  schedule("0 8 * * *", "missionOutdated", [missionOutdated.handler, missionOutdated.handlerNotice1Week]);
 
-schedule("0 7 * * *", "applicationOutaded", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]);
+  schedule("0 7 * * *", "applicationOutaded", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]);
 
-schedule(everyHours(1), "computeGoalsInscription", computeGoalsInscription.handler);
+  schedule(everyHours(1), "computeGoalsInscription", computeGoalsInscription.handler);
 
-schedule("0 1 * * *", "loginAttempts", loginAttempts.handler);
+  schedule("0 1 * * *", "loginAttempts", loginAttempts.handler);
 
-schedule("45 2 * * *", "syncReferentSupport", syncReferentSupport.handler);
+  schedule("45 2 * * *", "syncReferentSupport", syncReferentSupport.handler);
 
-schedule("15 1 * * *", "syncContactSupport", syncContactSupport.handler);
+  schedule("15 1 * * *", "syncContactSupport", syncContactSupport.handler);
+}
+
+module.exports = {
+  scheduleCrons,
+};

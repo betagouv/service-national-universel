@@ -46,7 +46,7 @@ async function validateUser(Model, jwtPayload, done, role) {
   return done(null, false);
 }
 
-module.exports = function () {
+function initPassport() {
   const opts = {};
   opts.jwtFromRequest = getToken;
   opts.secretOrKey = secret;
@@ -57,4 +57,7 @@ module.exports = function () {
   passport.use("dsnj", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done, ROLES.DSNJ)));
 };
 
-module.exports.getToken = getToken;
+module.exports = {
+  initPassport,
+  getToken,
+};
