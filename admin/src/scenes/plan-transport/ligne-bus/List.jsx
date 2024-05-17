@@ -134,7 +134,7 @@ export default function List() {
   }, [selectedFilters]);
 
   useEffect(() => {
-    if (!cohort) setCohort(cohorts?.[0].name);
+    if (!cohort) setCohort(cohorts?.[0]?.name);
   }, []);
 
   const getPlanDetransport = async () => {

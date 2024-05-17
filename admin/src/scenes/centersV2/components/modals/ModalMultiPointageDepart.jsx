@@ -57,7 +57,7 @@ renseigner le motif et la date de départ.`;
               <div className="flex items-center justify-center text-xl font-medium text-gray-900">{getTitle()}</div>
             </div>
             <div className="m-4">
-              {values.map((volontaire) => (
+              {values?.map((volontaire) => (
                 <div key={volontaire._id} className="flex items-center justify-center text-base font-normal text-gray-900">
                   {volontaire.firstName} {volontaire.lastName}
                 </div>
