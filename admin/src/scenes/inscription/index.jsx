@@ -25,6 +25,7 @@ import Panel from "./panel";
 import { toastr } from "react-redux-toastr";
 import Loader from "@/components/Loader";
 import { signinAs } from "@/utils/signinAs";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
@@ -284,6 +285,7 @@ export default function Inscription() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
+              intermediateFilters={[getCohortGroups()]}
             />
             <SortOption
               sortOptions={[
