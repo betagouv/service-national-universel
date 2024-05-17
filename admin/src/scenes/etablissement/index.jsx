@@ -5,6 +5,7 @@ import { SentryRoute } from "../../sentry";
 
 import View from "./view";
 import List from "./List";
+import NotFound from "@/components/layout/NotFound";
 
 export default function Index() {
   useDocumentTitle("Mon établissement");
@@ -16,7 +17,7 @@ export default function Index() {
         render={({ match }) => {
           const { id } = match.params;
           if (!/^[0-9a-fA-F]{24}$/.test(id)) {
-            return <Redirect to="/etablissement" />;
+            return <SentryRoute component={NotFound} />;
           }
           return <SentryRoute component={View} />;
         }}
