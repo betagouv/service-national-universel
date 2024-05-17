@@ -21,7 +21,7 @@ const scanFile = require("../../utils/virusScanner");
 const { getMimeFromFile } = require("../../utils/file");
 
 const { validatePdtFile, computeImportSummary } = require("../../pdt/import/pdtImportService");
-const { formatTime } = require("../../pdt/import/utils");
+const { formatTime } = require("../../pdt/import/pdtImportUtils");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
 router.post(
