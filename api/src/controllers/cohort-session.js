@@ -9,7 +9,7 @@ const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
 const passport = require("passport");
 const { ROLES, COHORT_TYPE } = require("snu-lib");
-const { ADMIN_URL } = require("../config");
+const config = require("config");
 const { isReInscriptionOpen, isInscriptionOpen } = require("./cohort/cohort.service");
 
 // Takes either a young ID in route parameter or young data in request body (for edition or signup pages).
@@ -52,7 +52,7 @@ router.post("/eligibility/2023/:id?", async (req, res) => {
       if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const bypassFilter =
-        (user?.role === ROLES.ADMIN && req.get("origin") === ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
+        (user?.role === ROLES.ADMIN && req.get("origin") === config.ADMIN_URL) || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && params.getAllSessions);
       const sessions = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user?.role)
         ? await getFilteredSessionsForCLE()
         : bypassFilter

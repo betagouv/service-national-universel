@@ -3,7 +3,7 @@ const CohortModel = require("../../models/cohort");
 const ReferentModel = require("../../models/referent");
 const { capture } = require("../../sentry");
 const { sendTemplate } = require("../../sendinblue");
-const config = require("../../config");
+const config = require("config");
 
 module.exports = (emailsEmitter) => {
   emailsEmitter.on(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, async ({ young, previousYoung, cohortName, cohortChangeReason, message, classe }) => {

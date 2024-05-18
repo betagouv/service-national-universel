@@ -26,7 +26,6 @@ const nanoid = require("nanoid");
 const { getCohesionCenterFromSession } = require("./commons");
 const { getTransporter } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
-const { ADMIN_URL, ENVIRONMENT } = require("../../config");
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
@@ -262,7 +261,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         params: {
           trigger: "pdr_changed",
           pdr_id: pointDeRassemblement.name,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          cta: `${config.ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
         },
       });
     }
@@ -324,7 +323,7 @@ router.put("/cohort/:id", passport.authenticate("referent", { session: false, fa
         params: {
           trigger: "pdr_changed",
           pdr_id: pointDeRassemblement.name,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          cta: `${config.ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
         },
       });
     }

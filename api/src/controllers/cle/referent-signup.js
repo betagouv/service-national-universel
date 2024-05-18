@@ -6,7 +6,7 @@ const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES, validate
 const mongoose = require("mongoose");
 
 const emailsEmitter = require("../../emails");
-const config = require("../../config");
+const config = require("config");
 const { capture } = require("../../sentry");
 const { ERRORS, validatePassword } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");

@@ -10,7 +10,7 @@ const {
 } = require("@sentry/node");
 const { ProfilingIntegration } = require("@sentry/profiling-node");
 
-const { RELEASE, ENVIRONMENT, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("./config");
+const config = require("config");
 
 const regex = /[0-9a-fA-F]{24}/g;
 
@@ -27,10 +27,10 @@ addGlobalEventProcessor((event) => {
 
 function initSentry() {
   init({
-    enabled: Boolean(SENTRY_URL),
-    dsn: SENTRY_URL,
+    enabled: Boolean(config.SENTRY_URL),
+    dsn: config.SENTRY_URL,
     environment: "api",
-    release: RELEASE,
+    release: config.RELEASE,
     normalizeDepth: 16,
     integrations: [
       new ExtraErrorData({ depth: 16 }),
@@ -40,8 +40,8 @@ function initSentry() {
       new ProfilingIntegration(),
       ...autoDiscoverNodePerformanceMonitoringIntegrations(),
     ],
-    tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE) || 0.01,
-    profilesSampleRate: Number(SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
+    tracesSampleRate: Number(config.SENTRY_TRACING_SAMPLE_RATE) || 0.01,
+    profilesSampleRate: Number(config.SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
     ignoreErrors: [
       /^No error$/,
       /__show__deepen/,
@@ -72,7 +72,7 @@ function initSentry() {
 }
 
 function initSentryMiddlewares(app) {
-  if (ENVIRONMENT !== "development") {
+  if (config.ENVIRONMENT !== "development") {
     // Evite le spam sentry en local
     initSentry();
   }

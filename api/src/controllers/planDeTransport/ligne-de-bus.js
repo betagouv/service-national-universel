@@ -32,7 +32,7 @@ const Joi = require("joi");
 const { ObjectId } = require("mongoose").Types;
 const mongoose = require("mongoose");
 const { sendTemplate } = require("../../sendinblue");
-const { ADMIN_URL } = require("../../config");
+const config = require("config");
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés
@@ -1021,7 +1021,7 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
       })),
       params: {
         lineName: ligne.busId,
-        cta: `${ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
+        cta: `${config.ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
       },
     });
 
@@ -1093,7 +1093,7 @@ async function notifyTranporteurs(ligne, type) {
       cohort: ligne.cohort,
       ID: ligne._id.toString(),
       lineName: ligne.busId,
-      cta: `${ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
+      cta: `${config.ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
     },
   });
 }

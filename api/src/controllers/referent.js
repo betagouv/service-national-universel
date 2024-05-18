@@ -26,7 +26,7 @@ const StateManager = require("../states");
 const emailsEmitter = require("../emails");
 
 const { getQPV, getDensity } = require("../geo");
-const config = require("../config");
+const config = require("config");
 const { capture } = require("../sentry");
 const { decrypt, encrypt } = require("../cryptoUtils");
 const { sendTemplate } = require("../sendinblue");
@@ -40,7 +40,6 @@ const {
   isYoung,
   inSevenDays,
   FILE_STATUS_PHASE1,
-  translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
@@ -79,6 +78,7 @@ const {
   MILITARY_FILE_KEYS,
   department2region,
   formatPhoneNumberFromPhoneZone,
+  translateFileStatusPhase1,
   canCheckIfRefExist,
   YOUNG_SOURCE,
   YOUNG_SOURCE_LIST,

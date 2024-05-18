@@ -3,14 +3,13 @@ const path = require("path");
 const { addYears, addHours } = require("date-fns");
 const fileName = path.basename(__filename, ".js");
 const { capture } = require("../sentry");
-const { JVA_API_KEY, API_ENGAGEMENT_URL, API_ENGAGEMENT_KEY } = require("../config");
+const config = require("config");
 const slack = require("../slack");
 const MissionModel = require("../models/mission");
 const StructureModel = require("../models/structure");
 const ReferentModel = require("../models/referent");
 
 const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL } = require("../config");
 
 const { ROLES, departmentLookUp, department2region, MISSION_DOMAINS, MISSION_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { updateApplicationStatus, updateApplicationTutor } = require("../services/application");
@@ -44,8 +43,8 @@ const SnuStructureException = [
 ];
 
 const fetchMission = (skip = 0) =>
-  fetch(`${API_ENGAGEMENT_URL}/v2/mission?snu=true&skip=${skip}&limit=50`, {
-    headers: { "x-api-key": API_ENGAGEMENT_KEY },
+  fetch(`${config.API_ENGAGEMENT_URL}/v2/mission?snu=true&skip=${skip}&limit=50`, {
+    headers: { "x-api-key": config.API_ENGAGEMENT_KEY },
     method: "GET",
   })
     .then((response) => response.json())
@@ -54,7 +53,7 @@ const fetchMission = (skip = 0) =>
     .catch((error) => console.log("error fetch mission :", error));
 
 const fetchStructure = async (id) => {
-  return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${JVA_API_KEY}`, {
+  return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${config.JVA_API_KEY}`, {
     method: "GET",
     redirect: "follow",
   })
@@ -210,7 +209,7 @@ const sync = async (result) => {
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
             emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
             params: {
-              cta: `${ADMIN_URL}/mission/${data._id}`,
+              cta: `${config.ADMIN_URL}/mission/${data._id}`,
             },
           });
         }
@@ -281,13 +280,13 @@ const cleanData = async () => {
 
 exports.handler = async () => {
   slack.info({ title: "sync with JVA missions", text: "I'm starting the synchronization !" });
-  if (!JVA_API_KEY) {
+  if (!config.JVA_API_KEY) {
     slack.error({ title: "sync with JVA missions", text: "I do not have any JVA_API_KEY !" });
     const err = new Error("NO JVA_API_KEY");
     capture(err);
     throw err;
   }
-  if (!API_ENGAGEMENT_KEY) {
+  if (!config.API_ENGAGEMENT_KEY) {
     slack.error({ title: "sync with API-ENGAGEMENT missions", text: "I do not have any API_ENGAGEMENT_KEY !" });
     const err = new Error("NO API_ENGAGEMENT_KEY");
     capture(err);

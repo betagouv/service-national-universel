@@ -22,8 +22,7 @@ const { ERRORS } = require("../utils");
 
 const { validateFirstName, validateString } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
-const { APP_URL } = require("../config");
-const config = require("../config");
+const config = require("config");
 
 function tokenParentValidMiddleware(req, res, next) {
   const { error, value: token } = validateString(req.query.token);
@@ -265,7 +264,7 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
           await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
             emailTo,
             params: {
-              cta: `${APP_URL}/`,
+              cta: `${config.APP_URL}/`,
               SOURCE: young.source,
             },
           });

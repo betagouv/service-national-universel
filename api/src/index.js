@@ -1,3 +1,6 @@
+const { resolveAsyncConfigs } = require('config/async');
+const config = require("config");
+
 const http = require("http");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -13,7 +16,7 @@ const requestIp = require("request-ip"); // Import request-ip package
 const express = require("express");
 const { createTerminus } = require("@godaddy/terminus");
 
-const { PORT, API_URL, APP_URL, ADMIN_URL, SUPPORT_URL, KNOWLEDGEBASE_URL, API_ANALYTICS_ENDPOINT, ENVIRONMENT } = require("./config");
+
 const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
 const { initDB, closeDB } = require("./mongo");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
@@ -67,7 +70,10 @@ const svc_jeveuxaider = require("./services/jeveuxaider");
 //   console.error(err);
 //   process.exit(1);
 // });
+
 async function main() {
+  await resolveAsyncConfigs(config);
+
   events.EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
   // ! Ignore specific error
@@ -87,7 +93,7 @@ async function main() {
     return;
   }
 
-  await require("./env-manager")();
+  // await require("./env-manager")();
 
   await initDB();
 

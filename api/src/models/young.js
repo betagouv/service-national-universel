@@ -5,7 +5,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE } = require("snu-lib");
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
-const { ENVIRONMENT } = require("../config");
+const config = require("config");
 const { capture } = require("../sentry");
 const MODELNAME = "young";
 const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
@@ -2120,7 +2120,7 @@ Schema.post("save", function (doc) {
     StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) }).catch((error) => capture(error));
   }
 
-  if (ENVIRONMENT === "testing") return;
+  if (config.ENVIRONMENT === "testing") return;
   sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
@@ -2201,6 +2201,6 @@ Schema.index({ sessionPhase1Id: 1 });
 Schema.index({ sessionPhase1Id: 1, status: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
-if (ENVIRONMENT === "production") OBJ.syncIndexes();
+if (config.ENVIRONMENT === "production") OBJ.syncIndexes();
 
 module.exports = OBJ;
