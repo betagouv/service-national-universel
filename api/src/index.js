@@ -24,6 +24,8 @@
 
   await require("./env-manager")();
 
+  a = 2;
+
   const { initSentryMiddlewares, capture } = require("./sentry");
 
   const bodyParser = require("body-parser");
@@ -67,8 +69,8 @@
   const registerSentryErrorHandler = initSentryMiddlewares(app);
   app.use(helmet());
 
-  if (['production', 'staging', 'ci', 'custom'].includes(ENVIRONMENT)) {
-    const url = new URL(API_URL)
+  if (["production", "staging", "ci", "custom"].includes(ENVIRONMENT)) {
+    const url = new URL(API_URL);
     app.use(
       forceDomain({
         hostname: url.hostname,
