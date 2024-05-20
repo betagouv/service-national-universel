@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import MedicalFileModal from "../../../../components/MedicalFileModal";
 import { StepCard } from "../StepCard";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
+import API from "@/services/api";
+import { setYoung } from "@/redux/auth/actions";
 
 export default function StepMedicalField({ data }) {
   const index = 4;
@@ -11,6 +13,16 @@ export default function StepMedicalField({ data }) {
   const isDone = isStepDone(STEPS.MEDICAL_FILE, young);
   const [open, setOpen] = useState(false);
   const email = data.session.sanitaryContactEmail;
+  const dispatch = useDispatch();
+
+  async function onClose() {
+    if (!young) return;
+    if (young.cohesionStayMedicalFileDownload === "false") {
+      const { ok, data } = await API.put("/young/phase1/cohesionStayMedical", { cohesionStayMedicalFileDownload: "true" });
+      if (ok) dispatch(setYoung(data));
+    }
+    setOpen(false);
+  }
 
   if (!isEnabled) {
     return (
@@ -41,7 +53,7 @@ export default function StepMedicalField({ data }) {
             Commencer
           </button>
         </div>
-        <MedicalFileModal title="Comment transmettre ma fiche sanitaire ?" isOpen={open} onClose={() => setOpen(false)} email={email} />
+        <MedicalFileModal title="Comment transmettre ma fiche sanitaire ?" isOpen={open} onClose={onClose} email={email} />
       </StepCard>
     );
   }
@@ -60,7 +72,7 @@ export default function StepMedicalField({ data }) {
           Ouvrir le mode d'emploi
         </button>
       </div>
-      <MedicalFileModal title="Comment transmettre ma fiche sanitaire ?" isOpen={open} onClose={() => setOpen(false)} email={data.session.sanitaryContactEmail} />
+      <MedicalFileModal title="Comment transmettre ma fiche sanitaire ?" isOpen={open} onClose={onClose} />
     </StepCard>
   );
 }
