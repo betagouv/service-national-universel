@@ -14,8 +14,8 @@ function classNames(...classes: (string | boolean | undefined)[]): string {
 interface ToggleDateProps {
   value: boolean;
   onChange: (value: boolean) => void;
-  range: { from: Date; to: Date } | null;
-  onChangeRange: (range: { from: Date; to: Date } | null) => void;
+  range: { from: Date | null; to: Date | null };
+  onChangeRange: (range: { from: Date | null; to: Date | null }) => void;
   disabled?: boolean;
   label?: string;
   readOnly?: boolean;
@@ -42,10 +42,10 @@ function ToggleDate({ value, onChange, range, onChangeRange, disabled = false, l
       </div>
       <div className="flex items-center justify-between">
         <p className="text-left text-xs text-gray-500">
-          Début : <strong>{value ? dayjs(range?.from).format("DD/MM/YYYY") : ""}</strong>
+          Début : <strong>{value && range?.from ? dayjs(range?.from).format("DD/MM/YYYY") : ""}</strong>
         </p>
         <p className="text-left text-xs text-gray-500">
-          Fin : <strong>{value ? dayjs(range?.to).format("DD/MM/YYYY") : ""}</strong>
+          Fin : <strong>{value && range?.to ? dayjs(range?.to).format("DD/MM/YYYY") : ""}</strong>
         </p>
         <Popover className="relative">
           {({ open }) => (
