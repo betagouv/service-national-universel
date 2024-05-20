@@ -294,8 +294,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                     from: values?.dateStart || session.dateStart,
                     to: values?.dateEnd || session.dateEnd,
                   }}
-                  onChangeRange={(range: { to: Date; from: Date }) => {
-                    if (values) setValues({ ...values, dateStart: range?.from, dateEnd: range?.to });
+                  onChangeRange={(range: { to: string; from: string }) => {
+                    if (values) setValues({ ...values, dateStart: range?.from.toString(), dateEnd: range?.to.toString() });
                   }}
                 />
                 {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
