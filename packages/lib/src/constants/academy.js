@@ -133,21 +133,17 @@ const academyToDepartments = {
   Nantes: ["Loire-Atlantique", "Maine-et-Loire", "Mayenne", "Sarthe", "Vendée"],
   "Aix-Marseille": ["Alpes-de-Haute-Provence", "Hautes-Alpes", "Bouches-du-Rhône", "Vaucluse"],
   Nice: ["Alpes-Maritimes", "Var"],
-  Guadeloupe: "Guadeloupe",
-  Martinique: "Martinique",
-  Mayotte: "Mayotte",
-  Guyane: "Guyane",
-  "La Réunion": "La Réunion",
-  "Nouvelle-Calédonie": "Nouvelle-Calédonie",
-  "Polynésie française": "Polynésie française",
-  "Wallis-et-Futuna": "Wallis-et-Futuna",
-  "Saint-Pierre-et-Miquelon": "Saint-Pierre-et-Miquelon",
+  Guadeloupe: ["Guadeloupe"],
+  Martinique: ["Martinique"],
+  Mayotte: ["Mayotte"],
+  Guyane: ["Guyane"],
+  "La Réunion": ["La Réunion"],
+  "Nouvelle-Calédonie": ["Nouvelle-Calédonie"],
+  "Polynésie française": ["Polynésie française"],
+  "Wallis-et-Futuna": ["Wallis-et-Futuna"],
+  "Saint-Pierre-et-Miquelon": ["Saint-Pierre-et-Miquelon"],
 };
 
 const academyList = [...new Set(Object.values(departmentToAcademy))];
 
-export {
-  departmentToAcademy,
-  academyList,
-  academyToDepartments,
-};
+export { departmentToAcademy, academyList, academyToDepartments };

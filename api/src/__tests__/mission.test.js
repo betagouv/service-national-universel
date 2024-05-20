@@ -13,8 +13,6 @@ const getNewYoungFixture = require("./fixtures/young");
 const { createApplication, getApplicationByIdHelper } = require("./helpers/application");
 const { getNewApplicationFixture } = require("./fixtures/application");
 
-jest.setTimeout(10_000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 

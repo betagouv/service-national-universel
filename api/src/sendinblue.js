@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 const queryString = require("querystring");
 
-const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
+const { SENDINBLUEKEY, ENVIRONMENT, ENABLE_SENDINBLUE } = require("./config");
 const { capture, captureMessage } = require("./sentry");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 const { rateLimiterContactSIB } = require("./rateLimiters");
@@ -16,7 +16,7 @@ const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports|snu
 
 const api = async (path, options = {}) => {
   try {
-    if (process.env.OFFLINE === "true") return console.log("No mail sent in OFFLINE mode");
+    if (!ENABLE_SENDINBLUE) return console.log("No mail sent as ENABLE_SENDINBLUE is disabled");
 
     if (!SENDINBLUEKEY) {
       console.log("NO SENDINBLUE KEY");

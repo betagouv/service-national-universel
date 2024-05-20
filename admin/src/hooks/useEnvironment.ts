@@ -1,8 +1,10 @@
+import { environment } from "@/config";
+
 const useEnvironment = () => {
   return {
-    isProduction: window.location.hostname.includes("snu.gouv.fr"),
-    isStaging: window.location.hostname.includes(".ci.") || window.location.hostname.includes("scw.cloud"),
-    isDevelopment: window.location.hostname.includes("localhost"),
+    isProduction: environment == "production",
+    isStaging: !["development", "production"].includes(environment),
+    isDevelopment: environment === "development",
   };
 };
 

@@ -11,7 +11,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ToggleDate({ value, onChange, range, onChangeRange, disabled = false, label, readOnly = false, tooltipText = false }) {
+export default function ToggleDate({ value, onChange, range, onChangeRange, disabled = false, label, readOnly = false, tooltipText }) {
   return (
     <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2">
       <div className="flex items-center justify-between">

@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const esClient = require("../es");
 const MODELNAME = "sessionphase1token";
 
 const Schema = new mongoose.Schema({
@@ -60,8 +58,6 @@ Schema.pre("save", function (next, params) {
   this.updatedAt = Date.now();
   next();
 });
-
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

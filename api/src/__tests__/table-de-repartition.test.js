@@ -5,8 +5,6 @@ const { createReferentHelper, deleteReferentByIdHelper } = require("./helpers/re
 const getNewReferentFixture = require("./fixtures/referent");
 const TableDeRepartitionModel = require("../models/PlanDeTransport/tableDeRepartition");
 
-jest.setTimeout(10_000);
-
 beforeAll(dbConnect);
 afterAll(dbClose);
 describe("Table de répartition", () => {

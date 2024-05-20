@@ -1,8 +1,11 @@
-const ENVS = {
-  development: "development",
-  staging: "staging",
-  production: "production",
-};
+const ENVS = [
+  "testing",
+  "development",
+  "ci",
+  "custom",
+  "staging",
+  "production",
+];
 
 // List of features
 const FEATURES_NAME = {
@@ -16,45 +19,34 @@ const FEATURES_NAME = {
 // If the environment is not defined then the feature is enabled
 const features = {
   [FEATURES_NAME.FORCE_REDIRECT]: {
-    [ENVS.production]: [],
-    [ENVS.staging]: [],
+    "production": [],
+    "staging": [],
+    "custom": [],
+    "ci": [],
   },
   [FEATURES_NAME.EMAIL_VALIDATION]: {
-    // [ENVS.staging]: [],
-    // [ENVS.development]: [],
+    // "staging": [],
+    // "development": [],
   },
   [FEATURES_NAME.YOUNG_INSCRIPTION]: {
-    [ENVS.production]: [],
+    "production": [],
   },
   [FEATURES_NAME.DEVELOPERS_MODE]: {
-    [ENVS.production]: [],
+    "production": [],
     // Allow developers mode in staging and development
   },
 };
 
 function isFeatureEnabled(featureName, userRole, environment) {
   const feature = features[featureName];
-  environment = environment || getEnvFromDomain();
-  if (!feature || !ENVS[environment]) {
+
+  if (!feature || !ENVS.includes(environment)) {
     return false;
   }
 
   // If the environment is not defined then the feature is enabled
   // or if the environment is defined and the user has the role
   return !feature[environment] || feature[environment].includes(userRole);
-}
-
-function getEnvFromDomain() {
-  if (!window) throw new Error("Cannot be called outside of the browser");
-
-  const domain = window.location.hostname;
-  if (domain.includes("snu.gouv.fr")) {
-    return ENVS.production;
-  }
-  if (domain.includes("beta-snu.dev")) {
-    return ENVS.staging;
-  }
-  return ENVS.development;
 }
 
 export { FEATURES_NAME, isFeatureEnabled };
