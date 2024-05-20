@@ -155,7 +155,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   return (
     <div className="mx-8 my-4 space-y-4">
       <form onSubmit={handleSubmit} id="session-form">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <Title>Par séjour</Title>
           <SelectCohort cohort={selectedCohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} key="selectCohort" />
         </div>
@@ -207,7 +207,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
           />
           <div className="flex flex-row">
             <div className="w-[45%]">
-              <div className="rounded-lg bg-white pr-5 mb-4">
+              <div className="rounded-lg bg-white mb-4">
                 <SessionHorizontalBar
                   title="Places"
                   labels={["disponibles", "occupés"]}
@@ -216,11 +216,18 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                   showTooltips={true}
                 />
               </div>
-              <div className="flex w-80 flex-1 items-center justify-center ">
+              <div className="flex w-full flex-col items-start justify-center">
+                <Label
+                  className="text-xs leading-5 font-medium mt-2"
+                  title="Places ouvertes"
+                  name="placesTotal"
+                  tooltip="C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
+                />
                 <Field
                   error={errors.placesTotal}
                   readOnly={!values || !canCreateOrUpdateCohesionCenter(user)}
-                  label="Places ouvertes"
+                  label=""
+                  tooltips={null}
                   value={values?.placesTotal?.toString() || session.placesTotal.toString()}
                   onChange={(e) => {
                     const inputValue = e.target.value;
@@ -231,23 +238,27 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       if (values) setValues({ ...values, placesTotal: 0 }); // or another default value
                     }
                   }}
-                  tooltips="C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
                 />
               </div>
               {center?.region === "Provence-Alpes-Côte d'Azur" && cohort?.name === "Juin 2024 - 2" && (
-                <div className="flex flex-row justify-center items-center w-full mt-2">
-                  <div className="w-full">
-                    <label>Réception des fiches sanitaires (facultatif)</label>
+                <div className="flex flex-call justify-start items-center w-full mt-2">
+                  <div className="w-full mt-3">
+                    <Label
+                      className="text-xs leading-5 font-medium"
+                      title="Réception des fiches sanitaires (facultatif)"
+                      name="sanitaryContactEmail"
+                      tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
+                    />
                     <Field
                       error={errors.sanitaryContactEmail}
                       readOnly={!values || !canEditSanitaryEmailContact(user, cohort)}
                       disabled={!canEditSanitaryEmailContact(user, cohort)}
-                      label="Adresse email académique"
+                      label=""
+                      tooltips={null}
                       value={values?.sanitaryContactEmail || session?.sanitaryContactEmail}
                       onChange={(e) => {
                         if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
                       }}
-                      tooltips="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
                     />
                   </div>
                 </div>

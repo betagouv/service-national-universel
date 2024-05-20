@@ -70,7 +70,7 @@ export default function SessionHorizontalBar({ title, values, labels, showToolti
         </div>
       </div>
       <div className="relative">
-        <div className="h-[31px] rounded-full flex justify-start bg-gray-100">
+        <div className="h-[10px] rounded-full flex justify-start bg-gray-100">
           {bars.map(
             (bar, idx) =>
               bar.width > 0 && (
