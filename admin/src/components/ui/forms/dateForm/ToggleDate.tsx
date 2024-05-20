@@ -7,20 +7,32 @@ import dayjs from "@/utils/dayjs.utils";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 
-function classNames(...classes) {
+function classNames(...classes: (string | boolean | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ToggleDate({ value, onChange, range, onChangeRange, disabled = false, label, readOnly = false, tooltipText }) {
+interface ToggleDateProps {
+  value: boolean;
+  onChange: (value: boolean) => void;
+  range: { from: Date; to: Date } | null;
+  onChangeRange: (range: { from: Date; to: Date } | null) => void;
+  disabled?: boolean;
+  label?: string;
+  readOnly?: boolean;
+  tooltipText?: React.ReactNode;
+  className?: string;
+}
+
+function ToggleDate({ value, onChange, range, onChangeRange, disabled = false, label, readOnly = false, tooltipText, className = "bg-gray-100" }: ToggleDateProps) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2">
+    <div className={`flex flex-col gap-2 rounded-lg ${className} px-3 py-2`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <p className="text-left text-sm  text-gray-800">{label}</p>
+          <p className="text-left text-sm text-gray-800">{label}</p>
           {tooltipText && (
             <>
               <MdInfoOutline data-tip data-for="affectation_manuelle" className="h-4 w-4 cursor-pointer text-gray-400" />
-              <ReactTooltip id="affectation_manuelle" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md" tooltipRadius="6">
+              <ReactTooltip id="affectation_manuelle" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                 <div className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">{tooltipText}</div>
               </ReactTooltip>
             </>
@@ -54,7 +66,7 @@ export default function ToggleDate({ value, onChange, range, onChangeRange, disa
                 leaveTo="opacity-0 translate-y-1">
                 <Popover.Panel className="absolute right-0 z-10 mt-2 translate-x-[15px] transform pt-2">
                   <div className="flex flex-auto rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 ">
-                    <DatePicker mode="range" fromYear={2022} toYear={2030} value={range} onChange={onChangeRange} />
+                    <DatePicker mode="range" fromYear={2022} toYear={2030} value={range} disabled={disabled} onChange={onChangeRange} />
                   </div>
                 </Popover.Panel>
               </Transition>
@@ -65,3 +77,5 @@ export default function ToggleDate({ value, onChange, range, onChangeRange, disa
     </div>
   );
 }
+
+export default ToggleDate;
