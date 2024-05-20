@@ -105,7 +105,7 @@ export default function VolontairePanel({ onChange, value }) {
                 à {young.birthZip} {young.birthCity}, {young.birthCountry}
               </div>
             ) : null}
-            <div style={{ display: "flex", flexWrap: "wrap" }}>
+            <div className="flex flex-wrap justify-around">
               <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
@@ -114,7 +114,7 @@ export default function VolontairePanel({ onChange, value }) {
                   <button onClick={() => onPrendreLaPlace(young._id)}>
                     <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
                   </button>
-                  <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />
+                  {user.role === ROLES.ADMIN && <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />}
                 </>
               )}
             </div>
