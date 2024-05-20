@@ -21,10 +21,11 @@
     app.listen(PORT, () => console.log("Listening on port " + PORT));
     return;
   }
+
   await require("./env-manager")();
 
-  ab = 2;
-  dwad;
+  a = 2;
+
   const { initSentryMiddlewares, capture } = require("./sentry");
 
   const bodyParser = require("body-parser");
