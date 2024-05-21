@@ -33,6 +33,7 @@ export default function Home() {
   const [reinscriptionOpen, setReinscriptionOpen] = useState(false);
   const [reinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
 
+  // A combiner dans un service useReinscription
   const fetchReInscriptionOpen = async () => {
     try {
       const { ok, data, code } = await API.get(`/cohort-session/isReInscriptionOpen`);
@@ -56,6 +57,28 @@ export default function Home() {
   if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
+    // SI JEUNE EXCLU, RETURN ECRAN EXCLUSION.
+    // SI JEUNE REFUSÉ: <RefusedV2>
+    // fonction hasAccessToPhase2 => RETURN HomePhase2
+
+    // Mon inscription est complete => YOUNG_STATUS.VALIDATED || YOUNG_STATUS.WAITING_LIST
+    // <WaitingList>
+    // <WaitingAffectation>
+    // <Affected>
+
+    // Mon inscription est en cours
+    //   <WaitingValidation>
+    //   <WaitingCorrection>
+
+    // Je peux me réinscrire
+    //    <WaitingReinscription>
+
+    // Je ne peux pas m'inscrire sur l'année en cours:
+    //   <Withdrawn />
+    //   <AvenirCohort /> MERGE AVEC =>  <FutureCohort />
+
+    // Mon séjour est en cours
+
     const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
 
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
@@ -82,13 +105,17 @@ export default function Home() {
     if (hasWithdrawn) {
       return <Withdrawn />;
     }
+
+    // A DEPLACER DANS HomePhase2
     const hasCompletedPhase2 = [YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(young.statusPhase2);
     const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
 
+    // A DEPLACER DANS HomePhase2
     if (isCohortTooOld(young) && !hasCompletedPhase2 && !hasMission) {
       return <DelaiDepasse />;
     }
 
+    // DOUBLON AVEC ValidatedV2 => Dégager un des deux.
     if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
 
     if (
@@ -99,7 +126,11 @@ export default function Home() {
       return <HomePhase2 />;
     }
 
+    if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
+      return <Phase1NotDone />;
+    }
 
+    // Si le jeune est dans une cohorte de cette année.
     if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
       const isCohortInstructionOpen = new Date() < new Date(cohort.instructionEndDate);
@@ -112,6 +143,7 @@ export default function Home() {
         if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) {
           return <Affected />;
         } else {
+          // A RENOMMER => WaitingAffectation
           return <ValidatedV2 />;
         }
       }
