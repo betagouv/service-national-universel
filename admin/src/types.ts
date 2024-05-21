@@ -42,6 +42,6 @@ export type Session = {
   placesLeft: number;
   dateStart: string | null;
   dateEnd: string | null;
-  canBeDeleted: Boolean;
+  canBeDeleted: boolean;
   sanitaryContactEmail: string;
 };
