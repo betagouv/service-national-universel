@@ -9,28 +9,33 @@ import { HiOutlineDownload, HiMail } from "react-icons/hi";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../components/ui/buttons/ButtonLight";
 import ConfirmationModal from "../../../components/ui/modals/ConfirmationModal";
+import { capture } from "@/sentry";
 
-const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche sanitaire", email }) => {
+const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Téléchargez votre fiche sanitaire", email }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);
 
   const handleClick = async () => {
-    setLoading(true);
-    await onClose();
-    setLoading(false);
+    if (onClick) {
+      setLoading(true);
+      await onClick();
+      setLoading(false);
+    }
+    onClose();
   };
 
   const handleConfirm = async () => {
     try {
-      const { ok } = await API.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`, {
+      const { ok, code } = await API.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`, {
         object: `Fiche sanitaire à compléter`,
         message: "Vous trouverez téléchargeable ci-dessous la fiche sanitaire à compléter.",
         link: CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf" + "?utm_campaign=transactionnel+telecharger+docum&utm_source=notifauto&utm_medium=mail+410+telecharger",
       });
-      if (ok) toastr.success(`Document envoyé à ${young.email}`, "");
-      else toastr.error("Erreur lors de l'envoi du document", "");
+      if (!ok) throw new Error(code);
+      toastr.success(`Document envoyé à ${young.email}`, "");
     } catch (error) {
+      capture(error);
       toastr.error("Erreur lors de l'envoi du document", "");
     } finally {
       setOpen(false);
@@ -48,14 +53,14 @@ const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche 
         subTitle={`Vous allez recevoir le lien de téléchargement de la fiche sanitaire par mail à l'adresse ${young.email}.`}
       />
       <h2 className="font-medium text-gray-800 text-xl text-center m-0">{title}</h2>
-      <ul>
-        <li className="flex px-3 py-4 gap-3">
+      <ul className="mt-3">
+        <li className="flex px-3 py-2 gap-3">
           <div>
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200 text-sm text-gray-700">1</span>
           </div>
           <div>
             <p className="text-sm text-gray-800 font-bold">Télécharger la fiche sanitaire et la faire compléter</p>
-            <p className="text-xs text-gray-700 leading-relaxed">par l'un de vos représentant</p>
+            <p className="text-xs text-gray-700 leading-relaxed">par l'un de vos représentants légaux</p>
             <div className="mt-2 flex flex-col md:flex-row gap-2 text-gray-700">
               <a
                 href={`${CDN_BASE_URL}/file/fiche-sanitaire-2024.pdf`}
@@ -73,7 +78,7 @@ const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche 
           </div>
         </li>
 
-        <li className="flex px-3 py-4 gap-3">
+        <li className="mt-1 flex px-3 py-2 gap-3">
           <div>
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200 text-sm text-gray-700">2</span>
           </div>
@@ -85,7 +90,7 @@ const MedicalFileModal = ({ isOpen, onClose, title = "Téléchargez votre fiche 
           </div>
         </li>
 
-        <li className="flex bg-blue-50 rounded-xl px-3 py-4 gap-3">
+        <li className="flex bg-blue-50 rounded-xl px-3 py-4 mt-3 gap-3">
           <div>
             <span className="flex h-8 w-8 bg-white shrink-0 items-center justify-center rounded-full border border-gray-300 text-sm text-gray-700">3</span>
           </div>
