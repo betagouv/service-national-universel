@@ -62,7 +62,7 @@ module.exports = {
 
 function getEnvironment() {
   if (process.env.NODE_ENV === "test") {
-    return "testing"
+    return "test"
   }
   if (['production', 'staging', 'ci', 'custom'].includes(process.env.ENVIRONMENT)) {
     return process.env.ENVIRONMENT;

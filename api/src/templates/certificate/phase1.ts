@@ -72,7 +72,7 @@ function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter)
 
   doc.font(FONT).fontSize(FONT_SIZE).lineGap(LINE_GAP).fillColor(FILL_COLOR);
 
-  if (config.ENVIRONMENT !== "testing") {
+  if (config.ENVIRONMENT !== "test") {
     doc.image(path.join(config.IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
   }
   doc

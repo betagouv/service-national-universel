@@ -30,7 +30,7 @@ async function runCrons() {
 }
 
 async function runAPI(runCronsOnCC) {
-    if (config.ENVIRONMENT !== "testing") {
+    if (config.ENVIRONMENT !== "test") {
         console.log("API_URL", config.API_URL);
         console.log("APP_URL", config.APP_URL);
         console.log("ADMIN_URL", config.ADMIN_URL);

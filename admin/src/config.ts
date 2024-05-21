@@ -21,7 +21,7 @@ const appURL = getEnv("APP_URL", "http://localhost:8081");
 const adminURL = getEnv("ADMIN_URL", "http://localhost:8082");
 const supportURL = getEnv("SUPPORT_URL", "http://localhost:8083");
 const maintenance = getEnv("MAINTENANCE") === "true";
-const environment: "production" | "staging" | "ci" | "custom" | "testing" | "development" = getEnv("ENVIRONMENT", "development");
+const environment: "production" | "staging" | "ci" | "custom" | "test" | "development" = getEnv("ENVIRONMENT", "development");
 const RELEASE = getEnv("RELEASE");
 const SENTRY_URL = getEnv("SENTRY_URL");
 const SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 1.0);

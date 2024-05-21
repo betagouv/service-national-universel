@@ -2120,7 +2120,7 @@ Schema.post("save", function (doc) {
     StateManager.Classe.compute(doc.classeId, doc._user, { YoungModel: mongoose.model(MODELNAME, Schema) }).catch((error) => capture(error));
   }
 
-  if (config.ENVIRONMENT === "testing") return;
+  if (config.ENVIRONMENT === "test") return;
   sendinblue.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {

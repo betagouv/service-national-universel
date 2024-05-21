@@ -82,7 +82,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
 
   doc.font(FONT).fillColor(FILL_COLOR).fontSize(9);
 
-  if (config.ENVIRONMENT !== "testing") {
+  if (config.ENVIRONMENT !== "test") {
     doc.image(path.join(config.IMAGES_ROOTDIR, getTemplate(young)), 0, 0, {
       fit: [page.width, page.height],
       align: "center",
