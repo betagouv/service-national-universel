@@ -1,6 +1,11 @@
 const { resolveAsyncConfigs } = require('config/async');
 const config = require("config");
 
+if (!process.env.SCW_ACCESS_KEY || !process.env.SCW_SECRET_KEY) {
+  console.error("SCW_ACCESS_KEY & SCW_SECRET_KEY are required to get configuration secrets");
+  process.exit(1);
+}
+
 require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 
 // ! Ignore specific error
