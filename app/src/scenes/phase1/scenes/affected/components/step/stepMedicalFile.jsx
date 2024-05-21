@@ -42,12 +42,12 @@ export default function StepMedicalField({ data }) {
           <div>
             <p className="font-semibold">
               Transmettez votre fiche sanitaire
-              <span className="text-xs bg-blue-100 text-blue-800 rounded w-fit px-1 md:ml-2 block md:inline">Obligatoire</span>
+              <span className="text-xs bg-blue-100 text-blue-800 rounded w-fit px-1 mt-2 md:ml-2 block md:inline">Obligatoire</span>
             </p>
-            <p className="mt-1 text-gray-500">
+            <p className="mt-2 text-gray-500">
               Envoyez votre fiche sanitaire et les documents annexes par e-mail à{" "}
-              <a href={`mailto:${email}`} className="text-gray-500 underline underline-offset-2">
-                {email}
+              <a href={`mailto:${email}`}>
+                <span className="inline-block text-gray-500 underline underline-offset-2">{email}</span>
               </a>
               .
             </p>
@@ -63,15 +63,15 @@ export default function StepMedicalField({ data }) {
           )}
         </div>
       ) : (
-        <div className="flex items-center flex-col md:flex-row justify-between text-sm">
+        <div className="flex items-center flex-col md:flex-row justify-between text-sm gap-4">
           <div>
             <p className="font-semibold">
               Téléchargez votre fiche sanitaire
-              <span className="text-xs bg-blue-100 text-blue-800 rounded w-fit px-1 ml-2">Obligatoire</span>
+              <span className="text-xs bg-blue-100 text-blue-800 rounded w-fit px-1 mt-2 md:ml-2 block md:inline">Obligatoire</span>
             </p>
-            <p className="mt-1 text-gray-500">Complétez votre fiche sanitaire et remettez là à votre arrivée au centre du séjour.</p>
+            <p className="mt-2 text-gray-500">Complétez votre fiche sanitaire et remettez là à votre arrivée au centre du séjour.</p>
           </div>
-          <button onClick={() => setOpen(true)} className="w-64 text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
+          <button onClick={() => setOpen(true)} className="w-full md:w-48 text-sm p-2 rounded flex gap-2 justify-center text-gray-600 hover:bg-gray-100 border shadow-sm">
             Ouvrir le mode d'emploi
           </button>
         </div>

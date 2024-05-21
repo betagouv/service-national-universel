@@ -99,8 +99,8 @@ const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Téléchargez vot
               <p className="text-sm text-gray-800 font-bold">Envoyer l'ensemble des documents par e-mail</p>
               <p className="text-xs text-gray-700 leading-relaxed">
                 à{" "}
-                <a href={`mailto:${email}`} className="text-blue-600 underline underline-offset-2">
-                  {email}
+                <a href={`mailto:${email}`} className="text-blue-600 underline underline-offset-2 break-normal">
+                  <span className="inline-block text-gray-500 underline underline-offset-2">{email}</span>
                 </a>{" "}
                 avant votre arrivé au séjour
               </p>
@@ -115,9 +115,9 @@ const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Téléchargez vot
               </div>
             </div>
           ) : (
-            <div className="text-xs">
-              <p className="font-bold text-gray-800">Remettre l’ensemble des documents en mains propres</p>
-              <p className="text-gray-600">
+            <div>
+              <p className="text-sm text-gray-800 font-bold">Remettre l’ensemble des documents en mains propres</p>
+              <p className="text-xs text-gray-600 leading-relaxed">
                 à l’équipe d’encadrement à l’arrivée au séjour, dans une enveloppe portant la mention <i>“À l’attention du référent sanitaire, Pli Confidentiel”</i>.
               </p>
             </div>
