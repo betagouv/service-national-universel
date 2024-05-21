@@ -15,6 +15,9 @@ console.error = function (message) {
 //   process.exit(1);
 // });
 
+// NODE_ENV environment variable (default "development") is used by :
+// - node-config : to determine the config file used in ./config
+// - jest : unit test (NODE_ENV == "test")
 resolveAsyncConfigs(config)
   .then(config => {
     const {runCrons, runAPI} = require('./main.js')
