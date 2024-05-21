@@ -9,6 +9,7 @@ import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
 import useAuth from "@/services/useAuth";
 import plausibleEvent from "../../services/plausible";
 
+// RESPONSIVE + WAITING LIST A DEGAGER ?
 export default function ValidatedV2() {
   const { young, isCLE } = useAuth();
   const history = useHistory();
