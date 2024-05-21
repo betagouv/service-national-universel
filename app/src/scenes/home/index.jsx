@@ -126,10 +126,6 @@ export default function Home() {
       return <HomePhase2 />;
     }
 
-    if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
-      return <Phase1NotDone />;
-    }
-
     // Si le jeune est dans une cohorte de cette année.
     if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
