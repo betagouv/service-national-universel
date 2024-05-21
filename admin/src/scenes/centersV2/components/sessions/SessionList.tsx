@@ -12,7 +12,7 @@ import Pencil from "@/assets/icons/Pencil";
 
 import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 import SelectCohort from "@/components/cohorts/SelectCohort";
-import { Container, InputText, Label } from "@snu/ds/admin";
+import { Container, Label } from "@snu/ds/admin";
 import { Title } from "../commons";
 import Field from "../Field";
 import TimeSchedule from "../TimeSchedule";
@@ -150,8 +150,6 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     history.push(`?cohorte=${cohortName}`);
   };
 
-  console.log(session.dateStart);
-
   return (
     <div className="mx-8 my-4 space-y-4">
       <form onSubmit={handleSubmit} id="session-form">
@@ -235,7 +233,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                     if (!isNaN(parsedValue)) {
                       if (values) setValues({ ...values, placesTotal: parsedValue });
                     } else if (inputValue === "") {
-                      if (values) setValues({ ...values, placesTotal: 0 }); // or another default value
+                      if (values) setValues({ ...values, placesTotal: 0 });
                     }
                   }}
                 />
@@ -255,7 +253,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       disabled={!canEditSanitaryEmailContact(user, cohort)}
                       label=""
                       tooltips={null}
-                      value={values?.sanitaryContactEmail || session?.sanitaryContactEmail}
+                      value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
                       onChange={(e) => {
                         if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
                       }}
