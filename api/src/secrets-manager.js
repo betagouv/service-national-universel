@@ -9,7 +9,6 @@ function getSecret(key) {
       const client = createClient({
         accessKey: config.SCW_ACCESS_KEY,
         secretKey: config.SCW_SECRET_KEY,
-        // defaultProjectId: process.env.SCW_DEFAULT_PROJECT_ID,
         defaultRegion: "fr-par",
         defaultZone: "fr-par-1",
       });
