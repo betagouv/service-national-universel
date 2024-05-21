@@ -842,4 +842,5 @@ module.exports = {
   validateHeadOfCenterCohortChange,
   validateParents,
   representantSchema,
+  idSchema,
 };

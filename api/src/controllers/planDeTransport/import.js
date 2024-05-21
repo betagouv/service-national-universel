@@ -21,8 +21,9 @@ const scanFile = require("../../utils/virusScanner");
 const { getMimeFromFile } = require("../../utils/file");
 const { validateId } = require("../../utils/validator");
 
-const { validatePdtFile, computeImportSummary } = require("../../pdt/import/pdtImportService");
-const { formatTime } = require("../../pdt/import/pdtImportUtils");
+const { validatePdtFile, computeImportSummary } = require("../../planDeTransport/import/pdtImportService");
+const { formatTime, getMergedBusIdsFromLigneBus, computeMergedBusIds } = require("../../planDeTransport/import/pdtImportUtils");
+const { syncMergedBus } = require("../../planDeTransport/ligneDeBus/ligneDeBusService");
 const { startSession, withTransaction, endSession } = require("../../mongo");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
@@ -101,6 +102,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
     if (!canSendPlanDeTransport(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -127,6 +129,10 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           newLines.push(importData.lines[i]);
         }
       }
+
+      const existingMergedBusIds = getMergedBusIdsFromLigneBus(oldLines);
+      // calcul de la listes des lignes fusionnées associées à la colonne LIGNES FUSIONNÉES
+      const newMergedBusIds = computeMergedBusIds(newLines, existingMergedBusIds);
 
       // import des nouvelles lignes
       for (const line of newLines) {
@@ -156,19 +162,18 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           sessionId: session?._id.toString(),
           meetingPointsIds: pdrIds,
           classeId: line["ID CLASSE"] ? line["ID CLASSE"] : undefined,
-          mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"].split(",") : [],
+          mergedBusIds: newMergedBusIds[line["NUMERO DE LIGNE"]] || [],
         };
         const newBusLine = new LigneBusModel(busLineData);
         const busLine = await newBusLine.save({ session: transaction });
 
         // Mise à jour des lignes fusionnées existantes
-        for (const mergedBusId of busLineData.mergedBusIds) {
-          const oldMergeLine = await LigneBusModel.findOne({ busId: mergedBusId });
-          if (oldMergeLine) {
-            oldMergeLine.set({ mergedBusIds: busLineData.mergedBusIds });
-            await oldMergeLine.save({ session: transaction });
-          }
-        }
+        await syncMergedBus({
+          ligneBus: busLine,
+          busIdsToUpdate: busLineData.mergedBusIds.filter((busId) => busId !== busLineData.busId),
+          newMergedBusIds: busLineData.mergedBusIds,
+          transaction: transaction,
+        });
 
         const lineToPointWithCorrespondance = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc, pdrNumber) => {
           if (pdrNumber > 1 && !line[`ID PDR ${pdrNumber}`]) return acc;

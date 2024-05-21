@@ -6,3 +6,4 @@ export * from "./alerteMessageDto";
 export * from "./youngDto";
 export * from "./contractDto";
 export * from "./etablissementDto";
+export * from "./ligneDeBus";

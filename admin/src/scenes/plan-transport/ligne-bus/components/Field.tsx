@@ -1,9 +1,20 @@
-import React from "react";
+import React, { ChangeEventHandler } from "react";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
 import { copyToClipboard } from "../../../../utils";
 
-export default function Field({ onChange, value, label, disabled = false, error, readOnly = false, copy, placeholder }) {
+interface Props {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  error?: string;
+  readOnly?: boolean;
+  copy?: boolean;
+  placeholder?: string;
+  onChange: ChangeEventHandler<HTMLInputElement>;
+}
+
+export default function Field({ onChange, value, label, disabled, error, readOnly, copy, placeholder }: Props) {
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
