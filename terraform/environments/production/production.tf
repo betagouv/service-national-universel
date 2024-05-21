@@ -60,8 +60,13 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "NODE_ENV"                          = "production"
-    "RELEASE"                           = var.api_image_tag
+    "NODE_ENV"       = "production"
+    "RELEASE"        = var.api_image_tag
+  }
+
+  secret_environment_variables = {
+    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
+    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }
 
@@ -195,6 +200,8 @@ resource "scaleway_container" "crons" {
   environment_variables = merge(scaleway_container.api.environment_variables, {
     "RUN_CRONS" = "true"
   })
+
+  secret_environment_variables = scaleway_container.api.secret_environment_variables
 }
 
 output "api_endpoint" {

@@ -135,6 +135,11 @@ resource "scaleway_container" "api" {
     "RELEASE"     = var.api_image_tag
   }
 
+  secret_environment_variables = {
+    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
+    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  }
+
 resource "scaleway_domain_record" "api" {
   dns_zone = scaleway_domain_zone.main.id
   name     = "api"

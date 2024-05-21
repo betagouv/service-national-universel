@@ -102,12 +102,17 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "NODE_ENV"                          = "custom"
-    "API_URL"                           = "https://${local.api_hostname}"
-    "ADMIN_URL"                         = "https://${local.admin_hostname}"
-    "APP_URL"                           = "https://${local.app_hostname}"
-    "SECRET_NAME"                       = scaleway_secret.custom.name
-    "RELEASE"                           = var.api_image_tag
+    "NODE_ENV"       = "custom"
+    "API_URL"        = "https://${local.api_hostname}"
+    "ADMIN_URL"      = "https://${local.admin_hostname}"
+    "APP_URL"        = "https://${local.app_hostname}"
+    "SECRET_NAME"    = scaleway_secret.custom.name
+    "RELEASE"        = var.api_image_tag
+  }
+
+  secret_environment_variables = {
+    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
+    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }
 
