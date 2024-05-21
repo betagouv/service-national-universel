@@ -32,7 +32,7 @@ export default function SessionHorizontalBar({ title, values, labels, showToolti
       const total = values.reduce((value, originalValue) => value + originalValue, 0);
       setTotal(total);
       const localGoal = goal === 0 ? total : goal;
-      const colors = ["#1E40AF", "#E5E7EB"];
+      const colors = ["#1D4ED8", "#E5E7EB"];
 
       setBars(
         values.map((value, idx) => ({
