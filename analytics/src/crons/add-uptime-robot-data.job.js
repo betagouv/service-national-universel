@@ -13,7 +13,7 @@ module.exports.handler = async function () {
       headers: { "Content-Type": "application/json" },
       method: "POST",
       body: JSON.stringify({
-        monitors: "788918276-788918288-788918273-792593759-792593824-792593767-792593794-793453217-793452221",
+        monitors: "788918276-788918288-788918273-792593759-792593767-792593794-793453217-793452221",
         // uptime_ratio sur le dernier jour
         custom_uptime_ratios: "1",
       }),
