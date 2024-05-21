@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const config = require("config");
 const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
 const SchemaDeRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
 const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");

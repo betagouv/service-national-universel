@@ -25,6 +25,7 @@ const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
+const config = require("config");
 const {
   canViewSchemaDeRepartition,
   YOUNG_STATUS,
