@@ -114,7 +114,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
   return (
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
-        <div className="text-xl leading-6 text-[#242526]">{title}</div>
+        <div className="text-lg leading-7 text-gray-900 font-bold">{title}</div>
         {canEditLigneBusTeam(user) || isBusEditionOpen(user, cohort) || isTeamLeaderOrSupervisorEditable(user, cohort) ? (
           <>
             {!editInfo ? (

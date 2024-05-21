@@ -13,7 +13,7 @@ const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
 beforeAll(dbConnect);
 afterAll(dbClose);
 
-describe("Meeting Point", () => {
+describe("Ligne To Point", () => {
   let res;
   let ligneToPoint;
 

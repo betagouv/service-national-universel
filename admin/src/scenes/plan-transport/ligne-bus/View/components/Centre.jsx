@@ -62,7 +62,7 @@ export default function Centre({ bus, setBus, cohort }) {
   return (
     <div className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
-        <div className="text-xl leading-6 text-[#242526]">Centre de cohésion</div>
+        <div className="text-lg leading-7 text-gray-900 font-bold">Centre de cohésion</div>
         {canEditLigneBusCenter(user) || isBusEditionOpen(user, cohort) ? (
           <>
             {!editCenter ? (
