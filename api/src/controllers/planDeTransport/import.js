@@ -22,6 +22,7 @@ const { getMimeFromFile } = require("../../utils/file");
 
 const { validatePdtFile, computeImportSummary } = require("../../pdt/import/pdtImportService");
 const { formatTime } = require("../../pdt/import/pdtImportUtils");
+const { syncMergedBus } = require("../../pdt/pdtService");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
 router.post(
@@ -160,13 +161,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       const busLine = await newBusLine.save();
 
       // Mise à jour des lignes fusionnées existantes
-      for (const mergedBusId of busLineData.mergedBusIds) {
-        const oldMergeLine = await LigneBusModel.findOne({ busId: mergedBusId });
-        if (oldMergeLine) {
-          oldMergeLine.set({ mergedBusIds: busLineData.mergedBusIds });
-          await oldMergeLine.save();
-        }
-      }
+      await syncMergedBus(busLineData, busLineData.mergedBusIds, busLineData.mergedBusIds);
 
       const lineToPointWithCorrespondance = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc, pdrNumber) => {
         if (pdrNumber > 1 && !line[`ID PDR ${pdrNumber}`]) return acc;

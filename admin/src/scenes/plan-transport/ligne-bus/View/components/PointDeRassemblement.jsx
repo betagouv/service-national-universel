@@ -160,7 +160,7 @@ export default function PointDeRassemblement({ bus, setBus, index, pdr, volume, 
     <div className="w-full rounded-xl bg-white p-8">
       <div className="relative flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
+          <div className="text-lg leading-7 text-gray-900 font-bold">Point de rassemblement</div>
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
           <div className="ml-3 flex items-center gap-2">
             <DoubleProfil className="text-gray-400" />

@@ -1,4 +1,6 @@
-import { ROLES, CLE_COLORATION_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST } from "snu-lib";
+import { ROLES } from "snu-lib";
+
+export type RouteResponse<T> = { ok: boolean; code?: string; data: T };
 
 export type Young = { _id: string };
 
@@ -45,4 +47,27 @@ export type Session = {
   dateEnd: string | null;
   canBeDeleted?: boolean;
   sanitaryContactEmail: string;
+};
+
+export type Bus = {
+  _id?: string;
+  cohort?: string;
+  busId?: string;
+  departuredDate?: string;
+  returnDate?: string;
+  youngCapacity?: number | string;
+  totalCapacity?: number | string;
+  followerCapacity?: number | string;
+  travelTime?: string;
+  lunchBreak?: string;
+  lunchBreakReturn?: string;
+  classeId?: string;
+  mergedBusIds?: string[];
+  mergedBusDetail?: {
+    _id: string;
+    busId: string;
+    totalCapacity: number;
+    youngCapacity: number;
+    youngSeatsTaken: number;
+  }[];
 };

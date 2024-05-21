@@ -224,6 +224,8 @@ describe("Meeting point", () => {
       expect(res.body.data.departuredDate).toBe(ligneBus.departuredDate.toISOString());
       expect(res.body.data.busId).toBe(ligneBus.busId);
       expect(res.body.data.cohort).toBe(ligneBus.cohort);
+      expect(res.body.data.mergedBusIds).toBe([].toString());
+      expect(res.body.data.mergedBusDetail).toBe([].toString());
       passport.user = previous;
     });
 

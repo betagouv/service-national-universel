@@ -1,15 +1,10 @@
 const express = require("express");
-const router = express.Router();
 const passport = require("passport");
-const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
-const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
-const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
-// const ModificationBusModel = require("../../models/PlanDeTransport/modificationBus");
-const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
-const cohesionCenterModel = require("../../models/cohesionCenter");
-const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
-const ReferentModel = require("../../models/referent");
-const CohortModel = require("../../models/cohort");
+const Joi = require("joi");
+const { ObjectId } = require("mongoose").Types;
+const mongoose = require("mongoose");
+const config = require("config");
+
 const {
   canViewLigneBus,
   canEditLigneBusTeam,
@@ -27,13 +22,23 @@ const {
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
 } = require("snu-lib");
+
+const LigneBusModel = require("../../models/PlanDeTransport/ligneBus");
+const LigneToPointModel = require("../../models/PlanDeTransport/ligneToPoint");
+const PlanTransportModel = require("../../models/PlanDeTransport/planTransport");
+const PointDeRassemblementModel = require("../../models/PlanDeTransport/pointDeRassemblement");
+const cohesionCenterModel = require("../../models/cohesionCenter");
+const schemaRepartitionModel = require("../../models/PlanDeTransport/schemaDeRepartition");
+const ReferentModel = require("../../models/referent");
+const CohortModel = require("../../models/cohort");
+
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
-const Joi = require("joi");
-const { ObjectId } = require("mongoose").Types;
-const mongoose = require("mongoose");
 const { sendTemplate } = require("../../sendinblue");
-const config = require("config");
+
+const { getInfoBus } = require("../../pdt/pdtService");
+
+const router = express.Router();
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés
@@ -665,20 +670,6 @@ router.get("/cohort/:cohort/hasValue", passport.authenticate("referent", { sessi
   }
 });
 
-async function getInfoBus(line) {
-  const ligneToBus = await LigneToPointModel.find({ lineId: line._id });
-
-  let meetingsPointsDetail = [];
-  for (let line of ligneToBus) {
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(line.meetingPointId);
-    meetingsPointsDetail.push({ ...line._doc, ...pointDeRassemblement._doc });
-  }
-
-  const centerDetail = await cohesionCenterModel.findById(line.centerId);
-
-  return { ...line._doc, meetingsPointsDetail, centerDetail };
-}
-
 const PATCHES_COUNT_PER_PAGE = 20;
 const HIDDEN_FIELDS = ["/missionsInMail", "/historic", "/uploadedAt", "/sessionPhase1Id", "/correctedAt", "/lastStatusAt", "/token", "/Token"];
 const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
@@ -1032,6 +1023,8 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.use("/", require("../../pdt/pdtController"));
 
 module.exports = router;
 
