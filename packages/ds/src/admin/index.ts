@@ -2,6 +2,7 @@
 
 // Form
 import InputText from "./form/InputText";
+import InputNumber from "./form/InputNumber";
 import InputPhone from "./form/InputPhone";
 import Label from "./form/Label";
 import Select from "./form/Select/Select";
@@ -24,6 +25,7 @@ import ModalConfirmation from "./ui/ModalConfirmation";
 export {
   // Form
   InputText,
+  InputNumber,
   InputPhone,
   Label,
 

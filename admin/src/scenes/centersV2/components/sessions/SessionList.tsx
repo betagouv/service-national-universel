@@ -12,7 +12,7 @@ import Pencil from "@/assets/icons/Pencil";
 
 import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 import SelectCohort from "@/components/cohorts/SelectCohort";
-import { Container, Label } from "@snu/ds/admin";
+import { Container, InputText, InputNumber, Label } from "@snu/ds/admin";
 import { Title } from "../commons";
 import Field from "../Field";
 import TimeSchedule from "../TimeSchedule";
@@ -215,28 +215,24 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                 />
               </div>
               <div className="flex w-full flex-col items-start justify-center">
-                <Label
-                  className="text-xs leading-5 font-medium mt-2"
-                  title="Places ouvertes"
-                  name="placesTotal"
-                  tooltip="C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
-                />
-                <Field
-                  error={errors.placesTotal}
-                  readOnly={!values || !canCreateOrUpdateCohesionCenter(user)}
-                  label=""
-                  tooltips={null}
-                  value={values?.placesTotal?.toString() || session.placesTotal.toString()}
-                  onChange={(e) => {
-                    const inputValue = e.target.value;
-                    const parsedValue = parseInt(inputValue, 10);
-                    if (!isNaN(parsedValue)) {
+                <div className="w-full">
+                  <Label
+                    className="text-xs leading-5 font-medium mt-2"
+                    title="Places ouvertes"
+                    name="placesTotal"
+                    tooltip="C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
+                  />
+                  <InputNumber
+                    label=""
+                    name="placesTotal"
+                    value={values ? values?.placesTotal : session.placesTotal}
+                    onChange={(e) => {
+                      const inputValue = e.target.value;
+                      const parsedValue = parseInt(inputValue, 10);
                       if (values) setValues({ ...values, placesTotal: parsedValue });
-                    } else if (inputValue === "") {
-                      if (values) setValues({ ...values, placesTotal: 0 });
-                    }
-                  }}
-                />
+                    }}
+                  />
+                </div>
               </div>
               {center?.region === "Provence-Alpes-Côte d'Azur" && cohort?.name === "Juin 2024 - 2" && (
                 <div className="flex flex-call justify-start items-center w-full mt-2">
@@ -247,12 +243,9 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                       name="sanitaryContactEmail"
                       tooltip="Si vous renseignez l'adresse email suivante, elle sera visible sur l'espace personnel des volontaires. Ils seront ainsi invités à envoyer leurs fiches sanitaires à cette adresse. Seules les adresses emails académiques sécurisées sont autorisées."
                     />
-                    <Field
-                      error={errors.sanitaryContactEmail}
-                      readOnly={!values || !canEditSanitaryEmailContact(user, cohort)}
-                      disabled={!canEditSanitaryEmailContact(user, cohort)}
-                      label=""
-                      tooltips={null}
+                    <InputText
+                      label="Adresse email académique"
+                      name="sanitaryContactEmail"
                       value={values ? values.sanitaryContactEmail : session.sanitaryContactEmail}
                       onChange={(e) => {
                         if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });

@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom"; // Assuming you are using react-router
-import { getGraphColors } from "./graph-commons";
+import React from "react";
 import GraphTooltip from "./GraphTooltip";
 
 interface SessionHorizontalBarProps {
@@ -8,7 +6,6 @@ interface SessionHorizontalBarProps {
   values: number[];
   labels: string[];
   showTooltips: boolean;
-  legendUrls?: string[];
   goal: number;
   className?: string;
 }
@@ -17,45 +14,26 @@ interface BarProps {
   color: string;
   label: string;
   value: number;
-  percent: string;
   width: number;
   tooltip: string | null;
 }
 
 export default function SessionHorizontalBar({ title, values, labels, showTooltips = false, goal, className = "" }: SessionHorizontalBarProps) {
-  const [bars, setBars] = useState<BarProps[]>([]);
-  const [total, setTotal] = useState<number>(0);
-  const [x100, setX100] = useState<number | null>(null);
+  if (!values || values.length === 0) return null;
 
-  useEffect(() => {
-    if (values && values.length > 0) {
-      const total = values.reduce((value, originalValue) => value + originalValue, 0);
-      setTotal(total);
-      const localGoal = goal === 0 ? total : goal;
-      const colors = ["#1D4ED8", "#E5E7EB"];
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const localGoal = goal === 0 ? total : goal;
+  const colors = ["#1D4ED8", "#E5E7EB"];
 
-      setBars(
-        values.map((value, idx) => ({
-          color: colors[idx % colors.length],
-          label: labels[idx],
-          value,
-          percent: localGoal === 0 ? "-" : `${Math.round((value / localGoal) * 100)}%`,
-          width: Math.min(Math.round((value / Math.max(total, localGoal)) * 100), 100),
-          tooltip: showTooltips ? (localGoal === 0 ? "-" : `${Math.round((value / localGoal) * 100)}% ${labels[idx].toLowerCase()}`) : null,
-        })),
-      );
+  const bars: BarProps[] = values.map((value, idx) => ({
+    color: colors[idx % colors.length],
+    label: labels[idx],
+    value,
+    width: Math.min(Math.round((value / Math.max(total, localGoal)) * 100), 100),
+    tooltip: showTooltips ? (localGoal === 0 ? "-" : `${Math.round((value / localGoal) * 100)}% ${labels[idx].toLowerCase()}`) : null,
+  }));
 
-      if (total > goal) {
-        setX100(Math.round((goal / total) * 100));
-      } else {
-        setX100(null);
-      }
-    } else {
-      setBars([]);
-      setTotal(0);
-      setX100(null);
-    }
-  }, [values, goal, labels, showTooltips]);
+  const x100 = total > goal ? Math.round((goal / total) * 100) : null;
 
   return (
     <div className={className}>
@@ -83,13 +61,6 @@ export default function SessionHorizontalBar({ title, values, labels, showToolti
               ),
           )}
         </div>
-        {x100 && (
-          <div className="absolute top-[-4px] bottom-[-4px] z-20 w-[5px] rounded-full border-[1px] border-white bg-red-600" style={{ left: `${x100}%` }}>
-            <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 rounded-[4px] border-[1px] border-white bg-red-600 py-[2px] px-1 text-[8px] font-bold text-white">
-              100%
-            </div>
-          </div>
-        )}
       </div>
       <div className="mt-2 mr-8 flex justify-center last:mr-0">
         {bars.map((bar, idx) => (
