@@ -4,30 +4,27 @@ import * as FileSaver from "file-saver";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { Badge, Button, Container, Header, Label, Page } from "@snu/ds/admin";
-import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
+import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
+import { HiPlus, HiUsers, HiOutlineOfficeBuilding, HiChevronDown } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-lib";
-
 import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
 import { getCohortGroups } from "@/services/cohort.service";
 
 export default function List() {
-  const user = useSelector((state) => state.Auth.user);
-
   const [classes, setClasses] = useState(null);
   const [data, setData] = useState([]);
+  const pageId = "classe-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [etablissements, setEtablissements] = useState(null);
   const [paramData, setParamData] = useState({
     page: 0,
   });
   const [size, setSize] = useState(10);
+  const user = useSelector((state) => state.Auth.user);
   const [exportLoading, setExportLoading] = useState(false);
-
-  const pageId = "classe-list";
 
   useEffect(() => {
     (async () => {
@@ -54,18 +51,11 @@ export default function List() {
   const exportData = async ({ type }) => {
     setExportLoading(true);
     try {
-      // TODO: reintégrer export ES une fois synchro ok
-      // const res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
-      //   filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
-      //     return { ...e, [key]: value.filter };
-      //   }, {}),
-      // });
-      const res = await api.post(
-        `/classe/export?type=${type}`,
-        Object.entries(selectedFilters).reduce((e, [key, value]) => {
+      const res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
+        filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
           return { ...e, [key]: value.filter };
         }, {}),
-      );
+      });
       const result = await exportExcelSheet({ data: res.data, type });
       const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
       FileSaver.saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" }), result.fileName);
@@ -104,7 +94,6 @@ export default function List() {
   ].filter(Boolean);
 
   if (classes === null) return null;
-  const isCohortSelected = selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0;
 
   return (
     <Page>
@@ -118,10 +107,7 @@ export default function List() {
             </Link>
           ),
           [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
-            <div className="flex gap-2 items-center">
-              <Label title="" tooltip={!isCohortSelected ? "Vous devez selectionner une cohort pour pouvoir exporter le SR" : undefined} />
-              <Button title="Exporter le SR" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} disabled={!isCohortSelected} />
-            </div>
+            <Button title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} />
           ),
         ].filter(Boolean)}
       />
