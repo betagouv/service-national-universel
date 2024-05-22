@@ -192,10 +192,10 @@ jobs:
           failure=0
           while read name
           do
-            echo $name
             container_id=$(terraform output -raw ${name}_container_id)
+            echo $name $container_id
             status=$(
-              curl -X GET \
+              curl -sX GET \
                 -H "X-Auth-Token: $SCW_SECRET_KEY" \
                 "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/${container_id}" \
               | jq -r '.status'
