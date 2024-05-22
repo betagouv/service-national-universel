@@ -184,3 +184,32 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
             --data "{ \"body\": \"Application endpoints :\n\n- $api_endpoint\n- $app_endpoint\n- $admin_endpoint\" }"
+
+      - name: Healthchecks
+        shell: bash
+        working-directory: ${{ env.custom_directory }}
+        run: |
+          failure=0
+          while read name
+          do
+            echo $name
+            container_id=$(terraform output -raw ${name}_container_id)
+            status=$(
+              curl -X GET \
+                -H "X-Auth-Token: $SCW_SECRET_KEY" \
+                "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/${container_id}" \
+              | jq -r '.status'
+            )
+            if [[ $status != "ready" ]]
+            then
+                echo "Container ${name} is not on 'ready' state" 1>&2
+                failure=1
+            fi
+          done <<< 'app
+          admin
+          api'
+
+          if [[ $failure ]]
+          then
+              exit 1
+          fi

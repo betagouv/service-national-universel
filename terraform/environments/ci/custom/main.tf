@@ -232,18 +232,29 @@ resource "scaleway_container" "app" {
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
 }
+output "api_container_id" {
+  value = scaleway_container.api.id
+}
 output "api_image_tag" {
   value = split(":", scaleway_container.api.registry_image)[1]
 }
+
 output "app_endpoint" {
   value = "https://${local.app_hostname}"
 }
 output "app_image_tag" {
   value = split(":", scaleway_container.app.registry_image)[1]
 }
+output "app_container_id" {
+  value = scaleway_container.app.id
+}
+
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
 }
 output "admin_image_tag" {
   value = split(":", scaleway_container.admin.registry_image)[1]
+}
+output "admin_container_id" {
+  value = scaleway_container.admin.id
 }
