@@ -21,6 +21,7 @@ import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";
 import { getFilterArray, transformVolontaires, transformVolontairesSchool } from "./utils";
 import { signinAs } from "@/utils/signinAs";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
@@ -134,6 +135,7 @@ export default function VolontaireList() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
+              intermediateFilters={[getCohortGroups()]}
             />
             <SortOption
               sortOptions={[

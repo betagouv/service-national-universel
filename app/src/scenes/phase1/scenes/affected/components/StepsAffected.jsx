@@ -43,7 +43,7 @@ export default function StepsAffected({ data }) {
         <StepPDR data={data} />
         <StepAgreement data={data} />
         <StepConvocation data={data} />
-        <StepMedicalFile />
+        <StepMedicalFile data={data} />
       </div>
     </section>
   );

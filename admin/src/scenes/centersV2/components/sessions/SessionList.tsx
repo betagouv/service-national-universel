@@ -76,15 +76,6 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     if (values.dateStart && values.dateEnd && values.dateStart > values.dateEnd) {
       errorsObject.date = "La date de début doit être antérieure à la date de fin";
     }
-    if (values.sanitaryContactEmail) {
-      const regex = new RegExp(patternEmailAcademy);
-      if (!regex.test(values.sanitaryContactEmail)) {
-        errorsObject.sanitaryContactEmail = "L’adresse email ne semble pas valide. Veuillez vérifier qu’il s’agit bien d’une adresse académique.";
-      } else if (!validateEmailAcademique(values.sanitaryContactEmail)) {
-        errorsObject.sanitaryContactEmail =
-          "Cette adresse email académique n'existe pas ou n'est pas référencée. Veuillez vérifier qu’il s’agit bien d’une adresse académique valide.";
-      }
-    }
     if (Object.keys(errorsObject).length > 0) {
       setErrors(errorsObject);
       return;
