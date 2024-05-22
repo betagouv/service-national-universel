@@ -280,6 +280,7 @@ const cleanData = async () => {
 };
 
 exports.handler = async () => {
+  console.log("jeVeuxAiderDaily => LE CRONS SE LANCE BIEN !");
   slack.info({ title: "sync with JVA missions", text: "I'm starting the synchronization !" });
   if (!JVA_API_KEY) {
     slack.error({ title: "sync with JVA missions", text: "I do not have any JVA_API_KEY !" });

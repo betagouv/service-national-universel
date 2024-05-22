@@ -30,11 +30,13 @@ const getGoalAndComputeFillingRates = async ({ department, values }) => {
 
 exports.handler = async () => {
   try {
+    console.log("computeGoalsIncription => LE CRONS SE LANCE BIEN !");
     for (let i = 0; i < arr.length; i++) {
       const department = arr[i];
       const values = await getCount({ department });
       await getGoalAndComputeFillingRates({ department, values });
     }
+    await slack.success({ title: "computeGoalsInscription", text: "Le traitement s'est terminé avec succès." });
   } catch (e) {
     capture(e);
     slack.error({ title: "computeGoalsInscription", text: JSON.stringify(e) });
