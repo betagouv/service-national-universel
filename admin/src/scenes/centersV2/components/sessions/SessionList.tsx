@@ -14,7 +14,6 @@ import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 import { Container, InputText, InputNumber, Label } from "@snu/ds/admin";
 import { Title } from "../commons";
-import Field from "../Field";
 import TimeSchedule from "../TimeSchedule";
 import PedagoProject from "../PedagoProject";
 import { toastr } from "react-redux-toastr";
@@ -50,6 +49,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const cohort = cohorts.find((cohort) => cohort.name === selectedCohort) || cohorts[0];
   const session = sessions.find((session) => session.cohort === selectedCohort) || sessions[0];
   const setSession = (newSession: Session) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
+
+  console.log(cohort);
 
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState<Session | null>(null);
@@ -199,8 +200,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
               <div className="rounded-lg bg-white mb-4">
                 <SessionHorizontalBar
                   title="Places"
-                  labels={["disponibles", "occupés"]}
-                  values={[session.placesLeft || 0, session.placesTotal - session.placesLeft || 0]}
+                  labels={["occupés", "disponibles"]}
+                  values={[session.placesTotal - session.placesLeft || 0, session.placesLeft || 0]}
                   goal={session.placesTotal}
                   showTooltips={true}
                 />
@@ -260,10 +261,10 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="text-left text-xs text-gray-500">
-                      Début : <strong>{session ? dayjs(session.dateStart).format("DD/MM/YYYY") : ""}</strong>
+                      Début : <strong>{cohort ? dayjs(cohort.dateStart).format("DD/MM/YYYY") : ""}</strong>
                     </p>
                     <p className="text-left text-xs text-gray-500 mr-3.5">
-                      Fin : <strong>{session ? dayjs(session.dateEnd).format("DD/MM/YYYY") : ""}</strong>
+                      Fin : <strong>{cohort ? dayjs(cohort.dateEnd).format("DD/MM/YYYY") : ""}</strong>
                     </p>
                     <p className="text-left text-xs text-gray-500"></p>
                   </div>
@@ -307,7 +308,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                   </div>
                 </div>
               </div>
-              {canCreateOrUpdateCohesionCenter(user) && (
+              {/* sera peut-être à remettre ne pas supprimer de suite */}
+              {/* {canCreateOrUpdateCohesionCenter(user) && (
                 <button
                   type="button"
                   onClick={() => {
@@ -323,7 +325,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                   <Trash className={session.canBeDeleted ? "text-red-400" : "text-gray-400"} width={14} height={14} />
                   <div className={`${session.canBeDeleted ? "text-gray-800" : "text-gray-500"} text-xs`}>Supprimer le séjour</div>
                 </button>
-              )}
+              )} */}
             </div>
           </div>
         </Container>
