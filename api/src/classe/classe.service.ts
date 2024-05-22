@@ -1,5 +1,7 @@
-import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../young/young.service";
 import { CleEtablissementModel, LigneBusModel, ReferentModel, CohesionCenterModel, PointDeRassemblementModel, YoungModel } from "@/models";
+import { serializeReferent, serializeYoung } from "@/utils/serializer";
+
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "@/young/young.service";
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
@@ -25,20 +27,18 @@ export const findPdrsForClasses = async (classes) => {
   return pdrs;
 };
 
-export const findYoungsForClasses = async (classes) => {
+export const getYoungsGroupByClasses = async (classes) => {
   const classesIds = classes.map(({ _id }) => _id);
-  const students = await YoungModel.find({ classeId: { $in: classesIds } });
+  const youngs = await YoungModel.find({ classeId: { $in: classesIds } });
 
-  //count students by class
-  const youngs = students.reduce((acc, cur) => {
-    if (!acc[cur.classeId]) {
-      acc[cur.classeId] = [];
+  // group youngs by classe
+  return youngs.reduce((acc, young) => {
+    if (!acc[young.classeId]) {
+      acc[young.classeId] = [];
     }
-    acc[cur.classeId].push(cur);
+    acc[young.classeId].push(serializeYoung(young));
     return acc;
   }, {});
-
-  return youngs;
 };
 
 export const findLigneInfoForClasses = async (classes) => {
@@ -49,6 +49,5 @@ export const findLigneInfoForClasses = async (classes) => {
 export const findReferentInfoForClasses = async (classes) => {
   const refIds = classes.map(({ referentClasseIds }) => referentClasseIds);
   const referents = await ReferentModel.find({ _id: { $in: refIds } });
-  // const referentsData = serializeReferents(referents);
-  return referents;
+  return referents.map(serializeReferent);
 };

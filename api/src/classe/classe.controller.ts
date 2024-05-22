@@ -15,7 +15,7 @@ import {
   findEtablissementsForClasses,
   findCohesionCentersForClasses,
   findPdrsForClasses,
-  findYoungsForClasses,
+  getYoungsGroupByClasses,
   findLigneInfoForClasses,
   findReferentInfoForClasses,
 } from "./classe.service";
@@ -69,24 +69,26 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const entities = await CleClasseModel.find({
+      const classes = await CleClasseModel.find({
         cohort: value.cohort,
         status: { $in: [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.INSCRIPTION_TO_CHECK, STATUS_CLASSE.VALIDATED] },
-      });
-      const classes = JSON.parse(JSON.stringify(entities));
+      }).lean();
       const etablissements = await findEtablissementsForClasses(classes);
       const centres = await findCohesionCentersForClasses(classes);
       const pdrs = await findPdrsForClasses(classes);
-      const youngs = await findYoungsForClasses(classes);
+      const youngs = await getYoungsGroupByClasses(classes);
       const lignesBus = await findLigneInfoForClasses(classes);
       const referents = await findReferentInfoForClasses(classes);
 
       for (let classe of classes) {
+        // populate
         classe.etablissement = etablissements?.find((e) => classe.etablissementId === e._id.toString());
         classe.cohesionCenter = centres?.find((e) => classe.cohesionCenterId === e._id.toString());
         classe.pointDeRassemblement = pdrs?.find((e) => classe.pointDeRassemblementId === e._id.toString());
         classe.ligne = lignesBus.find((e) => classe.ligneId === e._id.toString());
         classe.referentClasse = referents?.filter((e) => classe.referentClasseIds.includes(e._id.toString()));
+
+        // calcul des effectifs
         const classeYoungs = youngs[classe._id];
         classe.studentInProgress = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length || 0;
         classe.studentWaiting = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length || 0;
