@@ -205,6 +205,5 @@ jobs:
 
           if $failure
           then
-            echo "failure"
             exit 1
           fi

@@ -232,11 +232,11 @@ resource "scaleway_container" "app" {
 output "api_endpoint" {
   value = "https://${local.api_hostname}"
 }
-output "api_container_status" {
-  value = scaleway_container.api.status
-}
 output "api_image_tag" {
   value = split(":", scaleway_container.api.registry_image)[1]
+}
+output "api_container_status" {
+  value = scaleway_container.api.status
 }
 
 output "app_endpoint" {
