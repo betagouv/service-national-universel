@@ -107,7 +107,6 @@ resource "scaleway_container" "api" {
     "ADMIN_URL"      = "https://${local.admin_hostname}"
     "APP_URL"        = "https://${local.app_hostname}"
     "SECRET_NAME"    = scaleway_secret.custom.name
-    "RELEASE"        = var.api_image_tag
   }
 
   secret_environment_variables = {
@@ -136,12 +135,10 @@ resource "scaleway_container" "admin" {
 
   environment_variables = {
     "NGINX_HOSTNAME"             = local.admin_hostname
-    "APP_NAME"                   = "admin"
     "ENVIRONMENT"                = "custom"
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
-    "RELEASE"                    = var.admin_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.1
     "SENTRY_TRACING_SAMPLE_RATE" = 0.1
     "SUPPORT_URL"                = "https://support.beta-snu.dev"
@@ -171,12 +168,10 @@ resource "scaleway_container" "app" {
 
   environment_variables = {
     "NGINX_HOSTNAME"             = local.app_hostname
-    "APP_NAME"                   = "app"
     "ENVIRONMENT"                = "custom"
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
-    "RELEASE"                    = var.app_image_tag
     "SENTRY_SESSION_SAMPLE_RATE" = 0.1
     "SENTRY_TRACING_SAMPLE_RATE" = 0.1
     "SUPPORT_URL"                = "https://support.beta-snu.dev"

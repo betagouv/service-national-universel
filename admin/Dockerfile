@@ -55,6 +55,9 @@ COPY --from=builder /app/admin/docker_nginx.conf /etc/nginx/templates/default.co
 
 RUN chmod +x ./docker_start.sh
 
+ENV APP_NAME admin
+ENV RELEASE=${RELEASE}
+
 EXPOSE 8080
 
 # override default entrypoint
