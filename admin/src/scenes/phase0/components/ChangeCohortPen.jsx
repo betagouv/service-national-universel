@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { IoRepeat } from "react-icons/io5";
-import { HiUsers, HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
+import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, STATUS_CLASSE, COHORT_TYPE, YOUNG_STATUS_PHASE1 } from "snu-lib";
@@ -12,7 +12,6 @@ import api from "@/services/api";
 import Loader from "@/components/Loader";
 import { capture } from "@/sentry";
 import downloadPDF from "@/utils/download-pdf";
-import SelectCohort from "../../../components/cohorts/SelectCohort";
 
 export function ChangeCohortPen({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
@@ -98,19 +97,25 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
     });
   };
 
-  /*   const getCohortOptions = (cohorts) => {
+  const getCohortOptions = (cohorts) => {
     let updatedCohorts = cohorts.filter((c) => c.type === COHORT_TYPE.VOLONTAIRE);
     return updatedCohorts.map((cohort) => ({
       value: cohort.name,
       label: (
-        <div className="flex flex-nowrap items-center justify-start gap-1.5 p-2.5 w-full">
-          <HiUsers size={24} className="mt-0.5 mr-1 min-w-[24px]" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
-          <span className="text-gray-500 font-medium whitespace-nowrap">{formatCohortPeriod(cohort, "short")}</span>
-          <span className="text-gray-900 font-bold text-ellipsis overflow-hidden whitespace-nowrap">{`${cohort.name} `}</span>
+        <div className="flex flex-nowrap items-center justify-between gap-1.5 p-2.5 w-full">
+          <div className="flex items-center gap-1.5">
+            {cohort.isEligible ? (
+              <HiCheckCircle size={24} className="mt-0.5 mr-1 min-w-[24px] text-emerald-500" />
+            ) : (
+              <HiOutlineXCircle size={24} className="mt-0.5 mr-1 min-w-[24px] text-red-500" />
+            )}
+            <span className="text-gray-900 text-sm leading-5 font-normal">{`${cohort.name} `}</span>
+          </div>
+          <span className="text-gray-500 text-xs leading-4 font-medium text-right">{cohort.isEligible ? "éligible" : "Non éligible"}</span>
         </div>
       ),
     }));
-  }; */
+  };
 
   useEffect(() => {
     switch (state) {
@@ -138,7 +143,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 onChange={setMotif}
               />
               {Array.isArray(cohorts) ? (
-                <Select
+                /*                 <Select
                   className="text-left"
                   placeholder="Choix de la nouvelle cohorte"
                   options={cohorts
@@ -149,9 +154,8 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   isClearable={true}
                   value={cohort}
                   onChange={setCohort}
-                />
-              ) : (
-                /*                 <Select
+                /> */
+                <Select
                   className="text-left"
                   placeholder="Choix de la nouvelle cohorte"
                   options={getCohortOptions(cohorts)}
@@ -160,7 +164,8 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   isClearable={true}
                   value={cohort}
                   onChange={setCohort}
-                /> */
+                />
+              ) : (
                 <div className="flex items-center justify-between">
                   <Loader size="20px" containerClassName="!grow-0 !shrink-0 w-auto" />
                   <p className="flex-1 text-left">Chargement des cohortes en cours...</p>
