@@ -1,7 +1,7 @@
-import { CleEtablissementModel, LigneBusModel, ReferentModel, CohesionCenterModel, PointDeRassemblementModel, YoungModel } from "@/models";
-import { serializeReferent, serializeYoung } from "@/utils/serializer";
+import { CleEtablissementModel, LigneBusModel, ReferentModel, CohesionCenterModel, PointDeRassemblementModel, YoungModel } from "../models";
+import { serializeReferent, serializeYoung } from "../utils/serializer";
 
-import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "@/young/young.service";
+import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../young/young.service";
 
 export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);

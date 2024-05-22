@@ -4,11 +4,11 @@ import Joi from "joi";
 
 import { ROLES, canDownloadYoungDocuments, YOUNG_STATUS, STATUS_CLASSE } from "snu-lib";
 
-import { capture } from "@/sentry";
-import { ERRORS, isReferent } from "@/utils";
-import { CleClasseModel } from "@/models";
+import { capture } from "../sentry";
+import { ERRORS, isReferent } from "../utils";
+import { CleClasseModel } from "../models";
 
-import { UserRequest } from "@/controllers/request";
+import { UserRequest } from "../controllers/request";
 
 import {
   generateConvocationsByClasseId,
