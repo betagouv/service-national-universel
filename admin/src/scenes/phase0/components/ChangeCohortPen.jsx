@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { IoRepeat } from "react-icons/io5";
 import { HiUsers, HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
 import { useSelector } from "react-redux";
@@ -12,6 +12,7 @@ import api from "@/services/api";
 import Loader from "@/components/Loader";
 import { capture } from "@/sentry";
 import downloadPDF from "@/utils/download-pdf";
+import SelectCohort from "../../../components/cohorts/SelectCohort";
 
 export function ChangeCohortPen({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
@@ -97,6 +98,20 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
     });
   };
 
+  /*   const getCohortOptions = (cohorts) => {
+    let updatedCohorts = cohorts.filter((c) => c.type === COHORT_TYPE.VOLONTAIRE);
+    return updatedCohorts.map((cohort) => ({
+      value: cohort.name,
+      label: (
+        <div className="flex flex-nowrap items-center justify-start gap-1.5 p-2.5 w-full">
+          <HiUsers size={24} className="mt-0.5 mr-1 min-w-[24px]" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
+          <span className="text-gray-500 font-medium whitespace-nowrap">{formatCohortPeriod(cohort, "short")}</span>
+          <span className="text-gray-900 font-bold text-ellipsis overflow-hidden whitespace-nowrap">{`${cohort.name} `}</span>
+        </div>
+      ),
+    }));
+  }; */
+
   useEffect(() => {
     switch (state) {
       // HTS
@@ -136,6 +151,16 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   onChange={setCohort}
                 />
               ) : (
+                /*                 <Select
+                  className="text-left"
+                  placeholder="Choix de la nouvelle cohorte"
+                  options={getCohortOptions(cohorts)}
+                  noOptionsMessage={"Aucune cohorte éligible n'est disponible."}
+                  closeMenuOnSelect
+                  isClearable={true}
+                  value={cohort}
+                  onChange={setCohort}
+                /> */
                 <div className="flex items-center justify-between">
                   <Loader size="20px" containerClassName="!grow-0 !shrink-0 w-auto" />
                   <p className="flex-1 text-left">Chargement des cohortes en cours...</p>
