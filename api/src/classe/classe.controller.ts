@@ -10,14 +10,8 @@ import { CleClasseModel } from "../models";
 
 import { UserRequest } from "../controllers/request";
 
-import {
-  generateConvocationsByClasseId,
-  findCohesionCentersForClasses,
-  findPdrsForClasses,
-  getYoungsGroupByClasses,
-  findLigneInfoForClasses,
-  findReferentInfoForClasses,
-} from "./classe.service";
+import { generateConvocationsByClasseId } from "./classe.service";
+import { findCohesionCentersForClasses, findPdrsForClasses, getYoungsGroupByClasses, findLigneInfoForClasses, findReferentInfoForClasses } from "./export/classeExportService";
 
 const router = express.Router();
 router.post(
