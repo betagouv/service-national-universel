@@ -1,4 +1,4 @@
-function getEnv(name: string, fallback?: string | number) {
+function getEnv(name: string, fallback?: string | number | boolean) {
   const runtime = globalThis.runtime_env || {};
   let v = runtime[name];
   if (v !== undefined && v !== "") {
@@ -19,7 +19,7 @@ const apiURL = getEnv("API_URL", "http://localhost:8080");
 const appURL = getEnv("APP_URL", "http://localhost:8081");
 const adminURL = getEnv("ADMIN_URL", "http://localhost:8082");
 const supportURL = getEnv("SUPPORT_URL", "http://localhost:8083");
-const maintenance = getEnv("MAINTENANCE") === "true";
+const maintenance = getEnv("MAINTENANCE", false) === "true";
 const environment: "production" | "staging" | "ci" | "custom" | "test" | "development" = getEnv("ENVIRONMENT", "development");
 const RELEASE = getEnv("RELEASE");
 const SENTRY_URL = getEnv("SENTRY_URL", "https://70778e8aa9a6f1b9f483a8b6c9046a12@sentry.selego.co/140");
