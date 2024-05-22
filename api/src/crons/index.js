@@ -104,7 +104,7 @@ function _log(task, handlers) {
 }
 
 function schedule(crontab, name, handlers) {
-  sentry_cron.schedule(crontab, _log(name, handlers), { name, recoverMissedExecutions: true });
+  sentry_cron.schedule(crontab, _log(name, handlers), { name, recoverMissedExecutions: true, timezone: "Etc/UTC" });
 }
 
 schedule("0 2 * * *", "missionPatches", missionPatches.handler);
