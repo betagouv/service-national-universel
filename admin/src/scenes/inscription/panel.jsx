@@ -2,9 +2,8 @@ import Img3 from "../../assets/close_icon.png";
 import Img2 from "../../assets/pencil.svg";
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { useSelector } from "react-redux";
 
-import { formatDateFR, ROLES } from "snu-lib";
+import { formatDateFR } from "snu-lib";
 import Badge from "../../components/Badge";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -25,7 +24,6 @@ export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {

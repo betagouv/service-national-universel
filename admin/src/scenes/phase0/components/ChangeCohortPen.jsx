@@ -143,18 +143,6 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 onChange={setMotif}
               />
               {Array.isArray(cohorts) ? (
-                /*                 <Select
-                  className="text-left"
-                  placeholder="Choix de la nouvelle cohorte"
-                  options={cohorts
-                    ?.filter((c) => c.type === COHORT_TYPE.VOLONTAIRE)
-                    .map((c) => ({ ...c, label: `Cohorte ${c.name}${!c.isEligible ? " (non éligible)" : " (éligible)"}`, value: c.name }))}
-                  noOptionsMessage={"Aucune cohorte éligible n'est disponible."}
-                  closeMenuOnSelect
-                  isClearable={true}
-                  value={cohort}
-                  onChange={setCohort}
-                /> */
                 <Select
                   className="text-left"
                   placeholder="Choix de la nouvelle cohorte"
