@@ -316,7 +316,7 @@ jobs:
         run: git push origin ${{ env.production_branch }}
 
       - name: Update production_state branch
-        run: git push -f origin production_state
+        run: git push -f origin HEAD:production_state
 
       - name: Remove RC branch
         run: git push origin --delete ${{ needs.prepare.outputs.target_branch }}
