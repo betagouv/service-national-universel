@@ -37,7 +37,6 @@ async function runAPI(runCronsOnCC) {
         console.log("SUPPORT_URL", config.SUPPORT_URL);
         console.log("KNOWLEDGEBASE_URL", config.KNOWLEDGEBASE_URL);
         console.log("ANALYTICS_URL", config.API_ANALYTICS_ENDPOINT);
-        console.log("ENVIRONMENT: ", config.ENVIRONMENT);
     }
 
     await initDB();

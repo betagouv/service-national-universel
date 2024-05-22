@@ -1,9 +1,21 @@
 const { resolveAsyncConfigs } = require('config/async');
 const config = require("config");
 
+// NODE_ENV environment variable (default "development") is used by :
+// - node-config : to determine the config file used in ./config
+// - jest : unit test (NODE_ENV == "test")
+const environment = config.util.getEnv("NODE_ENV");
+console.log("ENVIRONMENT: ", environment);
+
 if (!process.env.SCW_ACCESS_KEY || !process.env.SCW_SECRET_KEY) {
-  console.error("SCW_ACCESS_KEY & SCW_SECRET_KEY are required to get configuration secrets");
-  process.exit(1);
+  const message = "SCW_ACCESS_KEY & SCW_SECRET_KEY are required to get configuration secrets";
+  if (environment === "development") {
+    console.warn(message);
+  } else {
+    console.error(message);
+    process.exitCode = 1;
+    return;
+  }
 }
 
 require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
@@ -15,14 +27,6 @@ console.error = function (message) {
   originalConsoleError.apply(console, arguments);
 };
 
-// process.on("unhandledRejection", (err) => {
-//   console.error(err);
-//   process.exit(1);
-// });
-
-// NODE_ENV environment variable (default "development") is used by :
-// - node-config : to determine the config file used in ./config
-// - jest : unit test (NODE_ENV == "test")
 resolveAsyncConfigs(config)
   .then(config => {
     const {runCrons, runAPI} = require('./main.js')
