@@ -189,7 +189,7 @@ jobs:
         shell: bash
         working-directory: ${{ env.custom_directory }}
         run: |
-          failure=0
+          failure=false
           while read name
           do
             status=$(terraform output -raw ${name}_container_status)
@@ -197,13 +197,14 @@ jobs:
             if [[ $status != "ready" ]]
             then
                 echo "Container ${name} is on '$status' state" 1>&2
-                failure=1
+                failure=true
             fi
           done <<< 'app
           admin
           api'
 
-          if [[ $failure ]]
+          if $failure
           then
-              exit 1
+            echo "failure"
+            exit 1
           fi
