@@ -260,11 +260,12 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               )}
             </Title>
             <AttestationDownloadButton young={young} />
-            {[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && young.status !== YOUNG_STATUS.WITHDRAWN && (
+            {/* temporary disabled (demande DG) */}
+            {/*             {[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && young.status !== YOUNG_STATUS.WITHDRAWN && (
               <>
                 <DsfrButton title="Désister" onClick={() => onSelectStatus(YOUNG_STATUS.WITHDRAWN)} />
               </>
-            )}
+            )} */}
           </div>
 
           {isStructure ? (

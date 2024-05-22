@@ -37,6 +37,7 @@ export const statusClassForBadge = (status) => {
 export function getRights(user, classe, cohort) {
   if (!user || !classe || !cohort) return {};
   return {
+    //Attention, le canEdit donne aussi les droit a désister la classe pour les ADMIN CLE !!!
     canEdit:
       // [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) &&
       // classe?.status !== STATUS_CLASSE.WITHDRAWN, //à garder car ça va changer
