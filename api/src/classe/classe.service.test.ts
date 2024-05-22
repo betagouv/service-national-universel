@@ -1,8 +1,12 @@
+const { dbConnect, dbClose } = require("../__tests__/helpers/db");
 const youngService = require("../young/young.service");
 const classService = require("./classe.service");
 
 const findYoungsByClasseIdSpy = jest.spyOn(youngService, "findYoungsByClasseId");
 const generateConvocationsForMultipleYoungsSpy = jest.spyOn(youngService, "generateConvocationsForMultipleYoungs");
+
+beforeAll(dbConnect);
+afterAll(dbClose);
 
 describe("ClasseService", () => {
   it("should return a pdf", async () => {

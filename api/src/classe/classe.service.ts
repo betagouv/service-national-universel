@@ -1,4 +1,4 @@
-import { CleEtablissementModel, LigneBusModel, ReferentModel, CohesionCenterModel, PointDeRassemblementModel, YoungModel } from "../models";
+import { LigneBusModel, ReferentModel, CohesionCenterModel, PointDeRassemblementModel, YoungModel } from "../models";
 import { serializeReferent, serializeYoung } from "../utils/serializer";
 
 import { findYoungsByClasseId, generateConvocationsForMultipleYoungs } from "../young/young.service";
@@ -7,12 +7,6 @@ export const generateConvocationsByClasseId = async (classeId: string) => {
   const youngsInClasse = await findYoungsByClasseId(classeId);
 
   return await generateConvocationsForMultipleYoungs(youngsInClasse);
-};
-
-export const findEtablissementsForClasses = async (classes) => {
-  const etablissementIds = classes.map(({ etablissementId }) => etablissementId).filter(Boolean);
-  const etablissements = await CleEtablissementModel.find({ _id: { $in: etablissementIds } });
-  return etablissements;
 };
 
 export const findCohesionCentersForClasses = async (classes) => {

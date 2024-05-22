@@ -12,7 +12,6 @@ import { UserRequest } from "../controllers/request";
 
 import {
   generateConvocationsByClasseId,
-  findEtablissementsForClasses,
   findCohesionCentersForClasses,
   findPdrsForClasses,
   getYoungsGroupByClasses,
@@ -69,11 +68,19 @@ router.post(
       }
       if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-      const classes = await CleClasseModel.find({
+      const allClasses = await CleClasseModel.find({
         cohort: value.cohort,
         status: { $in: [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.INSCRIPTION_TO_CHECK, STATUS_CLASSE.VALIDATED] },
-      }).lean();
-      const etablissements = await findEtablissementsForClasses(classes);
+      })
+        .populate({
+          path: "etablissement",
+        })
+        .lean();
+
+      // uniquement les classes de la région du référent
+      const classes = allClasses.filter((classe) => req.user.role !== ROLES.REFERENT_REGION || classe.etablissement?.region === req.user.region);
+
+      // const etablissements = await findEtablissementsForClasses(classes);
       const centres = await findCohesionCentersForClasses(classes);
       const pdrs = await findPdrsForClasses(classes);
       const youngs = await getYoungsGroupByClasses(classes);
@@ -82,11 +89,6 @@ router.post(
 
       for (let classe of classes) {
         // populate
-        classe.etablissement = etablissements?.find((e) => classe.etablissementId === e._id.toString());
-        if (req.user.role === ROLES.REFERENT_REGION && classe.etablissement?.region !== req.user.region) {
-          // uniquement les classes de sa région
-          continue;
-        }
         classe.cohesionCenter = centres?.find((e) => classe.cohesionCenterId === e._id.toString());
         classe.pointDeRassemblement = pdrs?.find((e) => classe.pointDeRassemblementId === e._id.toString());
         classe.ligne = lignesBus.find((e) => classe.ligneId === e._id.toString());
