@@ -2,8 +2,6 @@
 
 set -ex
 
-cd /usr/share/nginx/html
-
 if [[ $ENVIRONMENT == "" ]]
 then
     env="development"
@@ -17,9 +15,9 @@ then
   exit 1
 fi
 
-config=$(cat /docker_config/$env.json | tr -d '\n\t ' | envsubst)
+config=$(cat docker_config/$env.json | tr -d '\n\t ' | envsubst)
 
-
+cd /usr/share/nginx/html
 
 mv index.html index.html.template
 

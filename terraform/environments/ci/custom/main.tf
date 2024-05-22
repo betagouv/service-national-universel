@@ -139,15 +139,6 @@ resource "scaleway_container" "admin" {
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
-    "SENTRY_SESSION_SAMPLE_RATE" = 0.1
-    "SENTRY_TRACING_SAMPLE_RATE" = 0.1
-    "SUPPORT_URL"                = "https://support.beta-snu.dev"
-  }
-
-  secret_environment_variables = {
-    "SENTRY_URL"                 = local.secrets.SENTRY_ADMIN
-    "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
-    "VITE_USERBACK_ACCESS_TOKEN" = local.secrets.USERBACK_ACCESS_TOKEN
   }
 }
 
@@ -172,16 +163,6 @@ resource "scaleway_container" "app" {
     "ADMIN_URL"                  = "https://${local.admin_hostname}"
     "API_URL"                    = "https://${local.api_hostname}"
     "APP_URL"                    = "https://${local.app_hostname}"
-    "SENTRY_SESSION_SAMPLE_RATE" = 0.1
-    "SENTRY_TRACING_SAMPLE_RATE" = 0.1
-    "SUPPORT_URL"                = "https://support.beta-snu.dev"
-    "API_ENGAGEMENT_URL"         = local.secrets.API_ENGAGEMENT_URL
-    "API_ENGAGEMENT_SNU_ID"      = local.secrets.API_ENGAGEMENT_SNU_ID
-  }
-
-  secret_environment_variables = {
-    "SENTRY_URL"        = local.secrets.SENTRY_MONCOMPTE
-    "SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
   }
 }
 

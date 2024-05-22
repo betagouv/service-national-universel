@@ -92,20 +92,8 @@ resource "scaleway_container" "admin" {
   deploy          = true
 
   environment_variables = {
-    "NGINX_HOSTNAME"             = local.admin_hostname
-    "ENVIRONMENT"                = "production"
-    "ADMIN_URL"                  = "https://${local.admin_hostname}"
-    "API_URL"                    = "https://${local.api_hostname}"
-    "APP_URL"                    = "https://${local.app_hostname}"
-    "SENTRY_SESSION_SAMPLE_RATE" = 0.005
-    "SENTRY_TRACING_SAMPLE_RATE" = 0.01
-    "SUPPORT_URL"                = "https://support.snu.gouv.fr"
-  }
-
-  secret_environment_variables = {
-    "SENTRY_URL"                 = local.secrets.SENTRY_ADMIN
-    "SENTRY_AUTH_TOKEN"          = local.secrets.SENTRY_AUTH_TOKEN
-    "VITE_USERBACK_ACCESS_TOKEN" = local.secrets.USERBACK_ACCESS_TOKEN
+    "NGINX_HOSTNAME" = local.admin_hostname
+    "ENVIRONMENT"    = "production"
   }
 }
 
@@ -130,22 +118,8 @@ resource "scaleway_container" "app" {
   deploy          = true
 
   environment_variables = {
-    "NGINX_HOSTNAME"             = local.app_hostname
-    "ENVIRONMENT"                = "production"
-    "ADMIN_URL"                  = "https://${local.admin_hostname}"
-    "API_URL"                    = "https://${local.api_hostname}"
-    "APP_URL"                    = "https://${local.app_hostname}"
-    "SENTRY_SESSION_SAMPLE_RATE" = 0.005
-    "SENTRY_TRACING_SAMPLE_RATE" = 0.01
-    "SUPPORT_URL"                = "https://support.snu.gouv.fr"
-    "FRANCE_CONNECT_URL"         = "https://app.franceconnect.gouv.fr/api/v1"
-    "API_ENGAGEMENT_URL"         = local.secrets.API_ENGAGEMENT_URL
-    "API_ENGAGEMENT_SNU_ID"      = local.secrets.API_ENGAGEMENT_SNU_ID
-  }
-
-  secret_environment_variables = {
-    "SENTRY_URL"        = local.secrets.SENTRY_MONCOMPTE
-    "SENTRY_AUTH_TOKEN" = local.secrets.SENTRY_AUTH_TOKEN
+    "NGINX_HOSTNAME" = local.app_hostname
+    "ENVIRONMENT"    = "production"
   }
 }
 
