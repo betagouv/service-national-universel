@@ -2,7 +2,7 @@ import passport from "passport";
 import express, { Response } from "express";
 import Joi from "joi";
 
-import { ROLES, canDownloadYoungDocuments, YOUNG_STATUS } from "snu-lib";
+import { ROLES, canDownloadYoungDocuments, YOUNG_STATUS, STATUS_CLASSE } from "snu-lib";
 
 import { capture } from "@/sentry";
 import { ERRORS, isReferent } from "@/utils";
@@ -34,7 +34,6 @@ router.post(
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      // @ts-expect-error canDownloadYoungDocuments args types
       if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, null, "convocation")) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
@@ -69,7 +68,12 @@ router.post(
       if (error) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      const classes = JSON.parse(JSON.stringify(await CleClasseModel.find({ cohort: value.cohort })));
+
+      const entities = await CleClasseModel.find({
+        cohort: value.cohort,
+        status: { $in: [STATUS_CLASSE.INSCRIPTION_IN_PROGRESS, STATUS_CLASSE.INSCRIPTION_TO_CHECK, STATUS_CLASSE.VALIDATED] },
+      });
+      const classes = JSON.parse(JSON.stringify(entities));
       const etablissements = await findEtablissementsForClasses(classes);
       const centres = await findCohesionCentersForClasses(classes);
       const pdrs = await findPdrsForClasses(classes);
@@ -91,7 +95,6 @@ router.post(
         classe.studentNotAutorized = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length || 0;
         classe.studentWithdrawn = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length || 0;
       }
-      // Validé, inscription en cours, à valider
       res.send({ ok: true, data: classes });
     } catch (error) {
       capture(error);
