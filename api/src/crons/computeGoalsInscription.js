@@ -30,7 +30,6 @@ const getGoalAndComputeFillingRates = async ({ department, values }) => {
 
 exports.handler = async () => {
   try {
-    console.log("computeGoalsIncription => LE CRONS SE LANCE BIEN !");
     for (let i = 0; i < arr.length; i++) {
       const department = arr[i];
       const values = await getCount({ department });

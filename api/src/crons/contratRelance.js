@@ -36,7 +36,6 @@ const trigger = async () => {
 
 exports.handler = async () => {
   try {
-    console.log("contratRelance => LE CRONS SE LANCE BIEN !");
     trigger();
   } catch (e) {
     capture(e);
