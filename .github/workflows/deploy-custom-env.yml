@@ -202,7 +202,7 @@ jobs:
             )
             if [[ $status != "ready" ]]
             then
-                echo "Container ${name} is not on 'ready' state" 1>&2
+                echo "Container ${name} is on '$status' state" 1>&2
                 failure=1
             fi
           done <<< 'app
