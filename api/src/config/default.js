@@ -2,6 +2,7 @@ module.exports = {
   ENVIRONMENT: undefined,
   RELEASE: undefined,
   SECRET_NAME: undefined,
+  SECRET_REVISION: "latest_enabled",
   PORT: 8080,
   IMAGES_ROOTDIR: `${__dirname}/../../public/images`,
   FONT_ROOTDIR: `${__dirname}/../assets/fonts`,

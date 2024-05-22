@@ -17,7 +17,8 @@ function getSecret(key) {
       const api = new Secret.v1alpha1.API(client);
 
       const secretName = config.SECRET_NAME;
-      const secret = await api.accessSecretVersionByName({ secretName, revision: "latest_enabled" });
+      const revision = config.SECRET_REVISION;
+      const secret = await api.accessSecretVersionByName({ secretName, revision });
       const decodedData = Buffer.from(secret.data, "base64").toString("utf8");
       secrets = JSON.parse(decodedData);
     }

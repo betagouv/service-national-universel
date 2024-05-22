@@ -5,7 +5,7 @@ const config = require("config");
 // - node-config : to determine the config file used in ./config
 // - jest : unit test (NODE_ENV == "test")
 const environment = config.util.getEnv("NODE_ENV");
-console.log("ENVIRONMENT: ", environment);
+console.log("ENVIRONMENT:", environment);
 
 if (!process.env.SCW_ACCESS_KEY || !process.env.SCW_SECRET_KEY) {
   const message = "SCW_ACCESS_KEY & SCW_SECRET_KEY are required to get configuration secrets";

@@ -3,6 +3,7 @@ const asyncSecretConfig = require("../secrets-manager");
 module.exports = {
     ENVIRONMENT: "production",
     SECRET_NAME: "snu-production",
+    SECRET_REVISION: "16",
     RELEASE: process.env.RELEASE,
     API_URL: "https://api.snu.gouv.fr",
     APP_URL: "https://moncompte.snu.gouv.fr",
