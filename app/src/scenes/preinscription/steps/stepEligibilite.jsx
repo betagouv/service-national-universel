@@ -40,8 +40,6 @@ export default function StepEligibilite() {
 
   const history = useHistory();
 
-  if (!data) return <div />;
-
   const optionsScolarite = [
     { value: "NOT_SCOLARISE", label: "Non scolarisé(e)" },
     { value: "4eme", label: "4ème" },
