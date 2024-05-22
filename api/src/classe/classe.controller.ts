@@ -61,13 +61,13 @@ router.post(
   }),
   async (req: UserRequest, res: Response) => {
     try {
-      if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       const { error, value } = Joi.object({ cohort: Joi.array().min(1).items(Joi.string()).required() })
         .unknown()
         .validate(req.body, { stripUnknown: true });
       if (error) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
+      if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const classes = await CleClasseModel.find({
         cohort: value.cohort,
@@ -83,6 +83,10 @@ router.post(
       for (let classe of classes) {
         // populate
         classe.etablissement = etablissements?.find((e) => classe.etablissementId === e._id.toString());
+        if (req.user.role === ROLES.REFERENT_REGION && classe.etablissement?.region !== req.user.region) {
+          // uniquement les classes de sa région
+          continue;
+        }
         classe.cohesionCenter = centres?.find((e) => classe.cohesionCenterId === e._id.toString());
         classe.pointDeRassemblement = pdrs?.find((e) => classe.pointDeRassemblementId === e._id.toString());
         classe.ligne = lignesBus.find((e) => classe.ligneId === e._id.toString());

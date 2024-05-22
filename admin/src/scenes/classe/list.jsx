@@ -4,11 +4,11 @@ import * as FileSaver from "file-saver";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
+import { Badge, Button, Container, Header, Label, Page } from "@snu/ds/admin";
 import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE, YOUNG_STATUS } from "snu-lib";
+import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-lib";
 
 import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
@@ -104,6 +104,7 @@ export default function List() {
   ].filter(Boolean);
 
   if (classes === null) return null;
+  const isCohortSelected = selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0;
 
   return (
     <Page>
@@ -117,12 +118,10 @@ export default function List() {
             </Link>
           ),
           [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
-            <Button
-              title="Exporter"
-              onClick={() => exportData({ type: "schema-de-repartition" })}
-              loading={exportLoading}
-              disabled={!selectedFilters.cohort || selectedFilters.cohort.filter?.length === 0}
-            />
+            <div className="flex gap-2 items-center">
+              <Label title="" tooltip={!isCohortSelected ? "Vous devez selectionner une cohort pour pouvoir exporter le SR" : undefined} />
+              <Button title="Exporter le SR" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} disabled={!isCohortSelected} />
+            </div>
           ),
         ].filter(Boolean)}
       />
