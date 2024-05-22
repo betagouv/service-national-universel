@@ -251,7 +251,7 @@ jobs:
         run: curl -I "$(terraform output -raw app_endpoint)"
 
       - name: Update production_state branch
-        run: git push -f origin production_state
+        run: git push -f origin HEAD:production_state
 
   deploy_cc:
     needs: [prepare, build]
