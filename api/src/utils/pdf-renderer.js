@@ -56,7 +56,7 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
     return generateBatchCohesion(outStream, young);
   }
   if (type === "contract" && template === "2" && contract) {
-    if (new Date(contract.createAt) < new Date("2024-03-20")) {
+    if (new Date(contract.createdAt) < new Date("2024-03-20")) {
       return generateContractPhase2OldVersion(outStream, contract);
     }
     return generateContractPhase2(outStream, contract);

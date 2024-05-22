@@ -35,7 +35,7 @@ function _page1(doc) {
   _y = doc.y;
   doc.image(path.join(IMAGES_ROOTDIR, "logo-snu.png"), 40, _y, { width: 60, height: 60 });
 
-  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H1).text("Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)", 120, _y, {
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H1).text("Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU) - ancienne version", 120, _y, {
     align: "center",
     width: 430,
   });
@@ -49,29 +49,10 @@ function _page1(doc) {
 
   doc.moveDown(0.5);
   doc.text(
-    `Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé une réserve thématique dénommée « Réserve du service national universel », régie par les dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté.`,
+    `
+    Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé la « Réserve du service national universel », nouvelle réserve civique relevant des dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté. Dans ce nouveau cadre réglementaire, les missions d’intérêt général revêtent « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif, familial ou culturel, ou concourent à des missions de défense et de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté française et européenne ». Le décret du 29 juillet 2020 a précisé qu’une mission d’intérêt général correspond à un engagement volontaire d’une durée minimale de quatre-vingt-quatre heures, qui peut être accomplie de manière continue ou, dans la limite d’une période d’une année, de manière discontinue.`,
     MARGIN + 10,
     doc.y,
-    { width },
-  );
-  doc.moveDown(1);
-  doc.text(
-    `La réserve est ouverte aux mineurs âgés de quinze ans révolus satisfaisant aux conditions fixées par l'article 3 de la loi du 27 janvier 2017 susvisée et ayant participé au séjour de cohésion mentionné à l'article R. 113-1 du code du service national, qui accomplissent une mission d'intérêt général au titre du service national universel.`,
-    { width },
-  );
-  doc.moveDown(1);
-  doc.text(
-    `La mission d’intérêt général revêt « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif ou culturel, ou concourent à des missions de défense et de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté française et européenne ».`,
-    { width },
-  );
-  doc.moveDown(1);
-  doc.text(
-    `Les activités exercées dans ce cadre sont complémentaires des activités confiées aux personnels de l'organisme d'accueil et ne peuvent se substituer à la création d'un emploi ou au recrutement d'un stagiaire.`,
-    { width },
-  );
-  doc.moveDown(1);
-  doc.text(
-    `La phase d’engagement du volontaire, à l’issue du séjour de cohésion, couvre une durée minimale de quatre-vingt-quatre heures, qui peut être accomplie en continu ou, dans la limite d’une période d’une année, de manière fractionnée.`,
     { width },
   );
   doc.moveDown(0.5);
@@ -315,7 +296,7 @@ function render(doc, contract) {
   doc.fontSize(FONT_SIZE);
 
   doc.font(FONT_BOLD).text(`${contract.youngLastName} ${contract.youngFirstName}`, { continued: true });
-  doc.font(FONT).text(` s’engage à réaliser une mission d’intérêt général validée par l’autorité territoriale de gestion de la réserve du SNU : `, { continued: true });
+  doc.font(FONT).text(` s’engage à réaliser une mission d’intérêt général validée par l’autorité territoriale en charge du SNU, la mission : `, { continued: true });
   doc.font(FONT_BOLD).text(contract.missionName);
   doc.moveDown(1);
 
@@ -371,7 +352,7 @@ function render(doc, contract) {
   doc
     .font(FONT)
     .text(
-      `. La durée quotidienne de la mission est égale à huit heures au maximum. Une pause de trente minutes doit être appliquée pour toute période de mission ininterrompue atteignant quatre heures et demie. Les missions effectuées entre 22 heures et 6 heures sont interdites. Pour les missions effectuées de manière continue, le repos hebdomadaire est de deux jours consécutifs au minimum. Si le volontaire est scolarisé, la mission ne peut être effectuée sur le temps scolaire. Si le volontaire travaille, le temps de travail cumulé avec le temps d’accomplissement de la mission d’intérêt général ne peut excéder 8 heures par jour et 35 heures par semaine.`,
+      `. La durée quotidienne de la mission est égale à sept heures au maximum. Une pause de trente minutes doit être appliquée pour toute période de mission ininterrompue atteignant quatre heures et demie. Les missions effectuées entre 22 heures et 6 heures sont interdites. Pour les missions effectuées de manière continue, le repos hebdomadaire est de deux jours consécutifs au minimum. Si le volontaire est scolarisé, la mission ne peut être effectuée sur le temps scolaire. Si le volontaire travaille, le temps de travail cumulé avec le temps d’accomplissement de la mission d’intérêt général ne peut excéder 7 heures par jour et 35 heures par semaine.`,
     );
   doc.moveDown(1);
 
@@ -394,16 +375,14 @@ function render(doc, contract) {
   doc.fontSize(FONT_SIZE).font(FONT);
 
   doc.text(
-    `L’Etat, représenté par le directeur académique des services de l’Education nationale, valide la mission d’intérêt général et s’assure de la qualité des conditions de réalisation de cette mission au regard des finalités du SNU.`,
+    `L’Etat s’engage à identifier les missions susceptibles d’être proposées au volontaire dans le cadre des missions d’intérêt général. L’Etat s’assure de la qualité des conditions de réalisation de cette mission au regard des finalités du SNU. Enfin, l’Etat valide la réalisation de la mission du volontaire. La structure d’accueil s’engage à proposer des missions permettant la mobilisation du volontaire en faveur de l’intérêt général. Un mentor est nommé au sein de la structure afin de s’assurer du suivi du volontaire et de la qualité des conditions de son accueil.`,
   );
   doc.moveDown(1);
-  doc.text(
-    `La structure d’accueil s’engage à proposer des missions permettant la mobilisation du volontaire en faveur de l’intérêt général. Un tuteur est nommé au sein de la structure afin de s’assurer du suivi du volontaire et de la qualité des conditions de son accueil.`,
-  );
-  doc.moveDown(1);
+
   doc.text(
     `Le cas échéant, la structure d’accueil précise les frais qu’elle entend prendre en charge, totalement ou partiellement, dans le cadre de la mission d’intérêt général (frais de transports, repas, hébergement...).`,
   );
+  doc.moveDown(1);
   doc.moveDown(1);
   doc.text(
     `Le volontaire s’engage à respecter le règlement intérieur de la structure qui l’accueille, à respecter les personnes, le matériel et les locaux et à agir en conformité avec les exigences de son engagement dans le cadre du SNU : ponctualité, politesse, implication. Le volontaire est tenu à la discrétion pour les faits et informations dont il a connaissance dans l’exercice de ses missions. Il est également tenu aux obligations de convenance et de réserve inhérentes à ses fonctions.`,
@@ -412,11 +391,7 @@ function render(doc, contract) {
   doc.text(`Le volontaire exécute la mission d’intérêt général à titre bénévole.`);
   doc.moveDown(1);
   doc.text(
-    `L'engagement, l'affectation et l'activité du volontaire ne sont régis ni par le code du travail, ni par le chapitre Ier de la loi n° 84-16 du 11 janvier 1984 portant dispositions statutaires relatives à la fonction publique de l'Etat, le chapitre Ier de la loi n° 84-53 du 26 janvier 1984 portant dispositions statutaires relatives à la fonction publique territoriale ou le chapitre Ier de la loi n° 86-33 du 9 janvier 1986 portant dispositions statutaires relatives à la fonction publique hospitalière.`,
-  );
-  doc.moveDown(1);
-  doc.text(
-    `Le cas échéant, la structure d’accueil, directement ou par le tuteur désigné, informe le représentant de l’Etat, signataire du présent contrat, des difficultés rencontrées dans l’exécution du présent contrat.`,
+    `L'engagement, l'affectation et l'activité du volontaire ne sont régis ni par le code du travail, ni par le chapitre Ier de la loi n° 84-16 du 11 janvier 1984 portant dispositions statutaires relatives à la fonction publique de l'Etat, le chapitre Ier de la loi n° 84-53 du 26 janvier 1984 portant dispositions statutaires relatives à la fonction publique territoriale ou le chapitre Ier de la loi n° 86-33 du 9 janvier 1986 portant dispositions statutaires relatives à la fonction publique hospitalière. Le cas échéant, la structure d’accueil, directement ou par le mentor désigné, informe le représentant de l’Etat, signataire du présent contrat, des difficultés rencontrées dans l’exécution du présent contrat.`,
   );
   doc.moveDown(1);
   doc.text(
@@ -424,8 +399,17 @@ function render(doc, contract) {
   );
   doc.moveDown(2);
 
-  // E
-  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`e) Responsabilités`);
+  //E
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`e) Journée de fin de mission d'intérêt général`);
+  doc.moveDown(1);
+  doc.fontSize(FONT_SIZE).font(FONT);
+
+  doc.text(
+    `Une journée de fin de mission d’intérêt général est organisée, en dehors des heures de MIG mentionnées au b), pour préparer une éventuelle participation du volontaire à la phase III du SNU, soit un engagement volontaire de plusieurs mois, notamment dans le cadre du service civique ou du volontariat des armées. La participation du volontaire est requise.`,
+  );
+
+  // F
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`f) Responsabilités`);
   doc.moveDown(1);
   doc.fontSize(FONT_SIZE).font(FONT);
 
@@ -434,8 +418,8 @@ function render(doc, contract) {
   );
   doc.moveDown(2);
 
-  // F
-  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`f) Résiliation du contrat`);
+  // G
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`g) Résiliation du contrat`);
   doc.moveDown(1);
   doc.fontSize(FONT_SIZE).font(FONT);
 
@@ -444,14 +428,20 @@ function render(doc, contract) {
   );
   doc.moveDown(2);
 
-  // G
-  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`g) Conditions de validation de la mission d’intérêt général`);
+  // H
+  doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`h) Conditions de validation de la mission d’intérêt général`);
   doc.moveDown(1);
   doc.fontSize(FONT_SIZE).font(FONT);
 
   doc.text(
     `La confirmation de la réalisation de la mission d'intérêt général est effectuée par le tuteur de mission qui, au nom de la structure d'accueil, effectue la procédure de fin de mission sur la plateforme.`,
   );
+  doc.moveDown(1);
+  doc.text(
+    `La validation est conditionnée à la réalisation de 84 heures de mission au minimum au sein de la structure. La mission est accomplie de manière continue, ou dans la limite de la période d’une année, de manière discontinue.`,
+  );
+  doc.moveDown(1);
+  doc.text(`Réalisé le ${formatDateFRTimezoneUTC(contract.date)}.`);
   doc.moveDown(1);
   doc.moveDown(1);
 
