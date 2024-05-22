@@ -27,6 +27,10 @@ console.error = function (message) {
   originalConsoleError.apply(console, arguments);
 };
 
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 resolveAsyncConfigs(config)
   .then(config => {
     const {runCrons, runAPI} = require('./main.js')
