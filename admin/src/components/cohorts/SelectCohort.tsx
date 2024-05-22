@@ -13,13 +13,11 @@ interface Props {
   sort?: string;
   withBadge?: boolean;
   className?: string;
-  isSearchable?: boolean;
-  needDefaultValue?: boolean;
   filterFn?: (cohort: CohortState["Cohorts"][0]) => boolean;
   onChange?: (cohortName: string) => void;
 }
 
-export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, className, isSearchable, needDefaultValue }: Props) {
+export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, className }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
@@ -52,8 +50,7 @@ export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChan
       <Select
         options={options}
         value={options.find(({ value }) => value == currentCohortName) || null}
-        defaultValue={needDefaultValue ? currentCohortName : null}
-        placeholder="Select a cohort"
+        defaultValue={currentCohortName}
         maxMenuHeight={520}
         className="w-[450px] max-w-[450px]"
         controlCustomStyle={{

@@ -89,7 +89,7 @@ export default function InscriptionPanel({ onChange, value }) {
               </div>
             ) : null}
             {value.frenchNationality === "true" ? <div style={{ fontStyle: "italic", fontSize: "0.9rem" }}>🇫🇷 Nationalité française</div> : null}
-            <div className="flex flex-wrap justify-around">
+            <div style={{ display: "flex", flexWrap: "wrap" }}>
               <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
@@ -100,7 +100,7 @@ export default function InscriptionPanel({ onChange, value }) {
                 }}>
                 <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
               </button>
-              {user.role === ROLES.ADMIN && <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />}
+              <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />
             </div>
             {value.status === YOUNG_STATUS.WITHDRAWN && <div className="mt-3">⚠️ Désistement : &quot;{value.withdrawnMessage}&quot;</div>}
           </div>
