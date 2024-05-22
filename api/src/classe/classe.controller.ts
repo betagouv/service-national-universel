@@ -1,12 +1,24 @@
 import passport from "passport";
 import express, { Response } from "express";
 import Joi from "joi";
-import { capture } from "../sentry";
-import { ERRORS, isReferent } from "../utils";
-import { canDownloadYoungDocuments } from "snu-lib";
-import { generateConvocationsByClasseId } from "./classe.service";
 
-import { UserRequest } from "../controllers/request";
+import { ROLES, canDownloadYoungDocuments, YOUNG_STATUS } from "snu-lib";
+
+import { capture } from "@/sentry";
+import { ERRORS, isReferent } from "@/utils";
+import { CleClasseModel } from "@/models";
+
+import { UserRequest } from "@/controllers/request";
+
+import {
+  generateConvocationsByClasseId,
+  findEtablissementsForClasses,
+  findCohesionCentersForClasses,
+  findPdrsForClasses,
+  findYoungsForClasses,
+  findLigneInfoForClasses,
+  findReferentInfoForClasses,
+} from "./classe.service";
 
 const router = express.Router();
 router.post(
@@ -22,6 +34,7 @@ router.post(
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
+      // @ts-expect-error canDownloadYoungDocuments args types
       if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, null, "convocation")) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
@@ -34,6 +47,52 @@ router.post(
         "cache-control": "public, max-age=1",
       });
       res.send(convocations);
+    } catch (error) {
+      capture(error);
+      return res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
+
+router.post(
+  "/export",
+  passport.authenticate(["young", "referent"], {
+    session: false,
+    failWithError: true,
+  }),
+  async (req: UserRequest, res: Response) => {
+    try {
+      if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const { error, value } = Joi.object({ cohort: Joi.array().min(1).items(Joi.string()).required() })
+        .unknown()
+        .validate(req.body, { stripUnknown: true });
+      if (error) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      const classes = JSON.parse(JSON.stringify(await CleClasseModel.find({ cohort: value.cohort })));
+      const etablissements = await findEtablissementsForClasses(classes);
+      const centres = await findCohesionCentersForClasses(classes);
+      const pdrs = await findPdrsForClasses(classes);
+      const youngs = await findYoungsForClasses(classes);
+      const lignesBus = await findLigneInfoForClasses(classes);
+      const referents = await findReferentInfoForClasses(classes);
+
+      for (let classe of classes) {
+        classe.etablissement = etablissements?.find((e) => classe.etablissementId === e._id.toString());
+        classe.cohesionCenter = centres?.find((e) => classe.cohesionCenterId === e._id.toString());
+        classe.pointDeRassemblement = pdrs?.find((e) => classe.pointDeRassemblementId === e._id.toString());
+        classe.ligne = lignesBus.find((e) => classe.ligneId === e._id.toString());
+        classe.referentClasse = referents?.filter((e) => classe.referentClasseIds.includes(e._id.toString()));
+        const classeYoungs = youngs[classe._id];
+        classe.studentInProgress = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length || 0;
+        classe.studentWaiting = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length || 0;
+        classe.studentValidated = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length || 0;
+        classe.studentAbandoned = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length || 0;
+        classe.studentNotAutorized = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length || 0;
+        classe.studentWithdrawn = classeYoungs?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length || 0;
+      }
+      // Validé, inscription en cours, à valider
+      res.send({ ok: true, data: classes });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: error.message });
