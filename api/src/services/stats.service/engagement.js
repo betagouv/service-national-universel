@@ -264,6 +264,7 @@ async function getYoungsWhoStartedOrFinishedMissions(startDate, endDate, user) {
     },
     size: ES_NO_LIMIT,
     track_total_hits: true,
+    _source: false,
   };
 
   if (user.role === ROLES.REFERENT_DEPARTMENT) {

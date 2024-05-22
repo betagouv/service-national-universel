@@ -107,7 +107,7 @@ export default function Affected() {
                 <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
               </div>
               <div className="col-span-2">
-                <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
+                <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} data={data}/>
               </div>
             </div>
 

@@ -220,7 +220,14 @@ function canViewReferent(actor, target) {
   return isMe || isAdminOrReferent || isResponsibleModifyingResponsible || isHeadCenter || isAdministratorCLE || isReferentClasse;
 }
 
-function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }) {
+type CanUpdateReferent = {
+  actor: any;
+  originalTarget: any;
+  modifiedTarget: any | null;
+  structure: any;
+};
+
+function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }: CanUpdateReferent) {
   const isMe = actor._id?.toString() === originalTarget._id?.toString();
   const isAdmin = actor.role === ROLES.ADMIN;
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
@@ -302,7 +309,9 @@ function canViewYoungFile(actor, target, targetCenter = null) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
   const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
+  // @ts-ignore
   const isReferentCenterFromSameDepartmentTargetCenter = actor.department === targetCenter?.department;
+  // @ts-ignore
   const isReferentCenterFromSameRegionTargetCenter = actor.region === targetCenter?.region;
   const authorized =
     isAdmin ||
