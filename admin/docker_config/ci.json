@@ -1,0 +1,10 @@
+{
+    "ENVIRONMENT":"ci",
+    "API_URL":"http://localhost:8080",
+    "APP_URL":"http://localhost:8081",
+    "ADMIN_URL":"http://localhost:8082",
+    "SUPPORT_URL":"http://localhost:8083",
+    "MAINTENANCE":"$MAINTENANCE",
+    "RELEASE":"$RELEASE",
+    "SENTRY_URL":"$SENTRY_URL"
+}

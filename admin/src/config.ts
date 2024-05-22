@@ -24,8 +24,8 @@ const maintenance = getEnv("MAINTENANCE") === "true";
 const environment: "production" | "staging" | "ci" | "custom" | "test" | "development" = getEnv("ENVIRONMENT", "development");
 const RELEASE = getEnv("RELEASE");
 const SENTRY_URL = getEnv("SENTRY_URL");
-const SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 1.0);
-const SENTRY_SESSION_SAMPLE_RATE = getEnv("SENTRY_SESSION_SAMPLE_RATE", 1.0);
-const SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("SENTRY_ON_ERROR_SAMPLE_RATE", 1.0);
+const SENTRY_TRACING_SAMPLE_RATE = getEnv("SENTRY_TRACING_SAMPLE_RATE", 0.1);
+const SENTRY_SESSION_SAMPLE_RATE = getEnv("SENTRY_SESSION_SAMPLE_RATE", 0.1);
+const SENTRY_ON_ERROR_SAMPLE_RATE = getEnv("SENTRY_ON_ERROR_SAMPLE_RATE", 1);
 
 export { apiURL, appURL, RELEASE, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_ON_ERROR_SAMPLE_RATE, environment, adminURL, supportURL, maintenance };
