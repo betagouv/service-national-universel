@@ -350,7 +350,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               </div>
             </div>
             <Field
-              mode="edition"
+              mode={[ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) ? "readonly" : "edition"}
               name="status"
               label={translate(phase)}
               value={translateInscriptionStatus(young.status)}
