@@ -251,7 +251,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
               <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
             </div>
             <div className="w-[45%]">
-              <p className="mb-3">Date du séjour</p>
+              <p className="mb-3">Dates du séjour</p>
               <div className="flex flex-col w-full">
                 <div className="flex flex-col gap-2 rounded-lg bg-gray-100 px-3 py-2 mb-2">
                   <div className="flex items-center justify-between">
