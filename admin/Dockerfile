@@ -57,6 +57,7 @@ COPY --from=builder /app/admin/docker_config docker_config
 RUN chmod +x ./docker_start.sh
 
 ENV APP_NAME admin
+ARG RELEASE=""
 ENV RELEASE=${RELEASE}
 
 EXPOSE 8080

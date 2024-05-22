@@ -50,6 +50,7 @@ LABEL org.opencontainers.image.source="https://github.com/betagouv/service-natio
 ENV APP_NAME api
 ENV PORT 8080
 ENV HOST 0.0.0.0
+ARG RELEASE=""
 ENV RELEASE=${RELEASE}
 ENV NODE_CONFIG_DIR=./api/src/config
 
