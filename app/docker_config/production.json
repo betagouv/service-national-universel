@@ -1,11 +1,12 @@
 {
-    "ENVIRONMENT":"production",
-    "API_URL":"https://api.snu.gouv.fr",
-    "APP_URL":"https://moncompte.snu.gouv.fr",
-    "ADMIN_URL":"https://admin.snu.gouv.fr",
-    "SUPPORT_URL":"https://support.snu.gouv.fr",
-    "MAINTENANCE":"$MAINTENANCE",
-    "RELEASE":"$RELEASE",
-    "SENTRY_TRACING_SAMPLE_RATE":"0.01",
-    "SENTRY_SESSION_SAMPLE_RATE":"0.005"
+  "ENVIRONMENT": "production",
+  "API_URL": "https://api.snu.gouv.fr",
+  "APP_URL": "https://moncompte.snu.gouv.fr",
+  "ADMIN_URL": "https://admin.snu.gouv.fr",
+  "SUPPORT_URL": "https://support.snu.gouv.fr",
+  "FRANCE_CONNECT_URL": "https://app.franceconnect.gouv.fr/api/v1",
+  "MAINTENANCE": "$MAINTENANCE",
+  "RELEASE": "$RELEASE",
+  "SENTRY_SESSION_SAMPLE_RATE": "0.005",
+  "SENTRY_TRACING_SAMPLE_RATE": "0.01"
 }
