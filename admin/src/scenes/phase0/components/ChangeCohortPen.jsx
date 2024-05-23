@@ -200,7 +200,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Nouvelle cohorte :</div>
-                  <Badge title={cohort.label} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
+                  <Badge title={cohort.value} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
                 </div>
               </div>
             </div>
@@ -242,7 +242,8 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                     {young.firstName} <span className="uppercase">{young.lastName}</span>
                   </span>
                   , votre changement de séjour pour le Service National Universel a bien été pris en compte. Vous êtes maintenant positionné(e) sur le séjour de{" "}
-                  <span className="font-medium">{cohort.name}</span>.{!young.cniFiles?.length && !young.files?.cniFiles?.length && " Veuillez ajouter votre CNI dans votre compte."}
+                  <span className="font-medium">{cohort.value}</span>.
+                  {!young.cniFiles?.length && !young.files?.cniFiles?.length && " Veuillez ajouter votre CNI dans votre compte."}
                 </p>
                 <textarea
                   className="my-6 px-[10px] py-[6px] w-full min-h-[88px] rounded-md border-[1px] border-gray-300 bg-white"
@@ -265,7 +266,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   setIsSaving(true);
                   await api.put(`/referent/young/${young._id}/change-cohort`, {
                     source: YOUNG_SOURCE.VOLONTAIRE,
-                    cohort: cohort.name,
+                    cohort: cohort.value,
                     message: emailMessage,
                     cohortChangeReason: motif.label,
                   });
