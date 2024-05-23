@@ -34,10 +34,7 @@ export default function Contract({ young }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   let { applicationId } = useParams();
-  // manager_department
 
-  // We load the first application that has VALIDATED status.
-  // Then we load associated mission, tutor and structure (because we need all this mess).
   const [application, setApplication] = useState(null);
   const [contract, setContract] = useState(null);
   const [mission, setMission] = useState(null);
@@ -50,90 +47,42 @@ export default function Contract({ young }) {
   });
 
   useEffect(() => {
-    const getApplication = async () => {
-      if (!young) return;
-      // todo : why not just
-      // let { ok, data, code } = await api.get(`/application/${applicationId}`);
-      let { ok, data, code } = await api.get(`/young/${young._id}/application`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      const currentApplication = data.find((e) => e._id === applicationId);
-
-      if (currentApplication.contractId) {
-        ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
-        if (!ok) {
-          capture(new Error(code));
-          return toastr.error("Oups, une erreur est survenue", code);
-        }
-        setContract(data);
-      }
-      setApplication(currentApplication);
-    };
-    getApplication();
-  }, []);
-
-  useEffect(() => {
-    const getMission = async () => {
-      if (!application) return;
-      const { ok, data, code } = await api.get(`/mission/${application.missionId}`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      return setMission(data);
-    };
-    getMission();
-  }, [application]);
-
-  useEffect(() => {
-    const getTutor = async () => {
+    (async () => {
       try {
-        if (!application || !(application.tutorId || application.tutor?._id)) return setTutor({});
-        const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
-        if (!ok) {
-          toastr.warning(translate(code), `Aucun représentant de la structure n'a été trouvé`, { timeOut: 5000 });
-          return setTutor({});
-        }
-        return setTutor(data);
-      } catch (e) {
-        return setTutor({});
-      }
-    };
-    getTutor();
-  }, [application]);
+        const { ok, data: application, code } = await api.get(`/application/${applicationId}`);
+        if (!ok) throw new Error(code);
 
-  useEffect(() => {
-    const getManagerDepartment = async () => {
-      try {
-        if (!young) return;
-        const { ok, data, code } = await api.get(`/department-service/${young.department}`);
-        if (!ok) {
-          toastr.warning(translate(code), `Aucun représentant de l'état n'a été trouvé pour le département ${young.department}`, { timeOut: 5000 });
-          return setManagerDepartment({});
-        }
-        if (data.representantEtat && Object.keys(data.representantEtat).length) return setManagerDepartment(data.representantEtat);
-        else setManagerDepartment({});
-      } catch (e) {
-        setManagerDepartment({});
-      }
-    };
-    getManagerDepartment();
-  }, [young]);
+        const { ok: contractOk, data: contract, code: contractCode } = await api.get(`/contract/${application.contractId}`);
+        if (!contractOk) throw new Error(contractCode);
 
-  useEffect(() => {
-    const getStructure = async () => {
-      if (!application) return;
-      const { ok, data, code } = await api.get(`/structure/${application.structureId}`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
+        const { ok: missionOk, data: mission, code: missionCode } = await api.get(`/mission/${application.missionId}`);
+        if (!missionOk) throw new Error(missionCode);
+
+        const { ok: tutorOk, data: tutor, code: tutorCode } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
+        if (!tutorOk) throw new Error(tutorCode);
+
+        const { ok: managerOk, data: manager, code: managerCode } = await api.get(`/department-service/${young.department}`);
+        if (!managerOk) throw new Error(managerCode);
+
+        const { ok: structureOk, data: structure, code: structureCode } = await api.get(`/structure/${application.structureId}`);
+        if (!structureOk) throw new Error(structureCode);
+
+        setApplication(application);
+        setContract(contract);
+        setMission(mission);
+        setTutor(tutor);
+        setStructure(structure);
+        if (Object.keys(manager.representantEtat).length) {
+          setManagerDepartment(manager.representantEtat);
+        } else {
+          toastr.warning(translate(managerCode), `Aucun représentant de l'état n'a été trouvé pour le département ${young.department}`, { timeOut: 5000 });
+        }
+      } catch (e) {
+        toastr.error("Oups, une erreur est survenue", translate(e.message));
+        capture(e);
       }
-      return setStructure(data);
-    };
-    getStructure();
-  }, [application]);
+    })();
+  }, [young, applicationId]);
 
   const onSubmit = async (values) => {
     try {
@@ -194,7 +143,7 @@ export default function Contract({ young }) {
     if (values["structureManagerEmail"]) await setFieldValue("structureManagerEmail", values["structureManagerEmail"].trim());
   };
 
-  if (!application || !mission || !managerDepartment || !tutor || !structure) return <Loader />;
+  if (!application || !mission || !tutor || !structure) return <Loader />;
 
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
 
