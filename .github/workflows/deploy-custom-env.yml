@@ -184,3 +184,26 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
             --data "{ \"body\": \"Application endpoints :\n\n- $api_endpoint\n- $app_endpoint\n- $admin_endpoint\" }"
+
+      - name: Healthchecks
+        shell: bash
+        working-directory: ${{ env.custom_directory }}
+        run: |
+          failure=false
+          while read name
+          do
+            status=$(terraform output -raw ${name}_container_status)
+            echo $name $status
+            if [[ $status != "ready" ]]
+            then
+                echo "Container ${name} is on '$status' state" 1>&2
+                failure=true
+            fi
+          done <<< 'app
+          admin
+          api'
+
+          if $failure
+          then
+            exit 1
+          fi
