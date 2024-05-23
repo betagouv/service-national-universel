@@ -32,6 +32,9 @@ export function filterDataForYoungSection(data, section) {
       foreignCity: data.foreignCity,
       foreignCountry: data.foreignCountry,
       files: data.files,
+      cohort: data.cohort,
+      parentStatementOfHonorInvalidId: data.parentStatementOfHonorInvalidId,
+      parent1Email: data.parent1Email,
     };
   } else if (section === "parent") {
     bodyYoungSection = {
