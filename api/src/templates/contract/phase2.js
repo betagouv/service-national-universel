@@ -190,18 +190,6 @@ function _page2(doc, contract) {
   }
 }
 
-function render(doc, contract) {
-  _page1(doc);
-
-  _page2(doc, contract);
-
-  if (new Date(contract.createdAd) < new Date("2024-03-20")) {
-    _page3Old(doc, contract);
-  } else {
-    _page3(doc, contract);
-  }
-}
-
 function _pageCharte(doc) {
   doc.addPage();
 
@@ -310,6 +298,17 @@ function _pageCharte(doc) {
   doc.moveDown(1);
 }
 
+function render(doc, contract) {
+  _page1(doc);
+
+  _page2(doc, contract);
+
+  if (new Date(contract.createdAd) < new Date("2024-03-20")) {
+    _page3Old(doc, contract);
+  } else {
+    _page3(doc, contract);
+  }
+}
 function _page3Old(doc, contract) {
   doc.addPage();
 
