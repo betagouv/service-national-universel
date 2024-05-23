@@ -26,7 +26,7 @@ export { default as WaitingListModel } from "./waitingList";
 export { default as YoungModel } from "./young";
 
 export { default as CleClasseModel } from "./cle/classe";
-export { default as CleEtablissement } from "./cle/etablissement";
+export { default as CleEtablissementModel } from "./cle/etablissement";
 
 export { default as ImportPlanTransportModel } from "./PlanDeTransport/importPlanTransport";
 export { default as LigneBusModel } from "./PlanDeTransport/ligneBus";
