@@ -19,7 +19,6 @@
   require("./services/databases/redis.service");
 
   // @todo: can it be removed?
-  // ! Gérer ici la variable ?
   const origin = ["http://localhost:8085"];
   app.use(cors({ credentials: true, origin }));
   app.use(bodyParser.json({ limit: "50mb" }));
