@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useLocation } from "react-router-dom";
 
-import { department2region, region2department, ROLES } from "snu-lib";
+import { department2region, region2department, ROLES, COHORT_TYPE } from "snu-lib";
 
 import { capture } from "@/sentry";
 import API from "@/services/api";
@@ -22,7 +22,7 @@ import BoxAffectation from "./components/BoxAffectation";
 import BoxDisponibilite from "./components/BoxDisponibilite";
 import BoxCentres from "./components/BoxCentres";
 import DetailTable from "./components/DetailTable";
-import { exportSRCLE } from "./utils";
+import { exportSRCLE, exportSRHTS } from "./utils";
 
 import { parseQuery } from "../util";
 import PlanTransportBreadcrumb from "../components/PlanTransportBreadcrumb";
@@ -87,9 +87,9 @@ export default function SchemaRepartition({ region, department }) {
     }
     const { cohort } = parseQuery(location.search);
     if (cohort && cohortList && updatedCohortsList.find((c) => c.name === cohort)) {
-      setCohort(cohort);
+      setCohort(updatedCohortsList.find((c) => c.name === cohort));
     } else {
-      setCohort(updatedCohortsList?.[0]?.name || null);
+      setCohort(updatedCohortsList?.[0] || null);
     }
     setFilteredCohortList(updatedCohortsList);
   }, [cohortList]);
@@ -167,7 +167,7 @@ export default function SchemaRepartition({ region, department }) {
       if (department) {
         url += "/" + department;
       }
-      const { data, ok } = await API.get(url + "/" + cohort);
+      const { data, ok } = await API.get(url + "/" + cohort.name);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
       setData(data);
       setLoading(false);
@@ -179,41 +179,47 @@ export default function SchemaRepartition({ region, department }) {
 
   function goToNational() {
     if ([ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION].includes(user.role)) {
-      history.push("/schema-repartition?cohort=" + cohort);
+      history.push("/schema-repartition?cohort=" + cohort.name);
     }
     // if (region && user.role === ROLES.REFERENT_REGION) {
-    //   history.push(`/schema-repartition/${region}?cohort=${cohort}`);
+    //   history.push(`/schema-repartition/${region}?cohort=${cohort.name}`);
     // }
   }
 
   function goToRegion() {
     if (region && user.role !== ROLES.REFERENT_DEPARTMENT) {
-      history.push(`/schema-repartition/${region}?cohort=${cohort}`);
+      history.push(`/schema-repartition/${region}?cohort=${cohort.name}`);
     }
   }
 
   // function goToDepartment() {
   //   if (region && department) {
-  //     history.push(`/schema-repartition/${region}/${department}?cohort=${cohort}`);
+  //     history.push(`/schema-repartition/${region}/${department}?cohort=${cohort.name}`);
   //   }
   // }
 
   function goToRow(row) {
     if (region) {
-      history.push(`/schema-repartition/${region}/${row.name}?cohort=${cohort}`);
+      history.push(`/schema-repartition/${region}/${row.name}?cohort=${cohort.name}`);
     } else {
-      history.push(`/schema-repartition/${row.name}?cohort=${cohort}`);
+      history.push(`/schema-repartition/${row.name}?cohort=${cohort.name}`);
     }
   }
 
-  async function exportDetail() {
-    if (user.role === ROLES.TRANSPORTER) {
-      await exportSRCLE(cohort);
-    } else {
-      const groups = await loadExportData();
-      const result = await exportExcelSheet(groups);
-      const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
-      FileSaver.saveAs(new Blob([buffer], { type: ExcelFileType }), result.fileName);
+  async function handleExportDetail() {
+    try {
+      if (cohort.type === COHORT_TYPE.CLE) {
+        await exportSRCLE(cohort.name);
+      } else {
+        await exportSRHTS(cohort.name, region, department);
+        /* const groups = await loadExportData();
+        const result = await exportExcelSheet(groups);
+        const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
+        FileSaver.saveAs(new Blob([buffer], { type: ExcelFileType }), result.fileName); */
+      }
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des données. Nous ne pouvons exporter les données.");
     }
   }
 
@@ -311,10 +317,10 @@ export default function SchemaRepartition({ region, department }) {
 
   const getSchemaRepartitionRoute = () => {
     if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role)) {
-      return `/schema-repartition?cohort=${cohort}`;
+      return `/schema-repartition?cohort=${cohort.name}`;
     }
     if (region && user.role === ROLES.REFERENT_REGION) {
-      return `/schema-repartition/${region}?cohort=${cohort}`;
+      return `/schema-repartition/${region}?cohort=${cohort.name}`;
     }
   };
 
@@ -324,7 +330,7 @@ export default function SchemaRepartition({ region, department }) {
   };
 
   const handleChangeDepartment = (value) => {
-    history.push(`/schema-repartition/${department2region[value]}/${value}?cohort=${cohort}`);
+    history.push(`/schema-repartition/${department2region[value]}/${value}?cohort=${cohort.name}`);
   };
 
   if (!cohort) return <Loading />;
@@ -343,7 +349,7 @@ export default function SchemaRepartition({ region, department }) {
           {filteredCohortList.length > 0 && (
             <div className="flex gap-4">
               {user.role === ROLES.REFERENT_DEPARTMENT && user.department.length > 1 && <Select options={departementsList} value={department} onChange={handleChangeDepartment} />}
-              <SelectCohort cohort={cohort} onChange={handleChangeCohort} sort="dateStart" filterFn={(c) => filteredCohortList.find(({ name }) => name === c.name)} />
+              <SelectCohort cohort={cohort.name} onChange={handleChangeCohort} sort="dateStart" filterFn={(c) => filteredCohortList.find(({ name }) => name === c.name)} />
             </div>
           )}
         </div>
@@ -368,7 +374,7 @@ export default function SchemaRepartition({ region, department }) {
             {isDepartmental ? (
               <>
                 <SchemaEditor
-                  onExportDetail={exportDetail}
+                  onExportDetail={handleExportDetail}
                   region={region}
                   department={department}
                   cohort={cohort}
@@ -380,7 +386,7 @@ export default function SchemaRepartition({ region, department }) {
                 <SchemaDepartmentDetail department={department} cohort={cohort} departmentData={data} />
               </>
             ) : (
-              <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={exportDetail} cohort={cohort} user={user} />
+              <DetailTable rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={handleExportDetail} cohort={cohort} user={user} />
             )}
           </>
         )}

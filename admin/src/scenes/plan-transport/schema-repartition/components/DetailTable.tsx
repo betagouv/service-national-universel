@@ -5,23 +5,23 @@ import { toastr } from "react-redux-toastr";
 
 import ExternalLink from "@/assets/icons/ExternalLink";
 
-import { ROLES, getDepartmentNumber } from "snu-lib";
-import { getCohortByName } from "@/services/cohort.service";
+import { ROLES, getDepartmentNumber, COHORT_TYPE } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 
 import { Box, BoxHeader, Badge, Loading, AlertPoint } from "../../components/commons";
 import { formatRate } from "../../util";
 
-export default function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort: cohortName, user }) {
+export default function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort, user }) {
   const [isUserAuthorizedToExportData, setIsUserAuthorizedToExportData] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   function goToRow(row) {
     onGoToRow && onGoToRow(row);
   }
+  console.log("cohort", cohort.type);
+  console.log(COHORT_TYPE.VOLONTAIRE);
 
   const checkIfUserIsAuthorizedToExportData = async () => {
-    const { data: cohort } = await getCohortByName(cohortName);
     if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {
       setIsUserAuthorizedToExportData(false);
       return;
@@ -31,7 +31,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
 
   useEffect(() => {
     checkIfUserIsAuthorizedToExportData();
-  }, [cohortName]);
+  }, [cohort]);
 
   const handleClickedExport = async () => {
     try {
@@ -57,7 +57,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
           </ReactTooltip>
         </span>
       </BoxHeader>
-      {user.role !== ROLES.TRANSPORTER && (
+      {cohort?.type === COHORT_TYPE.VOLONTAIRE && (
         <div className="border-t-[1px] border-b-[##E5E7EB] mt-[24px]">
           <table className="w-[100%]">
             <thead className="text-[11px] uppercase leading-[16px] text-[#7E858C]">
@@ -108,7 +108,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
                         )}
                         {user.role !== ROLES.TRANSPORTER && (
                           <Link
-                            to={getIntradepartmentalYoungsLink(isNational ? row.name : null, isNational ? null : row.name, cohortName)}
+                            to={getIntradepartmentalYoungsLink(isNational ? row.name : null, isNational ? null : row.name, cohort.name)}
                             className="ml-2"
                             onClick={(e) => {
                               e.stopPropagation();

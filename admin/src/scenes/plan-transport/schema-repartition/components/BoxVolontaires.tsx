@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import cx from "classnames";
 
 import ExternalLink from "@/assets/icons/ExternalLink";
 import People from "@/assets/icons/People";
@@ -9,7 +10,7 @@ import { Box, MiniTitle, Badge, BigDigits, Loading } from "../../components/comm
 export default function BoxVolontaires({ summary, className = "", loading }) {
   return (
     <Box>
-      <div className={cx("mb-[10px] flex items-center",  className)}>
+      <div className={cx("mb-[10px] flex items-center", className)}>
         <MiniTitle>Volontaires</MiniTitle>
         {!loading && summary.intradepartmental > 0 && (
           <>
@@ -26,11 +27,7 @@ export default function BoxVolontaires({ summary, className = "", loading }) {
         <div className="flex items-center">
           <People className="text-[#9CA3AF]" />
           <BigDigits className="mx-[8px]">{summary.total}</BigDigits>
-          {summary.intradepartmental > 0 ? (
-            <div>dont {summary.intradepartmental} intra-départemental</div>
-          ) : (
-            <Badge>{formatRate(summary.assigned, summary.total)} affectés</Badge>
-          )}
+          {summary.intradepartmental > 0 ? <div>dont {summary.intradepartmental} intra-départemental</div> : <Badge>{formatRate(summary.assigned, summary.total)} affectés</Badge>}
         </div>
       )}
     </Box>
