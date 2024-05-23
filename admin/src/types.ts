@@ -23,7 +23,7 @@ export type Center = {
   department: string;
   domain: string;
   name: string;
-  placesTotal?: number;
+  placesTotal: number;
   pmr: string;
   region: string;
   sessionStatus: string[];
