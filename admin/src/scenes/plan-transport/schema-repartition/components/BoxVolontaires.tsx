@@ -27,7 +27,7 @@ export default function BoxVolontaires({ summary, className = "", loading }) {
           <People className="text-[#9CA3AF]" />
           <BigDigits className="mx-[8px]">{summary.total}</BigDigits>
           {summary.intradepartmental > 0 ? (
-            <div className="">dont {summary.intradepartmental} intra-départemental</div>
+            <div>dont {summary.intradepartmental} intra-départemental</div>
           ) : (
             <Badge>{formatRate(summary.assigned, summary.total)} affectés</Badge>
           )}
