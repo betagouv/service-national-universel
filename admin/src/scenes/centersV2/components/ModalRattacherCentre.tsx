@@ -51,7 +51,7 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
 
   const handleChange = (option) => {
     if (option.value === "new") {
-      history.push("/centre/nouveau");
+      history.push(`/centre/nouveau?cohort=${selectedCohort}`);
       return;
     }
     setSelectedCentre(option.center);
