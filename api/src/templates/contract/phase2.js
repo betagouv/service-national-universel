@@ -190,6 +190,18 @@ function _page2(doc, contract) {
   }
 }
 
+function render(doc, contract) {
+  _page1(doc);
+
+  _page2(doc, contract);
+
+  if (new Date(contract.createdAd) < new Date("2024-03-20")) {
+    _page3Old(doc, contract);
+  } else {
+    _page3(doc, contract);
+  }
+}
+
 function _pageCharte(doc) {
   doc.addPage();
 
@@ -298,7 +310,7 @@ function _pageCharte(doc) {
   doc.moveDown(1);
 }
 
-function _page3_old(doc, contract) {
+function _page3Old(doc, contract) {
   doc.addPage();
 
   doc.font(FONT).text(`Il a été convenu ce qui suit :`);
@@ -690,18 +702,6 @@ function _signature(doc, contract) {
         doc.text(formatDateFRTimezoneUTC(contract.parent2ValidationDate));
       }
     }
-  }
-}
-
-function render(doc, contract) {
-  _page1(doc);
-
-  _page2(doc, contract);
-
-  if (new Date(contract.createdAd) < new Date("2024-03-20")) {
-    _page3_old(doc, contract);
-  } else {
-    _page3(doc, contract);
   }
 }
 
