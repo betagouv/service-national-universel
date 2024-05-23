@@ -6,7 +6,7 @@ module.exports = {
   },
   moduleFileExtensions: ["js", "json", "ts"],
   modulePaths: ["<rootDir>"],
-  testRegex: ".*.spec.js$",
+  testRegex: ".*.spec.(js|ts)$",
   testPathIgnorePatterns: ["/(common-js|node_modules)/"],
   testEnvironment: "node",
   preset: "ts-jest",
