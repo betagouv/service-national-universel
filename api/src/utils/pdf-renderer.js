@@ -15,7 +15,6 @@ const { generateCertifSNU } = require("../templates/certificate/snu");
 const { generateDroitImage } = require("../templates/droitImage/droitImage");
 const { generateCohesion, generateBatchCohesion } = require("../templates/convocation/cohesion");
 const { generateContractPhase2 } = require("../templates/contract/phase2");
-const { generateContractPhase2OldVersion } = require("../templates/contract/phase2-old");
 
 class InMemoryWritable extends Writable {
   constructor(options) {
@@ -56,9 +55,6 @@ async function generatePdfIntoStream(outStream, { type, template, young, contrac
     return generateBatchCohesion(outStream, young);
   }
   if (type === "contract" && template === "2" && contract) {
-    if (new Date(contract.createdAt) < new Date("2024-03-20")) {
-      return generateContractPhase2OldVersion(outStream, contract);
-    }
     return generateContractPhase2(outStream, contract);
   }
   throw new Error(ERRORS.NOT_FOUND);
