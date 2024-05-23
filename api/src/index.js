@@ -113,11 +113,6 @@
   });
   app.use(loggingMiddleware);
 
-  // WARNING : CleverCloud only
-  if (process.env.RUN_CRONS_CC && ENVIRONMENT === "production" && process.env.CC_DEPLOYMENT_ID && process.env.INSTANCE_NUMBER === "0") {
-    require("./crons");
-  }
-
   app.use(cookieParser());
 
   app.use(express.static(__dirname + "/../public"));
