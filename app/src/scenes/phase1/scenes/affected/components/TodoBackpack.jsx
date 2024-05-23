@@ -7,7 +7,7 @@ import SnuBackPack from "../assets/SnuBackPack";
 import { ModalConvocation } from "./ModalConvocation";
 import useAuth from "@/services/useAuth";
 
-export default function TodoBackpack({ lunchBreak }) {
+export default function TodoBackpack({ lunchBreak, data }) {
   const { isCLE } = useAuth();
   const [modalConvocationOpen, setModalConvocationOpen] = useState(false);
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
@@ -37,8 +37,8 @@ export default function TodoBackpack({ lunchBreak }) {
     <div className="mx-[0.5rem] flex overflow-hidden rounded-xl bg-white shadow-nina md:mx-[0rem] md:shadow-none">
       <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
 
-      <div className="relative p-4">
-        <h1 className="mb-6 text-xl font-bold">Dans mon sac...</h1>
+      <div className="relative p-4 xl:w-1/2">
+        <h1 className="mb-6 text-xl font-bold">A préparer...</h1>
         {!isCLE && (
           <>
             <div className="flex items-baseline gap-4">
@@ -67,7 +67,14 @@ export default function TodoBackpack({ lunchBreak }) {
             <button onClick={() => setMedicalFileModalOpen(true)} className="h-6 font-semibold underline decoration-2 underline-offset-4">
               fiche sanitaire
             </button>{" "}
-            complétée, sous enveloppe destinée au référent sanitaire
+            {data.session.sanitaryContactEmail ? (
+              <>
+                <p>complétée, à envoyer par e-mail à</p>
+                <p>{data.session.sanitaryContactEmail}</p>
+              </>
+            ) : (
+              "complétée, sous enveloppe destinée au référent sanitaire"
+            )}
           </label>
         </div>
 
@@ -87,7 +94,7 @@ export default function TodoBackpack({ lunchBreak }) {
         )}
       </div>
 
-      <SnuBackPack className="mt-4 block flex-none md:hidden md:h-64 md:w-64 xl:block" />
+      <SnuBackPack className="mt-4 block flex-none md:hidden md:h-64 md:w-64 xl:block xl:w-1/2" />
 
       <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
     </div>

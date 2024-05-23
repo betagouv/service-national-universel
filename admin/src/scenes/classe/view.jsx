@@ -99,10 +99,10 @@ export default function View() {
         setInfoBus({
           busId: ligne.busId,
           departureDate: dayjs(ligne.departuredDate).format("dddd D MMMM YYYY"),
-          meetingHour: meetingPoint.meetingHour,
-          departureHour: meetingPoint.departureHour,
+          meetingHour: meetingPoint?.meetingHour,
+          departureHour: meetingPoint?.departureHour,
           returnDate: dayjs(ligne.returnDate).format("dddd D MMMM YYYY"),
-          returnHour: meetingPoint.returnHour,
+          returnHour: meetingPoint?.returnHour,
         });
       }
 

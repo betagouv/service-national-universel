@@ -9,15 +9,16 @@ import { Select, BadgeNotif } from "@snu/ds/admin";
 import { CohortState } from "@/redux/cohorts/reducer";
 
 interface Props {
-  cohort: string;
+  cohort?: string | null;
   sort?: string;
   withBadge?: boolean;
+  disabled?: boolean;
   className?: string;
   filterFn?: (cohort: CohortState["Cohorts"][0]) => boolean;
   onChange?: (cohortName: string) => void;
 }
 
-export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, className }: Props) {
+export default function SelectCohort({ cohort, withBadge, sort, disabled, filterFn, onChange, className }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
@@ -51,6 +52,7 @@ export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChan
         options={options}
         value={options.find(({ value }) => value == currentCohortName) || null}
         defaultValue={currentCohortName}
+        disabled={disabled}
         maxMenuHeight={520}
         className="w-[450px] max-w-[450px]"
         controlCustomStyle={{
