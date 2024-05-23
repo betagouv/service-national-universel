@@ -15,9 +15,10 @@ interface Props {
   className?: string;
   filterFn?: (cohort: CohortState["Cohorts"][0]) => boolean;
   onChange?: (cohortName: string) => void;
+  isSearchable?: boolean;
 }
 
-export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, className }: Props) {
+export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, className, isSearchable }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
