@@ -4,7 +4,7 @@
   "APP_URL": "https://moncompte.snu.gouv.fr",
   "ADMIN_URL": "https://admin.snu.gouv.fr",
   "SUPPORT_URL": "https://support.snu.gouv.fr",
-  "MAINTENANCE": "$MAINTENANCE",
+  "MAINTENANCE": "false",
   "RELEASE": "$RELEASE",
   "SENTRY_SESSION_SAMPLE_RATE": "0.005",
   "SENTRY_TRACING_SAMPLE_RATE": "0.01"
