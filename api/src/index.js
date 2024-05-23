@@ -8,7 +8,7 @@
     originalConsoleError.apply(console, arguments);
   };
 
-  if (process.env.RUN_CRONS) {
+  if (process.env.RUN_CRONS === "true") {
     const { PORT } = require("./config");
     const { initSentry } = require("./sentry");
     initSentry();
