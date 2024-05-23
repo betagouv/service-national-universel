@@ -49,8 +49,8 @@ export default function Contract({ young }) {
   useEffect(() => {
     (async () => {
       try {
-        const { ok, data: application, code } = await api.get(`/application/${applicationId}`);
-        if (!ok) throw new Error(code);
+        const { ok: applicationOk, data: application, code: applicationCode } = await api.get(`/application/${applicationId}`);
+        if (!applicationOk) throw new Error(applicationCode);
 
         const { ok: contractOk, data: contract, code: contractCode } = await api.get(`/contract/${application.contractId}`);
         if (!contractOk) throw new Error(contractCode);
