@@ -828,7 +828,7 @@ function canExportConvoyeur(actor) {
 }
 
 function canEditLigneBusTeam(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canEditLigneBusGeneralInfo(actor) {
