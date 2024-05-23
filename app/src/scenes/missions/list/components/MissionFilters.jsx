@@ -155,7 +155,7 @@ export default function MissionFilters({ filters, setFilters }) {
         return "N'importe quand";
     }
   };
-
+  
   return (
     <>
       {/* Mobile */}
@@ -331,12 +331,11 @@ export default function MissionFilters({ filters, setFilters }) {
                               id="second-address"
                               name="address"
                               type="radio"
-                              checked={filters.location === relativeLocation}
-                              onChange={() => setFilters((prev) => ({ ...prev, location: relativeLocation }))}
+                              checked={JSON.stringify(filters.location) === JSON.stringify(relativeLocation)}                              onChange={() => setFilters((prev) => ({ ...prev, location: relativeLocation }))}
                               className="hidden"
                             />
                             <label htmlFor="second-address" className="mr-2">
-                              {filters.location === relativeLocation ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                              {JSON.stringify(filters.location) === JSON.stringify(relativeLocation) ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                             </label>
                             <label htmlFor="second-address" className="cursor-pointer">
                               <span className="text-xs text-gray-700">Autour de l&apos;adresse d&apos; un proche</span>
@@ -584,12 +583,12 @@ export default function MissionFilters({ filters, setFilters }) {
                           id="second-address"
                           name="address"
                           type="radio"
-                          checked={filters.location === relativeLocation}
+                          checked={JSON.stringify(filters.location) === JSON.stringify(relativeLocation)}
                           onChange={() => setFilters((prev) => ({ ...prev, location: relativeLocation }))}
                           className="hidden"
                         />
                         <label htmlFor="second-address" className="mr-2">
-                          {filters.location === relativeLocation ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
+                          {JSON.stringify(filters.location) === JSON.stringify(relativeLocation) ? <img src={RadioInput} /> : <img src={RadioUnchecked} />}
                         </label>
                         <label htmlFor="second-address" className="cursor-pointer">
                           <span className="text-[13px] text-gray-700">Autour de l&apos;adresse d&apos;un proche</span>
