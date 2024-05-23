@@ -20,6 +20,7 @@ export default function DetailTable({ rows, className = "", loading, isNational,
   }
   console.log("cohort", cohort.type);
   console.log(COHORT_TYPE.VOLONTAIRE);
+  console.log("hello");
 
   const checkIfUserIsAuthorizedToExportData = async () => {
     if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {
