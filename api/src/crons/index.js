@@ -160,7 +160,7 @@ schedule("0 8 * * *", "missionOutdated", [missionOutdated.handler, missionOutdat
 
 schedule("0 7 * * *", "applicationOutaded", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]);
 
-schedule("5 * * * *", "computeGoalsInscription", computeGoalsInscription.handler);
+schedule("5 */1 * * *", "computeGoalsInscription", computeGoalsInscription.handler);
 
 schedule("0 1 * * *", "loginAttempts", loginAttempts.handler);
 
