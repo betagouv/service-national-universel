@@ -362,9 +362,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
 
             {young.status !== YOUNG_STATUS.DELETED && ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
               <div className="my-[15px] flex items-center justify-between">
-                <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
-                  Supprimer
-                </Button>
+                {user.role === ROLES.ADMIN && (
+                  <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
+                    Supprimer
+                  </Button>
+                )}
                 <button
                   onClick={() => {
                     window.open(appURL, "_blank");
