@@ -2,18 +2,9 @@ import React from "react";
 
 import { Box, MiniTitle, Loading } from "../../components/commons";
 import ProgressBar from "../../components/ProgressBar";
+import { BoxProps } from "./types";
 
-interface Props {
-  summary: {
-    intradepartmental: number;
-    assigned: boolean;
-    total: number;
-  };
-  className?: string;
-  loading?: boolean;
-}
-
-export default function BoxAffectation({ summary, className, loading }: Props) {
+export default function BoxAffectation({ summary, className, loading }: BoxProps) {
   return (
     <Box className={className}>
       <MiniTitle className="mb-[10px]">Affectation des volontaires</MiniTitle>

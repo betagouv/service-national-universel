@@ -4,24 +4,13 @@ import { Link } from "react-router-dom";
 import { ROLES, getDepartmentNumber } from "snu-lib";
 
 import { Box, MiniTitle, Badge, BigDigits, Loading } from "../../components/commons";
+import { BoxProps } from "./types";
+import { User } from "@/types";
 
 import FrenchMap from "@/assets/icons/FrenchMap";
 import ChevronRight from "@/assets/icons/ChevronRight";
 
-interface Props {
-  summary: {
-    intradepartmental: number;
-    assigned: boolean;
-    total: number;
-  };
-  className?: string;
-  loading?: boolean;
-  isNational?: boolean;
-  isDepartmental?: boolean;
-  user: unknown;
-}
-
-export default function BoxCentres({ summary, className, loading, isNational, isDepartmental, user }: Props) {
+export default function BoxCentres({ summary, className, loading, isNational, isDepartmental, user }: BoxProps & { isNational?: boolean; isDepartmental?: boolean; user: User }) {
   return (
     <Box className={`overflow-hidden ${className}`}>
       <FrenchMap className="absolute right-[-40px] top-[30px] z-[0]" />

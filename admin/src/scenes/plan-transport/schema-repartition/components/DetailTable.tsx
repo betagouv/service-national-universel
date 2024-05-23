@@ -8,28 +8,29 @@ import ExternalLink from "@/assets/icons/ExternalLink";
 import { ROLES, getDepartmentNumber, COHORT_TYPE } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 import { capture } from "@/sentry";
+import { User, Cohort } from "@/types";
 
 import { Box, BoxHeader, Badge, Loading, AlertPoint } from "../../components/commons";
 import { formatRate } from "../../util";
 
 interface Props {
-  rows: {
-    assigned: number | null;
-    capacity: number | null;
-    centers: number | null;
-    intraCapacity: number | null;
-    intradepartmentalAssigned: number | null;
-    intradepartmental: number | null;
+  rows: Array<{
+    assigned: number;
+    capacity: number;
+    centers: number;
+    intraCapacity: number;
+    intradepartmentalAssigned: number;
+    intradepartmental: number;
     name: string;
-    total: number | null;
-  };
+    total: number;
+  }>;
   className?: string;
   loading: boolean;
   isNational: boolean;
-  onGoToRow: () => void;
+  onGoToRow: (row) => void;
   onExportDetail: () => void;
-  user: object;
-  cohort: object;
+  user: User;
+  cohort: Cohort;
 }
 
 export default function DetailTable({ rows, className, loading, isNational, onGoToRow, onExportDetail, cohort, user }: Props) {

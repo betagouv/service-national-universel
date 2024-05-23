@@ -19,7 +19,7 @@ export async function exportSRCLE(cohort) {
   }
 }
 
-function exportExcelSheetForCLE({ data: classes, type }) {
+function exportExcelSheetForCLE({ data: classes }) {
   let sheetData = classes.map((c) => ({
     id: c._id.toString(),
     uniqueKeyAndId: c.uniqueKeyAndId,
@@ -109,7 +109,7 @@ function exportExcelSheetForCLE({ data: classes, type }) {
   // --- create workbook
   const workbook = XLSX.utils.book_new();
   // ⚠️ Becareful, sheet name length is limited to 31 characters
-  XLSX.utils.book_append_sheet(workbook, sheet, type === "schema-de-repartition" ? "Répartition des classes" : "Liste des classes");
+  XLSX.utils.book_append_sheet(workbook, sheet, "Répartition des classes");
   const fileName = "classes-schema-repartition.xlsx";
   return { workbook, fileName };
 }

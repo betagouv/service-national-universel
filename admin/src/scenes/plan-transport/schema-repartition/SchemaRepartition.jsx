@@ -181,9 +181,6 @@ export default function SchemaRepartition({ region, department }) {
     if ([ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION].includes(user.role)) {
       history.push("/schema-repartition?cohort=" + cohort.name);
     }
-    // if (region && user.role === ROLES.REFERENT_REGION) {
-    //   history.push(`/schema-repartition/${region}?cohort=${cohort.name}`);
-    // }
   }
 
   function goToRegion() {
@@ -191,12 +188,6 @@ export default function SchemaRepartition({ region, department }) {
       history.push(`/schema-repartition/${region}?cohort=${cohort.name}`);
     }
   }
-
-  // function goToDepartment() {
-  //   if (region && department) {
-  //     history.push(`/schema-repartition/${region}/${department}?cohort=${cohort.name}`);
-  //   }
-  // }
 
   function goToRow(row) {
     if (region) {
@@ -238,9 +229,6 @@ export default function SchemaRepartition({ region, department }) {
   };
 
   if (!cohort) return <Loading />;
-
-  //rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={handleExportDetail} cohort={cohort} user={user} />;
-  console.log("data", data.rows);
 
   return (
     <div>

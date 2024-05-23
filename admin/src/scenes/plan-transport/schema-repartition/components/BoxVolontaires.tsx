@@ -6,18 +6,9 @@ import ExternalLink from "@/assets/icons/ExternalLink";
 import People from "@/assets/icons/People";
 import { formatRate } from "../../util";
 import { Box, MiniTitle, Badge, BigDigits, Loading } from "../../components/commons";
+import { BoxProps } from "./types";
 
-interface Props {
-  summary: {
-    intradepartmental: number;
-    assigned: boolean;
-    total: number;
-  };
-  className?: string;
-  loading?: boolean;
-}
-
-export default function BoxVolontaires({ summary, className, loading }: Props) {
+export default function BoxVolontaires({ summary, className, loading }: BoxProps) {
   return (
     <Box>
       <div className={cx("mb-[10px] flex items-center", className)}>
