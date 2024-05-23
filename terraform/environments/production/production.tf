@@ -49,7 +49,7 @@ resource "scaleway_container" "api" {
   namespace_id    = scaleway_container_namespace.production.id
   registry_image  = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port            = 8080
-  cpu_limit       = 512
+  cpu_limit       = 1024
   memory_limit    = 2048
   min_scale       = 4
   max_scale       = 20
@@ -239,7 +239,7 @@ resource "scaleway_container" "crons" {
   namespace_id   = scaleway_container_namespace.production.id
   registry_image = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port           = 8080
-  cpu_limit      = 768
+  cpu_limit      = 1024
   memory_limit   = 1024
   min_scale      = 1
   max_scale      = 1
@@ -260,21 +260,39 @@ output "api_endpoint" {
 output "api_image_tag" {
   value = split(":", scaleway_container.api.registry_image)[1]
 }
+output "api_container_status" {
+  value = scaleway_container.api.status
+}
+output "crons_container_status" {
+  value = scaleway_container.crons.status
+}
+
 output "app_endpoint" {
   value = "https://${local.app_hostname}"
 }
 output "app_image_tag" {
   value = split(":", scaleway_container.app.registry_image)[1]
 }
+output "app_container_status" {
+  value = scaleway_container.app.status
+}
+
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
 }
 output "admin_image_tag" {
   value = split(":", scaleway_container.admin.registry_image)[1]
 }
+output "admin_container_status" {
+  value = scaleway_container.admin.status
+}
+
 output "antivirus_endpoint" {
   value = "https://${local.antivirus_hostname}"
 }
 output "antivirus_image_tag" {
   value = split(":", scaleway_container.antivirus.registry_image)[1]
+}
+output "antivirus_container_status" {
+  value = scaleway_container.antivirus.status
 }

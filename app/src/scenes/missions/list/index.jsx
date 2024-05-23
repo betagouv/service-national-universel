@@ -64,7 +64,7 @@ export default function List() {
         <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Trouvez une mission d&apos;intérêt général</h1>
         <div className="flex items-center justify-between">
           <p className="text-sm font-normal text-gray-700">
-            Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.{" "}
+            Vous disposez d’un an pour débuter votre phase d’engagement et de deux ans pour la terminer.{" "}
             <a
               className="font-medium underline hover:text-gray-700 hover:underline"
               href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"

@@ -15,7 +15,6 @@ env:
   production_branch: "production"
 
 jobs:
-
   prepare:
     runs-on: ubuntu-latest
     if: github.ref_name == 'production_hotfix'
@@ -53,7 +52,7 @@ jobs:
 
       - name: Prepare
         id: prepare
-        run : |
+        run: |
           api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
           echo "api_image_tag: $api_image_tag"
           echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
@@ -89,12 +88,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [
-          {name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
-          {name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
-          {name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
-          {name: antivirus, tag: "${{needs.prepare.outputs.antivirus_image_tag}}" },
-        ]
+        app:
+          [
+            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+            {
+              name: antivirus,
+              tag: "${{needs.prepare.outputs.antivirus_image_tag}}",
+            },
+          ]
 
     steps:
       - uses: actions/checkout@v4
@@ -161,17 +164,28 @@ jobs:
             -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
             -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
-      - name: Staging - Healthcheck API
+      - name: Healthchecks
+        shell: bash
         working-directory: ${{ env.staging_directory }}
-        run: curl -I "$(terraform output -raw api_endpoint)"
+        run: |
+          failure=false
+          while read name
+          do
+            status=$(terraform output -raw ${name}_container_status)
+            echo $name $status
+            if [[ $status != "ready" ]]
+            then
+                echo "Container ${name} is on '$status' state" 1>&2
+                failure=true
+            fi
+          done <<< 'app
+          admin
+          api'
 
-      - name: Staging - Healthcheck Admin
-        working-directory: ${{ env.staging_directory }}
-        run: curl -I "$(terraform output -raw admin_endpoint)"
-
-      - name: Staging - Healthcheck App
-        working-directory: ${{ env.staging_directory }}
-        run: curl -I "$(terraform output -raw app_endpoint)"
+          if $failure
+          then
+            exit 1
+          fi
 
   plan_production:
     runs-on: ubuntu-latest
@@ -235,17 +249,33 @@ jobs:
             -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
             -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
 
-      - name: Production - Healthcheck API
+      - name: Healthchecks
+        shell: bash
         working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw api_endpoint)"
+        run: |
+          failure=false
+          while read name
+          do
+            status=$(terraform output -raw ${name}_container_status)
+            echo $name $status
+            if [[ $status != "ready" ]]
+            then
+                echo "Container ${name} is on '$status' state" 1>&2
+                failure=true
+            fi
+          done <<< 'app
+          admin
+          api
+          antivirus
+          crons'
 
-      - name: Production - Healthcheck Admin
-        working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw admin_endpoint)"
+          if $failure
+          then
+            exit 1
+          fi
 
-      - name: Production - Healthcheck App
-        working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw app_endpoint)"
+      - name: Update production_state branch
+        run: git push -f origin HEAD:production_state
 
   deploy_cc:
     needs: [prepare, build]
