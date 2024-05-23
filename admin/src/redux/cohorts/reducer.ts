@@ -1,3 +1,4 @@
+import { COHORT_TYPE } from "snu-lib";
 import { COHORTS_ACTIONS } from "./actions";
 
 const initialState = [];
@@ -8,6 +9,7 @@ export type CohortState = {
     name: string;
     dateStart: string;
     dateEnd: string;
+    type: (typeof COHORT_TYPE)[keyof typeof COHORT_TYPE];
   }[];
 };
 

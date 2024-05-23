@@ -222,6 +222,13 @@ const Schema = new mongoose.Schema({
       description: "La ligne est retardée au Retour",
     },
   },
+  mergedBusIds: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des lignes de bus fusionnées",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
