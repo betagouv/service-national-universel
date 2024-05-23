@@ -29,32 +29,32 @@ export default function ExportBox({ title, availableFrom, availableUntil, onClic
   const isExpired = now.isAfter(exportAvailableUntil);
 
   return (
-    <div className="flex flex-1 flex-col rounded-xl bg-white p-6 shadow text-gray-900 h-[21em]">
+    <div className="flex flex-1 flex-col rounded-xl bg-white py-6 px-8 shadow-sm text-gray-900 h-[21em]">
       <h1 className="h-20 text-lg leading-7 font-bold">{title}</h1>
       <div className="flex-grow h-1/5">
         {isBefore && (
           <p className="text-sm leading-5 font-normal text-gray-500">
-            Disponible à partir du : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom?.format("YYYY-MM-DD")}</span>
+            Disponible à partir du : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom?.format("DD-MM-YYYY")}</span>
           </p>
         )}
         {isAvailable && (
           <div className="text-sm leading-5 font-normal text-gray-500 flex flex-col gap-2">
             <p>
-              Générée le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom?.format("YYYY-MM-DD")}</span>
+              Générée le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableFrom?.format("DD-MM-YYYY")}</span>
             </p>
             <p>
-              Disponible jusqu'au : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableUntil.format("YYYY-MM-DD")}</span>
+              Disponible jusqu'au : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableUntil.format("DD-MM-YYYY")}</span>
             </p>
           </div>
         )}
         {isExpired && (
           <p className="text-sm leading-5 font-normal text-gray-500">
-            Indisponible depuis le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableUntil.format("YYYY-MM-DD")}</span>
+            Indisponible depuis le : <span className="text-sm leading-5 font-bold text-gray-900">{exportAvailableUntil.format("DD-MM-YYYY")}</span>
           </p>
         )}
       </div>
-      <div className="h-20">
-        {user.role === ROLES.ADMIN && <Button title="Modifier la date" type="tertiary" leftIcon={<HiOutlinePencil />} className="w-full mb-2 mx-auto" onClick={onClick} />}
+      <div>
+        {user.role === ROLES.ADMIN && <Button title="Modifier la date" type="modify" leftIcon={<HiOutlinePencil />} className="w-full mb-3 mx-auto" onClick={onClick} />}
         {isAvailable && !isExpired ? (
           <Button title="Exporter" loading={isDownloading} className="w-full mx-auto" disabled={isDownloading} onClick={onDownload} />
         ) : (
