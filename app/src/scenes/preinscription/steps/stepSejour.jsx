@@ -64,7 +64,7 @@ function SessionButton({ session }) {
   const eventName = `Phase0/CTA ${isLoggedIn ? "reinscription" : "preinscription"} - sejour ${session.name}`;
 
   function handleClick() {
-    setData({ ...data, cohort: session.name, step });
+    setData({ ...data, cohort: session.name, source: session.type, step });
     plausibleEvent(eventName);
     history.push(route);
   }

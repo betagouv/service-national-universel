@@ -284,7 +284,9 @@ function hasAccessToReinscription(young) {
     isCle(young) &&
     young.frenchNationality === "true" &&
     ![YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.status) &&
-    ![YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.DELETED, YOUNG_STATUS.NOT_ELIGIBLE].includes(young.statusPhase1)
+    ![YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.WAITING_LIST].includes(
+      young.statusPhase1,
+    )
   ) {
     return true;
   }
