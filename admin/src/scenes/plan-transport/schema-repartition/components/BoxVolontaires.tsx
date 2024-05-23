@@ -9,7 +9,7 @@ import { Box, MiniTitle, Badge, BigDigits, Loading } from "../../components/comm
 export default function BoxVolontaires({ summary, className = "", loading }) {
   return (
     <Box>
-      <div className={`mb-[10px] flex items-center ${className}`}>
+      <div className={cx("mb-[10px] flex items-center",  className)}>
         <MiniTitle>Volontaires</MiniTitle>
         {!loading && summary.intradepartmental > 0 && (
           <>
