@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { canEditLigneBusTeam, isBusEditionOpen, translate } from "snu-lib";
+import { canEditLigneBusTeam, isBusEditionOpen, isTeamLeaderOrSupervisorEditable, translate } from "snu-lib";
 import validator from "validator";
 import Bin from "../../../../../assets/Bin";
 import Pencil from "../../../../../assets/icons/Pencil";
@@ -115,7 +115,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-xl leading-6 text-[#242526]">{title}</div>
-        {canEditLigneBusTeam(user) || isBusEditionOpen(user, cohort) ? (
+        {canEditLigneBusTeam(user) || isBusEditionOpen(user, cohort) || isTeamLeaderOrSupervisorEditable(user, cohort) ? (
           <>
             {!editInfo ? (
               <>

@@ -74,7 +74,6 @@ router.post(
       // uniquement les classes de la région du référent
       const classes = allClasses.filter((classe) => req.user.role !== ROLES.REFERENT_REGION || classe.etablissement?.region === req.user.region);
 
-      // const etablissements = await findEtablissementsForClasses(classes);
       const centres = await findCohesionCentersForClasses(classes);
       const pdrs = await findPdrsForClasses(classes);
       const youngs = await getYoungsGroupByClasses(classes);

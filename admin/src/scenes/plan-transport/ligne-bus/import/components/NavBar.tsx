@@ -1,6 +1,7 @@
 import React from "react";
+import { ImportStep } from "../type";
 
-export default function NabBar({ steps }) {
+export default function NabBar({ steps }: { steps: ImportStep[] }) {
   return (
     <nav aria-label="Progress">
       <ol role="list" className="space-y-4 md:flex md:space-y-0 md:space-x-8">

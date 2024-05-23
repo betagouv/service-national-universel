@@ -15,6 +15,7 @@ import { statusClassForBadge } from "./utils";
 import { getCohortGroups } from "@/services/cohort.service";
 
 export default function List() {
+  const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
 
   const [classes, setClasses] = useState(null);
@@ -28,6 +29,7 @@ export default function List() {
   const [exportLoading, setExportLoading] = useState(false);
 
   const pageId = "classe-list";
+  const exportv1 = new URLSearchParams(history.location.search).get("export-v1");
 
   useEffect(() => {
     (async () => {
@@ -55,17 +57,21 @@ export default function List() {
     setExportLoading(true);
     try {
       // TODO: reintégrer export ES une fois synchro ok
-      // const res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
-      //   filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
-      //     return { ...e, [key]: value.filter };
-      //   }, {}),
-      // });
-      const res = await api.post(
-        `/classe/export?type=${type}`,
-        Object.entries(selectedFilters).reduce((e, [key, value]) => {
-          return { ...e, [key]: value.filter };
-        }, {}),
-      );
+      let res;
+      if (exportv1) {
+        res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
+          filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
+            return { ...e, [key]: value.filter };
+          }, {}),
+        });
+      } else {
+        res = await api.post(
+          `/classe/export?type=${type}`,
+          Object.entries(selectedFilters).reduce((e, [key, value]) => {
+            return { ...e, [key]: value.filter };
+          }, {}),
+        );
+      }
       const result = await exportExcelSheet({ data: res.data, type });
       const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
       FileSaver.saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" }), result.fileName);
@@ -104,7 +110,7 @@ export default function List() {
   ].filter(Boolean);
 
   if (classes === null) return null;
-  const isCohortSelected = selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0;
+  const isCohortSelected = exportv1 || (selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0);
 
   return (
     <Page>
