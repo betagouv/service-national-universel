@@ -305,7 +305,8 @@ jobs:
           done <<< 'app
           admin
           api
-          antivirus'
+          antivirus
+          crons'
 
           if $failure
           then
