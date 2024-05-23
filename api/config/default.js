@@ -4,7 +4,7 @@ module.exports = {
   SECRET_NAME: undefined,
   SECRET_REVISION: "latest_enabled",
   PORT: 8080,
-  IMAGES_ROOTDIR: `${__dirname}/../../public/images`,
+  IMAGES_ROOTDIR: `${__dirname}/../public/images`,
   FONT_ROOTDIR: `${__dirname}/../assets/fonts`,
   ENABLE_SENDINBLUE: true,
   API_URL: "http://localhost:8080",

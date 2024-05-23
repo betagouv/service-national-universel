@@ -1,4 +1,4 @@
-const { resolveAsyncConfigs } = require('config/async');
+const { resolveAsyncConfigs } = require("config/async");
 const config = require("config");
 
 // NODE_ENV environment variable (default "development") is used by :
@@ -27,18 +27,17 @@ console.error = function (message) {
   originalConsoleError.apply(console, arguments);
 };
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
 });
 
-resolveAsyncConfigs(config)
-  .then(config => {
-    const {runCrons, runAPI} = require('./main.js')
+resolveAsyncConfigs(config).then((config) => {
+  const { runCrons, runAPI } = require("./main.js");
 
-    if (process.env.RUN_CRONS) {
-      runCrons();
-    } else {
-      const runCronsOnCC = (process.env.RUN_CRONS_CC && config.ENVIRONMENT === "production" && process.env.CC_DEPLOYMENT_ID && process.env.INSTANCE_NUMBER === "0")
-      runAPI(runCronsOnCC);
-    }
-  });
+  if (process.env.RUN_CRONS) {
+    runCrons();
+  } else {
+    const runCronsOnCC = process.env.RUN_CRONS_CC && config.ENVIRONMENT === "production" && process.env.CC_DEPLOYMENT_ID && process.env.INSTANCE_NUMBER === "0";
+    runAPI(runCronsOnCC);
+  }
+});
