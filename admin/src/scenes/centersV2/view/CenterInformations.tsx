@@ -319,7 +319,7 @@ export default function Details({ center, setCenter, sessions, setSessions }) {
                   readOnly={!editInfo}
                   label="Capacité maximale d'accueil"
                   onChange={(e) => setData({ ...data, placesTotal: parseInt(e.target.value) })}
-                  value={data.placesTotal.toString()}
+                  value={data?.placesTotal?.toString()}
                   error={errors?.placesTotal}
                   tooltips={
                     "C’est la capacité d’hébergement maximale du centre, qui dépend du bâti. Elle doit être supérieure ou égale au nombre de places ouvertes sur un séjour donné"
