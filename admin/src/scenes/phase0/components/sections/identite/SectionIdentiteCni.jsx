@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { getCohortStartDate, translate, ROLES } from "snu-lib";
+import { translate, ROLES } from "snu-lib";
 
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
@@ -88,9 +88,9 @@ export default function SectionIdentiteCni({ young, cohort, globalMode, currentR
 function HonorCertificate({ young, cohort }) {
   let cniExpired = false;
   if (young && young.cohort && young.latestCNIFileExpirationDate) {
-    const cohortDate = getCohortStartDate(young, cohort);
-    if (cohortDate) {
-      cniExpired = dayjs(young.latestCNIFileExpirationDate).toUtc().valueOf() < dayjs(cohortDate).toUtc().valueOf();
+    const cohortStartingDate = cohort?.dateStart;
+    if (cohortStartingDate) {
+      cniExpired = dayjs(young.latestCNIFileExpirationDate).toUtc().valueOf() < dayjs(cohortStartingDate).toUtc().valueOf();
     }
   }
 
