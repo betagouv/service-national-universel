@@ -8,7 +8,7 @@
     originalConsoleError.apply(console, arguments);
   };
 
-  if (process.env.RUN_CRONS) {
+  if (process.env.RUN_CRONS === "true") {
     const { PORT } = require("./config");
     const { initSentry } = require("./sentry");
     initSentry();
@@ -112,11 +112,6 @@
     next();
   });
   app.use(loggingMiddleware);
-
-  // WARNING : CleverCloud only
-  if (process.env.RUN_CRONS_CC && ENVIRONMENT === "production" && process.env.CC_DEPLOYMENT_ID && process.env.INSTANCE_NUMBER === "0") {
-    require("./crons");
-  }
 
   app.use(cookieParser());
 
