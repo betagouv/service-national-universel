@@ -3,7 +3,6 @@ const path = require("path");
 // ! L'un des objectifs était d'enlever ce fichier aussi
 // ! On rerajoute une tache sinon
 
-require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 const { Secret, createClient } = require("@scaleway/sdk");
 
 async function loadEnv() {
