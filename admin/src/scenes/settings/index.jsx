@@ -25,6 +25,7 @@ import NumberInput from "@/components/ui/forms/NumberInput";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
 import { settings, uselessSettings } from "./utils";
+import { InformationsConvoyage } from "@/scenes/settings/InformationsConvoyage";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
@@ -432,6 +433,11 @@ export default function Settings() {
                       onChange={() => setData({ ...data, pdrEditionOpenForTransporter: !data.pdrEditionOpenForTransporter })}
                     />
                   </div>
+                  <InformationsConvoyage
+                    disabled={isLoading || readOnly}
+                    informationsConvoyageData={data?.informationsConvoyage}
+                    handleChange={(informationsConvoyage) => setData({ ...data, informationsConvoyage: informationsConvoyage })}
+                  />
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Création de groupe et modification du schéma de répartition</p>
