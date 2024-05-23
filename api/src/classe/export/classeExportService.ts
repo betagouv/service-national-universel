@@ -15,7 +15,7 @@ export const findPdrsForClasses = async (classes) => {
 
 export const getYoungsGroupByClasses = async (classes) => {
   const classesIds = classes.map(({ _id }) => _id).filter(Boolean);
-  const youngs = await YoungModel.find({ classeId: { $in: classesIds } }).select({ _id: 1, status: 1 });
+  const youngs = await YoungModel.find({ classeId: { $in: classesIds } }).select({ _id: 1, status: 1, classeId: 1 });
 
   // group youngs by classe
   return youngs.reduce((acc, young) => {
