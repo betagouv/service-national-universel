@@ -263,6 +263,9 @@ output "api_image_tag" {
 output "api_container_status" {
   value = scaleway_container.api.status
 }
+output "crons_container_status" {
+  value = scaleway_container.crons.status
+}
 
 output "app_endpoint" {
   value = "https://${local.app_hostname}"
