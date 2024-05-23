@@ -239,7 +239,7 @@ resource "scaleway_container" "crons" {
   namespace_id   = scaleway_container_namespace.production.id
   registry_image = "${scaleway_registry_namespace.main.endpoint}/api:${var.api_image_tag}"
   port           = 8080
-  cpu_limit      = 768
+  cpu_limit      = 1024
   memory_limit   = 1024
   min_scale      = 1
   max_scale      = 1
