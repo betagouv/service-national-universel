@@ -212,107 +212,11 @@ export default function SchemaRepartition({ region, department }) {
         await exportSRCLE(cohort.name);
       } else {
         await exportSRHTS(cohort.name, region, department);
-        /* const groups = await loadExportData();
-        const result = await exportExcelSheet(groups);
-        const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
-        FileSaver.saveAs(new Blob([buffer], { type: ExcelFileType }), result.fileName); */
       }
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération des données. Nous ne pouvons exporter les données.");
     }
-  }
-
-  async function loadExportData() {
-    let url = "/schema-de-repartition/export";
-    if (region) {
-      url += "/" + region;
-    }
-    if (department) {
-      url += "/" + department;
-    }
-    url += "/" + cohort;
-
-    const result = await API.get(url);
-    if (!result.ok) {
-      return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
-    }
-    return result.data;
-  }
-
-  async function exportExcelSheet(groups) {
-    let maxGatheringPlaces = 0;
-
-    let sheetData = groups.map((g) => {
-      let data = {
-        cohort: g.cohort,
-        id: g._id.toString(),
-        updatedAt: dayjs(g.updatedAt).format("DD/MM/YYYY HH:mm"),
-        region: g.fromRegion,
-        department: g.fromDepartment,
-        youngsVolume: g.youngsVolume,
-        centerId: g.centerId,
-        centerName: `${g.center.name} ${g.center.address} ${g.center.zip} ${g.center.city}`,
-        centerDepartment: g.center.department,
-        centerRegion: g.center.region,
-      };
-      if (maxGatheringPlaces < g.gatheringPlaces.length) {
-        maxGatheringPlaces = g.gatheringPlaces.length;
-      }
-      for (let i = 0, n = g.gatheringPlaces.length; i < n; ++i) {
-        const pdr = g.gatheringPlaces[i];
-        data["gpId" + i] = pdr._id;
-        data["gpName" + i] = `${pdr.name} ${pdr.address} ${pdr.zip} ${pdr.city}`;
-      }
-      return data;
-    });
-
-    // tri par centre
-    sheetData.sort((a, b) => {
-      const aname = a.centerName;
-      const bname = b.centerName;
-
-      if (aname) {
-        if (bname) {
-          return aname.localeCompare(bname);
-        } else {
-          return -1;
-        }
-      } else {
-        if (bname) {
-          return 1;
-        } else {
-          return 0;
-        }
-      }
-    });
-
-    let sheet = XLSX.utils.json_to_sheet(sheetData);
-
-    // --- fix header names
-    let headers = [
-      "Cohorte",
-      "ID",
-      "Date de dernière modification",
-      "Région des volontaires",
-      "Département des volontaires",
-      "Nombre de volontaires",
-      "ID centre",
-      "Désignation du centre",
-      "Département du centre",
-      "Région du centre",
-    ];
-    for (let i = 1; i <= maxGatheringPlaces; ++i) {
-      headers.push(...["ID du point de rassemblement " + i, "Désignation du point de rassemblement " + i]);
-    }
-    XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
-
-    // --- create workbook
-    let workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, sheet, "Schéma de répartition");
-    const fileName = "schema-repartition.xlsx";
-    // const workbook = { Sheets: { data: sheet }, SheetNames: ["Schema de repartition"] };
-    return { workbook, fileName };
   }
 
   const getSchemaRepartitionRoute = () => {
@@ -334,6 +238,9 @@ export default function SchemaRepartition({ region, department }) {
   };
 
   if (!cohort) return <Loading />;
+
+  //rows={data.rows} loading={loading} isNational={isNational} onGoToRow={goToRow} onExportDetail={handleExportDetail} cohort={cohort} user={user} />;
+  console.log("data", data.rows);
 
   return (
     <div>

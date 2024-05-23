@@ -126,7 +126,7 @@ export async function exportSRHTS(cohort, region, department) {
     url += "/" + cohort;
 
     const res = await api.get(url);
-    const result = await exportExcelSheetForHTS({ data: res.data });
+    const result = await exportExcelSheetForHTS(res.data);
     const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
     FileSaver.saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" }), result.fileName);
   } catch (error) {
@@ -135,6 +135,7 @@ export async function exportSRHTS(cohort, region, department) {
 }
 
 async function exportExcelSheetForHTS(groups) {
+  console.log(groups)
   let maxGatheringPlaces = 0;
 
   const sheetData = groups.map((g) => {

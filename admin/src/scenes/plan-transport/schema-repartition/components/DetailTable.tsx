@@ -12,15 +12,32 @@ import { capture } from "@/sentry";
 import { Box, BoxHeader, Badge, Loading, AlertPoint } from "../../components/commons";
 import { formatRate } from "../../util";
 
-export default function DetailTable({ rows, className = "", loading, isNational, onGoToRow, onExportDetail, cohort, user }) {
+interface Props {
+  rows: {
+    assigned: number | null;
+    capacity: number | null;
+    centers: number | null;
+    intraCapacity: number | null;
+    intradepartmentalAssigned: number | null;
+    intradepartmental: number | null;
+    name: string;
+    total: number | null;
+  };
+  className?: string;
+  loading: boolean;
+  isNational: boolean;
+  onGoToRow: () => void;
+  onExportDetail: () => void;
+  user: object;
+  cohort: object;
+}
+
+export default function DetailTable({ rows, className, loading, isNational, onGoToRow, onExportDetail, cohort, user }: Props) {
   const [isUserAuthorizedToExportData, setIsUserAuthorizedToExportData] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   function goToRow(row) {
     onGoToRow && onGoToRow(row);
   }
-  console.log("cohort", cohort.type);
-  console.log(COHORT_TYPE.VOLONTAIRE);
-  console.log("hello");
 
   const checkIfUserIsAuthorizedToExportData = async () => {
     if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {

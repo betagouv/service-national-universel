@@ -8,7 +8,20 @@ import { Box, MiniTitle, Badge, BigDigits, Loading } from "../../components/comm
 import FrenchMap from "@/assets/icons/FrenchMap";
 import ChevronRight from "@/assets/icons/ChevronRight";
 
-export default function BoxCentres({ summary, className = "", loading, isNational, isDepartmental, user }) {
+interface Props {
+  summary: {
+    intradepartmental: number;
+    assigned: boolean;
+    total: number;
+  };
+  className?: string;
+  loading?: boolean;
+  isNational?: boolean;
+  isDepartmental?: boolean;
+  user: unknown;
+}
+
+export default function BoxCentres({ summary, className, loading, isNational, isDepartmental, user }: Props) {
   return (
     <Box className={`overflow-hidden ${className}`}>
       <FrenchMap className="absolute right-[-40px] top-[30px] z-[0]" />

@@ -3,7 +3,18 @@ import React from "react";
 import { Box, MiniTitle, Badge, Loading } from "../../components/commons";
 import ProgressArc from "../../components/ProgressArc";
 
-export default function BoxDisponibilite({ summary, className = "", loading, isNational }) {
+interface Props {
+  summary: {
+    intradepartmental: number;
+    assigned: boolean;
+    total: number;
+  };
+  className?: string;
+  loading?: boolean;
+  isNational?: boolean;
+}
+
+export default function BoxDisponibilite({ summary, className, loading, isNational }: Props) {
   return (
     <Box className={`flex-column flex justify-between pb-[0px] ${className}`}>
       <div>
