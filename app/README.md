@@ -20,7 +20,7 @@ Lancer la commande `npm run dev` pour accéder à l'application via l'URL `http:
 
 En local, si vous mettez des variables d'environnement dans un fichier `.env` à la racine du projet "app", elles seront automatiquement injectées dans l'application. (s'inspirer de .env-example)
 
-## Variables d'environnements (production)
+## Variables d'environnements (docker)
 
 En production, les fichiers statiques générés par l'étape de build sont servis par [nginx](https://nginx.org/en/docs/) (cf [Dockerfile](Dockerfile) & [docker_nginx.conf](docker_nginx.conf))
 
