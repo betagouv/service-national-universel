@@ -19,7 +19,7 @@ interface Props {
   isSearchable?: boolean;
 }
 
-export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, className, isSearchable }: Props) {
+export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, disabled, className, isSearchable }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
