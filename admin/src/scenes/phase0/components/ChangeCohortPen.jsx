@@ -102,7 +102,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
     return updatedCohorts.map((cohort) => ({
       value: cohort.name,
       label: (
-        <div className="flex flex-nowrap items-center justify-between gap-1.5 p-2.5 w-full">
+        <div className="flex flex-nowrap items-center justify-between gap-1.5 p-2.5 h-[40px] w-full">
           <div className="flex items-center gap-1.5">
             {cohort.isEligible ? (
               <HiCheckCircle size={24} className="mt-0.5 mr-1 min-w-[24px] text-emerald-500" />
