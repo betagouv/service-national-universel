@@ -78,7 +78,7 @@ export default function SectionIdentiteContact({ young, globalMode, currentReque
       <PhoneField
         name="phone"
         young={young}
-        value={young.phone}
+        value={young.phone.replace(/\s+/g, "")}
         onChange={(value) => onChange("phone", value)}
         zoneValue={young.phoneZone}
         onChangeZone={(value) => onChange("phoneZone", value)}
