@@ -228,8 +228,6 @@ export default function SchemaRepartition({ region, department }) {
 
   if (!cohort) return <Loading />;
 
-  console.log("data", data);
-
   return (
     <div>
       <Breadcrumbs items={[{ label: "Schéma de répartition", to: getSchemaRepartitionRoute() }]} />
