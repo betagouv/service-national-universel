@@ -60,7 +60,7 @@ const everyHours = (x) => `0 */${x} * * *`;
 
 // Crons qui peuvent être de  jour :
 // applicationPending.handler() : tous les lundis à 9h00
-// noticePushMission.handler() : tous les lundis à 9h00
+// noticePushMission.handler() : tous les lundis à 9h02
 // apiEngagement.handler() : toutes les 6 heures à la 10ème minute
 // jeVeuxAiderDaily.handler() : toutes les 6 heures à la 7ème minute
 // contratRelance.handler() : tous les jours à 6h00
@@ -129,8 +129,8 @@ schedule("30 7 * * 1", "parentRevalidateRI", parentRevalidateRI.handler);
 // Every day at 11:00
 schedule("0 11 * * *", "reminderInscription", reminderInscription.handler);
 
-// Every day at 11:00
-schedule("0 11 * * *", "reminderWaitingCorrection", reminderWaitingCorrection.handler);
+// Every day at 11:02
+schedule("2 11 * * *", "reminderWaitingCorrection", reminderWaitingCorrection.handler);
 
 // Every day at 10:00
 schedule("0 10 * * *", "reminderImageRightsParent2", reminderImageRightsParent2.handler);
@@ -144,7 +144,7 @@ schedule("0 9 * * 1", "applicationPending", applicationPending.handler);
 
 schedule("0 15 * * *", "deleteCNIAdnSpecificAmenagementType", deleteCNIAdnSpecificAmenagementType.handler);
 
-schedule("0 9 * * 1", "noticePushMission", noticePushMission.handler);
+schedule("2 9 * * 1", "noticePushMission", noticePushMission.handler);
 
 // everyday at 0200
 schedule("10 */6 * * *", "apiEngagement", apiEngagement.handler);
