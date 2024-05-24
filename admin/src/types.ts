@@ -5,7 +5,7 @@ export type BusLine = { _id: string };
 
 export type User = {
   role: (typeof ROLES)[keyof typeof ROLES];
-  structureId: string;
+  structureId?: string;
   subRole?: string;
 };
 

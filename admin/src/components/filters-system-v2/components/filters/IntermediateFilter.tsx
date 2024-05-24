@@ -12,8 +12,8 @@ export type IntermediateFilterProps = {
   filter?: any;
 };
 
-export const isEverySubValueChecked = (filter: RowFilter, selectedFilters, dataOnDropDown: DataFilter[]) => {
-  return (dataOnDropDown.length !== 0 && selectedFilters[filter.name]?.filter?.length === dataOnDropDown.length) || false;
+export const isEverySubValueChecked = (filter: RowFilter, selectedFilters, dataOnDropDown: DataFilter[] | undefined) => {
+  return (dataOnDropDown?.length !== 0 && selectedFilters?.[filter.name]?.filter?.length === dataOnDropDown?.length) || false;
 };
 
 export const syncRootFilter = (intermediateFilter: IIntermediateFilter, newSelectedFilters: { [key: string]: { filter: string[] } }) => {
