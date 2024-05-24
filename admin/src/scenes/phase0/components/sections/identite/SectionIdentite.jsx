@@ -96,7 +96,7 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
     }
 
     if (!data.phone || !isPhoneNumberWellFormated(data.phone, data.phoneZone)) {
-      errors.phone = PHONE_ZONES[data.phoneZone || "AUTRE"].errorMessage;
+      errors.phone = PHONE_ZONES[data.phoneZone].errorMessage;
       result = false;
     }
 
