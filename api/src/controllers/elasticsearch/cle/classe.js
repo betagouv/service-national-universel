@@ -8,8 +8,9 @@ const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const EtablissementModel = require("../../../models/cle/etablissement");
+const CohortModel = require("../../../models/cohort");
 const { serializeReferents } = require("../../../utils/es-serializer");
-const { YOUNG_STATUS } = require("snu-lib");
+const { YOUNG_STATUS, STATUS_CLASSE } = require("snu-lib");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -63,7 +64,17 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
 
       if (req.query?.type === "schema-de-repartition") {
-        if (![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+        if (user.role === ROLES.TRANSPORTER) {
+          const cohort = [...new Set(response.map((item) => item.cohort).filter(Boolean))];
+          if (cohort.length !== 1) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          const IsSchemaDownloadIsTrue = await CohortModel.findOne({ name: cohort });
+          if (!IsSchemaDownloadIsTrue) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+          if (IsSchemaDownloadIsTrue.repartitionSchemaDownloadAvailibility === false && user.role === ROLES.TRANSPORTER) {
+            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+          }
+        }
 
         response = await populateWithEtablissementInfo(response);
         response = await populateWithCohesionCenterInfo(response);
@@ -109,6 +120,10 @@ async function buildClasseContext(user) {
   if (user.role === ROLES.REFERENT_REGION) {
     const etablissements = await EtablissementModel.find({ region: user.region });
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
+  }
+
+  if (user.role === ROLES.TRANSPORTER) {
+    contextFilters.push({ bool: { must_not: { term: { "status.keyword": STATUS_CLASSE.WITHDRAWN } } } });
   }
 
   return { classeContextFilters: contextFilters };
