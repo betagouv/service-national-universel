@@ -95,7 +95,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
     focusedSession.team.splice(index, 1);
 
     try {
-      const r = await api.put(`/session-phase1/${focusedSession._id}`, { team: focusedSession.team });
+      const r = await api.put(`/session-phase1/${focusedSession._id}/team`, { team: focusedSession.team });
       const { ok, data } = r;
       if (!ok) toastr.error("Oups, une erreur est survenue lors de la suppression du membre", translate(data.code));
       setFocusedSession(data);
