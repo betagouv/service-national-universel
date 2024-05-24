@@ -6,9 +6,10 @@ import { toastr } from "react-redux-toastr";
 import ExternalLink from "@/assets/icons/ExternalLink";
 
 import { ROLES, getDepartmentNumber, COHORT_TYPE } from "snu-lib";
+import { CohortDto } from "snu-lib/src/dto/cohortDto";
 import { Button } from "@snu/ds/admin";
 import { capture } from "@/sentry";
-import { User, Cohort } from "@/types";
+import { User } from "@/types";
 
 import { Box, BoxHeader, Badge, Loading, AlertPoint } from "../../components/commons";
 import { formatRate } from "../../util";
@@ -29,7 +30,7 @@ interface Props {
   onGoToRow: (row) => void;
   onExportDetail: () => void;
   user: User;
-  cohort: Cohort;
+  cohort: CohortDto;
 }
 
 export default function DetailTable({ rows, className, loading, isNational, onGoToRow, onExportDetail, cohort, user }: Props) {
