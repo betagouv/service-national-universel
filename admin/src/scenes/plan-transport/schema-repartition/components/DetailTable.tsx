@@ -17,12 +17,11 @@ interface Props {
   rows: Array<{
     assigned: number;
     capacity: number;
-    centers: number;
-    intraCapacity: number;
     intradepartmentalAssigned: number;
     intradepartmental: number;
     name: string;
     total: number;
+    intraCapacity?: number;
   }>;
   className?: string;
   loading: boolean;
@@ -143,8 +142,8 @@ export default function DetailTable({ rows, className, loading, isNational, onGo
                       <Loading width={"w-full"} />
                     ) : (
                       <div className="flex items-center">
-                        <AlertPoint threshold={0} value={row.intraCapacity - row.intradepartmentalAssigned} />
-                        {Math.max(0, row.intraCapacity - row.intradepartmentalAssigned)}
+                        <AlertPoint threshold={0} value={row.intraCapacity || 0 - row.intradepartmentalAssigned} />
+                        {Math.max(0, row.intraCapacity || 0 - row.intradepartmentalAssigned)}
                       </div>
                     )}
                   </td>

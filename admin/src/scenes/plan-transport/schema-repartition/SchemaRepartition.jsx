@@ -31,8 +31,6 @@ import Select from "../components/Select";
 import SchemaEditor from "./SchemaEditor";
 import SchemaDepartmentDetail from "./SchemaDepartmentDetail";
 
-const ExcelFileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-
 export default function SchemaRepartition({ region, department }) {
   const history = useHistory();
   const location = useLocation();
@@ -229,6 +227,8 @@ export default function SchemaRepartition({ region, department }) {
   };
 
   if (!cohort) return <Loading />;
+
+  console.log("data", data);
 
   return (
     <div>
