@@ -729,7 +729,7 @@ function canSearchInElasticSearch(actor, index) {
   } else if (index === "lignebus") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
   } else if (index === "classe") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE,ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "youngCle") {
     return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
   } else if (index === "etablissement") {

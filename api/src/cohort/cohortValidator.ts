@@ -6,6 +6,8 @@ export const validateCohortDto = (dto: CohortDto): Joi.ValidationResult<CohortDt
     // Informations générales
     dateStart: Joi.date().required(),
     dateEnd: Joi.date().required(),
+    name: Joi.string().required(),
+    type: Joi.string().required(),
     // Inscriptions (phase 0)
     inscriptionStartDate: Joi.date().required(),
     inscriptionEndDate: Joi.date().required(),
