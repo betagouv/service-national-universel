@@ -4,6 +4,7 @@ const esClient = require("../../es");
 const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "classe";
+const EtablissementModel = require("./etablissement");
 
 const Schema = new mongoose.Schema({
   etablissementId: {
@@ -232,16 +233,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(
-  mongooseElastic(esClient, {
-    populate: ["etablissement"],
-    virtuals: [
-      { key: "region", type: "String" },
-      { key: "department", type: "String" },
-    ],
-  }),
-  MODELNAME,
-);
+Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
