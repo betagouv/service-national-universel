@@ -32,7 +32,7 @@ process.on("unhandledRejection", (reason, promise) => {
 });
 
 resolveAsyncConfigs(config).then((config) => {
-  const { runCrons, runAPI } = require("./main.js");
+  const { runCrons, runAPI } = require("./main");
 
   if (process.env.RUN_CRONS) {
     runCrons();

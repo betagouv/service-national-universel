@@ -1,4 +1,4 @@
-const asyncSecretConfig = require("../secrets-manager");
+const asyncSecretConfig = require("../src/secrets-manager");
 
 module.exports = {
   ENVIRONMENT: "production",
