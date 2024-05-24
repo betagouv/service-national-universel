@@ -90,8 +90,12 @@ export default function SectionIdentite({ young, cohort, onStartRequest, current
       errors.email = "L'email ne semble pas valide";
       result = false;
     }
+    if (!data.phoneZone) {
+      errors.phone = "Veuillez sélectionner une zone";
+      result = false;
+    }
 
-    if (!data.phone || !isPhoneNumberWellFormated(data.phone, data.phoneZone || "AUTRE")) {
+    if (!data.phone || !isPhoneNumberWellFormated(data.phone, data.phoneZone)) {
       errors.phone = PHONE_ZONES[data.phoneZone || "AUTRE"].errorMessage;
       result = false;
     }
