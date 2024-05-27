@@ -22,7 +22,7 @@ const {
 } = require("snu-lib");
 const { ObjectId } = require("mongoose").Types;
 const { sendTemplate } = require("../../sendinblue");
-const config = require("../../config");
+const config = require("config");
 
 const updateModificationDependencies = async (modif, fromUser) => {
   const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": ObjectId(modif._id) });

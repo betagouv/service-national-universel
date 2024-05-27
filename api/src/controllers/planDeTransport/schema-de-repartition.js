@@ -25,7 +25,7 @@ const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../../sentry");
 const { ERRORS } = require("../../utils");
-const { ADMIN_URL, ENVIRONMENT } = require("../../config");
+const config = require("config");
 const {
   canViewSchemaDeRepartition,
   YOUNG_STATUS,
@@ -957,7 +957,7 @@ router.post("", passport.authenticate("referent", { session: false, failWithErro
           trigger: "group_added",
           region: data.fromRegion,
           group_id: data._id,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${data.cohort}`,
+          cta: `${config.ADMIN_URL}/schema-repartition?cohort=${data.cohort}`,
         },
       });
     }
@@ -1008,7 +1008,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
           trigger: "group_deleted",
           region: schema.fromRegion,
           group_id: schema._id,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${schema.cohort}`,
+          cta: `${config.ADMIN_URL}/schema-repartition?cohort=${schema.cohort}`,
         },
       });
     }
@@ -1073,7 +1073,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           trigger: "group_changed",
           region: schema.fromRegion,
           group_id: schema._id,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${schema.cohort}`,
+          cta: `${config.ADMIN_URL}/schema-repartition?cohort=${schema.cohort}`,
         },
       });
     }

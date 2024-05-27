@@ -1,5 +1,5 @@
 const fetch = require("node-fetch");
-const { API_ENGAGEMENT_KEY } = require("../config");
+const config = require("config");
 const { capture, captureMessage } = require("../sentry");
 const slack = require("../slack");
 const MissionApiModel = require("../models/missionAPI");
@@ -43,7 +43,7 @@ const cleanData = async () => {
 };
 
 exports.handler = async () => {
-  if (!API_ENGAGEMENT_KEY) {
+  if (!config.API_ENGAGEMENT_KEY) {
     slack.error({ title: "sync with missions api-engagement", text: "I do not have any API_ENGAGEMENT_KEY !" });
     const err = new Error("NO API_ENGAGEMENT_KEY");
     capture(err);
@@ -51,7 +51,7 @@ exports.handler = async () => {
   }
   try {
     const myHeaders = new fetch.Headers();
-    myHeaders.append("apikey", API_ENGAGEMENT_KEY);
+    myHeaders.append("apikey", config.API_ENGAGEMENT_KEY);
     const requestOptions = {
       method: "GET",
       headers: myHeaders,

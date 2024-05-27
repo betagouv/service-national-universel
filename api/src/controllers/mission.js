@@ -18,7 +18,7 @@ const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, c
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL } = require("../config");
+const config = require("config");
 const { putLocation } = require("../services/gouv.fr/api-adresse");
 
 //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
@@ -81,7 +81,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
           emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
           params: {
-            cta: `${ADMIN_URL}/mission/${data._id}`,
+            cta: `${config.ADMIN_URL}/mission/${data._id}`,
           },
         });
       }
@@ -192,7 +192,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
             emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
             params: {
-              cta: `${ADMIN_URL}/mission/${mission._id}`,
+              cta: `${config.ADMIN_URL}/mission/${mission._id}`,
             },
           });
         }
@@ -211,7 +211,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_VALIDATED, {
             emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
             params: {
-              cta: `${ADMIN_URL}/dashboard`,
+              cta: `${config.ADMIN_URL}/dashboard`,
               missionName: mission.name,
             },
           });

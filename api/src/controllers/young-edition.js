@@ -41,12 +41,11 @@ const {
 const { getDensity, getQPV } = require("../geo");
 const { sendTemplate } = require("../sendinblue");
 const { format } = require("date-fns");
-const config = require("../config");
+const config = require("config");
 const YoungObject = require("../models/young");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohortModel = require("../models/cohort");
-const { APP_URL } = require("../config");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -501,7 +500,7 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
         await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
           emailTo,
           params: {
-            cta: `${APP_URL}/`,
+            cta: `${config.APP_URL}/`,
             SOURCE: young.source,
           },
         });

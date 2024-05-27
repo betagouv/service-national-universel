@@ -12,7 +12,7 @@ const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } = require("../cookie-options
 const { capture } = require("../sentry");
 const SNUpport = require("../SNUpport");
 const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
-const { ADMIN_URL, FILE_ENCRYPTION_SECRET_SUPPORT } = require("../config");
+const config = require("config");
 const { sendTemplate } = require("../sendinblue");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
@@ -461,7 +461,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
 
       const data = fs.readFileSync(tempFilePath);
       const path = getS3Path(name);
-      const encryptedBuffer = encrypt(data, FILE_ENCRYPTION_SECRET_SUPPORT);
+      const encryptedBuffer = encrypt(data, config.FILE_ENCRYPTION_SECRET_SUPPORT);
       const response = await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG);
       responseData.push({ name, url: response.Location, path: response.key });
       fs.unlinkSync(tempFilePath);
@@ -478,7 +478,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
 router.get("/s3file/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const file = await getFile(`message/${req.params.id}`, SUPPORT_BUCKET_CONFIG);
-    const buffer = decrypt(file.Body, FILE_ENCRYPTION_SECRET_SUPPORT);
+    const buffer = decrypt(file.Body, config.FILE_ENCRYPTION_SECRET_SUPPORT);
     return res.status(200).send({ ok: true, data: buffer });
   } catch (error) {
     capture(error);
@@ -506,7 +506,7 @@ const notifyReferent = async (ticket, message) => {
     sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: `${referent.email}` }],
       params: {
-        cta: `${ADMIN_URL}/boite-de-reception`,
+        cta: `${config.ADMIN_URL}/boite-de-reception`,
         message,
         from: `${ticketCreator.firstName} ${ticketCreator.lastName}`,
       },

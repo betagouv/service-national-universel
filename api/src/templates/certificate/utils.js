@@ -1,5 +1,5 @@
 const path = require("path");
-const { FONT_ROOTDIR } = require("../../config");
+const config = require("config");
 const PDFDocument = require("pdfkit");
 const { MINISTRES } = require("snu-lib");
 
@@ -31,8 +31,8 @@ const FILL_COLOR = "#444";
 function initDocument(options = {}) {
   const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0, ...options });
 
-  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
+  doc.registerFont(FONT, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
+  doc.registerFont(FONT_BOLD, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
 
   return doc;
 }

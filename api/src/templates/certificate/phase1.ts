@@ -5,7 +5,7 @@ import SessionPhase1Model from "../../models/sessionPhase1";
 import CohesionCenterModel from "../../models/cohesionCenter";
 import MeetingPointModel from "../../models/meetingPoint";
 import CohortModel from "../../models/cohort";
-import { ENVIRONMENT, IMAGES_ROOTDIR } from "../../config";
+import config from "config";
 import { ERRORS } from "../../utils/errors";
 import { initDocument, getMinistres, getCohesionCenterLocation, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } from "./utils";
 
@@ -72,8 +72,8 @@ function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter)
 
   doc.font(FONT).fontSize(FONT_SIZE).lineGap(LINE_GAP).fillColor(FILL_COLOR);
 
-  if (ENVIRONMENT !== "testing") {
-    doc.image(path.join(IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+  if (config.ENVIRONMENT !== "test") {
+    doc.image(path.join(config.IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
   }
   doc
     .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 280, { continued: true })
