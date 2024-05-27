@@ -2199,6 +2199,7 @@ Schema.plugin(
 Schema.index({ ligneId: 1 });
 Schema.index({ sessionPhase1Id: 1 });
 Schema.index({ sessionPhase1Id: 1, status: 1 });
+Schema.index({ classeId: -1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 if (ENVIRONMENT === "production") OBJ.syncIndexes();
