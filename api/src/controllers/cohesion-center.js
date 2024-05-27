@@ -12,7 +12,7 @@ const CohortModel = require("../models/cohort");
 const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { SENDINBLUE_TEMPLATES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib");
 const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL, ENVIRONMENT } = require("../config");
+const config = require("config");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateId } = require("../utils/validator");
@@ -214,7 +214,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         params: {
           trigger: "centre_changed",
           centre_id: value.name,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          cta: `${config.ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
         },
       });
     }

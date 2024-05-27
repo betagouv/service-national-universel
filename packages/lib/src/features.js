@@ -1,5 +1,5 @@
 const ENVS = [
-  "testing",
+  "test",
   "development",
   "ci",
   "custom",

@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 import querystring from "querystring";
 import { capture } from "./sentry";
-import { QPV_USERNAME, QPV_PASSWORD } from "./config";
+import config from "config";
 import AreaModel from "./models/areas";
 
 type GeoReferenceurResponse = {
@@ -16,7 +16,7 @@ const url = "https://wsa.sig.ville.gouv.fr/service/georeferenceur.json";
 
 async function getQPV(postcode: string, commune: string, adresse: string): Promise<unknown> {
   try {
-    if (!QPV_USERNAME || !QPV_PASSWORD) return console.log("QPV ENV VARIABLES ARE NOT SET (QPV_USERNAME and QPV_PASSWORD) ");
+    if (!config.QPV_USERNAME || !config.QPV_PASSWORD) return console.log("QPV ENV VARIABLES ARE NOT SET (QPV_USERNAME and QPV_PASSWORD) ");
 
     // I need to remove postcode and city from the adresse
     let addresseFormated = adresse.replace(postcode, "").replace(commune, "");
@@ -39,7 +39,7 @@ async function getQPV(postcode: string, commune: string, adresse: string): Promi
         retryOn: [502, 503, 504],
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Basic " + Buffer.from(QPV_USERNAME + ":" + QPV_PASSWORD).toString("base64"),
+          Authorization: "Basic " + Buffer.from(config.QPV_USERNAME + ":" + config.QPV_PASSWORD).toString("base64"),
         },
       })
         .then((res) => {

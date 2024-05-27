@@ -1,8 +1,7 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { setYoung } from "@/redux/auth/actions";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import { capture } from "../../../sentry";
@@ -39,7 +38,6 @@ export default function StepEligibilite() {
   const [loading, setLoading] = React.useState(false);
   const [confirmationModal, setConfirmationModal] = React.useState({ isOpen: false, onConfirm: null });
 
-  const dispatch = useDispatch();
   const history = useHistory();
 
   const optionsScolarite = [

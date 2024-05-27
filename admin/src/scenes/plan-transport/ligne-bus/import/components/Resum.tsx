@@ -1,15 +1,26 @@
 import React from "react";
-import { PlainButton } from "../../../components/Buttons";
-import { capture } from "../../../../../sentry";
 import { toastr } from "react-redux-toastr";
-import api from "../../../../../services/api";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { COHORT_TYPE } from "snu-lib";
 import { HiExclamation } from "react-icons/hi";
 
-export default function Resum({ summary, cohort, addLigne }) {
-  const cohorts = useSelector((state) => state.Cohorts);
+import { COHORT_TYPE } from "snu-lib";
+
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import { CohortState } from "@/redux/cohorts/reducer";
+
+import { PlainButton } from "../../../components/Buttons";
+import { ImportSummaryResponse } from "../type";
+
+interface Props {
+  cohort: string;
+  addLigne?: string | null;
+  summary: ImportSummaryResponse | null;
+}
+
+export default function Resum({ summary, cohort, addLigne }: Props) {
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const currentCohort = cohorts.find((c) => c.name === cohort);
   const [isLoading, setIsLoading] = React.useState(false);
   const history = useHistory();
@@ -17,16 +28,16 @@ export default function Resum({ summary, cohort, addLigne }) {
   async function onSubmit() {
     setIsLoading(true);
     try {
-      const { ok } = await api.post(`/plan-de-transport/import/${summary._id}/execute`, {});
+      const { ok } = await api.post(`/plan-de-transport/import/${summary?._id}/execute`, {});
       if (!ok) {
-        toastr.error("Impossible d'importer le plan de transport. Veuillez réessayer dans quelques instants.");
+        toastr.error("Impossible d'importer le plan de transport. Veuillez réessayer dans quelques instants.", "");
       } else {
-        toastr.success("Import réussi.");
+        toastr.success("Import réussi.", "");
         history.push(`/ligne-de-bus?cohort=${cohort}`);
       }
     } catch (err) {
       capture(err);
-      toastr.error("Une erreur interne est survenue pendant l'import. Veuillez réessayer dans quelques instants.");
+      toastr.error("Une erreur interne est survenue pendant l'import. Veuillez réessayer dans quelques instants.", "");
     }
     setIsLoading(false);
   }
@@ -40,28 +51,28 @@ export default function Resum({ summary, cohort, addLigne }) {
           <div className="text-sm leading-5">
             <p className="font-medium">Attention</p>
             <p>
-              Le plus grand nombre de Points de rassemblement importés pour une ligne de bus est de : <span className="font-bold">{summary.maxPdrOnLine}</span>.
+              Le plus grand nombre de Points de rassemblement importés pour une ligne de bus est de : <span className="font-bold">{summary?.maxPdrOnLine}</span>.
             </p>
             <p>Si vous constatez une incohérence, veuillez vérifier les noms de vos colonnes svp.</p>
           </div>
         </div>
         <div className="flex items-stretch justify-center gap-6 pt-6 pb-12">
           <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
-            <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.busLineCount}</div>
+            <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary?.busLineCount}</div>
             <div className="text-xs font-medium leading-5 text-gray-800">lignes de transport {addLigne && "supplémentaires"}</div>
           </div>
           <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
-            <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.centerCount}</div>
+            <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary?.centerCount}</div>
             <div className="text-xs font-medium leading-5 text-gray-800">centres de cohésion {addLigne && "supplémentaires"}</div>
           </div>
-          {currentCohort.type === COHORT_TYPE.CLE && (
+          {currentCohort?.type === COHORT_TYPE.CLE && (
             <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
-              <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.classeCount}</div>
+              <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary?.classeCount}</div>
               <div className="text-xs font-medium leading-5 text-gray-800">classes {addLigne && "supplémentaires"}</div>
             </div>
           )}
           <div className="flex h-32 w-52 flex-col justify-center rounded-xl bg-gray-100 px-4">
-            <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary.pdrCount}</div>
+            <div className="text-[42px] font-extrabold leading-[120%] text-gray-800">{summary?.pdrCount}</div>
             <div className="text-xs font-medium leading-5 text-gray-800">points de rassemblement {addLigne && "supplémentaires"}</div>
           </div>
         </div>

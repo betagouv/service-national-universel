@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
-const { MONGO_URL, ENVIRONMENT } = require("./config");
+const config = require("config");
 
 // Set up default mongoose connection
 async function initDB() {
-  if (!MONGO_URL) {
+  if (!config.MONGO_URL) {
     throw new Error("ERROR CONNECTION. MONGO URL EMPTY");
   }
 
@@ -37,13 +37,13 @@ async function initDB() {
     tls: true, // Enable TLS
   };
 
-  if (ENVIRONMENT === "production") {
+  if (config.ENVIRONMENT === "production") {
     options.maxPoolSize = 200;
     options.minPoolSize = 50;
   }
 
   try {
-    await mongoose.connect(MONGO_URL, options);
+    await mongoose.connect(config.MONGO_URL, options);
   } catch (error) {
     if (error.reason && error.reason.servers) {
       console.error(error.reason.servers);

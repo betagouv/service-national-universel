@@ -36,9 +36,25 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
 
   const fetchCenters = async (q: string) => {
     const { responses } = await api.post("/elasticsearch/cohesioncenter/not-in-cohort/" + selectedCohort, { filters: { searchbar: [q] } });
-    return responses[0].hits.hits.map((hit) => {
-      return { label: hit._source.name, value: hit._id, center: hit._source };
+    const options = responses[0].hits.hits.map((hit) => ({ label: hit._source.name, value: hit._id, center: hit._source }));
+    options.push({
+      label: (
+        <div className="p-1 border-t-2 text-center">
+          <p className="mt-2 text-center">Le centre n'est pas dans la liste ?</p>
+          <p className="mt-2 text-blue-600">Créer un centre</p>
+        </div>
+      ),
+      value: "new",
     });
+    return options;
+  };
+
+  const handleChange = (option) => {
+    if (option.value === "new") {
+      history.push(`/centre/nouveau?cohort=${selectedCohort}`);
+      return;
+    }
+    setSelectedCentre(option.center);
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -103,7 +119,7 @@ export default function ModalRattacherCentre({ isOpen, onSuccess, onCancel, user
               label="Nom du centre"
               placeholder="Nom du centre"
               value={selectedCentre ? { label: selectedCentre.name, value: selectedCentre._id } : null}
-              onChange={(option) => setSelectedCentre(option.center)}
+              onChange={handleChange}
               closeMenuOnSelect
               isAsync
               loadOptions={fetchCenters}
