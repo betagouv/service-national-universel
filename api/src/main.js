@@ -112,7 +112,7 @@ async function runAPI() {
   app.use("/bus", require("./controllers/bus"));
   app.use("/cle", require("./controllers/cle"));
   app.use("/cohesion-center", require("./controllers/cohesion-center"));
-  app.use("/cohort", require("./controllers/cohort/cohort.controller"));
+  app.use("/cohort", require("./cohort/cohortController"));
   app.use("/cohort-session", require("./controllers/cohort-session"));
   app.use("/contract", require("./controllers/contract"));
   app.use("/correction-request", require("./controllers/correction-request"));
