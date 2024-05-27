@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { IoRepeat } from "react-icons/io5";
-import { HiUsers, HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
+import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, STATUS_CLASSE, COHORT_TYPE, YOUNG_STATUS_PHASE1 } from "snu-lib";
@@ -97,6 +97,26 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
     });
   };
 
+  const getCohortOptions = (cohorts) => {
+    let updatedCohorts = cohorts.filter((c) => c.type === COHORT_TYPE.VOLONTAIRE);
+    return updatedCohorts.map((cohort) => ({
+      value: cohort.name,
+      label: (
+        <div className="flex flex-nowrap items-center justify-between gap-1.5 p-2.5 h-[40px] w-full">
+          <div className="flex items-center gap-1.5">
+            {cohort.isEligible ? (
+              <HiCheckCircle size={24} className="mt-0.5 mr-1 min-w-[24px] text-emerald-500" />
+            ) : (
+              <HiOutlineXCircle size={24} className="mt-0.5 mr-1 min-w-[24px] text-red-500" />
+            )}
+            <span className="text-gray-900 text-sm leading-5 font-normal">{`${cohort.name} `}</span>
+          </div>
+          <span className="text-gray-500 text-xs leading-4 font-medium text-right">{cohort.isEligible ? "éligible" : "Non éligible"}</span>
+        </div>
+      ),
+    }));
+  };
+
   useEffect(() => {
     switch (state) {
       // HTS
@@ -126,9 +146,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 <Select
                   className="text-left"
                   placeholder="Choix de la nouvelle cohorte"
-                  options={cohorts
-                    ?.filter((c) => c.type === COHORT_TYPE.VOLONTAIRE)
-                    .map((c) => ({ ...c, label: `Cohorte ${c.name}${!c.isEligible ? " (non éligible)" : " (éligible)"}`, value: c.name }))}
+                  options={getCohortOptions(cohorts)}
                   noOptionsMessage={"Aucune cohorte éligible n'est disponible."}
                   closeMenuOnSelect
                   isClearable={true}
@@ -182,7 +200,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Nouvelle cohorte :</div>
-                  <Badge title={cohort.label} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
+                  <Badge title={cohort.value} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
                 </div>
               </div>
             </div>
@@ -224,7 +242,8 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                     {young.firstName} <span className="uppercase">{young.lastName}</span>
                   </span>
                   , votre changement de séjour pour le Service National Universel a bien été pris en compte. Vous êtes maintenant positionné(e) sur le séjour de{" "}
-                  <span className="font-medium">{cohort.name}</span>.{!young.cniFiles?.length && !young.files?.cniFiles?.length && " Veuillez ajouter votre CNI dans votre compte."}
+                  <span className="font-medium">{cohort.value}</span>.
+                  {!young.cniFiles?.length && !young.files?.cniFiles?.length && " Veuillez ajouter votre CNI dans votre compte."}
                 </p>
                 <textarea
                   className="my-6 px-[10px] py-[6px] w-full min-h-[88px] rounded-md border-[1px] border-gray-300 bg-white"
@@ -247,7 +266,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   setIsSaving(true);
                   await api.put(`/referent/young/${young._id}/change-cohort`, {
                     source: YOUNG_SOURCE.VOLONTAIRE,
-                    cohort: cohort.name,
+                    cohort: cohort.value,
                     message: emailMessage,
                     cohortChangeReason: motif.label,
                   });

@@ -5,7 +5,7 @@ export type BusLine = { _id: string };
 
 export type User = {
   role: (typeof ROLES)[keyof typeof ROLES];
-  structureId: string;
+  structureId?: string;
   subRole?: string;
 };
 
@@ -23,7 +23,7 @@ export type Center = {
   department: string;
   domain: string;
   name: string;
-  placesTotal: number;
+  placesTotal?: number;
   pmr: string;
   region: string;
   sessionStatus: string[];

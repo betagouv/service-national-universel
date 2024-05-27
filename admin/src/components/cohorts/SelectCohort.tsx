@@ -16,9 +16,10 @@ interface Props {
   className?: string;
   filterFn?: (cohort: CohortState["Cohorts"][0]) => boolean;
   onChange?: (cohortName: string) => void;
+  isSearchable?: boolean;
 }
 
-export default function SelectCohort({ cohort, withBadge, sort, disabled, filterFn, onChange, className }: Props) {
+export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, disabled, className, isSearchable }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
@@ -74,6 +75,7 @@ export default function SelectCohort({ cohort, withBadge, sort, disabled, filter
         onMenuOpen={() => setIsSelectMenuOpen(true)}
         onMenuClose={() => setIsSelectMenuOpen(false)}
         badge={withBadge ? <BadgeNotif count={options.length} /> : undefined}
+        isSearchable={isSearchable}
       />
     </div>
   );
