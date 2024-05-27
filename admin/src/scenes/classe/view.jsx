@@ -355,7 +355,8 @@ export default function View() {
                 </Link>
               </>
             )}
-            {edit && user.role === ROLES.ADMINISTRATEUR_CLE ? (
+
+            {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? (
               <div className="flex items-center justify-end mt-6">
                 <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={() => setModalDelete(true)}>
                   <BsTrash3 className="mr-2" />

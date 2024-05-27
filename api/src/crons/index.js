@@ -60,13 +60,13 @@ const everyHours = (x) => `0 */${x} * * *`;
 
 // Crons qui peuvent être de  jour :
 // applicationPending.handler() : tous les lundis à 9h00
-// noticePushMission.handler() : tous les lundis à 9h00
-// apiEngagement.handler() : toutes les 6 heures
-// jeVeuxAiderDaily.handler() : toutes les 6 heures
+// noticePushMission.handler() : tous les lundis à 9h02
+// apiEngagement.handler() : toutes les 6 heures à la 10ème minute
+// jeVeuxAiderDaily.handler() : toutes les 6 heures à la 7ème minute
 // contratRelance.handler() : tous les jours à 6h00
 // missionOutdated.handler() : tous les jours à 8h00
 // applicationOutaded.handler() : tous les jours à 7h00
-// computeGoalsInscription.handler() : toutes les heures
+// computeGoalsInscription.handler() : toutes les heures à la 5ème minute
 // loginAttempts.handler() : tous les jours à 1h00
 // parentConsentementReminder.handler() : tous les jours à 8h27
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
@@ -130,8 +130,8 @@ function scheduleCrons() {
   // Every day at 11:00
   schedule("0 11 * * *", "reminderInscription", reminderInscription.handler);
 
-  // Every day at 11:00
-  schedule("0 11 * * *", "reminderWaitingCorrection", reminderWaitingCorrection.handler);
+  // Every day at 11:02
+  schedule("2 11 * * *", "reminderWaitingCorrection", reminderWaitingCorrection.handler);
 
   // Every day at 10:00
   schedule("0 10 * * *", "reminderImageRightsParent2", reminderImageRightsParent2.handler);
@@ -145,15 +145,16 @@ function scheduleCrons() {
 
   schedule("0 15 * * *", "deleteCNIAdnSpecificAmenagementType", deleteCNIAdnSpecificAmenagementType.handler);
 
-  schedule("0 9 * * 1", "noticePushMission", noticePushMission.handler);
+
+  schedule("2 9 * * 1", "noticePushMission", noticePushMission.handler);
 
   // everyday at 0200
-  schedule(everyHours(6), "apiEngagement", apiEngagement.handler);
+  schedule("10 */6 * * *", "apiEngagement", apiEngagement.handler);
 
   // everyday at 0200
   schedule("0 0 * * *", "deleteInactiveRefs", deleteInactiveRefs.handler);
 
-  schedule(everyHours(6), "jeVeuxAiderDaily", jeVeuxAiderDaily.handler);
+  schedule("7 */6 * * *", "jeVeuxAiderDaily", jeVeuxAiderDaily.handler);
 
   schedule("0 6 * * *", "contratRelance", contratRelance.handler);
 
@@ -161,7 +162,7 @@ function scheduleCrons() {
 
   schedule("0 7 * * *", "applicationOutaded", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]);
 
-  schedule(everyHours(1), "computeGoalsInscription", computeGoalsInscription.handler);
+  schedule("5 */1 * * *", "computeGoalsInscription", computeGoalsInscription.handler);
 
   schedule("0 1 * * *", "loginAttempts", loginAttempts.handler);
 
