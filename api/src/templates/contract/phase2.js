@@ -308,7 +308,13 @@ function render(doc, contract) {
   } else {
     _page3(doc, contract);
   }
+
+  _signature(doc, contract);
+  doc.moveDown(2);
+
+  _pageCharte(doc);
 }
+
 function _page3Old(doc, contract) {
   doc.addPage();
 
@@ -469,11 +475,6 @@ function _page3Old(doc, contract) {
   doc.text(`Réalisé le ${formatDateFRTimezoneUTC(contract.date)}.`);
   doc.moveDown(1);
   doc.moveDown(1);
-
-  _signature(doc, contract);
-  doc.moveDown(2);
-
-  _pageCharte(doc);
 }
 
 function _page3(doc, contract) {
@@ -627,11 +628,6 @@ function _page3(doc, contract) {
   );
   doc.moveDown(1);
   doc.moveDown(1);
-
-  _signature(doc, contract);
-  doc.moveDown(2);
-
-  _pageCharte(doc);
 }
 
 function _badge(doc, status) {
