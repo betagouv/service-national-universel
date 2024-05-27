@@ -25,6 +25,7 @@ const {
   canExportConvoyeur,
   isAdmin,
   SENDINBLUE_TEMPLATES,
+  isTeamLeaderOrSupervisorEditable,
 } = require("snu-lib");
 const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
@@ -184,7 +185,7 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
-      if (!canEditLigneBusTeam(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canEditLigneBusTeam(req.user) && !isTeamLeaderOrSupervisorEditable(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const NewMember = {
@@ -252,7 +253,7 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
     if (req.user.role === ROLES.TRANSPORTER) {
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
-      if (!canEditLigneBusTeam(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canEditLigneBusTeam(req.user) && !isTeamLeaderOrSupervisorEditable(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const memberToDelete = ligne.team.id(value.idTeam);

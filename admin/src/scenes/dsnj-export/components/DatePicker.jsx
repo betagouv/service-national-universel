@@ -8,10 +8,10 @@ import cx from "classnames";
 function MyDatePicker({ dateKey, onChangeDate, isOpen = false, onClose, minDate = undefined, maxDate = undefined }) {
   return (
     <div
-      className={cx("flex absolute top-[30%]", {
+      className={cx("flex absolute top-[32%]", {
         "left-[28%]": dateKey === "cohesionCenters",
-        "left-[50%]": dateKey === "youngsBeforeSession",
-        "left-[77%]": dateKey === "youngsAfterSession",
+        "left-[52%]": dateKey === "youngsBeforeSession",
+        "left-[79%]": dateKey === "youngsAfterSession",
       })}>
       <div>
         <DatePicker

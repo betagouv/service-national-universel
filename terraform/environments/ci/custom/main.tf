@@ -172,15 +172,26 @@ output "api_endpoint" {
 output "api_image_tag" {
   value = split(":", scaleway_container.api.registry_image)[1]
 }
+output "api_container_status" {
+  value = scaleway_container.api.status
+}
+
 output "app_endpoint" {
   value = "https://${local.app_hostname}"
 }
 output "app_image_tag" {
   value = split(":", scaleway_container.app.registry_image)[1]
 }
+output "app_container_status" {
+  value = scaleway_container.app.status
+}
+
 output "admin_endpoint" {
   value = "https://${local.admin_hostname}"
 }
 output "admin_image_tag" {
   value = split(":", scaleway_container.admin.registry_image)[1]
+}
+output "admin_container_status" {
+  value = scaleway_container.admin.status
 }
