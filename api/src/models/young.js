@@ -2196,6 +2196,7 @@ Schema.plugin(
   MODELNAME,
 );
 
+Schema.index({ classeId: 1 });
 Schema.index({ ligneId: 1 });
 Schema.index({ sessionPhase1Id: 1 });
 Schema.index({ sessionPhase1Id: 1, status: 1 });
