@@ -92,7 +92,11 @@ router.get("/isInscriptionOpen", async (req, res) => {
   const { sessionName } = value;
 
   try {
-    const data = await isInscriptionOpen(sessionName);
+    let data = false;
+    if (sessionName) {
+      const cohort = await CohortModel.findOne({ name: sessionName });
+      data = cohort?.isInscriptionOpen || data;
+    } else data = await isInscriptionOpen();
 
     return res.send({
       ok: true,

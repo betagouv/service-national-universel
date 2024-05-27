@@ -84,6 +84,8 @@ const Schema = new mongoose.Schema({
   inscriptionEndDate: { type: Date, required: true },
   instructionEndDate: { type: Date, required: true },
   inscriptionModificationEndDate: { type: Date },
+  reInscriptionStartDate: { type: Date },
+  reInscriptionEndDate: { type: Date },
 
   buffer: {
     type: Number,
@@ -321,11 +323,18 @@ Schema.virtual("fromUser").set(function (fromUser) {
 });
 
 Schema.virtual("isInscriptionOpen").get(function () {
-  const now = new Date();
   const start = this.inscriptionStartDate;
   const end = this.inscriptionEndDate;
   if (!start || !end || isAfter(start, end)) return false;
-  return isWithinInterval(now, { start, end });
+  return isWithinInterval(new Date(), { start, end });
+});
+
+Schema.virtual("isReInscriptionOpen").get(function () {
+  const start = this.reInscriptionStartDate;
+  const end = this.reInscriptionEndDate;
+  if (!start || !end) return this.isInscriptionOpen;
+  if (isAfter(start, end)) return false;
+  return isWithinInterval(new Date(), { start, end });
 });
 
 Schema.pre("save", function (next) {
