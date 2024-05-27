@@ -1,13 +1,11 @@
 import Joi from "joi";
-import { CohortDto } from "snu-lib/src/dto";
+import { UpdateCohortDto } from "snu-lib/src/dto";
 
-export const validateCohortDto = (dto: CohortDto): Joi.ValidationResult<CohortDto> => {
-  return Joi.object<CohortDto>({
+export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<UpdateCohortDto> => {
+  return Joi.object<UpdateCohortDto, true, UpdateCohortDto>({
     // Informations générales
     dateStart: Joi.date().required(),
     dateEnd: Joi.date().required(),
-    name: Joi.string().required(),
-    type: Joi.string().required(),
     // Inscriptions (phase 0)
     inscriptionStartDate: Joi.date().required(),
     inscriptionEndDate: Joi.date().required(),
