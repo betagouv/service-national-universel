@@ -4,6 +4,6 @@
   "APP_URL": "https://moncompte.ci.beta-snu.dev",
   "ADMIN_URL": "https://admin.ci.beta-snu.dev",
   "SUPPORT_URL": "https://support.beta-snu.dev",
-  "MAINTENANCE": "false",
+  "MAINTENANCE": "$MAINTENANCE",
   "RELEASE": "$RELEASE"
 }

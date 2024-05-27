@@ -5,7 +5,7 @@
   "ADMIN_URL": "https://admin.snu.gouv.fr",
   "SUPPORT_URL": "https://support.snu.gouv.fr",
   "FRANCE_CONNECT_URL": "https://app.franceconnect.gouv.fr/api/v1",
-  "MAINTENANCE": "false",
+  "MAINTENANCE": "$MAINTENANCE",
   "RELEASE": "$RELEASE",
   "SENTRY_SESSION_SAMPLE_RATE": "0.005",
   "SENTRY_TRACING_SAMPLE_RATE": "0.01"

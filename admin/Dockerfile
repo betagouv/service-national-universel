@@ -59,6 +59,7 @@ RUN chmod +x ./docker_start.sh
 ENV APP_NAME admin
 ARG RELEASE=""
 ENV RELEASE=${RELEASE}
+ENV MAINTENANCE="false"
 
 EXPOSE 8080
 
