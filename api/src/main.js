@@ -29,7 +29,7 @@ async function runCrons() {
   app.listen(config.PORT, () => console.log("Listening on port " + config.PORT));
 }
 
-async function runAPI(runCronsOnCC) {
+async function runAPI() {
   if (config.ENVIRONMENT !== "test") {
     console.log("API_URL", config.API_URL);
     console.log("APP_URL", config.APP_URL);
@@ -100,12 +100,6 @@ async function runAPI(runCronsOnCC) {
     next();
   });
   app.use(loggingMiddleware);
-
-  // WARNING : CleverCloud only
-  // TODO : REMOVE after isolate a dedicated clevercloud cron service
-  if (runCronsOnCC) {
-    scheduleCrons();
-  }
 
   app.use(cookieParser());
 

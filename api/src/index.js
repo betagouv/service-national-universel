@@ -37,7 +37,6 @@ resolveAsyncConfigs(config).then((config) => {
   if (process.env.RUN_CRONS === "true") {
     runCrons();
   } else {
-    const runCronsOnCC = process.env.RUN_CRONS_CC && config.ENVIRONMENT === "production" && process.env.CC_DEPLOYMENT_ID && process.env.INSTANCE_NUMBER === "0";
-    runAPI(runCronsOnCC);
+    runAPI();
   }
 });
