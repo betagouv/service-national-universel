@@ -24,7 +24,7 @@ const LIST_INDENT = 15;
 const MARGIN = 50;
 
 function isLocalTransport(young) {
-  return young.transportInfoGivenByLocal === "true" && young.source !== "CLE";
+  return young.transportInfoGivenByLocal === "true";
 }
 
 const getMeetingAddress = (young, meetingPoint, center) => {
