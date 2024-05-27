@@ -5,7 +5,7 @@ let secrets = null;
 
 function getSecret(key) {
 
-  return async (config, original) => {
+  return async (config) => {
     if (secrets === null) {
       const client = createClient({
         accessKey: config.SCW_ACCESS_KEY,
