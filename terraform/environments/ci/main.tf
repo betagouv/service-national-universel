@@ -129,7 +129,6 @@ resource "scaleway_container" "api" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
-}
 
   environment_variables = {
     "NODE_ENV"    = "ci"
@@ -139,6 +138,7 @@ resource "scaleway_container" "api" {
     "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
+}
 
 resource "scaleway_domain_record" "api" {
   dns_zone = scaleway_domain_zone.main.id
