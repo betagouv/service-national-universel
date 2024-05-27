@@ -129,6 +129,7 @@ resource "scaleway_container" "api" {
   privacy         = "public"
   protocol        = "http1"
   deploy          = true
+}
 
   environment_variables = {
     "NODE_ENV"    = "ci"
