@@ -1,3 +1,5 @@
+require("dotenv").config({ path: `${__dirname}/../../.env` });
+
 module.exports = {
   ENVIRONMENT: undefined,
   RELEASE: undefined,
