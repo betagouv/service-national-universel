@@ -20,7 +20,7 @@ const {
   getDepartmentByZip,
 } = require("snu-lib");
 
-const { ADMIN_URL } = require("../../config");
+const config = require("config");
 const { capture } = require("../../sentry");
 const { sendTemplate } = require("../../sendinblue");
 
@@ -250,7 +250,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
         centreDepartement: center?.department || getDepartmentByZip(young.cohesionCenterZip),
         departureReason: departSejourMotif,
         departureNote: departSejourMotifComment,
-        cta: `${ADMIN_URL}/volontaire/${young._id}`,
+        cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
       },
     });
 

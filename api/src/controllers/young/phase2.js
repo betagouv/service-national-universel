@@ -2,7 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const config = require("../../config");
+const config = require("config");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");

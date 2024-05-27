@@ -40,7 +40,7 @@ const {
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL } = require("../config");
+const config = require("config");
 const SessionPhase1 = require("../models/sessionPhase1");
 const fs = require("fs");
 const mongoose = require("mongoose");
@@ -337,7 +337,7 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
     for (const email of value.emails) {
       await sendTemplate(SENDINBLUE_TEMPLATES.SHARE_SESSION_PHASE1, {
         emailTo: [{ email: email }],
-        params: { link: `${ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort.toLowerCase() },
+        params: { link: `${config.ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort.toLowerCase() },
       });
     }
 
@@ -747,7 +747,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
         fileName: key === "time-schedule" ? "l'emploi du temps" : key === "pedago-project" ? "le projet pédagogique" : null,
         date: date ? datefns.format(date, "dd MMMM yyyy", { locale: fr }) : "?",
         cohesioncenter: session.nameCentre,
-        cta: `${ADMIN_URL}/centre/${session.cohesionCenterId}?sessionId=${session._id}`,
+        cta: `${config.ADMIN_URL}/centre/${session.cohesionCenterId}?sessionId=${session._id}`,
       },
     });
 

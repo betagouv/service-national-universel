@@ -18,8 +18,7 @@ const { ERRORS, deleteFile } = require("../utils");
 const passport = require("passport");
 const { canUpdateYoungStatus, YOUNG_STATUS, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { sendTemplate } = require("../sendinblue");
-const { APP_URL } = require("../config");
-const config = require("../config");
+const config = require("config");
 
 router.post("/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -79,7 +78,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
-          cta: `${APP_URL}/`,
+          cta: `${config.APP_URL}/`,
         },
       });
     } catch (e) {
@@ -169,7 +168,7 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
         await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_REMIND_CORRECTION, {
           emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
           params: {
-            cta: `${APP_URL}/`,
+            cta: `${config.APP_URL}/`,
           },
         });
       } catch (e) {

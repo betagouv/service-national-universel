@@ -1,29 +1,27 @@
-#!/bin/sh
+#!/bin/bash
 
 set -ex
+
+if [[ $ENVIRONMENT == "" ]]
+then
+    env="development"
+else
+    env=$ENVIRONMENT
+fi
+
+if [[ $env != "development" ]] && [[ $env != "custom" ]] && [[ $env != "ci" ]] && [[ $env != "staging" ]] && [[ $env != "production" ]]
+then
+  echo "Invalid environment name : $env"
+  exit 1
+fi
+
+config=$(cat docker_config/$env.json | tr -d '\n\t ' | envsubst)
 
 cd /usr/share/nginx/html
 
 mv index.html index.html.template
 
-sed '/<noscript> You need to enable JavaScript to run this app. <\/noscript>/a\
-<script> \
-    globalThis.runtime_env = { \
-        "API_URL":"$API_URL", \
-        "APP_URL":"$APP_URL", \
-        "ADMIN_URL":"$ADMIN_URL", \
-        "SUPPORT_URL":"$SUPPORT_URL", \
-        "MAINTENANCE":"$MAINTENANCE", \
-        "RELEASE":"$RELEASE", \
-        "ENVIRONMENT":"$ENVIRONMENT", \
-        "SENTRY_URL":"$SENTRY_URL", \
-        "SENTRY_TRACING_SAMPLE_RATE":"$SENTRY_TRACING_SAMPLE_RATE", \
-        "SENTRY_SESSION_SAMPLE_RATE":"$SENTRY_SESSION_SAMPLE_RATE", \
-        "SENTRY_ON_ERROR_SAMPLE_RATE":"$SENTRY_ON_ERROR_SAMPLE_RATE" \
-    }; \
-</script> \
-' index.html.template \
-| envsubst > index.html
+sed "s#\(<noscript> You need to enable JavaScript to run this app. </noscript>\)#\1<script>globalThis.runtime_env=JSON.parse('$config');</script>#" index.html.template > index.html
 
 cd -
 

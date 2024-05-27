@@ -1,4 +1,4 @@
-const config = require("./config");
+const config = require("config");
 const { JWT_SIGNIN_MAX_AGE_SEC, JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC, JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC } = require("./jwt-options");
 
 //!COOKIE need to be in milliseconds
