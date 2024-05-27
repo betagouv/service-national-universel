@@ -6,6 +6,7 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "sourceRoot": "./src",
+    "sourceMap": true,
     "declarationDir": "./dist",
   },
   "exclude": ["**/dist/**/*", "**/node_modules/*"]
