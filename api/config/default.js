@@ -5,7 +5,7 @@ module.exports = {
   SECRET_REVISION: "latest_enabled",
   PORT: 8080,
   IMAGES_ROOTDIR: `${__dirname}/../public/images`,
-  FONT_ROOTDIR: `${__dirname}/../assets/fonts`,
+  FONT_ROOTDIR: `${__dirname}/../src/assets/fonts`,
   ENABLE_SENDINBLUE: true,
   API_URL: "http://localhost:8080",
   APP_URL: "http://localhost:8081",
