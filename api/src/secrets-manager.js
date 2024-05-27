@@ -1,11 +1,11 @@
 const { Secret, createClient } = require("@scaleway/sdk");
-const asyncConfig = require('config/async').asyncConfig;
+const asyncConfig = require("config/async").asyncConfig;
 
 let secrets = null;
 
 function getSecret(key) {
-
   return async (config) => {
+    // * L'env est chargé une seule fois
     if (secrets === null) {
       const client = createClient({
         accessKey: config.SCW_ACCESS_KEY,
@@ -23,8 +23,8 @@ function getSecret(key) {
       secrets = JSON.parse(decodedData);
     }
 
-    return secrets[key]
-  }
+    return secrets[key];
+  };
 }
 
 function asyncSecretConfig() {
@@ -70,7 +70,7 @@ function asyncSecretConfig() {
     JVA_TOKEN: asyncConfig(getSecret("JVA_TOKEN")),
     JVA_API_KEY: asyncConfig(getSecret("JVA_API_KEY")),
     REDIS_URL: asyncConfig(getSecret("REDIS_URL")),
-  }
+  };
 }
 
 module.exports = asyncSecretConfig;
