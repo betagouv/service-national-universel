@@ -60,7 +60,7 @@ export default function TravelInfo({ location, departureDate, returnDate }) {
             </p>
             <p className="max-w-md text-sm leading-relaxed">
               <span className="capitalize">{dayjs(returnDate).locale("fr").format("dddd")}</span> <span>{dayjs(returnDate).locale("fr").format("D MMMM")}</span>
-              {!isCle(young) && `à ${returnHour}`}
+              {!isCle(young) && ` à ${returnHour}`}
             </p>
             <p className="my-2 rounded-xl bg-gray-100 py-2 px-3 text-sm">
               {location.name},

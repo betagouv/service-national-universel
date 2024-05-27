@@ -1,4 +1,6 @@
 export type CohortDto = {
+  name: string;
+  type: string;
   dateStart: Date;
   dateEnd: Date;
   inscriptionStartDate: Date;

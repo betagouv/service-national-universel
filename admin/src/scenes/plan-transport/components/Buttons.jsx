@@ -45,7 +45,7 @@ export function BorderButton({ children, className = "", onClick = () => {}, to,
   }
 }
 
-export function PlainButton({ children, className = "", onClick = () => {}, spinner = false, mode = "blue", disabled = false }) {
+export function PlainButton({ children, className = "", onClick = (e) => {}, spinner = false, mode = "blue", disabled = false }) {
   let color;
   switch (mode) {
     case "green":

@@ -50,10 +50,16 @@ LABEL org.opencontainers.image.source=https://github.com/betagouv/service-nation
 LABEL org.opencontainers.image.description="This image provides a consistent and reproducible environment for the admin, ensuring it deploys faster and runs the same way regardless of the deployment environment."
 
 COPY --from=installer /app/admin/build/ /usr/share/nginx/html
-COPY --from=builder /app/admin/docker_start.sh .
 COPY --from=builder /app/admin/docker_nginx.conf /etc/nginx/templates/default.conf.template
+COPY --from=builder /app/admin/docker_start.sh .
+COPY --from=builder /app/admin/docker_config docker_config
 
 RUN chmod +x ./docker_start.sh
+
+ENV APP_NAME admin
+ARG RELEASE=""
+ENV RELEASE=${RELEASE}
+ENV MAINTENANCE="false"
 
 EXPOSE 8080
 

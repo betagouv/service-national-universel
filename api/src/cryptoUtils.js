@@ -1,11 +1,11 @@
 const crypto = require("crypto");
 
-const { FILE_ENCRYPTION_SECRET } = require("./config");
+const config = require("config");
 
 const ALGO = "aes-256-ctr";
 
 const getKey = (secret) => {
-  const SECRET = secret || FILE_ENCRYPTION_SECRET;
+  const SECRET = secret || config.FILE_ENCRYPTION_SECRET;
   return crypto.createHash("sha256").update(SECRET).digest("base64").substr(0, 32);
 };
 

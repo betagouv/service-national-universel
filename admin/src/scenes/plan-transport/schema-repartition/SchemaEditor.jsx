@@ -3,15 +3,18 @@ import { Box, BoxHeader } from "../components/commons";
 import Iceberg from "../../../assets/icons/Iceberg";
 import GroupSelector from "./GroupSelector";
 import GroupEditor from "./GroupEditor";
-import ButtonPrimary from "../../../components/ui/buttons/ButtonPrimary";
-import { getCohortByName } from "../../../services/cohort.service";
+import { getCohortByName } from "@/services/cohort.service";
 import { ROLES } from "snu-lib";
 import ReactTooltip from "react-tooltip";
+import { Button } from "@snu/ds/admin";
+import { capture } from "@/sentry";
+import { toastr } from "react-redux-toastr";
 
 export default function SchemaEditor({ className = "", onExportDetail, department, region, cohort: cohortName, groups, summary, onChange, user }) {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isUserAuthorizedToExportData, setIsUserAuthorizedToExportData] = useState(false);
   const [isUserAuthorizedToCreateGroup, setIsUserAuthorizedToCreateGroup] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
 
   function groupSelected(group) {
     setSelectedGroup(group);
@@ -23,6 +26,18 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
       onChange && onChange();
     }
   }
+
+  const handleClickedExport = async () => {
+    try {
+      setExportLoading(true);
+      await onExportDetail();
+    } catch (e) {
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération des données. Nous ne pouvons exporter les données.");
+    } finally {
+      setExportLoading(false);
+    }
+  };
 
   const checkIfUserIsAuthorizedToExportData = async (cohort) => {
     if ((!cohort || !cohort.repartitionSchemaDownloadAvailability) && user.role === ROLES.TRANSPORTER) {
@@ -62,9 +77,7 @@ export default function SchemaEditor({ className = "", onExportDetail, departmen
     <Box className={className}>
       <BoxHeader title={`Gérer les volontaires de ${department}`}>
         <span data-tip data-tip-disable={false} data-for="export-data">
-          <ButtonPrimary onClick={onExportDetail} disabled={!isUserAuthorizedToExportData}>
-            Exporter
-          </ButtonPrimary>
+          <Button onClick={() => handleClickedExport()} title="Exporter" loading={exportLoading} disabled={!isUserAuthorizedToExportData} />
           <ReactTooltip
             disable={isUserAuthorizedToExportData}
             id="export-data"

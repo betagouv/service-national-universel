@@ -1,6 +1,6 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { IMAGES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
+const config = require("config");
 const { formatDateFRTimezoneUTC } = require("snu-lib");
 
 const FONT = "Marianne";
@@ -32,7 +32,7 @@ function _page1(doc) {
 
   doc.moveDown(2);
   _y = doc.y;
-  doc.image(path.join(IMAGES_ROOTDIR, "logo-snu.png"), 40, _y, { width: 60, height: 60 });
+  doc.image(path.join(config.IMAGES_ROOTDIR, "logo-snu.png"), 40, _y, { width: 60, height: 60 });
 
   doc.font(FONT_BOLD).fontSize(FONT_SIZE_H1).text("Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)", 120, _y, {
     align: "center",
@@ -717,9 +717,9 @@ function initDocument() {
     autoFirstPage: false,
   });
 
-  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
-  doc.registerFont(FONT_ITALIC, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
+  doc.registerFont(FONT, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
+  doc.registerFont(FONT_BOLD, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
+  doc.registerFont(FONT_ITALIC, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
 
   return doc;
 }
