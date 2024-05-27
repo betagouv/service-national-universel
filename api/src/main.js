@@ -45,7 +45,7 @@ async function runAPI() {
       Download all certificate templates when instance is starting,
       making them available for PDF generation
 
-      These templates are sensitive data, so we can't treat theam as simple statics
+      These templates are sensitive data, so we can't treat them as simple statics
 
       TODO : A possible improvement would be to download templates at build time
     */
