@@ -60,12 +60,12 @@ export default function Home() {
 
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
-    if (reinscriptionOpen && hasAccessToReinscription(young)) {
-      return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
-    }
-
     if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
       return <Phase1NotDone />;
+    }
+    
+    if (reinscriptionOpen && hasAccessToReinscription(young)) {
+      return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
     }
 
     if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {

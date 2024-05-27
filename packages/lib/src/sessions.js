@@ -284,8 +284,18 @@ function hasAccessToReinscription(young) {
     return false;
   }
 
-  if(young.frenchNationality === "false") {
-    return false
+  if (isCle(young)) {
+    if (young.frenchNationality === "false") {
+      return false;
+    }
+    if ([YOUNG_STATUS.ABANDONED].includes(young.status)) {
+      return true;
+    }
+    if ([YOUNG_STATUS_PHASE1.WITHDRAWN, YOUNG_STATUS_PHASE1.NOT_DONE].includes(young.status)) {
+      return true;
+    }
+
+    return false;
   }
 
   if (isCohortTooOld(young)) {
