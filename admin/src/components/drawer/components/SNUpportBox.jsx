@@ -2,14 +2,12 @@ import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import api from "@/services/api";
-import { useHistory } from "react-router-dom";
 import { translate } from "@/utils";
 import Mail from "../icons/Mail";
 import Separator from "./Separator";
 
 export default function SNUpportBox({ newTickets, openedTickets, sideBarOpen }) {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const history = useHistory();
 
   const onMouseEnter = () => {
     setPopoverOpen(true);
@@ -22,7 +20,7 @@ export default function SNUpportBox({ newTickets, openedTickets, sideBarOpen }) 
   const connectToSNUpport = async () => {
     try {
       const { ok, data, code } = await api.get(`/SNUpport/signin`);
-      if (!ok) return history.push("/boite-de-reception");
+      if (!ok) return toastr.error("Oups, une erreur est survenue. Veuillez contacter le support", translate(code));
       window.open(data, "_blank", "noopener,noreferrer");
     } catch (e) {
       console.log(e);
