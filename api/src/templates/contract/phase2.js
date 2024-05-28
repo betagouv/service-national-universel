@@ -303,7 +303,7 @@ function render(doc, contract) {
 
   _page2(doc, contract);
 
-  if (new Date(contract.createdAd) < new Date("2024-03-14")) {
+  if (new Date(contract.createdAt) < new Date("2024-03-14")) {
     _page3Old(doc, contract);
   } else {
     _page3(doc, contract);
