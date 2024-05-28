@@ -48,3 +48,5 @@ export type CohortDto = {
     editionOpenForHeadOfCenter?: boolean;
   } | null;
 };
+
+export type UpdateCohortDto = Omit<CohortDto, "name" | "type">;
