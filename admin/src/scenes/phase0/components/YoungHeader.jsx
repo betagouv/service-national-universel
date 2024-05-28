@@ -43,6 +43,7 @@ import SelectAction from "@/components/SelectAction";
 import downloadPDF from "@/utils/download-pdf";
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import { capture } from "@/sentry";
+import { signinAs } from "@/utils/signinAs";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
@@ -81,6 +82,10 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
             break;
         }
       }
+      //referent can withdraw a young from every status except withdrawn
+      if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && young.status !== "WITHDRAWN") options.push(YOUNG_STATUS.WITHDRAWN);
+      options = [...new Set(options)];
+
       setStatusOptions(options.map((opt) => ({ value: opt, label: translateInscriptionStatus(opt) })));
     } else {
       setStatusOptions([]);
@@ -111,7 +116,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       title: status === YOUNG_STATUS.WITHDRAWN ? "Désistement" : "Modification de statut",
       message: `${
         status === YOUNG_STATUS.WITHDRAWN ? `Êtes-vous sûr(e) de vouloir désister ce profil?` : `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?`
-      } Un email sera automatiquement envoyé à l'utlisateur.`,
+      } Un email sera automatiquement envoyé à l'utilisateur.`,
       type: status,
     });
   };
@@ -225,9 +230,12 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   const onPrendreLaPlace = async (young_id) => {
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
-    plausibleEvent("Volontaires/CTA - Prendre sa place");
-    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    try {
+      plausibleEvent("Volontaires/CTA - Prendre sa place");
+      await signinAs("young", young_id);
+    } catch (e) {
+      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    }
   };
 
   return (
@@ -354,9 +362,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
 
             {young.status !== YOUNG_STATUS.DELETED && ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
               <div className="my-[15px] flex items-center justify-between">
-                <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
-                  Supprimer
-                </Button>
+                {user.role === ROLES.ADMIN && (
+                  <Button icon={<Bin fill="red" />} onClick={handleDeleteYoung}>
+                    Supprimer
+                  </Button>
+                )}
                 <button
                   onClick={() => {
                     window.open(appURL, "_blank");

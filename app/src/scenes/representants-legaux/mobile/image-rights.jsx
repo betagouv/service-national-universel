@@ -14,11 +14,10 @@ import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import PhoneField from "@/components/dsfr/forms/PhoneField";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress } from "../utils";
-import { getAddressOptions } from "@/services/api-adresse";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function ImageRights({ parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -290,7 +289,7 @@ function ImageRightsForm({ young, token, parentId }) {
               <>
                 <ResponsiveRadioButton label="Je réside..." options={addressTypeOptions} onChange={(e) => setData({ ...data, addressType: e })} value={data.addressType} />
                 {data.addressType === FRANCE ? (
-                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} />
+                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} />
                 ) : (
                   <>
                     <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />
@@ -344,7 +343,7 @@ function ImageRightsForm({ young, token, parentId }) {
 
           {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
         </div>
-        <SignupButtonContainer onClickNext={onSubmit} labelNext="Valider" disabled={saving} />
+        <SignupButtons onClickNext={onSubmit} labelNext="Valider" disabled={saving} />
       </DSFRContainer>
     </>
   );

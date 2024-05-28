@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const getNewReferentFixture = require("./fixtures/referent");
@@ -14,8 +13,6 @@ jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
 }));
-
-jest.setTimeout(10_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -273,7 +270,7 @@ describe("Referent", () => {
     it("should return 401 when new password is identical as last password", async () => {
       const fixture = getNewReferentFixture();
       const token = await crypto.randomBytes(20).toString("hex");
-      const young = await createReferentHelper({
+      await createReferentHelper({
         ...fixture,
         email: fixture.email.toLowerCase(),
         forgotPasswordResetExpires: Date.now() + 1000 * 60 * 60 * 24 * 7,

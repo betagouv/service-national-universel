@@ -1,0 +1,165 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Install and start All applications",
+      "dependsOn": ["Install dependencies", "Start All Applications"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Install and start Admin",
+      "dependsOn": ["Install dependencies", "Start Admin Applications"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Install and start App",
+      "dependsOn": ["Install dependencies", "Start App Applications"],
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Install dependencies",
+      "command": "npm install",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Build dependencies",
+      "command": "APP_NAME=\\!antivirus npm run build",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Clean dependencies",
+      "command": "npm run clean",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start Admin Applications",
+      "dependsOn": ["Start Lib", "Start DS", "Start Api", "Start Admin"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Start App Applications",
+      "dependsOn": ["Start Lib", "Start DS", "Start Api", "Start App"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Start All Applications",
+      "dependsOn": [
+        "Start Lib",
+        "Start DS",
+        "Start Api",
+        "Start Admin",
+        "Start App",
+        "Start Support"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Start App",
+      "command": "npm run dev:app app",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start Admin",
+      "command": "npm run dev:app admin",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start Api",
+      "command": "npm run dev:app api",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start Antivirus",
+      "command": "npm run dev:app antivirus",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start Lib",
+      "command": "npm run dev:app snu-lib",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start DS",
+      "command": "npm run dev:app @snu/ds",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start Analytics",
+      "command": "npm run dev:app analytics",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start Support",
+      "command": "npm install && npm run dev",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./knowledge-base-public"
+      }
+    },
+    {
+      "label": "Start Pdf",
+      "command": "npm install && npm run dev",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./pdf"
+      }
+    }
+  ]
+}

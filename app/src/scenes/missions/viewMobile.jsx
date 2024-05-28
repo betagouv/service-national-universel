@@ -37,13 +37,12 @@ import IconDomain from "./components/IconDomain";
 import ModalPJ from "./components/ModalPJ";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
+import plausibleEvent from "@/services/plausible";
+import { apiEngagement } from "./utils";
 
-export default function viewMobile() {
+export default function ViewMobile() {
   const [mission, setMission] = useState();
   const [modal, setModal] = useState(null);
-  const [disabledAge, setDisabledAge] = useState(false);
-  const [disabledIncomplete, setDisabledIncomplete] = useState(false);
-  const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState("mots");
   const [contract, setContract] = useState(null);
@@ -61,6 +60,9 @@ export default function viewMobile() {
   const getMission = async () => {
     if (!id) return setMission(null);
     const { data } = await api.get(`/mission/${id}`);
+    if (data?.apiEngagementId && (!data.application || data.application?.status === APPLICATION_STATUS.WAITING_ACCEPTATION)) {
+      await apiEngagement(data.apiEngagementId);
+    }
     return setMission(data);
   };
 
@@ -68,6 +70,7 @@ export default function viewMobile() {
 
   useEffect(() => {
     getMission();
+    return localStorage.removeItem("jva_mission_click_id");
   }, []);
 
   useEffect(() => {
@@ -84,36 +87,6 @@ export default function viewMobile() {
     getContract();
   }, [mission?.application]);
 
-  useEffect(() => {
-    function getDiffYear(a, b) {
-      const from = new Date(a);
-      from.setHours(0, 0, 0, 0);
-      const to = new Date(b);
-      to.setHours(0, 0, 0, 0);
-      const diffTime = Math.abs(to - from);
-      const res = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365.25));
-      if (!res || isNaN(res)) return "?";
-      return res;
-    }
-
-    // si c'est une préparation militaire
-    // on vérifie que le vonlontaire aura plus de 16 ans au début de la mission, que son dossier est complet et que son dossier n'est pas refusé
-    if (mission?.isMilitaryPreparation === "true") {
-      const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
-      setDisabledAge(ageAtStart < 16);
-      setDisabledPmRefused(young.statusMilitaryPreparationFiles === "REFUSED");
-      if (
-        !young.files.militaryPreparationFilesIdentity.length ||
-        !young.files.militaryPreparationFilesAuthorization.length ||
-        !young.files.militaryPreparationFilesCertificate.length
-      ) {
-        setDisabledIncomplete(true);
-      } else {
-        setDisabledIncomplete(false);
-      }
-    }
-  }, [mission, young]);
-
   const getTags = () => {
     const tags = [];
     mission.city && tags.push(mission.city + (mission.zip ? ` - ${mission.zip}` : ""));
@@ -122,11 +95,13 @@ export default function viewMobile() {
     return tags;
   };
 
-  const scrollToBottom = () => {
-    if (!docRef.current) return;
-    docRef.current.scrollIntoView({
-      behavior: "smooth",
-    });
+  const handleClick = (mission) => {
+    if (mission.isMilitaryPreparation === "true") {
+      plausibleEvent("Phase 2/CTA - PM - Candidater");
+    } else {
+      plausibleEvent("Phase2/CTA missions - Candidater");
+    }
+    setModal("APPLY");
   };
 
   const updateApplication = async (status) => {
@@ -186,34 +161,15 @@ export default function viewMobile() {
           <div className="mt-2 flex items-center justify-center">
             {mission.application ? (
               <ApplicationStatus
-                application={mission.application}
-                tutor={mission?.tutor}
                 mission={mission}
                 updateApplication={updateApplication}
                 loading={loading}
                 setLoading={setLoading}
-                disabledAge={disabledAge}
-                disabledIncomplete={disabledIncomplete}
-                disabledPmRefused={disabledPmRefused}
-                scrollToBottom={scrollToBottom}
                 contract={contract}
                 contractHasAllValidation={contractHasAllValidation}
-                young={young}
               />
             ) : (
-              <ApplyButton
-                placesLeft={mission.placesLeft}
-                setModal={setModal}
-                young={young}
-                disabledAge={disabledAge}
-                disabledIncomplete={disabledIncomplete}
-                disabledPmRefused={disabledPmRefused}
-                scrollToBottom={scrollToBottom}
-                duration={mission?.duration}
-                isMilitaryPreparation={mission?.isMilitaryPreparation}
-                hebergement={mission?.hebergement}
-                hebergementPayant={mission?.hebergementPayant}
-              />
+              <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
             )}
           </div>
         </div>
@@ -515,22 +471,10 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
   </div>
 );
 
-const ApplicationStatus = ({
-  application,
-  tutor,
-  mission,
-  updateApplication,
-  loading,
-  setLoading,
-  disabledAge,
-  disabledIncomplete,
-  disabledPmRefused,
-  scrollToBottom,
-  contract,
-  contractHasAllValidation,
-  young,
-}) => {
-  const [message, setMessage] = React.useState(null);
+const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, contract, contractHasAllValidation }) => {
+  const young = useSelector((state) => state.Auth.young);
+  const tutor = mission?.tutor;
+  const application = mission?.application;
 
   const refContractButton = React.useRef();
 
@@ -543,12 +487,6 @@ const ApplicationStatus = ({
     });
   };
 
-  useEffect(() => {
-    if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");
-    if (disabledPmRefused) setMessage("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
-    if (disabledAge) setMessage("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
-  }, [disabledAge, disabledIncomplete, disabledPmRefused]);
-
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (refContractButton.current && !refContractButton.current.contains(event.target)) {
@@ -560,6 +498,29 @@ const ApplicationStatus = ({
       document.removeEventListener("click", handleClickOutside, true);
     };
   }, []);
+
+  const handleClick = async () => {
+    try {
+      if (mission.isMilitaryPreparation === "true") {
+        if (!["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
+          const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
+            statusMilitaryPreparationFiles: "WAITING_VERIFICATION",
+          });
+          if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
+        }
+        if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
+          updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+        } else {
+          updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
+        }
+      } else {
+        updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
+      }
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue lors de la candidature.");
+    }
+  };
 
   const theme = {
     background: {
@@ -620,7 +581,7 @@ const ApplicationStatus = ({
                 className={`${
                   openContractButton ? "block" : "hidden"
                 }  absolute right-0 top-[40px] z-50 !min-w-full overflow-hidden rounded-lg bg-white shadow transition lg:!min-w-3/4`}>
-                <div
+                <button
                   key="download"
                   onClick={() => {
                     setLoading(true);
@@ -632,7 +593,7 @@ const ApplicationStatus = ({
                     <Download className="h-4 w-4 text-gray-400" />
                     <div>Télécharger</div>
                   </div>
-                </div>
+                </button>
                 <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
               </div>
             </div>
@@ -666,10 +627,8 @@ const ApplicationStatus = ({
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-3">
-          {disabledAge || disabledIncomplete || disabledPmRefused ? (
-            <button
-              className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2"
-              onClick={() => disabledIncomplete && !disabledPmRefused && !disabledAge && scrollToBottom()}>
+          {!mission.canApply ? (
+            <button disabled className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2">
               <CheckCircle className="mr-2 h-5 w-5 text-blue-400 " />
               <span className="text-sm font-medium leading-5 text-white">Accepter</span>
             </button>
@@ -677,28 +636,7 @@ const ApplicationStatus = ({
             <button
               className="group flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 transition duration-300 ease-in-out hover:bg-blue-500 disabled:bg-blue-400"
               disabled={loading}
-              onClick={async () => {
-                try {
-                  if (mission.isMilitaryPreparation === "true") {
-                    if (!["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
-                      const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
-                        statusMilitaryPreparationFiles: "WAITING_VERIFICATION",
-                      });
-                      if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
-                    }
-                    if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
-                      updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
-                    } else {
-                      updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
-                    }
-                  } else {
-                    updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
-                  }
-                } catch (e) {
-                  console.log(e);
-                  toastr.error("Oups, une erreur est survenue lors de la candidature.");
-                }
-              }}>
+              onClick={handleClick}>
               <CheckCircle className="mr-2 h-5 w-5 text-blue-600 hover:text-blue-500 group-disabled:text-blue-400" />
               <span className="text-sm font-medium leading-5 text-white">Accepter</span>
             </button>
@@ -711,7 +649,7 @@ const ApplicationStatus = ({
             <span className="text-sm font-medium leading-5 text-black">Décliner</span>
           </button>
         </div>
-        {disabledAge || disabledIncomplete || disabledPmRefused ? <div className="text-center text-xs text-red-500">{message}</div> : null}
+        {!mission.canApply ? <div className="text-center text-xs text-red-500">{mission.message}</div> : null}
 
         <HoursAndPlaces duration={mission?.duration} placesLeft={mission.placesLeft} hebergement={mission.hebergement} hebergementPayant={mission.hebergementPayant} />
       </div>

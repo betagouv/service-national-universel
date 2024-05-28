@@ -3,12 +3,11 @@
  * Il vérifie si on est la veille de la fermeture des instructions d'une cohorte.
  * Si c'est le cas, il envoit à tous les référents départementaux pour qui il reste des jeunes en attente de validation une relance mail.
  */
-require("../mongo");
 const { capture } = require("../sentry");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
-const { ADMIN_URL } = require("../config");
+const config = require("config");
 const { YOUNG_STATUS, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, SENDINBLUE_TEMPLATES } = require("snu-lib");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
@@ -43,6 +42,7 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     await slack.error({ title: "clotureInscriptionReminder", text: JSON.stringify(e) });
+    throw e;
   }
 };
 
@@ -80,7 +80,7 @@ function sendReminder(referent, department, cohort) {
   return sendTemplate(SENDINBLUE_TEMPLATES.referent.INSTRUCTION_END_REMINDER, {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
     params: {
-      cta: `${ADMIN_URL}/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D&COHORT=%5B"${encodeURIComponent(cohort)}"%5D&DEPARTMENT=%5B"${encodeURIComponent(department._id)}"%5D`,
+      cta: `${config.ADMIN_URL}/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D&COHORT=%5B"${encodeURIComponent(cohort)}"%5D&DEPARTMENT=%5B"${encodeURIComponent(department._id)}"%5D`,
       department: department._id,
       cohort,
       pending_cases: department.count,

@@ -1,6 +1,3 @@
-require("dotenv").config({ path: "./../../../.env-prod" });
-require("../../mongo");
-
 const { ObjectId } = require("mongoose").Types;
 const fetch = require("node-fetch");
 const { getAge } = require("snu-lib");
@@ -9,7 +6,7 @@ const { capture } = require("../../sentry");
 const slack = require("../../slack");
 const ClasseModel = require("../../models/cle/classe");
 const ClassePatchModel = require("./models/classePatch");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -54,7 +51,7 @@ async function createLog(patch, actualClasse, event, value) {
 
   const age = getAge(classe?.birthdateAt || actualClasse?.birthdateAt);
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/classe`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/classe`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -93,7 +90,7 @@ const rebuildClasse = (classeInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(ClassePatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -103,6 +100,7 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Classe Logs", text: `${JSON.toString(e)}` });
     capture(e);
+    throw e;
   }
 };
 
@@ -110,7 +108,7 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./classe').manualHandler('2023-12-17', '2023-12-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(ClassePatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 

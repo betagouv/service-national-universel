@@ -313,6 +313,7 @@ const sessionPhase1Keys = {
   placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
   dateStart: Joi.date().allow(null),
   dateEnd: Joi.date().allow(null),
+  sanitaryContactEmail: Joi.string().allow(null, ""),
 };
 
 function validateSessionPhase1(session) {
@@ -367,6 +368,7 @@ function validateYoung(young, user) {
     invitationExpires: Joi.string().allow(null, ""),
     cniFiles: Joi.array().items(Joi.string().allow(null, "")),
     acceptCGU: Joi.string().allow(null, ""),
+    acceptRI: Joi.string().allow(null, ""),
     cohesionStayPresence: Joi.string().allow(null, ""),
     presenceJDM: Joi.string().allow(null, ""),
     departSejourAt: Joi.string().allow(null, ""),
@@ -768,23 +770,23 @@ const representantSchema = (isRequired) => {
     parent2Status: Joi.alternatives().conditional("parent2", {
       is: true,
       then: needRequired(Joi.string().trim().valid("father", "mother", "representant"), isRequired),
-      otherwise: Joi.isError(new Error()),
+      otherwise: Joi.allow(null),
     }),
-    parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(validateFirstName().trim(), isRequired), otherwise: Joi.isError(new Error()) }),
+    parent2FirstName: Joi.alternatives().conditional("parent2", { is: true, then: needRequired(validateFirstName().trim(), isRequired), otherwise: Joi.allow(null) }),
     parent2LastName: Joi.alternatives().conditional("parent2", {
       is: true,
       then: needRequired(Joi.string().uppercase().trim(), isRequired),
-      otherwise: Joi.isError(new Error()),
+      otherwise: Joi.allow(null),
     }),
     parent2Email: Joi.alternatives().conditional("parent2", {
       is: true,
       then: needRequired(Joi.string().trim().lowercase().email(), isRequired),
-      otherwise: Joi.isError(new Error()),
+      otherwise: Joi.allow(null),
     }),
     parent2Phone: Joi.alternatives().conditional("parent2", {
       is: true,
       then: needRequired(Joi.string().trim(), isRequired),
-      otherwise: Joi.isError(new Error()),
+      otherwise: Joi.allow(null),
     }),
 
     parent2PhoneZone: Joi.alternatives().conditional("parent2", {
@@ -795,7 +797,7 @@ const representantSchema = (isRequired) => {
           .valid(...PHONE_ZONES_NAMES_ARR),
         isRequired,
       ),
-      otherwise: Joi.isError(new Error()),
+      otherwise: Joi.allow(null),
     }),
   };
 };

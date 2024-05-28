@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { PHONE_ZONES } from "snu-lib";
 import { setYoung } from "../../../../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import ButtonPrimary from "../../../../components/ui/buttons/ButtonPrimary";
@@ -92,6 +92,23 @@ const AccountRepresentantsPage = () => {
     return !hasError;
   };
 
+  const handleChangeParent2 = (value) => {
+    setHasParent2(value);
+    if (!value) {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        parent2Status: "",
+        parent2LastName: "",
+        parent2FirstName: "",
+        parent2Email: "",
+        parent2Phone: {
+          phoneNumber: "",
+          phoneZone: "",
+        },
+      }));
+    }
+  };
+
   const handleSubmitRepresentantsForm = async (event) => {
     event.preventDefault();
     if (!validateForm()) {
@@ -116,6 +133,13 @@ const AccountRepresentantsPage = () => {
         youngDataToUpdate.parent2Phone = formValues.parent2Phone.phoneNumber.trim();
         youngDataToUpdate.parent2PhoneZone = formValues.parent2Phone.phoneZone;
         youngDataToUpdate.parent2Email = formValues.parent2Email.trim();
+      } else {
+        youngDataToUpdate.parent2Status = "";
+        youngDataToUpdate.parent2LastName = "";
+        youngDataToUpdate.parent2FirstName = "";
+        youngDataToUpdate.parent2Phone = "";
+        youngDataToUpdate.parent2PhoneZone = "AUTRE";
+        youngDataToUpdate.parent2Email = "";
       }
 
       const { title, message, data: updatedYoung } = await updateYoung("parents", youngDataToUpdate);
@@ -190,7 +214,8 @@ const AccountRepresentantsPage = () => {
                 placeholder={PHONE_ZONES[formValues.parent1Phone.phoneZone]?.example}
               />
             </section>
-            <Checkbox label="Je ne possède pas de second(e) représentant(e) légal(e)" onChange={(value) => setHasParent2(!value)} value={!hasParent2} useCheckedAsValue />
+            {/* <Checkbox label="Je renseigne un(e) second(e) représentant(e) légal(e)" onChange={(value) => setHasParent2(value)} value={hasParent2} useCheckedAsValue /> */}
+            <Checkbox label="Je renseigne un(e) second(e) représentant(e) légal(e)" onChange={handleChangeParent2} value={hasParent2} useCheckedAsValue />
             {hasParent2 && (
               <section className="mb-4">
                 <SectionTitle>Représentant légal 2</SectionTitle>

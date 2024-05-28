@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Formik, Field } from "formik";
+import { Formik, Field, Form } from "formik";
 import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -13,20 +13,21 @@ import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
-import { formatToActualTime } from "snu-lib/date";
-import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
+import { formatToActualTime, isValidRedirectUrl } from "snu-lib";
 import { captureMessage } from "../../sentry";
 
 export default function Signin() {
   const history = useHistory();
   const dispatch = useDispatch();
+
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
-  const [tooManyRequests, setTooManyRequests] = useState({ status: false, date: null });
-  const params = queryString.parse(location.search);
-  const { redirect, unauthorized } = params;
 
-  if (user) return <Redirect to={"/" + (redirect || "")} />;
+  const [tooManyRequests, setTooManyRequests] = useState({ status: false, date: null });
+
+  const { redirect, unauthorized } = queryString.parse(location.search);
+
+  if (user) return <Redirect to={redirect || "/"} />;
   if (unauthorized === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
   return (
@@ -67,8 +68,9 @@ export default function Signin() {
                     if (user) {
                       plausibleEvent("Connexion réussie");
                       dispatch(setUser(user));
-                      if (isFeatureEnabled(FEATURES_NAME.FORCE_REDIRECT, undefined, environment) ? redirect : isValidRedirectUrl(redirect))
-                        return (window.location.href = redirect);
+                      if ((isFeatureEnabled(FEATURES_NAME.FORCE_REDIRECT, undefined, environment) && redirect) || isValidRedirectUrl(redirect)) {
+                        return (window.location.href = redirect || "/");
+                      }
                       if (redirect) {
                         captureMessage("Invalid redirect url", { extra: { redirect } });
                         toastr.error("Url de redirection invalide : " + redirect);
@@ -85,12 +87,13 @@ export default function Signin() {
                       setTooManyRequests({ status: true, date: formatToActualTime(e?.data?.nextLoginAttemptIn) });
                     }
                     toastr.error("Erreur détectée");
+                  } finally {
+                    actions.setSubmitting(false);
                   }
-                  actions.setSubmitting(false);
                 }}>
-                {({ values, isSubmitting, handleChange, handleSubmit }) => {
+                {({ values, isSubmitting, handleChange }) => {
                   return (
-                    <form onSubmit={handleSubmit} className="mb-6 flex flex-col items-start gap-4">
+                    <Form className="mb-6 flex flex-col items-start gap-4">
                       {!userIsValid && (
                         <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">E-mail et/ou mot de passe incorrect(s)</div>
                       )}
@@ -127,13 +130,13 @@ export default function Signin() {
                       </Link>
                       <div className="w-full flex justify-end">
                         <button
-                          loading={isSubmitting}
+                          disabled={isSubmitting}
                           type="submit"
                           className="block cursor-pointer !rounded-xl border-0 bg-[#2563EB] py-3 px-4 mt-2 text-base font-medium text-white transition-colors">
                           Se connecter
                         </button>
                       </div>
-                    </form>
+                    </Form>
                   );
                 }}
               </Formik>

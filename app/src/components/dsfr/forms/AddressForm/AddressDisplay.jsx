@@ -2,6 +2,7 @@ import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import React from "react";
 import { RiSearchLine } from "react-icons/ri";
 import { HiCheckCircle } from "react-icons/hi";
+import { Input } from "@snu/ds/dsfr";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
 
@@ -19,49 +20,38 @@ export default function AddressDisplay({ data, updateData, error, correction }) 
 
   return (
     <div className="flex flex-col gap-2">
-      {/* If the user does not select a housenumber, we allow them to input address data, otherwise the address field is disabled */}
-      {data?.coordinatesAccuracyLevel === "housenumber" ? (
-        <label className="flex flex-col gap-2 w-full">
-          Adresse
-          <div className="flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
-            <input disabled type="text" value={data.address || data.adresse} className="w-full text-gray-400 bg-[#EEEEEE]" />
-            <HiCheckCircle />
-          </div>
-          <ErrorMessage>{correction?.address}</ErrorMessage>
-        </label>
-      ) : (
-        <>
-          <label className="flex flex-col gap-2 w-full text-gray-800">
-            Adresse
-            <input
-              type="text"
-              value={data.address || data.adresse}
-              onChange={(e) => updateData({ address: e.target.value })}
-              className="bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2 text-gray-800 border-b-2 border-gray-800"
-            />
-            <ErrorMessage>{correction?.address}</ErrorMessage>
-          </label>
-        </>
-      )}
+      <Input
+        label="Adresse"
+        nativeInputProps={{
+          value: data.address || data.adresse,
+          onChange: (e) => updateData({ ...data, address: e.target.value }),
+        }}
+        disabled={data?.coordinatesAccuracyLevel === "housenumber"}
+        state={data?.coordinatesAccuracyLevel === "housenumber" ? "success" : correction?.address && error}
+        stateRelatedMessage={correction?.address}
+      />
 
       <div className="flex flex-col md:flex-row gap-2 md:gap-8">
-        <label className="flex flex-col gap-2 w-full">
-          Ville
-          <div className="appearance-none flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
-            <input type="text" value={data.city} disabled className="w-full text-gray-400 bg-[#EEEEEE]" />
-            <HiCheckCircle />
-          </div>
-          <ErrorMessage>{correction?.city}</ErrorMessage>
-        </label>
-
-        <label className="flex flex-col gap-2 w-full">
-          Code postal
-          <div className="flex w-full items-center bg-[#EEEEEE] rounded-tl rounded-tr px-3 py-2">
-            <input type="text" value={data.zip} disabled className="w-full text-gray-400 bg-[#EEEEEE]" />
-            <HiCheckCircle />
-          </div>
-          <ErrorMessage>{correction?.zip}</ErrorMessage>
-        </label>
+        <Input
+          className="w-full"
+          label="Ville"
+          nativeInputProps={{
+            value: data.city,
+          }}
+          disabled
+          state={correction?.address ? "error" : "success"}
+          stateRelatedMessage={correction?.address}
+        />
+        <Input
+          className="w-full mb-4"
+          label="Code Postal"
+          nativeInputProps={{
+            value: data.zip,
+          }}
+          disabled
+          state={correction?.zip ? "error" : "success"}
+          stateRelatedMessage={correction?.zip}
+        />
       </div>
       <ErrorMessage>{error}</ErrorMessage>
       <button onClick={handleClick} className="text-blue-france-sun-113 hover:text-blue-france-sun-113-hover ml-auto py-1 w-fit flex gap-2 items-center">

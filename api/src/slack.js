@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const { SLACK_BOT_TOKEN, SLACK_BOT_CHANNEL, ENVIRONMENT } = require("./config");
+const config = require("config");
 const { capture } = require("./sentry");
 
 const STATUS_PREFIX = {
@@ -15,9 +15,9 @@ const STATUS_COLOR = {
 };
 
 const postMessage = async ({ title, text, author_name, color }) => {
-  if (!SLACK_BOT_TOKEN || !SLACK_BOT_CHANNEL) return capture("NO SLACK CREDENTIALS");
+  if (!config.SLACK_BOT_TOKEN || !config.SLACK_BOT_CHANNEL) return capture("NO SLACK CREDENTIALS");
   const payload = {
-    channel: SLACK_BOT_CHANNEL,
+    channel: config.SLACK_BOT_CHANNEL,
     attachments: [
       {
         title,
@@ -27,14 +27,14 @@ const postMessage = async ({ title, text, author_name, color }) => {
       },
     ],
   };
-  if (ENVIRONMENT === "production") {
+  if (config.ENVIRONMENT === "production") {
     fetch("https://slack.com/api/chat.postMessage", {
       method: "POST",
       body: JSON.stringify(payload),
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Content-Length": payload.length,
-        Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
+        Authorization: `Bearer ${config.SLACK_BOT_TOKEN}`,
         Accept: "application/json",
       },
     })
@@ -42,8 +42,7 @@ const postMessage = async ({ title, text, author_name, color }) => {
         return res.json();
       })
       .catch((error) => {
-        capture(error);
-        console.log(error);
+        console.error(error);
       });
   } else {
     console.log("slack", payload?.attachments);

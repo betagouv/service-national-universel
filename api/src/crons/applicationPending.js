@@ -1,11 +1,10 @@
-require("../mongo");
 const { capture } = require("../sentry");
 const Application = require("../models/application");
 const Referent = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { ADMIN_URL } = require("../config");
+const config = require("config");
 const { differenceInDays, getMonth } = require("date-fns");
 
 exports.handler = async () => {
@@ -36,7 +35,7 @@ exports.handler = async () => {
         sendTemplate(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER, {
           emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
           params: {
-            cta: `${ADMIN_URL}/volontaire/${application.youngId}`,
+            cta: `${config.ADMIN_URL}/volontaire/${application.youngId}`,
             youngFirstName: application.youngFirstName,
             youngLastName: application.youngLastName,
             missionName: application.missionName,
@@ -55,5 +54,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "applicationPending", text: JSON.stringify(e) });
+    throw e;
   }
 };

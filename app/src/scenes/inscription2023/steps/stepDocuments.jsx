@@ -13,17 +13,17 @@ import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
 import Info from "../../../components/info";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import plausibleEvent from "@/services/plausible";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepDocuments() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [error, setError] = useState({});
-  const corrections = young?.correctionRequests
-    ?.filter((correctionRequest) => correctionRequest?.cohort === young?.cohort)
-    ?.filter((e) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(e.field) && ["SENT", "REMINDED"].includes(e.status));
+  const corrections = young?.correctionRequests?.filter(
+    (correction) => ["cniFile", "latestCNIFileExpirationDate", "latestCNIFileCategory"].includes(correction.field) && ["SENT", "REMINDED"].includes(correction.status),
+  );
   const disabledUpload = young?.files.cniFiles.length > 2;
 
   const IDs = [
@@ -108,22 +108,22 @@ export default function StepDocuments() {
         <div className="mt-2 text-sm text-gray-800">Choisissez le justificatif d’identité que vous souhaitez importer :</div>
         <div className="flex flex-col my-3 gap-3">
           {IDs.map((doc) => (
-            <button
+            <span
               key={doc.category}
               disabled={disabledUpload}
               onClick={() => handleClick(doc)}
-              className="hover:bg-[#FAFAFA] disabled:cursor-not-allowed disabled:bg-[#FAFAFA] w-full flex items-center justify-between border p-4 group">
-              <div className="text-left">
-                <p>{doc.title}</p>
-                {doc.subtitle && <p className="text-sm text-gray-500">{doc.subtitle}</p>}
+              className="cursor-pointer hover:bg-[#FAFAFA] disabled:cursor-not-allowed disabled:bg-[#FAFAFA] w-full flex items-center justify-between border p-4 group">
+              <div className="text-left flex flex-col">
+                <span>{doc.title}</span>
+                {doc.subtitle && <span className="text-sm text-gray-500">{doc.subtitle}</span>}
               </div>
               <div className="w-10 h-10 bg-blue-france-sun-113 group-hover:bg-blue-france-sun-113-hover group-disabled:bg-gray-400">
                 <RiArrowRightLine className="text-white w-6 h-6 mx-auto my-2" />
               </div>
-            </button>
+            </span>
           ))}
         </div>
-        <SignupButtonContainer onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />
+        <SignupButtons onClickNext={corrections ? null : onSubmit} onClickPrevious={corrections ? null : goBack} disabled={disabled} />
       </DSFRContainer>
     </>
   );

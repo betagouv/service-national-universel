@@ -1,11 +1,10 @@
-require("../mongo");
 const { capture } = require("../sentry");
 const YoungModel = require("../models/young");
 const CohortModel = require("../models/cohort");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
-const { APP_URL } = require("../config");
+const config = require("config");
 
 exports.handler = async () => {
   try {
@@ -39,7 +38,7 @@ exports.handler = async () => {
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_IMAGERIGHT_REMINDER, {
           emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
           params: {
-            cta: `${APP_URL}/representants-legaux/droits-image?token=${young.parent2Inscription2023Token}`,
+            cta: `${config.APP_URL}/representants-legaux/droits-image?token=${young.parent2Inscription2023Token}`,
             youngFirstName: young.firstName,
             youngName: young.lastName,
           },
@@ -53,5 +52,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: `Parent 2 image right reminder - ERROR`, text: JSON.stringify(e) });
+    throw e;
   }
 };

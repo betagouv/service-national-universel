@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 const crypto = require("crypto");
 const { ObjectId } = require("mongoose").Types;
 const request = require("supertest");
@@ -30,8 +29,6 @@ jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
 }));
-
-jest.setTimeout(10_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);

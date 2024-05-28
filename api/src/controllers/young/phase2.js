@@ -2,7 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const config = require("../../config");
+const config = require("config");
 
 const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
@@ -26,6 +26,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       sousType: Joi.string()
         .trim()
         .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
+      desc: Joi.string().trim().when("type", { is: "Autre", then: Joi.required() }),
       structureName: Joi.string().trim().required(),
       address: Joi.string().trim().required(),
       zip: Joi.string().trim().required(),
@@ -63,7 +64,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     const youngId = value.id;
     delete value.id;
-    await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
+    const data = await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
     if (isYoung) {
       young.set({ status_equivalence: "WAITING_VERIFICATION" });
     }
@@ -118,7 +119,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       });
     }
 
-    res.status(200).send({ ok: true });
+    res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -137,6 +138,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       sousType: Joi.string()
         .trim()
         .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
+      desc: Joi.string().trim(),
       structureName: Joi.string().trim(),
       address: Joi.string().trim(),
       zip: Joi.string().trim(),
@@ -197,7 +199,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     delete value.id;
     delete value.idEquivalence;
     equivalence.set(value);
-    await equivalence.save({ fromUser: req.user });
+    const data = await equivalence.save({ fromUser: req.user });
     await young.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young[`EQUIVALENCE_${value.status}`];
@@ -212,7 +214,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       cc,
     });
 
-    res.status(200).send({ ok: true });
+    res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const { getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");
@@ -23,8 +22,6 @@ jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
   getSignedUrl: () => "",
 }));
-
-jest.setTimeout(10_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -81,7 +78,7 @@ describe("Session Phase 1", () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const sessionPhase1 = await createSessionPhase1(getNewSessionPhase1Fixture());
-      const cohort = await createCohortHelper(
+      await createCohortHelper(
         getNewCohortFixture({
           name: sessionPhase1.cohort,
           sessionEditionOpenForReferentRegion: true,

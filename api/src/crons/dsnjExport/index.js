@@ -1,5 +1,3 @@
-require("../../mongo");
-
 const { generateYoungsExport, generateCohesionCentersExport, addToSlackRapport, printSlackInfo } = require("./utils");
 const { capture } = require("../../sentry");
 const slack = require("../../slack");
@@ -15,7 +13,7 @@ exports.handler = async () => {
     const exportsGenerated = {};
 
     for (const cohort of cohorts) {
-      if (!cohort.dsnjExportDates) return;
+      if (!cohort.dsnjExportDates) continue;
       const cohesionCenterExportDate = cohort.dsnjExportDates[EXPORT_COHESION_CENTERS] ? new Date(cohort.dsnjExportDates[EXPORT_COHESION_CENTERS]) : undefined;
       const youngBeforeSessionExportDate = cohort.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION] ? new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_BEFORE_SESSION]) : undefined;
       const youngAfterSessionExportDate = cohort.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION] ? new Date(cohort.dsnjExportDates[EXPORT_YOUNGS_AFTER_SESSION]) : undefined;
@@ -43,5 +41,6 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "DSNJ export generation", text: e });
     capture(e);
+    throw e;
   }
 };

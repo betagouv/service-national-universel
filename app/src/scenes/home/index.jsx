@@ -1,13 +1,8 @@
 import { React, useEffect, useState } from "react";
 import { Redirect } from "react-router-dom";
-
-import Loader from "@/components/Loader";
-import { capture } from "@/sentry";
-import API from "@/services/api";
-import { toastr } from "react-redux-toastr";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToPhase2, hasAccessToReinscription } from "../../utils";
-import { cohortAssignmentAnnouncementsIsOpenForYoung } from "../../utils/cohorts";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, getCohortNames, hasAccessToReinscription } from "../../utils";
+import { cohortAssignmentAnnouncementsIsOpenForYoung, getCohort } from "../../utils/cohorts";
 import Affected from "./Affected";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
@@ -23,17 +18,24 @@ import WaitingList from "./waitingList";
 import Withdrawn from "./withdrawn";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import { IS_INSCRIPTION_OPEN_CLE } from "snu-lib";
+import AvenirCohort from "./AvenirCohort";
+import { isCohortTooOld } from "snu-lib";
+import { capture } from "@/sentry";
+import { toastr } from "react-redux-toastr";
+import API from "@/services/api";
+import Loader from "@/components/Loader";
 
 export default function Home() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
-  const [isReinscriptionOpen, setReinscriptionOpen] = useState(false);
-  const [isReinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
+  const cohort = getCohort(young.cohort);
 
-  const fetchInscriptionOpen = async () => {
+  const [reinscriptionOpen, setReinscriptionOpen] = useState(false);
+  const [reinscriptionOpenLoading, setReinscriptionOpenLoading] = useState(true);
+
+  const fetchReInscriptionOpen = async () => {
     try {
-      const { ok, data, code } = await API.get(`/cohort-session/isInscriptionOpen`);
+      const { ok, data, code } = await API.get(`/cohort-session/isReInscriptionOpen`);
       if (!ok) {
         capture(new Error(code));
         return toastr.error("Oups, une erreur est survenue", code);
@@ -46,27 +48,45 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchInscriptionOpen();
+    fetchReInscriptionOpen();
   }, []);
+
+  if (reinscriptionOpenLoading) return <Loader />;
 
   if (!young) return <Redirect to="/auth" />;
 
   const renderStep = () => {
+    const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status);
+
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
-    if (!hasAccessToPhase2(young)) return <DelaiDepasse />;
-
-    if (isReinscriptionOpen === false) {
-      if (young.status === YOUNG_STATUS.ABANDONED) return <Withdrawn />;
-      if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
+    if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
+      return <Phase1NotDone />;
     }
 
     if (hasAccessToReinscription(young)) {
-      if (isReinscriptionOpenLoading) return <Loader />;
-      if (young.status === YOUNG_STATUS.WITHDRAWN && ["DONE", "EXEMPTED"].includes(young.statusPhase1)) {
-        return <Withdrawn />;
+      if (!reinscriptionOpen) {
+        if (hasWithdrawn) {
+          return <Withdrawn />;
+        }
+        if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
+          return <AvenirCohort />;
+        }
+        if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+          return <FutureCohort />;
+        }
       }
-      return <WaitingReinscription reinscriptionOpen={isReinscriptionOpen} />;
+      return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
+    }
+
+    if (hasWithdrawn) {
+      return <Withdrawn />;
+    }
+    const hasCompletedPhase2 = [YOUNG_STATUS_PHASE2.DONE, YOUNG_STATUS_PHASE2.EXEMPTED].includes(young.statusPhase2);
+    const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
+
+    if (isCohortTooOld(young) && !hasCompletedPhase2 && !hasMission) {
+      return <DelaiDepasse />;
     }
 
     if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
@@ -79,13 +99,11 @@ export default function Home() {
       return <HomePhase2 />;
     }
 
-    if ([YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
-      return <Phase1NotDone />;
-    }
 
     if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step
-      if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !IS_INSCRIPTION_OPEN_CLE) {
+      const isCohortInstructionOpen = new Date() < new Date(cohort.instructionEndDate);
+      if (isCLE && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) && !isCohortInstructionOpen) {
         return <InscriptionClosedCLE />;
       }
       if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
@@ -97,10 +115,6 @@ export default function Home() {
           return <ValidatedV2 />;
         }
       }
-    }
-
-    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
-      return <FutureCohort />;
     }
 
     return <Default />;

@@ -1,4 +1,3 @@
-require("../mongo");
 const path = require("path");
 const { capture } = require("../sentry");
 const Mission = require("../models/mission");
@@ -8,7 +7,7 @@ const YoungObject = require("../models/young");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
-const { ADMIN_URL, APP_URL } = require("../config");
+const config = require("config");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
 
@@ -32,7 +31,7 @@ const clean = async () => {
           emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
           params: {
             missionName: mission.name,
-            cta: `${ADMIN_URL}/mission/${mission._id}/youngs`,
+            cta: `${config.ADMIN_URL}/mission/${mission._id}/youngs`,
           },
         });
     }
@@ -59,8 +58,8 @@ const notify1Week = async () => {
           emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
           params: {
             missionName: mission.name,
-            ctaMission: `${ADMIN_URL}/mission/${mission._id}`,
-            ctaYoungMission: `${ADMIN_URL}/mission/${mission._id}/youngs`,
+            ctaMission: `${config.ADMIN_URL}/mission/${mission._id}`,
+            ctaYoungMission: `${config.ADMIN_URL}/mission/${mission._id}/youngs`,
           },
         });
     }
@@ -101,7 +100,7 @@ const cancelApplications = async (mission) => {
       await sendTemplate(sendinblueTemplate, {
         emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
         params: {
-          cta: `${APP_URL}/phase2`,
+          cta: `${config.APP_URL}/phase2`,
           missionName: mission.name,
           message: mission.statusComment,
         },
@@ -119,6 +118,7 @@ exports.handler = async () => {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
     slack.error({ title: "outdated mission", text: JSON.stringify(e) });
+    throw e;
   }
 };
 
@@ -129,6 +129,7 @@ exports.handlerNotice1Week = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "1 week notice outdated mission", text: JSON.stringify(e) });
+    throw e;
   }
 };
 

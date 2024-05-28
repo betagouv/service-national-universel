@@ -18,7 +18,7 @@ export default function EditEquivalence() {
   const young = useSelector((state) => state.Auth.young);
   const optionsDuree = ["Heure(s)", "Demi-journée(s)", "Jour(s)"];
   const optionsFrequence = ["Par semaine", "Par mois", "Par an"];
-  const keyList = ["type", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
+  const keyList = ["type", "desc", "structureName", "address", "zip", "city", "startDate", "endDate", "frequency", "contactFullName", "contactEmail", "files"];
   const [data, setData] = useState();
   const [openType, setOpenType] = useState(false);
   const [openSousType, setOpenSousType] = React.useState(false);
@@ -126,6 +126,13 @@ export default function EditEquivalence() {
         if (["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(data.type) && (data?.sousType === undefined || data.sousType === "")) {
           error = true;
         }
+      } else if (key === "desc") {
+        if (data.type === "Autre" && (data[key] === undefined || data[key] === "")) {
+          error = true;
+        }
+        if (data.type !== "Autre") {
+          delete data.desc;
+        }
       } else if (data[key] === undefined || data[key] === "") {
         error = true;
       }
@@ -177,8 +184,8 @@ export default function EditEquivalence() {
 
   return (
     <div className="align-center my-4 flex justify-center ">
-      <div className="p-4 lg:w-1/2">
-        <div className="text-center text-2xl font-extrabold leading-10 tracking-tight md:text-4xl ">
+      <div className="p-4 max-w-2xl">
+        <div className="text-center text-2xl font-bold leading-10 tracking-tight md:text-4xl ">
           {mode === "create" ? "Je demande la reconnaissance d'un engagement déjà réalisé" : "Je modifie ma demande de reconnaissance d'engagement"}
         </div>
         <div className="mt-4 rounded-lg border-[1px] border-blue-400 bg-blue-50">
@@ -205,11 +212,11 @@ export default function EditEquivalence() {
           </div>
         ) : null}
         <div className="mt-4 rounded-lg bg-white p-6">
-          <div className="text-lg font-bold leading-7">Informations générales</div>
-          <div className="mt-2 text-sm font-normal leading-5 text-gray-500">Veuillez compléter le formulaire ci-dessous.</div>
-          <div className="mt-6 text-xs font-medium leading-4">Quoi ?</div>
+          <h2 className="text-lg font-bold leading-7 mt-0">Informations générales</h2>
+          <p className="mt-2 text-sm font-normal leading-5 text-gray-500">Veuillez compléter le formulaire ci-dessous.</p>
+          <p className="mt-6 text-xs font-medium leading-4">Quoi ?</p>
           <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
-            {data?.type ? <div className="text-xs font-normal leading-4 text-gray-500">Type d&apos;engagement</div> : null}
+            {data?.type ? <p className="text-xs font-normal leading-4 text-gray-500">Type d&apos;engagement</p> : null}
             <div className="relative" ref={refType}>
               <button className="flex w-full cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50" onClick={() => setOpenType((e) => !e)}>
                 <div className="flex items-center gap-2">
@@ -310,6 +317,20 @@ export default function EditEquivalence() {
                 </div>
               </div>
               {error?.sousType && <div className="text-xs font-normal leading-4 text-red-500">{error.sousType}</div>}
+            </div>
+          )}
+
+          {data?.type === "Autre" && (
+            <div className="mt-3 w-full rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
+              {data?.desc ? <div className="text-xs font-normal leading-4 text-gray-500">Engagement réalisé</div> : null}
+              <input
+                placeholder="Engagement réalisé"
+                type="text"
+                value={data?.desc}
+                onChange={(e) => setData({ ...data, desc: e.target.value })}
+                className="w-full text-sm font-normal leading-5"
+              />
+              {error?.desc && <div className="text-xs font-normal leading-4 text-red-500">{error.desc}</div>}
             </div>
           )}
 

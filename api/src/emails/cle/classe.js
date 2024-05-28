@@ -2,7 +2,7 @@ const { SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES } = require("snu-lib");
 const EtablissementModel = require("../../models/cle/etablissement");
 const ReferentModel = require("../../models/referent");
 const { capture } = require("../../sentry");
-const config = require("../../config");
+const config = require("config");
 const { sendTemplate } = require("../../sendinblue");
 
 module.exports = (emailsEmitter) => {

@@ -6,7 +6,7 @@
   const express = require("express");
   const cors = require("cors");
   const { initSentry, capture } = require("./sentry");
-  const { PORT } = require("./config.js");
+  const { PORT } = require("./config");
 
   const app = express();
 

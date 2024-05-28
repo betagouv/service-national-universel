@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { IoRepeat } from "react-icons/io5";
-import { HiUsers, HiCheckCircle, HiExclamationCircle } from "react-icons/hi";
+import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_STATUS, YOUNG_SOURCE, STATUS_CLASSE } from "snu-lib";
+import { ROLES, translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, STATUS_CLASSE, COHORT_TYPE, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
-import { Badge, ModalConfirmation, Select } from "@snu/ds/admin";
+import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
 import Pencil from "@/assets/icons/Pencil";
+import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
 import api from "@/services/api";
 import Loader from "@/components/Loader";
 import { capture } from "@/sentry";
+import downloadPDF from "@/utils/download-pdf";
 
 export function ChangeCohortPen({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
@@ -31,9 +33,9 @@ export function ChangeCohortPen({ young, onChange }) {
       // }
       const { data } = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
       if (Array.isArray(data)) {
-        const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible })).filter((c) => c.name !== young.cohort);
+        const cohorts = data.map((c) => ({ name: c.name, goal: c.goalReached, isEligible: c.isEligible, type: c.type })).filter((c) => c.name !== young.cohort);
         // TODO: rajouter un flag hidden pour les cohort non visible
-
+        cohorts.push({ name: "à venir", type: "VOLONTAIRE" });
         setOptions(cohorts);
       } else setOptions([]);
     })();
@@ -88,6 +90,33 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
     }
   }, [isOpen]);
 
+  const downloadAttestation = () => {
+    downloadPDF({
+      url: `/young/${young._id}/documents/certificate/1`,
+      fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
+    });
+  };
+
+  const getCohortOptions = (cohorts) => {
+    let updatedCohorts = cohorts.filter((c) => c.type === COHORT_TYPE.VOLONTAIRE);
+    return updatedCohorts.map((cohort) => ({
+      value: cohort.name,
+      label: (
+        <div className="flex flex-nowrap items-center justify-between gap-1.5 p-2.5 h-[40px] w-full">
+          <div className="flex items-center gap-1.5">
+            {cohort.isEligible ? (
+              <HiCheckCircle size={24} className="mt-0.5 mr-1 min-w-[24px] text-emerald-500" />
+            ) : (
+              <HiOutlineXCircle size={24} className="mt-0.5 mr-1 min-w-[24px] text-red-500" />
+            )}
+            <span className="text-gray-900 text-sm leading-5 font-normal">{`${cohort.name} `}</span>
+          </div>
+          <span className="text-gray-500 text-xs leading-4 font-medium text-right">{cohort.isEligible ? "éligible" : "Non éligible"}</span>
+        </div>
+      ),
+    }));
+  };
+
   useEffect(() => {
     switch (state) {
       // HTS
@@ -117,7 +146,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 <Select
                   className="text-left"
                   placeholder="Choix de la nouvelle cohorte"
-                  options={cohorts?.map((c) => ({ ...c, label: `Cohorte ${c.name}${!c.isEligible ? " (non éligible)" : null}`, value: c.name }))}
+                  options={getCohortOptions(cohorts)}
                   noOptionsMessage={"Aucune cohorte éligible n'est disponible."}
                   closeMenuOnSelect
                   isClearable={true}
@@ -171,7 +200,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Nouvelle cohorte :</div>
-                  <Badge title={cohort.label} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
+                  <Badge title={cohort.value} leftIcon={<HiUsers size={16} className="text-indigo-500" />} />
                 </div>
               </div>
             </div>
@@ -213,7 +242,8 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                     {young.firstName} <span className="uppercase">{young.lastName}</span>
                   </span>
                   , votre changement de séjour pour le Service National Universel a bien été pris en compte. Vous êtes maintenant positionné(e) sur le séjour de{" "}
-                  <span className="font-medium">{cohort.name}</span>.{!young.cniFiles?.length && !young.files?.cniFiles?.length && " Veuillez ajouter votre CNI dans votre compte."}
+                  <span className="font-medium">{cohort.value}</span>.
+                  {!young.cniFiles?.length && !young.files?.cniFiles?.length && " Veuillez ajouter votre CNI dans votre compte."}
                 </p>
                 <textarea
                   className="my-6 px-[10px] py-[6px] w-full min-h-[88px] rounded-md border-[1px] border-gray-300 bg-white"
@@ -236,7 +266,7 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
                   setIsSaving(true);
                   await api.put(`/referent/young/${young._id}/change-cohort`, {
                     source: YOUNG_SOURCE.VOLONTAIRE,
-                    cohort: cohort.name,
+                    cohort: cohort.value,
                     message: emailMessage,
                     cohortChangeReason: motif.label,
                   });
@@ -319,7 +349,57 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
           ),
           actions: [
             { title: "Annuler", isCancel: true, onClick: onClose },
-            { title: "Valider", disabled: !classe, onClick: () => setState("cle-confirmation") },
+            {
+              title: "Valider",
+              disabled: !classe,
+              onClick: () => {
+                if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) {
+                  return setState("cle-attestation");
+                }
+                setState("cle-confirmation");
+              },
+            },
+          ],
+        });
+      case "cle-attestation":
+        return setStep({
+          ...step,
+          content: (
+            <div className="text-gray-900">
+              <p className="text-lg text-red-500 mb-3">
+                Attention : l’attestation de la Phase 1 validée (HTS) de{" "}
+                <span className="font-medium">
+                  {young.firstName} <span className="uppercase">{young.lastName}</span>
+                </span>{" "}
+                ne sera plus accessible après ce changement de cohorte ! Veuillez vérifier ces informations afin que cette attestation lui soit envoyée par email&nbsp;:
+              </p>
+              <div className="text-left">
+                <div className="flex space-x-3 mb-3">
+                  <InputText className="flex-1" label="Prénom" value={young.firstName} />
+                  <InputText className="flex-1" label="Nom" value={young.lastName} />
+                </div>
+                <InputText className="mb-3" label="Adresse email" value={young.email} disabled />
+                <p className="mb-3">
+                  Si cette adresse email n’est pas correcte,{" "}
+                  <span className="underline text-blue-500 cursor-pointer" onClick={onClose}>
+                    veuillez la modifier sur le profil du volontaire
+                  </span>
+                  .
+                </p>
+                <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-md">
+                  <UploadedFileIcon width={64} height={64} />
+                  <div className="flex-1 font-medium mx-2">Attestation Phase 1 validée (HTS)</div>
+                  <Button title="Télécharger" type="wired" onClick={downloadAttestation} />
+                </div>
+              </div>
+            </div>
+          ),
+          actions: [
+            { title: "Annuler", isCancel: true, onClick: onClose },
+            {
+              title: "Valider",
+              onClick: () => setState("cle-confirmation"),
+            },
           ],
         });
       case "cle-confirmation":
@@ -370,14 +450,19 @@ function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onChange }) 
               onClick: async () => {
                 try {
                   setIsSaving(true);
+                  // ⚠️ It's important to make sure the certificate is properly sent before changing the cohort
+                  // Because afterwards, the certificate will no longer be accessible because we override lots of young's data
+                  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) {
+                    await api.post(`/young/${young._id}/documents/certificate/1/send-email?switchToCle=true`, {
+                      fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
+                    });
+                  }
                   await api.put(`/referent/young/${young._id}/change-cohort`, {
                     source: YOUNG_SOURCE.CLE,
                     cohort: classe.cohort,
                     etablissementId: etablissement._id,
                     classeId: classe._id,
                   });
-                  // if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
-                  // if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
                   await onChange();
                   toastr.success("Cohorte modifiée avec succès");
                 } catch (error) {

@@ -20,6 +20,7 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const YoungModel = require("../models/young");
 const ClasseModel = require("../models/cle/classe");
+const ApplicationObject = require("../models/application");
 const { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } = require("../utils");
 const { capture } = require("../sentry");
 const { validateFirstName } = require("../utils/validator");
@@ -40,11 +41,11 @@ const {
 const { getDensity, getQPV } = require("../geo");
 const { sendTemplate } = require("../sendinblue");
 const { format } = require("date-fns");
-const config = require("../config");
+const config = require("config");
 const YoungObject = require("../models/young");
 const LigneDeBusModel = require("../models/PlanDeTransport/ligneBus");
 const SessionPhase1Model = require("../models/sessionPhase1");
-const { APP_URL } = require("../config");
+const CohortModel = require("../models/cohort");
 
 const youngEmployedSituationOptions = [YOUNG_SITUATIONS.EMPLOYEE, YOUNG_SITUATIONS.INDEPENDANT, YOUNG_SITUATIONS.SELF_EMPLOYED, YOUNG_SITUATIONS.ADAPTED_COMPANY];
 const youngSchooledSituationOptions = [
@@ -110,6 +111,10 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);
       if (qpv === true) value.qpv = "true";
@@ -131,11 +136,26 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 
     if (value.birthdateAt) value.birthdateAt = value.birthdateAt.setUTCHours(11, 0, 0);
 
+    if (value.latestCNIFileExpirationDate && young.cohort !== "à venir") {
+      const cohort = await CohortModel.findOne({ name: young.cohort });
+      value.CNIFileNotValidOnStart = new Date(value.latestCNIFileExpirationDate) < new Date(cohort.dateStart);
+    }
+
     // test de déménagement.
     if (young.department !== value.department && value.department !== null && value.department !== undefined && young.department !== null && young.department !== undefined) {
       await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
       await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
     }
+
+    //update applications
+    const applications = await ApplicationObject.find({ youngId: young._id });
+
+    const updatePromises = applications.map((application) => {
+      application.set({ youngCity: value.city, youngDepartment: value.department });
+      return application.save();
+    });
+
+    await Promise.all(updatePromises);
 
     young.set(value);
     await young.save({ fromUser: req.user });
@@ -234,8 +254,10 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    console.log("SAVE VALUE: ", value);
-    console.log("body: ", req.body);
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     young.set(value);
     young.set({
@@ -274,6 +296,10 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     const young = await YoungModel.findById(id);
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- update dates
@@ -368,6 +394,10 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     let changes = {
       [`parent${value.parent}AllowSNU`]: value.allow ? "true" : "false",
     };
@@ -437,6 +467,10 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const classe = await ClasseModel.findById(young.classeId).populate({
       path: "etablissement",
       options: { select: { coordinateurIds: 1, referentEtablissementIds: 1 } },
@@ -466,7 +500,7 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
         await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT_CONSENTED, {
           emailTo,
           params: {
-            cta: `${APP_URL}/`,
+            cta: `${config.APP_URL}/`,
             SOURCE: young.source,
           },
         });
@@ -491,15 +525,17 @@ function generateChanges(value, young) {
     }
   };
 
-  setIfTrue(value.consent, "parentAllowSNU", "true");
   setIfTrue(value.consent, "status", YOUNG_STATUS.WAITING_VALIDATION);
+  setIfTrue(value.consent && young.inscriptionStep2023 === "WAITING_CONSENT", "inscriptionStep2023", "DONE");
+  setIfTrue(value.consent && young.reinscriptionStep2023 === "WAITING_CONSENT", "reinscriptionStep2023", "DONE");
+  setIfTrue(value.consent, "parentAllowSNU", "true");
+
+  //Parent 1
   setIfTrue(value.consent, "parent1AllowSNU", "true");
   setIfTrue(value.consent, "parent1ValidationDate", new Date());
-
   setIfTrue(value.imageRights, "parent1AllowImageRights", "true");
-
+  //Parent 2
   setIfTrue(young.parent2Status && value.consent, "parent2AllowSNU", "true");
-
   setIfTrue(young.parent2Status && value.imageRights, "parent2AllowImageRights", "true");
   setIfTrue(young.parent2Status && value.imageRights, "parent2ValidationDate", new Date());
 
@@ -693,12 +729,17 @@ router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent"
       capture(bodyError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
+
     const parentId = bodyValue.parentId;
 
     // --- get young & verify rights
     const young = await YoungObject.findById(youngId);
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    }
+
+    if (!canEditYoung(req.user, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- Check and resend notification

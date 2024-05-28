@@ -26,26 +26,26 @@ export default function ModalRecap({ isOpen, title, message, onCancel, onConfirm
           {title}
         </div>
         <div className="text-gray-500 leading-[24px] mb-4">{message}</div>
-        <hr className="my-2" />
-        <div className="mb-3">
-          <p className="text-gray-500">Niveau de scolarité</p>
-          <p className="font-bold">{translateGrade(young.scolarity)}</p>
+        <hr />
+        <div className="flex flex-col mb-3">
+          <span className="text-gray-500">Niveau de scolarité</span>
+          <span className="font-bold">{translateGrade(young.scolarity)}</span>
         </div>
-        <hr className="my-2" />
-        <div className="mb-3">
+        <hr />
+        <div className="mb-3 flex flex-col ">
           {young.scolarity === GRADES.NOT_SCOLARISE ? (
             <>
-              <p className="text-gray-500">Code postal</p>
-              <p className="font-bold">{young?.zip}</p>
+              <span className="text-gray-500">Code postal</span>
+              <span className="font-bold">{young?.zip}</span>
             </>
           ) : (
             <>
-              <p className="text-gray-500">Commune de l'établissement</p>
-              <p className="font-bold">{young.school?.city}</p>
+              <span className="text-gray-500 mr-2">Commune de l'établissement</span>
+              <span className="font-bold">{young.school?.city}</span>
             </>
           )}
         </div>
-        <hr className="my-2" />
+        <hr />
         <div className="flex justify-end my-8">
           <SecondaryButton className="mr-2" disabled={sending} onClick={onCancel}>
             {cancelText}

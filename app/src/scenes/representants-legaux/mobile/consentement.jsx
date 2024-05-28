@@ -16,13 +16,12 @@ import validator from "validator";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import api from "../../../services/api";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import plausibleEvent from "../../../services/plausible";
 import AuthorizeBlock from "../components/AuthorizeBlock";
 import { getAddress, getDataForConsentStep } from "../utils";
 import PhoneField from "../../../components/dsfr/forms/PhoneField";
-import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib/phone-number";
-import { getAddressOptions } from "@/services/api-adresse";
+import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function Consentement({ step, parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
@@ -288,7 +287,7 @@ function ConsentementForm({ young, token, step, parentId }) {
               <>
                 <ResponsiveRadioButton label="Je réside..." options={livesInFranceOption} onChange={(e) => setData({ ...data, livesInFrance: e })} value={data.livesInFrance} />
                 {data.livesInFrance === FRANCE ? (
-                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} getOptions={getAddressOptions} error={errors.address} />
+                  <AddressForm data={data} updateData={(newData) => setData({ ...data, ...newData })} error={errors.address} />
                 ) : (
                   <>
                     <Input className="" value={data.address} label="Adresse de résidence" onChange={(e) => setData({ ...data, address: e })} error={errors.address} />
@@ -334,7 +333,7 @@ function ConsentementForm({ young, token, step, parentId }) {
                     </Check>
                     <Check checked={data.internalRules} onChange={(e) => setData({ ...data, internalRules: e })} className="mt-[24px]" error={errors.internalRules}>
                       Reconnais avoir pris connaissance du{" "}
-                      <a href={CDN_BASE_URL + "/file/snu-reglement-interieur.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
+                      <a href={CDN_BASE_URL + "/file/SNU-reglement-interieur-2024.pdf"} target="blank" className="underline" onClick={(e) => e.stopPropagation()}>
                         Règlement Intérieur du séjour de cohésion
                       </a>
                       .
@@ -365,7 +364,7 @@ function ConsentementForm({ young, token, step, parentId }) {
                     <div className="mb-3">
                       <p>
                         Cette autorisation est valable pour une utilisation sur l’ensemble du parcours du service national universel, tant durant le séjour de cohésion que dans le
-                        cadre de la mobilisation du volontaire au titre de la réserve du SNU :{" "}
+                        cadre de la mobilisation du volontaire au titre de la réserve du SNU :{" "}
                       </p>
                       <div className="ml-4 mt-2 mb-2">
                         <li>pour une durée de 5 ans à compter de la signature de la présente ;</li>
@@ -391,7 +390,7 @@ function ConsentementForm({ young, token, step, parentId }) {
           )}
           {errors.global && <ErrorMessage className="mb-[32px]">{errors.global}</ErrorMessage>}
         </div>
-        <SignupButtonContainer onClickNext={onSubmit} labelNext="Je valide" onClickPrevious={onPrevious} disabled={saving} />
+        <SignupButtons onClickNext={onSubmit} labelNext="Je valide" onClickPrevious={onPrevious} disabled={saving} />
       </DSFRContainer>
     </>
   );

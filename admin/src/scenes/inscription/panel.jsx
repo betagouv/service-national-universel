@@ -2,8 +2,9 @@ import Img3 from "../../assets/close_icon.png";
 import Img2 from "../../assets/pencil.svg";
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-import { formatDateFR } from "snu-lib";
+import { formatDateFR, ROLES } from "snu-lib";
 import Badge from "../../components/Badge";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -18,11 +19,13 @@ import { formatPhoneNumberFR, getAge, isInRuralArea, translate as t, YOUNG_STATU
 import styled from "styled-components";
 import PanelV2 from "../../components/PanelV2";
 import { toastr } from "react-redux-toastr";
+import { signinAs } from "@/utils/signinAs";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -55,9 +58,12 @@ export default function InscriptionPanel({ onChange, value }) {
   };
 
   const onPrendreLaPlace = async (young_id) => {
-    plausibleEvent("Volontaires/CTA - Prendre sa place");
-    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    try {
+      plausibleEvent("Volontaires/CTA - Prendre sa place");
+      await signinAs("young", young_id);
+    } catch (e) {
+      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    }
   };
 
   return (
@@ -83,7 +89,7 @@ export default function InscriptionPanel({ onChange, value }) {
               </div>
             ) : null}
             {value.frenchNationality === "true" ? <div style={{ fontStyle: "italic", fontSize: "0.9rem" }}>🇫🇷 Nationalité française</div> : null}
-            <div style={{ display: "flex", flexWrap: "wrap" }}>
+            <div className="flex flex-wrap justify-around">
               <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
@@ -94,7 +100,7 @@ export default function InscriptionPanel({ onChange, value }) {
                 }}>
                 <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
               </button>
-              <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />
+              {user.role === ROLES.ADMIN && <PanelActionButton onClick={handleDeleteYoung} icon="bin" title="Supprimer" />}
             </div>
             {value.status === YOUNG_STATUS.WITHDRAWN && <div className="mt-3">⚠️ Désistement : &quot;{value.withdrawnMessage}&quot;</div>}
           </div>

@@ -8,18 +8,17 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const mime = require("mime-types");
 const fs = require("fs");
-const FileType = require("file-type");
 const fileUpload = require("express-fileupload");
 const redis = require("redis");
+
 const { decrypt, encrypt } = require("../../cryptoUtils");
-const config = require("../../config");
+const config = require("config");
 const { capture } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const SessionPhase1 = require("../../models/sessionPhase1");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
-const CohortModel = require("../../models/cohort");
 const AuthObject = require("../../auth");
 const LigneDeBusModel = require("../../models/PlanDeTransport/ligneBus");
 const ClasseModel = require("../../models/cle/classe");
@@ -32,13 +31,13 @@ const {
   isYoung,
   isReferent,
   updatePlacesSessionPhase1,
-  translateFileStatusPhase1,
   getCcOfYoung,
   getFile,
   autoValidationSessionPhase1Young,
   deleteFile,
   updateSeatsTakenInBusLine,
 } = require("../../utils");
+const { getMimeFromFile, getMimeFromBuffer } = require("../../utils/file");
 const { sendTemplate, unsync } = require("../../sendinblue");
 const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../../cookie-options");
 const { validateYoung, validateId, validatePhase1Document } = require("../../utils/validator");
@@ -53,7 +52,6 @@ const {
   canViewYoungApplications,
   canEditPresenceYoung,
   canDeletePatchesHistory,
-  getCohortPeriod,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS,
@@ -61,7 +59,9 @@ const {
   YOUNG_STATUS_PHASE2,
   YOUNG_SOURCE,
   youngCanChangeSession,
-  youngCanDeleteAccount,
+  youngCanWithdraw,
+  translateFileStatusPhase1,
+  REGLEMENT_INTERIEUR_VERSION,
 } = require("snu-lib");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
@@ -69,6 +69,7 @@ const { anonymizeContractsFromYoungId } = require("../../services/contract");
 const { getFillingRate, FILLING_RATE_LIMIT } = require("../../services/inscription-goal");
 const { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } = require("../../jwt-options");
 const scanFile = require("../../utils/virusScanner");
+const emailsEmitter = require("../../emails");
 
 router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
 router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
@@ -187,20 +188,16 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype } = currentFile;
-        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
-        if (config.ENVIRONMENT === "production") {
-          const scanResult = await scanFile(tempFilePath, name, req.user._id);
-          if (scanResult.infected) {
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          } else if (scanResult.error) {
-            return res.status(500).send({ ok: false, code: scanResult.error });
-          }
+        const scanResult = await scanFile(tempFilePath, name, req.user._id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
 
         const data = fs.readFileSync(tempFilePath);
@@ -237,6 +234,8 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
 
     const obj = { ...value };
 
+    obj.acceptRI = REGLEMENT_INTERIEUR_VERSION;
+
     const formatedDate = new Date(obj.birthdateAt).setUTCHours(11, 0, 0);
     obj.birthdateAt = formatedDate;
 
@@ -252,7 +251,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
     if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     obj.inscriptionDoneDate = new Date();
-    if ([ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(req.user.role)) {
+    if (obj.classeId) {
       obj.source = YOUNG_SOURCE.CLE;
       const classe = await ClasseModel.findById(obj.classeId);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -448,6 +447,30 @@ router.put("/accept-cgu", passport.authenticate("young", { session: false, failW
   }
 });
 
+router.put("/accept-ri", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
+    await young.save({ fromUser: req.user });
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
+      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
+      params: {
+        cta: `${config.APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
+        youngFirstName: young.firstName,
+        youngName: young.lastName,
+      },
+    });
+
+    res.status(200).send({ ok: true, data: serializeYoung(young, young) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.put("/:id/change-cohort", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body);
@@ -468,6 +491,7 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     const { cohort, cohortChangeReason, cohortDetailedChangeReason } = value;
+    const previousYoung = { ...young.toObject() };
 
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
@@ -557,15 +581,12 @@ router.put("/:id/change-cohort", passport.authenticate("young", { session: false
       });
     }
 
-    let template = SENDINBLUE_TEMPLATES.young.CHANGE_COHORT;
-    const cohortObj = await CohortModel.findOne({ name: cohort });
-
-    await sendTemplate(template, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: {
-        motif: cohortChangeReason,
-        cohort: cohortObj ? getCohortPeriod(cohortObj) : cohort,
-      },
+    emailsEmitter.emit(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
+      young,
+      previousYoung,
+      cohortName: cohort,
+      cohortChangeReason,
+      message: value.message,
     });
 
     res.status(200).send({ ok: true, data: young });
@@ -705,7 +726,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
       scope: `openid given_name family_name email`,
       redirect_uri: `${config.APP_URL}/${value.callback}`,
       response_type: "code",
-      client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
+      client_id: config.FRANCE_CONNECT_CLIENT_ID,
       state: crypto.randomBytes(20).toString("hex"),
       nonce: crypto.randomBytes(20).toString("hex"),
       acr_values: "eidas1",
@@ -721,7 +742,7 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 
     await redisClient.disconnect();
 
-    const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
+    const url = `${config.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
     return res.status(200).send({ ok: true, data: { url } });
   } catch (error) {
     capture(error);
@@ -743,12 +764,12 @@ router.post("/france-connect/user-info", async (req, res) => {
     const body = {
       grant_type: "authorization_code",
       redirect_uri: `${config.APP_URL}/${value.callback}`,
-      client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
-      client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
+      client_id: config.FRANCE_CONNECT_CLIENT_ID,
+      client_secret: config.FRANCE_CONNECT_CLIENT_SECRET,
       code: value.code,
     };
 
-    const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
+    const tokenResponse = await fetch(`${config.FRANCE_CONNECT_URL}/token`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
       body: queryString.stringify(body),
@@ -779,7 +800,7 @@ router.post("/france-connect/user-info", async (req, res) => {
     }
 
     // … then get user info.
-    const userInfoResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/userinfo`, {
+    const userInfoResponse = await fetch(`${config.FRANCE_CONNECT_URL}/userinfo`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token["access_token"]}` },
     });
@@ -794,8 +815,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 });
 
 // Delete one user (only admin can delete user)
-// And apparently referent in same geography as well (see canDeleteYoung())
-router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -805,7 +825,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent", "young"], { se
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const fieldToKeep = [
       "_id",
@@ -892,7 +912,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!youngCanDeleteAccount(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!youngCanWithdraw(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
     const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
@@ -922,6 +942,19 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
+    // If they are CLE, we notify the class referent.
+    try {
+      if (young.cohort === YOUNG_SOURCE.CLE) {
+        const referent = await ReferentModel.findOne({ role: ROLES.REFERENT_CLASS, classeId: young.classeId });
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: { youngFirstName: young.firstName, youngLastName: young.lastName, raisondesistement: withdrawnReason },
+        });
+      }
+    } catch (e) {
+      capture(e);
+    }
+
     res.status(200).send({ ok: true, data: serializeYoung(updatedYoung, updatedYoung) });
   } catch (error) {
     capture(error);
@@ -941,7 +974,7 @@ router.put("/abandon", passport.authenticate("young", { session: false, failWith
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!youngCanDeleteAccount(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!youngCanWithdraw(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
     const inscriptionStatus = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
@@ -1154,8 +1187,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
 
     let mimeFromFile = null;
     try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
+      mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {
       capture(e);
     }

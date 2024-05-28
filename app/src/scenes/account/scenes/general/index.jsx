@@ -3,8 +3,8 @@ import queryString from "query-string";
 import { BiLoaderAlt } from "react-icons/bi";
 import { Link, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { youngCanChangeSession, youngCanDeleteAccount } from "snu-lib";
-import { PHONE_ZONES } from "snu-lib/phone-number";
+import { youngCanChangeSession, youngCanWithdraw } from "snu-lib";
+import { PHONE_ZONES } from "snu-lib";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "@/redux/auth/actions";
 import { validateEmail, validatePhoneNumber } from "@/utils/form-validation.utils";
@@ -201,7 +201,7 @@ const AccountGeneralPage = () => {
             Changer de séjour
           </Link>
         ) : null}
-        {youngCanDeleteAccount(young) ? <Withdrawal young={young} /> : null}
+        {youngCanWithdraw(young) ? <Withdrawal young={young} /> : null}
       </div>
     </>
   );

@@ -2,28 +2,40 @@
   "name": "service-national-universel",
   "scripts": {
     "lint": "turbo run lint --continue",
-    "dev": "[[ -e .git/hooks/pre-commit ]] && turbo run dev || echo 'Follow Procedure here : https://www.notion.so/jeveuxaider/Gitguardian-1b6d580a315f4f7c8440fde951aa42c9?pvs=4'",
+    "dev": "[[ -e .git/hooks/pre-commit ]] && dotenv -- turbo run dev --filter=!antivirus || echo 'Follow Procedure here : https://www.notion.so/jeveuxaider/Gitguardian-1b6d580a315f4f7c8440fde951aa42c9?pvs=4'",
+    "dev:app": "[[ -e .git/hooks/pre-commit ]] && dotenv -- turbo run dev --filter",
     "build": "turbo run build --filter=$APP_NAME",
     "start": "turbo run start --filter=$APP_NAME",
-    "test": "turbo build --filter='./packages/lib' && turbo run test --filter=api"
+    "test": "turbo build --filter='./packages/lib' && turbo run test --filter=api",
+    "clean": "turbo run clean"
   },
   "dependencies": {
-    "heic-convert": "^2.1.0",
+    "classnames": "^2.5.1",
+    "dotenv-cli": "latest",
     "libphonenumber-js": "^1.10.41",
     "request-ip": "^3.3.0",
-    "sanitize-html": "^2.11.0",
-    "turbo": "^1.10.13"
+    "sanitize-html": "^2.12.1",
+    "turbo": "^1.13.2"
   },
   "workspaces": [
     "packages/*",
     "app",
     "admin",
     "api",
-    "analytics"
+    "analytics",
+    "antivirus"
   ],
   "engines": {
-    "node": "^18.16.0",
-    "npm": "^9.5.1",
+    "node": "^18.20",
+    "npm": "^10.5",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^18.16.0",
+    "eslint-plugin-import": "^2.29.1",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.3",
+    "typescript-eslint": "^7.4.0"
   }
 }

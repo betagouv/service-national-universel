@@ -44,7 +44,7 @@ export default function TicketInfos({ ticket }) {
   }, [user]);
 
   const resolveTicket = async () => {
-    const response = await api.put(`/zammood/ticket/${ticket._id}`, { status: "CLOSED" });
+    const response = await api.put(`/SNUpport/ticket/${ticket._id}`, { status: "CLOSED" });
     if (!response.ok) console.log(response.status, "error");
     if (response.ok) toastr.success("Ticket résolu !");
     history.go(0);

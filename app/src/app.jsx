@@ -2,13 +2,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Redirect, Router, Switch, useLocation, useHistory } from "react-router-dom";
+import { Redirect, Link, Router, Switch, useLocation, useHistory } from "react-router-dom";
 import queryString from "query-string";
-import { QueryClient, QueryClientProvider, QueryCache } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 
 import { setYoung } from "./redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import * as Sentry from "@sentry/react";
+
+import useDocumentCss from "@/hooks/useDocumentCss";
+import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 
 import Account from "./scenes/account";
 import AllEngagements from "./scenes/all-engagements/index";
@@ -36,6 +39,7 @@ import NonEligible from "./scenes/noneligible";
 import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
+import AutresEngagements from "./scenes/phase3/home/waitingRealisation";
 import Echanges from "./scenes/echanges";
 import Preferences from "./scenes/preferences";
 import PreInscription from "./scenes/preinscription";
@@ -45,10 +49,13 @@ import AccountAlreadyExists from "./scenes/account/AccountAlreadyExists";
 import RepresentantsLegaux from "./scenes/representants-legaux";
 import Thanks from "./scenes/contact/Thanks";
 import ViewMessage from "./scenes/echanges/View";
+import ModalRI from "./components/modals/ModalRI";
+import Notice from "./components/ui/alerts/Notice";
 
 import { environment, maintenance } from "./config";
 import api, { initApi } from "./services/api";
-import { ENABLE_PM, YOUNG_STATUS } from "./utils";
+import { queryClient } from "./services/react-query";
+import { ENABLE_PM, YOUNG_STATUS, shouldDisplayMaintenanceNotice, shouldReAcceptRI } from "./utils";
 import {
   youngCanChangeSession,
   inscriptionModificationOpenForYoungs,
@@ -57,9 +64,8 @@ import {
   isFeatureEnabled,
   FEATURES_NAME,
 } from "snu-lib";
-import { capture, history, initSentry, SentryRoute } from "./sentry";
-import { getAvailableSessions } from "./services/cohort.service";
-import { cohortsInit, canYoungResumePhase1, getCohort } from "./utils/cohorts";
+import { history, initSentry, SentryRoute } from "./sentry";
+import { cohortsInit, getCohort } from "./utils/cohorts";
 
 initSentry();
 initApi();
@@ -70,33 +76,37 @@ function FallbackComponent() {
 
 const myFallback = <FallbackComponent />;
 
-const queryClient = new QueryClient({
-  queryCache: new QueryCache({ onError: (error) => capture(error) }),
-});
-
 export default function App() {
   return (
     <Sentry.ErrorBoundary fallback={myFallback}>
       <QueryClientProvider client={queryClient}>
         <Router history={history}>
           <ScrollToTop />
-          <div className="flex h-screen flex-col justify-between">
+          <div className="flex min-h-screen flex-col justify-between">
             {maintenance ? (
               <Switch>
                 <SentryRoute path="/" component={Maintenance} />
               </Switch>
             ) : (
               <Switch>
-                {/* Aucune authentification nécessaire */}
-                <SentryRoute path="/noneligible" component={NonEligible} />
-                <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-                <SentryRoute path="/validate-contract/done" component={ContractDone} />
-                <SentryRoute path="/validate-contract" component={Contract} />
-                <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-                <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
-                <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
-                {/* Authentification accessoire */}
-                <SentryRoute path={["/public-besoin-d-aide", "/auth", "/public-engagements", "/besoin-d-aide", "/merci", "/preinscription"]} component={() => <OptionalLogIn />} />
+                <SentryRoute
+                  path={[
+                    "/validate-contract/done",
+                    "/validate-contract",
+                    "/conditions-generales-utilisation",
+                    "/noneligible",
+                    "/representants-legaux",
+                    "/je-rejoins-ma-classe-engagee",
+                    "/je-suis-deja-inscrit",
+                    "/public-besoin-d-aide",
+                    "/auth",
+                    "/public-engagements",
+                    "/besoin-d-aide",
+                    "/merci",
+                    "/preinscription",
+                  ]}
+                  component={() => <OptionalLogIn />}
+                />
                 {/* Authentification nécessaire */}
                 <SentryRoute path="/" component={() => <MandatoryLogIn />} />
               </Switch>
@@ -109,6 +119,9 @@ export default function App() {
 }
 
 const OptionalLogIn = () => {
+  //DSFR CSS is only loaded on public routes.
+  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+  startReactDsfr({ defaultColorScheme: "light", Link });
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.young);
@@ -143,6 +156,13 @@ const OptionalLogIn = () => {
 
   return (
     <Switch>
+      <SentryRoute path="/validate-contract/done" component={ContractDone} />
+      <SentryRoute path="/validate-contract" component={Contract} />
+      <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+      <SentryRoute path="/noneligible" component={NonEligible} />
+      <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
+      <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+      <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
       <SentryRoute path="/public-besoin-d-aide" component={Contact} />
       <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
       <SentryRoute path="/besoin-d-aide" component={Contact} />
@@ -150,6 +170,19 @@ const OptionalLogIn = () => {
       <SentryRoute path="/public-engagements" component={AllEngagements} />
       <SentryRoute path="/merci" component={Thanks} />
       <SentryRoute path="/preinscription" component={PreInscription} />
+      <Redirect to="/" />
+    </Switch>
+  );
+};
+
+const Inscription = () => {
+  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+  startReactDsfr({ defaultColorScheme: "light", Link });
+
+  return (
+    <Switch>
+      <SentryRoute path="/inscription2023" component={Inscription2023} />
+      <SentryRoute path="/reinscription" component={ReInscription} />
       <Redirect to="/" />
     </Switch>
   );
@@ -200,8 +233,7 @@ const MandatoryLogIn = () => {
 
   return (
     <Switch>
-      <SentryRoute path="/inscription2023" component={Inscription2023} />
-      <SentryRoute path="/reinscription" component={ReInscription} />
+      <SentryRoute path={["/inscription2023", "/reinscription"]} component={Inscription} />
       <SentryRoute path="/" component={Espace} />
     </Switch>
   );
@@ -209,6 +241,7 @@ const MandatoryLogIn = () => {
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
+  const [isModalRIOpen, setIsModalRIOpen] = useState(false);
 
   const young = useSelector((state) => state.Auth.young);
   const cohort = getCohort(young.cohort);
@@ -223,11 +256,23 @@ const Espace = () => {
     return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
   };
 
+  const handleModalRIConfirm = async () => {
+    setIsModalRIOpen(false);
+    const { ok, code } = await api.put(`/young/accept-ri`);
+    if (!ok) {
+      setIsModalRIOpen(true);
+      return toastr.error(`Une erreur est survenue : ${code}`);
+    }
+    return toastr.success("Vous avez bien accepté le nouveau règlement intérieur.");
+  };
+
   useEffect(() => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
+    } else if (shouldReAcceptRI(young, cohort)) {
+      setIsModalRIOpen(true);
     }
-  }, [young]);
+  }, [young, cohort]);
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
@@ -241,6 +286,9 @@ const Espace = () => {
         <Navbar />
       </div>
       <main className="mt-16 md:mt-0 md:ml-[16rem]">
+        {shouldDisplayMaintenanceNotice && (
+          <Notice>Maintenance planifiée jeudi 18 avril de 20h à minuit&nbsp;: vous ne serez pas en mesure d'accéder aux plateformes pendant cette période.</Notice>
+        )}
         <Switch>
           <SentryRoute exact path="/" component={Home} />
           <SentryRoute path="/account" component={Account} />
@@ -248,6 +296,7 @@ const Espace = () => {
           <SentryRoute path="/phase1" component={Phase1} />
           <SentryRoute path="/phase2" component={Phase2} />
           <SentryRoute path="/phase3" component={Phase3} />
+          <SentryRoute path="/autres-engagements" component={AutresEngagements} />
           <SentryRoute path="/les-programmes" component={Engagement} />
           <SentryRoute path="/preferences" component={Preferences} />
           <SentryRoute path="/mission" component={Missions} />
@@ -263,6 +312,7 @@ const Espace = () => {
       <Footer />
 
       <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} />
+      <ModalRI isOpen={isModalRIOpen} onAccept={handleModalRIConfirm} />
     </>
   );
 };

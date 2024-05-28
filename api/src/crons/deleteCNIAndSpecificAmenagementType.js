@@ -1,4 +1,3 @@
-require("../mongo");
 const { capture } = require("../sentry");
 const slack = require("../slack");
 const YoungModel = require("../models/young");
@@ -12,7 +11,7 @@ exports.handler = async () => {
 
   const where = {
     statusPhase1: { $in: ["DONE", "NOT_DONE", "WITHDRAWN"] },
-    status: { $in: ["WITHDRAWN", "ABANDONED", "REFUSED", "NOT_ELIGIBLE", "NOT_AUTORISED"] },
+    status: { $in: ["WITHDRAWN", "ABANDONED", "REFUSED", "NOT_ELIGIBLE", "NOT_AUTORISED", "VALIDATED"] },
     cohort: { $in: finishedCohortNames },
     latestCNIFileCategory: { $ne: "deleted" },
   };
@@ -40,5 +39,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     await slack.error({ title: "WARNING: Problème suppression CNI && specificAmenagmentType", text: JSON.stringify(e) });
+    throw e;
   }
 };

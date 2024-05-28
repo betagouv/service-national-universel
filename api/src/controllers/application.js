@@ -3,6 +3,9 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const { ObjectId } = require("mongoose").Types;
+const fs = require("fs");
+const fileUpload = require("express-fileupload");
+const mime = require("mime-types");
 
 const { capture, captureMessage } = require("../sentry");
 const ApplicationObject = require("../models/application");
@@ -13,12 +16,10 @@ const YoungObject = require("../models/young");
 const CohortObject = require("../models/cohort");
 const ReferentObject = require("../models/referent");
 const { decrypt, encrypt } = require("../cryptoUtils");
-const fs = require("fs");
-const FileType = require("file-type");
-const fileUpload = require("express-fileupload");
+
 const { sendTemplate } = require("../sendinblue");
 const { validateUpdateApplication, validateNewApplication, validateId } = require("../utils/validator");
-const { ENVIRONMENT, ADMIN_URL, APP_URL } = require("../config");
+const config = require("config");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -28,6 +29,7 @@ const {
   canViewContract,
   translateAddFilePhase2,
   translateAddFilesPhase2,
+  APPLICATION_STATUS,
 } = require("snu-lib");
 const { serializeApplication, serializeYoung, serializeContract } = require("../utils/serializer");
 const {
@@ -43,9 +45,11 @@ const {
   getReferentManagerPhase2,
   updateYoungApplicationFilesType,
 } = require("../utils");
-const mime = require("mime-types");
 const patches = require("./patches");
 const scanFile = require("../utils/virusScanner");
+const { getAuthorizationToApply } = require("../services/application");
+const { apiEngagement } = require("../services/gouv.fr/api-engagement");
+const { getMimeFromBuffer, getMimeFromFile } = require("../utils/file");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
@@ -149,6 +153,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    const { clickId } = Joi.object({ clickId: Joi.string().optional() }).validate(req.query, { stripUnknown: true }).value;
+
     if (!("priority" in value)) {
       const applications = await ApplicationObject.find({ youngId: value.youngId });
       value.priority = applications.length + 1;
@@ -157,16 +163,21 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // On vérifie si les candidatures sont ouvertes.
-    if (mission.visibility === "HIDDEN") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (mission.visibility === "HIDDEN") {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
     value.isJvaMission = mission.isJvaMission;
 
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const cohort = await CohortObject.findOne({ name: young.cohort });
-
-    if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung(req.user)) {
+      const { canApply, message } = await getAuthorizationToApply(mission, young);
+      if (!canApply) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
+      }
+    }
 
     // A young can only create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
@@ -192,6 +203,10 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
+      const cohort = await CohortObject.findOne({ name: young.cohort });
+      if (!canApplyToPhase2(young, cohort)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
     }
 
     // On vérifie que la candidature n'existe pas déjà en base de donnée.
@@ -199,6 +214,13 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     if (doublon) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
+
+    // Send tracking data to API Engagement
+    if (mission.apiEngagementId) {
+      const data = await apiEngagement.create(value, mission.apiEngagementId, clickId);
+      value.apiEngagementId = data?._id;
+    }
+
     value.contractStatus = "DRAFT";
     const data = await ApplicationObject.create(value);
     await updateYoungPhase2Hours(young, req.user);
@@ -289,6 +311,10 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
       application.set({ status: valueKey.key });
       await application.save({ fromUser: req.user });
 
+      if (application.apiEngagementId) {
+        await apiEngagement.update(application);
+      }
+
       await updateYoungPhase2Hours(young, req.user);
       await updateStatusPhase2(young, req.user);
       await updateYoungStatusPhase2Contract(young, req.user);
@@ -341,7 +367,21 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
       }
     }
 
+    const originalStatus = application.status;
+
     application.set(value);
+
+    if (application.isJvaMission === "true") {
+      // When a young accepts a mission proposed by a ref, it counts as an application creation in API Engagement
+      if (originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION && application.status === APPLICATION_STATUS.WAITING_VALIDATION) {
+        const mission = await MissionObject.findById(application.missionId);
+        const data = await apiEngagement.create(application, mission.apiEngagementId, null);
+        application.set({ apiEngagementId: data._id });
+      } else {
+        await apiEngagement.update(application);
+      }
+    }
+
     await application.save({ fromUser: req.user });
 
     await updateYoungPhase2Hours(young, req.user);
@@ -462,7 +502,7 @@ router.post("/notify/docs-military-preparation/:template", passport.authenticate
         name: `${referent.firstName} ${referent.lastName}`,
         email: referent.email,
       })),
-      params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
+      params: { cta: `${config.ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
     });
     return res.status(200).send({ ok: true, data: mail });
   } catch (error) {
@@ -532,13 +572,13 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
 
     if (template === SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-      params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2/application/${application._id}/contrat` };
+      params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2/application/${application._id}/contrat` };
     } else if (template === SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION) {
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
-      params = { ...params, cta: `${APP_URL}/candidature?utm_campaign=transactionel+mig+candidature+approuvee&utm_source=notifauto&utm_medium=mail+151+faire` };
+      params = { ...params, cta: `${config.APP_URL}/candidature?utm_campaign=transactionel+mig+candidature+approuvee&utm_source=notifauto&utm_medium=mail+151+faire` };
     } else if (template === SENDINBLUE_TEMPLATES.referent.VALIDATE_APPLICATION_TUTOR) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-      params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}` };
+      params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}` };
     } else if (template === SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
     } else if (template === SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION) {
@@ -547,14 +587,14 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
     } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
-      params = { ...params, message, cta: `${APP_URL}/mission?utm_campaign=transactionnel+mig+candidature+nonretenue&utm_source=notifauto&utm_medium=mail+152+candidater` };
+      params = { ...params, message, cta: `${config.APP_URL}/mission?utm_campaign=transactionnel+mig+candidature+nonretenue&utm_source=notifauto&utm_medium=mail+152+candidater` };
     } else if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
         if (young.statusMilitaryPreparationFiles === "VALIDATED") {
           emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
           template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
-          params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+          params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
         } else {
           const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
           emailTo = referentManagerPhase2.map((referent) => ({
@@ -562,23 +602,23 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
             email: referent.email,
           }));
           template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED;
-          params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+          params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
         }
       } else {
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
-        params = { ...params, cta: `${ADMIN_URL}/volontaire${application.youngId}/phase2` };
+        params = { ...params, cta: `${config.ADMIN_URL}/volontaire${application.youngId}/phase2` };
       }
     } else if (template === SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION) {
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
-        params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+        params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
       } else {
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
-        params = { ...params, cta: `${ADMIN_URL}/volontaire${application.youngId}/phase2` };
+        params = { ...params, cta: `${config.ADMIN_URL}/volontaire${application.youngId}/phase2` };
       }
     } else if (template === SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION) {
       // get CC of young
@@ -593,7 +633,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       const sendYoungRPMail = async () => {
         // prevenir jeune / RP
         emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
-        params.cta = `${APP_URL}/mission/${application.missionId}`;
+        params.cta = `${config.APP_URL}/mission/${application.missionId}`;
         const mail = await sendTemplate(template, {
           emailTo,
           params,
@@ -620,7 +660,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
           // prevenir tuteur mission
           emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-          params.cta = `${ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+          params.cta = `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2`;
 
           await sendTemplate(template, {
             emailTo,
@@ -635,7 +675,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
             name: `${referent.firstName} ${referent.lastName}`,
             email: referent.email,
           }));
-          params.cta = `${ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+          params.cta = `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2`;
 
           await sendTemplate(template, {
             emailTo,
@@ -645,7 +685,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         } else if (req.user.role === ROLES.ADMIN || req.user.role === ROLES.REFERENT_REGION) {
           // prevenir tutor
           emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-          params.cta = `${ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+          params.cta = `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2`;
           await sendTemplate(template, {
             emailTo,
             params,
@@ -727,21 +767,19 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype } = currentFile;
-        const { mime: mimeFromMagicNumbers } = await FileType.fromFile(tempFilePath);
+        const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
         const validTypes = ["image/jpeg", "image/png", "application/pdf"];
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
           fs.unlinkSync(tempFilePath);
           captureMessage("Wrong filetype", { extra: { tempFilePath, mimetype } });
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
-        if (ENVIRONMENT === "production") {
-          const scanResult = await scanFile(tempFilePath, name, user._id);
-          if (scanResult.infected) {
-            return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-          } else if (scanResult.error) {
-            return res.status(500).send({ ok: false, code: scanResult.error });
-          }
+
+        const scanResult = await scanFile(tempFilePath, name, user._id);
+        if (scanResult.infected) {
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
+
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
@@ -791,8 +829,7 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
 
     let mimeFromFile = null;
     try {
-      const { mime } = await FileType.fromBuffer(decryptedBuffer);
-      mimeFromFile = mime;
+      mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {
       //
     }

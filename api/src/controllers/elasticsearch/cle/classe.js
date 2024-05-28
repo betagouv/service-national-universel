@@ -8,7 +8,9 @@ const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const EtablissementModel = require("../../../models/cle/etablissement");
+const CohortModel = require("../../../models/cohort");
 const { serializeReferents } = require("../../../utils/es-serializer");
+const { YOUNG_STATUS, STATUS_CLASSE } = require("snu-lib");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -62,12 +64,24 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
 
       if (req.query?.type === "schema-de-repartition") {
-        // Export is only available for admin for now
-        if (![ROLES.ADMIN].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+        if (user.role === ROLES.TRANSPORTER) {
+          const cohort = [...new Set(response.map((item) => item.cohort).filter(Boolean))];
+          if (cohort.length !== 1) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+          const IsSchemaDownloadIsTrue = await CohortModel.findOne({ name: cohort });
+          if (!IsSchemaDownloadIsTrue) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+          if (IsSchemaDownloadIsTrue.repartitionSchemaDownloadAvailibility === false && user.role === ROLES.TRANSPORTER) {
+            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+          }
+        }
 
         response = await populateWithEtablissementInfo(response);
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
+        response = await populateWithYoungsInfo(response);
+        response = await populateWithLigneInfo(response);
+        response = await populateWithReferentInfo(response, req.params.action);
       }
 
       return res.status(200).send({ ok: true, data: response });
@@ -75,7 +89,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       let response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
 
       if (req.query?.needRefInfo) {
-        response.body.responses[0].hits.hits = await populateWithReferentInfo(response.body.responses[0].hits.hits);
+        response.body.responses[0].hits.hits = await populateWithReferentInfo(response.body.responses[0].hits.hits, req.params.action);
       }
 
       return res.status(200).send(response.body);
@@ -108,15 +122,37 @@ async function buildClasseContext(user) {
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
   }
 
+  if (user.role === ROLES.TRANSPORTER) {
+    contextFilters.push({ bool: { must_not: { term: { "status.keyword": STATUS_CLASSE.WITHDRAWN } } } });
+  }
+
   return { classeContextFilters: contextFilters };
 }
 
-const populateWithReferentInfo = async (classes) => {
-  const refIds = [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))];
+const populateWithReferentInfo = async (classes, action) => {
+  const refIds =
+    action === "search"
+      ? [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))]
+      : [...new Set(classes.map((item) => item.referentClasseIds).filter(Boolean))];
+
   const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
   const referentsData = serializeReferents(referents);
+
   return classes.map((item) => {
-    item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+    if (action === "search") {
+      item._source.referentClasse = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
+    } else {
+      item.referentClasse = referentsData?.filter((e) => item.referentClasseIds.includes(e._id.toString()));
+    }
+    return item;
+  });
+};
+const populateWithLigneInfo = async (classes) => {
+  const ligneIds = [...new Set(classes.map((item) => item.ligneId).filter(Boolean))];
+  const ligneBus = await allRecords("lignebus", { ids: { values: ligneIds.flat() } });
+  return classes.map((item) => {
+    item.ligne = ligneBus.find((e) => item.ligneId === e._id.toString());
+
     return item;
   });
 };
@@ -144,6 +180,31 @@ const populateWithPdrInfo = async (classes) => {
   const pdrs = await allRecords("pointderassemblement", { ids: { values: pdrIds.flat() } });
   return classes.map((item) => {
     item.pointDeRassemblement = pdrs?.filter((e) => item.pointDeRassemblementId === e._id.toString()).shift();
+    return item;
+  });
+};
+
+const populateWithYoungsInfo = async (classes) => {
+  const classesIds = classes.map((item) => item._id);
+  const students = await allRecords("young", { bool: { must: [{ terms: { classeId: classesIds } }] } });
+
+  //count students by class
+  const result = students.reduce((acc, cur) => {
+    if (!acc[cur.classeId]) {
+      acc[cur.classeId] = [];
+    }
+    acc[cur.classeId].push(cur);
+    return acc;
+  }, {});
+
+  //populate classes with students count
+  return classes.map((item) => {
+    item.studentInProgress = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.IN_PROGRESS || student.status === YOUNG_STATUS.WAITING_CORRECTION).length;
+    item.studentWaiting = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WAITING_VALIDATION).length;
+    item.studentValidated = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.VALIDATED).length;
+    item.studentAbandoned = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.ABANDONED).length;
+    item.studentNotAutorized = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.NOT_AUTORISED).length;
+    item.studentWithdrawn = result[item._id]?.filter((student) => student.status === YOUNG_STATUS.WITHDRAWN).length;
     return item;
   });
 };

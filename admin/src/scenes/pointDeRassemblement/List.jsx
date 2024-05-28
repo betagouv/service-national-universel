@@ -15,6 +15,7 @@ import api from "../../services/api";
 import DoubleProfil from "../plan-transport/ligne-bus/components/Icons/DoubleProfil";
 import { Loading, TabItem, Title } from "./components/common";
 import ModalCreation from "./components/ModalCreation";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function List() {
   const user = useSelector((state) => state.Auth.user);
@@ -138,6 +139,7 @@ const ListPoints = ({ user }) => {
             paramData={paramData}
             setParamData={setParamData}
             size={size}
+            intermediateFilters={[getCohortGroups("cohorts")]}
           />
           <ExportComponent
             title="Exporter"
@@ -315,6 +317,7 @@ const ListSessions = ({ user, firstSession }) => {
             paramData={paramData}
             setParamData={setParamData}
             size={size}
+            intermediateFilters={[getCohortGroups("cohorts")]}
           />
           <ExportComponent
             title="Exporter"

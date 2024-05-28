@@ -20,9 +20,10 @@ const {
   getCohortNames,
   isYoungInReinscription,
   isCle,
+  REGLEMENT_INTERIEUR_VERSION,
 } = require("snu-lib");
 const { sendTemplate } = require("./../../sendinblue");
-const config = require("../../config");
+const config = require("config");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessions } = require("../../utils/cohort");
 
@@ -292,8 +293,9 @@ router.put("/consentement", passport.authenticate("young", { session: false, fai
     if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set({
-      acceptCGU: "true",
       consentment: "true",
+      acceptCGU: "true",
+      acceptRI: REGLEMENT_INTERIEUR_VERSION,
     });
 
     if (isYoungInReinscription(young)) {

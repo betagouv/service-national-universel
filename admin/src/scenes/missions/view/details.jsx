@@ -3,9 +3,13 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
+import { useSelector } from "react-redux";
 import validator from "validator";
+
+import { useAddress, MISSION_STATUS } from "snu-lib";
+import { AddressForm } from "@snu/ds/common";
+import { useDebounce } from "@uidotdev/usehooks";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
-import InfoCircleMission from "@/assets/icons/InfoCircleMission";
 
 import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, SENDINBLUE_TEMPLATES, ENABLE_PM } from "@/utils";
 import MissionView from "./wrapper";
@@ -20,10 +24,8 @@ import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { adminURL } from "../../../config";
 import ExternalLink from "../../../assets/icons/ExternalLink";
-import { MISSION_STATUS } from "snu-lib";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
-import { useSelector } from "react-redux";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -42,6 +44,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
   const [newTutor, setNewTutor] = useState({ firstName: "", lastName: "", email: "", phone: "" });
 
   const [modalConfirmation, setModalConfirmation] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
 
   const thresholdPendingReached = mission.pendingApplications > 0 && mission.pendingApplications >= mission.placesLeft * 5;
   const valuesToCheck =
@@ -270,18 +276,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
           </div>
         ) : null}
         {mission.status === MISSION_STATUS.WAITING_VALIDATION ? (
-          <InfoMessage
-            bg="bg-blue-700"
-            Icon={InfoCircleMission}
-            message="La mission est en attente de validation. Son contenu va être vérifié par un référent SNU du département dans lequel se déroulera la mission dans les jours à venir."
-          />
+          <InfoMessage message="La mission est en attente de validation. Son contenu va être vérifié par un référent SNU du département dans lequel se déroulera la mission dans les jours à venir." />
         ) : null}
         {mission.status === MISSION_STATUS.DRAFT ? (
-          <InfoMessage
-            bg="bg-blue-700"
-            Icon={InfoCircleMission}
-            message='Si la mission reste au statut brouillon celle-ci ne sera pas étudiée et par conséquent le volontaire ne pourra pas y candidater. Pensez à modifier son statut en la passant "En attente de validation". (bouton en haut à droite de votre écran)'
-          />
+          <InfoMessage message='Si la mission reste au statut brouillon celle-ci ne sera pas étudiée et par conséquent le volontaire ne pourra pas y candidater. Pensez à modifier son statut en la passant "En attente de validation". (bouton en haut à droite de votre écran)' />
         ) : null}
         <div className="mb-8 rounded-xl bg-white pt-2 mt-8">
           <div className="flex flex-col rounded-xl bg-white px-8 pb-12">
@@ -416,39 +414,14 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 <div>
                   <div className="mt-8 mb-4 text-lg font-medium text-gray-900">Lieu où se déroule la mission</div>
                   <div className="mb-2 text-xs font-medium">Adresse</div>
-                  <Field
+                  <AddressForm
                     readOnly={!editing}
-                    bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
-                    label="Adresse"
-                    name="address"
-                    onChange={(address) => {
-                      setValues({ ...values, address, addressVerified: false });
-                    }}
-                    value={values.address}
-                    error={errors?.address}
+                    data={{ address: values.address, zip: values.zip, city: values.city }}
+                    updateData={(address) => setValues({ ...values, ...address, addressVerified: false })}
+                    query={query}
+                    setQuery={setQuery}
+                    options={results}
                   />
-                  <div className="my-4 flex flex-row justify-between gap-3">
-                    <Field
-                      readOnly={!editing}
-                      bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
-                      label="Code postal"
-                      className="w-[50%]"
-                      name="zip"
-                      onChange={(zip) => setValues({ ...values, zip, addressVerified: false })}
-                      value={values.zip}
-                      error={errors?.zip}
-                    />
-                    <Field
-                      readOnly={!editing}
-                      bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
-                      label="Ville"
-                      name="city"
-                      className="w-[50%]"
-                      onChange={(city) => setValues({ ...values, city, addressVerified: false })}
-                      value={values.city}
-                      error={errors?.city}
-                    />
-                  </div>
                   {editing && (!mission?.isJvaMission || mission?.isJvaMission === "false") && !values.addressVerified && (
                     <div className="flex flex-col gap-2 ">
                       <VerifyAddress

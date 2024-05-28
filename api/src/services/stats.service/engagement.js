@@ -1,7 +1,7 @@
 const { ES_NO_LIMIT, ROLES, YOUNG_STATUS_PHASE2, CONTRACT_STATUS, END_DATE_PHASE1, APPLICATION_STATUS, MISSION_STATUS, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
 const CohortModel = require("../../models/cohort");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
 
 async function getAccessToken(endpoint, apiKey) {
   const response = await fetch(`${endpoint}/auth/token`, {
@@ -202,7 +202,7 @@ async function getMissionsOnTerm(startDate, endDate, user) {
 
 async function getContractsSigned(startDate, endDate, user) {
   // ref dep && admin
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
   let body = {
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
@@ -212,7 +212,7 @@ async function getContractsSigned(startDate, endDate, user) {
     body.department = user.department;
   }
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-contract-signed`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/application-contract-signed`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -264,6 +264,7 @@ async function getYoungsWhoStartedOrFinishedMissions(startDate, endDate, user) {
     },
     size: ES_NO_LIMIT,
     track_total_hits: true,
+    _source: false,
   };
 
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
@@ -354,8 +355,8 @@ async function getMissionsChangeStatus(startDate, endDate, user) {
       break;
   }
 
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/mission-change-status`, {
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/mission-change-status`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -428,7 +429,7 @@ async function getMissionsChangeStatus(startDate, endDate, user) {
 
 async function getApplicationsChangeStatus(startDate, endDate, user) {
   // responsible && supervisor && ref dep && admin
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
   let body = {
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
@@ -447,7 +448,7 @@ async function getApplicationsChangeStatus(startDate, endDate, user) {
       break;
   }
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-change-status`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/application-change-status`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -538,7 +539,7 @@ async function getNewMissions(startDate, endDate, user) {
 
 async function getProposedMissionsAcceptedOrRefusedByYoung(startDate, endDate, user) {
   // ref dep only
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
   let body = {
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
@@ -546,7 +547,7 @@ async function getProposedMissionsAcceptedOrRefusedByYoung(startDate, endDate, u
     department: user.department,
   };
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/application-accepted-refused`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/application-accepted-refused`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });

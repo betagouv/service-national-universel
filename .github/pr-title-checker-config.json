@@ -1,0 +1,16 @@
+{
+  "LABEL": {
+    "name": "Pull request title validation",
+    "color": "EEEEEE"
+  },
+  "CHECKS": {
+    "regexp": "^((chore|revert)\\((release,? ?|app,? ?|admin,? ?|misc,? ?|api,? ?|all,? ?|github,? ?|terraform,? ?|kb,? ?|lib,? ?)+\\) ?:.*)|((feat\\(|fix\\(|refactor\\()(release,? ?|app,? ?|admin,? ?|misc,? ?|api,? ?|all,? ?|github,? ?|terraform,? ?|kb,? ?|lib,? ?)+\\) ?: ?[0-9]+ ?-.*)$",
+    "regexpFlags": "i",
+    "ignoreLabels": ["bypass title", "meta"]
+  },
+  "MESSAGES": {
+    "success": "Title is compliant",
+    "failure": "Title is not respecting the guidelines.",
+    "notice": ""
+  }
+}

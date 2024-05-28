@@ -19,6 +19,12 @@
     case "reminder/inscription":
       await require("./reminderInscription").handler();
       break;
+    case "parent-revalidate-ri":
+      await require("./parentRevalidateRI").handler();
+      break;
+    case "dsnj":
+      await require("./dsnjExport/index").handler();
+      break;
   }
   process.exit(0);
 })();

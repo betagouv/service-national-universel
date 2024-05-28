@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
 
 const getNewPointDeRassemblementFixture = require("./fixtures/PlanDeTransport/pointDeRassemblement");
@@ -18,15 +17,11 @@ const { createYoungHelper } = require("./helpers/young");
 const SchemaDeRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
 const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRassemblement");
 const LigneToPointModel = require("../models/PlanDeTransport/ligneToPoint");
-const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
-const YoungModel = require("../models/young");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
 }));
-
-jest.setTimeout(10_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -308,7 +303,7 @@ describe("Meeting point", () => {
           lon: 2.3522,
         },
       };
-      const { pdr, bus, ligneToPoint } = await createPointDeRassemblementWithBus(PointDeRassemblement, "centerId", "sessionId");
+      const { pdr, bus } = await createPointDeRassemblementWithBus(PointDeRassemblement, "centerId", "sessionId");
 
       // Send a request to get the meeting point and bus data
       const res = await request(getAppHelper()).get(`/point-de-rassemblement/${pdr._id}/bus/${bus.cohort}`).send();
@@ -366,7 +361,7 @@ describe("Meeting point", () => {
           lon: 2.3522,
         },
       };
-      const { pdr, bus, ligneToPoint } = await createPointDeRassemblementWithBus(PointDeRassemblement, "centerId", "sessionId");
+      const { pdr, bus } = await createPointDeRassemblementWithBus(PointDeRassemblement, "centerId", "sessionId");
       const cohort = bus.cohort;
 
       // Send a request to get the meeting point and bus data

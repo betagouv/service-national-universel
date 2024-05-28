@@ -12,7 +12,7 @@ const CohortModel = require("../models/cohort");
 const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
 const { SENDINBLUE_TEMPLATES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib");
 const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL, ENVIRONMENT } = require("../config");
+const config = require("config");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateId } = require("../utils/validator");
@@ -101,6 +101,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
       placesTotal: Joi.number().required(),
+      email: Joi.string().email().allow(null, ""),
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {
@@ -118,7 +119,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
     const newCohorts = center.cohorts;
     newCohorts.push(value.cohort);
 
-    await SessionPhase1.create({
+    const session = await SessionPhase1.create({
       cohesionCenterId,
       cohort: value.cohort,
       placesTotal: value.placesTotal,
@@ -129,11 +130,12 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       nameCentre: center.name,
       cityCentre: center.city,
       zipCentre: center.zip,
+      sanitaryContactEmail: value.email,
     });
     center.set({ cohorts: newCohorts });
     await center.save({ fromUser: req.user });
 
-    res.status(200).send({ ok: true });
+    res.status(200).send({ ok: true, data: serializeSessionPhase1(session) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -212,7 +214,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         params: {
           trigger: "centre_changed",
           centre_id: value.name,
-          cta: `${ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
+          cta: `${config.ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
         },
       });
     }

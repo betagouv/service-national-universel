@@ -1,19 +1,13 @@
-require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
-const getNewBusFixture = require("./fixtures/bus");
 const { getNewCohesionCenterFixture, getNewCohesionCenterFixtureV2 } = require("./fixtures/cohesionCenter");
 const { getNewSessionPhase1Fixture } = require("./fixtures/sessionPhase1");
 const { createSessionPhase1, getSessionPhase1ById } = require("./helpers/sessionPhase1");
 
-const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
-const getNewReferentFixture = require("./fixtures/referent");
 const getNewYoungFixture = require("./fixtures/young");
 const getAppHelper = require("./helpers/app");
-const { createBusHelper, getBusByIdHelper } = require("./helpers/bus");
-const { notExistingCohesionCenterId, createCohesionCenter, getCohesionCenterById, createCohesionCenterWithSession } = require("./helpers/cohesionCenter");
+const { notExistingCohesionCenterId, createCohesionCenter, createCohesionCenterWithSession } = require("./helpers/cohesionCenter");
 const { dbConnect, dbClose } = require("./helpers/db");
-const { createMeetingPointHelper, getMeetingPointByIdHelper } = require("./helpers/meetingPoint");
-const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
+const { createYoungHelper } = require("./helpers/young");
 const { ROLES } = require("snu-lib");
 
 jest.mock("../sendinblue", () => ({
@@ -25,8 +19,6 @@ jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
   getSignedUrl: () => "",
 }));
-
-jest.setTimeout(10_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);

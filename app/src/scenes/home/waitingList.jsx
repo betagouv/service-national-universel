@@ -5,10 +5,8 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getCohort } from "../../utils/cohorts";
 import Clock from "../../assets/icons/Clock";
-import WaitingListContent from "./components/WaitingListContent";
 import { translate, getCohortPeriod } from "snu-lib";
 import JDMA from "../../components/JDMA";
-import { environment } from "../../config";
 import plausibleEvent from "../../services/plausible";
 
 export default function WaitingList() {
@@ -16,72 +14,45 @@ export default function WaitingList() {
   const cohort = getCohort(young.cohort);
 
   function handleClick() {
-    if (environment === "production") {
-      plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) });
-    }
+    plausibleEvent("Compte/CTA - Je donne mon avis", { statut: translate(young.status) });
   }
 
   return (
-    <>
-      {/* DESKTOP */}
-      <div className="hidden lg:flex">
-        <div className="m-8 w-full">
-          <div className="flex items-center justify-between overflow-hidden rounded-xl bg-white shadow-sm max-w-7xl mx-auto">
-            <div className="flex w-1/2 flex-col gap-8 py-6 pl-10 pr-3">
-              <div className="text-[44px] font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
-              </div>
-              <div className="mt-2 text-xl font-bold text-[#242526]">
-                Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {getCohortPeriod(cohort || young.cohort)}.
-              </div>
+    <main className="max-w-7xl pb-20 md:pb-0 md:m-8 2xl:mx-auto">
+      <div className="bg-white md:rounded-xl shadow-sm flex flex-col md:flex-row">
+        <img className="block md:hidden" src={Img2} />
 
-              <hr className="text-gray-200" />
-              <div className="flex gap-5">
-                <Clock className="text-gray-600 flex-1 rounded-full bg-gray-100 p-2" />
-                <div className="flex-1 text-sm leading-5 text-gray-500 space-y-6">
-                  <WaitingListContent showLinks={cohort?.uselessInformation?.showChangeCohortButtonOnHomeWaitingList} />
-                </div>
-              </div>
-              <hr className="text-gray-200" />
-              <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">
-                Changer de séjour &gt;
-              </Link>
+        <div className="px-[1rem] pb-[3rem] md:p-[3rem]">
+          <h1 className="text-3xl md:text-[44px] font-medium tracking-tight !leading-snug text-gray-800 md:mb-10 max-w-xl">
+            <strong>{young.firstName}</strong>, bienvenue sur votre compte volontaire.
+          </h1>
+
+          <div className="text-xl font-bold text-gray-800 mt-8">
+            Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {getCohortPeriod(cohort || young.cohort)}.
+          </div>
+
+          <hr className="text-gray-200 my-4" />
+
+          <div className="flex gap-5">
+            <Clock className="text-gray-600 flex-1 rounded-full bg-gray-100 p-2" />
+            <div className="flex-1 text-sm leading-5 text-gray-500 space-y-6">
+              Votre inscription au SNU est bien validée. Nous vous recontacterons dès qu’une place se libère dans les prochains jours
             </div>
-            <img className="w-1/2 object-fill" src={Img3} />
           </div>
 
-          <div className="flex justify-end py-4 pr-8">
-            <JDMA id="3154" />
-          </div>
+          <hr className="text-gray-200 my-4" />
+
+          <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">
+            Changer de séjour &gt;
+          </Link>
         </div>
-      </div>
-      {/* MOBILE */}
-      <div className="flex w-full flex-col lg:hidden">
-        <div className="flex flex-col-reverse bg-white">
-          <div className="flex flex-col gap-4 px-4 pb-8   ">
-            <div className="text-3xl font-medium leading-tight tracking-tight text-gray-800">
-              <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
-            </div>
-            <div className="mt-3 text-lg font-bold text-[#242526]">
-              Vous êtes inscrit{young?.gender === "female" && "e"} sur liste complémentaire pour le séjour {getCohortPeriod(cohort || young.cohort)}.
-            </div>
 
-            <hr className="mt-3 text-gray-200" />
-            <div className="flex gap-2 my-2">
-              <Clock className="text-gray-600 rounded-full bg-gray-100 p-2" />
-              <div className="flex-1 text-sm leading-5 text-gray-500 space-y-4">
-                <WaitingListContent showLinks={cohort?.uselessInformation?.showChangeCohortButtonOnHomeWaitingList} />
-              </div>
-            </div>
-            <hr className="text-gray-200" />
-
-            <div className="flex justify-end py-4 pr-8">
-              <JDMA id="3154" onClick={handleClick} />
-            </div>
-          </div>
-          <img className="object-contain" src={Img2} />
-        </div>
+        <img className="flex-1 hidden xl:block" src={Img3} />
       </div>
-    </>
+
+      <div className="flex justify-end m-8">
+        <JDMA id="3154" onClick={handleClick} />
+      </div>
+    </main>
   );
 }

@@ -3,7 +3,8 @@ import { Modal } from "reactstrap";
 import CloseSvg from "../../../../assets/Close";
 import { ModalContainer } from "../../../../components/modals/Modal";
 import { BorderButton } from "../../../phase0/components/Buttons";
-import { DeleteButton, DownloadButton } from "../../../phase0/components/commons";
+import { DownloadButton } from "@/scenes/phase0/components/commons/DownloadButton";
+import { DeleteButton } from "@/scenes/phase0/components/commons/DeleteButton";
 import AddImage from "../../../../assets/icons/AddImage";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../../../components/Loader";
@@ -14,11 +15,7 @@ import { download } from "snu-lib";
 const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 const ACCEPTABLE_MIME_TYPES = ["image/jpg", "image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
 
-export default function ModalPedagoProject({ session, onCancel, onChanged }) {
-  function sessionChanged(newSession) {
-    onChanged && onChanged(newSession);
-  }
-
+export default function ModalPedagoProject({ session, setSession, onCancel }) {
   return (
     <Modal centered isOpen={true} toggle={onCancel}>
       <ModalContainer className="p-8">
@@ -26,11 +23,11 @@ export default function ModalPedagoProject({ session, onCancel, onChanged }) {
         <div className="align-center flex text-xl font-medium text-black">Projet pédagogique du séjour</div>
         <div className="w-full">
           {session.pedagoProjectFiles && session.pedagoProjectFiles.length > 0 ? (
-            session.pedagoProjectFiles.map((file) => <PedagoProjectFile session={session} file={file} key={file.name} onDelete={onChanged} />)
+            session.pedagoProjectFiles.map((file) => <PedagoProjectFile session={session} file={file} key={file.name} setSession={setSession} />)
           ) : (
             <div className="my-8">Aucun projet pédagogique pour l&apos;instant.</div>
           )}
-          <DropZone session={session} className="my-8" sessionChanged={sessionChanged} />
+          <DropZone session={session} setSession={setSession} className="my-8" />
           <BorderButton mode="grey" onClick={onCancel} className="w-full">
             Fermer
           </BorderButton>
@@ -40,7 +37,7 @@ export default function ModalPedagoProject({ session, onCancel, onChanged }) {
   );
 }
 
-function PedagoProjectFile({ session, file, onDelete, className = "" }) {
+function PedagoProjectFile({ session, setSession, file, className = "" }) {
   const [communicating, setCommunicating] = useState(false);
 
   async function deleteFile() {
@@ -51,7 +48,7 @@ function PedagoProjectFile({ session, file, onDelete, className = "" }) {
         capture(res.code);
         toastr.error("Une erreur s'est produite lors de la suppression du fichier. Veuillez réessayer.");
       } else {
-        onDelete && onDelete(res.data);
+        setSession(res.data);
       }
     } catch (err) {
       toastr.error("Une erreur s'est produite lors de la suppression du fichier. Veuillez réessayer dans quelques instants.");
@@ -89,7 +86,7 @@ function PedagoProjectFile({ session, file, onDelete, className = "" }) {
   );
 }
 
-function DropZone({ session, className = "", sessionChanged }) {
+function DropZone({ session, setSession, className = "" }) {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -154,7 +151,7 @@ function DropZone({ session, className = "", sessionChanged }) {
         setError("Une erreur s'est produite lors du téléversement de votre fichier.");
         return;
       }
-      sessionChanged(res.session);
+      setSession(res.session);
     } catch (err) {
       toastr.error("Une erreur est survenue. Nous n'avons pu enregistrer le fichier. Veuillez réessayer dans quelques instants.");
     }

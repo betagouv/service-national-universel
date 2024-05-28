@@ -19,6 +19,7 @@ import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import PanelV2 from "../../components/PanelV2";
+import { signinAs } from "@/utils/signinAs";
 
 export default function UserPanel({ onChange, value }) {
   const [structure, setStructure] = useState();
@@ -45,11 +46,9 @@ export default function UserPanel({ onChange, value }) {
   const handleImpersonate = async () => {
     try {
       plausibleEvent("Utilisateurs/CTA - Prendre sa place");
-      const { ok, data, token } = await api.post(`/referent/signin_as/referent/${value._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
+      const data = await signinAs("referent", value._id);
+      dispatch(setUser(data));
       history.push("/dashboard");
-      if (token) api.setToken(token);
-      if (data) dispatch(setUser(data));
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
@@ -92,6 +91,8 @@ export default function UserPanel({ onChange, value }) {
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(value);
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(value);
+      if (!ok && code === "LINKED_CLASSES") return onUniqueResponsible(value);
+      if (!ok && code === "LINKED_ETABLISSEMENT") return onUniqueResponsible(value);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       return onReferentDeleted();
     } catch (e) {

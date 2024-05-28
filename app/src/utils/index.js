@@ -1,12 +1,27 @@
 import PasswordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, REGLEMENT_INTERIEUR_VERSION, isCohortTooOld } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
 import { isCohortDone } from "./cohorts";
+
 function addOneDay(date) {
   const newDate = new Date(date);
   newDate.setDate(newDate.getDate() + 1);
   return newDate;
+}
+
+/*  
+  Un jeune doit réaccepter le Reglement intérieur si le départ de sa cohorte est 
+  apres la date de mise en place du dernier reglement (et s'il ne l'a pas déja 
+  accepté).
+*/
+export function shouldReAcceptRI(young, cohort) {
+  const newRiDate = new Date(REGLEMENT_INTERIEUR_VERSION);
+  const cohortStartDate = new Date(cohort?.dateStart);
+  if (permissionPhase1(young) && cohortStartDate >= newRiDate && young?.acceptRI != REGLEMENT_INTERIEUR_VERSION) {
+    return true;
+  }
+  return false;
 }
 
 export function getPasswordErrorMessage(v) {
@@ -59,32 +74,35 @@ export function permissionPhase1(y) {
   );
 }
 
+export function hasAccessToPhase2(young) {
+  if (!young) return false;
+  if (young.statusPhase2 === "VALIDATED") return true;
+  if (young.status === YOUNG_STATUS.WITHDRAWN) return false;
+  const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
+
+  if (isCohortTooOld(young) && !userIsDoingAMission) {
+    return false;
+  }
+  if (wasYoungExcluded(young)) return false;
+  return true;
+}
+
 export function permissionPhase2(y) {
-  if (!y) return false;
+  if (wasYoungExcluded(y)) return false;
   if (y.statusPhase2OpenedAt && new Date(y.statusPhase2OpenedAt) < new Date()) return true;
   if (!hasAccessToPhase2(y)) return false;
-  return (
-    (y.status !== YOUNG_STATUS.WITHDRAWN &&
-      (![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) ||
-        [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1) ||
-        y.cohesionStayPresence === "true")) ||
-    y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED
-  );
+
+  // If young has validated phase 2
+  if (y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return true;
+  // If young has done phase 1 or was exempted.
+  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1)) return true;
+
+  return false;
 }
 
 export function permissionPhase3(y) {
   if (!permissionApp(y)) return false;
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
-}
-
-export function hasAccessToPhase2(young) {
-  if (young.statusPhase2 === "VALIDATED") return true;
-  const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
-  const cohortIsTooOld = ["2019", "2020"].includes(young.cohort);
-  if (cohortIsTooOld && !userIsDoingAMission) {
-    return false;
-  }
-  return true;
 }
 
 // from the end of the cohort's last day
@@ -163,3 +181,5 @@ export const validateId = (id) => {
 };
 
 export const desktopBreakpoint = 768;
+
+export const shouldDisplayMaintenanceNotice = new Date() < new Date("2024-04-18T23:59:59");

@@ -6,7 +6,6 @@ import DoubleDayTile from "../../components/DoubleDayTile";
 import Loader from "../../components/Loader";
 import WithTooltip from "../../components/WithTooltip";
 import api from "../../services/api";
-import plausibleEvent from "../../services/plausible";
 import {
   formatStringDateTimezoneUTC,
   translate,
@@ -39,13 +38,12 @@ import Download from "../../assets/icons/Download";
 import { capture } from "../../sentry";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
+import plausibleEvent from "@/services/plausible";
+import { apiEngagement } from "./utils";
 
-export default function viewDesktop() {
+export default function ViewDesktop() {
   const [mission, setMission] = useState();
   const [modal, setModal] = useState(null);
-  const [disabledAge, setDisabledAge] = useState(false);
-  const [disabledIncomplete, setDisabledIncomplete] = useState(false);
-  const [disabledPmRefused, setDisabledPmRefused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [contract, setContract] = useState(null);
   const [openContractButton, setOpenContractButton] = useState();
@@ -63,6 +61,9 @@ export default function viewDesktop() {
   const getMission = async () => {
     if (!id) return setMission(null);
     const { data } = await api.get(`/mission/${id}`);
+    if (data?.apiEngagementId && (!data.application || data.application?.status === APPLICATION_STATUS.WAITING_ACCEPTATION)) {
+      await apiEngagement(data.apiEngagementId);
+    }
     return setMission(data);
   };
 
@@ -84,37 +85,8 @@ export default function viewDesktop() {
 
   useEffect(() => {
     getMission();
+    return localStorage.removeItem("jva_mission_click_id");
   }, []);
-
-  useEffect(() => {
-    function getDiffYear(a, b) {
-      const from = new Date(a);
-      from.setHours(0, 0, 0, 0);
-      const to = new Date(b);
-      to.setHours(0, 0, 0, 0);
-      const diffTime = Math.abs(to - from);
-      const res = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365.25));
-      if (!res || isNaN(res)) return "?";
-      return res;
-    }
-
-    // si c'est une préparation militaire
-    // on vérifie que le vonlontaire aura plus de 16 ans au début de la mission, que son dossier est complet et que son dossier n'est pas refusé
-    if (mission?.isMilitaryPreparation === "true") {
-      const ageAtStart = getDiffYear(mission.startAt, young.birthdateAt);
-      setDisabledAge(ageAtStart < 16);
-      setDisabledPmRefused(young.statusMilitaryPreparationFiles === "REFUSED");
-      if (
-        !young.files.militaryPreparationFilesIdentity.length ||
-        !young.files.militaryPreparationFilesAuthorization.length ||
-        !young.files.militaryPreparationFilesCertificate.length
-      ) {
-        setDisabledIncomplete(true);
-      } else {
-        setDisabledIncomplete(false);
-      }
-    }
-  }, [mission, young]);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -134,13 +106,6 @@ export default function viewDesktop() {
     // tags.push(mission.remote ? "À distance" : "En présentiel");
     mission.domains.forEach((d) => tags.push(translate(d)));
     return tags;
-  };
-
-  const scrollToBottom = () => {
-    if (!docRef.current) return;
-    docRef.current.scrollIntoView({
-      behavior: "smooth",
-    });
   };
 
   const updateApplication = async (status) => {
@@ -172,6 +137,15 @@ export default function viewDesktop() {
       url: `/contract/${contractId}/download`,
       fileName: `${young.firstName} ${young.lastName} - contrat ${contractId}.pdf`,
     });
+  };
+
+  const handleClick = (mission) => {
+    if (mission.isMilitaryPreparation === "true") {
+      plausibleEvent("Phase 2/CTA - PM - Candidater");
+    } else {
+      plausibleEvent("Phase2/CTA missions - Candidater");
+    }
+    setModal("APPLY");
   };
 
   if (!mission) return <Loader />;
@@ -227,29 +201,9 @@ export default function viewDesktop() {
           </div>
           <div className="mt-3 flex items-center justify-center lg:!mt-0">
             {mission.application ? (
-              <ApplicationStatus
-                application={mission.application}
-                tutor={mission?.tutor}
-                mission={mission}
-                updateApplication={updateApplication}
-                loading={loading}
-                disabledAge={disabledAge}
-                disabledIncomplete={disabledIncomplete}
-                disabledPmRefused={disabledPmRefused}
-                scrollToBottom={scrollToBottom}
-                young={young}
-              />
+              <ApplicationStatus mission={mission} updateApplication={updateApplication} loading={loading} />
             ) : (
-              <ApplyButton
-                placesLeft={mission.placesLeft}
-                setModal={setModal}
-                disabledAge={disabledAge}
-                disabledIncomplete={disabledIncomplete}
-                disabledPmRefused={disabledPmRefused}
-                scrollToBottom={scrollToBottom}
-                young={young}
-                isMilitaryPreparation={mission?.isMilitaryPreparation}
-              />
+              <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
             )}
           </div>
         </div>
@@ -509,15 +463,11 @@ export default function viewDesktop() {
   );
 }
 
-const ApplicationStatus = ({ application, tutor, mission, updateApplication, loading, disabledAge, disabledIncomplete, disabledPmRefused, scrollToBottom, young }) => {
-  const [message, setMessage] = React.useState(null);
+const ApplicationStatus = ({ mission, updateApplication, loading }) => {
+  const young = useSelector((state) => state.Auth.young);
   const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
-
-  useEffect(() => {
-    if (disabledIncomplete) setMessage("Pour candidater, veuillez téléverser le dossier d’égibilité présent en bas de page");
-    if (disabledPmRefused) setMessage("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
-    if (disabledAge) setMessage("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
-  }, [disabledAge, disabledIncomplete, disabledPmRefused]);
+  const application = mission?.application;
+  const tutor = mission?.tutor;
 
   const theme = {
     background: {
@@ -648,11 +598,9 @@ const ApplicationStatus = ({ application, tutor, mission, updateApplication, loa
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-3">
-          {disabledAge || disabledIncomplete || disabledPmRefused ? (
-            <WithTooltip tooltipText={message}>
-              <button
-                className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2"
-                onClick={() => disabledIncomplete && !disabledPmRefused && !disabledAge && scrollToBottom()}>
+          {!mission.canApply ? (
+            <WithTooltip tooltipText={mission.message}>
+              <button disabled className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2">
                 <CheckCircle className="mr-2 h-5 w-5 text-blue-400" />
                 <span className="text-sm font-medium leading-5 text-white">Accepter</span>
               </button>

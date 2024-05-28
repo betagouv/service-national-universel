@@ -31,10 +31,10 @@ export default function TicketMessage({ ticket: propTicket }) {
   const getTicket = async (id) => {
     try {
       if (!id) return setTicket(undefined);
-      const { data, ok } = await api.get(`/zammood/ticket/${id}?`);
+      const { data, ok } = await api.get(`/SNUpport/ticket/${id}?`);
       if (!ok) return;
       setTicket(data.ticket);
-      const zammoodMessages = data?.messages
+      const SNUpportMessages = data?.messages
         .map((message) => {
           return {
             id: message._id,
@@ -46,7 +46,7 @@ export default function TicketMessage({ ticket: propTicket }) {
           };
         })
         .filter((message) => message !== undefined);
-      setMessages(zammoodMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      setMessages(SNUpportMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
     } catch (e) {
       setTicket(undefined);
     }
@@ -60,7 +60,7 @@ export default function TicketMessage({ ticket: propTicket }) {
     setSending(true);
     const id = ticket?._id;
     if (!message) return setSending(false);
-    const { ok, code } = await api.post(`/zammood/ticket/${id}/message`, { message });
+    const { ok, code } = await api.post(`/SNUpport/ticket/${id}/message`, { message });
     if (!ok) {
       capture(new Error(code));
       toastr.error("Oups, une erreur est survenue", translate(code));

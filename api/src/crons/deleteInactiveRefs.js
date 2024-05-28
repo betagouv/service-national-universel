@@ -1,4 +1,3 @@
-require("../mongo");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
 const { capture } = require("../sentry");
@@ -21,11 +20,12 @@ exports.handler = async () => {
     }).cursor();
     await cursor.eachAsync(async function (ref) {
       const lastLogin = ref.lastLoginAt === null ? ref.createdAt : ref.lastLoginAt;
+      const emailTo = [{ name: `${ref.firstName} ${ref.lastName}`, email: ref.email }]
       if (diffDays(lastLogin, sixMonthsAgo) === 0) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.referent.DELETE_ACCOUNT_NOTIFICATION_1, { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.DELETE_ACCOUNT_NOTIFICATION_1, { emailTo });
       }
       if (diffDays(lastLogin, sixMonthsAgo) === 7) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.referent.DELETE_ACCOUNT_NOTIFICATION_2, { name: `${ref.firstName} ${ref.lastName}`, email: ref.email });
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.DELETE_ACCOUNT_NOTIFICATION_2, { emailTo });
       }
       if (diffDays(lastLogin, sixMonthsAgo) >= 14) {
         await ref.remove();
@@ -35,5 +35,6 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "Delete inactive refs", text: JSON.stringify(e) });
+    throw e;
   }
 };

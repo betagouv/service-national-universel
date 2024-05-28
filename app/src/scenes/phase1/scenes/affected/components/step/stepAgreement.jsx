@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import { StepCard } from "../StepCard";
 import { AgreementModal } from "../modals/AgreementModal";
+import { STEPS, isStepDone } from "../../utils/steps.utils";
+import { useSelector } from "react-redux";
 
-export default function StepAgreement({ departureDate, returnDate, enabled, isDone, stepNumber }) {
+export default function StepAgreement({ data: { departureDate, returnDate } }) {
+  const young = useSelector((state) => state.Auth.young);
+  const index = 2;
+  const isEnabled = isStepDone(STEPS.PDR, young);
+  const isDone = isStepDone(STEPS.AGREEMENT, young);
   const [isOpen, setIsOpen] = useState(false);
 
-  if (!enabled) {
+  if (!isEnabled) {
     return (
-      <StepCard state="disabled" stepNumber={2}>
+      <StepCard variant="disabled" index={index}>
         <p className="font-medium text-gray-400">Confirmez votre participation au séjour</p>
       </StepCard>
     );
@@ -15,10 +21,10 @@ export default function StepAgreement({ departureDate, returnDate, enabled, isDo
 
   if (isDone) {
     return (
-      <StepCard state="done" stepNumber={stepNumber}>
+      <StepCard variant="done" index={index}>
         <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
           <div>
-            <p className="font-semibold">Confirmez de votre participation au séjour</p>
+            <p className="font-semibold">Confirmez votre participation au séjour</p>
             <p className="mt-[0.75rem] md:mt-[0.25rem] text-gray-500">Vous devez confirmer votre participation au séjour avant votre départ.</p>
           </div>
           <div className="w-full md:w-auto mt-1 md:mt-0">
@@ -33,7 +39,7 @@ export default function StepAgreement({ departureDate, returnDate, enabled, isDo
   }
 
   return (
-    <StepCard state="todo" stepNumber={stepNumber}>
+    <StepCard index={index}>
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold text-gray-800">Confirmez votre participation au séjour</p>

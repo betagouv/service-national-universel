@@ -7,16 +7,13 @@ dayjs.extend(utc);
 import { capture } from "../../../../../../sentry";
 import api from "../../../../../../services/api";
 import { getMeetingHour, getReturnHour, isCle } from "snu-lib";
-import { getMeetingPointChoiceLimitDateForCohort } from "../../../../../../utils/cohorts";
-import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../../utils/steps.utils";
+import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR, pdrChoiceExpired, pdrChoiceLimitDate } from "../../utils/steps.utils";
 import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
 
-export default function StepPDR({ center, session, meetingPoint, departureDate, returnDate, stepNumber }) {
+export default function StepPDR({ data: { center, session, meetingPoint, departureDate, returnDate } }) {
+  const index = 1;
   const young = useSelector((state) => state.Auth.young);
-  const date = getMeetingPointChoiceLimitDateForCohort(young.cohort);
-  const pdrChoiceLimitDate = date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
-  const pdrChoiceExpired = date ? dayjs.utc().isAfter(dayjs(date)) : false;
 
   const [open, setOpen] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState([]);
@@ -50,7 +47,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
 
   if (isCle(young)) {
     return (
-      <StepCard state="done" stepNumber={stepNumber}>
+      <StepCard variant="done" index={index}>
         <p className="font-semibold text-sm">Confirmation du point de rendez-vous : vous n'avez rien à faire</p>
         <p className="leading-tight mt-1 text-sm text-gray-500">Vos informations de transport vers le centre vous seront transmises par votre établissement.</p>
       </StepCard>
@@ -59,8 +56,8 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
 
   if (young.meetingPointId) {
     return (
-      <StepCard state="done" stepNumber={stepNumber}>
-        <div className="flex flex-col md:flex-row gap-3 justify-between">
+      <StepCard variant="done" index={index}>
+        <div className="flex flex-col md:flex-row gap-3 justify-between text-sm">
           <div>
             <p className="font-semibold">Point de rassemblement</p>
             <p className="leading-tight my-2">{addressOf(meetingPoint)}</p>
@@ -76,21 +73,19 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
             </div>
           </div>
           <div>
-            {!isCle(young) && (
-              <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
-                Modifier
-              </button>
-            )}
+            <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
+              Modifier
+            </button>
           </div>
         </div>
-        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired} />
+        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired(young.cohort)} />
       </StepCard>
     );
   }
 
   if (young.deplacementPhase1Autonomous === "true") {
     return (
-      <StepCard state="done" stepNumber={stepNumber}>
+      <StepCard variant="done" index={index}>
         <div className="flex flex-col md:flex-row gap-3 justify-between text-sm">
           <div>
             <p className="font-semibold">Point de rassemblement</p>
@@ -107,30 +102,28 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
             </div>
           </div>
           <div>
-            {!isCle(young) && (
-              <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
-                Modifier
-              </button>
-            )}
+            <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
+              Modifier
+            </button>
           </div>
         </div>
-        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired} />
+        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired(young.cohort)} />
       </StepCard>
     );
   }
 
   if (young.transportInfoGivenByLocal === "true") {
     return (
-      <StepCard state="done" stepNumber={stepNumber}>
+      <StepCard variant="done" index={index}>
         <p className="font-semibold">Confirmation du point de rendez-vous : vous n'avez rien à faire</p>
         <p className="leading-tight my-2">Vos informations de transport vers le centre vous seront transmises par email.</p>
       </StepCard>
     );
   }
 
-  if (pdrChoiceExpired) {
+  if (pdrChoiceExpired(young.cohort)) {
     return (
-      <StepCard state="disabled" stepNumber={stepNumber}>
+      <StepCard variant="disabled" index={index}>
         <p className="font-semibold text-gray-500">Date de choix dépassée</p>
         <p className="text-sm text-gray-500">Un point de rassemblement va vous être attribué par votre référent SNU</p>
       </StepCard>
@@ -138,12 +131,12 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
   }
 
   return (
-    <StepCard state="todo" stepNumber={stepNumber}>
+    <StepCard index={index}>
       <div className="flex flex-col md:flex-row gap-3 justify-between">
         <div>
           <p className="font-semibold leading-tight">Confirmez votre point de rassemblement</p>
           <p className="text-sm mt-2 text-gray-500">
-            À faire avant le <strong>{pdrChoiceLimitDate}</strong>.
+            À faire avant le <strong>{pdrChoiceLimitDate(young.cohort)}</strong>.
           </p>
         </div>
         <div>
@@ -152,7 +145,7 @@ export default function StepPDR({ center, session, meetingPoint, departureDate, 
           </button>
         </div>
       </div>
-      <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired} />
+      <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired(young.cohort)} />
     </StepCard>
   );
 }

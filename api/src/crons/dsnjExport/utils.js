@@ -35,11 +35,11 @@ const genderTranslation = {
   female: "Féminin",
 };
 
-const findCohesionCenterBySessionId = (sessionId, sessions, centers) => {
+const findCohesionCenterBySessionId = (sessionId, sessions, centers, young) => {
   const session = sessions.find(({ _id }) => {
     return _id.toString() === sessionId.toString();
   });
-  if (!session) return {};
+  if (!session) throw new Error(`DSNJExport: Session not found for young: ${young._id}`);
   return centers.find(({ _id }) => _id.toString() === session.cohesionCenterId.toString());
 };
 
@@ -106,7 +106,9 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
   const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: cohesionCenterIds } }).select({ _id: 1, name: 1, code2022: 1 });
   const cohesionCenterParSessionId = {};
   const statusList = afterSession ? ["VALIDATED"] : ["WAITING_LIST", "VALIDATED"];
-  const youngs = await YoungModel.find({ cohort: cohort.name, status: { $in: statusList } }).select({
+  const q = { cohort: cohort.name, status: { $in: statusList } };
+  if (afterSession) q.frenchNationality = "true";
+  const youngs = await YoungModel.find(q).select({
     _id: 1,
     sessionPhase1Id: 1,
     email: 1,
@@ -161,7 +163,7 @@ const generateYoungsExport = async (cohort, afterSession = false, action = "uplo
     if (sessionPhase1Id) {
       cohesionCenter = cohesionCenterParSessionId[sessionPhase1Id];
       if (!cohesionCenter) {
-        cohesionCenter = findCohesionCenterBySessionId(sessionPhase1Id, sessions, cohesionCenters);
+        cohesionCenter = findCohesionCenterBySessionId(sessionPhase1Id, sessions, cohesionCenters, young);
         cohesionCenterParSessionId[sessionPhase1Id] = cohesionCenter;
       }
     }

@@ -1,64 +1,65 @@
 const mongoose = require("mongoose");
-const { MONGO_URL, ENVIRONMENT } = require("./config.js");
+const config = require("config");
 
-//Set up default mongoose connection
-
-if (MONGO_URL) {
-  if (ENVIRONMENT == "production") {
-    mongoose.connect(MONGO_URL, {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false, // * https://stackoverflow.com/a/52572958
-      poolSize: 5_000,
-      maxPoolSize: 5_000,
-      minPoolSize: 500,
-      waitQueueTimeoutMS: 30_000,
-    });
-  } else {
-    mongoose.connect(MONGO_URL, {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false, // * https://stackoverflow.com/a/52572958
-      poolSize: 500,
-      maxPoolSize: 500,
-      minPoolSize: 200,
-      waitQueueTimeoutMS: 30_000,
-    });
+// Set up default mongoose connection
+async function initDB() {
+  if (!config.MONGO_URL) {
+    throw new Error("ERROR CONNECTION. MONGO URL EMPTY");
   }
-} else {
-  console.log("ERROR CONNEXION. MONGO URL EMPTY");
+
+  const db = mongoose.connection;
+
+  db.on("error", console.error.bind(console, "MONGODB: connection error:"));
+
+  db.on("connecting", () => console.log("MONGODB: connecting"));
+  db.on("open", () => console.log("MONGODB: open"));
+  db.on("connected", () => console.log("MONGODB: connected"));
+  db.on("disconnecting", () => console.log("MONGODB: disconnecting"));
+  db.on("disconnected", () => console.log("MONGODB: disconnected"));
+  db.on("reconnected", () => console.log("MONGODB: reconnected"));
+  db.on("close", () => console.log("MONGODB: close"));
+
+  db.on("fullsetup", () => console.log("MONGODB: fullsetup"));
+  db.on("all", () => console.log("MONGODB: all"));
+  db.on("reconnectFailed", () => console.log("MONGODB: reconnectFailed"));
+
+  let options = {
+    appname: "ApiSnu", // Add your application name
+    // * Remove when we update to mongoose 6 : https://stackoverflow.com/a/68962378
+    useCreateIndex: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    // * ----
+    maxPoolSize: 30,
+    minPoolSize: 5,
+    waitQueueTimeoutMS: 30_000,
+    tls: true, // Enable TLS
+  };
+
+  if (config.ENVIRONMENT === "production") {
+    options.maxPoolSize = 200;
+    options.minPoolSize = 50;
+  }
+
+  try {
+    await mongoose.connect(config.MONGO_URL, options);
+  } catch (error) {
+    if (error.reason && error.reason.servers) {
+      console.error(error.reason.servers);
+    } else {
+      console.error("MONGODB: connection error:", error);
+    }
+    throw error;
+  }
 }
 
-mongoose.Promise = global.Promise; //Get the default connection
-let db = mongoose.connection;
+async function closeDB() {
+  const db = mongoose.connection;
+  await db.close();
+}
 
-//Bind connection to error event (to get notification of connection errors)
-db.on("error", console.error.bind(console, "MongoDB connection error:"));
-db.once("open", () => {
-  console.log("MongoDB connexion OK");
-  // db.db.listCollections().toArray(function (err, names) {
-  //   if (err) {
-  //     console.log(err);
-  //   } else {
-  //     for (i = 0; i < names.length; i++) {
-  //       console.log(names[i].name);
-  // if ((names[i].name = "userprofiles")) {
-  //     console.log("Userprofile Collection Exists in DB");
-  //     mongooseconnection.connection.db.dropCollection(
-  //         "userprofiles",
-  //         function(err, result) {
-  //             console.log("Collection droped");
-  //         }
-  //     );
-  //     console.log("Userprofile Collection No Longer Available");
-  // } else {
-  //     console.log("Collection doesn't exist");
-  // }
-  //     }
-  //   }
-  // });
-});
-
-module.exports = db;
+module.exports = {
+  initDB,
+  closeDB,
+};

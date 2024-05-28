@@ -9,6 +9,7 @@ import StepNonEligible from "./steps/stepNonEligible";
 import StepSejour from "./steps/stepSejour";
 import StepProfil from "./steps/stepProfil";
 import StepConfirm from "./steps/stepConfirm";
+import StepNoSejour from "../preinscription/steps/stepNoSejour";
 import EmailValidation from "./EmailValidation";
 import Done from "./Done";
 
@@ -17,8 +18,8 @@ import { getStepFromUrlParam, PREINSCRIPTION_STEPS as STEPS, PREINSCRIPTION_STEP
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import Loader from "@/components/Loader";
 import { toastr } from "react-redux-toastr";
-import { FEATURES_NAME, isFeatureEnabled } from "snu-lib/features";
-import { YOUNG_SOURCE } from "snu-lib/constants";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
+import { YOUNG_SOURCE } from "snu-lib";
 import { environment } from "@/config";
 import useAuth from "@/services/useAuth";
 
@@ -28,6 +29,7 @@ function renderStepResponsive(step) {
   if (step === STEPS.SEJOUR) return <StepSejour />;
   if (step === STEPS.PROFIL) return <StepProfil />;
   if (step === STEPS.CONFIRM) return <StepConfirm />;
+  if (step === STEPS.NO_SEJOUR) return <StepNoSejour />;
 }
 
 const Step = () => {

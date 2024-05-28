@@ -1,4 +1,3 @@
-require("dotenv").config({ path: "./.env-testing" });
 const { faker } = require("@faker-js/faker");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
@@ -29,8 +28,6 @@ jest.mock("../cryptoUtils", () => ({
   decrypt: () => Buffer.from("test"),
   encrypt: () => Buffer.from("test"),
 }));
-
-jest.setTimeout(10_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);

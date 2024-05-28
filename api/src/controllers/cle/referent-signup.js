@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, canUpdateEtablissement, ROLES, SUB_ROLES, validateEmailAcademique } = require("snu-lib");
 const mongoose = require("mongoose");
 
 const emailsEmitter = require("../../emails");
-const config = require("../../config");
+const config = require("config");
 const { capture } = require("../../sentry");
 const { ERRORS, validatePassword } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
@@ -15,7 +15,6 @@ const SchoolRamsesModel = require("../../models/schoolRAMSES");
 const EtablissementModel = require("../../models/cle/etablissement");
 const ClasseModel = require("../../models/cle/classe");
 const { serializeReferent } = require("../../utils/serializer");
-const { validateEmailAcademique } = require("../../services/cle/referent");
 
 router.get("/token/:token", async (req, res) => {
   try {

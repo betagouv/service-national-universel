@@ -2,17 +2,19 @@ import React, { useEffect, useState } from "react";
 import { ImQuotesLeft } from "react-icons/im";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
 
+import { YOUNG_SOURCE } from "snu-lib";
+
+import ModalConfirm from "@/components/modals/ModalConfirm";
 import dayjs from "@/utils/dayjs.utils";
-import { AiOutlineExclamationCircle } from "react-icons/ai";
-import ExternalLink from "../../../assets/icons/ExternalLink";
-import Refresh from "../../../assets/icons/Refresh";
-import { adminURL } from "../../../config";
-import { capture } from "../../../sentry";
-import api from "../../../services/api";
-import { getCohortByName } from "../../../services/cohort.service";
-import { YOUNG_STATUS_PHASE1, canAssignManually, translate, youngCheckinField } from "../../../utils";
+import ExternalLink from "@/assets/icons/ExternalLink";
+import Refresh from "@/assets/icons/Refresh";
+import { adminURL } from "@/config";
+import { capture } from "@/sentry";
+import api from "@/services/api";
+import { getCohortByName } from "@/services/cohort.service";
+import { YOUNG_STATUS_PHASE1, canAssignManually, translate, youngCheckinField } from "@/utils";
+
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import ModalAffectations from "../components/ModalAffectation";
@@ -111,14 +113,13 @@ export default function Phase1(props) {
       <div className="p-[30px]">
         {meetingPoint?.bus?.delayedForth === "true" || meetingPoint?.bus?.delayedBack === "true" ? (
           <InfoMessage
-            bg="bg-[#B45309]"
-            Icon={AiOutlineExclamationCircle}
+            priority="important"
             message={`Le départ de la ligne de bus de ce jeune est retardé ${
               meetingPoint?.bus?.delayedForth === "true" && meetingPoint?.bus?.delayedBack === "true"
                 ? "à l'Aller et au Retour"
                 : meetingPoint?.bus?.delayedForth === "true"
-                ? "à l'Aller"
-                : "au Retour"
+                  ? "à l'Aller"
+                  : "au Retour"
             }.`}
           />
         ) : null}
@@ -169,7 +170,7 @@ export default function Phase1(props) {
                     <Field title="Code postal" value={cohesionCenter.zip} />
                     <Field title="Ville" value={cohesionCenter.city} />
                   </div>
-                  {isCohortOpenForAffectation && editing && (
+                  {isCohortOpenForAffectation && editing && young.source !== "CLE" && (
                     <button
                       onClick={() => setModalAffectation({ isOpen: true })}
                       className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
@@ -202,6 +203,10 @@ export default function Phase1(props) {
                       <div>Les informations de transport seront transmises par email.</div>
                     ) : young?.deplacementPhase1Autonomous === "true" ? (
                       <div>{young.firstName} se rend au centre et en revient par ses propres moyens.</div>
+                    ) : young?.source === YOUNG_SOURCE.CLE ? (
+                      <>
+                        <div>Le point de rassemblement n&apos;a pas été confirmé par le référent régional.</div>
+                      </>
                     ) : editing ? (
                       <>
                         <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement.</div>
@@ -209,11 +214,13 @@ export default function Phase1(props) {
                     ) : (
                       <>
                         <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement. Voici le(s) point(s) de rassemblement proposé(s) :</div>
-                        <PDRpropose young={young} center={cohesionCenter} modalAffectations={modalAffectations} setModalAffectation={setModalAffectation}></PDRpropose>
+                        {young.source !== "CLE" && (
+                          <PDRpropose young={young} center={cohesionCenter} modalAffectations={modalAffectations} setModalAffectation={setModalAffectation}></PDRpropose>
+                        )}
                       </>
                     )}
                   </div>
-                  {isCohortOpenForAffectation && editing && (
+                  {isCohortOpenForAffectation && editing && young.source !== "CLE" && (
                     <div className="flex items-center gap-3 !justify-end w-full">
                       <button
                         onClick={() => setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id })}
@@ -227,7 +234,7 @@ export default function Phase1(props) {
                           <div>Choisir un PDR</div>
                         )}
                       </button>
-                      {young.meetingPointId && young.ligneId && (
+                      {young.meetingPointId && young.ligneId && young.source !== "CLE" && (
                         <button
                           className="flex cursor-pointer flex-row items-center justify-center gap-2  rounded border-[1px] border-gray-300 p-2"
                           onClick={() => setModalChangePdrSameLine({ isOpen: true })}>
@@ -242,7 +249,7 @@ export default function Phase1(props) {
             ) : (
               <div className="my-52 flex flex-col items-center justify-center gap-4">
                 <div className="text-base font-bold text-gray-900">Ce volontaire n&apos;est affecté à aucun centre</div>
-                {isCohortOpenForAffectation && (
+                {isCohortOpenForAffectation && young.source !== "CLE" && (
                   <div
                     className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white"
                     onClick={() => {

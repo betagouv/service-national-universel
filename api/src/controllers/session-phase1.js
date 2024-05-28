@@ -3,6 +3,12 @@ const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
 const crypto = require("crypto");
+const datefns = require("date-fns");
+const { fr } = require("date-fns/locale");
+const fileUpload = require("express-fileupload");
+
+const { generateBatchCertifPhase1 } = require("../templates/certificate/phase1");
+const { generateBatchDroitImage } = require("../templates/droitImage/droitImage");
 const { capture } = require("../sentry");
 const SessionPhase1Model = require("../models/sessionPhase1");
 const CohesionCenterModel = require("../models/cohesionCenter");
@@ -13,8 +19,7 @@ const PointDeRassemblementModel = require("../models/PlanDeTransport/pointDeRass
 const LigneBusModel = require("../models/PlanDeTransport/ligneBus");
 const sessionPhase1TokenModel = require("../models/sessionPhase1Token");
 const schemaRepartitionModel = require("../models/PlanDeTransport/schemaDeRepartition");
-const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter, timeout } = require("../utils");
-const Zip = require("adm-zip");
+const { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } = require("../utils");
 const {
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -35,23 +40,13 @@ const {
 const { serializeSessionPhase1, serializeCohesionCenter } = require("../utils/serializer");
 const { validateSessionPhase1, validateId } = require("../utils/validator");
 const { sendTemplate } = require("../sendinblue");
-const { ADMIN_URL } = require("../config");
-
-const datefns = require("date-fns");
-const { fr } = require("date-fns/locale");
-const fileUpload = require("express-fileupload");
+const config = require("config");
 const SessionPhase1 = require("../models/sessionPhase1");
-const FileType = require("file-type");
 const fs = require("fs");
-const config = require("../config");
 const mongoose = require("mongoose");
 const { encrypt, decrypt } = require("../cryptoUtils");
-const { readTemplate, renderWithTemplate } = require("../templates/droitImage");
-const fetch = require("node-fetch");
-const { phase1 } = require("../../src/templates/certificate/index");
 const scanFile = require("../utils/virusScanner");
-
-const TIMEOUT_PDF_SERVICE = 15000;
+const { getMimeFromFile } = require("../utils/file");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -269,34 +264,10 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    let zip = new Zip();
-    const batchSize = 10;
-    const numBatches = Math.ceil(youngs.length / batchSize);
-    for (let i = 0; i < numBatches; i++) {
-      const batchStart = i * batchSize;
-      const batchEnd = Math.min(batchStart + batchSize, youngs.length);
-      const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-        const html = await phase1(young);
-        const context = await timeout(getPDF(html, { format: "A4", margin: 0, landscape: true }), TIMEOUT_PDF_SERVICE);
-        return { name: young.lastName + " " + young.firstName + " - certificat.pdf", body: context };
-      });
-      const pdfs = await Promise.all(pdfPromises);
-      pdfs.forEach((pdf) => {
-        zip.addFile(pdf.name, pdf.body);
-      });
-    }
-    const noticePdf = await getFile(`file/noticeImpression.pdf`);
-    if (noticePdf) {
-      zip.addFile("01-notice-d'impression.pdf", noticePdf.Body);
-    }
-
-    res.set({
-      "content-disposition": `inline; filename="certificats.zip"`,
-      "content-type": "application/zip",
-      "cache-control": "public, max-age=1",
-    });
-    res.status(200).end(zip.toBuffer());
+    const cohort = await CohortModel.findOne({ name: session.cohort });
+    generateBatchCertifPhase1(res, youngs, session, cohort, cohesionCenter);
   } catch (error) {
+    console.log("error", error);
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
@@ -366,7 +337,7 @@ router.post("/:sessionId/share", passport.authenticate("referent", { session: fa
     for (const email of value.emails) {
       await sendTemplate(SENDINBLUE_TEMPLATES.SHARE_SESSION_PHASE1, {
         emailTo: [{ email: email }],
-        params: { link: `${ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort.toLowerCase() },
+        params: { link: `${config.ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort.toLowerCase() },
       });
     }
 
@@ -570,21 +541,17 @@ router.post(
       const file = files[0];
 
       const { name, tempFilePath, mimetype, size } = file;
-      const filetype = await FileType.fromFile(tempFilePath);
-      const mimeFromMagicNumbers = filetype ? filetype.mime : "application/pdf";
+      const filetype = await getMimeFromFile(tempFilePath);
+      const mimeFromMagicNumbers = filetype || "application/pdf";
       const validTypes = ["image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
       if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
 
-      if (config.ENVIRONMENT === "production") {
-        const scanResult = await scanFile(tempFilePath, name, req.user.id);
-        if (scanResult.infected) {
-          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-        } else if (scanResult.error) {
-          return res.status(500).send({ ok: false, code: scanResult.error });
-        }
+      const scanResult = await scanFile(tempFilePath, name, req.user.id);
+      if (scanResult.infected) {
+        return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
       }
 
       const newFile = {
@@ -780,7 +747,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
         fileName: key === "time-schedule" ? "l'emploi du temps" : key === "pedago-project" ? "le projet pédagogique" : null,
         date: date ? datefns.format(date, "dd MMMM yyyy", { locale: fr }) : "?",
         cohesioncenter: session.nameCentre,
-        cta: `${ADMIN_URL}/centre/${session.cohesionCenterId}?sessionId=${session._id}`,
+        cta: `${config.ADMIN_URL}/centre/${session.cohesionCenterId}?sessionId=${session._id}`,
       },
     });
 
@@ -812,61 +779,13 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
     }
     // --- found youngs
     const youngs = await YoungModel.find({ sessionPhase1Id: session._id }).sort({ lastName: 1, firstName: 1 });
-    // --- start zip file
-    let zip = new Zip();
 
-    // --- build PDFS 10 by 10 and zip'em
-    const template = readTemplate();
-    const batchSize = 10;
-    const numBatches = Math.ceil(youngs.length / batchSize);
-    for (let i = 0; i < numBatches; i++) {
-      const batchStart = i * batchSize;
-      const batchEnd = Math.min(batchStart + batchSize, youngs.length);
-      const pdfPromises = youngs.slice(batchStart, batchEnd).map(async (young) => {
-        const html = renderWithTemplate(young, template);
-        const body = await timeout(getPDF(html, { format: "A4", margin: 0 }), TIMEOUT_PDF_SERVICE);
-        return { name: young.lastName + " " + young.firstName + " - Droits à l'image.pdf", body };
-      });
-      const pdfs = await Promise.all(pdfPromises);
-      pdfs.forEach((pdf) => {
-        zip.addFile(pdf.name, pdf.body);
-      });
-    }
-
-    // --- send zip file
-    res.set({
-      "content-disposition": `inline; filename="droits-image.zip"`,
-      "content-type": "application/zip",
-      "cache-control": "public, max-age=1",
-    });
-    res.status(200).end(zip.toBuffer());
+    generateBatchDroitImage(res, youngs);
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-async function getPDF(html, options) {
-  const response = await fetch(config.API_PDF_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-    body: JSON.stringify({ html, options }),
-  });
-  if (response.status && response.status !== 200) {
-    throw new Error("Error with PDF service");
-  }
-
-  return stream2buffer(response.body);
-}
-
-function stream2buffer(stream) {
-  return new Promise((resolve, reject) => {
-    const buf = [];
-    stream.on("data", (chunk) => buf.push(chunk));
-    stream.on("end", () => resolve(Buffer.concat(buf)));
-    stream.on("error", (err) => reject(err));
-  });
-}
 
 const formatDateTimeZone = (date) => {
   //set timezone to UTC

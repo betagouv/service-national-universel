@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { HiChevronDown, HiChevronRight, HiChevronUp } from "react-icons/hi";
+
 import { ROLES } from "snu-lib";
+import { BadgeNotif } from "@snu/ds/admin";
+
 import api from "@/services/api";
+
 import getNoteData from "./todos.constants";
 import Engagement from "./ui/icons/Engagement";
 import Inscription from "./ui/icons/Inscription";
 import Sejour from "./ui/icons/Sejour";
-import { useSelector } from "react-redux";
 
 // Adding Todos to a user role dashboard
 // 1. Import <Todos /> in the dashboard/general component
@@ -28,19 +32,19 @@ export default function Todos({ user }) {
 
   const updateStats = async () => {
     const response = await api.post("/elasticsearch/dashboard/general/todo");
-    const s = response.data;
     const filteredStats = {};
-
-    // Remove empty values
-    Object.entries(s).forEach(([key, value]) => {
-      const filteredValue = {};
-      Object.entries(value).forEach(([subKey, item]) => {
-        if (item !== 0 && (!Array.isArray(item) || item.length > 0)) {
-          filteredValue[subKey] = item;
-        }
+    if (response.data) {
+      // Remove empty values
+      Object.entries(response.data).forEach(([key, value]) => {
+        const filteredValue = {};
+        Object.entries(value).forEach(([subKey, item]) => {
+          if (item !== 0 && (!Array.isArray(item) || item.length > 0)) {
+            filteredValue[subKey] = item;
+          }
+        });
+        filteredStats[key] = filteredValue;
       });
-      filteredStats[key] = filteredValue;
-    });
+    }
 
     setStats(filteredStats);
   };
@@ -146,9 +150,7 @@ export default function Todos({ user }) {
               {column.title ? (
                 <>
                   <div className="text-sm font-bold leading-5 text-gray-900">{column.title}</div>
-                  <div className={`rounded-full bg-blue-50 px-2.5 pt-0.5 pb-1 text-sm font-medium leading-none ${!column.total ? "text-gray-400" : "text-blue-600"}`}>
-                    {column.total}
-                  </div>
+                  <BadgeNotif count={column.total} />
                 </>
               ) : (
                 <div className="text-sm font-bold leading-5 text-gray-900">&nbsp;</div>

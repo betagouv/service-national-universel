@@ -9,9 +9,12 @@ import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
 import Error from "../../../components/error";
 import { BsShieldLock } from "react-icons/bs";
-import { isValidRedirectUrl } from "snu-lib/isValidRedirectUrl";
+import { isValidRedirectUrl } from "snu-lib";
 import { environment } from "../../../config";
 import { captureMessage } from "../../../sentry";
+import { DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
+
+const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN = DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS / 60 / 1000;
 
 export default function Signin() {
   const [disabled, setDisabled] = React.useState(true);
@@ -53,9 +56,13 @@ export default function Signin() {
       }
     } catch (e) {
       setLoading(false);
-      toastr.error("Code non reconnu", "Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de 10 minutes, veuillez retenter de vous connecter.", {
-        timeOut: 10_000,
-      });
+      toastr.error(
+        "Code non reconnu.",
+        `Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de ${DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN} minutes, veuillez retenter de vous connecter.`,
+        {
+          timeOut: 10_000,
+        },
+      );
     }
   };
 
@@ -77,9 +84,12 @@ export default function Signin() {
 
         <div className="flex flex-col gap-1 py-4 text-sm leading-relaxed">
           <p className="mb-1">
-            Un mail contenant le code unique de connexion vous a été envoyé à l'adresse <b>{email}</b>.
+            Un mail contenant le code unique de connexion vous a été envoyé à l'adresse "<b>{email}</b>".
           </p>
-          <p className="mb-4">Ce code est valable pendant 10 minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été transmis par mail.</p>
+          <p className="mb-4">
+            Ce code est valable pendant {DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN} minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été
+            transmis par mail.
+          </p>
           <label>
             Saisir le code reçu par email
             <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e)} />

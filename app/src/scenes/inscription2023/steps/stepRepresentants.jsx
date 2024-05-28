@@ -5,7 +5,6 @@ import { Redirect, useHistory, useParams } from "react-router-dom";
 import { YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import Error from "../../../components/error";
-import CheckBox from "../../../components/dsfr/forms/checkbox";
 import { supportURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
 import { capture } from "../../../sentry";
@@ -13,13 +12,12 @@ import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
 import { getCorrectionByStep } from "../../../utils/navigation";
-import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib/phone-number";
-import Input from "../components/Input";
-import PhoneField from "../../../components/dsfr/forms/PhoneField";
+import { isPhoneNumberWellFormated, PHONE_ZONES, PHONE_ZONES_NAMES } from "snu-lib";
+// import Input from "../components/Input";
 import RadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import useAuth from "@/services/useAuth";
+import { SignupButtons, Checkbox, Input, InputPhone } from "@snu/ds/dsfr";
 
 const parentsStatus = [
   { label: "Mère", value: "mother" },
@@ -222,8 +220,8 @@ export default function StepRepresentants() {
     setLoading(false);
   };
 
-  const supportLink = `${supportURL}${	
-    isCLE ? "/base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"	
+  const supportLink = `${supportURL}${
+    isCLE ? "/base-de-connaissance/cle-je-minscris-et-indique-mes-representants-legaux" : "/base-de-connaissance/je-minscris-et-indique-mes-representants-legaux"
   }`;
 
   if (young.status === YOUNG_STATUS.WAITING_CORRECTION && !Object.keys(corrections).length) {
@@ -235,26 +233,35 @@ export default function StepRepresentants() {
       <DSFRContainer title="Mes représentants légaux" supportLink={supportLink} supportEvent="Phase0/aide inscription - rep leg">
         {errors?.text && <Error {...errors} onClose={() => setErrors({})} />}
         <FormRepresentant i={1} data={data} setData={setData} errors={errors} corrections={corrections} young={young} />
-        <hr className="my-4 h-px border-0 bg-gray-200" />
+        <hr className="my-4" />
         <div className="flex items-center gap-4">
-          <CheckBox
-            checked={isParent2Visible}
-            onChange={(e) => {
-              const eventName = isCLE ? "CLE/CTA inscription - ajouter rep leg" : "Phase0/CTA inscription - ajouter rep leg";
-              plausibleEvent(eventName);
-              // Event mal nommé, pas un call to action. Ne pas confondre avec l'event envoyé lors du clic sur le bouton "Suivant".
-              setIsParent2Visible(e);
-            }}
+          <Checkbox
+            options={[
+              {
+                label: (
+                  <span>
+                    Je renseigne un(e) second(e) représentant(e) légal(e) - <span className="text-[#666666]">Facultatif</span>
+                  </span>
+                ),
+                nativeInputProps: {
+                  checked: isParent2Visible,
+                  onChange: (e) => {
+                    const eventName = isCLE ? "CLE/CTA inscription - ajouter rep leg" : "Phase0/CTA inscription - ajouter rep leg";
+                    plausibleEvent(eventName);
+                    // Event mal nommé, pas un call to action. Ne pas confondre avec l'event envoyé lors du clic sur le bouton "Suivant".
+                    setIsParent2Visible(e.target.checked);
+                  },
+                },
+              },
+            ]}
           />
-          <div className="flex-1 text-[16px] text-[#3A3A3A]">
-            Je renseigne un(e) second(e) représentant(e) légal(e) - <span className="text-[#666666]">Facultatif</span>
-          </div>
+          <div className="flex-1 text-[16px] text-[#3A3A3A]"></div>
         </div>
         {isParent2Visible ? <FormRepresentant i={2} data={data} setData={setData} errors={errors} corrections={corrections} young={young} /> : null}
         {young.status === YOUNG_STATUS.WAITING_CORRECTION ? (
-          <SignupButtonContainer onClickNext={onCorrection} onClickPrevious={() => history.push("/")} disabled={loading} />
+          <SignupButtons onClickNext={onCorrection} onClickPrevious={() => history.push("/")} disabled={loading} />
         ) : (
-          <SignupButtonContainer onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
+          <SignupButtons onClickNext={onSubmit} onClickPrevious={() => history.push("/inscription2023/consentement")} disabled={loading} />
         )}
       </DSFRContainer>
     </>
@@ -284,36 +291,42 @@ const FormRepresentant = ({ i, data, setData, errors, corrections }) => {
         error={errors[`parent${i}Status`]}
         correction={corrections[`parent${i}Status`]}
       />
+
       <Input
-        value={data[`parent${i}FirstName`]}
         label="Son prénom"
-        onChange={(e) => setData({ ...data, [`parent${i}FirstName`]: e })}
-        error={errors[`parent${i}FirstName`]}
-        correction={corrections[`parent${i}FirstName`]}
+        nativeInputProps={{
+          value: data[`parent${i}FirstName`],
+          onChange: (e) => setData({ ...data, [`parent${i}FirstName`]: e.target.value }),
+        }}
+        state={(corrections[`parent${i}FirstName`] || errors[`parent${i}FirstName`]) && "error"}
+        stateRelatedMessage={corrections[`parent${i}FirstName`] || errors[`parent${i}FirstName`]}
       />
       <Input
-        value={data[`parent${i}LastName`]}
         label="Son nom"
-        onChange={(e) => setData({ ...data, [`parent${i}LastName`]: e })}
-        error={errors[`parent${i}LastName`]}
-        correction={corrections[`parent${i}LastName`]}
+        nativeInputProps={{
+          value: data[`parent${i}LastName`],
+          onChange: (e) => setData({ ...data, [`parent${i}LastName`]: e.target.value }),
+        }}
+        state={(corrections[`parent${i}LastName`] || errors[`parent${i}LastName`]) && "error"}
+        stateRelatedMessage={corrections[`parent${i}LastName`] || errors[`parent${i}LastName`]}
       />
       <Input
-        value={data[`parent${i}Email`]}
-        label="Son e-mail"
-        onChange={(e) => setData({ ...data, [`parent${i}Email`]: e })}
-        error={errors[`parent${i}Email`]}
-        correction={corrections[`parent${i}Email`]}
+        label="Son email"
+        nativeInputProps={{
+          value: data[`parent${i}Email`],
+          onChange: (e) => setData({ ...data, [`parent${i}Email`]: e.target.value }),
+        }}
+        state={(corrections[`parent${i}Email`] || errors[`parent${i}Email`]) && "error"}
+        stateRelatedMessage={corrections[`parent${i}Email`] || errors[`parent${i}Email`]}
       />
-      <PhoneField
+      <InputPhone
         label="Son numéro de téléphone"
         onChange={(value) => setData({ ...data, [`parent${i}Phone`]: value })}
         onChangeZone={(value) => setData({ ...data, [`parent${i}PhoneZone`]: value })}
         value={data[`parent${i}Phone`]}
         zoneValue={data[`parent${i}PhoneZone`]}
         placeholder={PHONE_ZONES[data[`parent${i}PhoneZone`]]?.example}
-        error={errors[`parent${i}Phone`] || errors[`parent${i}PhoneZone`]}
-        correction={corrections[`parent${i}Phone`]}
+        error={errors[`parent${i}Phone`] || errors[`parent${i}PhoneZone`] || corrections[`parent${i}Phone`]}
       />
     </div>
   );

@@ -1,16 +1,14 @@
 import Img4 from "../../../assets/observe.svg";
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Row, Col } from "reactstrap";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 
-import ProgramCard from "../../../components/programCard";
 import MissionCard from "../components/missionCard";
 import api from "../../../services/api";
-import { HeroContainer, Hero } from "../../../components/Content";
-const images = import.meta.globEager("../../../assets/programmes-engagement/*");
+import ButtonLinkPrimary from "@/components/ui/buttons/ButtonLinkPrimary";
+import EngagementCard from "@/scenes/preinscription/components/EngagementCard";
+import Breadcrumb from "@/components/layout/navbar/components/BreadCrumb";
 
 export default function WaitingRealisation() {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -19,7 +17,7 @@ export default function WaitingRealisation() {
 
   useEffect(() => {
     (async () => {
-      const { data, ok } = await api.get("/program");
+      const { data, ok } = await api.get("/program/public/engagements");
       if (!ok) return toastr.error("Une erreur est survenue.");
       setPrograms(data);
     })();
@@ -39,83 +37,57 @@ export default function WaitingRealisation() {
   }, []);
 
   return (
-    <HeroContainer>
-      <Hero>
-        <div className="content">
-          <h1>
-            <strong>{young.firstName},</strong> poursuivez votre engagement ! <span>Facultatif</span>
-          </h1>
-          <p>
-            A l’issue de la mission d’intérêt général, chaque volontaire peut poursuivre son engagement et sa participation à la création d’une société fraternelle, notamment en
-            réalisant la phase 3 du SNU. Cet engagement volontaire s’adresse aux jeunes de 16 ans à 25 ans, et dure de 3 mois à 1 an.
-          </p>
+    <>
+      <Breadcrumb />
+      <div className="mb-4 pt-2 pb-4 sm:px-4 md:px-16 md:pb-6 md:pt-6 md:mx-6 md:mt-10 rounded-lg bg-white">
+        <div className="mb-8">
+          <h2 className="text-gray-900 text-2xl md:text-4xl font-bold mb-2">Les autres programmes d&apos;engagement</h2>
+          <p className="text-gray-600 text-lg">Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
         </div>
-        <div className="thumb" />
-      </Hero>
-      <TransparentHero>
-        <Heading>
-          <h2>Parmi les possibilités d&apos;engagement</h2>
-          <p>Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
-        </Heading>
-        <Row>
-          {programs.slice(0, 3).map((p, i) => (
-            <Col key={i}>
-              <ProgramCard program={p} image={p.imageFile ? p.imageFile : images[`../../../assets/programmes-engagement/${p.imageString}`]?.default} />
-            </Col>
-          ))}
-        </Row>
-        <SeeMore to="/les-programmes">Tous les programmes d&apos;engagement →</SeeMore>
-        <hr style={{ margin: "40px 0", opacity: 0.8 }} />
-      </TransparentHero>
-      <TransparentHero>
-        <Heading>
-          <h2>Trouvez une mission de bénévolat à distance ou près de chez vous</h2>
-          <p>Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
-        </Heading>
-        <Missions>
-          {data?.total ? data?.hits.map((e) => <MissionCard mission={e._source} key={e._id} image={Img4} />) : null}
-          <SeeMore to="/phase3/mission">Toutes les missions →</SeeMore>
-        </Missions>
-      </TransparentHero>
-    </HeroContainer>
+        <div className="overflow-x-auto">
+          <div className="flex flex-row gap-4 mb-4">
+            {programs.slice(0, 3).map((p) => (
+              <EngagementCard program={p} key={p.name} />
+            ))}
+          </div>
+        </div>
+
+        <ButtonLinkPrimary to="/les-programmes" className="flex w-full justify-center">
+          Voir toutes les possibilités d'engagement
+        </ButtonLinkPrimary>
+        <hr className=" md:mt-24 h-px border-0 bg-gray-200" />
+        <div className="mb-2">
+          <h2 className="text-[#161e2e] text-4xl font-bold">Trouvez une mission de bénévolat ou de volontariat</h2>
+          <p className="text-gray-500 text-xl mt-2">Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
+        </div>
+        <div className="mt-8 px-3">{data?.total ? data?.hits.map((e) => <MissionCard mission={e._source} key={e._id} image={Img4} />) : null}</div>
+        <ButtonLinkPrimary to="/phase3/mission" className="flex w-full justify-center mb-8 md:mb-0">
+          Rechercher une mission
+        </ButtonLinkPrimary>
+        <hr className="pb-8 mt-12 hidden md:block" />
+        <div className="mb-2 flex flex-col md:flex-row md:space-x-5 px-1">
+          <div className="flex mb-2 md:mb-0 md:w-1/2 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+            <a
+              href="https://support.snu.gouv.fr/base-de-connaissance/phase-2-la-mission-dinteret-general-1"
+              target="_blank"
+              rel="noreferrer"
+              className="flex flex-1 items-start justify-between gap-1 p-3">
+              <div className="flex-1 font-bold text-gray-800">J’ai des questions sur la phase 2</div>
+              <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
+            </a>
+          </div>
+          <div className="flex md:w-1/2 mb-2 md:mb-0 cursor-pointer rounded-lg py-2 border-[1px] bg-white border-gray-200 hover:border-gray-300">
+            <a
+              href="https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise-1"
+              target="_blank"
+              rel="noreferrer"
+              className="flex flex-1 items-start justify-between gap-1 ml-0 p-3">
+              <div className="flex-1 font-bold text-gray-800">J’ai des questions sur la reconnaissance d'engagement</div>
+              <ArrowUpRight className="text-2xl text-gray-400 group-hover:scale-105" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
-
-const Heading = styled.div`
-  margin-top: 40px;
-  margin-bottom: 30px;
-  h2 {
-    color: #161e2e;
-    font-size: 34px;
-    font-weight: 700;
-  }
-  p {
-    color: #6b7280;
-    font-size: 18px;
-  }
-`;
-
-const SeeMore = styled(Link)`
-  :hover {
-    color: #372f78;
-  }
-  cursor: pointer;
-  color: #5145cd;
-  font-size: 16px;
-`;
-
-const Missions = styled.div`
-  padding: 40px;
-  border-radius: 6px;
-  background: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  .pagination {
-    display: none;
-  }
-`;
-
-const TransparentHero = styled.div`
-  padding: 0 2rem;
-  max-width: 80rem;
-  margin: 1rem auto;
-`;

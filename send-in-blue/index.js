@@ -8,7 +8,7 @@ const { initSentry, capture } = require("./sentry");
 
 const EmailObject = require("./models/email");
 
-const { PORT: port } = require("./config.js");
+const { PORT: port } = require("./config");
 
 require("./mongo");
 

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "react-router-dom";
+import { useSelector } from "react-redux";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
+import { ROLES, YOUNG_SOURCE } from "snu-lib";
 
 import api from "../../../services/api";
 import Phase1 from "./phase1";
@@ -21,6 +23,8 @@ import CustomMission from "./customMission";
 export default function Index({ ...props }) {
   const [young, setYoung] = useState();
   const setDocumentTitle = useDocumentTitle("Volontaires");
+  const user = useSelector((state) => state.Auth.user);
+  const cohort = useSelector((state) => state.Cohorts).find((e) => e.name === young?.cohort);
 
   const getYoung = async () => {
     const id = props.match && props.match.params && props.match.params.id;
@@ -36,7 +40,10 @@ export default function Index({ ...props }) {
   };
 
   const getDetail = () => {
-    const mode = [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) ? "correction" : "readonly";
+    let mode = [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status) ? "correction" : "readonly";
+    if (new Date() > new Date(cohort?.instructionEndDate)) {
+      mode = "readonly";
+    }
     return <VolontairePhase0View young={young} onChange={getYoung} globalMode={mode} />;
   };
 

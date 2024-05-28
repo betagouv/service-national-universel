@@ -1,0 +1,78 @@
+name: Clean images tags
+
+inputs:
+  registry:
+    description: "Registry endpoint"
+    required: true
+  image_name:
+    description: "Name of the image"
+    required: true
+  lifetime:
+    description: "Lifetime of image tag"
+    default: "3 week" # https://www.gnu.org/software/coreutils/manual/html_node/Relative-items-in-date-strings.html
+  region:
+    description: "Region of the registry"
+    default: "fr-par"
+  api_endpoint:
+    description: "Stable tag for the image"
+    default: "https://api.scaleway.com/registry/v1/regions"
+  secret_key:
+    description: "Secret key"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get registry name
+      id: registry_name
+      shell: bash
+      run: |
+        registry_name=$(echo "${{ inputs.registry }}" | cut -d "/" -f 2)
+        echo $registry_name
+        echo "registry_name=$registry_name" >> $GITHUB_OUTPUT
+
+    - name: Get registry ID
+      id: registry_id
+      shell: bash
+      env:
+        SCW_SECRET_KEY: ${{ inputs.secret_key }}
+      run: |
+        registry_id=$(
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/namespaces?name=${{ steps.registry_name.outputs.registry_name }}" \
+          | jq -r ".namespaces[0].id"
+        )
+        echo $registry_id
+        echo "registry_id=$registry_id" >> $GITHUB_OUTPUT
+
+    - name: Get image ID
+      id: image_id
+      shell: bash
+      env:
+        SCW_SECRET_KEY: ${{ inputs.secret_key }}
+      run: |
+        image_id=$(
+          curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/images?namespace_id=${{ steps.registry_id.outputs.registry_id }}&name=${{ inputs.image_name }}" \
+          | jq -r ".images[0].id"
+        )
+        echo $image_id
+        echo "image_id=$image_id" >> $GITHUB_OUTPUT
+
+    - name: Check tag existence
+      shell: bash
+      env:
+        SCW_SECRET_KEY: ${{ inputs.secret_key }}
+      run: |
+        valid_until=$(date -I --date="-${{ inputs.lifetime }}")
+        echo $valid_until
+        curl -sX GET -H "X-Auth-Token: $SCW_SECRET_KEY" \
+          "${{ inputs.api_endpoint }}/${{ inputs.region }}/images/${{ steps.image_id.outputs.image_id }}/tags?order_by=created_at_asc" \
+          | jq -r ".tags[]|select(.updated_at < \"$valid_until\")|.id" \
+          > tags_ids
+        while read tag_id
+        do
+          echo "$tag_id"
+          curl -sX DELETE -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            "${{ inputs.api_endpoint }}/${{ inputs.region }}/tags/$tag_id"
+        done < tags_ids

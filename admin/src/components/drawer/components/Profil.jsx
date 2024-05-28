@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES, translate } from "snu-lib";
-import { setUser } from "@/redux/auth/actions";
+import { setUser, setPreviousSignin } from "@/redux/auth/actions";
 import api from "@/services/api";
 import AddUser from "../icons/AddUser";
 import Logout from "../icons/Logout";
@@ -50,6 +50,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
       setIsLoggingOut(true);
       await api.post(`/referent/logout`);
       dispatch(setUser(null));
+      dispatch(setPreviousSignin(null));
       toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
       return history.push("/auth");
     } catch (e) {
@@ -68,7 +69,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
     }
   };
   return (
-    <div>
+    <div className="shrink-0">
       <Separator open={sideBarOpen} />
       <Popover className="relative focus:outline-none">
         {() => {

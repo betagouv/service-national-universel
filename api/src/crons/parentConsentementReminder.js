@@ -1,10 +1,9 @@
-require("../mongo");
 const { capture } = require("../sentry");
 const YoungModel = require("../models/young");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { APP_URL } = require("../config");
+const config = require("config");
 
 exports.handler = async () => {
   try {
@@ -21,7 +20,7 @@ exports.handler = async () => {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT_REMINDER, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
         params: {
-          cta: `${APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}`,
+          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}`,
           youngFirstName: young.firstName,
           youngName: young.lastName,
         },
@@ -31,6 +30,7 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "parentConsentementReminder", text: JSON.stringify(e) });
+    throw e;
   }
 };
 

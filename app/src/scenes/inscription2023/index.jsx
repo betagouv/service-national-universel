@@ -19,7 +19,7 @@ import { getStepFromUrlParam, getStepUrl, CORRECTION_STEPS, CORRECTION_STEPS_LIS
 import { YOUNG_STATUS, inscriptionCreationOpenForYoungs, inscriptionModificationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
-import { environment, supportURL } from "../../config";
+import { supportURL } from "../../config";
 import { getCohort } from "@/utils/cohorts";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
@@ -109,7 +109,7 @@ export default function Index() {
 
   if (!young) return <Redirect to="/preinscription" />;
 
-  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir" && environment === "production") {
+  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir") {
     return <FutureCohort />;
   }
 

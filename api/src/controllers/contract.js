@@ -9,17 +9,15 @@ const YoungObject = require("../models/young");
 const ApplicationObject = require("../models/application");
 const ReferentObject = require("../models/referent");
 const StructureObject = require("../models/structure");
-const { ERRORS, isYoung, isReferent, timeout } = require("../utils");
+const { ERRORS, isYoung, isReferent } = require("../utils");
 const { sendTemplate } = require("../sendinblue");
-const { APP_URL } = require("../config");
-const contractTemplate = require("../templates/contractPhase2");
+const config = require("config");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
 const Joi = require("joi");
 const patches = require("./patches");
-const fetch = require("node-fetch");
-const config = require("../config");
+const { generatePdfIntoStream } = require("../utils/pdf-renderer");
 
 async function createContract(data, fromUser) {
   const { sendMessage } = data;
@@ -183,7 +181,7 @@ async function sendContractEmail(contract, options) {
       toName: options.name,
       youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
       missionName: contract.missionName,
-      cta: `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
+      cta: `${config.APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
     };
     const emailTo = [{ name: options.name, email: options.email }];
     if (options?.cc?.length) {
@@ -410,7 +408,7 @@ router.post("/token/:token", async (req, res) => {
         emailTo,
         params: {
           missionName: data.missionName,
-          cta: `${APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signe&utm_source=notifauto&utm_medium=mail+183+telecharger`,
+          cta: `${config.APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signe&utm_source=notifauto&utm_medium=mail+183+telecharger`,
         },
       });
     }
@@ -422,7 +420,6 @@ router.post("/token/:token", async (req, res) => {
   }
 });
 
-const TIMEOUT_PDF_SERVICE = 10000;
 router.post("/:id/download", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: idError, value: id } = validateId(req.params.id);
@@ -440,37 +437,8 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    // Create html
-    const newhtml = await contractTemplate.render(contract);
-    if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await generatePdfIntoStream(res, { type: "contract", template: "2", contract });
 
-    const getPDF = async () =>
-      await fetch(config.API_PDF_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/pdf" },
-        body: JSON.stringify({ html: newhtml, options: { format: "A4", margin: 0 } }),
-      }).then((response) => {
-        // ! On a retravaillé pour faire passer les tests
-        if (response.status && response.status !== 200) throw new Error("Error with PDF service");
-        res.set({
-          "content-length": response.headers.get("content-length"),
-          "content-disposition": `inline; filename="test.pdf"`,
-          "content-type": "application/pdf",
-          "cache-control": "public, max-age=1",
-        });
-        response.body.pipe(res);
-        if (res.statusCode !== 200) throw new Error("Error with PDF service");
-        response.body.on("error", (e) => {
-          capture(e);
-          res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-        });
-      });
-    try {
-      await timeout(getPDF(), TIMEOUT_PDF_SERVICE);
-    } catch (e) {
-      res.status(500).send({ ok: false, code: ERRORS.PDF_ERROR });
-      capture(e);
-    }
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

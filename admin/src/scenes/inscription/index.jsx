@@ -24,6 +24,8 @@ import DeletedInscriptionPanel from "./deletedPanel";
 import Panel from "./panel";
 import { toastr } from "react-redux-toastr";
 import Loader from "@/components/Loader";
+import { signinAs } from "@/utils/signinAs";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
@@ -229,11 +231,12 @@ export default function Inscription() {
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
             <Link
-              to="/volontaire/create"
+              to={selectedFilters?.classeId?.filter?.length === 1 ? `/volontaire/create?classeId=${selectedFilters?.classeId?.filter[0]}` : "/volontaire/create"}
               onClick={() => plausibleEvent("Inscriptions/CTA - Nouvelle inscription")}
               className="ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out">
               <AiOutlinePlus className="text-white h-4 w-4 group-hover:!text-blue-600" />
-              <p>Nouvelle inscription</p>
+
+              <p>{selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}</p>
             </Link>
             <ExportComponent
               title="Exporter les inscriptions"
@@ -282,6 +285,7 @@ export default function Inscription() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
+              intermediateFilters={[getCohortGroups()]}
             />
             <SortOption
               sortOptions={[
@@ -387,9 +391,12 @@ const Action = ({ hit }) => {
   const onPrendreLaPlace = async (young_id) => {
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
-    plausibleEvent("Volontaires/CTA - Prendre sa place");
-    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    try {
+      plausibleEvent("Volontaires/CTA - Prendre sa place");
+      await signinAs("young", young_id);
+    } catch (e) {
+      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    }
   };
 
   return (

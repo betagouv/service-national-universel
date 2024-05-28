@@ -9,6 +9,7 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 export default function WaitingReinscription({ reinscriptionOpen }) {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
+
   let textPrecision;
   let textSecond;
 
@@ -19,14 +20,11 @@ export default function WaitingReinscription({ reinscriptionOpen }) {
       textSecond = "Pour la valider, inscrivez-vous pour participer à un prochain séjour !";
     }
   } else {
-    if (young.status === YOUNG_STATUS.WAITING_LIST && young.cohort === "à venir")
-      textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
-    else if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
-    else if (young.cohort === "à venir")
-      textPrecision = "Nous vous tiendrons informé par mail lors de l’ouverture des inscriptions pour les séjours à venir de l’année scolaire 2023-2024.";
-    else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED)
-      textPrecision = "Vous n'avez pas pu participer au séjour de cohésion.";
-    else return;
+    if (young.status === YOUNG_STATUS.WAITING_LIST) textPrecision = "Vous étiez sur liste complémentaire sur un séjour précédent.";
+    else if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && young.departSejourMotif !== "Exclusion") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
+      textPrecision = "Vous n’avez pas réalisé votre séjour de cohésion";
+      textSecond = "Votre phase 1 n’est donc pas validée";
+    } else return;
   }
   const onClickEligibilte = async () => {
     plausibleEvent("Phase0/CTA reinscription - home page");

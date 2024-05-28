@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
-import Input from "./Input";
+import { Input } from "@snu/ds/dsfr";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import { RiArrowGoBackLine } from "react-icons/ri";
-import { getAddressOptions } from "@/services/api-adresse";
 import { getCities, getSchools } from "../utils";
 import { toastr } from "react-redux-toastr";
 import Select from "@/components/dsfr/forms/SearchableSelect";
@@ -60,7 +59,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
   return manualFilling ? (
     <>
       <hr></hr>
-      <div className="flex items-center py-4">
+      <div className="flex items-center">
         <RiArrowGoBackLine className="font-bold mt-1 mr-2 text-[#000091]" />
         <button
           className="text-[#000091] cursor-pointer"
@@ -74,11 +73,14 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <Input
         value={manualSchool.fullName}
         label="Saisir le nom de l'établissement"
-        onChange={(value) => {
-          setManualSchool({ ...manualSchool, fullName: value });
+        nativeInputProps={{
+          placeholder: "Ex. Lycée général Carnot, Collège Georges Brassens...",
+          onChange: (e) => {
+            setManualSchool({ ...manualSchool, fullName: e.target.value });
+          },
         }}
-        error={errors?.manualFullName}
-        correction={corrections?.schoolName}
+        stateRelatedMessage={errors?.manualFullName || corrections?.schoolName}
+        state={errors?.manualFullName || (corrections?.schoolName && "error")}
       />
       <AddressForm
         data={manualSchool}
@@ -86,7 +88,6 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
           setManualSchool({ ...manualSchool, ...newData });
           onSelectSchool({ ...newData, fullName: manualSchool.fullName, country: "FRANCE" });
         }}
-        getOptions={getAddressOptions}
         label="Rechercher l'adresse de l'établissement"
         error={errors?.school}
         correction={corrections?.schoolAddress}
@@ -97,6 +98,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
       <hr></hr>
       <AsyncCombobox
         label="Rechercher la commune de l'établissement"
+        placeholder="Ex. Lille, La Rochelle, Paris 13e..."
         hint="Aucune commune trouvée."
         getOptions={getCities}
         value={city}

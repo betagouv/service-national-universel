@@ -185,6 +185,12 @@ const Schema = new mongoose.Schema({
       description: "Heure de départ du centre",
     },
   },
+  classeId: {
+    type: String,
+    documentation: {
+      description: "Id de la classe",
+    },
+  },
 
   meetingPointsIds: {
     type: [String],
@@ -214,6 +220,13 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "La ligne est retardée au Retour",
+    },
+  },
+  mergedBusIds: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des lignes de bus fusionnées",
     },
   },
 

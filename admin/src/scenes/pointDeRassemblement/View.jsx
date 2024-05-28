@@ -1,9 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
+
 import {
+  useAddress,
   canCreateMeetingPoint,
   canDeleteMeetingPoint,
   canDeleteMeetingPointSession,
@@ -13,28 +15,34 @@ import {
   ROLES,
   START_DATE_SESSION_PHASE1,
 } from "snu-lib";
-import Pencil from "../../assets/icons/Pencil";
-import Trash from "../../assets/icons/Trash";
-import Breadcrumbs from "../../components/Breadcrumbs";
-import Loader from "../../components/Loader";
-import { capture } from "../../sentry";
-import api from "../../services/api";
+import { AddressForm } from "@snu/ds/common";
+import { useDebounce } from "@uidotdev/usehooks";
+
+import { capture } from "@/sentry";
+import api from "@/services/api";
+
+import Pencil from "@/assets/icons/Pencil";
+import Trash from "@/assets/icons/Trash";
+
+import Breadcrumbs from "@/components/Breadcrumbs";
+import Loader from "@/components/Loader";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
 import VerifyAddress from "../phase0/components/VerifyAddress";
 import { Title } from "./components/common";
 import Field from "./components/Field";
 import ModalConfirmDelete from "./components/ModalConfirmDelete";
 import ModalCreation from "./components/ModalCreation";
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export default function View(props) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+
   const urlParams = new URLSearchParams(window.location.search);
+
   const mount = React.useRef(false);
-  const [data, setData] = React.useState(null);
+
+  const [pdr, setPdr] = React.useState(null);
   const [modalCreation, setModalCreation] = React.useState({ isOpen: false });
   const [modalDelete, setModalDelete] = React.useState({ isOpen: false });
   const [isLoading, setIsLoading] = React.useState(false);
@@ -46,6 +54,10 @@ export default function View(props) {
   const [nbYoung, setNbYoung] = React.useState([]);
   const [lines, setLines] = React.useState([]);
   const [pdrInSchema, setPdrInSchema] = React.useState(false);
+  const [query, setQuery] = useState("");
+
+  const debouncedQuery = useDebounce(query, 300);
+  const { results } = useAddress({ query: debouncedQuery, options: { limit: 10 }, enabled: debouncedQuery.length > 2 });
 
   useEffect(() => {
     (async () => {
@@ -67,7 +79,7 @@ export default function View(props) {
     setLines(responses[0].aggregations.group_by_cohort.buckets.map((b) => ({ cohort: b.key, count: b.doc_count })));
   };
 
-  const getPDR = async () => {
+  const loadPDR = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return <div />;
@@ -76,7 +88,7 @@ export default function View(props) {
         toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement", code);
         return history.push("/point-de-rassemblement");
       }
-      setData({ ...reponsePDR, addressVerified: true });
+      setPdr({ ...reponsePDR, addressVerified: true });
 
       //check if pdr is in schema
       const { ok: okSchema, code: codeSchema, data: reponseSchema } = await api.get(`/point-de-rassemblement/${reponsePDR._id.toString()}/in-schema`);
@@ -89,7 +101,7 @@ export default function View(props) {
       await setYoungsFromES(id);
       await setLinesFromES(id);
 
-      return reponsePDR.cohorts;
+      return reponsePDR;
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement");
@@ -99,8 +111,8 @@ export default function View(props) {
   React.useEffect(() => {
     (async () => {
       if (mount.current === false) {
-        const cohorts = await getPDR();
-        setCurrentCohort(urlParams.get("cohort") || cohorts[0]);
+        const pdrUpdated = await loadPDR();
+        setCurrentCohort(urlParams.get("cohort") || pdrUpdated?.cohorts?.[0] || "");
         mount.current = true;
       }
     })();
@@ -108,35 +120,35 @@ export default function View(props) {
 
   React.useEffect(() => {
     if (editInfo === false || editSession === false) {
-      getPDR();
+      loadPDR();
       setErrors({});
     }
   }, [editInfo, editSession]);
 
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
-    setData({
-      ...data,
+  const handleVerifyAddress = (isConfirmed) => (suggestion) => {
+    setPdr({
+      ...pdr,
       addressVerified: true,
       region: suggestion.region,
       department: suggestion.department,
       location: suggestion.location,
-      address: isConfirmed ? suggestion.address : data.address,
-      zip: isConfirmed ? suggestion.zip : data.zip,
-      city: isConfirmed ? suggestion.city : data.city,
+      address: isConfirmed ? suggestion.address : pdr.address,
+      zip: isConfirmed ? suggestion.zip : pdr.zip,
+      city: isConfirmed ? suggestion.city : pdr.city,
     });
   };
 
-  const changeComplement = (e) => {
-    let complementAddressToUpdate = data.complementAddress;
+  const handleChangeComplement = (e) => {
+    let complementAddressToUpdate = pdr.complementAddress;
     complementAddressToUpdate = complementAddressToUpdate.filter((c) => c.cohort !== currentCohort);
     complementAddressToUpdate.push({ cohort: currentCohort, complement: e, edit: true });
-    setData({ ...data, complementAddress: complementAddressToUpdate });
+    setPdr({ ...pdr, complementAddress: complementAddressToUpdate });
   };
 
-  const onDelete = async () => {
+  const handleDelete = async () => {
     try {
       setIsLoading(true);
-      const { ok, code } = await api.remove(`/point-de-rassemblement/${data._id}`);
+      const { ok, code } = await api.remove(`/point-de-rassemblement/${pdr._id}`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression du point de rassemblement", code);
         return setIsLoading(false);
@@ -150,17 +162,17 @@ export default function View(props) {
     }
   };
 
-  const onDeleteSession = async () => {
+  const handleDeleteSession = async () => {
     try {
       setIsLoading(true);
-      const { ok, code, data: PDR } = await api.put(`/point-de-rassemblement/delete/cohort/${data._id}`, { cohort: currentCohort });
+      const { ok, code, data: PDR } = await api.put(`/point-de-rassemblement/delete/cohort/${pdr._id}`, { cohort: currentCohort });
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression du séjour", code);
         return setIsLoading(false);
       }
       toastr.success("Le séjour a bien été supprimé");
       setCurrentCohort(PDR?.cohorts?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])[0]);
-      setData(PDR);
+      setPdr(PDR);
       setIsLoading(false);
     } catch (e) {
       capture(e);
@@ -169,23 +181,23 @@ export default function View(props) {
     }
   };
 
-  const onSubmitInfo = async () => {
+  const handleSubmitInfo = async () => {
     try {
       setIsLoading(true);
       const error = {};
-      if (!data?.name) {
+      if (!pdr?.name) {
         error.name = "Le nom est obligatoire";
       }
-      if (!data?.address) {
+      if (!pdr?.address) {
         error.address = "L'adresse est obligatoire";
       }
-      if (!data?.city) {
+      if (!pdr?.city) {
         error.city = "La ville est obligatoire";
       }
-      if (!data?.zip) {
+      if (!pdr?.zip) {
         error.zip = "Le code postal est obligatoire";
       }
-      if (!data?.addressVerified) {
+      if (!pdr?.addressVerified) {
         error.addressVerified = "L'adresse n'a pas été vérifiée";
       }
       console.log(error);
@@ -195,21 +207,21 @@ export default function View(props) {
         ok,
         code,
         data: PDR,
-      } = await api.put(`/point-de-rassemblement/${data._id}`, {
-        name: data.name,
-        address: data.address,
-        city: data.city,
-        zip: data.zip,
-        department: data.department,
-        region: data.region,
-        location: data.location,
+      } = await api.put(`/point-de-rassemblement/${pdr._id}`, {
+        name: pdr.name,
+        address: pdr.address,
+        city: pdr.city,
+        zip: pdr.zip,
+        department: pdr.department,
+        region: pdr.region,
+        location: pdr.location,
       });
 
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la création du point de rassemblement", code);
         return setIsLoading(false);
       }
-      setData(PDR);
+      setPdr(PDR);
       setEditInfo(false);
       setIsLoading(false);
     } catch (e) {
@@ -219,17 +231,17 @@ export default function View(props) {
     }
   };
 
-  const onSubmitSession = async () => {
+  const handleSubmitSession = async () => {
     try {
       setIsLoading(true);
-      const complementAddressToUpdate = data.complementAddress;
+      const complementAddressToUpdate = pdr.complementAddress;
       for await (const infoToUpdate of complementAddressToUpdate) {
         if (infoToUpdate?.edit) {
           const {
             ok,
             code,
             data: PDR,
-          } = await api.put(`/point-de-rassemblement/cohort/${data._id}`, {
+          } = await api.put(`/point-de-rassemblement/cohort/${pdr._id}`, {
             cohort: infoToUpdate.cohort,
             complementAddress: infoToUpdate.complement,
           });
@@ -238,7 +250,7 @@ export default function View(props) {
             toastr.error("Oups, une erreur est survenue lors de la modifications des compléments d'adresse", code);
             return setIsLoading(false);
           }
-          setData(PDR);
+          setPdr(PDR);
         }
       }
 
@@ -251,14 +263,15 @@ export default function View(props) {
     }
   };
 
-  if (!data) return <Loader />;
+  if (!pdr) return <Loader />;
 
   return (
     <>
       <Breadcrumbs items={[{ label: "Point de rassemblement", to: "/point-de-rassemblement/liste/liste-points" }, { label: "Fiche point de rassemblement" }]} />
       <div className="m-8 flex flex-col gap-6">
+        {/* HEADER */}
         <div className="flex items-center justify-between">
-          <Title>{data.name}</Title>
+          <Title>{pdr.name}</Title>
           <div className="flex items-center gap-2">
             {canDeleteMeetingPoint(user) ? (
               <button
@@ -268,7 +281,7 @@ export default function View(props) {
                     isOpen: true,
                     title: "Supprimer le point de rassemblement",
                     message: "Êtes-vous sûr de vouloir supprimer ce point de rassemblement ?",
-                    onDelete: onDelete,
+                    onDelete: handleDelete,
                   })
                 }
                 disabled={isLoading}>
@@ -285,10 +298,11 @@ export default function View(props) {
             ) : null}
           </div>
         </div>
+        {/* INFOS */}
         <div className="flex flex-col gap-8 rounded-lg bg-white px-8 pt-8 pb-12">
           <div className="flex items-center justify-between">
             <div className="text-lg font-medium leading-6 text-gray-900">Informations générales</div>
-            {canUpdateMeetingPoint(user, data) ? (
+            {canUpdateMeetingPoint(user, pdr) ? (
               <>
                 {!editInfo ? (
                   <div data-tip="" data-for="tooltip-edit-disabled">
@@ -318,7 +332,7 @@ export default function View(props) {
                     </button>
                     <button
                       className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      onClick={onSubmitInfo}
+                      onClick={handleSubmitInfo}
                       disabled={isLoading}>
                       <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                       Enregistrer les changements
@@ -334,8 +348,8 @@ export default function View(props) {
                 <div className="text-xs font-medium leading-4 text-gray-900">Nom du point de rassemblement</div>
                 <Field
                   label={"Nom du point de rassemblement"}
-                  onChange={(e) => setData({ ...data, name: e.target.value })}
-                  value={data.name}
+                  onChange={(e) => setPdr({ ...pdr, name: e.target.value })}
+                  value={pdr.name}
                   error={errors?.name}
                   readOnly={!editInfo}
                 />
@@ -347,42 +361,28 @@ export default function View(props) {
             <div className="flex w-[45%] flex-col justify-between">
               <div className="flex flex-col gap-3">
                 <div className="text-xs font-medium leading-4 text-gray-900">Adresse</div>
-                <Field
-                  label={"Adresse"}
-                  onChange={(e) => setData({ ...data, address: e.target.value, addressVerified: false })}
-                  value={data.address}
-                  error={errors?.address}
+
+                <AddressForm
                   readOnly={!editInfo}
+                  data={{ address: pdr.address, zip: pdr.zip, city: pdr.city }}
+                  updateData={(address) => setPdr({ ...pdr, ...address })}
+                  query={query}
+                  setQuery={setQuery}
+                  options={results}
                 />
                 <div className="flex items-center gap-3">
-                  <Field
-                    label="Code postal"
-                    onChange={(e) => setData({ ...data, zip: e.target.value, addressVerified: false })}
-                    value={data.zip}
-                    error={errors?.zip}
-                    readOnly={!editInfo}
-                  />
-                  <Field
-                    label="Ville"
-                    onChange={(e) => setData({ ...data, city: e.target.value, addressVerified: false })}
-                    value={data.city}
-                    error={errors?.city}
-                    readOnly={!editInfo}
-                  />
-                </div>
-                <div className="flex items-center gap-3">
-                  <Field label="Département" onChange={(e) => setData({ ...data, department: e.target.value })} value={data.department} readOnly={true} disabled={editInfo} />
-                  <Field label="Région" onChange={(e) => setData({ ...data, region: e.target.value })} value={data.region} readOnly={true} disabled={editInfo} />
+                  <Field label="Département" onChange={(e) => setPdr({ ...pdr, department: e.target.value })} value={pdr.department} readOnly={true} disabled={editInfo} />
+                  <Field label="Région" onChange={(e) => setPdr({ ...pdr, region: e.target.value })} value={pdr.region} readOnly={true} disabled={editInfo} />
                 </div>
                 {editInfo ? (
                   <div className="flex flex-col gap-2">
                     <VerifyAddress
-                      address={data.address}
-                      zip={data.zip}
-                      city={data.city}
-                      onSuccess={onVerifyAddress(true)}
-                      onFail={onVerifyAddress()}
-                      isVerified={data.addressVerified === true}
+                      address={pdr.address}
+                      zip={pdr.zip}
+                      city={pdr.city}
+                      onSuccess={handleVerifyAddress(true)}
+                      onFail={handleVerifyAddress()}
+                      isVerified={pdr.addressVerified === true}
                       buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
                       verifyText="Pour vérifier  l'adresse vous devez remplir les champs adresse, code postal et ville."
                     />
@@ -393,88 +393,94 @@ export default function View(props) {
             </div>
           </div>
         </div>
-        {data?.cohorts?.length > 0 ? (
-          <div className="flex flex-col rounded-lg bg-white pt-3">
-            <div className="flex items-center justify-between border-b border-gray-200 px-8">
-              <nav className="-mb-px flex space-x-8 " aria-label="Tabs">
-                {data?.cohorts
-                  ?.sort((a, b) => START_DATE_SESSION_PHASE1[a] - START_DATE_SESSION_PHASE1[b])
-                  ?.map((tab) => (
-                    <a
-                      key={tab}
-                      onClick={() => setCurrentCohort(tab)}
-                      className={classNames(
-                        tab === currentCohort ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                        "cursor-pointer whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium",
-                      )}>
-                      {tab}
-                    </a>
-                  ))}
-              </nav>
-              {canUpdateMeetingPoint(user, data) && isPdrEditionOpen(user, currentCohortDetails) ? (
-                <>
-                  {!editSession ? (
-                    <button
-                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      onClick={() => setEditSession(true)}
-                      disabled={isLoading}>
-                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                      Modifier
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <button
-                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={() => setEditSession(false)}
-                        disabled={isLoading}>
-                        Annuler
-                      </button>
+        {/* SEJOUR */}
+        {pdr?.cohorts?.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <Title>Par séjour</Title>
+              <SelectCohort
+                cohort={currentCohort}
+                filterFn={(c) => pdr.cohorts.find((name) => c.name === name)}
+                withBadge
+                onChange={(cohortName) => {
+                  setCurrentCohort(cohortName);
+                  history.replace({ search: `?cohort=${cohortName}` });
+                }}
+              />
+            </div>
+            <div className="flex flex-col px-8 py-4 gap-4 mb-8 rounded-lg bg-white z-0">
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-medium leading-6 text-gray-900">Détails</div>
+                {canUpdateMeetingPoint(user, pdr) && isPdrEditionOpen(user, currentCohortDetails) && (
+                  <>
+                    {!editSession ? (
                       <button
                         className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={onSubmitSession}
+                        onClick={() => setEditSession(true)}
                         disabled={isLoading}>
-                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-                        Enregistrer les changements
+                        <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
+                        Modifier
                       </button>
-                    </div>
-                  )}
-                </>
-              ) : null}
-            </div>
-            <div className="flex h-64 w-full px-8">
-              <div className="relative flex w-1/3 items-center justify-center  border-r-[1px] border-gray-200 p-4">
-                {canViewMeetingPointId(user) && <Field label="ID" value={data.code} copy={true} />}
-                {canDeleteMeetingPointSession(user) ? (
-                  <button
-                    className="absolute bottom-5 right-5 flex cursor-pointer items-center gap-2 px-2 py-1 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
-                    onClick={() =>
-                      setModalDelete({ isOpen: true, onDelete: onDeleteSession, title: "Supprimer la session", message: "Êtes-vous sûr de vouloir supprimer cette session ?" })
-                    }
-                    disabled={isLoading}>
-                    <Trash className="h-4 w-4 text-red-400" />
-                    <div className="text-xs font-medium leading-4 text-gray-800">Supprimer le séjour</div>
-                  </button>
-                ) : null}
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          onClick={() => setEditSession(false)}
+                          disabled={isLoading}>
+                          Annuler
+                        </button>
+                        <button
+                          className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                          onClick={handleSubmitSession}
+                          disabled={isLoading}>
+                          <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
+                          Enregistrer les changements
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-              <div className="flex w-1/3 flex-col items-center justify-center  border-r-[1px] border-gray-200">
-                <div
-                  className="flex h-1/2 w-full cursor-pointer items-center justify-center border-b-[1px] border-gray-200 text-sm font-medium leading-4 text-gray-900 hover:underline"
-                  onClick={() => history.push(`/ligne-de-bus/volontaires/point-de-rassemblement/${data._id.toString()}?cohort=${currentCohort}`)}>
-                  Voir les volontaires ({nbYoung.find((n) => n.cohort === currentCohort)?.count || 0})
+              <div className="flex h-64 w-full px-8">
+                <div className="relative flex w-1/3 items-center justify-center  border-r-[1px] border-gray-200 p-4">
+                  {canViewMeetingPointId(user) && <Field label="ID" value={pdr.code} copy={true} />}
+                  {canDeleteMeetingPointSession(user) ? (
+                    <button
+                      className="absolute bottom-5 right-5 flex cursor-pointer items-center gap-2 px-2 py-1 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={() =>
+                        setModalDelete({
+                          isOpen: true,
+                          onDelete: handleDeleteSession,
+                          title: "Supprimer la session",
+                          message: "Êtes-vous sûr de vouloir supprimer cette session ?",
+                        })
+                      }
+                      disabled={isLoading}>
+                      <Trash className="h-4 w-4 text-red-400" />
+                      <div className="text-xs font-medium leading-4 text-gray-800">Supprimer le séjour</div>
+                    </button>
+                  ) : null}
                 </div>
-                <div
-                  className="flex h-1/2 w-full cursor-pointer items-center justify-center border-b-[1px] border-gray-200 text-sm font-medium leading-4 text-gray-900 hover:underline"
-                  onClick={() => history.push(`/ligne-de-bus?cohort=${currentCohort}&centerCode=%5B"${data.code}"%5D`)}>
-                  Liste des lignes de transports ({lines.find((l) => l.cohort === currentCohort)?.count || 0})
+                <div className="flex w-1/3 flex-col items-center justify-center  border-r-[1px] border-gray-200">
+                  <div
+                    className="flex h-1/2 w-full cursor-pointer items-center justify-center border-y-[1px] border-gray-200 text-sm font-medium leading-4 text-gray-900 hover:underline"
+                    onClick={() => history.push(`/ligne-de-bus/volontaires/point-de-rassemblement/${pdr._id.toString()}?cohort=${currentCohort}`)}>
+                    Voir les volontaires ({nbYoung.find((n) => n.cohort === currentCohort)?.count || 0})
+                  </div>
+                  <div
+                    className="flex h-1/2 w-full cursor-pointer items-center justify-center border-b-[1px] border-gray-200 text-sm font-medium leading-4 text-gray-900 hover:underline"
+                    onClick={() => history.push(`/ligne-de-bus?cohort=${currentCohort}&pointDeRassemblements.code=${pdr.code}`)}>
+                    Liste des lignes de transports ({lines.find((l) => l.cohort === currentCohort)?.count || 0})
+                  </div>
                 </div>
-              </div>
-              <div className="flex w-1/3 items-center justify-center p-4">
-                <Field
-                  label="Complément d’adresse"
-                  onChange={(e) => changeComplement(e.target.value)}
-                  value={data.complementAddress.find((c) => c.cohort === currentCohort)?.complement || ""}
-                  readOnly={!editSession}
-                />
+                <div className="flex w-1/3 items-center justify-center p-4">
+                  <Field
+                    label="Complément d’adresse"
+                    onChange={(e) => handleChangeComplement(e.target.value)}
+                    value={pdr.complementAddress.find((c) => c.cohort === currentCohort)?.complement || ""}
+                    readOnly={!editSession}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -484,10 +490,10 @@ export default function View(props) {
         isOpen={modalCreation.isOpen}
         onCancel={async (cohort) => {
           setModalCreation({ isOpen: false });
-          await getPDR();
+          await loadPDR();
           setCurrentCohort(cohort);
         }}
-        defaultPDR={data}
+        defaultPDR={pdr}
         editable={false}
       />
       <ModalConfirmDelete

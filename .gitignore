@@ -4,7 +4,8 @@
 
 **/.turbo
 
-.vscode
+.vscode/*
+!.vscode/tasks.json
 .env*
 .cache_ggshield
 Zammadwebhook.json
@@ -12,3 +13,4 @@ requestZammad.json
 
 .idea
 node_modules
+out/

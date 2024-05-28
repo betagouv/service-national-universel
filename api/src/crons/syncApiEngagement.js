@@ -1,7 +1,6 @@
 const fetch = require("node-fetch");
-require("../mongo");
-const { API_ENGAGEMENT_KEY } = require("../config");
-const { capture } = require("../sentry");
+const config = require("config");
+const { capture, captureMessage } = require("../sentry");
 const slack = require("../slack");
 const MissionApiModel = require("../models/missionAPI");
 
@@ -13,11 +12,11 @@ const fetchData = (requestOptions, batch = 0) => {
     .then((response) => response.json())
     .then((result) => sync(result))
     .then((rest) => (rest ? fetchData(requestOptions, ++batch) : cleanData()))
-    .catch((error) => console.log("error", error));
+    .catch((error) => capture(error, { extra: { requestOptions, batch } }));
 };
 
 const sync = async (result) => {
-  if (!result.ok) return console.log("ERROR", result);
+  if (!result.ok) return captureMessage("Error while fetching missions from api-engagement", { extra: result });
   for (let i = 0; i < result.data.length; i++) {
     const t = result.data[i];
     t.lastSyncAt = Date.now();
@@ -34,7 +33,6 @@ const sync = async (result) => {
 };
 
 const cleanData = async () => {
-  // slack.info({ title: "sync with missions api-engagement", text: "I'm cleaning the outdated missions !" });
   try {
     await MissionApiModel.deleteMany({ lastSyncAt: { $lte: startTime } });
     slack.success({ title: "sync with missions api-engagement" });
@@ -45,15 +43,15 @@ const cleanData = async () => {
 };
 
 exports.handler = async () => {
-  // slack.info({ title: "sync with missions api-engagement", text: "I'm starting the synchronization !" });
-  if (!API_ENGAGEMENT_KEY) {
+  if (!config.API_ENGAGEMENT_KEY) {
     slack.error({ title: "sync with missions api-engagement", text: "I do not have any API_ENGAGEMENT_KEY !" });
-    capture("NO API_ENGAGEMENT_KEY");
-    return;
+    const err = new Error("NO API_ENGAGEMENT_KEY");
+    capture(err);
+    throw err;
   }
   try {
     const myHeaders = new fetch.Headers();
-    myHeaders.append("apikey", API_ENGAGEMENT_KEY);
+    myHeaders.append("apikey", config.API_ENGAGEMENT_KEY);
     const requestOptions = {
       method: "GET",
       headers: myHeaders,
@@ -62,5 +60,6 @@ exports.handler = async () => {
     fetchData(requestOptions);
   } catch (e) {
     capture(e);
+    throw e;
   }
 };

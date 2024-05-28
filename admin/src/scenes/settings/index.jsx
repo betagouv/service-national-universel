@@ -4,29 +4,35 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
-import { isSuperAdmin, ROLES } from "snu-lib";
-import logo from "../../assets/logo-snu.png";
-import Breadcrumbs from "../../components/Breadcrumbs";
-import ButtonPrimary from "../../components/ui/buttons/ButtonPrimary";
-import { capture } from "../../sentry";
-import api from "../../services/api";
-import DatePickerInput from "../../components/ui/forms/dateForm/DatePickerInput";
-import InputText from "../../components/ui/forms/InputText";
-import InputTextarea from "../../components/ui/forms/InputTextarea";
-import Select from "../../components/forms/Select";
-import SimpleToggle from "../../components/ui/forms/dateForm/SimpleToggle";
-import ToggleDate from "../../components/ui/forms/dateForm/ToggleDate";
 import { BiLoaderAlt } from "react-icons/bi";
+
+import { isSuperAdmin, ROLES, COHORT_TYPE } from "snu-lib";
+import { Container } from "@snu/ds/admin";
+
+import api from "@/services/api";
+
+import { capture } from "@/sentry";
+import logo from "@/assets/logo-snu.png";
+
+import Breadcrumbs from "@/components/Breadcrumbs";
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
+import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
+import InputText from "@/components/ui/forms/InputText";
+import InputTextarea from "@/components/ui/forms/InputTextarea";
+import SimpleToggle from "@/components/ui/forms/dateForm/SimpleToggle";
+import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
+import NumberInput from "@/components/ui/forms/NumberInput";
+import SelectCohort from "@/components/cohorts/SelectCohort";
+
 import { settings, uselessSettings } from "./utils";
-import NumberInput from "../../components/ui/forms/NumberInput";
-import { getCohortSelectOptions } from "@/services/cohort.service";
+import { InformationsConvoyage } from "@/scenes/settings/InformationsConvoyage";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
-  const cohorts = useSelector((state) => state.Cohorts);
+
   const urlParams = new URLSearchParams(window.location.search);
+
   const [cohort, setCohort] = useState(urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort")) : null);
-  const [cohortList, setCohortList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const readOnly = !isSuperAdmin(user);
   const [noChange, setNoChange] = useState(true);
@@ -65,8 +71,6 @@ export default function Settings() {
   };
 
   useEffect(() => {
-    const cohortList = getCohortSelectOptions(cohorts, true);
-    setCohortList(cohortList);
     if (!cohort) {
       setCohort("Février 2024 - C");
     }
@@ -136,17 +140,13 @@ export default function Settings() {
       <div className="flex w-full flex-col px-8 pb-8">
         <div className="flex items-center justify-between py-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrage dynamique</div>
-          <div className="flex w-[258px] items-center">
-            <Select
-              label="Cohorte"
-              options={cohortList}
-              selected={cohortList.find((e) => e.value === cohort)}
-              setSelected={(e) => {
-                setCohort(e.value);
-                history.replace({ search: `?cohort=${encodeURIComponent(e.value)}` });
-              }}
-            />
-          </div>
+          <SelectCohort
+            cohort={cohort}
+            onChange={(cohortName) => {
+              setCohort(cohortName);
+              history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` });
+            }}
+          />
         </div>
         <div className="flex w-full flex-col gap-8">
           {/* Informations générales */}
@@ -433,6 +433,11 @@ export default function Settings() {
                       onChange={() => setData({ ...data, pdrEditionOpenForTransporter: !data.pdrEditionOpenForTransporter })}
                     />
                   </div>
+                  <InformationsConvoyage
+                    disabled={isLoading || readOnly}
+                    informationsConvoyageData={data?.informationsConvoyage}
+                    handleChange={(informationsConvoyage) => setData({ ...data, informationsConvoyage: informationsConvoyage })}
+                  />
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
                       <p className="text-xs  font-medium text-gray-900">Création de groupe et modification du schéma de répartition</p>
@@ -872,6 +877,96 @@ export default function Settings() {
               </div>
             </div>
           </div>
+
+          {data.type === COHORT_TYPE.CLE && (
+            <Container title="Classes engagées">
+              <div className="flex w-full">
+                <div className="flex w-[45%] flex-col gap-4">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs  font-medium text-gray-900">Modification des cohortes </p>
+                    </div>
+                    <SimpleToggle
+                      label="Référent régionaux"
+                      disabled={isLoading || readOnly}
+                      value={data.cleUpdateCohortForReferentRegion}
+                      onChange={() => setData({ ...data, cleUpdateCohortForReferentRegion: !data.cleUpdateCohortForReferentRegion })}
+                    />
+                  </div>
+                  <div className="mt-2 flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs  font-medium text-gray-900">Affichage des cohortes </p>
+                    </div>
+                    <SimpleToggle
+                      label="Admin CLE"
+                      disabled={isLoading || readOnly}
+                      value={data.cleDisplayCohortsForAdminCLE}
+                      onChange={() => setData({ ...data, cleDisplayCohortsForAdminCLE: !data.cleDisplayCohortsForAdminCLE })}
+                    />
+                    <SimpleToggle
+                      label="Référents de classe"
+                      disabled={isLoading || readOnly}
+                      value={data.cleDisplayCohortsForReferentClasse}
+                      onChange={() => setData({ ...data, cleDisplayCohortsForReferentClasse: !data.cleDisplayCohortsForReferentClasse })}
+                    />
+                  </div>
+                </div>
+                <div className="flex w-[10%] items-center justify-center">
+                  <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
+                </div>
+                <div className="flex w-[45%] flex-col gap-4">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs  font-medium text-gray-900">Modification des centres </p>
+                      </div>
+                      <SimpleToggle
+                        label="Référent régionaux"
+                        disabled={isLoading || readOnly}
+                        value={data.cleUpdateCentersForReferentRegion}
+                        onChange={() => setData({ ...data, cleUpdateCentersForReferentRegion: !data.cleUpdateCentersForReferentRegion })}
+                      />
+                    </div>
+                    <div className="mt-2 flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs  font-medium text-gray-900">Affichage des centres </p>
+                      </div>
+                      <SimpleToggle
+                        label="Admin CLE"
+                        disabled={isLoading || readOnly}
+                        value={data.cleDisplayCentersForAdminCLE}
+                        onChange={() => setData({ ...data, cleDisplayCentersForAdminCLE: !data.cleDisplayCentersForAdminCLE })}
+                      />
+                      <SimpleToggle
+                        label="Référents de classe"
+                        disabled={isLoading || readOnly}
+                        value={data.cleDisplayCentersForReferentClasse}
+                        onChange={() => setData({ ...data, cleDisplayCentersForReferentClasse: !data.cleDisplayCentersForReferentClasse })}
+                      />
+                    </div>
+                    <div className="mt-2 flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs  font-medium text-gray-900">Affichage des points de rassemblement </p>
+                      </div>
+                      <SimpleToggle
+                        label="Admin CLE"
+                        disabled={isLoading || readOnly}
+                        value={data.cleDisplayPDRForAdminCLE}
+                        onChange={() => setData({ ...data, cleDisplayPDRForAdminCLE: !data.cleDisplayPDRForAdminCLE })}
+                      />
+                      <SimpleToggle
+                        label="Référents de classe"
+                        disabled={isLoading || readOnly}
+                        value={data.cleDisplayPDRForReferentClasse}
+                        onChange={() => setData({ ...data, cleDisplayPDRForReferentClasse: !data.cleDisplayPDRForReferentClasse })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Container>
+          )}
+
           {!readOnly && (
             <div className="flex items-center justify-center gap-3 ">
               <ButtonPrimary disabled={isLoading || noChange} className="h-[50px] w-[300px]" onClick={onSubmit}>

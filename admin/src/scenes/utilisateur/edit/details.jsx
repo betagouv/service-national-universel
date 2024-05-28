@@ -314,6 +314,8 @@ export default function Details({ user, setUser, currentUser }) {
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action", "");
       if (!ok && code === "LINKED_STRUCTURE") return onUniqueResponsible(user);
       if (!ok && code === "LINKED_MISSIONS") return onDeleteTutorLinked(user);
+      if (!ok && code === "LINKED_CLASSES") return onUniqueResponsible(user);
+      if (!ok && code === "LINKED_ETABLISSEMENT") return onUniqueResponsible(user);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       return onReferentDeleted();
     } catch (e) {

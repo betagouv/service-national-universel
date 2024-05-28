@@ -1,5 +1,23 @@
 {
+  "labels": ["dependencies"],
   "extends": [
-    "config:base"
-  ]
+    "config:recommended",
+    "group:monorepos",
+    "group:recommended",
+    ":semanticCommitTypeAll(chore)",
+    ":semanticCommitScope(lib)",
+    "schedule:daily"
+  ],
+  "packageRules": [
+    {
+      "enabled": false,
+      "groupName": "everything",
+      "matchPackagePatterns": ["*"],
+      "separateMajorMinor": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "osvVulnerabilityAlerts": true
 }

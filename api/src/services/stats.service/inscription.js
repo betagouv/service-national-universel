@@ -1,6 +1,6 @@
 const { ES_NO_LIMIT, ROLES, getCohortNames, YOUNG_STATUS, YOUNG_PHASE, formatDateForPostGre } = require("snu-lib");
 const esClient = require("../../es");
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
 
 async function getAccessToken(endpoint, apiKey) {
   const response = await fetch(`${endpoint}/auth/token`, {
@@ -262,7 +262,7 @@ async function getAbandonedRegistration(startDate, endDate, user) {
 
 async function getYoungValidatedFromWaitingStatus(startDate, endDate, user) {
   // ref dep && ref reg && admin
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
   let body = {
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
@@ -276,7 +276,7 @@ async function getYoungValidatedFromWaitingStatus(startDate, endDate, user) {
   if (user.role === ROLES.REFERENT_REGION) {
     body.region = user.region;
   }
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/young-validated-from`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -315,7 +315,7 @@ async function getYoungValidatedFromWaitingStatus(startDate, endDate, user) {
 
 async function getYoungWithdrawnAfterValidated(startDate, endDate, user) {
   // ref dep && ref reg && admin
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
   let body = {
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
@@ -329,7 +329,7 @@ async function getYoungWithdrawnAfterValidated(startDate, endDate, user) {
   if (user.role === ROLES.REFERENT_REGION) {
     body.region = user.region;
   }
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/young-validated-from`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -349,7 +349,7 @@ async function getYoungWithdrawnAfterValidated(startDate, endDate, user) {
 
 async function getYoungAbandonedBeforeValidated(startDate, endDate, user) {
   // ref dep only
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
   let body = {
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
@@ -358,7 +358,7 @@ async function getYoungAbandonedBeforeValidated(startDate, endDate, user) {
     department: user.department,
   };
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-validated-from`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/young-validated-from`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -397,7 +397,7 @@ async function getYoungAbandonedBeforeValidated(startDate, endDate, user) {
 
 async function getYoungWhoChangedCohort(startDate, endDate, user) {
   // ref dep && ref reg && admin
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
   let body = {
     startDate: formatDateForPostGre(startDate),
     endDate: formatDateForPostGre(endDate),
@@ -410,7 +410,7 @@ async function getYoungWhoChangedCohort(startDate, endDate, user) {
     body.region = user.region;
   }
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-cohort/count`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/young-cohort/count`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -434,7 +434,7 @@ async function getYoungWhoMovedOutFromDepartment(startDate, endDate, user) {
     throw new Error("User must be a department referent");
   }
 
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
   let body = {
     type: "DEPARTURE",
     department: user.department[0],
@@ -442,7 +442,7 @@ async function getYoungWhoMovedOutFromDepartment(startDate, endDate, user) {
     endDate: formatDateForPostGre(endDate),
   };
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-moved`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/young-moved`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });
@@ -466,7 +466,7 @@ async function getYoungWhoMovedInFromDepartment(startDate, endDate, user) {
     throw new Error("User must be a department referent");
   }
 
-  const token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+  const token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
   let body = {
     type: "ARRIVAL",
     department: user.department[0],
@@ -474,7 +474,7 @@ async function getYoungWhoMovedInFromDepartment(startDate, endDate, user) {
     endDate: formatDateForPostGre(endDate),
   };
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/stats/young-moved`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/stats/young-moved`, {
     ...postParams(token),
     body: JSON.stringify(body),
   });

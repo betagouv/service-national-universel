@@ -86,7 +86,7 @@ export default function DropdownButton({
 
   return (
     <div ref={ref}>
-      <div className="relative py-2">
+      <div className="relative print:hidden">
         {/* select item */}
         {mode === "badge" ? (
           <Badge
@@ -108,10 +108,12 @@ export default function DropdownButton({
           <Button
             title={loading ? loadingLabel : title}
             type={type}
-            className={buttonClassName}
+            className={`${buttonClassName} ${loading && "cursor-wait"}`}
             leftIcon={icon}
             rightIcon={
-              rightIcon && <HiChevronDown size={20} className={`mt-0.5 -mr-[7px]`} />
+              rightIcon && (
+                <HiChevronDown size={20} className={`mt-0.5 -mr-[7px]`} />
+              )
             }
             disabled={disabled || loading}
             onClick={(e) => {
@@ -160,7 +162,7 @@ const getDivClass = ({
   open?: boolean;
   position: EPosition;
 }) => {
-  const baseClass = `absolute top-[55px] min-w-[250px] rounded-lg bg-white transition ${
+  const baseClass = `absolute top-[45px] min-w-[250px] rounded-lg bg-white transition ${
     position === EPosition.Left ? "left-0" : "right-0"
   } border-3 z-50 overflow-hidden shadow-md border border-gray-100`;
   if (open) {

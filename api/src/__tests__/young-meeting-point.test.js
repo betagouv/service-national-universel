@@ -1,15 +1,12 @@
-require("dotenv").config({ path: "./.env-testing" });
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
 const { createYoungHelper, notExistingYoungId } = require("./helpers/young");
 const { createMeetingPointHelper, notExistingMeetingPointId } = require("./helpers/meetingPoint");
 const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
-// const { createBusHelper } = require("./helpers/bus");
-// const getNewBusFixture = require("./fixtures/bus");
+const { createBusHelper } = require("./helpers/bus");
+const getNewBusFixture = require("./fixtures/bus");
 const { dbConnect, dbClose } = require("./helpers/db");
-
-jest.setTimeout(10_000);
 
 beforeAll(dbConnect);
 afterAll(dbClose);
@@ -34,16 +31,16 @@ describe("PUT /young/:id/meeting-point", () => {
     });
     expect(res.statusCode).toEqual(404);
   });
-  // it("should return 200 if young, bus and meeting point are found", async () => {
-  //   const young = await createYoungHelper(getNewYoungFixture());
-  //   const bus = await createBusHelper(getNewBusFixture());
-  //   const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), busId: bus._id.toString() });
-  //   const res = await request(getAppHelper()).put(`/young/${young._id}/meeting-point`).send({
-  //     meetingPointId: meetingPoint._id,
-  //     deplacementPhase1Autonomous: "true",
-  //   });
-  //   expect(res.statusCode).toEqual(200);
-  // });
+  it.skip("should return 200 if young, bus and meeting point are found", async () => {
+    const young = await createYoungHelper(getNewYoungFixture());
+    const bus = await createBusHelper(getNewBusFixture());
+    const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), busId: bus._id.toString() });
+    const res = await request(getAppHelper()).put(`/young/${young._id}/meeting-point`).send({
+      meetingPointId: meetingPoint._id,
+      deplacementPhase1Autonomous: "true",
+    });
+    expect(res.statusCode).toEqual(200);
+  });
   it("should be only accessible by young and referent", async () => {
     const passport = require("passport");
     await request(getAppHelper()).put(`/young/${notExistingYoungId}/meeting-point`).send();
@@ -79,11 +76,11 @@ describe("GET /young/:id/meeting-point", () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toBeFalsy();
   });
-  // it("should return 200 when young has a meeting point", async () => {
-  //   const meetingPoint = await createMeetingPointHelper(getNewMeetingPointFixture());
-  //   const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: meetingPoint._id });
-  //   const res = await request(getAppHelper()).get(`/young/${young._id}/meeting-point`).send();
-  //   expect(res.status).toBe(200);
-  //   expect(res.body.data._id).toBe(meetingPoint._id.toString());
-  // });
+  it.skip("should return 200 when young has a meeting point", async () => {
+    const meetingPoint = await createMeetingPointHelper(getNewMeetingPointFixture());
+    const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: meetingPoint._id });
+    const res = await request(getAppHelper()).get(`/young/${young._id}/meeting-point`).send();
+    expect(res.status).toBe(200);
+    expect(res.body.data._id).toBe(meetingPoint._id.toString());
+  });
 });

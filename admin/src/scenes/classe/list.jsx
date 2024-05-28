@@ -4,25 +4,32 @@ import * as FileSaver from "file-saver";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { Badge, Button, Container, Header, Page } from "@snu/ds/admin";
-import { HiPlus, HiUsers, HiOutlineOfficeBuilding, HiChevronDown } from "react-icons/hi";
+import { Badge, Button, Container, Header, Label, Page } from "@snu/ds/admin";
+import { HiPlus, HiUsers, HiOutlineOfficeBuilding } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES, translateStatusClasse, IS_CREATION_CLASSE_OPEN_CLE } from "snu-lib";
+
 import dayjs from "@/utils/dayjs.utils";
 import { statusClassForBadge } from "./utils";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function List() {
+  const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
+
   const [classes, setClasses] = useState(null);
   const [data, setData] = useState([]);
-  const pageId = "classe-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [etablissements, setEtablissements] = useState(null);
   const [paramData, setParamData] = useState({
     page: 0,
   });
   const [size, setSize] = useState(10);
-  const user = useSelector((state) => state.Auth.user);
+  const [exportLoading, setExportLoading] = useState(false);
+
+  const pageId = "classe-list";
+  const exportv1 = new URLSearchParams(history.location.search).get("export-v1");
 
   useEffect(() => {
     (async () => {
@@ -47,18 +54,31 @@ export default function List() {
   }, []);
 
   const exportData = async ({ type }) => {
+    setExportLoading(true);
     try {
-      const res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
-        filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
-          return { ...e, [key]: value.filter };
-        }, {}),
-      });
+      // TODO: reintégrer export ES une fois synchro ok
+      let res;
+      if (exportv1) {
+        res = await api.post(`/elasticsearch/cle/classe/export?type=${type}`, {
+          filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
+            return { ...e, [key]: value.filter };
+          }, {}),
+        });
+      } else {
+        res = await api.post(
+          `/classe/export?type=${type}`,
+          Object.entries(selectedFilters).reduce((e, [key, value]) => {
+            return { ...e, [key]: value.filter };
+          }, {}),
+        );
+      }
       const result = await exportExcelSheet({ data: res.data, type });
       const buffer = XLSX.write(result.workbook, { bookType: "xlsx", type: "array" });
       FileSaver.saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" }), result.fileName);
     } catch (error) {
       capture(error);
     }
+    setExportLoading(false);
   };
 
   if (classes === null || !etablissements) return null;
@@ -90,6 +110,7 @@ export default function List() {
   ].filter(Boolean);
 
   if (classes === null) return null;
+  const isCohortSelected = exportv1 || (selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0);
 
   return (
     <Page>
@@ -102,7 +123,12 @@ export default function List() {
               <Button leftIcon={<HiOutlineOfficeBuilding size={16} />} title="Créer une classe" />
             </Link>
           ),
-          [ROLES.ADMIN].includes(user.role) && <Button rightIcon={<HiChevronDown size={16} />} title="Exporter" onClick={() => exportData({ type: "schema-de-repartition" })} />,
+          [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
+            <div className="flex gap-2 items-center">
+              <Label title="" tooltip={!isCohortSelected ? "Vous devez selectionner une cohort pour pouvoir exporter le SR" : undefined} />
+              <Button title="Exporter le SR" onClick={() => exportData({ type: "schema-de-repartition" })} loading={exportLoading} disabled={!isCohortSelected} />
+            </div>
+          ),
         ].filter(Boolean)}
       />
       {!classes && (
@@ -132,6 +158,7 @@ export default function List() {
                 paramData={paramData}
                 setParamData={setParamData}
                 size={size}
+                intermediateFilters={[getCohortGroups()]}
               />
               <SortOption
                 sortOptions={[
@@ -252,7 +279,18 @@ function exportExcelSheet({ data: classes, type }) {
       updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
       region: c.etablissement?.region,
       department: c.etablissement?.department,
+      uai: c.etablissement?.uai,
+      etablissementName: c.etablissement?.name,
+      classeRefLastName: c.referentClasse ? c.referentClasse[0]?.lastName : "",
+      classeRefFirstName: c.referentClasse ? c.referentClasse[0]?.firstName : "",
+      classeRefEmail: c.referentClasse ? c.referentClasse[0]?.email : "",
       youngsVolume: c.totalSeats ?? 0,
+      studentInProgress: c.studentInProgress,
+      studentWaiting: c.studentWaiting,
+      studentValidated: c.studentValidated,
+      studentAbandoned: c.studentAbandoned,
+      studentNotAutorized: c.studentNotAutorized,
+      studentWithdrawn: c.studentWithdrawn,
       centerId: c.cohesionCenterId,
       centerName: c.cohesionCenter ? `${c.cohesionCenter?.name}, ${c.cohesionCenter?.address}, ${c.cohesionCenter?.zip} ${c.cohesionCenter?.city}` : "",
       centerDepartment: c.cohesionCenter?.department,
@@ -285,7 +323,18 @@ function exportExcelSheet({ data: classes, type }) {
       "Date de dernière modification",
       "Région des volontaires",
       "Département des volontaires",
-      "Nombre d'élèves",
+      "UAI de l'établissement",
+      "Nom de l'établissement",
+      "Nom du référent de classe",
+      "Prénom du référent de classe",
+      "Email du référent de classe",
+      "Nombre de places total",
+      "Nombre d'élèves en cours",
+      "Nombre d'élèves en attente",
+      "Nombre d'élèves validés",
+      "Nombre d'élèves abandonnés",
+      "Nombre d'élèves non autorisés",
+      "Nombre d'élèves désistés",
       "ID centre",
       "Désignation du centre",
       "Département du centre",

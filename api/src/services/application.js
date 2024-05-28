@@ -1,10 +1,11 @@
-const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge } = require("snu-lib");
 const { deletePatches } = require("../controllers/patches");
 const ApplicationModel = require("../models/application");
+const CohortModel = require("../models/cohort");
 const YoungModel = require("../models/young");
 const ReferentModel = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
-const { APP_URL } = require("../config");
+const config = require("config");
 const { getCcOfYoung } = require("../utils");
 const { getTutorName } = require("./mission");
 const { capture } = require("../sentry");
@@ -79,7 +80,7 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
       },
     });
     for (let application of applications) {
-      let cta = `${APP_URL}/phase2`;
+      let cta = `${config.APP_URL}/phase2`;
       let statusComment = "";
       let sendinblueTemplate = "";
       switch (mission.status) {
@@ -89,7 +90,7 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
         case MISSION_STATUS.CANCEL:
           statusComment = "La mission a été annulée.";
           sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_CANCEL;
-          cta = `${APP_URL}/phase2?utm_campaign=transactionnel+mig+annulee&utm_source=notifauto&utm_medium=mail+261+acceder`;
+          cta = `${config.APP_URL}/phase2?utm_campaign=transactionnel+mig+annulee&utm_source=notifauto&utm_medium=mail+261+acceder`;
           break;
         case MISSION_STATUS.ARCHIVED:
           statusComment = "La mission a été archivée.";
@@ -122,8 +123,65 @@ const updateApplicationStatus = async (mission, fromUser = null) => {
   }
 };
 
+const getAuthorizationToApply = async (mission, young) => {
+  let refusalMessages = [];
+  if (isCohortTooOld(young?.cohort)) {
+    refusalMessages.push("Le délai pour candidater est dépassé.");
+  }
+
+  const cohort = await CohortModel.findOne({ name: young.cohort });
+
+  if (!canApplyToPhase2(young, cohort)) {
+    refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
+  }
+
+  if (mission.placesLeft === 0) {
+    refusalMessages.push("La mission est déjà complète.");
+  }
+
+  if (mission.visibility === "HIDDEN") {
+    refusalMessages.push("La structure a fermé les candidatures pour cette mission.");
+  }
+
+  const applicationsCount = await ApplicationModel.countDocuments({
+    youngId: young._id,
+    status: { $in: [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION] },
+  });
+
+  if (applicationsCount >= 15) {
+    refusalMessages.push("Vous ne pouvez candidater qu'à 15 missions différentes.");
+  }
+
+  const isMilitaryPreparation = mission?.isMilitaryPreparation === "true";
+
+  const ageAtStart = calculateAge(young.birthdateAt, mission.startAt);
+
+  if (!isMilitaryPreparation && ageAtStart < 15) {
+    refusalMessages.push("Vous devez avoir au moins 15 ans pour candidater.");
+  }
+
+  // Military preparations have special rules
+  if (isMilitaryPreparation && ageAtStart < 16) {
+    refusalMessages.push("Pour candidater, vous devez avoir plus de 16 ans (révolus le 1er jour de la Préparation militaire choisie)");
+  }
+
+  if (isMilitaryPreparation && young.statusMilitaryPreparationFiles === "REFUSED") {
+    refusalMessages.push("Vous n’êtes pas éligible aux préparations militaires. Vous ne pouvez pas candidater");
+  }
+
+  const isMilitaryApplicationIncomplete =
+    !young.files.militaryPreparationFilesIdentity.length || !young.files.militaryPreparationFilesAuthorization.length || !young.files.militaryPreparationFilesCertificate.length;
+
+  if (isMilitaryPreparation && isMilitaryApplicationIncomplete) {
+    refusalMessages.push("Pour candidater, veuillez téléverser le dossier d’éligibilité présent en bas de page");
+  }
+
+  return { canApply: refusalMessages.length === 0, message: refusalMessages.join("\n") };
+};
+
 module.exports = {
   anonymizeApplicationsFromYoungId,
   updateApplicationTutor,
   updateApplicationStatus,
+  getAuthorizationToApply,
 };

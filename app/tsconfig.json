@@ -1,0 +1,13 @@
+{
+  "extends": "../front.tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "src",
+    "outDir": "build",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["src", "./globals.d.ts"],
+  "exclude": ["**/dist/**/*", "**/build/**/*", "node_modules", "**/node_modules/*"],
+  "references": [{ "path": "../packages/ds" }]
+}

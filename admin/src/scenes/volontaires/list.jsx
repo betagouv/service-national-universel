@@ -20,6 +20,8 @@ import { Title } from "../pointDeRassemblement/components/common";
 import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";
 import { getFilterArray, transformVolontaires, transformVolontairesSchool } from "./utils";
+import { signinAs } from "@/utils/signinAs";
+import { getCohortGroups } from "@/services/cohort.service";
 
 export default function VolontaireList() {
   const user = useSelector((state) => state.Auth.user);
@@ -133,6 +135,7 @@ export default function VolontaireList() {
               paramData={paramData}
               setParamData={setParamData}
               size={size}
+              intermediateFilters={[getCohortGroups()]}
             />
             <SortOption
               sortOptions={[
@@ -262,10 +265,13 @@ const Action = ({ hit }) => {
   const onPrendreLaPlace = async (young_id) => {
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
-    plausibleEvent("Volontaires/CTA - Prendre sa place");
-    const { ok } = await api.post(`/referent/signin_as/young/${young_id}`);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
-    window.open(appURL, "_blank");
+    try {
+      plausibleEvent("Volontaires/CTA - Prendre sa place");
+      await signinAs("young", young_id);
+      window.open(appURL, "_blank");
+    } catch (e) {
+      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+    }
   };
 
   return (

@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
-const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const esClient = require("../es");
 const MODELNAME = "missionequivalence";
 const { UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { generateRandomName, generateRandomEmail, generateAddress, starify } = require("../utils/anonymise");
@@ -25,6 +23,12 @@ const Schema = new mongoose.Schema({
     enum: [...ENGAGEMENT_TYPES],
     documentation: {
       description: "Type de mission",
+    },
+  },
+  desc: {
+    type: String,
+    documentation: {
+      description: "Description du type de mission si le type sélectionné est 'Autre'",
     },
   },
   sousType: {
@@ -145,7 +149,6 @@ Schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

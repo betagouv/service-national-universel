@@ -16,13 +16,15 @@ env:
   production_branch: "production"
 
 jobs:
-
   prepare:
     runs-on: ubuntu-latest
     if: github.ref_name == 'release_candidate'
     outputs:
       target_branch: ${{ steps.target_branch.outputs.target_branch }}
-      image_tag: ${{ steps.image_tag.outputs.image_tag }}
+      api_image_tag: ${{ steps.prepare.outputs.api_image_tag }}
+      admin_image_tag: ${{ steps.prepare.outputs.admin_image_tag }}
+      app_image_tag: ${{ steps.prepare.outputs.app_image_tag }}
+      antivirus_image_tag: ${{ steps.prepare.outputs.antivirus_image_tag }}
 
     steps:
       - name: Get target_branch
@@ -33,18 +35,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ steps.target_branch.outputs.target_branch }}
-
-      - name: Get last commit sha
-        id: commit_sha
-        run: |
-          commit_sha=$(git rev-parse HEAD)
-          echo "commit_sha=$commit_sha" >> $GITHUB_OUTPUT
-
-      - name: Get image tag
-        id: image_tag
-        uses: ./.github/actions/get_image_tag
-        with:
-          sha: ${{ steps.commit_sha.outputs.commit_sha }}
+          fetch-depth: 0
 
       - name: Check differences
         run: |
@@ -65,13 +56,72 @@ jobs:
       #     git switch ${{ env.production_branch }}
       #     git merge --ff-only ${{ steps.target_branch.outputs.target_branch }}
 
+      - name: Prepare
+        id: prepare
+        run: |
+          api_image_tag=$(git log --max-count=1 --oneline -- api packages | cut -d " " -f 1)
+          echo "api_image_tag: $api_image_tag"
+          echo "api_image_tag=$api_image_tag" >> $GITHUB_OUTPUT
+
+          admin_image_tag=$(git log --max-count=1 --oneline -- admin packages | cut -d " " -f 1)
+          echo "admin_image_tag: $admin_image_tag"
+          echo "admin_image_tag=$admin_image_tag" >> $GITHUB_OUTPUT
+
+          app_image_tag=$(git log --max-count=1 --oneline -- app packages | cut -d " " -f 1)
+          echo "app_image_tag: $app_image_tag"
+          echo "app_image_tag=$app_image_tag" >> $GITHUB_OUTPUT
+
+          antivirus_image_tag=$(git log --max-count=1 --oneline -- antivirus | cut -d " " -f 1)
+          echo "antivirus_image_tag: $antivirus_image_tag"
+          echo "antivirus_image_tag=$antivirus_image_tag" >> $GITHUB_OUTPUT
+
+          git fetch origin release_candidate production
+
+          rc_sha=$(git rev-parse origin/release_candidate)
+          echo "rc_sha: $rc_sha"
+          echo "rc_sha=$rc_sha" >> $GITHUB_OUTPUT
+
+          production_sha=$(git rev-parse origin/production)
+          echo "production_sha: $production_sha"
+          echo "production_sha=$production_sha" >> $GITHUB_OUTPUT
+
+      - name: Changelog
+        id: changelog
+        env:
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          NOTION_SECRET_KEY: ${{ secrets.NOTION_SECRET_KEY }}
+        run: |
+          .github/scripts/generate_changelog.sh "${{ steps.prepare.outputs.production_sha }}...${{ steps.prepare.outputs.rc_sha }}" > CHANGELOG.md
+          cat CHANGELOG.md
+          {
+            echo 'changelog<<EOF'
+            cat CHANGELOG.md
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post Changelog on slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: "#dev-release,#nouveauté-produit"
+          slack-message: "${{ steps.changelog.outputs.changelog }}"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   copy_image:
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app_name: [admin, api, app]
+        app:
+          [
+            { name: api, tag: "${{needs.prepare.outputs.api_image_tag}}" },
+            { name: app, tag: "${{needs.prepare.outputs.app_image_tag}}" },
+            { name: admin, tag: "${{needs.prepare.outputs.admin_image_tag}}" },
+            {
+              name: antivirus,
+              tag: "${{needs.prepare.outputs.antivirus_image_tag}}",
+            },
+          ]
 
     steps:
       - uses: actions/checkout@v4
@@ -83,8 +133,8 @@ jobs:
         uses: ./.github/actions/check_docker_image_tag
         with:
           registry: ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}
-          image_name: ${{ matrix.app_name }}
-          image_tag: ${{ needs.prepare.outputs.image_tag }}
+          image_name: ${{ matrix.app.name }}
+          image_tag: ${{ matrix.app.tag }}
           secret_key: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
 
       - name: Login to Production registry
@@ -97,23 +147,23 @@ jobs:
 
       - name: Pull CI image
         if: steps.check.outputs.tag_exists == 0
-        run: docker pull ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
+        run: docker pull ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app.name }}:${{ matrix.app.tag }}
 
       - name: Tag Production image (commit sha)
         if: steps.check.outputs.tag_exists == 0
         run: |
-          docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
-            ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }}
+          docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app.name }}:${{ matrix.app.tag }} \
+            ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app.name }}:${{ matrix.app.tag }}
 
       - name: Tag Production image (latest)
         if: steps.check.outputs.tag_exists == 0
         run: |
-          docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app_name }}:${{ needs.prepare.outputs.image_tag }} \
-            ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}:latest
+          docker tag ${{ secrets.SCW_CI_IMAGE_REGISTRY }}/${{ matrix.app.name }}:${{ matrix.app.tag }} \
+            ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app.name }}:latest
 
       - name: Push Production image
         if: steps.check.outputs.tag_exists == 0
-        run: docker push --all-tags ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app_name }}
+        run: docker push --all-tags ${{ secrets.SCW_PROD_IMAGE_REGISTRY }}/${{ matrix.app.name }}
 
   deploy_staging:
     runs-on: ubuntu-latest
@@ -141,25 +191,40 @@ jobs:
         working-directory: ${{ env.staging_directory }}
         run: |
           terraform plan -no-color -input=false \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
       - name: Staging - Terraform auto-apply
         working-directory: ${{ env.staging_directory }}
         run: |
           terraform apply -no-color -input=false -auto-approve \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}"
 
-      - name: Staging - Healthcheck API
+      - name: Healthchecks
+        shell: bash
         working-directory: ${{ env.staging_directory }}
-        run: curl -I "$(terraform output -raw api_endpoint)"
+        run: |
+          failure=false
+          while read name
+          do
+            status=$(terraform output -raw ${name}_container_status)
+            echo $name $status
+            if [[ $status != "ready" ]]
+            then
+                echo "Container ${name} is on '$status' state" 1>&2
+                failure=true
+            fi
+          done <<< 'app
+          admin
+          api'
 
-      - name: Staging - Healthcheck Admin
-        working-directory: ${{ env.staging_directory }}
-        run: curl -I "$(terraform output -raw admin_endpoint)"
-
-      - name: Staging - Healthcheck App
-        working-directory: ${{ env.staging_directory }}
-        run: curl -I "$(terraform output -raw app_endpoint)"
+          if $failure
+          then
+            exit 1
+          fi
 
   plan_production:
     runs-on: ubuntu-latest
@@ -187,7 +252,10 @@ jobs:
         working-directory: ${{ env.prod_directory }}
         run: |
           terraform plan -no-color -input=false \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
+            -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
 
   deploy_production:
     runs-on: ubuntu-latest
@@ -215,19 +283,45 @@ jobs:
         working-directory: ${{ env.prod_directory }}
         run: |
           terraform apply -no-color -input=false -auto-approve \
-            -var="image_tag=${{ needs.prepare.outputs.image_tag }}"
+            -var="api_image_tag=${{ needs.prepare.outputs.api_image_tag }}" \
+            -var="admin_image_tag=${{ needs.prepare.outputs.admin_image_tag }}" \
+            -var="app_image_tag=${{ needs.prepare.outputs.app_image_tag }}" \
+            -var="antivirus_image_tag=${{ needs.prepare.outputs.antivirus_image_tag }}"
 
-      - name: Production - Healthcheck API
+      - name: Healthchecks
+        shell: bash
         working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw api_endpoint)"
+        run: |
+          failure=false
+          while read name
+          do
+            status=$(terraform output -raw ${name}_container_status)
+            echo $name $status
+            if [[ $status != "ready" ]]
+            then
+                echo "Container ${name} is on '$status' state" 1>&2
+                failure=true
+            fi
+          done <<< 'app
+          admin
+          api
+          antivirus
+          crons'
 
-      - name: Production - Healthcheck Admin
-        working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw admin_endpoint)"
+          if $failure
+          then
+            exit 1
+          fi
 
-      - name: Production - Healthcheck App
-        working-directory: ${{ env.prod_directory }}
-        run: curl -I "$(terraform output -raw app_endpoint)"
+  deploy_cc:
+    needs: [prepare, copy_image]
+    if: ${{ vars.DEPLOY_ON_CC == 'true' }}
+    uses: ./.github/workflows/cc-deploy-production.yml
+    with:
+      api_image_tag: ${{ needs.prepare.outputs.api_image_tag }}
+      admin_image_tag: ${{ needs.prepare.outputs.admin_image_tag }}
+      app_image_tag: ${{ needs.prepare.outputs.app_image_tag }}
+    secrets: inherit
 
   merge_branch:
     runs-on: ubuntu-latest
@@ -245,25 +339,11 @@ jobs:
       - name: Push production
         run: git push origin ${{ env.production_branch }}
 
+      - name: Update production_state branch
+        run: git push -f origin HEAD:production_state
+
       - name: Remove RC branch
         run: git push origin --delete ${{ needs.prepare.outputs.target_branch }}
 
-      - name: Check if hotfix branch exists
-        id: check
-        continue-on-error: true
-        run: |
-          if git fetch origin ${{ env.hotfix_branch }} --prune ; then
-            echo "branch_exists=1" >> $GITHUB_OUTPUT
-          else
-            echo "branch_exists=0" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Delete existing hotfix branch
-        if: steps.check.outputs.branch_exists == '1'
-        run: git push origin --delete ${{ env.hotfix_branch }}
-
-      - name: Create hotfix branch from production
-        run: git checkout -b ${{ env.hotfix_branch }}
-
-      - name: Push hotfix branch
-        run: git push origin ${{ env.hotfix_branch }}
+      - name: Update production_hotfix branch
+        run: git push -f origin HEAD:production_hotfix

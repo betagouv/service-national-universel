@@ -1,4 +1,3 @@
-require("../mongo");
 const esClient = require("../es");
 const path = require("path");
 
@@ -7,7 +6,7 @@ const Young = require("../models/young");
 const { sendTemplate } = require("../sendinblue");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, translate, formatStringDate, END_DATE_PHASE1 } = require("snu-lib");
-const { APP_URL } = require("../config");
+const config = require("config");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
 
@@ -41,7 +40,7 @@ exports.handler = async () => {
           endAt: formatStringDate(mission._source.endAt),
           address: `${mission._source.city}, ${mission._source.zip}`,
           domains: mission._source.domains?.map(translate)?.join(", "),
-          cta: `${APP_URL}/mission/${mission._id}`,
+          cta: `${config.APP_URL}/mission/${mission._id}`,
         }));
         countMissionSent[missions?.length] = (countMissionSent[missions?.length] || 0) + 1;
         if (!missions) return;
@@ -55,7 +54,7 @@ exports.handler = async () => {
             emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
             params: {
               missions,
-              cta: `${APP_URL}/mission?utm_campaign=transactionnel+nouvelles+mig+publiees&utm_source=notifauto&utm_medium=mail+237+acceder`,
+              cta: `${config.APP_URL}/mission?utm_campaign=transactionnel+nouvelles+mig+publiees&utm_source=notifauto&utm_medium=mail+237+acceder`,
             },
             cc,
           });
@@ -86,6 +85,7 @@ exports.handler = async () => {
   } catch (e) {
     capture(e);
     slack.error({ title: "noticePushMission", text: JSON.stringify(e) });
+    throw e;
   }
 };
 

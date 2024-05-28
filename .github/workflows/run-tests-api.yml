@@ -1,16 +1,12 @@
 name: API - Run Tests
 
 on:
+  workflow_dispatch:
   workflow_call:
     inputs:
       branch_name:
         required: true
         type: string
-
-env:
-  SUBFOLDER_NAME: api
-  APP_NAME: snu-api
-  ENVIRONMENT_NAME: snu-api
 
 jobs:
   test:
@@ -34,14 +30,13 @@ jobs:
       - name: Install packages
         run: npm ci
 
-      - name: Lint code
-        working-directory: ${{ env.SUBFOLDER_NAME }}
-        continue-on-error: true
-        run: npm run lint
-
       - name: Build lib
         continue-on-error: false
         run: npm run build -w packages/lib
+
+      - name: Lint code
+        working-directory: api
+        run: npm run lint
 
       - name: Test and Send coverage
         uses: paambaati/codeclimate-action@v2.7.5
@@ -50,5 +45,5 @@ jobs:
           CI: true
           MONGO_URL: mongodb://localhost:27017/SampleDB
         with:
-          workingDirectory: ${{ env.SUBFOLDER_NAME }}
+          workingDirectory: api
           coverageCommand: npm run coverage

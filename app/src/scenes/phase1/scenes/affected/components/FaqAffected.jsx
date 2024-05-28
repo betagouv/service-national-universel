@@ -27,7 +27,7 @@ const FaqAffected = ({ className }) => {
               des affaires à apporter en cliquant sur “Lire plus”.
             </p>
           }
-          readMoreLink="https://support.snu.gouv.fr/base-de-connaissance/dans-ma-valise-materiel-trousseau"
+          readMoreLink="https://support.snu.gouv.fr/base-de-connaissance/dans-ma-valise-materiel-trousseau-copie-copie"
         />
 
         <a
@@ -43,7 +43,7 @@ const FaqAffected = ({ className }) => {
 
         <a
           className="flex w-full items-center justify-between rounded-lg border-[1px] border-gray-200 py-[22px] px-6 hover:text-inherit"
-          href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/snu-reglement-interieur.pdf"
+          href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU-reglement-interieur-2024.pdf"
           target="_blank"
           rel="noreferrer">
           <span className="font-bold">Lire le règlement intérieur</span>

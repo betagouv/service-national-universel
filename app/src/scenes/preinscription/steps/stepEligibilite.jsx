@@ -1,8 +1,7 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { setYoung } from "@/redux/auth/actions";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
 import { ReinscriptionContext } from "../../../context/ReinscriptionContextProvider";
 import { capture } from "../../../sentry";
@@ -16,7 +15,6 @@ import { PaddedContainer } from "@snu/ds/dsfr";
 
 import IconFrance from "../../../assets/IconFrance";
 import School from "../../../assets/school.png";
-import CheckBox from "../../../components/dsfr/forms/checkbox";
 import Input from "../../../components/dsfr/forms/input";
 import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
@@ -24,12 +22,10 @@ import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
-import SignupButtonContainer from "../../../components/dsfr/ui/buttons/SignupButtonContainer";
 import ProgressBar from "../components/ProgressBar";
 import { supportURL } from "@/config";
-import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
-import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { validateBirthDate } from "@/scenes/inscription2023/utils";
+import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
 
 export default function StepEligibilite() {
   const isLoggedIn = !!useSelector((state) => state?.Auth?.young);
@@ -42,7 +38,6 @@ export default function StepEligibilite() {
   const [loading, setLoading] = React.useState(false);
   const [confirmationModal, setConfirmationModal] = React.useState({ isOpen: false, onConfirm: null });
 
-  const dispatch = useDispatch();
   const history = useHistory();
 
   const optionsScolarite = [
@@ -169,18 +164,8 @@ export default function StepEligibilite() {
     }
 
     if (sessions.length === 0) {
-      if (isLoggedIn) {
-        const { ok, data, code } = await api.put("/young/reinscription/not-eligible");
-        if (!ok) {
-          capture(new Error(code));
-          setError({ text: "Impossible de vérifier votre éligibilité" });
-          setLoading(false);
-          return;
-        }
-        dispatch(setYoung(data));
-      }
-      setData({ ...data, message, step: STEPS.INELIGIBLE });
-      return history.push(`/${uri}/noneligible`);
+      setData({ ...data, message, step: STEPS.NO_SEJOUR });
+      return history.push(`/${uri}/no_sejour`);
     }
 
     setData({ ...data, sessions, step: STEPS.SEJOUR });
@@ -201,28 +186,36 @@ export default function StepEligibilite() {
               Si vous envisagez une participation au SNU dans le cadre des classes engagées, vous ne pouvez pas vous inscrire ici. Veuillez attendre que votre référent classe vous
               indique la procédure à suivre.
             </p>
-            <InlineButton className="text-sm md:pr-4 pt-2 md:pr-2 pb-1">
-              <a rel="noreferrer noopener" target="blank" href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
-                En savoir plus →
-              </a>
-            </InlineButton>
+            <a
+              className="text-sm text-[#000091]"
+              rel="noreferrer noopener"
+              target="blank"
+              href={`${supportURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
+              En savoir plus →
+            </a>
           </div>
         </PaddedContainer>
       )}
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${supportURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
         <div className="space-y-5">
           {!isLoggedIn && (
-            <div className="flex-start flex flex-col">
-              <div className="flex items-center gap-2 mb-2">
-                <CheckBox
-                  checked={data.frenchNationality === "true"}
-                  onChange={(e) => setData({ ...data, frenchNationality: e ? "true" : "false" })}
-                  label="Je suis de nationalité française"
-                />
-                <IconFrance />
-              </div>
-              {error.frenchNationality ? <ErrorMessage>{error.frenchNationality}</ErrorMessage> : null}
-            </div>
+            <Checkbox
+              state={error.frenchNationality && "error"}
+              stateRelatedMessage={error.frenchNationality}
+              options={[
+                {
+                  label: (
+                    <span className="flex items-center">
+                      <span className="mr-2">Je suis de nationalité française</span> <IconFrance />
+                    </span>
+                  ),
+                  nativeInputProps: {
+                    checked: data.frenchNationality === "true",
+                    onChange: (e) => setData({ ...data, frenchNationality: e.target.checked ? "true" : "false" }),
+                  },
+                },
+              ]}
+            />
           )}
           <div className="flex flex-col gap-4">
             <div className="flex w-full flex-col">
@@ -239,7 +232,12 @@ export default function StepEligibilite() {
             </div>
             <label className={`flex-start mt-2 flex w-full flex-col text-base ${isBirthdayModificationDisabled ? "text-[#929292]" : "text-[#161616]"}`}>
               Date de naissance
-              <DatePicker value={new Date(data.birthDate)} onChange={(date) => setData({ ...data, birthDate: date })} disabled={isBirthdayModificationDisabled} />
+              <DatePicker
+                initialValue={new Date(data.birthDate)}
+                onChange={(date) => setData({ ...data, birthDate: date })}
+                disabled={isBirthdayModificationDisabled}
+                state={error.birthDate ? "error" : "default"}
+              />
               {error.birthDate ? <span className="text-sm text-red-500">{error.birthDate}</span> : null}
             </label>
           </div>
@@ -278,7 +276,7 @@ export default function StepEligibilite() {
               ) : null}
             </>
           )}
-          <SignupButtonContainer onClickNext={onVerify} disabled={loading} />
+          <SignupButtons onClickNext={onVerify} disabled={loading} />
           {confirmationModal.isOpen && (
             <ModalRecap
               isOpen={confirmationModal?.isOpen}

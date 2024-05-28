@@ -5,15 +5,14 @@ import { ID } from "../utils";
 import { getCohort } from "@/utils/cohorts";
 import dayjs from "dayjs";
 import { formatDateFR, translateCorrectionReason } from "snu-lib";
-
 import DatePicker from "../../../components/dsfr/forms/DatePicker";
 import Error from "../../../components/error";
 import ErrorMessage from "../../../components/dsfr/forms/ErrorMessage";
 import MyDocs from "../components/MyDocs";
-import SignupButtonContainer from "@/components/dsfr/ui/buttons/SignupButtonContainer";
 import FileImport from "@/components/dsfr/forms/FileImport";
 import Verify from "./VerifyDocument";
 import plausibleEvent from "@/services/plausible";
+import { SignupButtons } from "@snu/ds/dsfr";
 
 export default function StepUploadDesktop({
   recto,
@@ -74,7 +73,7 @@ export default function StepUploadDesktop({
     return (
       <>
         <Verify recto={recto} verso={verso} checked={checked} setChecked={setChecked} />
-        <SignupButtonContainer
+        <SignupButtons
           onClickNext={() => (corrections?.length ? onCorrect(resetState) : onSubmit(resetState))}
           labelNext={loading ? "Scan antivirus en cours" : "Oui, les documents sont conformes"}
           disabled={Object.values(checked).some((e) => e === false)}
@@ -116,12 +115,12 @@ export default function StepUploadDesktop({
 
       {young.files.cniFiles?.length > 0 && (
         <>
-          <hr className="my-8 h-px border-0 bg-gray-200" />
+          <hr className="my-8" />
           <MyDocs />
         </>
       )}
 
-      <hr className="my-8 h-px border-0 bg-gray-200" />
+      <hr className="my-8" />
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
 
@@ -132,7 +131,7 @@ export default function StepUploadDesktop({
 
       {category !== "passport" && (
         <>
-          <hr className="my-8 h-px border-0 bg-gray-200" />
+          <hr className="my-8" />
           <p className="my-4">
             Ajouter <strong>le verso</strong>
           </p>
@@ -156,7 +155,7 @@ export default function StepUploadDesktop({
       {(recto || verso || date) && <ExpirationDate date={date} setDate={setDate} onChange={() => setHasChanged(true)} corrections={corrections} category={category} />}
 
       {Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      <SignupButtonContainer onClickNext={handleOnClickNext} disabled={!isEnabled} onClickPrevious={() => history.push("/inscription2023/documents")} />
+      <SignupButtons onClickNext={handleOnClickNext} disabled={!isEnabled} onClickPrevious={() => history.push("/inscription2023/documents")} />
     </>
   );
 }
@@ -165,7 +164,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
   const young = useSelector((state) => state.Auth.young);
   return (
     <>
-      <hr className="my-8 h-px border-0 bg-gray-200" />
+      <hr className="my-8" />
       <div className="my-4 flex w-full">
         <div className="w-1/2">
           <div className="text-xl font-medium">Renseignez la date d’expiration</div>
@@ -193,7 +192,7 @@ function ExpirationDate({ date, setDate, onChange, corrections, category }) {
           Date d&apos;expiration
           <DatePicker
             displayError
-            value={date}
+            initialValue={date}
             onChange={(date) => {
               setDate(date);
               onChange && onChange();

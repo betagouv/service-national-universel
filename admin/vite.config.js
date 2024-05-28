@@ -15,12 +15,15 @@ export default defineConfig(({ command, mode }) => {
     plugins.push(
       sentryVitePlugin({
         org: "sentry",
-        project: mode === "production" ? "snu-production" : "snu-staging",
+        project: "snu-admin",
         authToken: env.SENTRY_AUTH_TOKEN,
         url: "https://sentry.selego.co/",
-        environment: "admin",
+        environment: mode,
+        release: {
+          name: env.RELEASE,
+        },
         deploy: {
-          env: "admin",
+          env: mode,
         },
         validate: true,
         sourcemaps: {

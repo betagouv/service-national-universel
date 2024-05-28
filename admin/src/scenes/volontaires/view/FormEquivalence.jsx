@@ -160,6 +160,8 @@ export default function FormEquivalence({ young, onChange }) {
                   />
                 )}
 
+                {type === "Autre" && <InputText register={register} name="desc" label="Engagement réalisé" validation={{ required: true }} />}
+
                 <InputText register={register} name="structureName" label="Nom de la structure d'accueil" validation={{ required: true }} />
               </div>
 

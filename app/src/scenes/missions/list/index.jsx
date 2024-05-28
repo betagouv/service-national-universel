@@ -9,18 +9,18 @@ import MissionFilters from "./components/MissionFilters";
 import MissionList from "./components/MissionList";
 import Loader from "../../../components/Loader";
 import { HiOutlineAdjustments } from "react-icons/hi";
+import useAuth from "@/services/useAuth";
 
 export default function List() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const [data, setData] = useState();
   const urlParams = new URLSearchParams(window.location.search);
-  const isMilitaryPreparation = Boolean(urlParams.get("MILITARY_PREPARATION"));
+  const canDoMilitaryPreparation = young?.frenchNationality === "true";
 
   const [filters, setFilters] = useState({
     domains: [],
     distance: 50,
     location: young?.location || {},
-    isMilitaryPreparation: isMilitaryPreparation || false,
     period: "",
     subPeriod: [],
     searchbar: "",
@@ -47,6 +47,13 @@ export default function List() {
   );
 
   useEffect(() => {
+    const isMilitaryPreparation = urlParams.get("MILITARY_PREPARATION");
+    if (isMilitaryPreparation || !canDoMilitaryPreparation) {
+      setFilters({ ...filters, isMilitaryPreparation: canDoMilitaryPreparation && isMilitaryPreparation });
+    }
+  }, []);
+
+  useEffect(() => {
     updateOnFilterChange(filters, page, size, sort, setData);
   }, [filters, page, size, sort]);
 
@@ -57,7 +64,7 @@ export default function List() {
         <h1 className="text-2xl md:text-4xl font-bold text-gray-800">Trouvez une mission d&apos;intérêt général</h1>
         <div className="flex items-center justify-between">
           <p className="text-sm font-normal text-gray-700">
-            Vous devez réaliser vos 84 heures de mission dans l&apos;année qui suit votre séjour de cohésion.{" "}
+            Vous disposez d’un an pour débuter votre phase d’engagement et de deux ans pour la terminer.{" "}
             <a
               className="font-medium underline hover:text-gray-700 hover:underline"
               href="https://support.snu.gouv.fr/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig"

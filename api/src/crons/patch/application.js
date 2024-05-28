@@ -1,5 +1,3 @@
-require("../../mongo");
-
 const { ObjectId } = require("mongoose").Types;
 const fetch = require("node-fetch");
 
@@ -9,7 +7,7 @@ const slack = require("../../slack");
 const ApplicationModel = require("../../models/application");
 const ApplicationPatchModel = require("./models/applicationPatch");
 
-const { API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY } = require("../../config.js");
+const config = require("config");
 const { mongooseFilterForDayBefore, checkResponseStatus, getAccessToken, findAll, printResult } = require("./utils");
 
 let token;
@@ -51,7 +49,7 @@ async function createLog(patch, actualApplication, event, value) {
 
   const anonymizedApplication = new ApplicationModel(application).anonymise();
 
-  const response = await fetch(`${API_ANALYTICS_ENDPOINT}/log/application`, {
+  const response = await fetch(`${config.API_ANALYTICS_ENDPOINT}/log/application`, {
     method: "POST",
     redirect: "follow",
     headers: {
@@ -91,7 +89,7 @@ const rebuildApplication = (applicationInfos) => {
 
 exports.handler = async () => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(ApplicationPatchModel, mongooseFilterForDayBefore(), processPatch);
     await slack.info({
@@ -101,6 +99,7 @@ exports.handler = async () => {
   } catch (e) {
     slack.error({ title: "❌ Application Logs", text: e });
     capture(e);
+    throw e;
   }
 };
 
@@ -108,7 +107,7 @@ exports.handler = async () => {
 // commande terminal : node -e "require('./application').manualHandler('2023-08-17', '2023-08-18')"
 exports.manualHandler = async (startDate, endDate) => {
   try {
-    token = await getAccessToken(API_ANALYTICS_ENDPOINT, API_ANALYTICS_API_KEY);
+    token = await getAccessToken(config.API_ANALYTICS_ENDPOINT, config.API_ANALYTICS_API_KEY);
 
     await findAll(ApplicationPatchModel, { date: { $gte: new Date(startDate), $lt: new Date(endDate) } }, processPatch);
 

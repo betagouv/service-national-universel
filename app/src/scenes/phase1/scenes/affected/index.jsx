@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { isCle, transportDatesToString, youngCanChangeSession } from "snu-lib";
+import { capture } from "@/sentry";
+import { isCle, transportDatesToString, youngCanChangeSession, getDepartureDate, getReturnDate } from "snu-lib";
 import { getCohort } from "../../../../utils/cohorts";
 import api from "../../../../services/api";
-
 import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink";
 import CenterInfo from "./components/CenterInfo";
@@ -15,25 +15,26 @@ import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
-import { getDepartureDate, getReturnDate } from "snu-lib/transport-info";
+import { areAllStepsDone } from "./utils/steps.utils";
+import { RiInformationFill } from "react-icons/ri";
+import useAuth from "@/services/useAuth";
+import WithdrawalModal from "@/scenes/account/components/WithdrawalModal";
+import plausibleEvent from "@/services/plausible";
 
 export default function Affected() {
   const young = useSelector((state) => state.Auth.young);
+  const { isCLE } = useAuth();
   const [center, setCenter] = useState();
   const [meetingPoint, setMeetingPoint] = useState();
   const [session, setSession] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const cohort = getCohort(young.cohort);
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
-
-  const isStepMedicalFieldDone = (young) => young?.cohesionStayMedicalFileDownload === "true";
-
-  if (isStepMedicalFieldDone(young)) {
-    window.scrollTo(0, 0);
-  }
+  const data = { center, meetingPoint, session, departureDate, returnDate };
 
   useEffect(() => {
     if (!young.sessionPhase1Id) return;
@@ -46,12 +47,22 @@ export default function Affected() {
         setMeetingPoint(meetingPoint);
         setSession(session);
       } catch (e) {
+        capture(e);
         toastr.error("Oups, une erreur est survenue lors de la récupération des informations de votre séjour de cohésion.");
       } finally {
         setLoading(false);
       }
     })();
   }, [young]);
+
+  function handleClick() {
+    plausibleEvent("CLE affecte - desistement");
+    setIsOpen(true);
+  }
+
+  if (areAllStepsDone(young)) {
+    window.scrollTo(0, 0);
+  }
 
   if (loading) {
     return (
@@ -88,19 +99,37 @@ export default function Affected() {
 
           <CenterInfo center={center} />
         </header>
-        {isStepMedicalFieldDone(young) && (
-          <div className="order-3 flex-none gap-6 grid grid-cols-1 md:grid-cols-3">
-            <div>
-              <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
+
+        {areAllStepsDone(young) && (
+          <div className="order-3">
+            <div className="flex-none gap-6 grid grid-cols-1 md:grid-cols-3">
+              <div>
+                <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
+              </div>
+              <div className="col-span-2">
+                <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} data={data}/>
+              </div>
             </div>
-            <div className="col-span-2">
-              <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} />
-            </div>
+
+            {isCLE && (
+              <>
+                <WithdrawalModal isOpen={isOpen} onCancel={() => setIsOpen(false)} young={young} />
+                <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2 md:m-16">
+                  <div>
+                    <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
+                    <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
+                  </div>
+                  <button className="text-blue-600 underline underline-offset-2" onClick={handleClick}>
+                    Se désister du SNU.
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
-        <StepsAffected center={center} session={session} meetingPoint={meetingPoint} departureDate={departureDate} returnDate={returnDate} />
-        {!isCle(young) && <FaqAffected className={`${isStepMedicalFieldDone(young) ? "order-3" : "order-4"}`} />}
+        <StepsAffected data={data} />
+        {!isCle(young) && <FaqAffected className={`${areAllStepsDone(young) ? "order-3" : "order-4"}`} />}
       </div>
 
       <div className="flex justify-end py-4 pr-8">

@@ -27,7 +27,6 @@ jobs:
             "app",
             "send-in-blue",
             "packages/lib",
-            "pdf",
             "knowledge-base-public",
             "analytics",
           ]
@@ -41,8 +40,9 @@ jobs:
 
       - name: Install app
         run: |
+          npm i
           cd ${{ matrix.directory }}
-          npm i eslint @microsoft/eslint-formatter-sarif
+          npm i eslint@^8.56.0 @microsoft/eslint-formatter-sarif
         continue-on-error: true
 
       - name: Run ESLint
@@ -52,7 +52,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload analysis results to GitHub
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ matrix.directory }}/eslint-results.sarif
           wait-for-processing: true

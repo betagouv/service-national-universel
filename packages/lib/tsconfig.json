@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "target": "ES2021",
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "sourceRoot": "./src",
+    "declarationDir": "./dist",
+  },
+  "exclude": ["**/dist/**/*", "**/node_modules/*"]
+}

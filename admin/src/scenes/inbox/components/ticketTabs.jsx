@@ -17,7 +17,7 @@ export default function TicketTabs({ setTicket, selectedTicket }) {
 
   const getTickets = async (query) => {
     try {
-      const { ok, data } = await api.post(`/zammood/tickets`, query);
+      const { ok, data } = await api.post(`/SNUpport/tickets`, query);
       if (!ok) return setTickets([]);
       setTickets(data);
     } catch (err) {

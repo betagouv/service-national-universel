@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 const queryString = require("querystring");
 
-const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
+const config = require("config");
 const { capture, captureMessage } = require("./sentry");
 const { SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 const { rateLimiterContactSIB } = require("./rateLimiters");
@@ -16,7 +16,9 @@ const regexp_exception_staging = /selego\.co|(beta|education|jeunesse-sports|snu
 
 const api = async (path, options = {}) => {
   try {
-    if (!SENDINBLUEKEY) {
+    if (!config.ENABLE_SENDINBLUE) return console.log("No mail sent as ENABLE_SENDINBLUE is disabled");
+
+    if (!config.SENDINBLUEKEY) {
       console.log("NO SENDINBLUE KEY");
       console.log(options);
       return console.log("Mail was not sent.");
@@ -27,7 +29,7 @@ const api = async (path, options = {}) => {
       retries: 3,
       retryDelay: 1000,
       retryOn: [502, 503, 504],
-      headers: { "api-key": SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
+      headers: { "api-key": config.SENDINBLUEKEY, "Content-Type": "application/json", ...(options.headers || {}) },
     });
     const contentType = res.headers.raw()["content-type"];
     if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
@@ -59,7 +61,7 @@ async function sendSMS(phoneNumber, content, tag) {
     if (!sms || sms?.code) {
       captureMessage("Error sending an SMS", { extra: { sms, body } });
     }
-    if (ENVIRONMENT !== "production") {
+    if (config.ENVIRONMENT !== "production") {
       console.log(body, sms);
     }
   } catch (e) {
@@ -72,7 +74,7 @@ async function sendSMS(phoneNumber, content, tag) {
 async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc } = {}) {
   try {
     const body = {};
-    if (ENVIRONMENT !== "production") {
+    if (config.ENVIRONMENT !== "production") {
       console.log("to before filter:", to);
       to = to.filter((e) => e.email.match(regexp_exception_staging));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
@@ -91,7 +93,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (!mail || mail?.code) {
       captureMessage("Error sending an email", { extra: { mail, body } });
     }
-    if (ENVIRONMENT !== "production") {
+    if (config.ENVIRONMENT !== "production") {
       console.log(body, mail);
     }
   } catch (e) {
@@ -140,7 +142,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
     if (!id) throw new Error("No template id provided");
 
     const body = { templateId: parseInt(id) };
-    if (!force && ENVIRONMENT !== "production") {
+    if (!force && config.ENVIRONMENT !== "production") {
       console.log("emailTo before filter:", emailTo);
       emailTo = emailTo.filter((e) => e.email.match(regexp_exception_staging));
       if (cc?.length) cc = cc.filter((e) => e.email.match(regexp_exception_staging));
@@ -164,7 +166,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}, {
       captureMessage("Error sending a template", { extra: { mail, body } });
       return;
     }
-    if (ENVIRONMENT !== "production" || force) {
+    if (config.ENVIRONMENT !== "production" || force) {
       console.log(body, mail);
     }
     return mail;
@@ -245,7 +247,7 @@ async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted,
 }
 
 async function sync(obj, type, { force } = { force: false }) {
-  if (ENVIRONMENT !== "production" && !force) return console.log("no sync sendinblue");
+  if (config.ENVIRONMENT !== "production" && !force) return console.log("no sync sendinblue");
   try {
     const user = JSON.parse(JSON.stringify(obj));
     if (!user) return console.log("ERROR WITH ", obj);
@@ -312,7 +314,7 @@ async function syncContact(email, attributes, listIds) {
 }
 
 async function unsync(obj, options = { force: false }) {
-  if (ENVIRONMENT !== "production" && !options.force) {
+  if (config.ENVIRONMENT !== "production" && !options.force) {
     console.log("no unsync sendinblue");
     return;
   }

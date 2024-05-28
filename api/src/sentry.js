@@ -10,7 +10,7 @@ const {
 } = require("@sentry/node");
 const { ProfilingIntegration } = require("@sentry/profiling-node");
 
-const { ENVIRONMENT, SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_PROFILE_SAMPLE_RATE } = require("./config");
+const config = require("config");
 
 const regex = /[0-9a-fA-F]{24}/g;
 
@@ -25,51 +25,56 @@ addGlobalEventProcessor((event) => {
   return event;
 });
 
-function initSentry(app) {
-  if (ENVIRONMENT !== "development") {
+function initSentry() {
+  init({
+    enabled: Boolean(config.SENTRY_URL),
+    dsn: config.SENTRY_URL,
+    environment: "api",
+    release: config.RELEASE,
+    normalizeDepth: 16,
+    integrations: [
+      new ExtraErrorData({ depth: 16 }),
+      new RewriteFrames({ root: process.cwd() }),
+      new NodeIntegrations.Http({ tracing: true }),
+      new NodeIntegrations.Modules(),
+      new ProfilingIntegration(),
+      ...autoDiscoverNodePerformanceMonitoringIntegrations(),
+    ],
+    tracesSampleRate: Number(config.SENTRY_TRACING_SAMPLE_RATE) || 0.01,
+    profilesSampleRate: Number(config.SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
+    ignoreErrors: [
+      /^No error$/,
+      /__show__deepen/,
+      /_avast_submit/,
+      /Access is denied/,
+      /anonymous function: captureException/,
+      /Blocked a frame with origin/,
+      /can't redefine non-configurable property "userAgent"/,
+      /change_ua/,
+      /console is not defined/,
+      /cordova/,
+      /DataCloneError/,
+      /Error: AccessDeny/,
+      /event is not defined/,
+      /feedConf/,
+      /ibFindAllVideos/,
+      /myGloFrameList/,
+      /SecurityError/,
+      /MyIPhoneApp/,
+      /snapchat.com/,
+      /vid_mate_check is not defined/,
+      /win\.document\.body/,
+      /window\._sharedData\.entry_data/,
+      /window\.regainData/,
+      /ztePageScrollModule/,
+    ],
+  });
+}
+
+function initSentryMiddlewares(app) {
+  if (config.ENVIRONMENT !== "development") {
     // Evite le spam sentry en local
-    init({
-      enabled: Boolean(SENTRY_URL),
-      dsn: SENTRY_URL,
-      environment: "api",
-      normalizeDepth: 16,
-      integrations: [
-        new ExtraErrorData({ depth: 16 }),
-        new RewriteFrames({ root: process.cwd() }),
-        new NodeIntegrations.Http({ tracing: true }),
-        new NodeIntegrations.Modules(),
-        new ProfilingIntegration(),
-        ...autoDiscoverNodePerformanceMonitoringIntegrations(),
-      ],
-      tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE) || 0.01,
-      profilesSampleRate: Number(SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
-      ignoreErrors: [
-        /^No error$/,
-        /__show__deepen/,
-        /_avast_submit/,
-        /Access is denied/,
-        /anonymous function: captureException/,
-        /Blocked a frame with origin/,
-        /can't redefine non-configurable property "userAgent"/,
-        /change_ua/,
-        /console is not defined/,
-        /cordova/,
-        /DataCloneError/,
-        /Error: AccessDeny/,
-        /event is not defined/,
-        /feedConf/,
-        /ibFindAllVideos/,
-        /myGloFrameList/,
-        /SecurityError/,
-        /MyIPhoneApp/,
-        /snapchat.com/,
-        /vid_mate_check is not defined/,
-        /win\.document\.body/,
-        /window\._sharedData\.entry_data/,
-        /window\.regainData/,
-        /ztePageScrollModule/,
-      ],
-    });
+    initSentry();
   }
 
   // The request handler must be the first middleware on the app
@@ -85,7 +90,7 @@ function initSentry(app) {
 }
 
 function capture(err, contexte) {
-  console.log("capture", err);
+  console.error("capture", err);
   if (!err) {
     sentryCaptureMessage("Error not defined");
     return;
@@ -102,7 +107,7 @@ function capture(err, contexte) {
   }
 }
 function captureMessage(mess, contexte) {
-  console.log("captureMessage", mess);
+  console.error("captureMessage", mess);
   if (!mess) {
     sentryCaptureMessage("Message not defined");
     return;
@@ -115,6 +120,7 @@ function captureMessage(mess, contexte) {
 
 module.exports = {
   initSentry,
+  initSentryMiddlewares,
   capture,
   captureMessage,
 };
