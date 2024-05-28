@@ -69,10 +69,12 @@ export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<Up
     cleDisplayPDRForReferentClasseDate: ToFromDateValidator,
     cleUpdateCohortForReferentDepartment: Joi.boolean().default(false),
     cleUpdateCentersForReferentDepartment: Joi.boolean().default(false),
+    cleDisplayCohortsForAdminCLEDate: ToFromDateValidator,
+    cleDisplayCohortsForReferentClasseDate: ToFromDateValidator,
   }).validate(dto, { stripUnknown: true });
 };
 
-const ToFromDateValidator = {
+const ToFromDateValidator = Joi.object({
   from: Joi.date().allow(null, ""),
   to: Joi.date().allow(null, ""),
-};
+});

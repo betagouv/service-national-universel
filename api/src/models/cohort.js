@@ -113,7 +113,9 @@ const Schema = new mongoose.Schema({
   cleUpdateCohortForReferentDepartmentDate: { from: { type: Date }, to: { type: Date } },
   // CLE - display cohorts
   cleDisplayCohortsForAdminCLE: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForAdminCLEDate: { from: { type: Date }, to: { type: Date } },
   cleDisplayCohortsForReferentClasse: { type: Boolean, default: false, required: false },
+  cleDisplayCohortsForReferentClasseDate: { from: { type: Date }, to: { type: Date } },
   // CLE - update centers
   cleUpdateCentersForReferentRegion: { type: Boolean, default: false, required: false },
   cleUpdateCentersForReferentRegionDate: { from: { type: Date }, to: { type: Date } },

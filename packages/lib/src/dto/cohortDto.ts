@@ -28,7 +28,9 @@ export type CohortDto = {
   cleUpdateCohortForReferentRegion?: boolean;
   cleUpdateCohortForReferentDepartment?: boolean;
   cleDisplayCohortsForAdminCLE?: boolean;
+  cleDisplayCohortsForAdminCLEDate?: ToFromDate;
   cleDisplayCohortsForReferentClasse?: boolean;
+  cleDisplayCohortsForReferentClasseDate?: ToFromDate;
   cleUpdateCentersForReferentRegion?: boolean;
   cleUpdateCentersForReferentDepartment?: boolean;
   cleDisplayCentersForAdminCLE?: boolean;
@@ -60,9 +62,9 @@ export type CohortDto = {
   } | null;
 };
 
-export type UpdateCohortDto = Omit<CohortDto, "name" | "type">;
+export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId">;
 
 type ToFromDate = {
-  from: Date;
-  to: Date;
+  from: Date | null;
+  to: Date | null;
 };
