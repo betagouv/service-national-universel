@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import plausibleEvent from "../../services/plausible";
 
+// RESPONSIVE !
 export default function HomePhase2() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
