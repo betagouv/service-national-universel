@@ -25,16 +25,7 @@ function renderStepResponsive(step) {
 }
 
 const Step = () => {
-  const [data, updateValue] = useContext(ReinscriptionContext);
-  const young = useSelector((state) => state.Auth.young);
-  useEffect(() => {
-    updateValue({
-      ...data,
-      birthDate: young.birthdateAt,
-      zip: young.zip,
-      frenchNationality: young.frenchNationality,
-    });
-  }, []);
+  const [data] = useContext(ReinscriptionContext);
 
   const { step } = useParams();
 

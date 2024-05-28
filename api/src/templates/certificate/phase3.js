@@ -1,6 +1,6 @@
 const path = require("path");
 const { initDocument, getMinistres, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_COLOR } = require("./utils");
-const { ENVIRONMENT, IMAGES_ROOTDIR } = require("../../config");
+const config = require("config");
 
 function render(doc, young) {
   const d = young.statusPhase3ValidatedAt;
@@ -14,8 +14,8 @@ function render(doc, young) {
 
   doc.font(FONT).fontSize(FONT_SIZE).lineGap(LINE_GAP).fillColor(FILL_COLOR);
 
-  if (ENVIRONMENT !== "testing") {
-    doc.image(path.join(IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+  if (config.ENVIRONMENT !== "test") {
+    doc.image(path.join(config.IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
   }
 
   doc

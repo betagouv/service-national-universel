@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const Joi = require("joi");
 
 const { capture, captureMessage } = require("./sentry");
-const config = require("./config");
+const config = require("config");
 const { sendTemplate, regexp_exception_staging } = require("./sendinblue");
 const {
   JWT_SIGNIN_MAX_AGE_SEC,

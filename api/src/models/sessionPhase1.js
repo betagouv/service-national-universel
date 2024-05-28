@@ -4,7 +4,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const { getCohortNames } = require("snu-lib");
 const esClient = require("../es");
 const MODELNAME = "sessionphase1";
-const { ENVIRONMENT } = require("../config");
+const config = require("config");
 const { starify } = require("../utils/anonymise");
 
 const File = new mongoose.Schema({
@@ -238,6 +238,6 @@ Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["tea
 Schema.index({ cohesionCenterId: 1 });
 
 const OBJ = mongoose.model(MODELNAME, Schema);
-if (ENVIRONMENT === "production") OBJ.syncIndexes();
+if (config.ENVIRONMENT === "production") OBJ.syncIndexes();
 
 module.exports = OBJ;
