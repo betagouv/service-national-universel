@@ -89,32 +89,43 @@ function initSentryMiddlewares(app) {
   };
 }
 
+function _flatten(stack) {
+  // Remove new lines and merge spaces to get 1 line log output
+  return stack.replace(/\n/g, " | ").replace(/\s+/g, ' ');
+}
+
 function capture(err, contexte) {
-  console.error("capture", err);
   if (!err) {
-    sentryCaptureMessage("Error not defined");
+    const msg = "Error not defined"
+    console.error("capture", msg);
+    sentryCaptureMessage(msg);
     return;
   }
 
   if (err instanceof Error) {
+    console.error("capture", err.stack ? _flatten(err.stack) : err);
     sentryCaptureException(err, contexte);
   } else if (err.error instanceof Error) {
-    sentryCaptureException(err.error, contexte);
+    const e = err.error
+    console.error("capture", e.stack ? _flatten(e.stack) : e);
+    sentryCaptureException(e, contexte);
   } else if (err.message) {
+    console.error("capture", err.message);
     sentryCaptureMessage(err.message, contexte);
   } else {
-    sentryCaptureMessage("Error not defined well", { extra: { error: err, contexte: contexte } });
+    const msg = "Error not defined well"
+    console.error("capture", msg);
+    sentryCaptureMessage(msg, { extra: { error: err, contexte: contexte } });
   }
 }
 function captureMessage(mess, contexte) {
-  console.error("captureMessage", mess);
-  if (!mess) {
-    sentryCaptureMessage("Message not defined");
-    return;
-  }
-
   if (mess) {
+    console.error("captureMessage", mess);
     sentryCaptureMessage(mess, contexte);
+  } else {
+    const msg = "Message not defined"
+    console.error("captureMessage", msg);
+    sentryCaptureMessage("Message not defined");
   }
 }
 
