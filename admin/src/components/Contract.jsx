@@ -52,8 +52,11 @@ export default function Contract({ young }) {
         const { ok: applicationOk, data: application, code: applicationCode } = await api.get(`/application/${applicationId}`);
         if (!applicationOk) throw new Error(applicationCode);
 
-        const { ok: contractOk, data: contract, code: contractCode } = await api.get(`/contract/${application.contractId}`);
-        if (!contractOk) throw new Error(contractCode);
+        if (application.contractId) {
+          const { ok: contractOk, data: contract, code: contractCode } = await api.get(`/contract/${application.contractId}`);
+          if (!contractOk) throw new Error(contractCode);
+          setContract(contract);
+        }
 
         const { ok: missionOk, data: mission, code: missionCode } = await api.get(`/mission/${application.missionId}`);
         if (!missionOk) throw new Error(missionCode);
@@ -68,10 +71,10 @@ export default function Contract({ young }) {
         if (!structureOk) throw new Error(structureCode);
 
         setApplication(application);
-        setContract(contract);
         setMission(mission);
         setTutor(tutor);
         setStructure(structure);
+
         if (Object.keys(manager.representantEtat).length) {
           setManagerDepartment(manager.representantEtat);
         } else {
@@ -307,7 +310,7 @@ export default function Contract({ young }) {
         <DownloadContractButton young={young} uri={contract?._id}>
           Télécharger le contrat
         </DownloadContractButton>
-      ) : new Date(contract.created) < new Date("2024-03-14") ? (
+      ) : new Date(contract?.createdAt) < new Date("2024-03-14") ? (
         <ContractOld young={young} initialValues={initialValues} onSubmit={onSubmit} loadings={loadings} isYoungAdult={isYoungAdult} />
       ) : (
         <Formik validateOnChange={false} validateOnBlur={false} initialValues={initialValues} onSubmit={onSubmit}>
