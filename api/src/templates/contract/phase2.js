@@ -438,6 +438,7 @@ function _page3Old(doc, contract) {
   doc.text(
     `Une journée de fin de mission d’intérêt général est organisée, en dehors des heures de MIG mentionnées au b), pour préparer une éventuelle participation du volontaire à la phase III du SNU, soit un engagement volontaire de plusieurs mois, notamment dans le cadre du service civique ou du volontariat des armées. La participation du volontaire est requise.`,
   );
+  doc.moveDown(2);
 
   // F
   doc.font(FONT_BOLD).fontSize(FONT_SIZE_H2).text(`f) Responsabilités`);
