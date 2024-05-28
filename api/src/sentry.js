@@ -8,7 +8,6 @@ const {
   Handlers,
   autoDiscoverNodePerformanceMonitoringIntegrations,
 } = require("@sentry/node");
-const { ProfilingIntegration } = require("@sentry/profiling-node");
 
 const config = require("config");
 
@@ -26,6 +25,7 @@ addGlobalEventProcessor((event) => {
 });
 
 function initSentry() {
+  const { ProfilingIntegration } = require("@sentry/profiling-node");
   init({
     enabled: Boolean(config.SENTRY_URL),
     dsn: config.SENTRY_URL,
