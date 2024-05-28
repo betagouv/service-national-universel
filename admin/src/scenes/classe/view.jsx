@@ -99,10 +99,10 @@ export default function View() {
         setInfoBus({
           busId: ligne.busId,
           departureDate: dayjs(ligne.departuredDate).format("dddd D MMMM YYYY"),
-          meetingHour: meetingPoint.meetingHour,
-          departureHour: meetingPoint.departureHour,
+          meetingHour: meetingPoint?.meetingHour,
+          departureHour: meetingPoint?.departureHour,
           returnDate: dayjs(ligne.returnDate).format("dddd D MMMM YYYY"),
-          returnHour: meetingPoint.returnHour,
+          returnHour: meetingPoint?.returnHour,
         });
       }
 
@@ -355,7 +355,8 @@ export default function View() {
                 </Link>
               </>
             )}
-            {edit && user.role === ROLES.ADMINISTRATEUR_CLE ? (
+
+            {edit && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role) ? (
               <div className="flex items-center justify-end mt-6">
                 <button type="button" className="flex items-center justify-center text-xs text-red-500 hover:text-red-700" onClick={() => setModalDelete(true)}>
                   <BsTrash3 className="mr-2" />

@@ -69,7 +69,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
     const errorsObject: Errors = {};
     if (isNaN(values.placesTotal)) {
       errorsObject.placesTotal = "Le nombre de places est incorrect";
-    } else if (values.placesTotal > center.placesTotal) {
+    } else if (center.placesTotal && values.placesTotal > center.placesTotal) {
       errorsObject.placesTotal = "Le nombre de places ne peut pas être supérieur à la capacité du centre";
     } else if (values.placesTotal < session.placesTotal - session.placesLeft) {
       errorsObject.placesTotal = "Le nombre de places total est inférieur au nombre d'inscrits";

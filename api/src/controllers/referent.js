@@ -26,7 +26,7 @@ const StateManager = require("../states");
 const emailsEmitter = require("../emails");
 
 const { getQPV, getDensity } = require("../geo");
-const config = require("../config");
+const config = require("config");
 const { capture } = require("../sentry");
 const { decrypt, encrypt } = require("../cryptoUtils");
 const { sendTemplate } = require("../sendinblue");
@@ -40,7 +40,6 @@ const {
   isYoung,
   inSevenDays,
   FILE_STATUS_PHASE1,
-  translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
@@ -79,11 +78,14 @@ const {
   MILITARY_FILE_KEYS,
   department2region,
   formatPhoneNumberFromPhoneZone,
+  translateFileStatusPhase1,
   canCheckIfRefExist,
   YOUNG_SOURCE,
   YOUNG_SOURCE_LIST,
   APPLICATION_STATUS,
   EQUIVALENCE_STATUS,
+  YOUNG_SITUATIONS,
+  CLE_FILIERE_LIST,
 } = require("snu-lib");
 const { getFilteredSessions, getAllSessions } = require("../utils/cohort");
 const scanFile = require("../utils/virusScanner");
@@ -637,11 +639,13 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const previousYoung = { ...young.toObject() };
 
     let classe = undefined;
+    let etablissement = undefined;
     if (value.source === YOUNG_SOURCE.CLE) {
-      const [etablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(value.etablissementId), await ClasseModel.findById(value.classeId)]);
-      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
+      const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(value.etablissementId), await ClasseModel.findById(value.classeId)]);
+      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
       if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
       classe = dbClasse;
+      etablissement = dbEtablissement;
     }
 
     let previousEtablissement = undefined;
@@ -710,6 +714,18 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
         correctionRequests: correctionRequestsFiltered,
+        schooled: "true",
+        schoolName: etablissement.name,
+        schoolType: etablissement.type[0],
+        schoolAddress: etablissement.address,
+        schoolZip: etablissement.zip,
+        schoolCity: etablissement.city,
+        schoolDepartment: etablissement.department,
+        schoolRegion: etablissement.region,
+        schoolCountry: etablissement.country,
+        schoolId: undefined,
+        grade: classe.grade,
+        situation: getYoungSituationIfCLE(classe.filiere),
       });
       if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
         young.set({
@@ -806,6 +822,25 @@ const getYoungStatus = (young) => {
     default:
       return YOUNG_STATUS.WAITING_VALIDATION;
   }
+};
+
+const getYoungSituationIfCLE = (filiere) => {
+  if (filiere === CLE_FILIERE_LIST.GENERAL_AND_TECHNOLOGIC) {
+    return YOUNG_SITUATIONS.GENERAL_SCHOOL;
+  }
+  if (filiere === CLE_FILIERE_LIST.PROFESSIONAL) {
+    return YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL;
+  }
+  if (filiere === CLE_FILIERE_LIST.APPRENTICESHIP) {
+    return YOUNG_SITUATIONS.APPRENTICESHIP;
+  }
+  if (filiere === CLE_FILIERE_LIST.ADAPTED) {
+    return YOUNG_SITUATIONS.SPECIALIZED_SCHOOL;
+  }
+  if (filiere === CLE_FILIERE_LIST.MIXED) {
+    return YOUNG_SITUATIONS.GENERAL_SCHOOL;
+  }
+  return null;
 };
 
 router.post("/:tutorId/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {

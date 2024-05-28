@@ -35,6 +35,7 @@ exports.handler = async () => {
       const values = await getCount({ department });
       await getGoalAndComputeFillingRates({ department, values });
     }
+    await slack.success({ title: "computeGoalsInscription", text: "Le traitement s'est terminé avec succès." });
   } catch (e) {
     capture(e);
     slack.error({ title: "computeGoalsInscription", text: JSON.stringify(e) });

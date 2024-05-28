@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDotEnv": [".env"],
   "pipeline": {
     "build": {
       "outputs": [".dist/**", "!.dist/cache/**"]
@@ -11,7 +12,7 @@
       "cache": false,
       "persistent": true,
       "outputs": ["dist/**", "build/**"],
-      "dependsOn": ["@snu/ds#build"]
+      "dependsOn": ["@snu/ds#build", "^build"]
     },
     "start": {
       "outputs": [".launch/**", "!.launch/cache/**"]
