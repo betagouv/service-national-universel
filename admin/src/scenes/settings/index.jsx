@@ -26,6 +26,7 @@ import SelectCohort from "@/components/cohorts/SelectCohort";
 
 import { settings, uselessSettings } from "./utils";
 import { InformationsConvoyage } from "@/scenes/settings/InformationsConvoyage";
+import { CleSettings } from "@/scenes/settings/CleSettings";
 
 export default function Settings() {
   const { user } = useSelector((state) => state.Auth);
@@ -823,92 +824,7 @@ export default function Settings() {
           </div>
 
           {data.type === COHORT_TYPE.CLE && (
-            <Container title="Classes engagées">
-              <div className="flex w-full">
-                <div className="flex w-[45%] flex-col gap-4">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Modification des cohortes </p>
-                    </div>
-                    <SimpleToggle
-                      label="Référent régionaux"
-                      disabled={isLoading || readOnly}
-                      value={data.cleUpdateCohortForReferentRegion}
-                      onChange={() => setData({ ...data, cleUpdateCohortForReferentRegion: !data.cleUpdateCohortForReferentRegion })}
-                    />
-                  </div>
-                  <div className="mt-2 flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Affichage des cohortes </p>
-                    </div>
-                    <SimpleToggle
-                      label="Admin CLE"
-                      disabled={isLoading || readOnly}
-                      value={data.cleDisplayCohortsForAdminCLE}
-                      onChange={() => setData({ ...data, cleDisplayCohortsForAdminCLE: !data.cleDisplayCohortsForAdminCLE })}
-                    />
-                    <SimpleToggle
-                      label="Référents de classe"
-                      disabled={isLoading || readOnly}
-                      value={data.cleDisplayCohortsForReferentClasse}
-                      onChange={() => setData({ ...data, cleDisplayCohortsForReferentClasse: !data.cleDisplayCohortsForReferentClasse })}
-                    />
-                  </div>
-                </div>
-                <div className="flex w-[10%] items-center justify-center">
-                  <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
-                </div>
-                <div className="flex w-[45%] flex-col gap-4">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs  font-medium text-gray-900">Modification des centres </p>
-                      </div>
-                      <SimpleToggle
-                        label="Référent régionaux"
-                        disabled={isLoading || readOnly}
-                        value={data.cleUpdateCentersForReferentRegion}
-                        onChange={() => setData({ ...data, cleUpdateCentersForReferentRegion: !data.cleUpdateCentersForReferentRegion })}
-                      />
-                    </div>
-                    <div className="mt-2 flex flex-col gap-3">
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs  font-medium text-gray-900">Affichage des centres </p>
-                      </div>
-                      <SimpleToggle
-                        label="Admin CLE"
-                        disabled={isLoading || readOnly}
-                        value={data.cleDisplayCentersForAdminCLE}
-                        onChange={() => setData({ ...data, cleDisplayCentersForAdminCLE: !data.cleDisplayCentersForAdminCLE })}
-                      />
-                      <SimpleToggle
-                        label="Référents de classe"
-                        disabled={isLoading || readOnly}
-                        value={data.cleDisplayCentersForReferentClasse}
-                        onChange={() => setData({ ...data, cleDisplayCentersForReferentClasse: !data.cleDisplayCentersForReferentClasse })}
-                      />
-                    </div>
-                    <div className="mt-2 flex flex-col gap-3">
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs  font-medium text-gray-900">Affichage des points de rassemblement </p>
-                      </div>
-                      <SimpleToggle
-                        label="Admin CLE"
-                        disabled={isLoading || readOnly}
-                        value={data.cleDisplayPDRForAdminCLE}
-                        onChange={() => setData({ ...data, cleDisplayPDRForAdminCLE: !data.cleDisplayPDRForAdminCLE })}
-                      />
-                      <SimpleToggle
-                        label="Référents de classe"
-                        disabled={isLoading || readOnly}
-                        value={data.cleDisplayPDRForReferentClasse}
-                        onChange={() => setData({ ...data, cleDisplayPDRForReferentClasse: !data.cleDisplayPDRForReferentClasse })}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Container>
+            <CleSettings cleSettingsData={data} isLoading={isLoading} readOnly={readOnly} handleChange={(cleSettingsData) => setData({ ...data, ...cleSettingsData })} />
           )}
 
           {!readOnly && (

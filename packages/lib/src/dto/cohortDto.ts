@@ -1,4 +1,5 @@
 export type CohortDto = {
+  snuId: string;
   name: string;
   type: string;
   dateStart: Date;
@@ -48,7 +49,7 @@ export type CohortDto = {
   youngCheckinForRegionReferent?: boolean;
   youngCheckinForDepartmentReferent?: boolean;
   daysToValidate?: number | null;
-  uselessInformation?: object | null;
+  uselessInformation?: Record<string, any> | null;
   validationDate?: Date | null;
   validationDateForTerminaleGrade?: Date | null;
   daysToValidateForTerminalGrade?: number | null;
