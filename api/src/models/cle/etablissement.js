@@ -4,6 +4,7 @@ const esClient = require("../../es");
 const { CLE_TYPE_LIST, CLE_SECTOR_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "etablissement";
+const ClasseModel = require("./classe");
 
 const Schema = new mongoose.Schema({
   schoolId: {
@@ -127,9 +128,18 @@ Schema.virtual("user").set(function (user) {
   }
 });
 
-Schema.pre("save", function (next, params) {
+Schema.pre("save", async function (next, params) {
   this.user = params?.fromUser;
   this.updatedAt = Date.now();
+
+  if (this.isModified("department")) {
+    await ClasseModel.updateMany({ etablissementId: this._id }, { department: this.department });
+  }
+
+  if (this.isModified("region")) {
+    await ClasseModel.updateMany({ etablissementId: this._id }, { region: this.region });
+  }
+
   next();
 });
 

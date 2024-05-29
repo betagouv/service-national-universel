@@ -60,7 +60,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO update enum
   coloration: {
     type: String,
     enum: CLE_COLORATION_LIST,
@@ -84,7 +83,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  //TODO update with the good filiere enum
   filiere: {
     type: String,
     enum: CLE_FILIERE_LIST,
@@ -147,6 +145,20 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  department: {
+    type: String,
+    documentation: {
+      description: "Département de la classe",
+    },
+  },
+
+  region: {
+    type: String,
+    documentation: {
+      description: "Région de la classe",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   deletedAt: { type: Date },
@@ -197,13 +209,14 @@ Schema.virtual("isFull").get(function () {
   return this.totalSeats - this.seatsTaken <= 0;
 });
 
-Schema.virtual("department").get(function () {
-  return this.etablissement?.department ?? null;
-});
+// Supprimer les virtuals pour department et region
+// Schema.virtual("department").get(function () {
+//   return this.etablissement?.department ?? null;
+// });
 
-Schema.virtual("region").get(function () {
-  return this.etablissement?.region ?? null;
-});
+// Schema.virtual("region").get(function () {
+//   return this.etablissement?.region ?? null;
+// });
 
 Schema.virtual("user").set(function (user) {
   if (user) {
@@ -232,16 +245,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(
-  mongooseElastic(esClient, {
-    populate: ["etablissement"],
-    virtuals: [
-      { key: "region", type: "String" },
-      { key: "department", type: "String" },
-    ],
-  }),
-  MODELNAME,
-);
+Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
