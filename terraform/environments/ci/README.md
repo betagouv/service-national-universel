@@ -13,7 +13,6 @@ All CI resources are described in [main.tf](main.tf). The most important are :
 
 - The [project](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/account_project) that owns all resources of the ci environment
 - The [application user](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/iam_application) scoped on this project
-- The root [DNS zone](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/domain_zone): **ci.beta-snu.dev**
 - The [registry](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/registry_namespace)
 - The [secrets](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/secret)
 - The [serverless containers](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/container) that serve the different applications
@@ -50,17 +49,8 @@ Associated github workflows :
 
 All test environments resources are described in [custom/main.tf](custom/main.tf). The most important are :
 
-- The child [DNS zone](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/domain_zone): A nested DNS zone inside **ci.beta-snu.dev**
 - The [secrets](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/secret) specific to this test environment. (Copied from ci at creation)
 - The [serverless containers](https://registry.terraform.io/providers/scaleway/scaleway/latest/docs/resources/container) that serve the different applications
-
-Test environments have their own DNS zone inside the CI DNS zone. The name varies depending on the branch name.
-
-For example, if the branch name is **feat-1234-ci**, the applications can be accessed via these endpoints :
-
-- https://api.feat-1234-ci.ci.beta-snu.dev
-- https://app.feat-1234-ci.ci.beta-snu.dev
-- https://admin.feat-1234-ci.ci.beta-snu.dev
 
 ### Test environments backend
 

@@ -108,13 +108,6 @@ resource "scaleway_container_namespace" "custom" {
 
 # Containers
 
-# DNS zone
-resource "scaleway_domain_zone" "main" {
-  project_id = scaleway_account_project.main.id
-  domain     = local.domain
-  subdomain  = ""
-}
-
 resource "scaleway_container" "api" {
   name            = "${local.env}-api"
   namespace_id    = scaleway_container_namespace.main.id
@@ -138,14 +131,6 @@ resource "scaleway_container" "api" {
     "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
-}
-
-resource "scaleway_domain_record" "api" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "api"
-  type     = "CNAME"
-  data     = "${scaleway_container.api.domain_name}."
-  ttl      = 3600
 }
 
 resource "scaleway_container_domain" "api" {
@@ -176,14 +161,6 @@ resource "scaleway_container" "admin" {
   }
 }
 
-resource "scaleway_domain_record" "admin" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "admin"
-  type     = "CNAME"
-  data     = "${scaleway_container.admin.domain_name}."
-  ttl      = 3600
-}
-
 resource "scaleway_container_domain" "admin" {
   container_id = scaleway_container.admin.id
   hostname     = local.admin_hostname
@@ -208,14 +185,6 @@ resource "scaleway_container" "app" {
     "NGINX_HOSTNAME" = local.app_hostname
     "ENVIRONMENT"    = "ci"
   }
-}
-
-resource "scaleway_domain_record" "app" {
-  dns_zone = scaleway_domain_zone.main.id
-  name     = "moncompte"
-  type     = "CNAME"
-  data     = "${scaleway_container.app.domain_name}."
-  ttl      = 3600
 }
 
 resource "scaleway_container_domain" "app" {
