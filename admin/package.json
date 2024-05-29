@@ -65,7 +65,7 @@
     "snu-lib": "*",
     "styled-components": "5.3.11",
     "validator": "13.7.0",
-    "xlsx": "^0.18.5"
+    "xlsx": "~0.18.5"
   },
   "devDependencies": {
     "@sentry/vite-plugin": "^2.2.0",
