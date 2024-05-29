@@ -293,11 +293,11 @@ function hasAccessToReinscription(young) {
       return false
     }
 
-    if ([YOUNG_STATUS.ABANDONED].includes(young.status)) {
+    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN, ].includes(young.status)) {
       return true;
     }
 
-    if ([YOUNG_STATUS_PHASE1.WITHDRAWN, YOUNG_STATUS_PHASE1.NOT_DONE].includes(young.statusPhase1)) {
+    if ([YOUNG_STATUS_PHASE1.NOT_DONE].includes(young.statusPhase1)) {
       return true;
     }
 
