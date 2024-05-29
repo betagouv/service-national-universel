@@ -939,8 +939,12 @@ function canSearchStudent(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
 }
 
-function canDeleteClasse(actor) {
+function canWithdrawClasse(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
+}
+
+function canDeleteClasse(actor) {
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canAllowSNU(actor) {
@@ -1083,6 +1087,7 @@ export {
   canViewEtablissement,
   canSearchStudent,
   canDeleteClasse,
+  canWithdrawClasse,
   canAllowSNU,
   canEditSanitaryEmailContact,
 };

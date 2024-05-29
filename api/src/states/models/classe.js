@@ -109,4 +109,43 @@ ClasseStateManager.withdraw = async (_id, fromUser, options) => {
   return classe;
 };
 
+ClasseStateManager.delete = async (_id, fromUser, options) => {
+  const YoungModel = options?.YoungModel; // Prevent circular dependency in YoungModel post save hook
+  if (!YoungModel) throw new Error("YoungModel is required");
+
+  let classe = await ClasseModel.findById(_id);
+  if (!classe) throw new Error("Classe not found");
+  if (classe.deletedAt) throw new Error("Classe already deleted");
+  if (classe.cohesionCenterId) throw new Error("Classe already linked to a cohesion center");
+  if (classe.sessionId) throw new Error("Classe already linked to a session");
+  if (classe.ligneId) throw new Error("Classe already linked to a bus line");
+
+  const students = await YoungModel.find({
+    classeId: classe._id,
+    status: { $in: [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.VALIDATED] },
+  });
+
+  const studentsValidated = students.filter((student) => student.status === YOUNG_STATUS.VALIDATED);
+  if (studentsValidated.length > 0) throw new Error("Classe has validated students");
+
+  // Deelete classe
+  classe.set({ deletedAt: Date.now() });
+  classe = await classe.save({ fromUser });
+
+  // Set all students in "Inscription abandonnée"
+  await Promise.all(
+    students.map((s) => {
+      s.set({
+        status: YOUNG_STATUS.ABANDONED,
+        lastStatusAt: Date.now(),
+        withdrawnMessage: "classe désistée",
+        withdrawnReason: "other",
+      });
+      return s.save({ fromUser });
+    }),
+  );
+
+  return classe;
+};
+
 module.exports = ClasseStateManager;

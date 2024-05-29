@@ -15,6 +15,7 @@ const {
   canUpdateClasse,
   canUpdateClasseStay,
   canViewClasse,
+  canWithdrawClasse,
   canDeleteClasse,
 } = require("snu-lib");
 const { validateId } = require("../../utils/validator");
@@ -234,17 +235,23 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canDeleteClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canWithdrawClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await StateManager.Classe.withdraw(id, req.user, { YoungModel });
+    if (req.query?.type === "delete") {
+      if (!canDeleteClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      await StateManager.Classe.delete(id, req.user, { YoungModel });
+    }
+    if (req.query?.type === "withdraw") {
+      await StateManager.Classe.withdraw(id, req.user, { YoungModel });
+    }
 
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    res.status(500).send({ ok: false, code: error });
   }
 });
 
