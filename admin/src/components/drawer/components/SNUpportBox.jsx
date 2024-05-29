@@ -5,6 +5,7 @@ import api from "@/services/api";
 import { translate } from "@/utils";
 import Mail from "../icons/Mail";
 import Separator from "./Separator";
+import { capture } from "../../../sentry";
 
 export default function SNUpportBox({ newTickets, openedTickets, sideBarOpen }) {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -20,9 +21,13 @@ export default function SNUpportBox({ newTickets, openedTickets, sideBarOpen }) 
   const connectToSNUpport = async () => {
     try {
       const { ok, data, code } = await api.get(`/SNUpport/signin`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue. Veuillez contacter le support", translate(code));
+      if (!ok) {
+        capture("Failed to sign in to SNUpport", { ok, data, code });
+        return toastr.error("Oups, une erreur est survenue. Veuillez contacter le support", translate(code));
+      }
       window.open(data, "_blank", "noopener,noreferrer");
     } catch (e) {
+      capture(e);
       console.log(e);
       toastr.error(e.message, translate(e.code));
     }
