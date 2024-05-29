@@ -15,7 +15,7 @@
     "libphonenumber-js": "^1.10.41",
     "request-ip": "^3.3.0",
     "sanitize-html": "^2.12.1",
-    "turbo": "^1.13.2"
+    "turbo": "^1.13.3"
   },
   "workspaces": [
     "packages/*",
