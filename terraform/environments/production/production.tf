@@ -166,11 +166,15 @@ resource "scaleway_container" "crons" {
   protocol       = "http1"
   deploy         = true
 
-  environment_variables = merge(scaleway_container.api.environment_variables, {
-    "RUN_CRONS" = "true"
-  })
+  environment_variables = {
+    "NODE_ENV"       = "production"
+    "RUN_CRONS"      = "true"
+  }
 
-  secret_environment_variables = scaleway_container.api.secret_environment_variables
+  secret_environment_variables = {
+    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
+    "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
+  }
 }
 
 output "api_endpoint" {
