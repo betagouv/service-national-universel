@@ -89,9 +89,18 @@ function initSentryMiddlewares(app) {
   };
 }
 
-function _flatten(stack) {
+function _flattenStack(stack) {
   // Remove new lines and merge spaces to get 1 line log output
   return stack.replace(/\n/g, " | ").replace(/\s+/g, ' ');
+}
+
+function captureError(err, contexte) {
+  if (err.stack && config.ENABLE_FLATTEN_ERROR_LOG) {
+    console.error("capture", _flattenStack(err.stack));
+  } else {
+    console.error("capture", err);
+  }
+  sentryCaptureException(err, contexte);
 }
 
 function capture(err, contexte) {
@@ -103,12 +112,9 @@ function capture(err, contexte) {
   }
 
   if (err instanceof Error) {
-    console.error("capture", err.stack ? _flatten(err.stack) : err);
-    sentryCaptureException(err, contexte);
+    captureError(err, contexte);
   } else if (err.error instanceof Error) {
-    const e = err.error
-    console.error("capture", e.stack ? _flatten(e.stack) : e);
-    sentryCaptureException(e, contexte);
+    captureError(err.error, contexte);
   } else if (err.message) {
     console.error("capture", err.message);
     sentryCaptureMessage(err.message, contexte);
@@ -125,7 +131,7 @@ function captureMessage(mess, contexte) {
   } else {
     const msg = "Message not defined"
     console.error("captureMessage", msg);
-    sentryCaptureMessage("Message not defined");
+    sentryCaptureMessage(msg);
   }
 }
 
