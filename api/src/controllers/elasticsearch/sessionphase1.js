@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
@@ -66,10 +66,10 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     let sessionphase1 = [];
     let response;
     if (req.params.action === "export") {
-      response = await allRecords("sessionphase1", hitsRequestBody.query, esClient, exportFields);
+      response = await allRecords("sessionphase1", hitsRequestBody.query, esClient(), exportFields);
       sessionphase1 = response.map((s) => ({ _id: s._id, _source: s }));
     } else {
-      const esReponse = await esClient.msearch({ index: "sessionphase1", body: buildNdJson({ index: "sessionphase1", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const esReponse = await esClient().msearch({ index: "sessionphase1", body: buildNdJson({ index: "sessionphase1", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       response = esReponse.body;
       sessionphase1 = response?.responses[0]?.hits?.hits || [];
     }
@@ -120,7 +120,7 @@ router.post("/young-affectation/:cohort/:action(search|export)", passport.authen
       const response = await allRecords("sessionphase1", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "sessionphase1", body: buildNdJson({ index: "sessionphase1", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "sessionphase1", body: buildNdJson({ index: "sessionphase1", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
   } catch (error) {

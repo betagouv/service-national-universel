@@ -4,7 +4,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, ES_NO_LIMIT, canSearchInElasticSearch, canSearchSessionPhase1 } = require("snu-lib");
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
@@ -37,7 +37,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       response = await allRecords("cohesioncenter", hitsRequestBody.query);
       cohesionCenters = response.map((s) => ({ _id: s._id, _source: s }));
     } else {
-      const esReponse = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const esReponse = await esClient().msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       response = esReponse.body;
       cohesionCenters = response?.responses[0]?.hits?.hits || [];
     }
@@ -81,7 +81,7 @@ router.post("/not-in-cohort/:cohort", passport.authenticate(["referent"], { sess
     hitsRequestBody.size = ES_NO_LIMIT;
     hitsRequestBody.query.bool.must_not = [{ term: { "cohorts.keyword": String(req.params.cohort) } }];
 
-    const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody) });
+    const response = await esClient().msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
@@ -136,7 +136,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
       };
       const {
         body: { responses },
-      } = await esClient.msearch({
+      } = await esClient().msearch({
         index: "sessionphase1",
         body: buildNdJson({ index: "sessionphase1", type: "_doc" }, { query: sessionQuery, size: ES_NO_LIMIT }),
       });
@@ -165,7 +165,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
 
         const {
           body: { responses },
-        } = await esClient.msearch({
+        } = await esClient().msearch({
           index: "young",
           body: buildNdJson({ index: "young", type: "_doc" }, body),
         });
@@ -240,7 +240,7 @@ router.post("/presence/:action(search|export)", passport.authenticate(["referent
       });
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "cohesioncenter", body: buildNdJson({ index: "cohesioncenter", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
 
       const reducedAdditionalData = await getAdditionalData(response.body.responses[0].hits.hits.map((h) => h._id));
       response.body.responses[0].hits.hits = response.body.responses[0].hits.hits.map((h) => {

@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../../sentry");
-const esClient = require("../../../es");
+const { esClient } = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
@@ -57,7 +57,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       size,
     });
     if (req.params.action === "export") {
-      let etablissements = await allRecords("etablissement", hitsRequestBody.query, esClient, exportFields);
+      let etablissements = await allRecords("etablissement", hitsRequestBody.query, esClient(), exportFields);
       if (req.query.needReferentInfo) {
         etablissements = await populateWithReferentInfo({ etablissements, isExport: true });
       }
@@ -65,7 +65,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       etablissements = await populateEtablissementWithNumber({ etablissements, index: "young" });
       return res.status(200).send({ ok: true, data: etablissements });
     } else {
-      const esResponse = await esClient.msearch({ index: "etablissement", body: buildNdJson({ index: "etablissement", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const esResponse = await esClient().msearch({ index: "etablissement", body: buildNdJson({ index: "etablissement", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       let body = esResponse.body;
       let etablissements = body.responses[0].hits.hits || [];
       etablissements = await populateEtablissementWithNumber({ etablissements, index: "classe" });

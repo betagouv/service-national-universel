@@ -2,7 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { capture } = require("../../../sentry");
-const esClient = require("../../../es");
+const { esClient } = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
 const { ES_NO_LIMIT, getCohortNames, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
@@ -24,7 +24,7 @@ router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: f
       },
       size: ES_NO_LIMIT,
     };
-    const responseInscription = await esClient.search({ index: "inscriptiongoal", body: body });
+    const responseInscription = await esClient().search({ index: "inscriptiongoal", body: body });
     if (!responseInscription?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
@@ -73,7 +73,7 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
       track_total_hits: true,
     };
 
-    const result = await esClient.search({ index: "young", body: body });
+    const result = await esClient().search({ index: "young", body: body });
     const response = result.body;
     return res.status(200).send(response);
   } catch (error) {
@@ -105,7 +105,7 @@ router.post("/youngsReport", passport.authenticate(["referent"], { session: fals
       size: 0,
     };
 
-    const responses = await esClient.search({ index: "young", body: body });
+    const responses = await esClient().search({ index: "young", body: body });
     if (responses.body && responses.body.hits && responses.body.hits.hits) {
       return res.status(200).json(responses.body);
     } else {
@@ -268,7 +268,7 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
         },
       });
 
-    const result = await esClient.search({ index: "young", body: body });
+    const result = await esClient().search({ index: "young", body: body });
     const response = result.body;
     return res.status(200).send(response);
   } catch (error) {
@@ -363,7 +363,7 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
         },
       });
 
-    const result = await esClient.search({ index: "young", body: body });
+    const result = await esClient().search({ index: "young", body: body });
     const response = result.body;
     return res.status(200).send(response);
   } catch (error) {
@@ -465,7 +465,7 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
         },
       });
 
-    const responseYoung = await esClient.search({ index: "young", body: body });
+    const responseYoung = await esClient().search({ index: "young", body: body });
     if (!responseYoung?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
@@ -550,7 +550,7 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
         },
       });
 
-    const responseYoung = await esClient.search({ index: "young", body: body });
+    const responseYoung = await esClient().search({ index: "young", body: body });
     if (!responseYoung?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
     }

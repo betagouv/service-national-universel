@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, ES_NO_LIMIT, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
@@ -34,7 +34,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         size: 0,
         track_total_hits: true,
       };
-      const responseYoungs = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
+      const responseYoungs = await esClient().msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, body) });
       const reducedSchool = responseYoungs.body.responses[0].aggregations.school.buckets.reduce((acc, school) => {
         if (school.key === "") return acc;
         const schoolInfo = school.firstUser?.hits?.hits[0]?._source;
@@ -99,7 +99,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = serializeRamsesSchools(
-        await esClient.msearch({ index: "schoolramses", body: buildNdJson({ index: "schoolramses", type: "_doc" }, hitsRequestBody, aggsRequestBody) }),
+        await esClient().msearch({ index: "schoolramses", body: buildNdJson({ index: "schoolramses", type: "_doc" }, hitsRequestBody, aggsRequestBody) }),
       );
       const reducedSchool = await getYoungsFromSchoolIds(response.body.responses[0].hits.hits.map((h) => h._id));
       response.body.responses[0].hits.hits = response.body.responses[0].hits.hits.map((h) => {
@@ -199,7 +199,7 @@ router.post("/public/search", async (req, res) => {
       };
     }
 
-    const response = await esClient.msearch({ index: "schoolramses", body: buildNdJson({ index: "schoolramses", type: "_doc" }, query) });
+    const response = await esClient().msearch({ index: "schoolramses", body: buildNdJson({ index: "schoolramses", type: "_doc" }, query) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);

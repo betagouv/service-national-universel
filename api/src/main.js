@@ -16,13 +16,14 @@ const config = require("config");
 
 const { initSentry, initSentryMiddlewares, capture } = require("./sentry");
 const { initDB, closeDB } = require("./mongo");
+const { initESClient } = require("./es");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
 const { scheduleCrons } = require("./crons");
 const { initPassport } = require("./passport");
 
 async function runCrons() {
   initSentry();
-  await initDB();
+  await Promise.all([initDB(), initESClient()]);
   scheduleCrons();
   // Serverless containers requires running http server
   const app = express();
@@ -39,7 +40,7 @@ async function runAPI() {
     console.log("ANALYTICS_URL", config.API_ANALYTICS_ENDPOINT);
   }
 
-  await initDB();
+  await Promise.all([initDB(), initESClient()]);
 
   /*
       Download all certificate templates when instance is starting,

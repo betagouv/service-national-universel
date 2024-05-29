@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch, YOUNG_SOURCE } = require("snu-lib");
 const { capture } = require("../../../sentry");
-const esClient = require("../../../es");
+const { esClient } = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
@@ -95,12 +95,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     });
 
     if (req.params.action === "export") {
-      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("young", hitsRequestBody.query, esClient(), exportFields);
       let data = serializeYoungs(response);
       data = await populateYoungExport(data, exportFields);
       return res.status(200).send({ ok: true, data });
     } else {
-      const response = await esClient.msearch({
+      const response = await esClient().msearch({
         index: "young",
         body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody),
       });

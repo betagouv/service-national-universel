@@ -1,6 +1,6 @@
 const { allRecords } = require("../../../es/utils");
 const { serializeReferents } = require("../../../utils/es-serializer");
-const esClient = require("../../../es");
+const { esClient } = require("../../../es");
 const { ES_NO_LIMIT } = require("snu-lib");
 
 const populateWithReferentInfo = async ({ etablissements, isExport }) => {
@@ -32,7 +32,7 @@ const populateEtablissementWithNumber = async ({ etablissements, index }) => {
       size: 0,
     };
 
-    const results = await esClient.search({ index, body });
+    const results = await esClient().search({ index, body });
     const buckets = results.body.aggregations.group_by_etablissement.buckets;
 
     for (const etablissement of etablissements) {

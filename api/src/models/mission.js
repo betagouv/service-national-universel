@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const esClient = require("../es");
+const { esClient } = require("../es");
 const MODELNAME = "mission";
 const { generateAddress, generateRandomName, starify } = require("../utils/anonymise");
 
@@ -369,7 +369,7 @@ Schema.plugin(patchHistory, {
   },
   excludes: ["/updatedAt"],
 });
-Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
+Schema.plugin(mongooseElastic(esClient(), { selectiveIndexing: true, ignore: ["jvaRawData"] }), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

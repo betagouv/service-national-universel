@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST } = require("snu-lib");
 const patchHistory = require("mongoose-patch-history").default;
 const MODELNAME = "classe";
@@ -233,7 +233,7 @@ Schema.plugin(patchHistory, {
 });
 
 Schema.plugin(
-  mongooseElastic(esClient, {
+  mongooseElastic(esClient(), {
     populate: ["etablissement"],
     virtuals: [
       { key: "region", type: "String" },

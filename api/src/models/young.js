@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const { ROLES_LIST, PHONE_ZONES_NAMES_ARR, getCohortNames, YOUNG_SOURCE_LIST, YOUNG_SOURCE } = require("snu-lib");
-const esClient = require("../es");
+const { esClient } = require("../es");
 const sendinblue = require("../sendinblue");
 const config = require("config");
 const { capture } = require("../sentry");
@@ -2170,7 +2170,7 @@ Schema.plugin(patchHistory, {
 });
 
 Schema.plugin(
-  mongooseElastic(esClient, {
+  mongooseElastic(esClient(), {
     selectiveIndexing: true,
     ignore: [
       "historic",

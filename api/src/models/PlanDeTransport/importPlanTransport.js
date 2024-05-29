@@ -47,7 +47,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-// Schema.plugin(mongooseElastic(esClient), MODELNAME);
+// Schema.plugin(mongooseElastic(esClient()), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

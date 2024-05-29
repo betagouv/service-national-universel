@@ -2,7 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { capture } = require("../../../sentry");
-const esClient = require("../../../es");
+const { esClient } = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { ES_NO_LIMIT, ROLES, APPLICATION_STATUS, canSeeDashboardEngagementInfo, canSeeDashboardEngagementStatus } = require("snu-lib");
 const { joiElasticSearch, buildMissionContext, buildApplicationContext, buildDashboardUserRoleContext } = require("../utils");
@@ -48,7 +48,7 @@ router.post("/status-divers", passport.authenticate(["referent"], { session: fal
       size: 0,
     };
 
-    const reponse = await esClient.search({ index: "young", body: body });
+    const reponse = await esClient().search({ index: "young", body: body });
     if (!reponse?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
@@ -118,7 +118,7 @@ router.post("/structures", passport.authenticate(["referent"], { session: false,
       size: 0,
       track_total_hits: true,
     };
-    const responseInscription = await esClient.search({ index: "structure", body: body });
+    const responseInscription = await esClient().search({ index: "structure", body: body });
     if (!responseInscription?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
@@ -175,7 +175,7 @@ router.post("/status-de-phases", passport.authenticate(["referent"], { session: 
       size: 0,
     };
 
-    const reponse = await esClient.search({ index: "young", body: body });
+    const reponse = await esClient().search({ index: "young", body: body });
     if (!reponse?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
@@ -239,7 +239,7 @@ router.post("/mission-proposed-places", passport.authenticate(["referent"], { se
       size: 0,
     };
 
-    const responseMissions = await esClient.search({ index: "mission", body: body });
+    const responseMissions = await esClient().search({ index: "mission", body: body });
     if (!responseMissions?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
@@ -317,7 +317,7 @@ router.post("/mission-status", passport.authenticate("referent", { session: fals
       size: 0,
     };
 
-    const response = await esClient.search({ index: "mission", body: body });
+    const response = await esClient().search({ index: "mission", body: body });
 
     if (!response?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -390,7 +390,7 @@ router.post("/application-status", passport.authenticate("referent", { session: 
       size: 0,
     };
 
-    const response = await esClient.search({ index: "application", body: body });
+    const response = await esClient().search({ index: "application", body: body });
 
     if (!response?.body) {
       return res.status(404).send({ ok: false, code: ERRORS.INVALID_BODY });

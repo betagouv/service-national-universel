@@ -1,11 +1,11 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ROLES, region2department } = require("snu-lib");
 const { buildArbitratyNdJson, buildMissionContext, buildApplicationContext } = require("../../controllers/elasticsearch/utils");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { queryFromFilter, withAggs } = require("./todo.helper");
 const service = {};
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC] = async (user) => {
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "application",
     body: buildArbitratyNdJson(
       // Contrat (À suivre) X contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature
@@ -97,7 +97,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC] = async (user) => {
 };
 
 service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.STRUCTURE_MANAGER] = async (user) => {
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "departmentservice",
     body: buildArbitratyNdJson(
       { index: "departmentservice", type: "_doc" },
@@ -140,7 +140,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT] =
     missionContextFilters = mCtxF;
   }
 
-  const missions = await esClient.search({
+  const missions = await esClient().search({
     index: "mission",
     body: {
       query: {
@@ -158,7 +158,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT] =
   });
 
   const missionIds = missions.body.hits.hits.map((e) => e._id);
-  const applications = await esClient.search({
+  const applications = await esClient().search({
     index: "application",
     body: {
       query: {
@@ -176,7 +176,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT] =
   });
 
   const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
-  const youngs = await esClient.search({
+  const youngs = await esClient().search({
     index: "young",
     body: {
       query: {
@@ -201,7 +201,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS] = a
     missionContextFilters = mCtxF;
   }
 
-  const missions = await esClient.search({
+  const missions = await esClient().search({
     index: "mission",
     body: {
       query: {
@@ -220,7 +220,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS] = a
   });
 
   const missionIds = missions.body.hits.hits.map((e) => e._id);
-  const applications = await esClient.search({
+  const applications = await esClient().search({
     index: "application",
     body: {
       query: {
@@ -233,7 +233,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS] = a
   });
 
   const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
-  const youngs = await esClient.search({
+  const youngs = await esClient().search({
     index: "young",
     body: {
       query: {
@@ -258,7 +258,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTE
     missionContextFilters = mCtxF;
   }
 
-  const missions = await esClient.search({
+  const missions = await esClient().search({
     index: "mission",
     body: {
       query: {
@@ -276,7 +276,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTE
   });
 
   const missionIds = missions.body.hits.hits.map((e) => e._id);
-  const applications = await esClient.search({
+  const applications = await esClient().search({
     index: "application",
     body: {
       query: {
@@ -289,7 +289,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_STATUS_AFTE
   });
 
   const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
-  const youngs = await esClient.search({
+  const youngs = await esClient().search({
     index: "young",
     body: {
       query: {
@@ -316,7 +316,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = asyn
     missionContextFilters = mCtxF;
   }
 
-  const missions = await esClient.search({
+  const missions = await esClient().search({
     index: "mission",
     body: {
       query: {
@@ -335,7 +335,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = asyn
   });
 
   const missionIds = missions.body.hits.hits.map((e) => e._id);
-  const applications = await esClient.search({
+  const applications = await esClient().search({
     index: "application",
     body: {
       query: {
@@ -348,7 +348,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_UPDATE_AFTER_START] = asyn
   });
 
   const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
-  const youngs = await esClient.search({
+  const youngs = await esClient().search({
     index: "young",
     body: {
       query: {
@@ -373,7 +373,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AF
     missionContextFilters = mCtxF;
   }
 
-  const missions = await esClient.search({
+  const missions = await esClient().search({
     index: "mission",
     body: {
       query: {
@@ -391,7 +391,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AF
   });
 
   const missionIds = missions.body.hits.hits.map((e) => e._id);
-  const applications = await esClient.search({
+  const applications = await esClient().search({
     index: "application",
     body: {
       query: {
@@ -409,7 +409,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.YOUNG_TO_FOLLOW_WITHOUT_CONTRACT_AF
   });
 
   const youngIds = applications.body.hits.hits.map((e) => e._source.youngId);
-  const youngs = await esClient.search({
+  const youngs = await esClient().search({
     index: "young",
     body: {
       query: {
@@ -436,7 +436,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC_FOR_RESP] = async (user) => {
   }
 
   // Contrat (À suivre) X contrats d’engagement sont à éditer par la structure d’accueil et à envoyer en signature
-  const contract = await esClient.search({
+  const contract = await esClient().search({
     index: "application",
     body: {
       query: {
@@ -458,7 +458,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC_FOR_RESP] = async (user) => {
     },
   });
   //Missions (À corriger) X missions sont en attente de correction.
-  const missions = await esClient.search({
+  const missions = await esClient().search({
     index: "mission",
     body: {
       query: {
@@ -473,7 +473,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.ENGAGEMENT.BASIC_FOR_RESP] = async (user) => {
   });
 
   //Candidatures (À traiter) X candidatures sont en attente de validation.
-  const applications = await esClient.search({
+  const applications = await esClient().search({
     index: "application",
     body: {
       query: {

@@ -1,13 +1,13 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ES_NO_LIMIT, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { queryFromFilter, withAggs, buildFilterContext } = require("./todo.helper");
 const service = {};
 
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED] = async (user, { oneWeekBeforepdrChoiceLimitDate: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED]: [] };
 
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "young",
     body: buildArbitratyNdJson(
       { index: "young", type: "_doc" },
@@ -35,7 +35,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED] = async (u
   const cohorts = notStarted.filter((e) => assignementOpen.includes(e));
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED]: [] };
 
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "young",
     body: buildArbitratyNdJson(
       { index: "young", type: "_doc" },
@@ -68,7 +68,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE] = async (user
   const departmentsCohortsFromRepartition = await service.departmentsFromTableRepartition(user, cohorts);
   // On récupère les points de rassemblement pour chaque cohorte groupés par département
   // Si un département de la cohorte n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "pointderassemblement",
     body: buildArbitratyNdJson(
       ...cohorts.flatMap((cohort) => {
@@ -93,7 +93,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE] = async (user, { ses
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE]: [] };
   const departmentsCohortsFromRepartition = await service.departmentsFromTableRepartition(user, cohorts);
   // On récupère les entrées de session phase 1 pour chaque cohorte groupés par département
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "sessionphase1",
     body: buildArbitratyNdJson(
       ...cohorts.flatMap((cohort) => {
@@ -125,7 +125,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSe
     filters.push(contextFilters);
   }
 
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "sessionphase1",
     body: buildArbitratyNdJson(
       // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
@@ -154,7 +154,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL] = async (user, { seven
   const departmentsCohortsFromRepartition = await service.departmentsFromTableRepartition(user, cohorts);
   // On récupère les entrées de département service pour chaque cohorte groupés par département
   // Si un département de la cohorte n'a pas de contact on l'ajoute dans la liste à signaler.
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "departmentservice",
     body: buildArbitratyNdJson(
       ...cohorts.flatMap((cohort) => {
@@ -203,7 +203,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT] = async (user, { twoD
     filters.push(contextFilters);
   }
 
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "young",
     body: buildArbitratyNdJson({ index: "young", type: "_doc" }, withAggs(queryFromFilter(user.role, user.region, user.department, filters), "cohort.keyword")),
   });
@@ -219,7 +219,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT] = async (user, { twoD
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL] = async (user, { notStarted: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL]: [] };
 
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "sessionphase1",
     body: buildArbitratyNdJson(
       { index: "sessionphase1", type: "_doc" },
@@ -246,7 +246,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfter
     if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: [] };
     filters.push(contextFilters);
   }
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "young",
     body: buildArbitratyNdJson(
       ...cohorts.flatMap((cohort) => {
@@ -276,7 +276,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN] = async (user, { twoWeeksAfter
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MODIFICATION_REQUEST] = async (user, { notFinished: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MODIFICATION_REQUEST]: [] };
 
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "modificationbus",
     body: buildArbitratyNdJson(
       // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
@@ -300,7 +300,7 @@ service.departmentsFromTableRepartition = async (user, cohorts) => {
     departmentField: "fromDepartment",
   });
   q.size = ES_NO_LIMIT;
-  const responseRepartition = await esClient.msearch({
+  const responseRepartition = await esClient().msearch({
     index: "tablederepartition",
     body: buildArbitratyNdJson({ index: "tablederepartition", type: "_doc" }, q),
   });

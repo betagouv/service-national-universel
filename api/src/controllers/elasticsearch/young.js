@@ -5,7 +5,7 @@ const router = express.Router();
 const { ROLES, canSearchInElasticSearch, YOUNG_STATUS_PHASE1, ES_NO_LIMIT, youngExportFields } = require("snu-lib");
 const datesub = require("date-fns/sub");
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
@@ -206,10 +206,10 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
       },
     });
     if (req.params.action === "export") {
-      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("young", hitsRequestBody.query, esClient(), exportFields);
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
-      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeYoungs(response.body));
     }
   } catch (error) {
@@ -252,7 +252,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
       track_total_hits: true,
     };
 
-    const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, bodyQuery) });
+    const response = await esClient().msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, bodyQuery) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
@@ -312,10 +312,10 @@ router.post("/by-point-de-rassemblement/:meetingPointId/:action(search|export)",
       },
     });
     if (req.params.action === "export") {
-      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("young", hitsRequestBody.query, esClient(), exportFields);
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
-      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeYoungs(response.body));
     }
   } catch (error) {
@@ -415,7 +415,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
 
     if (["export", "exportBus"].includes(req.params.action)) {
       if (req.query.needSchoolInfo) {
-        const data = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+        const data = await allRecords("young", hitsRequestBody.query, esClient(), exportFields);
         let schoolsId = [...new Set(data.map((item) => item.schoolId).filter((e) => e))];
         let all = data;
 
@@ -427,7 +427,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
 
         response = { ok: true, data: serializeYoungs(all) };
       } else {
-        const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+        const response = await allRecords("young", hitsRequestBody.query, esClient(), exportFields);
         return res.status(200).send({ ok: true, data: serializeYoungs(response) });
       }
     }
@@ -435,7 +435,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     if (["export", "exportBus"].includes(req.params.action)) {
       return res.status(200).send(response);
     } else {
-      const esResponse = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const esResponse = await esClient().msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       response = serializeYoungs(esResponse.body);
       return res.status(200).send(response);
     }
@@ -483,12 +483,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       size,
     });
     if (req.params.action === "export") {
-      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("young", hitsRequestBody.query, esClient(), exportFields);
       let data = serializeYoungs(response);
       data = await populateYoungExport(data, exportFields);
       return res.status(200).send({ ok: true, data });
     } else {
-      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
   } catch (error) {
@@ -533,7 +533,7 @@ router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", pa
     });
 
     if (req.params.action === "export") {
-      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("young", hitsRequestBody.query, esClient(), exportFields);
       let data = serializeYoungs(response);
       //School
       if (exportFields.includes("schoolId")) {
@@ -544,7 +544,7 @@ router.post("/young-having-school-in-dep-or-region/:action(_msearch|export)", pa
 
       return res.status(200).send({ ok: true, data });
     } else {
-      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
   } catch (error) {
@@ -597,10 +597,10 @@ router.post("/propose-mission/:id/:action(search|export)", passport.authenticate
       hitsRequestBody.sort = { _geo_distance: { location: [mission.location?.lon, mission.location?.lat], order: "asc", unit: "km" } };
     }
     if (req.params.action === "export") {
-      const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("young", hitsRequestBody.query, esClient(), exportFields);
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
-      const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
   } catch (error) {
@@ -675,7 +675,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
       contextFilters,
     });
 
-    const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
+    const response = await allRecords("young", hitsRequestBody.query, esClient(), exportFields);
     const data = aggregateStatus(serializeYoungs(response));
     return res.status(200).send({ ok: true, data });
   } catch (error) {

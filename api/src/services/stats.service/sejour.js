@@ -1,5 +1,5 @@
 const { ES_NO_LIMIT, ROLES } = require("snu-lib");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 
 async function getYoungNotesPhase1(startDate, endDate, user) {
   // ref dep only
@@ -35,7 +35,7 @@ async function getYoungNotesPhase1(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "young", body });
+  const response = await esClient().search({ index: "young", body });
   const value = response.body.hits.total.value;
 
   return [
@@ -99,7 +99,7 @@ async function getTimeScheduleAndPedagoProject(startDate, endDate, user) {
     body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
   }
 
-  const response = await esClient.search({ index: "sessionphase1", body });
+  const response = await esClient().search({ index: "sessionphase1", body });
   const time = response.body.aggregations.group_by_timeSchedule.doc_count;
   const project = response.body.aggregations.group_by_pedagoProject.doc_count;
 
@@ -149,7 +149,7 @@ async function getTransportCorrectionRequests(startDate, endDate, user) {
     body.query.bool.filter.push({ match: { "region.keyword": user.region } });
   }
 
-  const response = await esClient.search({ index: "modificationbus", body });
+  const response = await esClient().search({ index: "modificationbus", body });
   const refusedCount = response.body.aggregations.group_by_status.buckets.find((e) => e.key === "REJECTED")?.doc_count || 0;
   const validatedCount = response.body.aggregations.group_by_status.buckets.find((e) => e.key === "ACCEPTED")?.doc_count || 0;
 
@@ -184,7 +184,7 @@ async function getSessions(startDate, endDate) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "sessionphase1", body });
+  const response = await esClient().search({ index: "sessionphase1", body });
   const value = response.body.hits.total.value;
 
   return [
@@ -217,7 +217,7 @@ async function getLineToPoints(startDate, endDate) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "lignetopoint", body });
+  const response = await esClient().search({ index: "lignetopoint", body });
   const value = response.body.aggregations.group_by_meetingPointId.buckets.length || 0;
 
   return [

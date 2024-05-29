@@ -1,5 +1,5 @@
 const { ES_NO_LIMIT, ROLES, YOUNG_STATUS_PHASE2, CONTRACT_STATUS, END_DATE_PHASE1, APPLICATION_STATUS, MISSION_STATUS, formatDateForPostGre } = require("snu-lib");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const CohortModel = require("../../models/cohort");
 const config = require("config");
 
@@ -58,7 +58,7 @@ async function getNewStructures(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "structure", body });
+  const response = await esClient().search({ index: "structure", body });
   const value = response.body.hits.total.value;
 
   return [
@@ -105,7 +105,7 @@ async function getYoungNotesPhase2(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "young", body });
+  const response = await esClient().search({ index: "young", body });
   const value = response.body.hits.total.value;
 
   return [
@@ -141,7 +141,7 @@ async function getYoungPhase2Validated(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "young", body });
+  const response = await esClient().search({ index: "young", body });
   const value = response.body.hits.total.value;
 
   return [
@@ -187,7 +187,7 @@ async function getMissionsOnTerm(startDate, endDate, user) {
       break;
   }
 
-  const response = await esClient.search({ index: "mission", body });
+  const response = await esClient().search({ index: "mission", body });
   const value = response.body.hits.total.value;
 
   return [
@@ -241,7 +241,7 @@ async function getContractsSigned(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response2 = await esClient.search({ index: "contract", body: body2 });
+  const response2 = await esClient().search({ index: "contract", body: body2 });
   const value = response2.body.hits.total.value;
 
   return [
@@ -271,7 +271,7 @@ async function getYoungsWhoStartedOrFinishedMissions(startDate, endDate, user) {
     body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
   }
 
-  const response = await esClient.search({ index: "young", body });
+  const response = await esClient().search({ index: "young", body });
   const youngs = response.body.hits.hits;
   const youngsIds = youngs.map((young) => young._id);
 
@@ -309,7 +309,7 @@ async function getYoungsWhoStartedOrFinishedMissions(startDate, endDate, user) {
   if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
     body2.query.bool.filter.push({ match: { "structureId.keyword": user.structureId } });
   }
-  const response2 = await esClient.search({ index: "contract", body: body2 });
+  const response2 = await esClient().search({ index: "contract", body: body2 });
   const startedMissions = response2.body.aggregations.missionStartAtDocs.doc_count;
   const finishedMissions = response2.body.aggregations.missionEndAtDocs.doc_count;
 
@@ -524,7 +524,7 @@ async function getNewMissions(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "mission", body });
+  const response = await esClient().search({ index: "mission", body });
   const value = response.body.aggregations.group_by_description.buckets.length;
 
   return [
@@ -600,7 +600,7 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "young", body });
+  const response = await esClient().search({ index: "young", body });
   const youngs = response.body.hits.hits;
   const youngsIds = youngs.map((young) => young._id);
   const youngsCohort = youngs.map((young) => ({
@@ -628,7 +628,7 @@ async function getYoungStartPhase2InTime(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response2 = await esClient.search({ index: "contract", body: body2 });
+  const response2 = await esClient().search({ index: "contract", body: body2 });
 
   let value = response2.body.aggregations.group_by_youngId.buckets;
 

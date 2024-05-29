@@ -2,7 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
 const { JVA_MISSION_DOMAINS } = require("snu-lib");
@@ -89,7 +89,7 @@ router.post("/search/", passport.authenticate("young", { session: false, failWit
     if (filters.domain) body.query.bool.must.push({ term: { "domain.keyword": filters.domain } });
     if (filters.distance) body.query.bool.must.push({ geo_distance: { distance: `${filters.distance}km`, location: filters.location } });
 
-    const results = await esClient.search({ index: "missionapi", body });
+    const results = await esClient().search({ index: "missionapi", body });
     if (results.body.error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     return res.status(200).send({ ok: true, data: results.body.hits });
   } catch (error) {

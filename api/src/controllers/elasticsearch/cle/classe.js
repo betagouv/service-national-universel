@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../../sentry");
-const esClient = require("../../../es");
+const { esClient } = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
@@ -61,7 +61,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     });
 
     if (req.params.action === "export") {
-      let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
+      let response = await allRecords("classe", hitsRequestBody.query, esClient(), exportFields);
 
       if (req.query?.type === "schema-de-repartition") {
         if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -86,7 +86,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
       return res.status(200).send({ ok: true, data: response });
     } else {
-      let response = await esClient.msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      let response = await esClient().msearch({ index: "classe", body: buildNdJson({ index: "classe", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
 
       if (req.query?.needRefInfo) {
         response.body.responses[0].hits.hits = await populateWithReferentInfo(response.body.responses[0].hits.hits, req.params.action);

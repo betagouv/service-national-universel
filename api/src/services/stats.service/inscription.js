@@ -1,5 +1,5 @@
 const { ES_NO_LIMIT, ROLES, getCohortNames, YOUNG_STATUS, YOUNG_PHASE, formatDateForPostGre } = require("snu-lib");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const config = require("config");
 
 async function getAccessToken(endpoint, apiKey) {
@@ -69,7 +69,7 @@ async function getYoungNotesPhase0(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "young", body });
+  const response = await esClient().search({ index: "young", body });
   const value = response.body.hits.total.value;
 
   return [
@@ -115,7 +115,7 @@ async function getYoungRegisteredWithParticularSituation(startDate, endDate, use
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "young", body });
+  const response = await esClient().search({ index: "young", body });
 
   let handicap = response.body.aggregations.group_by_handicap.buckets.find((bucket) => bucket.key === "true")?.doc_count || 0;
   let qpv = response.body.aggregations.group_by_qpv.buckets.find((bucket) => bucket.key === "true")?.doc_count || 0;
@@ -167,7 +167,7 @@ async function getDepartmentRegistrationGoal(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "inscriptiongoal", body });
+  const response = await esClient().search({ index: "inscriptiongoal", body });
   const data = response.body.hits.hits;
 
   const result = data.map((item) => ({
@@ -210,7 +210,7 @@ async function getRegisterFileOpen(startDate, endDate, user) {
     body.query.bool.filter.push({ terms: { "department.keyword": user.department } });
   }
 
-  const response = await esClient.search({ index: "young", body });
+  const response = await esClient().search({ index: "young", body });
   const value = response.body.hits.total.value;
 
   return [
@@ -247,7 +247,7 @@ async function getAbandonedRegistration(startDate, endDate, user) {
     track_total_hits: true,
   };
 
-  const response = await esClient.search({ index: "young", body });
+  const response = await esClient().search({ index: "young", body });
   const value = response.body.hits.total.value;
 
   return [

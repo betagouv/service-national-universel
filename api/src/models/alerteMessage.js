@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
-const esClient = require("../es/");
+const { esClient } = require("../es/");
 const patchHistory = require("mongoose-patch-history").default;
 const { ROLES_LIST } = require("snu-lib");
 
@@ -77,7 +77,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
+Schema.plugin(mongooseElastic(esClient()), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

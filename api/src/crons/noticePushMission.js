@@ -1,4 +1,4 @@
-const esClient = require("../es");
+const { esClient } = require("../es");
 const path = require("path");
 
 const { capture } = require("../sentry");
@@ -155,7 +155,7 @@ const getMissions = async ({ young }) => {
     ]
       .map((e) => `${JSON.stringify(e)}\n`)
       .join("");
-    const response = await esClient.msearch({
+    const response = await esClient().msearch({
       index: "mission",
       body,
     });

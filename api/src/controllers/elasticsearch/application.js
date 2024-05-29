@@ -2,7 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
@@ -92,12 +92,12 @@ router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["re
     });
 
     if (req.params.action === "export") {
-      const response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("application", hitsRequestBody.query, esClient(), exportFields);
       let data = serializeApplications(response);
       data = await populateApplications(data, exportFields);
       return res.status(200).send({ ok: true, data });
     } else {
-      const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeApplications(response.body));
     }
   } catch (error) {
@@ -157,12 +157,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     });
 
     if (req.params.action === "export") {
-      const response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("application", hitsRequestBody.query, esClient(), exportFields);
       let data = serializeApplications(response);
       data = await populateApplications(data, exportFields);
       return res.status(200).send({ ok: true, data });
     } else {
-      const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeApplications(response.body));
     }
   } catch (error) {
@@ -203,12 +203,12 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
     });
 
     if (req.params.action === "export") {
-      const response = await allRecords("application", hitsRequestBody.query, esClient, exportFields);
+      const response = await allRecords("application", hitsRequestBody.query, esClient(), exportFields);
       let data = serializeApplications(response);
       data = await populateApplications(data, exportFields);
       return res.status(200).send({ ok: true, data });
     } else {
-      const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeApplications(response.body));
     }
   } catch (error) {
@@ -253,7 +253,7 @@ router.post("/count-by-status", passport.authenticate(["referent"], { session: f
       track_total_hits: true,
     };
 
-    const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, query) });
+    const response = await esClient().msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, query) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);

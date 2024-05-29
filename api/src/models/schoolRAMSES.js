@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const patchHistory = require("mongoose-patch-history").default;
 const mongooseElastic = require("@selego/mongoose-elastic");
-const esClient = require("../es");
+const { esClient } = require("../es");
 const MODELNAME = "schoolramses";
 
 const Schema = new mongoose.Schema(
@@ -47,7 +47,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["raw_data"] }), MODELNAME);
+Schema.plugin(mongooseElastic(esClient(), { selectiveIndexing: true, ignore: ["raw_data"] }), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const esClient = require("../es");
+const { esClient } = require("../es");
 const sendinblue = require("../sendinblue");
 const { generateRandomName, generateRandomEmail, generateNewPhoneNumber } = require("../utils/anonymise");
 
@@ -331,7 +331,7 @@ Schema.plugin(patchHistory, {
 });
 
 Schema.plugin(
-  mongooseElastic(esClient, {
+  mongooseElastic(esClient(), {
     selectiveIndexing: true,
     ignore: [
       "password",

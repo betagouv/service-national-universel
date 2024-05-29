@@ -2,7 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { buildNdJson, joiElasticSearch, buildRequestBody } = require("./utils");
 const { ES_NO_LIMIT, canSearchLigneBus, canSearchInElasticSearch } = require("snu-lib");
@@ -37,7 +37,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
       track_total_hits: true,
     };
 
-    const response = await esClient.msearch({ index: "lignebus", body: buildNdJson({ index: "lignebus", type: "_doc" }, body) });
+    const response = await esClient().msearch({ index: "lignebus", body: buildNdJson({ index: "lignebus", type: "_doc" }, body) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
@@ -90,7 +90,7 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
       contextFilters,
       size,
     });
-    const response = await esClient.msearch({
+    const response = await esClient().msearch({
       index: "lignebus",
       body: buildNdJson({ index: "lignebus", type: "_doc" }, hitsRequestBody, aggsRequestBody),
     });
@@ -175,7 +175,7 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
 
     const { hitsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 
-    let response = await allRecords("lignebus", hitsRequestBody.query, esClient, exportFields);
+    let response = await allRecords("lignebus", hitsRequestBody.query, esClient(), exportFields);
 
     let promise = [];
     if (req.query?.needYoungInfo) {

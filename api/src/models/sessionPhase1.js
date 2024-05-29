@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const { getCohortNames } = require("snu-lib");
-const esClient = require("../es");
+const { esClient } = require("../es");
 const MODELNAME = "sessionphase1";
 const config = require("config");
 const { starify } = require("../utils/anonymise");
@@ -233,7 +233,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(mongooseElastic(esClient, { selectiveIndexing: true, ignore: ["team"] }), MODELNAME);
+Schema.plugin(mongooseElastic(esClient(), { selectiveIndexing: true, ignore: ["team"] }), MODELNAME);
 
 Schema.index({ cohesionCenterId: 1 });
 

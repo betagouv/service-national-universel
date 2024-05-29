@@ -2,7 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { capture } = require("../../../sentry");
-const esClient = require("../../../es");
+const { esClient } = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
 const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1, YOUNG_STATUS, canSeeDashboardSejourInfo, canSeeDashboardSejourHeadCenter } = require("snu-lib");
@@ -189,7 +189,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
   // Dans cette fonction on utilise notre Query sur les Young et on constitue notre objet pour le Front.
   const getYoungForSejourDasboard = async (queryFilters) => {
     const youngRequestBodyForCohesiongYoung = buildESRequestBodyForYoung(queryFilters);
-    const responseYoung = await esClient.search({ index: "young", body: youngRequestBodyForCohesiongYoung });
+    const responseYoung = await esClient().search({ index: "young", body: youngRequestBodyForCohesiongYoung });
     const YoungCenter = responseYoung.body;
     let resultYoung = {};
     resultYoung.statusPhase1 = YoungCenter.aggregations.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});
@@ -208,7 +208,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
   // Dans cette fonction on utilise nos Deux Query (Session Cohesion) afin de créer notre objet pour le Front.
   const getCenterAndSessionInfoForSejourDashboard = async (filters, user) => {
     const esRequestBodyForCohesion = buildESRequestBodyForCohesion(filters, user);
-    const responseCohesion = await esClient.search({ index: "cohesioncenter", body: esRequestBodyForCohesion });
+    const responseCohesion = await esClient().search({ index: "cohesioncenter", body: esRequestBodyForCohesion });
     if (!responseCohesion?.body?.aggregations || !responseCohesion?.body?.hits)
       return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterAndSessionInfoForSejourDashboard" });
     let resultCenter = {};
@@ -219,7 +219,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
 
     const cohesionCenterId = responseCohesion.body.hits.hits.map((e) => e._id);
     const esRequestForSession = buildESRequestBodyForSession(cohesionCenterId, filters);
-    const responseSession = await esClient.search({ index: "sessionphase1", body: esRequestForSession });
+    const responseSession = await esClient().search({ index: "sessionphase1", body: esRequestForSession });
     if (!responseSession?.body?.aggregations) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterAndSessionInfoForSejourDashboard" });
     resultCenter.placesTotalSession = responseSession.body.aggregations.placesTotal.value;
     resultCenter.placesLeftSession = responseSession.body.aggregations.placesLeft.value;
@@ -234,7 +234,7 @@ router.post("/moderator", passport.authenticate(["referent"], { session: false, 
     if (!responseSession?.body?.hits) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterInfoFromYoungForSejourDashboard" });
     const sessionList = responseSession.body.hits.hits.map((e) => ({ ...e._source, _id: e._id }));
     const esRequestBody = buildESRequestBodyForSessionCenter(filters, sessionList);
-    const response = await esClient.search({ index: "young", body: esRequestBody });
+    const response = await esClient().search({ index: "young", body: esRequestBody });
     if (!response?.body?.aggregations?.session) return res.status(404).send({ error: ERRORS.NOT_FOUND, message: "Error in getCenterInfoFromYoungForSejourDashboard" });
     const sessionByCenter = processESResponse(response, sessionList);
 
@@ -320,7 +320,7 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
   // Dans cette fonction on utilise notre Query sur les Young et on constitue notre objet pour le Front.
   const getYoungForSejourDasboard = async (queryFilters, centersId) => {
     const youngRequestBodyForCohesiongYoung = buildESRequestBodyForYoung(queryFilters, centersId);
-    const responseYoung = await esClient.search({ index: "young", body: youngRequestBodyForCohesiongYoung });
+    const responseYoung = await esClient().search({ index: "young", body: youngRequestBodyForCohesiongYoung });
     const YoungCenter = responseYoung.body;
     let resultYoung = {};
     resultYoung.statusPhase1 = YoungCenter.aggregations.statusPhase1.buckets.reduce((acc, e) => ({ ...acc, [e.key]: e.doc_count }), {});

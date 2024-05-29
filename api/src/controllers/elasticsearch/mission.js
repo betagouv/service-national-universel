@@ -2,7 +2,7 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody, buildMissionContext } = require("./utils");
@@ -76,7 +76,7 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
     if (req.params.action === "export") {
       response = await allRecords("mission", hitsRequestBody.query);
     } else {
-      response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      response = await esClient().msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
     }
 
     if (req.params.action === "export") {
@@ -157,7 +157,7 @@ router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["
       const response = await allRecords("mission", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
-      const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeMissions(response.body));
     }
   } catch (error) {
@@ -229,7 +229,7 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
       const response = await allRecords("mission", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
   } catch (error) {
@@ -371,7 +371,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
     }
     if (filters.subPeriod?.length) body.query.bool.must.push({ terms: { "subPeriod.keyword": filters.subPeriod } });
 
-    const results = await esClient.search({ index: "mission", body });
+    const results = await esClient().search({ index: "mission", body });
     if (results.body.error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     return res.status(200).send({ ok: true, data: results.body.hits });
   } catch (error) {
@@ -415,7 +415,7 @@ router.post("/by-tutor/:id/:action(search|export)", passport.authenticate(["refe
       const response = await allRecords("mission", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
   } catch (error) {

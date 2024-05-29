@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch, canViewEmailHistory } = require("snu-lib");
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
@@ -37,7 +37,7 @@ router.post("/:email/:action(search|export)", passport.authenticate(["referent"]
       const response = await allRecords("email", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "email", body: buildNdJson({ index: "email", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "email", body: buildNdJson({ index: "email", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
   } catch (error) {

@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch, department2region, departmentList, getCohortNames, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
@@ -166,7 +166,7 @@ router.post("/team/:action(search|export)", passport.authenticate(["referent"], 
       const response = await allRecords("referent", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(response.body);
     }
   } catch (error) {
@@ -225,7 +225,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       const response = await allRecords("referent", hitsRequestBody.query);
       return res.status(200).send({ ok: true, data: serializeReferents(response) });
     } else {
-      const response = await esClient.msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const response = await esClient().msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       return res.status(200).send(serializeReferents(response.body));
     }
   } catch (error) {
@@ -238,7 +238,7 @@ router.post("/structure/:structure", passport.authenticate(["referent"], { sessi
   try {
     if (!canSearchInElasticSearch(req.user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const response = await esClient.msearch({
+    const response = await esClient().msearch({
       index: "referent",
       body: buildNdJson(
         { index: "referent", type: "_doc" },

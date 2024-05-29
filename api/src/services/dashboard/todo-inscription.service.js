@@ -1,11 +1,11 @@
 const { DASHBOARD_TODOS_FUNCTIONS, ROLES } = require("snu-lib");
 const { buildArbitratyNdJson } = require("../../controllers/elasticsearch/utils");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { queryFromFilter, withAggs, buildFilterContext } = require("./todo.helper");
 const service = {};
 
 service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.BASIC] = async (user, { notFinished: cohorts }) => {
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "young",
     body: buildArbitratyNdJson(
       // Dossier (À instruire) X dossiers d’inscriptions sont en attente de validation.
@@ -41,7 +41,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.BASIC] = async (user, { notFinishe
 service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT] = async (user, { fiveDaysBeforeInscriptionEnd: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.WAITING_VALIDATION_BY_COHORT]: [] };
 
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "young",
     body: buildArbitratyNdJson(
       { index: "young", type: "_doc" },
@@ -73,7 +73,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT] = async (user, { assi
     filters.push(contextFilters);
   }
 
-  const response = await esClient.msearch({
+  const response = await esClient().msearch({
     index: "young",
     body: buildArbitratyNdJson({ index: "young", type: "_doc" }, withAggs(queryFromFilter(user.role, user.region, user.department, filters), "cohort.keyword")),
   });

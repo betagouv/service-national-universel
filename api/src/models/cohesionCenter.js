@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
-const esClient = require("../es");
+const { esClient } = require("../es");
 const MODELNAME = "cohesioncenter";
 
 const Schema = new mongoose.Schema({
@@ -205,7 +205,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
+Schema.plugin(mongooseElastic(esClient()), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

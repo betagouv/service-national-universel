@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { ROLES, canSearchInElasticSearch, ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
-const esClient = require("../../es");
+const { esClient } = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
@@ -104,7 +104,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       response = await allRecords("structure", hitsRequestBody.query);
       structures = response.map((s) => ({ _id: s._id, _source: s }));
     } else {
-      const esResponse = await esClient.msearch({ index: "structure", body: buildNdJson({ index: "structure", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+      const esResponse = await esClient().msearch({ index: "structure", body: buildNdJson({ index: "structure", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
       response = esResponse.body;
       structures =
         response && response.responses && response.responses.length > 0 && response.responses[0].hits && response.responses[0].hits.hits ? response.responses[0].hits.hits : [];
