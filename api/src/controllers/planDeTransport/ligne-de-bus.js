@@ -36,7 +36,7 @@ const { ERRORS } = require("../../utils");
 const { capture } = require("../../sentry");
 const { sendTemplate } = require("../../sendinblue");
 
-const { getInfoBus } = require("../../pdt/pdtService");
+const { getInfoBus } = require("../../pdt/ligneDeBus/ligneDeBusService");
 
 const router = express.Router();
 
@@ -1024,7 +1024,7 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
   }
 });
 
-router.use("/", require("../../pdt/pdtController"));
+router.use("/", require("../../pdt/ligneDeBus/ligneDeBusController"));
 
 module.exports = router;
 

@@ -89,29 +89,15 @@ describe("Ligne de bus", () => {
           lon: 2.3522,
         },
       });
-      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ cohort }));
-      await LigneBusModel.create({
-        name: "Ligne 2",
-        centerDepartureTime: new Date(),
-        centerArrivalTime: new Date(),
-        centerId: center._id,
-        sessionId: "session_id",
-        travelTime: 60,
-        followerCapacity: 20,
-        totalCapacity: 30,
-        youngCapacity: 10,
-        returnDate: new Date(),
-        departuredDate: new Date(),
-        busId: "bus_id",
-        cohort,
-      });
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ name: "Ligne 1", centerId: center._id, cohort }));
+      await LigneBusModel.create(getNewLigneBusFixture({ name: "Ligne 2", centerId: center._id, cohort }));
 
       const res = await request(getAppHelper()).get(`/ligne-de-bus/cohort/${cohort}`);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.data.ligneBus.length).toBe(2);
-      expect(res.body.data.ligneBus[0]._id).toBe(ligneBus._id.toString());
+      expect(res.body.data.ligneBus.map(({ _id }) => _id).includes(ligneBus._id.toString())).toBe(true);
     });
 
     it("should return 403 when user is not authorized", async () => {
@@ -438,6 +424,7 @@ describe("Ligne de bus", () => {
       });
       const ligneBus = await LigneBusModel.create(
         getNewLigneBusFixture({
+          centerId: center._id,
           cohort: "Février 2023 - C",
         }),
       );

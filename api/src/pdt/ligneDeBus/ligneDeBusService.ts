@@ -1,4 +1,4 @@
-const { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } = require("../models");
+const { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } = require("../../models");
 
 export async function getInfoBus(line) {
   const ligneToBus = await LigneToPointModel.find({ lineId: line._id });

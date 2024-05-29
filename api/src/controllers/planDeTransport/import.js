@@ -22,7 +22,7 @@ const { getMimeFromFile } = require("../../utils/file");
 
 const { validatePdtFile, computeImportSummary } = require("../../pdt/import/pdtImportService");
 const { formatTime } = require("../../pdt/import/pdtImportUtils");
-const { syncMergedBus } = require("../../pdt/pdtService");
+const { syncMergedBus } = require("../../pdt/ligneDeBus/ligneDeBusService");
 
 // Vérifie un plan de transport importé et l'enregistre dans la collection importplandetransport.
 router.post(

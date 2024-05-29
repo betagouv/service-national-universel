@@ -4,11 +4,11 @@ const Joi = require("joi");
 const passport = require("passport");
 
 const { canViewLigneBus } = require("snu-lib");
-const { capture } = require("../sentry");
-const { ERRORS } = require("../utils");
-const { LigneBusModel, PlanTransportModel } = require("../models");
+const { capture } = require("../../sentry");
+const { ERRORS } = require("../../utils");
+const { LigneBusModel, PlanTransportModel } = require("../../models");
 
-const { getInfoBus, syncMergedBus } = require("./pdtService");
+const { getInfoBus, syncMergedBus } = require("./ligneDeBusService");
 
 // Ajout d'une ligne fusionnée
 router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
