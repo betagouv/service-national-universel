@@ -152,6 +152,11 @@ export const getZonedDate = (date, timeZone = "Europe/Paris") => {
   return zonedDate;
 };
 
+export const isNowBetweenDates = (from, to) => {
+  const now = new Date();
+  return from <= now && now <= to;
+};
+
 export {
   MONTHS,
   formatDay,
