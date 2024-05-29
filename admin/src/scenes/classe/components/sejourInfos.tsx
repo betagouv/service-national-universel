@@ -18,7 +18,7 @@ interface Props {
   rights: Rights;
   user: User;
   onCancel: () => void;
-  infoBus: InfoBus;
+  infoBus: InfoBus | null;
   isLoading: boolean;
   onSendInfo: () => void;
 }

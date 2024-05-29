@@ -58,11 +58,11 @@ export type Classe = {
   uniqueId: string;
   uniqueKeyAndId: string;
   name: string;
-  coloration: (typeof CLE_COLORATION_LIST)[keyof typeof CLE_COLORATION_LIST];
+  coloration:string;
   totalSeats: number;
   seatsTaken: number;
-  filiere: (typeof CLE_FILIERE_LIST)[keyof typeof CLE_FILIERE_LIST];
-  grade: (typeof CLE_GRADE_LIST)[keyof typeof CLE_GRADE_LIST];
+  filiere:string;
+  grade:string;
   cohesionCenterId?: string;
   cohesionCenter?: any;
   sessionId?: string;
@@ -70,7 +70,7 @@ export type Classe = {
   ligneId?: string;
   pointDeRassemblementId?: string;
   pointDeRassemblement?: any;
-  status: (typeof STATUS_CLASSE_LIST)[keyof typeof STATUS_CLASSE_LIST];
+  status: string;
   statusPhase1: (typeof STATUS_PHASE1_CLASSE_LIST)[keyof typeof STATUS_PHASE1_CLASSE_LIST];
   createdAt: Date;
   updatedAt?: Date;

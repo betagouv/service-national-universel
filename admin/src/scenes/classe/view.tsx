@@ -27,12 +27,12 @@ import StatsInfos from "./components/statsInfos";
 import ModaleDelete from "./components/modale/modaleDelete";
 import ModaleWithdraw from "./components/modale/modaleWithdraw";
 import ModaleInvite from "./components/modale/modaleInvite";
-import { InfoBus, TStatus } from "./components/types";
+import { InfoBus, TStatus, Rights } from "./components/types";
 
 export default function View() {
   const [classe, setClasse] = useState<Classe | null>(null);
   const [url, setUrl] = useState("");
-  const [studentStatus, setStudentStatus] = useState([]);
+  const [studentStatus, setStudentStatus] = useState<{ [key: string]: number }>({});
   const [modaleInvite, setModaleInvite] = useState(false);
   const [modaleWithdraw, setModaleWithdraw] = useState(false);
   const [modaleDelete, setModaleDelete] = useState(false);
@@ -42,14 +42,14 @@ export default function View() {
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
-  const [isConvocationDownloading, handleConvocationDownload]: [boolean, () => void] = usePendingAction();
+  const [isConvocationDownloading, handleConvocationDownload] = usePendingAction() as [boolean, any];
 
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortsState) => state.Cohorts).filter(
     (c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort),
   );
   const cohort = cohorts.find((c) => c.name === classe?.cohort);
-  const rights = getRights(user, classe, cohort);
+  const rights = getRights(user, classe, cohort) as Rights;
 
   const history = useHistory();
   const totalSeatsTakenExcluding =
@@ -216,7 +216,7 @@ export default function View() {
   const headerActionList = () => {
     const actionsList: React.ReactNode[] = [];
 
-    if (![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe?.status) && IS_INSCRIPTION_OPEN_CLE) {
+    if (classe?.status && ![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && IS_INSCRIPTION_OPEN_CLE) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
         <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" className="mr-2" onClick={() => setModaleInvite(true)} />,
