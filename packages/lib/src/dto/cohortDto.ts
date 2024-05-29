@@ -65,6 +65,6 @@ export type CohortDto = {
 export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId">;
 
 type ToFromDate = {
-  from: Date | null;
-  to: Date | null;
+  from: string | null;
+  to: string | null;
 };

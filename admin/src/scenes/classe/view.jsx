@@ -382,7 +382,6 @@ export default function View() {
           </div>
         </Container>
       )}
-
       {(rights.showCenter || rights.showPDR) && (
         <Container
           title="Séjour"

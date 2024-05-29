@@ -153,8 +153,9 @@ export const getZonedDate = (date, timeZone = "Europe/Paris") => {
 };
 
 export const isNowBetweenDates = (from, to) => {
-  const now = new Date();
-  return from <= now && now <= to;
+  if (!from && !to) return true;
+  const now = new Date().toISOString();
+  return (from <= now && now <= to) || (!from && now <= to) || (from <= now && !to);
 };
 
 export {

@@ -1,4 +1,4 @@
-type ReferentRoleDto = {
+export type ReferentRoleDto = {
   _id: string;
   firstName?: string;
   lastName?: string;
