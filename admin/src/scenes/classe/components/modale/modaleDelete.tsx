@@ -16,7 +16,7 @@ export default function ModaleDelete({ modaleDelete, setModaleDelete, onDelete }
       onClose={() => {
         setModaleDelete(false);
       }}
-      className="md:max-w-[700px]"
+      className="md:max-w-[500px]"
       icon={<HiOutlineExclamation className="text-red-600 bg-red-50 rounded-full p-2" size={40} />}
       title="Supprimer cette classe"
       text="Voulez-vous vraiment supprimer cette classe ? Cette action est irréversible."

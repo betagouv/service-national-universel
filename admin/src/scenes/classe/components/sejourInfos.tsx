@@ -20,16 +20,16 @@ interface Props {
   onCancel: () => void;
   infoBus: InfoBus | null;
   isLoading: boolean;
-  onSendInfo: () => void;
+  onCheckInfo: () => void;
 }
 
-export default function SejourInfos({ classe, setClasse, editStay, setEditStay, errors, rights, user, onCancel, infoBus, isLoading, onSendInfo }: Props) {
+export default function SejourInfos({ classe, setClasse, editStay, setEditStay, errors, rights, user, onCancel, infoBus, isLoading, onCheckInfo }: Props) {
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
       return [
         <div key="actions" className="flex items-center justify-end ml-6">
           <Button key="cancel" type="cancel" title="Annuler" onClick={onCancel} disabled={isLoading} />
-          <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={onSendInfo} loading={isLoading} disabled={isLoading} />
+          <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={onCheckInfo} loading={isLoading} disabled={isLoading} />
         </div>,
       ];
     } else if (canEdit) {

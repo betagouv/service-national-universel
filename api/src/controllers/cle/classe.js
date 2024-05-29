@@ -136,26 +136,33 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     classe.set({ ...value, sessionId: classe.sessionId || null });
 
     if (canUpdateClasseStay(req.user)) {
-      classe.set({
-        sessionId: value.sessionId,
-        cohesionCenterId: value.cohesionCenterId,
-        pointDeRassemblementId: value.pointDeRassemblementId,
-      });
+      if (oldCohort !== value.cohort) {
+        const youngs = await YoungModel.find({ classeId: classe._id });
+        await Promise.all(
+          youngs.map((y) => {
+            y.set({ cohort: value.cohort });
+            return y.save({ fromUser: req.user });
+          }),
+        );
+        emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
+        if (!classe.ligneId) {
+          classe.set({
+            sessionId: undefined,
+            cohesionCenterId: undefined,
+            pointDeRassemblementId: undefined,
+          });
+        }
+      } else {
+        classe.set({
+          sessionId: value.sessionId,
+          cohesionCenterId: value.cohesionCenterId,
+          pointDeRassemblementId: value.pointDeRassemblementId,
+        });
+      }
     }
 
     classe = await classe.save({ fromUser: req.user });
     classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
-
-    if (oldCohort !== classe.cohort) {
-      const youngs = await YoungModel.find({ classeId: classe._id });
-      await Promise.all(
-        youngs.map((y) => {
-          y.set({ cohort: classe.cohort });
-          return y.save({ fromUser: req.user });
-        }),
-      );
-      emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
-    }
 
     emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_INFOS_COMPLETED, classe);
 

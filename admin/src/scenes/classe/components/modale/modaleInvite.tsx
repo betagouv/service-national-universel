@@ -17,7 +17,7 @@ export default function ModaleInvite({ modaleInvite, setModaleInvite, url }: Pro
   return (
     <Modal
       isOpen={modaleInvite}
-      className="w-[700px]"
+      className="w-[500px]"
       onClose={() => setModaleInvite(false)}
       content={
         <div className="flex flex-col items-center justify-center">

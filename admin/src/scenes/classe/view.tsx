@@ -27,6 +27,7 @@ import StatsInfos from "./components/statsInfos";
 import ModaleDelete from "./components/modale/modaleDelete";
 import ModaleWithdraw from "./components/modale/modaleWithdraw";
 import ModaleInvite from "./components/modale/modaleInvite";
+import ModaleCohort from "./components/modale/modaleCohort";
 import { InfoBus, TStatus, Rights } from "./components/types";
 
 export default function View() {
@@ -36,14 +37,15 @@ export default function View() {
   const [modaleInvite, setModaleInvite] = useState(false);
   const [modaleWithdraw, setModaleWithdraw] = useState(false);
   const [modaleDelete, setModaleDelete] = useState(false);
+  const [modaleCohort, setModaleCohort] = useState(false);
   const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
   const [edit, setEdit] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [oldClasseCohort, setOldClasseCohort] = useState();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
   const [isConvocationDownloading, handleConvocationDownload] = usePendingAction() as [boolean, any];
-
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortsState) => state.Cohorts).filter(
     (c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort),
@@ -69,6 +71,7 @@ export default function View() {
         return toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", translate(code));
       }
       setClasse(classe);
+      setOldClasseCohort(classe.cohort);
       if (classe?.ligneId) {
         //Bus
         const { ok: ok1, code: code1, data: ligne } = await api.get(`/ligne-de-bus/${classe.ligneId}`);
@@ -116,30 +119,41 @@ export default function View() {
     getClasse();
   }, [id, edit, editStay]);
 
+  const checkInfo = () => {
+    setErrors({});
+    interface Errors {
+      cohort?: string;
+      name?: string;
+      coloration?: string;
+      totalSeats?: string;
+      filiere?: string;
+      grade?: string;
+    }
+
+    const errors: Errors = {};
+    if (classe?.cohort !== oldClasseCohort && classe.ligneId) errors.cohort = "Vous ne pouvez pas modifier la cohorte car cette classe est affecté a une ligne de bus.";
+    if (!classe?.name) errors.name = "Ce champ est obligatoire";
+    if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
+    if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
+    if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
+    if (!classe?.grade) errors.grade = "Ce champ est obligatoire";
+
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
+      setIsLoading(false);
+      return;
+    }
+    if (classe?.cohort !== oldClasseCohort) {
+      setModaleCohort(true);
+    } else {
+      sendInfo();
+    }
+  };
+
   const sendInfo = async () => {
     try {
+      setModaleCohort(false);
       setIsLoading(true);
-      setErrors({});
-      interface Errors {
-        name?: string;
-        coloration?: string;
-        totalSeats?: string;
-        filiere?: string;
-        grade?: string;
-      }
-
-      const errors: Errors = {};
-      if (!classe?.name) errors.name = "Ce champ est obligatoire";
-      if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
-      if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
-      if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
-      if (!classe?.grade) errors.grade = "Ce champ est obligatoire";
-
-      if (Object.keys(errors).length > 0) {
-        setErrors(errors);
-        setIsLoading(false);
-        return;
-      }
 
       const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}`, classe);
 
@@ -288,7 +302,7 @@ export default function View() {
         cohorts={cohorts}
         user={user}
         onCancel={handleCancel}
-        onSendInfo={sendInfo}
+        onCheckInfo={checkInfo}
         setModaleWithdraw={setModaleWithdraw}
         isLoading={isLoading}
       />
@@ -307,7 +321,7 @@ export default function View() {
           infoBus={infoBus}
           onCancel={handleCancel}
           isLoading={isLoading}
-          onSendInfo={sendInfo}
+          onCheckInfo={checkInfo}
         />
       )}
 
@@ -316,6 +330,7 @@ export default function View() {
       <ModaleDelete modaleDelete={modaleDelete} setModaleDelete={setModaleDelete} onDelete={onDelete} />
       <ModaleWithdraw modaleWithdraw={modaleWithdraw} setModaleWithdraw={setModaleWithdraw} onDelete={onDelete} />
       <ModaleInvite modaleInvite={modaleInvite} setModaleInvite={setModaleInvite} url={url} />
+      <ModaleCohort modaleCohort={modaleCohort} setModaleCohort={setModaleCohort} onSendInfo={sendInfo} />
     </Page>
   );
 }

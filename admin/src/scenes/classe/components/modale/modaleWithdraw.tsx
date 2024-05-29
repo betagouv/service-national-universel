@@ -17,7 +17,7 @@ export default function ModaleWithdraw({ modaleWithdraw, setModaleWithdraw, onDe
       onClose={() => {
         setModaleWithdraw(false);
       }}
-      className="md:max-w-[700px]"
+      className="md:max-w-[500px]"
       icon={<IoWarningOutline className="text-red-600" size={40} />}
       title="Attention, vous êtes sur le point de désister cette classe."
       text="Cette action entraînera l'abandon de l'inscription de tous les élèves de cette classe."

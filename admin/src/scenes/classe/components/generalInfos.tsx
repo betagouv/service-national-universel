@@ -26,10 +26,10 @@ interface Props {
   setModaleWithdraw: (b: boolean) => void;
   isLoading: boolean;
   onCancel: () => void;
-  onSendInfo: () => void;
+  onCheckInfo: () => void;
 }
 
-export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors, rights, cohorts, user, setModaleWithdraw, isLoading, onCancel, onSendInfo }: Props) {
+export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors, rights, cohorts, user, setModaleWithdraw, isLoading, onCancel, onCheckInfo }: Props) {
   const colorOptions: SelectOption[] = Object.keys(CLE_COLORATION_LIST).map((value) => ({
     value: CLE_COLORATION_LIST[value],
     label: translateColoration(CLE_COLORATION_LIST[value]),
@@ -48,7 +48,7 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
       return [
         <div key="actions" className="flex items-center justify-end ml-6">
           <Button key="cancel" type="cancel" title="Annuler" onClick={onCancel} disabled={isLoading} />
-          <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={onSendInfo} loading={isLoading} disabled={isLoading} />
+          <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={onCheckInfo} loading={isLoading} disabled={isLoading} />
         </div>,
       ];
     } else if (canEdit) {
