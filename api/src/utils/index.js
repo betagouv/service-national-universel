@@ -89,7 +89,7 @@ const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
     const params = { Bucket: bucket, Key: name };
     s3bucket.getObject(params, (err, data) => {
       if (err) {
-        captureMessage(`Error getting file : ${name}`, { extras: { error: err } });
+        captureMessage(`Error getting file : ${name}`, { extra: { error: err } });
         reject(err);
       } else {
         resolve(data);

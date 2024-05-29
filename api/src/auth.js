@@ -356,7 +356,7 @@ class Auth {
       const shouldUse2FA = async () => {
         try {
           if (config.ENVIRONMENT === "development") return false;
-          if (['staging', 'ci', 'custom'].includes(config.ENVIRONMENT) && !user.email.match(regexp_exception_staging)) return false;
+          if (["staging", "ci", "custom"].includes(config.ENVIRONMENT) && !user.email.match(regexp_exception_staging)) return false;
 
           const trustToken = req.cookies[`trust_token-${user._id}`];
           if (!trustToken) return true;
@@ -735,7 +735,7 @@ class Auth {
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       const token = isYoung(user) ? value.token_young : value.token_ref;
       if (!data || !token) {
-        captureMessage("PB with signin_token", { extras: { data: data, token: token } });
+        captureMessage("PB with signin_token", { extra: { data: data, token: token } });
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
       res.send({ ok: true, token: token, user: data, data });
@@ -760,7 +760,7 @@ class Auth {
       });
 
       if (!data || !token) {
-        captureMessage("PB with signin_token", { extras: { data, token } });
+        captureMessage("PB with signin_token", { extra: { data, token } });
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
 
