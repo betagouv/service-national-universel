@@ -56,6 +56,7 @@ export type Bus = {
   departuredDate?: string;
   returnDate?: string;
   youngCapacity?: number | string;
+  youngSeatsTaken?: number | string;
   totalCapacity?: number | string;
   followerCapacity?: number | string;
   travelTime?: string;
@@ -63,11 +64,5 @@ export type Bus = {
   lunchBreakReturn?: string;
   classeId?: string;
   mergedBusIds?: string[];
-  mergedBusDetail?: {
-    _id: string;
-    busId: string;
-    totalCapacity: number;
-    youngCapacity: number;
-    youngSeatsTaken: number;
-  }[];
+  mergedBusDetails?: Pick<Bus, "_id" | "busId" | "totalCapacity" | "youngCapacity" | "youngSeatsTaken">[];
 };

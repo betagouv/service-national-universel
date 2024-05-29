@@ -12,9 +12,9 @@ export async function getInfoBus(line) {
 
   const centerDetail = await CohesionCenterModel.findById(line.centerId);
 
-  let mergedBusDetail = [];
+  let mergedBusDetails = [];
   if (line.mergedBusIds && line.mergedBusIds.length > 0) {
-    mergedBusDetail = (await LigneBusModel.find({ busId: { $in: line.mergedBusIds } })).map((b) => ({
+    mergedBusDetails = (await LigneBusModel.find({ busId: { $in: line.mergedBusIds } })).map((b) => ({
       _id: b._id,
       busId: b.busId,
       totalCapacity: b.totalCapacity,
@@ -23,7 +23,7 @@ export async function getInfoBus(line) {
     }));
   }
 
-  return { ...line._doc, meetingsPointsDetail, centerDetail, mergedBusDetail };
+  return { ...line._doc, meetingsPointsDetail, centerDetail, mergedBusDetails };
 }
 
 export async function syncMergedBus(ligneBus: any, busIdsToUpdate: string[], newMergedBusIds: string[]) {

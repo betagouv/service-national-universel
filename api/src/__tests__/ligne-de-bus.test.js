@@ -225,7 +225,7 @@ describe("Meeting point", () => {
       expect(res.body.data.busId).toBe(ligneBus.busId);
       expect(res.body.data.cohort).toBe(ligneBus.cohort);
       expect(res.body.data.mergedBusIds).toBe([].toString());
-      expect(res.body.data.mergedBusDetail).toBe([].toString());
+      expect(res.body.data.mergedBusDetails).toBe([].toString());
       passport.user = previous;
     });
 
