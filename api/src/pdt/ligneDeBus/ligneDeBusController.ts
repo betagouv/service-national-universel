@@ -1,17 +1,22 @@
-const express = require("express");
+import express, { Response } from "express";
+import passport from "passport";
+import Joi from "joi";
+
+import { canViewLigneBus } from "snu-lib";
+import { capture } from "@/sentry";
+import { ERRORS } from "@/utils";
+
+import { LigneBusModel, PlanTransportModel } from "@/models";
+// eslint-disable-next-line import/extensions
+import { BusDocument } from "@/models/PlanDeTransport/ligneBus.type";
+import { UserRequest } from "@/controllers/request";
+
+import { getInfoBus, syncMergedBus } from "./ligneDeBusService";
+
 const router = express.Router({ mergeParams: true });
-const Joi = require("joi");
-const passport = require("passport");
-
-const { canViewLigneBus } = require("snu-lib");
-const { capture } = require("../../sentry");
-const { ERRORS } = require("../../utils");
-const { LigneBusModel, PlanTransportModel } = require("../../models");
-
-const { getInfoBus, syncMergedBus } = require("./ligneDeBusService");
 
 // Ajout d'une ligne fusionnée
-router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // check params
     const { value: params, error: paramsError } = Joi.object({
@@ -26,7 +31,7 @@ router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { sessio
     if (payloadError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    let ligneBus = await LigneBusModel.findById(params.id);
+    let ligneBus: BusDocument = await LigneBusModel.findById(params.id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     // On ne peut pas s'ajouter soit même
     if (payload.mergedBusId === ligneBus.busId) {
@@ -38,17 +43,17 @@ router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { sessio
     if (!newLigneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // on vérifie qu'elle n'est pas déjà fusionnée
-    if (ligneBus.mergedBusIds.find((b) => b === payload.mergedBusId)) {
+    if (ligneBus.mergedBusIds?.find((b) => b === payload.mergedBusId)) {
       return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
     }
 
     // Mise à jour des lignes fusionnées existantes
-    const oldMergedBusIds = ligneBus.mergedBusIds;
+    const oldMergedBusIds = ligneBus.mergedBusIds || [];
     if (!oldMergedBusIds.includes(ligneBus.busId)) {
       oldMergedBusIds.push(ligneBus.busId);
     }
     const newMergedBusIds = [...oldMergedBusIds, payload.mergedBusId];
-    await syncMergedBus(ligneBus, newMergedBusIds, newMergedBusIds);
+    await syncMergedBus({ ligneBus, busIdsToUpdate: newMergedBusIds, newMergedBusIds });
 
     const infoBus = await getInfoBus(ligneBus);
     return res.status(200).send({ ok: true, data: infoBus });
@@ -59,7 +64,7 @@ router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { sessio
 });
 
 // Suppression d'une ligne fusionnée
-router.delete("/:id/ligne-fusionnee/:mergedBusId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id/ligne-fusionnee/:mergedBusId", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // check params
     const { error, value: params } = Joi.object({
@@ -70,14 +75,14 @@ router.delete("/:id/ligne-fusionnee/:mergedBusId", passport.authenticate(["refer
     // check authorization
     if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    let ligneBus = await LigneBusModel.findById(params.id);
+    let ligneBus: BusDocument = await LigneBusModel.findById(params.id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!ligneBus.mergedBusIds.find((b) => b === params.mergedBusId)) {
+    if (!ligneBus.mergedBusIds?.find((b) => b === params.mergedBusId)) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
     // Mise à jour des lignes fusionnées existantes
-    const oldMergedBusIds = ligneBus.mergedBusIds;
+    const oldMergedBusIds = ligneBus.mergedBusIds || [];
     if (!oldMergedBusIds.includes(ligneBus.busId)) {
       oldMergedBusIds.push(ligneBus.busId);
     }
@@ -85,7 +90,7 @@ router.delete("/:id/ligne-fusionnee/:mergedBusId", passport.authenticate(["refer
     if (newMergedBusIds.length === 1) {
       newMergedBusIds = [];
     }
-    await syncMergedBus(ligneBus, oldMergedBusIds, newMergedBusIds);
+    await syncMergedBus({ ligneBus, busIdsToUpdate: oldMergedBusIds, newMergedBusIds });
 
     const infoBus = await getInfoBus(ligneBus);
 

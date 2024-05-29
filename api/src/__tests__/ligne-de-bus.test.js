@@ -25,7 +25,7 @@ const mockModelMethodWithError = (model, method) => {
 };
 afterAll(dbClose);
 
-describe("Ligne de bus", () => {
+describe("LigneDeBus", () => {
   describe("GET /all", () => {
     afterEach(async () => {
       await Promise.all([LigneBusModel.deleteMany(), PointDeRassemblementModel.deleteMany(), LigneToPointModel.deleteMany()]);
@@ -191,8 +191,8 @@ describe("Ligne de bus", () => {
       expect(res.body.data.mergedBusIds).toEqual(["line-1", "line-2"]);
       expect(res.body.data.mergedBusDetails[0].busId).toEqual(ligneBus.busId);
       expect(res.body.data.mergedBusDetails[1].busId).toEqual(ligneBus2.busId);
-      expect(res.body.data.mergedBusDetails[0]._id).toEqual(ligneBus._id.toString());
-      expect(res.body.data.mergedBusDetails[1]._id).toEqual(ligneBus2._id.toString());
+      expect(res.body.data.mergedBusDetails.map(({ _id }) => _id).includes(ligneBus._id.toString())).toBe(true);
+      expect(res.body.data.mergedBusDetails.map(({ _id }) => _id).includes(ligneBus2._id.toString())).toBe(true);
       passport.user = previous;
     });
 

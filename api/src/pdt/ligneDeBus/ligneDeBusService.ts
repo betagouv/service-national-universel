@@ -1,4 +1,6 @@
-const { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } = require("../../models");
+import { BusDocument } from "@/models/PlanDeTransport/ligneBus.type";
+
+const { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } = require("@/models");
 
 export async function getInfoBus(line) {
   const ligneToBus = await LigneToPointModel.find({ lineId: line._id });
@@ -26,7 +28,7 @@ export async function getInfoBus(line) {
   return { ...line._doc, meetingsPointsDetail, centerDetail, mergedBusDetails };
 }
 
-export async function syncMergedBus(ligneBus: any, busIdsToUpdate: string[], newMergedBusIds: string[]) {
+export async function syncMergedBus({ ligneBus, busIdsToUpdate, newMergedBusIds }: { ligneBus: BusDocument; busIdsToUpdate: string[]; newMergedBusIds: string[] }) {
   for (const mergedBusId of busIdsToUpdate) {
     let otherMergedLine = ligneBus;
     if (mergedBusId !== ligneBus.busId) {
