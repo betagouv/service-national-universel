@@ -132,12 +132,14 @@ Schema.pre("save", async function (next, params) {
   this.user = params?.fromUser;
   this.updatedAt = Date.now();
 
-  if (this.isModified("department")) {
-    await ClasseModel.updateMany({ etablissementId: this._id }, { department: this.department });
-  }
-
-  if (this.isModified("region")) {
-    await ClasseModel.updateMany({ etablissementId: this._id }, { region: this.region });
+  if (this.isModified("department") || this.isModified("region")) {
+    await ClasseModel.updateMany(
+      { etablissementId: this._id },
+      {
+        ...(this.isModified("department") && { department: this.department }),
+        ...(this.isModified("region") && { region: this.region }),
+      },
+    );
   }
 
   next();

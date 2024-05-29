@@ -59,7 +59,7 @@ const Schema = new mongoose.Schema({
       description: "Nom de la classe",
     },
   },
-
+  //TODO update enum
   coloration: {
     type: String,
     enum: CLE_COLORATION_LIST,
@@ -83,6 +83,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  //TODO update with the good filiere enum
   filiere: {
     type: String,
     enum: CLE_FILIERE_LIST,
