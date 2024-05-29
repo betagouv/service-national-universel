@@ -7,24 +7,7 @@ import { Classe, User } from "@/types";
 import { searchSessions, searchPointDeRassemblements } from "../utils";
 import { ROLES } from "snu-lib";
 
-type Rights = {
-  canEdit: boolean;
-  canEditCohort: boolean;
-  canEditCenter: boolean;
-  canEditPDR: boolean;
-  showCohort: boolean;
-  showCenter: boolean;
-  showPDR: boolean;
-};
-
-type InfoBus = {
-  busId: string;
-  departureDate: Date;
-  meetingHour: string;
-  departureHour: string;
-  returnDate: Date;
-  returnHour: string;
-};
+import { Rights, InfoBus } from "./types";
 
 interface Props {
   classe: Classe;
@@ -34,13 +17,13 @@ interface Props {
   errors: { [key: string]: string };
   rights: Rights;
   user: User;
-  infoBus: InfoBus;
   onCancel: () => void;
+  infoBus: InfoBus;
   isLoading: boolean;
   onSendInfo: () => void;
 }
 
-export default function SejourInfos({ classe, setClasse, editStay, setEditStay, errors, rights, user, infoBus, onCancel, isLoading, onSendInfo }: Props) {
+export default function SejourInfos({ classe, setClasse, editStay, setEditStay, errors, rights, user, onCancel, infoBus, isLoading, onSendInfo }: Props) {
   const containerActionList = ({ edit, setEdit, canEdit }) => {
     if (edit) {
       return [
@@ -179,13 +162,13 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
                 <InputText name="busNumber" className="mb-3" label="Numéro de transport" value={infoBus.busId} disabled />
                 <Label title="Aller" name="Aller" />
                 <div className="flex gap-3">
-                  <InputText name="busDepartDate" className="mb-3" label="Date&nbsp;de&nbsp;départ" value={infoBus.departureDate.toISOString()} disabled />
+                  <InputText name="busDepartDate" className="mb-3" label="Date&nbsp;de&nbsp;départ" value={infoBus.departureDate} disabled />
                   <InputText name="busPdrHour" className="mb-3" label="Heure&nbsp;de&nbsp;convocation" value={infoBus.meetingHour} disabled />
                   <InputText name="busDepartHour" className="mb-3" label="Heure&nbsp;de&nbsp;départ" value={infoBus.departureHour} disabled />
                 </div>
                 <Label title="Retour" name="Retour" />
                 <div className="flex gap-3 w-full">
-                  <InputText name="busRetrunDate" className="mb-3 w-1/2" label="Date&nbsp;de&nbsp;retour" value={infoBus.returnDate.toISOString()} disabled />
+                  <InputText name="busRetrunDate" className="mb-3 w-1/2" label="Date&nbsp;de&nbsp;retour" value={infoBus.returnDate} disabled />
                   <InputText name="busReturnHour" className="mb-3 w-1/2" label="Heure&nbsp;de&nbsp;retour" value={infoBus.returnHour} disabled />
                 </div>
 

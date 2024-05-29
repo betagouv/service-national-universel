@@ -7,15 +7,11 @@ import { translate, CLE_COLORATION_LIST, CLE_GRADE_LIST, CLE_FILIERE_LIST, ROLES
 import { Container, Button, Label, InputText, Select } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib/src/dto/cohortDto";
 import { User, Classe } from "@/types";
+import { Rights } from "./types";
 
-type Rights = {
-  canEdit: boolean;
-  canEditCohort: boolean;
-  canEditCenter: boolean;
-  canEditPDR: boolean;
-  showCohort: boolean;
-  showCenter: boolean;
-  showPDR: boolean;
+type SelectOption = {
+  value: string;
+  label: string;
 };
 
 interface Props {
@@ -34,7 +30,7 @@ interface Props {
 }
 
 export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors, rights, cohorts, user, setModaleWithdraw, isLoading, onCancel, onSendInfo }: Props) {
-  const colorOptions = Object.keys(CLE_COLORATION_LIST).map((value) => ({
+  const colorOptions: SelectOption[] = Object.keys(CLE_COLORATION_LIST).map((value) => ({
     value: CLE_COLORATION_LIST[value],
     label: translateColoration(CLE_COLORATION_LIST[value]),
   }));

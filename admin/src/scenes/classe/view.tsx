@@ -3,9 +3,9 @@ import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsSend, BsTrash3 } from "react-icons/bs";
 import { useParams, useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import dayjs from "dayjs";
+import { toastr } from "react-redux-toastr";
 
 import { Page, Header, Button, Badge, DropdownButton } from "@snu/ds/admin";
 import { capture } from "@/sentry";
@@ -17,6 +17,8 @@ import Loader from "@/components/Loader";
 import plausibleEvent from "@/services/plausible";
 import { downloadCertificatesByClassId } from "@/services/convocation.service";
 import { usePendingAction } from "@/hooks/usePendingAction";
+import { Classe } from "@/types";
+import { AuthState, CohortsState } from "@/redux/auth/reducer";
 
 import GeneralInfos from "./components/generalInfos";
 import ReferentInfos from "./components/referentInfos";
@@ -25,31 +27,33 @@ import StatsInfos from "./components/statsInfos";
 import ModaleDelete from "./components/modale/modaleDelete";
 import ModaleWithdraw from "./components/modale/modaleWithdraw";
 import ModaleInvite from "./components/modale/modaleInvite";
-import { fi } from "date-fns/locale";
+import { InfoBus, TStatus } from "./components/types";
 
 export default function View() {
-  const [classe, setClasse] = useState({});
+  const [classe, setClasse] = useState<Classe | null>(null);
   const [url, setUrl] = useState("");
   const [studentStatus, setStudentStatus] = useState([]);
   const [modaleInvite, setModaleInvite] = useState(false);
   const [modaleWithdraw, setModaleWithdraw] = useState(false);
   const [modaleDelete, setModaleDelete] = useState(false);
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [errors, setErrors] = useState({});
   const [edit, setEdit] = useState(false);
   const [editStay, setEditStay] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [infoBus, setInfoBus] = useState(null);
-  const [isConvocationDownloading, handleConvocationDownload] = usePendingAction();
+  const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
+  const [isConvocationDownloading, handleConvocationDownload]: [boolean, () => void] = usePendingAction();
 
-  const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts).filter((c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort));
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const cohorts = useSelector((state: CohortsState) => state.Cohorts).filter(
+    (c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort),
+  );
   const cohort = cohorts.find((c) => c.name === classe?.cohort);
   const rights = getRights(user, classe, cohort);
 
   const history = useHistory();
   const totalSeatsTakenExcluding =
-    classe.seatsTaken -
+    (classe?.seatsTaken ?? 0) -
     (studentStatus[YOUNG_STATUS.WITHDRAWN] || 0) -
     (studentStatus[YOUNG_STATUS.REFUSED] || 0) -
     (studentStatus[YOUNG_STATUS.NOT_AUTORISED] || 0) -
@@ -90,7 +94,7 @@ export default function View() {
       }
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe");
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe", e);
     }
   };
 
@@ -104,7 +108,7 @@ export default function View() {
       setStudentStatus(response);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des élèves");
+      toastr.error("Oups, une erreur est survenue lors de la récupération des élèves", e);
     }
   };
 
@@ -116,12 +120,20 @@ export default function View() {
     try {
       setIsLoading(true);
       setErrors({});
-      let errors = {};
-      if (!classe.name) errors.name = "Ce champ est obligatoire";
-      if (!classe.coloration) errors.coloration = "Ce champ est obligatoire";
-      if (!classe.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
-      if (!classe.filiere) errors.filiere = "Ce champ est obligatoire";
-      if (!classe.grade) errors.grade = "Ce champ est obligatoire";
+      interface Errors {
+        name?: string;
+        coloration?: string;
+        totalSeats?: string;
+        filiere?: string;
+        grade?: string;
+      }
+
+      const errors: Errors = {};
+      if (!classe?.name) errors.name = "Ce champ est obligatoire";
+      if (!classe?.coloration) errors.coloration = "Ce champ est obligatoire";
+      if (!classe?.totalSeats) errors.totalSeats = "Ce champ est obligatoire";
+      if (!classe?.filiere) errors.filiere = "Ce champ est obligatoire";
+      if (!classe?.grade) errors.grade = "Ce champ est obligatoire";
 
       if (Object.keys(errors).length > 0) {
         setErrors(errors);
@@ -129,7 +141,7 @@ export default function View() {
         return;
       }
 
-      const { ok, code, data } = await api.put(`/cle/classe/${classe._id}`, classe);
+      const { ok, code, data } = await api.put(`/cle/classe/${classe?._id}`, classe);
 
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification de la classe", translate(code));
@@ -139,7 +151,7 @@ export default function View() {
       handleCancel();
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification de la classe");
+      toastr.error("Oups, une erreur est survenue lors de la modification de la classe", e);
     } finally {
       setIsLoading(false);
     }
@@ -156,7 +168,7 @@ export default function View() {
     try {
       setIsLoading(true);
       //delete data
-      const { ok, code } = await api.remove(`/cle/classe/${classe._id}?type=${type}`);
+      const { ok, code } = await api.remove(`/cle/classe/${classe?._id}?type=${type}`);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
         return setIsLoading(false);
@@ -164,7 +176,7 @@ export default function View() {
       history.push("/classes");
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression");
+      toastr.error("Oups, une erreur est survenue lors de la suppression", e);
     } finally {
       setIsLoading(false);
       setModaleDelete(false);
@@ -174,7 +186,7 @@ export default function View() {
 
   const onInscription = () => {
     plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
-    history.push(`/volontaire/create?classeId=${classe._id}`);
+    history.push(`/volontaire/create?classeId=${classe?._id}`);
   };
 
   const handleCertificateDownload = () => {
@@ -185,7 +197,12 @@ export default function View() {
       }
       return errorMessage;
     };
-    handleConvocationDownload(downloadCertificatesByClassId(classe._id), "Téléchargement des convocations en cours", "Les convocations ont bien été téléchargées", getErrorMessage);
+    handleConvocationDownload(
+      downloadCertificatesByClassId(classe?._id),
+      "Téléchargement des convocations en cours",
+      "Les convocations ont bien été téléchargées",
+      getErrorMessage,
+    );
   };
 
   const isClasseDeletable = () => {
@@ -197,9 +214,9 @@ export default function View() {
   };
 
   const headerActionList = () => {
-    let actionsList = [];
+    const actionsList: React.ReactNode[] = [];
 
-    if (![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe.status) && IS_INSCRIPTION_OPEN_CLE) {
+    if (![STATUS_CLASSE.DRAFT, STATUS_CLASSE.WITHDRAWN, STATUS_CLASSE.VALIDATED].includes(classe?.status) && IS_INSCRIPTION_OPEN_CLE) {
       actionsList.push(
         <Button key="inscription" leftIcon={<AiOutlinePlus size={20} className="mt-1" />} title="Inscrire un élève" className="mr-2" onClick={onInscription} />,
         <Button key="invite" leftIcon={<BsSend />} title="Inviter des élèves" className="mr-2" onClick={() => setModaleInvite(true)} />,
@@ -250,7 +267,7 @@ export default function View() {
     <Page>
       <Header
         title={classe.name || "Informations nécessaires"}
-        titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status)} />}
+        titleComponent={<Badge className="mx-4 mt-2" title={translateStatusClasse(classe.status)} status={statusClassForBadge(classe.status) as TStatus} />}
         breadcrumb={[
           { title: <HiOutlineOfficeBuilding size={20} /> },
           {
