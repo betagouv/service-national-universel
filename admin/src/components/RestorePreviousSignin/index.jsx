@@ -8,8 +8,8 @@ export default function RestorePreviousSignin() {
   const previousSigninToken = useSelector((state) => state.Auth.previousSigninToken);
   const history = useHistory();
 
-  const onClick = () => {
-    restorePreviousSignin();
+  const onClick = async () => {
+    await restorePreviousSignin();
     history.push("/");
   };
 
