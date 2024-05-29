@@ -1,7 +1,7 @@
 const { faker } = require("@faker-js/faker");
 faker.locale = "fr";
 
-function getNewPointDeRassemblementFixture() {
+function getNewPointDeRassemblementFixture(object = {}) {
   return {
     code: faker.lorem.words(),
     cohorts: ["Février 2023 - C"],
@@ -16,6 +16,7 @@ function getNewPointDeRassemblementFixture() {
       lat: Number(faker.address.latitude()),
       lon: Number(faker.address.longitude()),
     },
+    ...object,
   };
 }
 
