@@ -135,7 +135,7 @@ export default function IndexPhase2Mobile({ young }) {
         </div>
         <div className="rounded-lg border-[1px] border-gray-200">
           <a
-            href={`https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise`}
+            href={`https://support.snu.gouv.fr/base-de-connaissance/demander-la-reconnaissance-dun-engagement-deja-realise-1`}
             target="_blank"
             rel="noreferrer"
             className="flex items-start justify-between gap-1 p-3">
