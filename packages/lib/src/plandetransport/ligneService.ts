@@ -1,4 +1,4 @@
-import { CohortDto } from "../dto";
+import { CohortDto, BusDto } from "../dto";
 import { ROLES } from "../roles";
 
 export const isTeamLeaderOrSupervisorEditable = (actor, cohort: CohortDto) => {
@@ -16,4 +16,10 @@ export const isTeamLeaderOrSupervisorEditable = (actor, cohort: CohortDto) => {
     default:
       return false;
   }
+};
+
+export const isSameBusTeam = (ligne1: BusDto, ligne2: BusDto) => {
+  const currentChef = ligne1?.team?.find((item) => item.role === "leader")?._id;
+  const newChef = ligne2?.team?.find((item) => item.role === "leader")?._id;
+  return currentChef !== newChef;
 };

@@ -4,15 +4,16 @@ import { toastr } from "react-redux-toastr";
 import { HiOutlineExclamation, HiOutlinePlusCircle } from "react-icons/hi";
 
 import { Button, InputText, Modal } from "@snu/ds/admin";
-import { ERRORS } from "snu-lib";
+import { ERRORS, isSameBusTeam } from "snu-lib";
+import { BusDto } from "snu-lib/src/dto";
 
-import { Bus, RouteResponse } from "@/types";
+import { RouteResponse } from "@/types";
 import API from "@/services/api";
 
 interface Props {
   isOpen: boolean;
-  onClose: (bus?: Bus) => void;
-  bus: Bus;
+  onClose: (bus?: BusDto) => void;
+  bus: BusDto;
 }
 
 export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
@@ -20,7 +21,7 @@ export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
   const [showWarning, setShowWarning] = useState(false);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async ({ mergedBusId }: { mergedBusId: string }): Promise<RouteResponse<Bus>> => {
+    mutationFn: async ({ mergedBusId }: { mergedBusId: string }): Promise<RouteResponse<BusDto>> => {
       const response = await API.post(`/ligne-de-bus/${bus._id}/ligne-fusionnee/`, { mergedBusId });
       if (!response.ok) {
         throw Error(response.code);
@@ -38,9 +39,7 @@ export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
       }
       return toastr.error("Une erreur est survenue lors de la vérification de la ligne fusionnée", response.code);
     }
-    const currentChef = bus.team?.find((item) => item.role === "leader")?._id;
-    const newChef = response.data.team?.find((item) => item.role === "leader")?._id;
-    if (currentChef !== newChef) {
+    if (isSameBusTeam(bus, response.data)) {
       return setShowWarning(true);
     }
     mutate(
