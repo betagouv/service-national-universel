@@ -28,7 +28,8 @@ console.error = function (message) {
 };
 
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  console.error("Unhandled Rejection");
+  throw reason;
 });
 
 resolveAsyncConfigs(config).then((config) => {
