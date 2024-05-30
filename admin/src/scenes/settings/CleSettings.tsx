@@ -1,4 +1,3 @@
-import SimpleToggle from "@/components/ui/forms/dateForm/SimpleToggle";
 import React from "react";
 import { Container } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib/src/dto";
@@ -10,12 +9,12 @@ type CleSettingsProps = {
   cleSettingsData?: CleSettingsData;
   isLoading: boolean;
   readOnly: boolean;
-  handleChange: (data: CleSettingsData) => void;
+  onChange: (data: CleSettingsData) => void;
 };
 
-export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange }: CleSettingsProps) => {
-  const onChange = (data: Partial<CleSettingsData>) => {
-    handleChange({ ...cleSettingsData, ...data });
+export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: CleSettingsProps) => {
+  const handleChange = (data: Partial<CleSettingsData>) => {
+    onChange({ ...cleSettingsData, ...data });
   };
 
   return (
@@ -31,7 +30,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
               disabled={isLoading}
               readOnly={readOnly}
               value={!!cleSettingsData?.cleUpdateCohortForReferentRegion}
-              onChange={() => onChange({ cleUpdateCohortForReferentRegion: !cleSettingsData?.cleUpdateCohortForReferentRegion })}
+              onChange={() => handleChange({ cleUpdateCohortForReferentRegion: !cleSettingsData?.cleUpdateCohortForReferentRegion })}
               range={{
                 from: cleSettingsData?.cleUpdateCohortForReferentRegionDate?.from || null,
                 to: cleSettingsData?.cleUpdateCohortForReferentRegionDate?.to || null,
@@ -50,7 +49,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
               disabled={isLoading}
               readOnly={readOnly}
               value={!!cleSettingsData?.cleUpdateCohortForReferentDepartment}
-              onChange={() => onChange({ cleUpdateCohortForReferentDepartment: !cleSettingsData?.cleUpdateCohortForReferentDepartment })}
+              onChange={() => handleChange({ cleUpdateCohortForReferentDepartment: !cleSettingsData?.cleUpdateCohortForReferentDepartment })}
               range={{
                 from: cleSettingsData?.cleUpdateCohortForReferentDepartmentDate?.from || null,
                 to: cleSettingsData?.cleUpdateCohortForReferentDepartmentDate?.to || null,
@@ -74,7 +73,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
               disabled={isLoading}
               readOnly={readOnly}
               value={!!cleSettingsData?.cleDisplayCohortsForAdminCLE}
-              onChange={() => onChange({ cleDisplayCohortsForAdminCLE: !cleSettingsData?.cleDisplayCohortsForAdminCLE })}
+              onChange={() => handleChange({ cleDisplayCohortsForAdminCLE: !cleSettingsData?.cleDisplayCohortsForAdminCLE })}
               range={{
                 from: cleSettingsData?.cleDisplayCohortsForAdminCLEDate?.from || null,
                 to: cleSettingsData?.cleDisplayCohortsForAdminCLEDate?.to || null,
@@ -93,7 +92,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
               disabled={isLoading}
               readOnly={readOnly}
               value={!!cleSettingsData?.cleDisplayCohortsForReferentClasse}
-              onChange={() => onChange({ cleDisplayCohortsForReferentClasse: !cleSettingsData?.cleDisplayCohortsForReferentClasse })}
+              onChange={() => handleChange({ cleDisplayCohortsForReferentClasse: !cleSettingsData?.cleDisplayCohortsForReferentClasse })}
               range={{
                 from: cleSettingsData?.cleDisplayCohortsForReferentClasseDate?.from || null,
                 to: cleSettingsData?.cleDisplayCohortsForReferentClasseDate?.to || null,
@@ -123,7 +122,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
                 disabled={isLoading}
                 readOnly={readOnly}
                 value={!!cleSettingsData?.cleUpdateCentersForReferentRegion}
-                onChange={() => onChange({ cleUpdateCentersForReferentRegion: !cleSettingsData?.cleUpdateCentersForReferentRegion })}
+                onChange={() => handleChange({ cleUpdateCentersForReferentRegion: !cleSettingsData?.cleUpdateCentersForReferentRegion })}
                 range={{
                   from: cleSettingsData?.cleUpdateCentersForReferentRegionDate?.from || null,
                   to: cleSettingsData?.cleUpdateCentersForReferentRegionDate?.to || null,
@@ -142,7 +141,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
                 disabled={isLoading}
                 readOnly={readOnly}
                 value={!!cleSettingsData?.cleUpdateCentersForReferentDepartment}
-                onChange={() => onChange({ cleUpdateCentersForReferentDepartment: !cleSettingsData?.cleUpdateCentersForReferentDepartment })}
+                onChange={() => handleChange({ cleUpdateCentersForReferentDepartment: !cleSettingsData?.cleUpdateCentersForReferentDepartment })}
                 range={{
                   from: cleSettingsData?.cleUpdateCentersForReferentDepartmentDate?.from || null,
                   to: cleSettingsData?.cleUpdateCentersForReferentDepartmentDate?.to || null,
@@ -166,7 +165,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
                 disabled={isLoading}
                 readOnly={readOnly}
                 value={!!cleSettingsData?.cleDisplayCentersForAdminCLE}
-                onChange={() => onChange({ cleDisplayCentersForAdminCLE: !cleSettingsData?.cleDisplayCentersForAdminCLE })}
+                onChange={() => handleChange({ cleDisplayCentersForAdminCLE: !cleSettingsData?.cleDisplayCentersForAdminCLE })}
                 range={{
                   from: cleSettingsData?.cleDisplayCentersForAdminCLEDate?.from || null,
                   to: cleSettingsData?.cleDisplayCentersForAdminCLEDate?.to || null,
@@ -185,7 +184,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
                 disabled={isLoading}
                 readOnly={readOnly}
                 value={!!cleSettingsData?.cleDisplayCentersForReferentClasse}
-                onChange={() => onChange({ cleDisplayCentersForReferentClasse: !cleSettingsData?.cleDisplayCentersForReferentClasse })}
+                onChange={() => handleChange({ cleDisplayCentersForReferentClasse: !cleSettingsData?.cleDisplayCentersForReferentClasse })}
                 range={{
                   from: cleSettingsData?.cleDisplayCentersForReferentClasseDate?.from || null,
                   to: cleSettingsData?.cleDisplayCentersForReferentClasseDate?.to || null,
@@ -209,7 +208,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
                 disabled={isLoading}
                 readOnly={readOnly}
                 value={!!cleSettingsData?.cleDisplayPDRForAdminCLE}
-                onChange={() => onChange({ cleDisplayPDRForAdminCLE: !cleSettingsData?.cleDisplayPDRForAdminCLE })}
+                onChange={() => handleChange({ cleDisplayPDRForAdminCLE: !cleSettingsData?.cleDisplayPDRForAdminCLE })}
                 range={{
                   from: cleSettingsData?.cleDisplayPDRForAdminCLEDate?.from || null,
                   to: cleSettingsData?.cleDisplayPDRForAdminCLEDate?.to || null,
@@ -228,7 +227,7 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, handleChange
                 disabled={isLoading}
                 readOnly={readOnly}
                 value={!!cleSettingsData?.cleDisplayPDRForReferentClasse}
-                onChange={() => onChange({ cleDisplayPDRForReferentClasse: !cleSettingsData?.cleDisplayPDRForReferentClasse })}
+                onChange={() => handleChange({ cleDisplayPDRForReferentClasse: !cleSettingsData?.cleDisplayPDRForReferentClasse })}
                 range={{
                   from: cleSettingsData?.cleDisplayPDRForReferentClasseDate?.from || null,
                   to: cleSettingsData?.cleDisplayPDRForReferentClasseDate?.to || null,

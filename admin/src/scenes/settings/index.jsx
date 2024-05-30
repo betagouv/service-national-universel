@@ -824,7 +824,7 @@ export default function Settings() {
           </div>
 
           {data.type === COHORT_TYPE.CLE && (
-            <CleSettings cleSettingsData={data} isLoading={isLoading} readOnly={readOnly} handleChange={(cleSettingsData) => setData({ ...data, ...cleSettingsData })} />
+            <CleSettings cleSettingsData={data} isLoading={isLoading} readOnly={readOnly} onChange={(cleSettingsData) => setData({ ...data, ...cleSettingsData })} />
           )}
 
           {!readOnly && (
