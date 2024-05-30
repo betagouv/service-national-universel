@@ -21,7 +21,6 @@ router.get("/:cohort/ligne-de-bus/:busId", passport.authenticate(["referent"], {
       cohort: Joi.string().required(),
       busId: Joi.string().required(),
     }).validate(req.params);
-    // check payload
     if (paramsError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     // check authorization
     if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

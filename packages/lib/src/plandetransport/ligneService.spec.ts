@@ -1,4 +1,4 @@
-import { isTeamLeaderOrSupervisorEditable } from "./ligneService";
+import { isTeamLeaderOrSupervisorEditable, isSameBusTeam } from "./ligneService";
 import { ROLES } from "../roles";
 import { CohortDto } from "../dto";
 
@@ -41,5 +41,21 @@ describe("isTeamLeaderOrSupervisorEditable", () => {
 
   it("should return false for unknown role", () => {
     expect(isTeamLeaderOrSupervisorEditable({ role: "UNKNOWN" }, {} as CohortDto)).toBe(false);
+  });
+});
+
+describe("isSameBusTeam", () => {
+  it("should return true when empty", () => {
+    expect(isSameBusTeam({ team: [] }, { team: [] })).toBe(true);
+    expect(isSameBusTeam({}, {})).toBe(true);
+  });
+  it("should return true when same _ids", () => {
+    expect(isSameBusTeam({ team: [{ _id: "a" }] }, { team: [{ _id: "a" }] })).toBe(true);
+    expect(isSameBusTeam({ team: [{ _id: "a" }, { _id: "b" }] }, { team: [{ _id: "b" }, { _id: "a" }] })).toBe(true);
+  });
+  it("should return false when diffents _ids", () => {
+    expect(isSameBusTeam({ team: [{ _id: "a" }] }, { team: [{ _id: "b" }] })).toBe(false);
+    expect(isSameBusTeam({ team: [{ _id: "a" }, { _id: "b" }] }, { team: [{ _id: "a" }, { _id: "b" }, { _id: "c" }] })).toBe(false);
+    expect(isSameBusTeam({ team: [{ _id: "a" }, { _id: "b" }] }, { team: [{ _id: "b" }, { _id: "c" }] })).toBe(false);
   });
 });

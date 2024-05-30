@@ -19,7 +19,7 @@ export const isTeamLeaderOrSupervisorEditable = (actor, cohort: CohortDto) => {
 };
 
 export const isSameBusTeam = (ligne1: BusDto, ligne2: BusDto) => {
-  const currentChef = ligne1?.team?.find((item) => item.role === "leader")?._id;
-  const newChef = ligne2?.team?.find((item) => item.role === "leader")?._id;
-  return currentChef !== newChef;
+  const team1 = ligne1?.team?.map(({ _id }) => _id) || [];
+  const team2 = ligne2?.team?.map(({ _id }) => _id) || [];
+  return team1.sort().toString() == team2.sort().toString();
 };
