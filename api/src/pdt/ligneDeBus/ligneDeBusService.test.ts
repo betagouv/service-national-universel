@@ -13,10 +13,10 @@ const findOneBusSpy = jest.spyOn(LigneBusModel, "findOne");
 
 describe("ligneDeBusService", () => {
   it("should syncMergedBus all bus line", async () => {
-    const ligneBus = { busId: "#1", cohort: "cohort", set: () => null, save: () => () => Promise.resolve() } as any;
+    const ligneBus = { busId: "#1", cohort: "cohort", set: () => null, save: () => Promise.resolve() } as any;
     const busSaveSpy = jest.spyOn(ligneBus, "save");
     const busSetSpy = jest.spyOn(ligneBus, "set");
-    const ligneBus2 = { busId: "#1", cohort: "cohort", set: () => null, save: () => () => Promise.resolve() } as any;
+    const ligneBus2 = { busId: "#1", cohort: "cohort", set: () => null, save: () => Promise.resolve() } as any;
 
     // ligneBus found
     findOneBusSpy.mockResolvedValue(null);
