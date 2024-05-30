@@ -43,6 +43,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
         .trim()
         .valid(...getCohortNames(true, false, false))
         .required(),
+      source: Joi.string().required()
     }).validate({ ...req.body }, { stripUnknown: true });
 
     if (error) {

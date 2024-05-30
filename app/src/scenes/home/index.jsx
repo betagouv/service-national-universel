@@ -60,23 +60,19 @@ export default function Home() {
 
     if (young.status === YOUNG_STATUS.REFUSED) return <RefusedV2 />;
 
+    
+    if (reinscriptionOpen && hasAccessToReinscription(young)) {
+      return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
+    }
+    
     if ([YOUNG_STATUS.VALIDATED].includes(young.status) && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
       return <Phase1NotDone />;
     }
-
-    if (hasAccessToReinscription(young)) {
-      if (!reinscriptionOpen) {
-        if (hasWithdrawn) {
-          return <Withdrawn />;
-        }
-        if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
-          return <AvenirCohort />;
-        }
-        if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
-          return <FutureCohort />;
-        }
-      }
-      return <WaitingReinscription reinscriptionOpen={reinscriptionOpen} />;
+    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED].includes(young.status)) {
+      return <AvenirCohort />;
+    }
+    if (young.cohort === "à venir" && [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status)) {
+      return <FutureCohort />;
     }
 
     if (hasWithdrawn) {
@@ -98,7 +94,6 @@ export default function Home() {
     ) {
       return <HomePhase2 />;
     }
-
 
     if (getCohortNames(true, false, false).includes(young.cohort) && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1)) {
       // they are in the new cohort, we display the inscription step

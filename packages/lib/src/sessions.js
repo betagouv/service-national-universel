@@ -280,12 +280,30 @@ function shouldForceRedirectToReinscription(young) {
 const isCohortTooOld = (young) => ["2019", "2020"].includes(young.cohort);
 
 function hasAccessToReinscription(young) {
-  if (isCle(young)) {
-    return false;
-  }
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
+
+  if (isCle(young)) {
+    if (young.frenchNationality === "false") {
+      return false;
+    }
+
+    if([YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1)){
+      return false
+    }
+
+    if ([YOUNG_STATUS.ABANDONED, YOUNG_STATUS.WITHDRAWN, ].includes(young.status)) {
+      return true;
+    }
+
+    if ([YOUNG_STATUS_PHASE1.NOT_DONE].includes(young.statusPhase1)) {
+      return true;
+    }
+
+    return false;
+  }
+
   if (isCohortTooOld(young)) {
     return false;
   }
