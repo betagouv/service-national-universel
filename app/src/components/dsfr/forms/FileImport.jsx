@@ -6,7 +6,6 @@ export default function FileImport({ id, file, setFile, setError = () => {}, onC
     if (!e.target.files.length) return;
 
     let image = e.target.files[0];
-    console.log("Selected file:", image);
 
     if (!["application/pdf", "image/jpeg", "image/png", "image/jpg", "image/heif", "image/heic"].includes(image.type)) {
       setError({ message: "Format de fichier non supporté." });
@@ -15,14 +14,11 @@ export default function FileImport({ id, file, setFile, setError = () => {}, onC
 
     try {
       if (["image/heif", "image/heic"].includes(image.type)) {
-        console.log("Converting HEIC/HEIF to PNG");
         image = await convertImage(image, "PNG");
       }
       if (image.size > 1_000_000) {
-        console.log("Resizing image");
         image = await resizeImage(image);
       }
-      console.log("Final image:", image);
       setFile(image);
       setError({});
       onChange && onChange();

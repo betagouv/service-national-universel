@@ -13,7 +13,6 @@ export async function resizeImage(file, config = {}) {
   };
   config = { ...defaultConfig, ...config };
   let image = file;
-  console.log(image.size);
   if (image.size > 1000000) {
     image = await readAndCompressImage(file, config);
     image.name = file.name;
@@ -33,15 +32,12 @@ export async function convertImage(file, format = "PNG") {
 
   if (["image/heif", "image/heic"].includes(file.type)) {
     try {
-      console.log("Starting conversion of HEIC to PNG");
       const arrayBuffer = await file.arrayBuffer();
-      console.log("ArrayBuffer obtained:", arrayBuffer);
 
       const outputBlob = await heic2any({
         blob: new Blob([arrayBuffer], { type: file.type }),
         toType: `image/${format.toLowerCase()}`,
       });
-      console.log("Conversion successful:", outputBlob);
 
       const image = new File([outputBlob], `${file.name.split(".")[0]}.${format.toLowerCase()}`, { type: outputBlob.type });
       return image;
