@@ -16,7 +16,7 @@ export default function Index() {
     <Switch>
       <SentryRoute path="/classes/create" component={Create} />
       <SentryRoute
-        path="/etablissement/:id"
+        path="/classes/:id"
         render={({ match }) => {
           const { id } = match.params;
           if (!/^[0-9a-fA-F]{24}$/.test(id)) {
