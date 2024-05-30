@@ -136,8 +136,8 @@ Schema.pre("save", async function (next, params) {
     await ClasseModel.updateMany(
       { etablissementId: this._id },
       {
-        ...(this.isModified("department") && { department: this.department }),
-        ...(this.isModified("region") && { region: this.region }),
+        department: this.department,
+        region: this.region,
       },
     );
   }
