@@ -17,9 +17,6 @@ export async function resizeImage(file, config = {}) {
     image = await readAndCompressImage(file, config);
     image.name = file.name;
   }
-  if (image.size > 1000000) {
-    image = await resizeImage(image);
-  }
 
   return image;
 }
