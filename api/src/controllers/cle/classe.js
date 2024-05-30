@@ -131,6 +131,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
+
+    let youngs;
+    if (classe.cohort !== value.cohort) {
+      youngs = await YoungModel.find({ classeId: classe._id });
+      // * Impossible to change cohort if a young has already completed phase1
+      const youngWithStatusPhase1Done = youngs.find((y) => y.statusPhase1 === YOUNG_STATUS_PHASE1.DONE);
+      if (youngWithStatusPhase1Done) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const oldCohort = classe.cohort;
     classe.set({ ...value, sessionId: classe.sessionId || null });
 
@@ -146,7 +155,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     classe = await StateManager.Classe.compute(classe._id, req.user, { YoungModel });
 
     if (oldCohort !== classe.cohort) {
-      const youngs = await YoungModel.find({ classeId: classe._id });
       await Promise.all(
         youngs.map((y) => {
           y.set({ cohort: classe.cohort });
