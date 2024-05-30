@@ -65,4 +65,17 @@ export type Bus = {
   classeId?: string;
   mergedBusIds?: string[];
   mergedBusDetails?: Pick<Bus, "_id" | "busId" | "totalCapacity" | "youngCapacity" | "youngSeatsTaken">[];
+  team?: BusTeam[];
 };
+
+export interface BusTeam {
+  _id?: string;
+  role?: string;
+  lastName?: string;
+  firstName?: string;
+  birthdate?: Date;
+  mail?: string;
+  phone?: string;
+  forth?: boolean;
+  back?: boolean;
+}

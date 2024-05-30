@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
-import { HiOutlinePlusCircle } from "react-icons/hi";
+import { HiOutlineExclamation, HiOutlinePlusCircle } from "react-icons/hi";
 
 import { Button, InputText, Modal } from "@snu/ds/admin";
 import { ERRORS } from "snu-lib";
@@ -17,6 +17,7 @@ interface Props {
 
 export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
   const [mergedBusId, setMergedBusId] = useState("");
+  const [showWarning, setShowWarning] = useState(false);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async ({ mergedBusId }: { mergedBusId: string }): Promise<RouteResponse<Bus>> => {
@@ -28,7 +29,20 @@ export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
     },
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // check chef de file
+    const response = await API.get(`/plan-de-transport/${bus.cohort}/ligne-de-bus/${mergedBusId}`);
+    if (!response.ok) {
+      if (response.code === ERRORS.NOT_FOUND) {
+        return toastr.error(`Ligne de bus introuvable dans le PDT ${bus.cohort}`, "");
+      }
+      return toastr.error("Une erreur est survenue lors de la vérification de la ligne fusionnée", response.code);
+    }
+    const currentChef = bus.team?.find((item) => item.role === "leader")?._id;
+    const newChef = response.data.team?.find((item) => item.role === "leader")?._id;
+    if (currentChef !== newChef) {
+      return setShowWarning(true);
+    }
     mutate(
       {
         mergedBusId,
@@ -59,29 +73,54 @@ export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      content={
-        <div className="flex flex-col items-center text-center gap-6 mb-12">
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-50">
-              <HiOutlinePlusCircle className="w-6 h-6" />
+    <>
+      <Modal
+        isOpen={isOpen && !showWarning}
+        onClose={onClose}
+        content={
+          <div className="flex flex-col items-center text-center gap-6 mb-12">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-50">
+                <HiOutlinePlusCircle className="w-6 h-6" />
+              </div>
             </div>
+            <h1 className="font-bold text-xl">Fusionner une ligne</h1>
+            <p className="text-lg">
+              Avec quelle ligne souhaitez-vous fusionner la ligne <b>{bus.busId}</b> :
+            </p>
+            <InputText name="busId" placeholder="Saisir une ligne de bus" value={mergedBusId} onChange={(e) => setMergedBusId(e.target.value)} className="w-full" />
           </div>
-          <h1 className="font-bold text-xl">Fusionner une ligne</h1>
-          <p className="text-lg">
-            Avec quelle ligne souhaitez-vous fusionner la ligne <b>{bus.busId}</b> :
-          </p>
-          <InputText name="busId" placeholder="Saisir une ligne de bus" value={mergedBusId} onChange={(e) => setMergedBusId(e.target.value)} className="w-full" />
-        </div>
-      }
-      footer={
-        <div className="flex items-center justify-between gap-6">
-          <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => onClose()} />
-          <Button disabled={isPending || mergedBusId.length < 8} onClick={handleSubmit} title="Confirmer" className="flex-1" />
-        </div>
-      }
-    />
+        }
+        footer={
+          <div className="flex items-center justify-between gap-6">
+            <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => onClose()} />
+            <Button disabled={isPending || mergedBusId.length < 8} onClick={handleSubmit} title="Confirmer" className="flex-1" />
+          </div>
+        }
+      />
+      <Modal
+        isOpen={showWarning}
+        onClose={() => setShowWarning(false)}
+        content={
+          <div className="flex flex-col items-center text-center gap-6 mb-12">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50">
+                <HiOutlineExclamation className="text-red-600 w-6 h-6" />
+              </div>
+            </div>
+            <h1 className="font-bold text-xl">Fusionner une ligne</h1>
+            <p className="text-lg">
+              Attention vous souhaitez fusionner la ligne <b>{bus.busId}</b> avec la ligne <b>{mergedBusId}</b>,<br /> mais les chefs de file et/ou encadrants sont différents !
+            </p>
+          </div>
+        }
+        footer={
+          <div className="flex items-center justify-between gap-6">
+            <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => setShowWarning(false)} />
+            <Button disabled={isPending} onClick={handleSubmit} title="Confirmer" className="flex-1" />
+          </div>
+        }
+      />
+    </>
   );
 }

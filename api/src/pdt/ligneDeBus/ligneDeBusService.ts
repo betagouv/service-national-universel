@@ -16,7 +16,7 @@ export async function getInfoBus(line: BusDocument) {
 
   let mergedBusDetails = [];
   if (line.mergedBusIds && line.mergedBusIds.length > 0) {
-    mergedBusDetails = (await LigneBusModel.find({ busId: { $in: line.mergedBusIds }, cohort: line.cohort, deletedAt: { $exists: false } })).map((b) => ({
+    mergedBusDetails = (await LigneBusModel.find({ busId: { $in: line.mergedBusIds }, cohort: line.cohort, deletedAt: { $exists: false } })).map((b: BusDocument) => ({
       _id: b._id,
       busId: b.busId,
       totalCapacity: b.totalCapacity,

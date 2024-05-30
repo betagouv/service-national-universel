@@ -28,6 +28,7 @@ function getAppHelper() {
   app.use("/ligne-to-point", require("../../controllers/planDeTransport/ligne-to-point"));
   app.use("/ligne-de-bus", require("../../controllers/planDeTransport/ligne-de-bus"));
   app.use("/cle", require("../../controllers/cle"));
+  app.use("/plan-de-transport", require("../../pdt/pdtController"));
 
   return app;
 }

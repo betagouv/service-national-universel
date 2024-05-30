@@ -30,6 +30,7 @@ export interface IBus {
 }
 
 export interface BusTeam {
+  _id?: string;
   role?: string;
   lastName?: string;
   firstName?: string;
