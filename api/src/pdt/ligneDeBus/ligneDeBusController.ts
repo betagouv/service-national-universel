@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
 
-import { canViewLigneBus } from "snu-lib";
+import { canEditLigneBusGeneralInfo } from "snu-lib";
 import { capture } from "@/sentry";
 import { ERRORS } from "@/utils";
 
@@ -27,9 +27,9 @@ router.post("/:id/ligne-fusionnee", passport.authenticate(["referent"], { sessio
     const { value: payload, error: payloadError } = Joi.object({
       mergedBusId: Joi.string().required(),
     }).validate(req.body, { stripUnknown: true });
-    // check authorization
     if (payloadError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // check authorization
+    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let ligneBus: BusDocument = await LigneBusModel.findById(params.id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -73,7 +73,7 @@ router.delete("/:id/ligne-fusionnee/:mergedBusId", passport.authenticate(["refer
     }).validate(req.params);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     // check authorization
-    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let ligneBus: BusDocument = await LigneBusModel.findById(params.id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
