@@ -3,17 +3,17 @@ import { HiOutlineExclamation } from "react-icons/hi";
 import { ModalConfirmation } from "@snu/ds/admin";
 
 interface Props {
-  modaleCohort: boolean;
-  setModaleCohort: (b: boolean) => void;
+  isOpen: boolean;
+  onClose: (b: boolean) => void;
   onSendInfo: () => void;
 }
 
-export default function ModaleCohort({ modaleCohort, setModaleCohort, onSendInfo }: Props) {
+export default function ModaleCohort({ isOpen, onClose, onSendInfo }: Props) {
   return (
     <ModalConfirmation
-      isOpen={modaleCohort}
+      isOpen={isOpen}
       onClose={() => {
-        setModaleCohort(false);
+        onClose(false);
       }}
       className="md:max-w-[500px]"
       icon={<HiOutlineExclamation className="text-red-600 bg-red-50 rounded-full p-2" size={40} />}

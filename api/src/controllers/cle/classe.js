@@ -29,6 +29,7 @@ const YoungModel = require("../../models/young");
 const { findOrCreateReferent, inviteReferent } = require("../../services/cle/referent");
 const StateManager = require("../../states");
 const emailsEmitter = require("../../emails");
+const { deleteClasse } = require("../../classe/classe.service");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -136,22 +137,26 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     classe.set({ ...value, sessionId: classe.sessionId || null });
 
     if (canUpdateClasseStay(req.user)) {
-      if (oldCohort !== value.cohort) {
+      if (oldCohort !== value.cohort && !classe.ligneId) {
         const youngs = await YoungModel.find({ classeId: classe._id });
         await Promise.all(
           youngs.map((y) => {
-            y.set({ cohort: value.cohort });
+            y.set({
+              cohort: value.cohort,
+              sessionPhase1Id: undefined,
+              cohesionCenterId: undefined,
+              meetingPointId: undefined,
+            });
             return y.save({ fromUser: req.user });
           }),
         );
         emailsEmitter.emit(SENDINBLUE_TEMPLATES.CLE.CLASSE_COHORT_UPDATED, classe);
-        if (!classe.ligneId) {
-          classe.set({
-            sessionId: undefined,
-            cohesionCenterId: undefined,
-            pointDeRassemblementId: undefined,
-          });
-        }
+
+        classe.set({
+          sessionId: undefined,
+          cohesionCenterId: undefined,
+          pointDeRassemblementId: undefined,
+        });
       } else {
         classe.set({
           sessionId: value.sessionId,
@@ -236,22 +241,31 @@ router.get("/from-etablissement/:id", passport.authenticate("referent", { sessio
 
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
-      capture(error);
+    const { errorId, value: id } = validateId(req.params.id);
+    const { errorType, value: type } = Joi.string().valid("delete", "withdraw").required().validate(req.query.type);
+    if (errorId) {
+      capture(errorId);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    if (errorType) {
+      capture(errorType);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canWithdrawClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (type === "withdraw" && !canWithdrawClasse(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (type === "delete" && !canDeleteClasse(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.query?.type === "delete") {
-      if (!canDeleteClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      await StateManager.Classe.delete(id, req.user, { YoungModel });
+    if (type === "delete") {
+      await deleteClasse(id, req.user);
     }
-    if (req.query?.type === "withdraw") {
+    if (type === "withdraw") {
       await StateManager.Classe.withdraw(id, req.user, { YoungModel });
     }
 

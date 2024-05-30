@@ -8,17 +8,17 @@ import { copyToClipboard } from "@/utils";
 import { appURL } from "@/config";
 
 interface Props {
-  modaleInvite: boolean;
-  setModaleInvite: (b: boolean) => void;
+  isOpen: boolean;
+  onClose: (b: boolean) => void;
   url: string;
 }
 
-export default function ModaleInvite({ modaleInvite, setModaleInvite, url }: Props) {
+export default function ModaleInvite({ isOpen, onClose, url }: Props) {
   return (
     <Modal
-      isOpen={modaleInvite}
+      isOpen={isOpen}
       className="w-[500px]"
-      onClose={() => setModaleInvite(false)}
+      onClose={() => onClose(false)}
       content={
         <div className="flex flex-col items-center justify-center">
           <ProfilePic icon={({ size, className }) => <BsSend size={size} className={className} />} />
@@ -34,7 +34,7 @@ export default function ModaleInvite({ modaleInvite, setModaleInvite, url }: Pro
             className="mt-6 !w-80 flex items-center justify-center"
             onClick={() => {
               copyToClipboard(`${appURL}/je-rejoins-ma-classe-engagee/${url}`);
-              setModaleInvite(false);
+              onClose(false);
             }}
           />
         </div>

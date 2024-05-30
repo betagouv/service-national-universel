@@ -18,7 +18,8 @@ import plausibleEvent from "@/services/plausible";
 import { downloadCertificatesByClassId } from "@/services/convocation.service";
 import { usePendingAction } from "@/hooks/usePendingAction";
 import { Classe } from "@/types";
-import { AuthState, CohortsState } from "@/redux/auth/reducer";
+import { AuthState } from "@/redux/auth/reducer";
+import { CohortState } from "@/redux/cohorts/reducer";
 
 import GeneralInfos from "./components/generalInfos";
 import ReferentInfos from "./components/referentInfos";
@@ -47,7 +48,7 @@ export default function View() {
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
   const [isConvocationDownloading, handleConvocationDownload] = usePendingAction() as [boolean, any];
   const user = useSelector((state: AuthState) => state.Auth.user);
-  const cohorts = useSelector((state: CohortsState) => state.Cohorts).filter(
+  const cohorts = useSelector((state: CohortState) => state.Cohorts).filter(
     (c) => classe?.cohort === c.name || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort),
   );
   const cohort = cohorts.find((c) => c.name === classe?.cohort);
@@ -178,7 +179,7 @@ export default function View() {
     setErrors({});
   };
 
-  const onDelete = async (type) => {
+  const onDelete = async (type: "delete" | "withdraw") => {
     try {
       setIsLoading(true);
       //delete data
@@ -327,10 +328,10 @@ export default function View() {
 
       {classe?.status !== STATUS_CLASSE.DRAFT && <StatsInfos classe={classe} user={user} studentStatus={studentStatus} totalSeatsTakenExcluding={totalSeatsTakenExcluding} />}
 
-      <ModaleDelete modaleDelete={modaleDelete} setModaleDelete={setModaleDelete} onDelete={onDelete} />
-      <ModaleWithdraw modaleWithdraw={modaleWithdraw} setModaleWithdraw={setModaleWithdraw} onDelete={onDelete} />
-      <ModaleInvite modaleInvite={modaleInvite} setModaleInvite={setModaleInvite} url={url} />
-      <ModaleCohort modaleCohort={modaleCohort} setModaleCohort={setModaleCohort} onSendInfo={sendInfo} />
+      <ModaleDelete isOpen={modaleDelete} onClose={setModaleDelete} onDelete={onDelete} />
+      <ModaleWithdraw isOpen={modaleWithdraw} onClose={setModaleWithdraw} onDelete={onDelete} />
+      <ModaleInvite isOpen={modaleInvite} onClose={setModaleInvite} url={url} />
+      <ModaleCohort isOpen={modaleCohort} onClose={setModaleCohort} onSendInfo={sendInfo} />
     </Page>
   );
 }

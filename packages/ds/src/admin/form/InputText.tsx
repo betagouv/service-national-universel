@@ -75,7 +75,7 @@ export default function InputText({
             disabled={disabled}
             value={value}
             readOnly={readOnly}
-            onChange={(e) => onChange && onChange(e)}
+            onChange={(e) => onChange?.(e)}
           />
         </div>
         {isErrorActive && <ErrorIcon />}

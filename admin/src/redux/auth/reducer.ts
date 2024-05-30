@@ -1,7 +1,5 @@
 import { authActions } from "./actions";
 import { User } from "@/types";
-import { CohortDto } from "snu-lib/src/dto/cohortDto";
-
 
 export type AuthState = {
   // TODO: use API route response
@@ -15,10 +13,6 @@ export type AuthState = {
     previousSigninToken?: string;
   };
 };
-
-export type CohortsState = {
-  Cohorts:CohortDto[];
-}
 
 const SS_KEY_PREVIOUS_SIGNIN = "previousSigninToken";
 

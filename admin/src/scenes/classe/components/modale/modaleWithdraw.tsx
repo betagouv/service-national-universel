@@ -5,17 +5,17 @@ import { IoWarningOutline } from "react-icons/io5";
 import { ModalConfirmation } from "@snu/ds/admin";
 
 interface Props {
-  modaleWithdraw: boolean;
-  setModaleWithdraw: (b: boolean) => void;
+  isOpen: boolean;
+  onClose: (b: boolean) => void;
   onDelete: (action: "withdraw") => void;
 }
 
-export default function ModaleWithdraw({ modaleWithdraw, setModaleWithdraw, onDelete }: Props) {
+export default function ModaleWithdraw({ isOpen, onClose, onDelete }: Props) {
   return (
     <ModalConfirmation
-      isOpen={modaleWithdraw}
+      isOpen={isOpen}
       onClose={() => {
-        setModaleWithdraw(false);
+        onClose(false);
       }}
       className="md:max-w-[500px]"
       icon={<IoWarningOutline className="text-red-600" size={40} />}

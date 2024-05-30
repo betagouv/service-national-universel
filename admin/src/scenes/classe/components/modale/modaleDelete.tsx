@@ -4,17 +4,17 @@ import { HiOutlineExclamation } from "react-icons/hi";
 import { ModalConfirmation } from "@snu/ds/admin";
 
 interface Props {
-  modaleDelete: boolean;
-  setModaleDelete: (b: boolean) => void;
+  isOpen: boolean;
+  onClose: (b: boolean) => void;
   onDelete: (action: "delete") => void;
 }
 
-export default function ModaleDelete({ modaleDelete, setModaleDelete, onDelete }: Props) {
+export default function ModaleDelete({ isOpen, onClose, onDelete }: Props) {
   return (
     <ModalConfirmation
-      isOpen={modaleDelete}
+      isOpen={isOpen}
       onClose={() => {
-        setModaleDelete(false);
+        onClose(false);
       }}
       className="md:max-w-[500px]"
       icon={<HiOutlineExclamation className="text-red-600 bg-red-50 rounded-full p-2" size={40} />}
