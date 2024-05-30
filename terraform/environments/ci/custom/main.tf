@@ -110,7 +110,6 @@ resource "scaleway_container" "api" {
   }
 
   secret_environment_variables = {
-    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }
