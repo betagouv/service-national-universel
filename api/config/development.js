@@ -1,0 +1,6 @@
+module.exports = {
+  ENVIRONMENT: "development",
+  SENTRY_PROFILE_SAMPLE_RATE: 1.0,
+  SENTRY_TRACING_SAMPLE_RATE: 1.0,
+  ENABLE_FLATTEN_ERROR_LOGS: false,
+};

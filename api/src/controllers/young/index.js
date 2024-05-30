@@ -12,7 +12,7 @@ const fileUpload = require("express-fileupload");
 const redis = require("redis");
 
 const { decrypt, encrypt } = require("../../cryptoUtils");
-const config = require("../../config");
+const config = require("config");
 const { capture } = require("../../sentry");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
@@ -31,7 +31,6 @@ const {
   isYoung,
   isReferent,
   updatePlacesSessionPhase1,
-  translateFileStatusPhase1,
   getCcOfYoung,
   getFile,
   autoValidationSessionPhase1Young,
@@ -61,9 +60,9 @@ const {
   YOUNG_SOURCE,
   youngCanChangeSession,
   youngCanWithdraw,
+  translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
 } = require("snu-lib");
-const { APP_URL } = require("../../config");
 const { getFilteredSessions } = require("../../utils/cohort");
 const { anonymizeApplicationsFromYoungId } = require("../../services/application");
 const { anonymizeContractsFromYoungId } = require("../../services/contract");
@@ -459,7 +458,7 @@ router.put("/accept-ri", passport.authenticate("young", { session: false, failWi
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
       params: {
-        cta: `${APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
+        cta: `${config.APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
         youngFirstName: young.firstName,
         youngName: young.lastName,
       },
@@ -816,7 +815,6 @@ router.post("/france-connect/user-info", async (req, res) => {
 });
 
 // Delete one user (only admin can delete user)
-// And apparently referent in same geography as well (see canDeleteYoung())
 router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
@@ -827,7 +825,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const fieldToKeep = [
       "_id",

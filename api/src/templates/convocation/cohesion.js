@@ -1,6 +1,6 @@
 const path = require("path");
 const PDFDocument = require("pdfkit");
-const { ENVIRONMENT, IMAGES_ROOTDIR, FONT_ROOTDIR } = require("../../config");
+const config = require("config");
 const dayjs = require("dayjs");
 require("dayjs/locale/fr");
 
@@ -24,7 +24,7 @@ const LIST_INDENT = 15;
 const MARGIN = 50;
 
 function isLocalTransport(young) {
-  return young.transportInfoGivenByLocal === "true" && young.source !== "CLE";
+  return young.transportInfoGivenByLocal === "true";
 }
 
 const getMeetingAddress = (young, meetingPoint, center) => {
@@ -82,8 +82,8 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
 
   doc.font(FONT).fillColor(FILL_COLOR).fontSize(9);
 
-  if (ENVIRONMENT !== "testing") {
-    doc.image(path.join(IMAGES_ROOTDIR, getTemplate(young)), 0, 0, {
+  if (config.ENVIRONMENT !== "test") {
+    doc.image(path.join(config.IMAGES_ROOTDIR, getTemplate(young)), 0, 0, {
       fit: [page.width, page.height],
       align: "center",
       valign: "center",
@@ -195,9 +195,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
   doc.font(FONT).text(` est prévu`, { continued: true });
   if (!isLocalTransport(young)) {
     doc.font(FONT_BOLD).text(` le ${dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")}`, { continued: true });
-    if (young.source !== "CLE") {
-      doc.font(FONT_BOLD).text(` à ${meetingPoint ? ligneToPoint.returnHour : "11:00"}`, { continued: true });
-    }
+    doc.font(FONT_BOLD).text(` à ${meetingPoint ? ligneToPoint.returnHour : "11:00"}`, { continued: true });
   }
   doc.font(FONT).text(` au même endroit que le jour du départ en centre.`);
 
@@ -235,9 +233,9 @@ function initDocument(options = {}) {
     ...options,
   });
 
-  doc.registerFont(FONT, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
-  doc.registerFont(FONT_BOLD, path.join(FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
-  doc.registerFont(FONT_ITALIC, path.join(FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
+  doc.registerFont(FONT, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular.woff"));
+  doc.registerFont(FONT_BOLD, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Bold.woff"));
+  doc.registerFont(FONT_ITALIC, path.join(config.FONT_ROOTDIR, "Marianne/Marianne-Regular_Italic.woff"));
 
   return doc;
 }

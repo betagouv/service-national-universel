@@ -12,29 +12,13 @@ const ReferentModel = require("../models/referent");
 const ContractObject = require("../models/contract");
 const SessionPhase1 = require("../models/sessionPhase1");
 const CohortModel = require("../models/cohort");
-const { getDepartureDate } = require("snu-lib");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
 const { addDays } = require("date-fns");
-const { APP_URL, ADMIN_URL } = require("../config");
+const config = require("config");
 const {
-  CELLAR_ENDPOINT,
-  CELLAR_KEYID,
-  CELLAR_KEYSECRET,
-  BUCKET_NAME,
-  PUBLIC_BUCKET_NAME,
-  ENVIRONMENT,
-  API_ASSOCIATION_CELLAR_ENDPOINT,
-  API_ASSOCIATION_CELLAR_KEYID,
-  API_ASSOCIATION_CELLAR_KEYSECRET,
-  CELLAR_ENDPOINT_SUPPORT,
-  CELLAR_KEYID_SUPPORT,
-  CELLAR_KEYSECRET_SUPPORT,
-  PUBLIC_BUCKET_NAME_SUPPORT,
-  translateFileStatusPhase1,
-} = require("../config");
-const {
+  getDepartureDate,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
   SENDINBLUE_TEMPLATES,
@@ -65,17 +49,17 @@ function getReq(url, cb) {
 }
 
 const SUPPORT_BUCKET_CONFIG = {
-  bucket: PUBLIC_BUCKET_NAME_SUPPORT,
-  endpoint: CELLAR_ENDPOINT_SUPPORT,
-  accessKeyId: CELLAR_KEYID_SUPPORT,
-  secretAccessKey: CELLAR_KEYSECRET_SUPPORT,
+  bucket: config.PUBLIC_BUCKET_NAME_SUPPORT,
+  endpoint: config.CELLAR_ENDPOINT_SUPPORT,
+  accessKeyId: config.CELLAR_KEYID_SUPPORT,
+  secretAccessKey: config.CELLAR_KEYSECRET_SUPPORT,
 };
 
 const DEFAULT_BUCKET_CONFIG = {
-  bucket: BUCKET_NAME,
-  endpoint: CELLAR_ENDPOINT,
-  accessKeyId: CELLAR_KEYID,
-  secretAccessKey: CELLAR_KEYSECRET,
+  bucket: config.BUCKET_NAME,
+  endpoint: config.CELLAR_ENDPOINT,
+  accessKeyId: config.CELLAR_KEYID,
+  secretAccessKey: config.CELLAR_KEYSECRET,
 };
 
 function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
@@ -105,7 +89,7 @@ const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
     const params = { Bucket: bucket, Key: name };
     s3bucket.getObject(params, (err, data) => {
       if (err) {
-        captureMessage(`Error getting file : ${name}`, { extras: { error: err } });
+        captureMessage(`Error getting file : ${name}`, { extra: { error: err } });
         reject(err);
       } else {
         resolve(data);
@@ -116,9 +100,9 @@ const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
 
 function uploadPublicPicture(path, file) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
     const params = {
-      Bucket: PUBLIC_BUCKET_NAME,
+      Bucket: config.PUBLIC_BUCKET_NAME,
       Key: path,
       Body: file.data,
       ContentType: file.mimetype,
@@ -134,8 +118,8 @@ function uploadPublicPicture(path, file) {
 
 function deleteFile(path) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Key: path };
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
+    const params = { Bucket: config.BUCKET_NAME, Key: path };
     s3bucket.deleteObject(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
@@ -145,8 +129,8 @@ function deleteFile(path) {
 
 function listFiles(path) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Prefix: path };
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
+    const params = { Bucket: config.BUCKET_NAME, Prefix: path };
     s3bucket.listObjects(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data.Contents);
@@ -156,8 +140,8 @@ function listFiles(path) {
 
 function deleteFilesByList(filesList) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Delete: { Objects: filesList } };
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
+    const params = { Bucket: config.BUCKET_NAME, Delete: { Objects: filesList } };
     s3bucket.deleteObjects(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
@@ -167,8 +151,8 @@ function deleteFilesByList(filesList) {
 
 function getMetaDataFile(path) {
   return new Promise((resolve, reject) => {
-    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    const params = { Bucket: BUCKET_NAME, Key: path };
+    const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
+    const params = { Bucket: config.BUCKET_NAME, Key: path };
     s3bucket.headObject(params, (err, data) => {
       if (err) return reject(`error in callback:${err}`);
       resolve(data);
@@ -177,18 +161,18 @@ function getMetaDataFile(path) {
 }
 
 function getSignedUrl(path) {
-  const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+  const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
   return s3bucket.getSignedUrl("getObject", {
-    Bucket: BUCKET_NAME,
+    Bucket: config.BUCKET_NAME,
     Key: path,
   });
 }
 
 function getSignedUrlForApiAssociation(path) {
   const s3bucket = new AWS.S3({
-    endpoint: API_ASSOCIATION_CELLAR_ENDPOINT,
-    accessKeyId: API_ASSOCIATION_CELLAR_KEYID,
-    secretAccessKey: API_ASSOCIATION_CELLAR_KEYSECRET,
+    endpoint: config.API_ASSOCIATION_CELLAR_ENDPOINT,
+    accessKeyId: config.API_ASSOCIATION_CELLAR_KEYID,
+    secretAccessKey: config.API_ASSOCIATION_CELLAR_KEYSECRET,
   });
   return s3bucket.getSignedUrl("getObject", {
     Bucket: "association",
@@ -412,7 +396,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
       .toString()
       .replace(/{{firstName}}/, sanitizeAll(young.firstName))
       .replace(/{{lastName}}/, sanitizeAll(young.lastName))
-      .replace(/{{cta}}/g, sanitizeAll(`${APP_URL}/auth/login?redirect=phase1`)),
+      .replace(/{{cta}}/g, sanitizeAll(`${config.APP_URL}/auth/login?redirect=phase1`)),
     { cc },
   );
 };
@@ -483,7 +467,7 @@ const updateStatusPhase2 = async (young, fromUser) => {
       await sendTemplate(template, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
-          cta: `${APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
+          cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
         },
         cc,
       });
@@ -625,7 +609,7 @@ async function notifDepartmentChange(department, template, young, extraParams = 
       params: {
         youngFirstName: young.firstName,
         youngLastName: young.lastName,
-        cta: `${ADMIN_URL}/volontaire/${young._id}`,
+        cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
         ...extraParams,
       },
     });
@@ -1002,7 +986,6 @@ module.exports = {
   STEPS,
   STEPS2023,
   FILE_STATUS_PHASE1,
-  translateFileStatusPhase1,
   getCcOfYoung,
   notifDepartmentChange,
   autoValidationSessionPhase1Young,

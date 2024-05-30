@@ -104,13 +104,8 @@ function canInviteUser(actorRole, targetRole) {
 
 const canDeleteStructure = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target);
 
-const canDeleteYoung = (actor, target) => {
-  // un référent peut supprimer un volontaire, mais un volontaire peut se supprimer uniquement si il est HTS
-  if (actor._id.toString() === target._id.toString()) {
-    if (target.source === "CLE") return false;
-    return true;
-  }
-  return isAdmin(actor) || referentInSameGeography(actor, target);
+const canDeleteYoung = (actor) => {
+  return isAdmin(actor);
 };
 
 function canEditYoung(actor, young) {
@@ -734,7 +729,7 @@ function canSearchInElasticSearch(actor, index) {
   } else if (index === "lignebus") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
   } else if (index === "classe") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE,ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "youngCle") {
     return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
   } else if (index === "etablissement") {
@@ -828,7 +823,7 @@ function canExportConvoyeur(actor) {
 }
 
 function canEditLigneBusTeam(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canEditLigneBusGeneralInfo(actor) {

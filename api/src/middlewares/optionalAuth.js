@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const config = require("../config");
+const config = require("config");
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
 const { getToken } = require("../passport");

@@ -1,5 +1,5 @@
 // virusScanner.js
-const { API_ANTIVIRUS_ENDPOINT, API_ANTIVIRUS_TOKEN } = require("../config");
+const config = require("config");
 const { capture } = require("../sentry");
 const fetch = require("node-fetch");
 const FormData = require('form-data');
@@ -13,13 +13,13 @@ async function scanFile(tempFilePath, name, userId="anonymous") {
 
   const scan = async () => {
     const stream = createReadStream(tempFilePath);
-    const url = `${API_ANTIVIRUS_ENDPOINT}/scan`;
+    const url = `${config.API_ANTIVIRUS_ENDPOINT}/scan`;
 
     const formData = new FormData();
     formData.append('file', stream);
 
     const headers = formData.getHeaders()
-    headers["X-Auth-Token"] = API_ANTIVIRUS_TOKEN
+    headers["X-Auth-Token"] = config.API_ANTIVIRUS_TOKEN
 
     const response = await fetch(url, { method: 'POST', body: formData, headers });
 

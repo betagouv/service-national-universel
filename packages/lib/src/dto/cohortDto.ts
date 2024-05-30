@@ -1,4 +1,6 @@
 export type CohortDto = {
+  name: string;
+  type: string;
   dateStart: Date;
   dateEnd: Date;
   inscriptionStartDate: Date;
@@ -46,3 +48,5 @@ export type CohortDto = {
     editionOpenForHeadOfCenter?: boolean;
   } | null;
 };
+
+export type UpdateCohortDto = Omit<CohortDto, "name" | "type">;
