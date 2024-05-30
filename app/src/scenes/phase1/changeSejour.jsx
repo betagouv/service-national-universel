@@ -166,7 +166,7 @@ export default function ChangeSejour() {
                         </DropdownMenu>
                       </UncontrolledDropdown>
                       <a
-                        href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion-en-2022-1"
+                        href="https:support.snu.gouv.fr/base-de-connaissance/suis-je-eligible-a-un-sejour-de-cohesion"
                         style={{ color: "#5145cc" }}
                         target="_blank"
                         rel="noreferrer">

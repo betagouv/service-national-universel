@@ -7,7 +7,7 @@ function getNewLigneToPointFixture() {
     departureHour: "11:00",
     meetingHour: "10:00",
     returnHour: "17:00",
-    transportType: faker.random.arrayElement(["train", "bus", "fusée", "avion"]),
+    transportType: faker.helpers.arrayElement(["train", "bus", "fusée", "avion"]),
   };
 }
 

@@ -39,7 +39,7 @@ export default function WaitingReinscription({ reinscriptionOpen }) {
           <div className="flex items-center justify-between rounded-lg bg-white ">
             <div className="w-1/2 py-12 pl-10">
               <div className="text-[48px] border-b pb-12 font-medium leading-tight tracking-tight text-gray-800">
-                <strong>{young.firstName},</strong> vous souhaitez vous inscrire sur un séjour en 2024 ?
+                <strong>{young.firstName},</strong> vous souhaitez vous inscrire sur un nouveau séjour ?
               </div>
               <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
               {textSecond && <div className="left-7 mt-3 text-[#738297] pr-16">{textSecond}</div>}

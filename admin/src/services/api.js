@@ -49,7 +49,7 @@ class api {
           console.log("Fetch request was manually reloaded, ignoring error.");
           resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
-          capture(e, { extras: { path: "CHECK TOKEN", token: this.token } });
+          capture(e, { extra: { path: "CHECK TOKEN", token: this.token } });
           reject(e);
         }
       }

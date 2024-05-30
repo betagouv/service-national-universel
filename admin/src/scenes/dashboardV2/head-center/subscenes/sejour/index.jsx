@@ -24,15 +24,12 @@ export default function Index() {
     cohort: [cohort],
   };
 
-  const data = useAsync(
-    () => async () => {
-      const { resultYoung } = await api.post("/elasticsearch/dashboard/sejour/head-center", {
-        filters: Object.fromEntries(Object.entries(selectedFilters)),
-      });
-      return resultYoung;
-    },
-    [],
-  );
+  const { value: data } = useAsync(async () => {
+    const response = await api.post("/elasticsearch/dashboard/sejour/head-center", {
+      filters: Object.fromEntries(Object.entries(selectedFilters)),
+    });
+    return response.resultYoung;
+  }, []);
 
   return (
     <Page>

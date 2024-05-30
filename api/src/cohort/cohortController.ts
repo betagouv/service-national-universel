@@ -74,12 +74,12 @@ router.put("/:id/export/:exportDateKey", passport.authenticate(ROLES.ADMIN, { se
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    if (cohort.dsnjExportDates[exportDateKey]) {
-      await deleteFile(`dsnj/${cohort.snuId}/${exportDateKey}.xlsx`);
-    }
-
     if (!cohort.dsnjExportDates) {
       cohort.dsnjExportDates = {};
+    }
+
+    if (cohort.dsnjExportDates[exportDateKey]) {
+      await deleteFile(`dsnj/${cohort.snuId}/${exportDateKey}.xlsx`);
     }
 
     cohort.dsnjExportDates[exportDateKey] = date;

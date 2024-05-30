@@ -9,6 +9,7 @@ module.exports = {
   IMAGES_ROOTDIR: `${__dirname}/../public/images`,
   FONT_ROOTDIR: `${__dirname}/../src/assets/fonts`,
   ENABLE_SENDINBLUE: true,
+  ENABLE_FLATTEN_ERROR_LOGS: true, // Print error stack without newlines on stderr
   API_URL: "http://localhost:8080",
   APP_URL: "http://localhost:8081",
   ADMIN_URL: "http://localhost:8082",
