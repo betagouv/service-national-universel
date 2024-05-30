@@ -133,14 +133,13 @@ Schema.pre("save", async function (next, params) {
   this.updatedAt = Date.now();
 
   if (this.isModified("department") || this.isModified("region")) {
-    const classesToUpdate = await ClasseModel.find({ etablissementId: this._id });
-    for (const classe of classesToUpdate) {
-      classe.set({
+    await ClasseModel.updateMany(
+      { etablissementId: this._id },
+      {
         ...(this.isModified("department") && { department: this.department }),
         ...(this.isModified("region") && { region: this.region }),
-      });
-      await classe.save({ fromUser: params?.fromUser });
-    }
+      },
+    );
   }
 
   next();
