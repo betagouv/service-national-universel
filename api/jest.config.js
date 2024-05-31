@@ -6,6 +6,7 @@ const config = {
   testSequencer: require.resolve("./jest-sequencer-alphabetical.js"),
   testMatch: ["**/?(*.)+(test).[jt]s?(x)"],
   preset: "ts-jest",
+  moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" },
 };
 
 module.exports = config;
