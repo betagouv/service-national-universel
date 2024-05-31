@@ -3,13 +3,13 @@ import passport from "passport";
 import Joi from "joi";
 
 import { canEditLigneBusGeneralInfo } from "snu-lib";
-import { capture } from "@/sentry";
-import { ERRORS } from "@/utils";
+import { capture } from "../../sentry";
+import { ERRORS } from "../../utils";
 
-import { LigneBusModel, PlanTransportModel } from "@/models";
+import { LigneBusModel, PlanTransportModel } from "../../models";
 // eslint-disable-next-line import/extensions
-import { BusDocument } from "@/models/PlanDeTransport/ligneBus.type";
-import { UserRequest } from "@/controllers/request";
+import { BusDocument } from "../../models/PlanDeTransport/ligneBus.type";
+import { UserRequest } from "../../controllers/request";
 
 import { getInfoBus, syncMergedBus } from "./ligneDeBusService";
 

@@ -1,4 +1,4 @@
-import { BusDocument } from "@/models/PlanDeTransport/ligneBus.type";
+import { BusDocument } from "../../models/PlanDeTransport/ligneBus.type";
 
 const { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } = require("@/models");
 
@@ -30,13 +30,13 @@ export async function getInfoBus(line) {
 
 export async function syncMergedBus({ ligneBus, busIdsToUpdate, newMergedBusIds }: { ligneBus: BusDocument; busIdsToUpdate: string[]; newMergedBusIds: string[] }) {
   for (const mergedBusId of busIdsToUpdate) {
-    let otherMergedLine = ligneBus;
+    let ligneBusToUpdate = ligneBus;
     if (mergedBusId !== ligneBus.busId) {
-      otherMergedLine = await LigneBusModel.findOne({ busId: mergedBusId, cohort: ligneBus.cohort });
+      ligneBusToUpdate = await LigneBusModel.findOne({ busId: mergedBusId, cohort: ligneBus.cohort });
     }
-    if (otherMergedLine) {
-      otherMergedLine.set({ mergedBusIds: newMergedBusIds });
-      await otherMergedLine.save();
+    if (ligneBusToUpdate) {
+      ligneBusToUpdate.set({ mergedBusIds: newMergedBusIds });
+      await ligneBusToUpdate.save();
     }
   }
 }

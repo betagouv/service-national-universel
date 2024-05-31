@@ -161,7 +161,11 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       const busLine = await newBusLine.save();
 
       // Mise à jour des lignes fusionnées existantes
-      await syncMergedBus({ ligneBus: busLine, busIdsToUpdate: busLineData.mergedBusIds, newMergedBusIds: busLineData.mergedBusIds });
+      let mergedBusIds = busLineData.mergedBusIds;
+      if (!busLineData.mergedBusIds.includes(busLineData.busId)) {
+        mergedBusIds = [...mergedBusIds, busLineData.busId];
+      }
+      await syncMergedBus({ ligneBus: busLine, busIdsToUpdate: mergedBusIds, newMergedBusIds: mergedBusIds });
 
       const lineToPointWithCorrespondance = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc, pdrNumber) => {
         if (pdrNumber > 1 && !line[`ID PDR ${pdrNumber}`]) return acc;

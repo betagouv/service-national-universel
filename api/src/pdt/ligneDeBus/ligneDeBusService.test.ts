@@ -1,5 +1,5 @@
-import { dbConnect, dbClose } from "@/__tests__/helpers/db";
-import { LigneBusModel } from "@/models";
+import { dbConnect, dbClose } from "../../__tests__/helpers/db";
+import { LigneBusModel } from "../../models";
 
 import { syncMergedBus } from "./ligneDeBusService";
 

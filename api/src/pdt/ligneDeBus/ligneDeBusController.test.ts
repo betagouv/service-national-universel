@@ -1,9 +1,9 @@
 import passport from "passport";
 import request from "supertest";
-import { dbConnect, dbClose } from "@/__tests__/helpers/db";
-import getAppHelper from "@/__tests__/helpers/app";
-import getNewLigneBusFixture from "@/__tests__/fixtures/PlanDeTransport/ligneBus";
-import { LigneBusModel, PlanTransportModel } from "@/models";
+import { dbConnect, dbClose } from "../../__tests__/helpers/db";
+import getAppHelper from "../../__tests__/helpers/app";
+import getNewLigneBusFixture from "../../__tests__/fixtures/PlanDeTransport/ligneBus";
+import { LigneBusModel, PlanTransportModel } from "../../models";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
