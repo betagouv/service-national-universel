@@ -127,7 +127,7 @@ async function runAPI() {
   app.use("/filters", require("./controllers/filters"));
   app.use("/gouv.fr", require("./controllers/gouv.fr"));
   app.use("/inscription-goal", require("./controllers/inscription-goal"));
-  app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
+  app.use("/ligne-de-bus", require("./planDeTransport/ligneDeBus/ligneDeBusController"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
   app.use("/mission", require("./controllers/mission"));
   app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import"));

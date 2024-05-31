@@ -1,3 +1,7 @@
+import { validateLigneDeBusTeam } from "@/planDeTransport/ligneDeBus/ligneDeBusValidator";
+import { BusTeamDto } from "snu-lib/src/dto";
+import { updateTeamByLigneDeBusNames } from "@/planDeTransport/ligneDeBus/ligneDeBusService";
+
 const express = require("express");
 const passport = require("passport");
 const Joi = require("joi");
@@ -168,21 +172,10 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
 
 router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      role: Joi.string().required(),
-      idTeam: Joi.string(),
-      lastname: Joi.string().required(),
-      firstname: Joi.string().required(),
-      birthdate: Joi.date().required(),
-      phone: Joi.string().required(),
-      mail: Joi.string().required(),
-      forth: Joi.boolean().required(),
-      back: Joi.boolean().required(),
-    }).validate({ ...req.params, ...req.body });
+    const { error, value }: { error: any; value: BusTeamDto } = validateLigneDeBusTeam({ ...req.params, ...req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const ligne = await LigneBusModel.findById(value.id);
+    const ligne = await LigneBusModel.findById(req.params.id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const cohort = await CohortModel.find({ name: ligne.cohort });
     if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -195,8 +188,8 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
 
     const NewMember = {
       role: value.role,
-      lastName: value.lastname,
-      firstName: value.firstname,
+      lastName: value.lastName,
+      firstName: value.firstName,
       birthdate: value.birthdate,
       phone: value.phone,
       mail: value.mail,
@@ -204,14 +197,18 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
       back: value.back,
     };
 
+    if (ligne.mergedBusIds?.length > 0) {
+      await updateTeamByLigneDeBusNames(ligne.mergedBusIds, value);
+    }
+
     const memberToDelete = ligne.team.id(value.idTeam);
     if (!memberToDelete) {
       ligne.team.push(NewMember);
     } else {
       memberToDelete.set({
         role: value.role,
-        lastName: value.lastname,
-        firstName: value.firstname,
+        lastName: value.firstName,
+        firstName: value.firstName,
         birthdate: value.birthdate,
         phone: value.phone,
         mail: value.mail,
@@ -515,7 +512,7 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
 
     const listGroup = await schemaRepartitionModel.find({ centerId: ligneBus.centerId });
 
-    let idPDR = [];
+    let idPDR: any[] = [];
     for (let group of listGroup) {
       for (let pdr of group.gatheringPlaces) {
         if (!idPDR.includes(pdr)) {
@@ -623,7 +620,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
 
     const dataYoung = await LigneBusModel.aggregate(queryYoung).exec();
 
-    let result = {
+    let result: any = {
       meetingPoints: [],
     };
     let youngsCountBus = 0;
@@ -799,7 +796,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
 
       // --- get all ops...
       const db = mongoose.connection.db;
-      let patches = [];
+      let patches: any[] = [];
 
       // --- lignebus patches...
       let cursor = db.collection("lignebus_patches").find({ ref: { $in: lineIds } });
@@ -970,13 +967,13 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     //on prend un ref de chaque departement de la liste trié par subRole
     //et un ref de chaque region de la liste trié par subRole
 
-    const referentsToNotify = [];
+    const referentsToNotify: any[] = [];
 
     const getRefListToNotify = (type, list, subRoles) => {
       for (let i = 0; i < list.length; i++) {
         //place = soit une region soit un departement
         const place = list[i];
-        let referentsFromPlace = null;
+        let referentsFromPlace: any = null;
         //on filtre les user du departement ou de la region
         if (type === "region") {
           referentsFromPlace = referents.filter((u) => u.region === place && u.role === "referent_region");
@@ -986,7 +983,7 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
         }
         for (const subRole of subRoles) {
           //on recupere le premier user filtré qui a le bon subRole (le premier subRole du tableau) si il y en a pas le 2eme subRole etc...
-          const referentToNotifyInPlace = referentsFromPlace.find((u) => u.subRole === subRole);
+          const referentToNotifyInPlace = referentsFromPlace?.find((u) => u.subRole === subRole);
 
           if (referentToNotifyInPlace) {
             //si on en trouve un on s'arrete la (on ne veut quún ref par departement/region)
@@ -1054,7 +1051,7 @@ function filterPatchWithQuery(p, query) {
   );
 }
 
-function mergeArrayItems(array, subProperty) {
+function mergeArrayItems(array, subProperty?: string | null | undefined) {
   let set = {};
   for (const item of array) {
     if (subProperty) {

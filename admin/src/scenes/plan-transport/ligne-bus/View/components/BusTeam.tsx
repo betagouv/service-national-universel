@@ -11,6 +11,7 @@ import { capture } from "../../../../../sentry";
 import api from "../../../../../services/api";
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
+import { mapBusTeamViewToDto } from "@/scenes/plan-transport/ligne-bus/View/LigneDeBusMapper";
 
 type BusTeamProps = {
   bus: LigneBusDto;
@@ -23,16 +24,16 @@ type BusTeamProps = {
   cohort: any;
 };
 
-type DataType = {
-  idTeam: string;
-  role: string;
-  forth: boolean;
+export type BusTeamView = {
   back: boolean;
+  birthdate?: Date;
   firstname?: string;
+  forth: boolean;
+  idTeam?: string;
   lastname?: string;
-  birthdate?: string | Date;
   mail?: string;
   phone?: string;
+  role: string;
 };
 
 export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam, cohort }: BusTeamProps) {
@@ -40,7 +41,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [errors, setErrors] = React.useState<any>({});
-  const [data, setData] = React.useState<DataType>({
+  const [data, setData] = React.useState<BusTeamView>({
     idTeam: "create",
     role: role,
     forth: false,
@@ -99,8 +100,9 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
         return;
       }
 
+      const busTeamDto = mapBusTeamViewToDto(data);
       //Save data
-      const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/team`, data);
+      const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/team`, busTeamDto);
 
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification de la ligne", translate(code));

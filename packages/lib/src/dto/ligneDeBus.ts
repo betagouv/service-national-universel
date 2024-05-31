@@ -70,10 +70,31 @@ export type LigneBusDto = {
   lunchBreakReturn: boolean;
   travelTime: string;
   sessionId: string;
-  team: any[];
+  team: BusTeamDto[];
   createdAt: string;
   updatedAt: string;
   __v: number;
   meetingsPointsDetail: MeetingPointDetailDto[];
   centerDetail: CenterDetailDto;
 };
+
+export type BusTeamUpdateDto = {
+  role: BusTeamRole;
+  idTeam?: string;
+  lastName?: string;
+  firstName?: string;
+  birthdate?: Date;
+  mail?: string;
+  phone?: string;
+  forth: boolean;
+  back: boolean;
+};
+
+export type BusTeamDto = BusTeamUpdateDto & {
+  _id?: string;
+};
+
+export enum BusTeamRole {
+  SUPERVISOR = "supervisor",
+  LEADER = "leader",
+}
