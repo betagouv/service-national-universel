@@ -368,7 +368,7 @@ export const validatePdtFile = async (
 export const computeImportSummary = (lines: PdtLine[]) => {
   const countPdr = getLinePdrCount(lines[0]);
   let maxPdrOnLine = 0;
-  for (const line of lines.entries()) {
+  for (const [i, line] of lines.entries()) {
     const currentLinePDRCount = getLinePdrIds(line).length;
     if (currentLinePDRCount > maxPdrOnLine) {
       maxPdrOnLine = currentLinePDRCount;
