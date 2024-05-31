@@ -1,7 +1,8 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { DefaultRootState, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { canEditLigneBusTeam, isBusEditionOpen, isTeamLeaderOrSupervisorEditable, translate } from "snu-lib";
+import { LigneBusDto } from "snu-lib/src/dto";
 import validator from "validator";
 import Bin from "../../../../../assets/Bin";
 import Pencil from "../../../../../assets/icons/Pencil";
@@ -11,12 +12,35 @@ import api from "../../../../../services/api";
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
 
-export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam, cohort }) {
-  const user = useSelector((state) => state.Auth.user);
+type BusTeamProps = {
+  bus: LigneBusDto;
+  setBus: any;
+  title: string;
+  role: string;
+  addOpen: boolean;
+  setAddOpen: any;
+  idTeam: string;
+  cohort: any;
+};
+
+type DataType = {
+  idTeam: string;
+  role: string;
+  forth: boolean;
+  back: boolean;
+  firstname?: string;
+  lastname?: string;
+  birthdate?: string | Date;
+  mail?: string;
+  phone?: string;
+};
+
+export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam, cohort }: BusTeamProps) {
+  const user = useSelector((state: any) => state.Auth.user);
   const [editInfo, setEditInfo] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState({});
-  const [data, setData] = React.useState({
+  const [errors, setErrors] = React.useState<any>({});
+  const [data, setData] = React.useState<DataType>({
     idTeam: "create",
     role: role,
     forth: false,
@@ -42,10 +66,14 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
   }, [editInfo]);
 
   const onSubmitInfo = async () => {
+    console.log("bus.mergedBusIds", bus.mergedBusIds);
+    if (bus.mergedBusIds.length > 0) {
+      console.log("Vous ne pouvez pas modifier les informations d'une ligne de bus fusionnée");
+    }
     try {
       setIsLoading(true);
       setErrors({});
-      let errors = {};
+      const errors: any = {};
 
       const errorEmail = "Adresse email invalide";
       const errorPhone = "Numéro de téléphone invalide";
@@ -83,7 +111,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification de la ligne");
+      toastr.error("Oups, une erreur est survenue lors de la modification de la ligne", "");
       setIsLoading(false);
     }
   };
@@ -106,7 +134,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression");
+      toastr.error("Oups, une erreur est survenue lors de la suppression", "");
       setIsLoading(false);
     }
   };
@@ -166,7 +194,9 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
         <div className="flex w-[45%] flex-col justify-between gap-4">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
+              {/*@ts-expect-error jsx type*/}
               <Field label="Nom" onChange={(e) => setData({ ...data, lastname: e.target.value })} value={data.lastname} error={errors?.lastname} readOnly={!editInfo} />
+              {/*@ts-expect-error jsx type*/}
               <Field label="Prénom" onChange={(e) => setData({ ...data, firstname: e.target.value })} value={data.firstname} error={errors?.firstname} readOnly={!editInfo} />
             </div>
           </div>
@@ -179,8 +209,10 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
                 error={errors?.birthdate}
                 readOnly={!editInfo}
               />
+              {/*@ts-expect-error jsx type*/}
               <Field label="Téléphone" onChange={(e) => setData({ ...data, phone: e.target.value })} value={data.phone} error={errors?.phone} readOnly={!editInfo} />
             </div>
+            {/*@ts-expect-error jsx type*/}
             <Field label="Email" onChange={(e) => setData({ ...data, mail: e.target.value })} value={data.mail} error={errors?.mail} readOnly={!editInfo} />
           </div>
         </div>
@@ -188,6 +220,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
           <div className="my-2 h-full w-[1px] border-r-[1px] border-gray-300"></div>
         </div>
         <div className="flex w-[45%] flex-col gap-4 ">
+          {/*@ts-expect-error jsx type*/}
           <Field label="Numéro de ligne" value={bus.busId} readOnly={true} />
           <div className="flex items-center gap-4 rounded-lg bg-gray-100 p-3 text-sm text-gray-800 justify-between">
             <div className="font-medium text-gray-800">Concerné par l'aller : </div>
