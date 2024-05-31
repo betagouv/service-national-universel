@@ -170,7 +170,7 @@ export default function Phase1(props) {
                     <Field title="Code postal" value={cohesionCenter.zip} />
                     <Field title="Ville" value={cohesionCenter.city} />
                   </div>
-                  {isCohortOpenForAffectation && editing && young.source !== "CLE" && (
+                  {isCohortOpenForAffectation && editing && (
                     <button
                       onClick={() => setModalAffectation({ isOpen: true })}
                       className="flex w-fit cursor-pointer flex-row items-center justify-center gap-2 self-end rounded border-[1px] border-gray-300 p-2">
@@ -214,13 +214,12 @@ export default function Phase1(props) {
                     ) : (
                       <>
                         <div>{young.firstName} n&apos;a pas encore confirmé son point de rassemblement. Voici le(s) point(s) de rassemblement proposé(s) :</div>
-                        {young.source !== "CLE" && (
-                          <PDRpropose young={young} center={cohesionCenter} modalAffectations={modalAffectations} setModalAffectation={setModalAffectation}></PDRpropose>
-                        )}
+
+                        <PDRpropose young={young} center={cohesionCenter} modalAffectations={modalAffectations} setModalAffectation={setModalAffectation}></PDRpropose>
                       </>
                     )}
                   </div>
-                  {isCohortOpenForAffectation && editing && young.source !== "CLE" && (
+                  {isCohortOpenForAffectation && editing && (
                     <div className="flex items-center gap-3 !justify-end w-full">
                       <button
                         onClick={() => setModalAffectation({ isOpen: true, center: cohesionCenter, sessionId: young.sessionPhase1Id })}
@@ -234,7 +233,7 @@ export default function Phase1(props) {
                           <div>Choisir un PDR</div>
                         )}
                       </button>
-                      {young.meetingPointId && young.ligneId && young.source !== "CLE" && (
+                      {young.meetingPointId && young.ligneId && (
                         <button
                           className="flex cursor-pointer flex-row items-center justify-center gap-2  rounded border-[1px] border-gray-300 p-2"
                           onClick={() => setModalChangePdrSameLine({ isOpen: true })}>
@@ -249,7 +248,7 @@ export default function Phase1(props) {
             ) : (
               <div className="my-52 flex flex-col items-center justify-center gap-4">
                 <div className="text-base font-bold text-gray-900">Ce volontaire n&apos;est affecté à aucun centre</div>
-                {isCohortOpenForAffectation && young.source !== "CLE" && (
+                {isCohortOpenForAffectation && (
                   <div
                     className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white"
                     onClick={() => {
