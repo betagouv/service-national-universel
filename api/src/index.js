@@ -1,4 +1,5 @@
 const { resolveAsyncConfigs } = require("config/async");
+
 const config = require("config");
 
 // NODE_ENV environment variable (default "development") is used by :
