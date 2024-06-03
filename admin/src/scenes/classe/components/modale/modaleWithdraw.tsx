@@ -5,19 +5,19 @@ import { IoWarningOutline } from "react-icons/io5";
 import { ModalConfirmation } from "@snu/ds/admin";
 
 interface Props {
-  isOpen: boolean;
-  onClose: (b: boolean) => void;
+  modaleWithdraw: boolean;
+  setModaleWithdraw: (b: boolean) => void;
   onDelete: (action: "withdraw") => void;
 }
 
-export default function ModaleWithdraw({ isOpen, onClose, onDelete }: Props) {
+export default function ModaleWithdraw({ modaleWithdraw, setModaleWithdraw, onDelete }: Props) {
   return (
     <ModalConfirmation
-      isOpen={isOpen}
+      isOpen={modaleWithdraw}
       onClose={() => {
-        onClose(false);
+        setModaleWithdraw(false);
       }}
-      className="md:max-w-[500px]"
+      className="md:max-w-[700px]"
       icon={<IoWarningOutline className="text-red-600" size={40} />}
       title="Attention, vous êtes sur le point de désister cette classe."
       text="Cette action entraînera l'abandon de l'inscription de tous les élèves de cette classe."

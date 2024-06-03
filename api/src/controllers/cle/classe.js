@@ -252,20 +252,16 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (type === "withdraw" && !canWithdrawClasse(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-    if (type === "delete" && !canDeleteClasse(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    if (!canWithdrawClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const classe = await ClasseModel.findById(id);
     if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (type === "delete") {
-      await deleteClasse(id, req.user);
+    if (req.query?.type === "delete") {
+      if (!canDeleteClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      await StateManager.Classe.delete(id, req.user, { YoungModel });
     }
-    if (type === "withdraw") {
+    if (req.query?.type === "withdraw") {
       await StateManager.Classe.withdraw(id, req.user, { YoungModel });
     }
 

@@ -39,7 +39,7 @@ type OwnProps = {
   disabled?: boolean;
   icon?: React.ReactNode;
   buttonClassName?: string;
-  position?: "left" | "right";
+  position?: EPosition;
   tooltip?: string;
 };
 
@@ -53,7 +53,7 @@ export default function DropdownButton({
   disabled = false,
   icon,
   buttonClassName = "",
-  position = "left",
+  position = EPosition.Left,
   tooltip,
 }: OwnProps) {
   const [open, setOpen] = useState(false);
