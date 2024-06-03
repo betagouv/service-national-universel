@@ -232,7 +232,7 @@ export default function View() {
           items: [
             {
               key: "edit1",
-              render: classe && <DeleteButton classe={classe} setIsLoading={setIsLoading} />,
+              render: classe && <DeleteButton classe={classe} onLoading={setIsLoading} />,
             },
           ],
         },
