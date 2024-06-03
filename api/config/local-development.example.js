@@ -12,5 +12,4 @@ const secrets = getSecrets(secretKey, CI_PROJECT_ID, "snu-ci");
 module.exports = {
   ENABLE_SENDINBLUE: false,
   ...secrets,
-  secret: secrets["SECRET"],
 };

@@ -16,5 +16,4 @@ module.exports = {
   APP_URL: process.env.APP_URL,
   ADMIN_URL: process.env.ADMIN_URL,
   ...secrets,
-  secret: secrets["SECRET"],
 };

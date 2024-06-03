@@ -14,7 +14,7 @@ module.exports = {
   SENTRY_TRACING_SAMPLE_RATE: 0.8,
   SENTRY_PROFILE_SAMPLE_RATE: 0.1,
   MONGO_URL: undefined,
-  secret: "not-so-secret",
+  JWT_SECRET: "not-so-secret",
   SUPPORT_URL: "http://localhost:3000",
   SUPPORT_APIKEY: undefined,
   KNOWLEDGEBASE_URL: "http://localhost:8084",

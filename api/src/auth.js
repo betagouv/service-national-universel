@@ -171,7 +171,7 @@ class Auth {
         });
       }
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, {
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
@@ -308,7 +308,7 @@ class Auth {
         });
       }
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.secret, {
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
@@ -363,7 +363,7 @@ class Auth {
 
           let jwtPayload;
           try {
-            jwtPayload = await jwt.verify(trustToken, config.secret);
+            jwtPayload = await jwt.verify(trustToken, config.JWT_SECRET);
           } catch (e) {
             return true;
           }
@@ -402,7 +402,7 @@ class Auth {
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
       await user.save();
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
@@ -455,18 +455,18 @@ class Auth {
       }
       await user.save();
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       if (isYoung(user)) {
         if (rememberMe) {
-          const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.secret, { expiresIn: JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC });
+          const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC });
           res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
         }
         res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       } else if (isReferent(user)) {
         if (rememberMe) {
-          const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.secret, { expiresIn: JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC });
+          const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC });
           res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS));
         }
         res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
@@ -647,15 +647,15 @@ class Auth {
         },
       });
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       if (isYoung(user)) {
-        const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.secret, { expiresIn: JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC });
+        const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC });
         res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
         res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       } else if (isReferent(user)) {
-        const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.secret, { expiresIn: JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC });
+        const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC });
         res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS));
         res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       }
@@ -755,7 +755,7 @@ class Auth {
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.secret, {
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
 
@@ -842,7 +842,7 @@ class Auth {
       user.set({ password: newPassword, passwordChangedAt, loginAttempts: 0 });
       await user.save();
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.secret, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
+      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
