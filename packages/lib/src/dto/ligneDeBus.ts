@@ -54,7 +54,7 @@ export type LigneBusDto = {
   meetingPointsIds: string[];
   delayedForth: string;
   delayedBack: string;
-  mergedBusIds: string[];
+  mergedBusIds?: string[];
   _id: string;
   cohort: string;
   busId: string;

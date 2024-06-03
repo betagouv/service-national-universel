@@ -1,27 +1,32 @@
-import React from "react";
-import { DefaultRootState, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { canEditLigneBusTeam, isBusEditionOpen, isTeamLeaderOrSupervisorEditable, translate } from "snu-lib";
-import { LigneBusDto } from "snu-lib/src/dto";
 import validator from "validator";
-import Bin from "../../../../../assets/Bin";
-import Pencil from "../../../../../assets/icons/Pencil";
-import Toggle from "../../../../../components/Toggle";
-import { capture } from "../../../../../sentry";
-import api from "../../../../../services/api";
+import { HiOutlineExclamation } from "react-icons/hi";
+
+import { canEditLigneBusTeam, isBusEditionOpen, isTeamLeaderOrSupervisorEditable, translate } from "snu-lib";
+import { CohortDto, LigneBusDto } from "snu-lib/src/dto";
+import { ModalConfirmation } from "@snu/ds/admin";
+
+import Bin from "@/assets/Bin";
+import Pencil from "@/assets/icons/Pencil";
+import Toggle from "@/components/Toggle";
+import { capture } from "@/sentry";
+import api from "@/services/api";
+
+import { mapBusTeamViewToDto } from "@/scenes/plan-transport/ligne-bus/View/LigneDeBusMapper";
 import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
-import { mapBusTeamViewToDto } from "@/scenes/plan-transport/ligne-bus/View/LigneDeBusMapper";
 
 type BusTeamProps = {
   bus: LigneBusDto;
-  setBus: any;
+  onBusChange: (bus: BusTeamProps["bus"]) => void;
   title: string;
   role: string;
   addOpen: boolean;
-  setAddOpen: any;
+  onAddOpenChange?: (value?: boolean) => void;
   idTeam: string;
-  cohort: any;
+  cohort: CohortDto;
 };
 
 export type BusTeamView = {
@@ -36,19 +41,22 @@ export type BusTeamView = {
   role: string;
 };
 
-export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen, idTeam, cohort }: BusTeamProps) {
+export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddOpenChange, idTeam, cohort }: BusTeamProps) {
   const user = useSelector((state: any) => state.Auth.user);
-  const [editInfo, setEditInfo] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [errors, setErrors] = React.useState<any>({});
-  const [data, setData] = React.useState<BusTeamView>({
+
+  const [editInfo, setEditInfo] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showMergedLineConfirmation, setShowMergedLineConfirmation] = useState(false);
+  const [errors, setErrors] = useState<any>({});
+  const [data, setData] = useState<BusTeamView>({
     idTeam: "create",
     role: role,
     forth: false,
     back: false,
   });
+
   React.useEffect(() => {
-    if (!idTeam && setAddOpen) setEditInfo(true);
+    if (!idTeam && onAddOpenChange) setEditInfo(true);
     if (idTeam) {
       const member = bus.team.filter((item) => item._id === idTeam);
       setData({
@@ -66,11 +74,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
     setErrors({});
   }, [editInfo]);
 
-  const onSubmitInfo = async () => {
-    console.log("bus.mergedBusIds", bus.mergedBusIds);
-    if (bus.mergedBusIds.length > 0) {
-      console.log("Vous ne pouvez pas modifier les informations d'une ligne de bus fusionnée");
-    }
+  const handleSubmitInfo = async () => {
     try {
       setIsLoading(true);
       setErrors({});
@@ -100,6 +104,11 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
         return;
       }
 
+      if (bus.mergedBusIds?.length && !showMergedLineConfirmation) {
+        setIsLoading(false);
+        return setShowMergedLineConfirmation(true);
+      }
+
       const busTeamDto = mapBusTeamViewToDto(data);
       //Save data
       const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/team`, busTeamDto);
@@ -108,9 +117,10 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
         toastr.error("Oups, une erreur est survenue lors de la modification de la ligne", translate(code));
         return setIsLoading(false);
       }
-      setBus(ligneInfo);
+      onBusChange(ligneInfo);
       setEditInfo(false);
       setIsLoading(false);
+      setShowMergedLineConfirmation(false);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la ligne", "");
@@ -119,7 +129,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
   };
 
   const DeleteInfo = async () => {
-    if (data.idTeam === "create" && setAddOpen) return setAddOpen(false);
+    if (data.idTeam === "create" && onAddOpenChange) return onAddOpenChange(false);
     if (data.idTeam === "create") {
       return setEditInfo(false);
     }
@@ -131,7 +141,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
         toastr.error("Oups, une erreur est survenue lors de la suppression", translate(code));
         return setIsLoading(false);
       }
-      setBus(ligneInfo);
+      onBusChange(ligneInfo);
       setEditInfo(false);
       setIsLoading(false);
     } catch (e) {
@@ -150,7 +160,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
             {!editInfo ? (
               <>
                 {role === "supervisor" && bus.team.filter((item) => item.role === "supervisor").length && bus.team.length < 11 && !addOpen ? (
-                  <button className="flex text-blue-600 mr-[44rem] mt-1 cursor-pointer text-sm hover:underline" onClick={() => setAddOpen(true)}>
+                  <button className="flex text-blue-600 mr-[44rem] mt-1 cursor-pointer text-sm hover:underline" onClick={() => onAddOpenChange?.(true)}>
                     + Ajouter un encadrant
                   </button>
                 ) : null}
@@ -182,7 +192,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
                 ) : null}
                 <button
                   className="flex cursor-pointer items-center gap-2 rounded-full  border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={onSubmitInfo}
+                  onClick={handleSubmitInfo}
                   disabled={isLoading}>
                   <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                   Enregistrer les changements
@@ -247,6 +257,25 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
           {errors?.travel && <div className="text-[#EF4444]">{errors?.travel}</div>}
         </div>
       </div>
+      {showMergedLineConfirmation && (
+        <ModalConfirmation
+          isOpen={showMergedLineConfirmation}
+          onClose={() => setShowMergedLineConfirmation(false)}
+          icon={<HiOutlineExclamation size={48} className="text-gray-300" />}
+          title="Modifier un chef de file / encadrant"
+          text={
+            <p>
+              Attention vous souhaitez modifier le chef de file / encadrant Prénom Nom.
+              <br />
+              Ces modifications seront automatiquement répercutées sur toutes les autres lignes fusionnées concernées.
+            </p>
+          }
+          actions={[
+            { title: "Fermer", isCancel: true, onClick: () => setShowMergedLineConfirmation(false) },
+            { title: "Confirmer", onClick: handleSubmitInfo },
+          ]}
+        />
+      )}
     </div>
   );
 }
