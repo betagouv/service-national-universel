@@ -1,8 +1,8 @@
 import { BusDocument } from "../../models/PlanDeTransport/ligneBus.type";
 
-const { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } = require("@/models");
+const { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel } = require("../../models");
 
-export async function getInfoBus(line) {
+export async function getInfoBus(line: BusDocument) {
   const ligneToBus = await LigneToPointModel.find({ lineId: line._id });
 
   let meetingsPointsDetail = [];
@@ -16,7 +16,7 @@ export async function getInfoBus(line) {
 
   let mergedBusDetails = [];
   if (line.mergedBusIds && line.mergedBusIds.length > 0) {
-    mergedBusDetails = (await LigneBusModel.find({ busId: { $in: line.mergedBusIds } })).map((b) => ({
+    mergedBusDetails = (await LigneBusModel.find({ busId: { $in: line.mergedBusIds }, cohort: line.cohort, deletedAt: { $exists: false } })).map((b) => ({
       _id: b._id,
       busId: b.busId,
       totalCapacity: b.totalCapacity,
@@ -25,6 +25,7 @@ export async function getInfoBus(line) {
     }));
   }
 
+  // @ts-expect-error _doc is defined
   return { ...line._doc, meetingsPointsDetail, centerDetail, mergedBusDetails };
 }
 
@@ -32,7 +33,7 @@ export async function syncMergedBus({ ligneBus, busIdsToUpdate, newMergedBusIds 
   for (const mergedBusId of busIdsToUpdate) {
     let ligneBusToUpdate = ligneBus;
     if (mergedBusId !== ligneBus.busId) {
-      ligneBusToUpdate = await LigneBusModel.findOne({ busId: mergedBusId, cohort: ligneBus.cohort });
+      ligneBusToUpdate = await LigneBusModel.findOne({ busId: mergedBusId, cohort: ligneBus.cohort, deletedAt: { $exists: false } });
     }
     if (ligneBusToUpdate) {
       ligneBusToUpdate.set({ mergedBusIds: newMergedBusIds });
