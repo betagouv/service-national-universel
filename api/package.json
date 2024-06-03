@@ -28,7 +28,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^7.14.0",
     "@godaddy/terminus": "^4.12.1",
-    "@selego/mongoose-elastic": "^1.6.0",
+    "@selego/mongoose-elastic": "^1.7.1",
     "@sentry/integrations": "^7.58.1",
     "@sentry/node": "^7.92.0",
     "@sentry/profiling-node": "^1.2.1",

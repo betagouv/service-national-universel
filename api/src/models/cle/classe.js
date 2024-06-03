@@ -59,7 +59,6 @@ const Schema = new mongoose.Schema({
       description: "Nom de la classe",
     },
   },
-
   //TODO update enum
   coloration: {
     type: String,
@@ -147,6 +146,20 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  department: {
+    type: String,
+    documentation: {
+      description: "Département de la classe",
+    },
+  },
+
+  region: {
+    type: String,
+    documentation: {
+      description: "Région de la classe",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
   deletedAt: { type: Date },
@@ -197,14 +210,6 @@ Schema.virtual("isFull").get(function () {
   return this.totalSeats - this.seatsTaken <= 0;
 });
 
-Schema.virtual("department").get(function () {
-  return this.etablissement?.department ?? null;
-});
-
-Schema.virtual("region").get(function () {
-  return this.etablissement?.region ?? null;
-});
-
 Schema.virtual("user").set(function (user) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;
@@ -232,16 +237,7 @@ Schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-Schema.plugin(
-  mongooseElastic(esClient, {
-    populate: ["etablissement"],
-    virtuals: [
-      { key: "region", type: "String" },
-      { key: "department", type: "String" },
-    ],
-  }),
-  MODELNAME,
-);
+Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
