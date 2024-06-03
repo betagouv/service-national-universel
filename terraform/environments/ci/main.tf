@@ -124,11 +124,10 @@ resource "scaleway_container" "api" {
   deploy          = true
 
   environment_variables = {
-    "NODE_ENV"    = "ci"
+    "NODE_ENV"       = "ci"
   }
 
   secret_environment_variables = {
-    "SCW_ACCESS_KEY" = local.secrets.SCW_ACCESS_KEY
     "SCW_SECRET_KEY" = local.secrets.SCW_SECRET_KEY
   }
 }

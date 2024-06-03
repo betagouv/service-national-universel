@@ -49,7 +49,7 @@ async function validateUser(Model, jwtPayload, done, role) {
 function initPassport() {
   const opts = {};
   opts.jwtFromRequest = getToken;
-  opts.secretOrKey = config.secret;
+  opts.secretOrKey = config.JWT_SECRET;
 
   passport.use("young", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Young, jwtPayload, done)));
   passport.use("referent", new JwtStrategy(opts, (jwtPayload, done) => validateUser(Referent, jwtPayload, done)));
