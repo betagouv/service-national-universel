@@ -7,7 +7,7 @@ if (!secretKey || !secretName) {
   throw new Error("SCW_SECRET_KEY & SECRET_NAME are required to get configuration secrets");
 }
 
-const secrets = getSecrets(secretKey, CI_PROJECT_ID, secretName)
+const secrets = getSecrets(secretKey, CI_PROJECT_ID, secretName);
 
 module.exports = {
   ENVIRONMENT: "custom",

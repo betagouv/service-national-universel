@@ -7,7 +7,7 @@ if (!secretKey) {
   throw new Error("SCW_SECRET_KEY is required to get configuration secrets");
 }
 
-const secrets = getSecrets(secretKey, CI_PROJECT_ID, "snu-ci")
+const secrets = getSecrets(secretKey, CI_PROJECT_ID, "snu-ci");
 
 module.exports = {
   ENABLE_SENDINBLUE: false,
