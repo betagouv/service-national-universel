@@ -76,6 +76,7 @@ export type LigneBusDto = {
   __v: number;
   meetingsPointsDetail: MeetingPointDetailDto[];
   centerDetail: CenterDetailDto;
+  mergedBusDetails?: Pick<LigneBusDto, "_id" | "busId" | "totalCapacity" | "youngCapacity" | "youngSeatsTaken">[];
 };
 
 export type BusTeamUpdateDto = {

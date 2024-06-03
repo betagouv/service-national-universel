@@ -1,4 +1,4 @@
-import { CohortDto, BusDto } from "../dto";
+import { CohortDto, LigneBusDto } from "../dto";
 import { ROLES } from "../roles";
 
 export const isTeamLeaderOrSupervisorEditable = (actor, cohort: CohortDto) => {
@@ -18,7 +18,7 @@ export const isTeamLeaderOrSupervisorEditable = (actor, cohort: CohortDto) => {
   }
 };
 
-export const isSameBusTeam = (ligne1: BusDto, ligne2: BusDto) => {
+export const isSameBusTeam = (ligne1: LigneBusDto, ligne2: LigneBusDto) => {
   const team1 = ligne1?.team?.map(({ _id }) => _id) || [];
   const team2 = ligne2?.team?.map(({ _id }) => _id) || [];
   return team1.sort().toString() == team2.sort().toString();

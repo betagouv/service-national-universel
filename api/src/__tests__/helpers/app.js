@@ -26,9 +26,8 @@ function getAppHelper() {
   app.use("/inscription-goal", require("../../controllers/inscription-goal"));
   app.use("/table-de-repartition", require("../../controllers/planDeTransport/table-de-repartition"));
   app.use("/ligne-to-point", require("../../controllers/planDeTransport/ligne-to-point"));
-  app.use("/ligne-de-bus", require("../../controllers/planDeTransport/ligne-de-bus"));
   app.use("/cle", require("../../controllers/cle"));
-  app.use("/plan-de-transport", require("../../pdt/pdtController"));
+  app.use("/plan-de-transport", require("../../planDeTransport/planDeTransportController"));
   app.use("/ligne-de-bus", require("../../planDeTransport/ligneDeBus/ligneDeBusController"));
 
   return app;

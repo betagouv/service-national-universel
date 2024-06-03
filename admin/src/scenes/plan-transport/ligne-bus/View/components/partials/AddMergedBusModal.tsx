@@ -5,15 +5,15 @@ import { HiOutlineExclamation, HiOutlinePlusCircle } from "react-icons/hi";
 
 import { Button, InputText, Modal } from "@snu/ds/admin";
 import { ERRORS, isSameBusTeam } from "snu-lib";
-import { BusDto } from "snu-lib/src/dto";
+import { LigneBusDto } from "snu-lib/src/dto";
 
 import { RouteResponse } from "@/types";
 import API from "@/services/api";
 
 interface Props {
   isOpen: boolean;
-  onClose: (bus?: BusDto) => void;
-  bus: BusDto;
+  onClose: (bus?: LigneBusDto) => void;
+  bus: LigneBusDto;
 }
 
 export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
@@ -21,7 +21,7 @@ export default function AddMergedBusModal({ bus, isOpen, onClose }: Props) {
   const [showWarning, setShowWarning] = useState(false);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async ({ mergedBusId }: { mergedBusId: string }): Promise<RouteResponse<BusDto>> => {
+    mutationFn: async ({ mergedBusId }: { mergedBusId: string }): Promise<RouteResponse<LigneBusDto>> => {
       const response = await API.post(`/ligne-de-bus/${bus._id}/ligne-fusionnee/`, { mergedBusId });
       if (!response.ok) {
         throw Error(response.code);
