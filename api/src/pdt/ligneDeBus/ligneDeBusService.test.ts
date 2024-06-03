@@ -19,7 +19,6 @@ describe("ligneDeBusService", () => {
     const ligneBus2 = { busId: "#1", cohort: "cohort", set: () => null, save: () => Promise.resolve() } as any;
 
     // ligneBus found
-    findOneBusSpy.mockResolvedValue(null);
     await syncMergedBus({ ligneBus, busIdsToUpdate: ["#1", "#2"], newMergedBusIds: [] });
 
     expect(busSetSpy).toHaveBeenCalledTimes(1);
