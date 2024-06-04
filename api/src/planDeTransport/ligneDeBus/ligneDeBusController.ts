@@ -247,7 +247,7 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
       await removeTeamByLigneDeBusIds({
         busIds: ligne.mergedBusIds.filter((busId) => busId !== ligne.busId),
         cohort: ligne.cohort,
-        idTeam: value.idTeam,
+        idTeam: value.idTeam as string,
         fromUser: req.user,
       });
     }

@@ -46,7 +46,7 @@ export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddO
 
   const [editInfo, setEditInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [showMergedLineConfirmation, setShowMergedLineConfirmation] = useState(false);
+  const [showMergedLineConfirmation, setShowMergedLineConfirmation] = useState<"update" | "delete" | null>(null);
   const [errors, setErrors] = useState<any>({});
   const [data, setData] = useState<BusTeamView>({
     idTeam: "create",
@@ -106,7 +106,7 @@ export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddO
 
       if (bus.mergedBusIds?.length && !showMergedLineConfirmation) {
         setIsLoading(false);
-        return setShowMergedLineConfirmation(true);
+        return setShowMergedLineConfirmation("update");
       }
 
       const busTeamDto = mapBusTeamViewToDto(data);
@@ -120,7 +120,7 @@ export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddO
       onBusChange(ligneInfo);
       setEditInfo(false);
       setIsLoading(false);
-      setShowMergedLineConfirmation(false);
+      setShowMergedLineConfirmation(null);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification de la ligne", "");
@@ -128,14 +128,17 @@ export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddO
     }
   };
 
-  const DeleteInfo = async () => {
+  const handleDeleteMember = async () => {
     if (data.idTeam === "create" && onAddOpenChange) return onAddOpenChange(false);
     if (data.idTeam === "create") {
       return setEditInfo(false);
     }
     try {
+      if (bus.mergedBusIds?.length && !showMergedLineConfirmation) {
+        return setShowMergedLineConfirmation("delete");
+      }
       setIsLoading(true);
-      //delete data
+      // delete data
       const busTeamDto = mapBusTeamViewToDto(data);
       const { ok, code, data: ligneInfo } = await api.put(`/ligne-de-bus/${bus._id}/teamDelete`, busTeamDto);
       if (!ok) {
@@ -178,7 +181,7 @@ export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddO
                 {role === "supervisor" ? (
                   <button
                     className="flex cursor-pointer items-center gap-2 rounded-full text-red-600 border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs leading-5 hover:border-red-600"
-                    onClick={DeleteInfo}
+                    onClick={handleDeleteMember}
                     disabled={isLoading}>
                     <Bin /> Supprimer
                   </button>
@@ -260,8 +263,8 @@ export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddO
       </div>
       {showMergedLineConfirmation && (
         <ModalConfirmation
-          isOpen={showMergedLineConfirmation}
-          onClose={() => setShowMergedLineConfirmation(false)}
+          isOpen={!!showMergedLineConfirmation}
+          onClose={() => setShowMergedLineConfirmation(null)}
           icon={<HiOutlineExclamation size={48} className="text-gray-300" />}
           title="Modifier un chef de file / encadrant"
           text={
@@ -272,8 +275,8 @@ export default function BusTeam({ bus, onBusChange, title, role, addOpen, onAddO
             </p>
           }
           actions={[
-            { title: "Fermer", isCancel: true, onClick: () => setShowMergedLineConfirmation(false) },
-            { title: "Confirmer", onClick: handleSubmitInfo },
+            { title: "Fermer", isCancel: true, onClick: () => setShowMergedLineConfirmation(null) },
+            { title: "Confirmer", onClick: showMergedLineConfirmation === "delete" ? handleDeleteMember : handleSubmitInfo },
           ]}
         />
       )}
