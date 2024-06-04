@@ -11,6 +11,7 @@ import BackLink from "./components/BackLink";
 import AccountRepresentantsPage from "./scenes/representants";
 import AccountSchoolSituationPage from "./scenes/school-situation";
 import AccountSpecialSituationsPage from "./scenes/special-situations";
+import AccountWithdrawnPage from "./scenes/withdrawn";
 import Tabs from "../../components/nav/Tabs";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import useAuth from "@/services/useAuth";
@@ -39,6 +40,10 @@ const Account = () => {
     "special-situations": {
       title: "Situations particulières",
       key: "/account/special-situations",
+    },
+    "withdranw": {
+      title: "Se désister",
+      key: "/account/withdrawn",
     },
   };
   const device = useDevice();
@@ -90,6 +95,7 @@ const Account = () => {
           <SentryRoute path="/account/representants" component={AccountRepresentantsPage} />
           <SentryRoute path="/account/school-situation" component={AccountSchoolSituationPage} />
           <SentryRoute path="/account/special-situations" component={AccountSpecialSituationsPage} />
+          <SentryRoute path="/account/withdrawn" component={AccountWithdrawnPage} />
         </Switch>
       </div>
     </>

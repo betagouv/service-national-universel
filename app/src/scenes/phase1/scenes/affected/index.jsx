@@ -18,7 +18,6 @@ import TodoBackpack from "./components/TodoBackpack";
 import { areAllStepsDone } from "./utils/steps.utils";
 import { RiInformationFill } from "react-icons/ri";
 import useAuth from "@/services/useAuth";
-import WithdrawalModal from "@/scenes/account/components/WithdrawalModal";
 import plausibleEvent from "@/services/plausible";
 
 export default function Affected() {
@@ -29,7 +28,6 @@ export default function Affected() {
   const [session, setSession] = useState();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isOpen, setIsOpen] = useState(false);
 
   const cohort = getCohort(young.cohort);
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
@@ -57,7 +55,6 @@ export default function Affected() {
 
   function handleClick() {
     plausibleEvent("CLE affecte - desistement");
-    setIsOpen(true);
   }
 
   if (areAllStepsDone(young)) {
@@ -107,21 +104,20 @@ export default function Affected() {
                 <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
               </div>
               <div className="col-span-2">
-                <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} data={data}/>
+                <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} data={data} />
               </div>
             </div>
 
             {isCLE && (
               <>
-                <WithdrawalModal isOpen={isOpen} onCancel={() => setIsOpen(false)} young={young} />
-                <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2 md:m-16">
+                <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2">
                   <div>
                     <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
                     <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
                   </div>
-                  <button className="text-blue-600 underline underline-offset-2" onClick={handleClick}>
+                  <Link to="account/withdrawn?desistement=1" className="text-blue-600 underline underline-offset-2" onClick={handleClick}>
                     Se désister du SNU.
-                  </button>
+                  </Link>
                 </div>
               </>
             )}
